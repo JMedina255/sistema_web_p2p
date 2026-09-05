@@ -1,0 +1,796 @@
+/* ==========================================================================
+   DNA PORTAL WEB UPT — SISTEMA DE DISEÑO INSTITUCIONAL (EPIS-UPT, 2026)
+   Tokens, variables, componentes y utilidades extraídas de docs/diseño.md
+   ========================================================================== */
+
+:root {
+  /* 1.1 Colores Principales (Brand Identity) */
+  --primary-navy: #1C2A59;
+  --primary-navy-dark: #172349;
+  --primary-blue: #0066CC;
+  --accent-gold: #B99451;
+  --accent-gold-dark: #9D7A39;
+  --accent-gold-light: #D9BF7D;
+
+  /* 1.2 Colores de Superficie y Fondo */
+  --bg-page: #F4F6F9;
+  --bg-surface: #FFFFFF;
+  --border-color: #E2E8F0;
+  --border-subtle: #EDF2F7;
+
+  /* 1.3 Colores de Texto y Tipografía */
+  --text-primary: #1C2A59;
+  --text-heading: #1E2B5A;
+  --text-body: #5A6578;
+  --text-muted: #8A94A6;
+  --text-gold: #A6823F;
+
+  /* 1.4 Bordes y Radios */
+  --radius-card: 20px;
+  --radius-button: 12px;
+  --radius-pill: 9999px;
+
+  /* 1.5 Sombras */
+  --shadow-card: 0 8px 24px rgba(28, 42, 89, 0.07);
+  --shadow-hover: 0 14px 32px rgba(28, 42, 89, 0.12);
+  --shadow-floating: 0 4px 18px rgba(0, 0, 0, 0.10);
+  --shadow-header: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+  /* Transiciones */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Reset y Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tipografía */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-heading);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2.25rem;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 1.75rem;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+p {
+  color: var(--text-body);
+  font-size: 0.95rem;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+/* ==========================================================================
+   LAYOUT Y BARRAS DE NAVEGACIÓN DUAL (docs/diseño.md - Sección 3.1)
+   ========================================================================== */
+
+.top-utility-bar {
+  background-color: var(--primary-navy-dark);
+  color: #FFFFFF;
+  height: 38px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.top-utility-bar .utility-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.top-utility-bar a {
+  color: rgba(255, 255, 255, 0.85);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.top-utility-bar a:hover {
+  color: var(--accent-gold);
+}
+
+.main-header {
+  background-color: var(--bg-surface);
+  box-shadow: var(--shadow-header);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 0.85rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.brand-container {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.brand-badge {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--primary-navy) 0%, var(--primary-navy-dark) 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-gold);
+  font-weight: 800;
+  font-size: 1.15rem;
+  box-shadow: 0 4px 12px rgba(28, 42, 89, 0.25);
+  border: 2px solid var(--accent-gold-light);
+}
+
+.brand-text h1 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.brand-text span {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--bg-page);
+  padding: 0.3rem 0.4rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-color);
+}
+
+.nav-item-btn {
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  color: var(--text-body);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all var(--transition-fast);
+}
+
+.nav-item-btn:hover {
+  color: var(--primary-navy);
+  background-color: rgba(28, 42, 89, 0.05);
+}
+
+.nav-item-btn.active {
+  background-color: var(--primary-navy);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(28, 42, 89, 0.25);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ==========================================================================
+   BOTONES (docs/diseño.md - Sección 4.1)
+   ========================================================================== */
+
+.btn-gold {
+  background-color: var(--accent-gold);
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 0.65rem 1.4rem;
+  border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 10px rgba(185, 148, 81, 0.25);
+}
+
+.btn-gold:hover {
+  background-color: var(--accent-gold-dark);
+  box-shadow: 0 6px 16px rgba(185, 148, 81, 0.38);
+  transform: translateY(-2px);
+}
+
+.btn-gold:active {
+  transform: translateY(0);
+}
+
+.btn-pill-navy {
+  background-color: var(--primary-navy);
+  color: #FFFFFF;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.6rem 1.3rem;
+  border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all var(--transition-fast);
+}
+
+.btn-pill-navy:hover {
+  background-color: var(--primary-navy-dark);
+  box-shadow: 0 4px 12px rgba(28, 42, 89, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-outline-navy {
+  background: transparent;
+  color: var(--primary-navy);
+  border: 1.5px solid var(--primary-navy);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all var(--transition-fast);
+}
+
+.btn-outline-navy:hover {
+  background-color: var(--primary-navy);
+  color: #FFFFFF;
+}
+
+.btn-sm {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.78rem;
+}
+
+/* ==========================================================================
+   TARJETAS Y COMPONENTES (docs/diseño.md - Sección 4.2 & 4.3)
+   ========================================================================== */
+
+.upt-card {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-color);
+  padding: 1.75rem;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.upt-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.avatar-container {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-gold-border {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid var(--accent-gold-light);
+  object-fit: cover;
+  box-shadow: 0 4px 14px rgba(185, 148, 81, 0.25);
+  background-color: var(--bg-page);
+}
+
+/* Badges e Insignias */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge-gold {
+  background-color: rgba(185, 148, 81, 0.12);
+  color: var(--text-gold);
+  border: 1px solid rgba(185, 148, 81, 0.3);
+}
+
+.badge-navy {
+  background-color: rgba(28, 42, 89, 0.1);
+  color: var(--primary-navy);
+  border: 1px solid rgba(28, 42, 89, 0.2);
+}
+
+.badge-blue {
+  background-color: rgba(0, 102, 204, 0.1);
+  color: var(--primary-blue);
+  border: 1px solid rgba(0, 102, 204, 0.2);
+}
+
+.badge-success {
+  background-color: #E6F4EA;
+  color: #137333;
+  border: 1px solid #CEEAD6;
+}
+
+/* ==========================================================================
+   DOCKS FLOTANTES LATERALES (docs/diseño.md - Sección 3.2)
+   ========================================================================== */
+
+.dock-left {
+  position: fixed;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  box-shadow: var(--shadow-floating);
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.4rem;
+  gap: 0.5rem;
+  z-index: 40;
+}
+
+.dock-item {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-navy);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.dock-item:hover {
+  background-color: rgba(28, 42, 89, 0.08);
+  color: var(--primary-blue);
+  transform: scale(1.08);
+}
+
+.dock-item .tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  left: 115%;
+  background-color: var(--primary-navy-dark);
+  color: #FFFFFF;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.dock-item:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.dock-right {
+  position: fixed;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  box-shadow: var(--shadow-floating);
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.4rem;
+  gap: 0.5rem;
+  z-index: 40;
+}
+
+/* ==========================================================================
+   MODAL DE CONSENTIMIENTO INFORMADO (Ley N° 29733 - RF01)
+   ========================================================================== */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(23, 35, 73, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1.5rem;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.modal-card {
+  background-color: #FFFFFF;
+  border-radius: 20px;
+  max-width: 620px;
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid var(--border-color);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, var(--primary-navy) 0%, var(--primary-navy-dark) 100%);
+  color: #FFFFFF;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-body {
+  padding: 1.75rem 2rem;
+  max-height: 65vh;
+  overflow-y: auto;
+  font-size: 0.9rem;
+  color: var(--text-body);
+}
+
+.modal-legal-box {
+  background-color: var(--bg-page);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin: 1.25rem 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-heading);
+}
+
+.modal-footer {
+  padding: 1.25rem 2rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  background-color: #FAFAFA;
+}
+
+/* ==========================================================================
+   UTILIDADES Y CONTENEDORES
+   ========================================================================== */
+
+.main-content {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 5rem;
+}
+
+.grid-cols-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-cols-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-cols-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .dock-left,
+  .dock-right {
+    display: none;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* ==========================================================================
+   CARRUSEL DE IMÁGENES INSTITUCIONAL (docs/diseño.md - Sección 4.4)
+   ========================================================================== */
+
+.hero-carousel {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 2.5rem;
+  background-color: var(--primary-navy-dark);
+}
+
+.carousel-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease-in-out;
+  pointer-events: none;
+}
+
+.carousel-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.carousel-bg-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carousel-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(23, 35, 73, 0.88) 0%, rgba(28, 42, 89, 0.65) 50%, rgba(0, 102, 204, 0.25) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 4rem;
+  color: #FFFFFF;
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: rgba(28, 42, 89, 0.65);
+  backdrop-filter: blur(4px);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  cursor: pointer;
+  z-index: 10;
+  transition: all var(--transition-fast);
+}
+
+.carousel-arrow:hover {
+  background-color: var(--primary-navy);
+  color: var(--accent-gold);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-arrow.prev {
+  left: 1.25rem;
+}
+
+.carousel-arrow.next {
+  right: 1.25rem;
+}
+
+.carousel-dots {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background-color: #D1D5DB;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  padding: 0;
+}
+
+.carousel-dot.active {
+  width: 24px;
+  background-color: var(--accent-gold);
+}
+
+/* ==========================================================================
+   BARRA DE BÚSQUEDA EN TIEMPO REAL (BÚSQUEDA POR ESCRITURA)
+   ========================================================================== */
+
+.search-box-wrapper {
+  background-color: var(--bg-surface);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-pill);
+  padding: 0.5rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 4px 16px rgba(28, 42, 89, 0.06);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.search-box-wrapper:focus-within {
+  border-color: var(--accent-gold);
+  box-shadow: 0 6px 20px rgba(185, 148, 81, 0.2);
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text-heading);
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Chips de Asignaturas */
+.course-chips-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0 1rem;
+}
+
+.course-chip {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-body);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.course-chip:hover {
+  border-color: var(--primary-navy);
+  color: var(--primary-navy);
+}
+
+.course-chip.active {
+  background-color: var(--primary-navy);
+  border-color: var(--primary-navy);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(28, 42, 89, 0.25);
+}
+
+/* Tarjetas de Mentoría Específica */
+.mentorship-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.mentorship-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--accent-gold);
+}
