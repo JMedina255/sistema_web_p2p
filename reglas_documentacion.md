@@ -14,6 +14,7 @@
 | :---: | :--- | :--- | :--- | :---: | :--- |
 | **1.0** | Joan Medina / Renzo Antayhua | Dr. Ricardo Valcarcel | Dirección EPIS | 26/09/2026 | Creación de directrices formales: granularidad en fase de análisis, estructura quíntuple de cuadros, estándar PlantUML y sincronización continua con `diagramas_general.md`. |
 | **1.1** | Joan Medina / Renzo Antayhua | Dr. Ricardo Valcarcel | Dirección EPIS | 26/09/2026 | Incorporación de la Regla 6: Estructura canónica y obligatoria de 4 tablas para las narrativas de casos de uso (Sección 6.2.3). |
+| **1.2** | Joan Medina / Renzo Antayhua | Dr. Ricardo Valcarcel | Dirección EPIS | 26/09/2026 | Incorporación de la Regla 7: Sincronización y actualización continua del README principal (`README.md`) ante cualquier evolución de ingeniería o documentación. |
 
 ---
 
@@ -123,6 +124,20 @@ Todas las narrativas individuales de casos de uso (desde `CUS01` hasta `CUS24`) 
 
 ---
 
+### Regla 7: Sincronización y Actualización Continua del README Principal (`README.md`)
+* **Rol Estratégico:** El archivo [`README.md`](file:///C:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/README.md) en la raíz del repositorio constituye la carta de presentación oficial, la vitrina pública y la guía central de navegación arquitectónica y operativa del proyecto ante docentes, comités de evaluación y evaluadores externos.
+* **Gatillo de Actualización Obligatoria:** Ante cualquier modificación, adición o avance estructural en la documentación (`docs/`), modelado lógico UWE, refinamiento de casos de uso, ampliación de reglas de negocio, o evolución del código de frontend/backend, el `README.md` **debe ser actualizado de forma sincronizada y obligatoria en el mismo ciclo de trabajo**.
+* **Contenido Mínimo Canónico del README:**
+  1. **Encabezado Institucional:** Metadatos completos (Institución, Facultad, Escuela EPIS-UPT, Curso, Autores, Docente de cátedra, Semestre).
+  2. **Resumen de la Solución y Alcance:** Contexto de la problemática de reprobación, asignaturas críticas, propuesta de valor P2P y motor de recomendación híbrido *Top-k*.
+  3. **Índice y Enlaces a la Documentación Oficial:** Acceso directo y verificable a los entregables canónicos (`FD01`, `FD02`, `FD03 - SRS`, `FD04`, `resumen_sistema_y_casos_de_uso.md`, `diagramas_general.md`, `matriz_inconsistencias.md`, `Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx` y `reglas_documentacion.md`).
+  4. **Árbol de Directorios del Repositorio:** Estructura de carpetas fidedigna, completa y actualizada, detallando la función de cada archivo.
+  5. **Módulos y Casos de Uso Clave:** Resumen de módulos funcionales y flujo operativo del sistema.
+  6. **Instrucciones de Despliegue y Ejecución:** Guía paso a paso para levantar el entorno de desarrollo (maqueta frontend, servicios backend y base de datos).
+  7. **Marco Regulatorio y Ético:** Respaldo normativo explícito bajo la Ley N° 29733 de Protección de Datos Personales del Perú.
+
+---
+
 ## 3. Matriz de Cumplimiento de Reglas
 
 | Elemento Documental | Regla Aplicable | Validación de Conformidad |
@@ -133,4 +148,6 @@ Todas las narrativas individuales de casos de uso (desde `CUS01` hasta `CUS24`) 
 | **Archivos .md** | Regla 4 | UTF-8, Markdown estructurado (`#`, `##`, `###`). |
 | **Hardening de Artefactos** | Regla 5 | Reflejo inmediato en `docs/diagramas_general.md`. |
 | **Narrativas de Casos de Uso (6.2.3)** | Regla 6 | Esquema canónico de 4 tablas (Ficha, Flujo Principal, Alternativos, Excepciones). |
+| **README Principal (`README.md`)** | Regla 7 | Sincronización continua de árbol de directorios, catálogo de entregables, estado de ingeniería e instrucciones de despliegue. |
+
 
