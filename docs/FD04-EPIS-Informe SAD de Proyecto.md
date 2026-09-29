@@ -869,40 +869,58 @@ skinparam rectangle {
     BorderColor #2B3A42
 }
 
-skinparam interface {
+skinparam actor {
     BackgroundColor #E9ECEF
     BorderColor #1D2D44
 }
 
-' Actores Humanos
-actor "Estudiante Mentoreado\n(I - IV Ciclo)" as Alumno
-actor "Estudiante Mentor\n(VII - X Ciclo)" as Mentor
-actor "Comité de Tutoría\n& Dirección EPIS" as Admin
-
-' Límite del Sistema Central
-rectangle "SISTEMA WEB P2P DE MENTORÍAS\n(FastAPI / React SPA / Supabase / Redis)" as Core #E3F2FD {
-    [Motor de Recomendación Top-k] as RecEngine
-    [Gestor de Reservas & Quórum T-24h] as QuorumEngine
-    [Validador de Asistencia QR & Bitácoras] as LogEngine
-    [Módulo de Certificación SHA-256] as CertEngine
+' ===================================================
+' COLUMNA IZQUIERDA: ACTORES HUMANOS
+' ===================================================
+together {
+    actor "Estudiante Mentoreado\n(I - IV Ciclo)" as Alumno
+    actor "Estudiante Mentor\n(VII - X Ciclo)" as Mentor
+    actor "Comité de Tutoría\n& Dirección EPIS" as Admin
 }
 
-' Sistemas Institucionales y Externos
-rectangle "Servidor SMTP Institucional\n(Universidad Privada de Tacna)" as SMTP #FFF3E0
-rectangle "Google Workspace API\n(Google Meet Provisioning)" as MeetAPI #E8F5E9
-rectangle "Servidor Discord EPIS\n(Canales Virtuales de Asesoría)" as DiscordBot #EDE7F6
-rectangle "Parser Institucional de Horarios\n(Procesador PDF/Excel de Aulas)" as Parser #FCE4EC
+Alumno -[hidden]down-> Mentor
+Mentor -[hidden]down-> Admin
 
-' Interacciones de Actores Humanos
-Alumno --> Core : HTTPS / TLS 1.3\n(Solicitudes temáticas, reserva de cupos,\nconfirmación T-24h, escaneo QR y encuestas CSAT)
-Mentor --> Core : HTTPS / TLS 1.3\n(Ofertas de mentoría, gestión de quórum,\nbitácoras docentes y descarga de certificados)
-Admin --> Core : HTTPS / TLS 1.3 (MFA)\n(Priorización de cursos, visado de horas,\nparámetros de certificación y analítica institucional)
+' ===================================================
+' COLUMNA CENTRAL: SISTEMA WEB P2P (NÚCLEO)
+' ===================================================
+rectangle "SISTEMA WEB P2P DE MENTORÍAS\n(FastAPI / React SPA / Supabase / Redis)" as Core #E3F2FD {
+    rectangle "Motor de Recomendación\nTop-k Híbrido" as RecEngine #FFFFFF
+    rectangle "Gestor de Reservas &\nQuórum en T-24h" as QuorumEngine #FFFFFF
+    rectangle "Control de Asistencia QR &\nBitácoras Docentes" as LogEngine #FFFFFF
+    rectangle "Módulo de Certificación\n& Sellado SHA-256" as CertEngine #FFFFFF
+}
 
-' Interacciones con Entidades Externas
-Core --> SMTP : SMTP seguro / Port 587\n(Envío de códigos OTP 2FA y alertas perentorias de quórum)
-Core --> MeetAPI : OAuth 2.0 / REST API\n(Creación desatendida de salas virtuales de videoconferencia)
-Core --> DiscordBot : WebSocket / Bot API\n(Aprovisionamiento dinámico de canales de voz supervisados)
-Core --> Parser : REST API / JSON\n(Consulta de franjas horarias y aulas físicas disponibles)
+' ===================================================
+' COLUMNA DERECHA: SISTEMAS EXTERNOS
+' ===================================================
+together {
+    rectangle "Servidor SMTP Institucional\n(Correo UPT @upt.pe)" as SMTP #FFF3E0
+    rectangle "Google Workspace API\n(Provisioning Google Meet)" as MeetAPI #E8F5E9
+    rectangle "Servidor Discord EPIS\n(Canales Supervisados)" as DiscordBot #EDE7F6
+    rectangle "Parser de Horarios UPT\n(Extractor PDF/Excel)" as Parser #FCE4EC
+}
+
+SMTP -[hidden]down-> MeetAPI
+MeetAPI -[hidden]down-> DiscordBot
+DiscordBot -[hidden]down-> Parser
+
+' ===================================================
+' INTERACCIONES
+' ===================================================
+Alumno -right-> Core : HTTPS / TLS 1.3\n• Reservas de cupos\n• Confirmación T-24h y QR\n• Encuestas CSAT
+Mentor -right-> Core : HTTPS / TLS 1.3\n• Ofertas y quórum\n• Bitácoras y asistencia\n• Descarga certificados
+Admin -right-> Core : HTTPS / TLS 1.3 (MFA)\n• Visado de horas oficiales\n• Parámetros de certificación\n• Analítica directiva
+
+Core -right-> SMTP : SMTP Seguro (587)\n• Códigos OTP 2FA\n• Alertas de quórum
+Core -right-> MeetAPI : REST API\n• Generación de salas Meet
+Core -right-> DiscordBot : Bot API\n• Canales de voz supervisados
+Core -right-> Parser : JSON API\n• Consulta de aulas libres
 @enduml
 ```
 
