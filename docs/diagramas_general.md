@@ -8723,6 +8723,371 @@ Fuente: Elaboración propia.
 
 El modelo contextual formaliza que el Sistema Web P2P actúa como un intermediario orquestador de alta cohesión, desacoplado de las plataformas de comunicación de terceros y protegido bajo capas criptográficas de transporte (TLS 1.3) y autenticación multifactor.
 
+---
+
+### 8.3. Diagrama de la Vista de Escenarios Arquitectónicos Nucleares (+1 de Kruchten)
+
+#### Presentación de la Vista de Escenarios
+La vista de escenarios articula la síntesis operacional del sistema a través de los casos de uso arquitectónicamente significativos (E1 a E6), definiendo los requerimientos no funcionales de seguridad, rendimiento y trazabilidad legal sobre los demás modelos de diseño.
+
+#### Diagrama de la Vista de Escenarios
+
+```plantuml
+@startuml
+title Vista de Escenarios Arquitectónicos Nucleares (+1 de Kruchten)\nSistema Web P2P - EPIS UPT (2026)
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam usecase {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+    ArrowColor #2B3A42
+}
+
+skinparam actor {
+    BackgroundColor #E9ECEF
+    BorderColor #1D2D44
+}
+
+actor "Estudiante Mentoreado\n(I - IV Ciclo)" as Alumno
+actor "Estudiante Mentor\n(VII - X Ciclo)" as Mentor
+actor "Dirección EPIS /\nComité Tutoría" as Admin
+actor "Servicio Cron Backend" as Cron <<Sistema>>
+
+rectangle "Escenarios de Alto Impacto Arquitectónico (+1)" {
+    usecase "E1: Acceso Seguro 2FA &\nConsentimiento Ley 29733 (CUS01)" as E1
+    usecase "E2: Emparejamiento Híbrido\nTop-k en Tiempo Real (CUS02)" as E2
+    usecase "E3: Bloqueo Concurrente de\nCupos Transaccionales (CUS04)" as E3
+    usecase "E4: Corte Perentorio de Quórum\nen T-24h Desatendido (CUS23)" as E4
+    usecase "E5: Validación QR Dinámico\nEfímero de 60s (CUS11)" as E5
+    usecase "E6: Acreditación y Firma\nDigital SHA-256 (CUS13/CUS22)" as E6
+}
+
+Alumno --> E1
+Mentor --> E1
+Admin --> E1
+
+Alumno --> E2
+Alumno --> E3
+Cron --> E4
+Mentor --> E4
+Alumno --> E5
+Mentor --> E5
+Admin --> E6
+Mentor --> E6
+
+E3 ..> E2 : <<aprovecha>>
+E4 ..> E3 : <<evalúa aforo>>
+E5 ..> E4 : <<valida confirmados>>
+E6 ..> E5 : <<audita asistencia>>
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+El análisis de la vista de escenarios demuestra que los flujos operacionales críticos están interconectados secuencialmente, condicionando las capacidades de concurrencia y seguridad de las vistas lógica y física subsiguientes.
+
+---
+
+### 8.4. Diagrama de la Vista Lógica en Capas y Subsistemas ECB
+
+#### Presentación de la Vista Lógica
+La vista lógica descompone el sistema en tres capas arquitecturales (Presentación, Aplicación y Persistencia) bajo el patrón Entidad-Control-Frontera (ECB), garantizando desacoplamiento funcional y aislamiento de datos mediante políticas RLS en PostgreSQL y aceleración en memoria mediante Redis.
+
+#### Diagrama de la Vista Lógica
+
+```plantuml
+@startuml
+title Vista Lógica en Capas y Subsistemas ECB\nSistema Web P2P - EPIS UPT (2026)
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+package "Capa de Presentación (Frontera / Boundary)" #F8F9FA {
+    [Vistas de Autenticación & Consentimiento] as UI_Auth
+    [Vistas de Catálogo & Recomendación Top-k] as UI_Rec
+    [Vistas de Agendamiento, Reservas & Quórum] as UI_Booking
+    [Vistas de Asistencia QR & Bitácora Docente] as UI_Attendance
+    [Vistas de Certificación & Analítica Institucional] as UI_Admin
+}
+
+package "Capa de Aplicación y Negocio (Control)" #E3F2FD {
+    [Controlador de Seguridad, 2FA & JWT] as Ctrl_Auth
+    [Motor de Recomendación Híbrido (EdRecSys)] as Ctrl_Rec
+    [Controlador de Reservas & Transacciones] as Ctrl_Booking
+    [Orquestador de Quórum T-24h & Cron Jobs] as Ctrl_Quorum
+    [Servicio Criptográfico QR & Bitácoras] as Ctrl_Log
+    [Servicio de Emisión PDF & Hash SHA-256] as Ctrl_Cert
+}
+
+package "Capa de Persistencia y Dominio (Entidad)" #FFF3E0 {
+    database "PostgreSQL Relacional (Supabase)" as DB_Postgres {
+        [Políticas de Seguridad RLS] as Sec_RLS
+        [Tablas Maestras (Usuarios, Sesiones, Reservas)] as Tables_Core
+        [Tablas de Auditoría, Asistencia & Firmas] as Tables_Audit
+    }
+    database "Caché en Memoria (Redis Cloud)" as DB_Redis {
+        [Caché de Embeddings Curriculares] as Cache_Embeddings
+        [Tokens Efímeros de Sesión & QR] as Cache_Tokens
+    }
+}
+
+' Flujos de comunicación
+UI_Auth --> Ctrl_Auth : HTTPS / REST JSON
+UI_Rec --> Ctrl_Rec : Solicitud Top-k
+UI_Booking --> Ctrl_Booking : Bloqueo de Cupo
+UI_Attendance --> Ctrl_Log : Verificación QR
+UI_Admin --> Ctrl_Cert : Visado & Certificación
+
+Ctrl_Auth --> Sec_RLS : Contexto de Rol (JWT)
+Ctrl_Rec --> Cache_Embeddings : Búsqueda Rápida
+Ctrl_Rec --> Tables_Core : Consulta de Ofertas
+Ctrl_Booking --> Tables_Core : Transacción ACID
+Ctrl_Quorum --> Tables_Core : Corte en T-24h
+Ctrl_Log --> Cache_Tokens : Validación 60s
+Ctrl_Log --> Tables_Audit : Asiento de Presencia
+Ctrl_Cert --> Tables_Audit : Foliado y SHA-256
+Sec_RLS --> Tables_Core : Aislamiento por Fila
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+La vista lógica asegura un estricto principio de separación de responsabilidades: los componentes de la interfaz de usuario se comunican exclusivamente con los controladores de aplicación mediante contratos de API REST fuertemente tipados, mientras que el acceso a datos está blindado por políticas RLS y acelerado mediante Redis.
+
+---
+
+### 8.5. Diagrama de la Vista de Procesos, Concurrencia y Sincronización
+
+#### Presentación de la Vista de Procesos
+La vista de procesos describe la interacción dinámica entre hilos concurrentes, destacando el manejo no bloqueante con `asyncio` en FastAPI, la prevención de condiciones de carrera mediante transacciones serializables en PostgreSQL y la ejecución periódica del servicio Cron para la gobernanza del quórum.
+
+#### Diagrama de la Vista de Procesos
+
+```plantuml
+@startuml
+title Vista de Procesos, Concurrencia y Sincronización\nSistema Web P2P - EPIS UPT (2026)
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+participant "Clientes Concurrentes\n(Navegadores SPA)" as Clients
+participant "Event Loop Asíncrono\n(Uvicorn / FastAPI)" as EventLoop
+participant "Worker de Inferencia IA\n(NumPy / Scikit-learn)" as Worker_AI
+participant "Planificador Cron Daemon\n(APScheduler T-24h)" as Cron_Daemon
+participant "Pool de Conexiones DB\n(SQLAlchemy AsyncPool)" as DBPool
+database "Motor PostgreSQL\n(Transacciones ACID)" as EngineDB
+
+== Procesamiento Asíncrono de Peticiones Web ==
+Clients -> EventLoop: POST /api/v1/reservas (Concurrencia masiva)
+activate EventLoop
+EventLoop -> DBPool: Solicita conexión no bloqueante
+activate DBPool
+DBPool -> EngineDB: BEGIN TRANSACTION (ISOLATION LEVEL SERIALIZABLE)
+activate EngineDB
+EngineDB -> EngineDB: SELECT cupos_disponibles FOR UPDATE
+alt Cupos disponibles > 0
+    EngineDB -> EngineDB: INSERT INTO reserva_cupo (Estado: PENDIENTE)
+    EngineDB -> EngineDB: UPDATE oferta_mentoria SET cupos = cupos - 1
+    EngineDB --> DBPool: COMMIT TRANSACTION
+    DBPool --> EventLoop: Reserva formalizada
+    EventLoop --> Clients: 201 Created (Cupo Bloqueado)
+else Aforo agotado
+    EngineDB --> DBPool: ROLLBACK TRANSACTION
+    DBPool --> EventLoop: Error de sobrecupo
+    EventLoop --> Clients: 409 Conflict (Aforo Completo)
+end
+deactivate EngineDB
+deactivate DBPool
+deactivate EventLoop
+
+== Tarea Programada Desatendida (Corte de Quórum) ==
+Cron_Daemon -> EventLoop: Disparo periódico (cada 5 min en T-24h)
+activate EventLoop
+EventLoop -> EngineDB: SELECT sesiones WHERE fecha - NOW() <= 24h AND estado = 'PROGRAMADA'
+activate EngineDB
+EngineDB --> EventLoop: Nómina de sesiones por evaluar
+loop Para cada sesión en corte
+    alt Confirmados >= 50% del aforo
+        EventLoop -> EngineDB: UPDATE oferta_mentoria SET estado = 'CONFIRMADA'
+    else Confirmados < 50% del aforo
+        EventLoop -> EngineDB: UPDATE oferta_mentoria SET estado = 'QUORUM_INSUFICIENTE'
+        EventLoop -> Clients: Notificación Web Push / Email al Mentor (CUS07)
+    end
+end
+deactivate EngineDB
+deactivate EventLoop
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+El modelado de procesos demuestra que el uso de programación asíncrona combinada con transacciones serializables elimina las condiciones de carrera durante la reserva de vacantes y asegura la ejecución oportuna de los cortes de quórum desatendidos.
+
+---
+
+### 8.6. Diagrama de la Vista de Desarrollo y Organización de Paquetes
+
+#### Presentación de la Vista de Desarrollo
+La vista de desarrollo representa la estructura interna de los paquetes del código fuente, estableciendo la modularidad de componentes en el frontend React SPA y la jerarquía de capas (routers, schemas, services, ORM y migraciones) en el backend FastAPI.
+
+#### Diagrama de la Vista de Desarrollo
+
+```plantuml
+@startuml
+title Vista de Desarrollo y Organización de Paquetes\nSistema Web P2P - EPIS UPT (2026)
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+package "Ecosistema Frontend (TypeScript / React SPA)" {
+    package "src/components" {
+        [Views & Modals (Booking, Home, Recs)] as FE_Views
+        [Common UI (Navigation, Badges, Docks)] as FE_Common
+    }
+    package "src/services" {
+        [ApiClient (Axios + Interceptor JWT)] as FE_Api
+    }
+    package "src/data" {
+        [TypeScript Contracts & DTO Interfaces] as FE_Types
+    }
+}
+
+package "Ecosistema Backend (Python / FastAPI REST)" {
+    package "app/api/v1" {
+        [Routers (Auth, RecSys, Booking, Admin)] as BE_Routers
+    }
+    package "app/core" {
+        [Security Middleware & JWT Manager] as BE_Security
+        [Settings & App Config] as BE_Config
+    }
+    package "app/services" {
+        [Recommendation Service (Scikit-learn)] as BE_RecSys
+        [Quorum & Notification Service] as BE_Quorum
+        [Attendance & QR Generator] as BE_QR
+        [Certificate PDF Engine] as BE_Certs
+    }
+    package "app/models" {
+        [Pydantic Validation Schemas] as BE_Schemas
+        [SQLAlchemy Declarative ORM Models] as BE_ORM
+    }
+    package "app/db" {
+        [Alembic Database Migrations] as BE_Migrations
+        [Async Database Session Manager] as BE_Session
+    }
+}
+
+' Dependencias de Frontend
+FE_Views --> FE_Api : Invoca endpoints
+FE_Views --> FE_Common : Reutiliza UI
+FE_Api ..> FE_Types : Tipado estricto
+
+' Interoperabilidad mediante Contrato REST
+FE_Api ..> BE_Routers : JSON over HTTPS (OpenAPI 3.0)
+
+' Dependencias de Backend
+BE_Routers --> BE_Security : Valida Bearer Token
+BE_Routers --> BE_Schemas : Valida Request Body
+BE_Routers --> BE_Services : Delega ejecución
+BE_Routers --> BE_RecSys
+BE_Routers --> BE_Quorum
+BE_Routers --> BE_QR
+BE_Routers --> BE_Certs
+
+BE_RecSys --> BE_ORM : Consulta perfiles
+BE_Quorum --> BE_ORM : Actualiza estados
+BE_QR --> BE_ORM : Registra asistencias
+BE_Certs --> BE_ORM : Consulta horas visadas
+
+BE_ORM --> BE_Session : Persiste estado
+BE_Migrations ..> BE_ORM : Versiona esquemas relacionales
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+La vista de desarrollo evidencia que tanto el frontend como el backend mantienen una clara separación interna basada en capas funcionales y modelos de datos tipados, asegurando alta mantenibilidad (RNF09) y facilitando pruebas automatizadas desacopladas.
+
+---
+
+### 8.7. Diagrama de la Vista Física y Topología de Despliegue en Red
+
+#### Presentación de la Vista Física
+La vista física define la topología de nodos de cómputo, contenedores Docker y servicios gestionados en la nube, detallando los canales de comunicación cifrados mediante TLS 1.3 y los puertos de enlace con la infraestructura de la UPT.
+
+#### Diagrama de la Vista Física
+
+```plantuml
+@startuml
+title Vista Física y Topología de Despliegue en Red\nSistema Web P2P - EPIS UPT (2026)
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam node {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+}
+
+node "Dispositivos Clientes (Red EPIS / Internet)" as Node_Client {
+    artifact "Navegador Web Moderno\n(Chrome, Firefox, Edge, Safari)" as App_Client {
+        component "React 18 SPA Build\n(HTML5, CSS3, JS ES2022)" as Comp_SPA
+    }
+}
+
+node "Servidor Cloud de Aplicación (Linux Container Host)" as Node_Server {
+    node "Contenedor Proxy Inverso (NGINX)" as Cont_Nginx {
+        component "Terminación SSL TLS 1.3\nCompresión Gzip / Brotli\nRate Limiting & WAF" as Comp_Nginx
+    }
+    node "Contenedor Backend (Python 3.11)" as Cont_FastAPI {
+        component "Servidor ASGI Uvicorn\nFastAPI Application Framework\nMotor Algorítmico Scikit-learn" as Comp_FastAPI
+    }
+}
+
+node "Servicios Cloud Administrados (Supabase / AWS)" as Node_Cloud {
+    database "PostgreSQL 15+ Relacional" as Node_Postgres {
+        component "Esquema Relacional\nPolíticas RLS Nativas\nÍndices B-Tree & Triggers" as Comp_Postgres
+    }
+    database "Redis Cloud (In-Memory)" as Node_Redis {
+        component "Caché de Embeddings Top-k\nTokens Efímeros QR (TTL 60s)" as Comp_Redis
+    }
+    folder "Cloud Object Storage" as Node_Storage {
+        component "Bucket Seguro de Certificados PDF\nEvidencias de Bitácoras Docentes" as Comp_Storage
+    }
+}
+
+node "Infraestructura Institucional UPT" as Node_UPT {
+    server "Servidor de Correo SMTP (@upt.pe)" as Srv_SMTP
+}
+
+' Enlaces de Red
+Comp_SPA --> Comp_Nginx : HTTPS / Port 443 (TLS 1.3)
+Comp_Nginx --> Comp_FastAPI : HTTP / Port 8000 (Red Interna Docker)
+Comp_FastAPI --> Comp_Postgres : TCP / Port 5432 (SSL Certificado)
+Comp_FastAPI --> Comp_Redis : TCP / Port 6379 (TLS / Auth)
+Comp_FastAPI --> Comp_Storage : HTTPS / S3 API Rest
+Comp_FastAPI --> Srv_SMTP : SMTP Seguro / Port 587 (TLS)
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+El diagrama de despliegue físico ratifica que la solución opera bajo un esquema perimetral seguro: las peticiones externas acceden exclusivamente a través del proxy inverso NGINX con cifrado TLS 1.3, mientras que los datos residen en servicios gestionados de alta disponibilidad con réplicas y políticas RLS que aíslan la información a nivel de fila.
+
+
 
 
 
