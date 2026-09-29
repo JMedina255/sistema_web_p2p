@@ -9087,6 +9087,394 @@ Fuente: Elaboración propia.
 
 El diagrama de despliegue físico ratifica que la solución opera bajo un esquema perimetral seguro: las peticiones externas acceden exclusivamente a través del proxy inverso NGINX con cifrado TLS 1.3, mientras que los datos residen en servicios gestionados de alta disponibilidad con réplicas y políticas RLS que aíslan la información a nivel de fila.
 
+---
+
+### 8.8. Diagrama de Contenedores del Sistema Web P2P (Estándar C4 Nivel 2 / UWE)
+
+#### Presentación del Diagrama de Contenedores
+El diagrama de contenedores describe la arquitectura en unidades de ejecución desacopladas, delimitando el frontend SPA en React, el proxy inverso NGINX, la API REST en FastAPI, el motor de recomendación EdRecSys, la base de datos relacional PostgreSQL con RLS, la caché en memoria Redis y el almacenamiento cloud de certificados en Supabase Storage.
+
+#### Diagrama de Contenedores del Sistema
+
+```plantuml
+@startuml
+title Diagrama de Contenedores del Sistema Web P2P (Modelo C4 Nivel 2)\nEPIS - UPT (2026)
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam rectangle {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+}
+
+skinparam database {
+    BackgroundColor #FFF3E0
+    BorderColor #E65100
+}
+
+' Actores Humanos
+actor "Estudiante Mentoreado\n(I - IV Ciclo)" as Alumno
+actor "Estudiante Mentor\n(VII - X Ciclo)" as Mentor
+actor "Comité de Tutoría\n& Dirección EPIS" as Admin
+
+' Límite del Sistema Web P2P
+rectangle "Límite del Sistema Web P2P" #E3F2FD {
+    [Contenedor 1: Single-Page Application (SPA)\nReact 18 / TypeScript / Vite / Tailwind CSS\n(Se ejecuta en el navegador web del usuario)] as C_SPA
+    
+    [Contenedor 2: Proxy Inverso & WAF\nNGINX Container en Linux Host\n(Terminación SSL TLS 1.3, Rate Limiting, Gzip)] as C_Proxy
+    
+    [Contenedor 3: Backend Core API\nFastAPI / Python 3.11 / Uvicorn ASGI\n(Lógica de negocio, autenticación JWT, orquestador de quórum)] as C_API
+    
+    [Contenedor 4: Motor de Inferencia IA\nEdRecSys Service / NumPy / Scikit-learn\n(Cálculo de similitud coseno vectorial y ranking Top-k)] as C_RecSys
+    
+    database "Contenedor 5: Base de Datos Relacional\nPostgreSQL 15+ (Supabase Managed Cloud)\n(Tablas normalizadas, políticas RLS, transacciones ACID)" as C_Postgres
+    
+    database "Contenedor 6: Almacén en Memoria\nRedis Cloud (High-Speed Memory Cache)\n(Embeddings temáticos, tokens efímeros QR TTL 60s)" as C_Redis
+    
+    [Contenedor 7: Almacenamiento de Objetos\nSupabase Object Storage / S3 Bucket\n(Custodia inmutable de PDFs foliados y evidencias)] as C_Storage
+}
+
+' Sistemas Institucionales y Externos
+rectangle "Servidor SMTP Institucional\nUniversidad Privada de Tacna (@upt.pe)" as Ext_SMTP #FFFDE7
+rectangle "Google Workspace API\n(Google Meet Provisioning)" as Ext_Meet #E8F5E9
+rectangle "Servidor Discord EPIS\n(Canales de Voz Supervisados)" as Ext_Discord #EDE7F6
+rectangle "Parser Institucional de Horarios\n(Microservicio Extractor PDF/Excel de Aulas)" as Ext_Parser #FCE4EC
+
+' Interacciones de Usuarios hacia SPA
+Alumno --> C_SPA : Accede vía navegador\nHTTPS / Puerto 443
+Mentor --> C_SPA : Accede vía navegador\nHTTPS / Puerto 443
+Admin --> C_SPA : Accede con MFA\nHTTPS / Puerto 443
+
+' Flujos de Comunicación entre Contenedores
+C_SPA --> C_Proxy : Solicitudes API REST\nJSON over HTTPS (TLS 1.3)
+C_Proxy --> C_API : Enrutamiento no bloqueante\nHTTP / Puerto 8000 (Red Docker interna)
+C_API <--> C_RecSys : Invocación de inferencia\ngRPC / In-Process Async
+C_API --> C_Postgres : Consultas y transacciones ACID\nTCP / Puerto 5432 (SSL Certificado)
+C_API --> C_Redis : Lectura/Escritura rápida (Tokens QR y Caché)\nTCP / Puerto 6379 (TLS / Auth)
+C_API --> C_Storage : Carga y lectura de certificados\nHTTPS / REST S3 API
+
+' Integraciones Externas
+C_API --> Ext_SMTP : Despacho OTP 2FA y alertas quórum\nSMTP Seguro / Puerto 587 (TLS)
+C_API --> Ext_Meet : Aprovisionamiento de videollamadas\nOAuth 2.0 / REST API
+C_API --> Ext_Discord : Creación de canales de asesoría\nWebSocket / Bot API
+C_API --> Ext_Parser : Consulta de aulas libres en campus\nREST API / JSON
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+El diagrama de contenedores ratifica que el software implementa una topología perimetral con proxy inverso NGINX para terminación SSL y mitigación de sobrecargas, desacoplando los cálculos matriciales del motor de recomendación y asegurando transacciones ACID concurrentes en PostgreSQL bajo políticas de seguridad RLS.
+
+---
+
+### 8.9. Diagrama de Componentes de Implementación del Sistema Web P2P
+
+#### Presentación del Diagrama de Componentes
+El diagrama de componentes de implementación modela la descomposición de la solución en módulos funcionales y servicios de dominio acoplados mediante interfaces y contratos de puertos, garantizando la aplicación del principio de inversión de dependencias y la modularidad del código fuente.
+
+#### Diagrama de Componentes de Implementación
+
+```plantuml
+@startuml
+title Diagrama de Componentes de Implementación del Sistema Web P2P\nEPIS - UPT (2026)
+
+skinparam componentStyle uml2
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam component {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+}
+
+skinparam interface {
+    BackgroundColor #E9ECEF
+    BorderColor #1D2D44
+}
+
+package "Ecosistema Frontend (React 18 SPA / TypeScript)" {
+    [AuthViewComponent] as Comp_UI_Auth
+    [RecommendationComponent] as Comp_UI_Rec
+    [BookingScheduleComponent] as Comp_UI_Book
+    [AttendanceQRComponent] as Comp_UI_QR
+    [LogbookDocComponent] as Comp_UI_Log
+    [CertificateAdminComponent] as Comp_UI_Cert
+    
+    interface "IApiClient" as Int_ApiClient
+    [ApiClient (Axios + JWT Interceptor)] as Comp_ApiClient
+    
+    Comp_UI_Auth ..> Int_ApiClient : consume
+    Comp_UI_Rec ..> Int_ApiClient : consume
+    Comp_UI_Book ..> Int_ApiClient : consume
+    Comp_UI_QR ..> Int_ApiClient : consume
+    Comp_UI_Log ..> Int_ApiClient : consume
+    Comp_UI_Cert ..> Int_ApiClient : consume
+    Comp_ApiClient -up- Int_ApiClient
+}
+
+package "Ecosistema Backend (FastAPI / Python 3.11)" {
+    interface "ISecurityMiddleware" as Int_SecMiddleware
+    [SecurityMiddleware (Bearer Auth)] as Comp_SecMiddleware
+    Comp_SecMiddleware -up- Int_SecMiddleware
+    
+    package "Capa de Enrutamiento y Controladores (API Routers)" {
+        [AuthRouter] as Router_Auth
+        [RecSysRouter] as Router_Rec
+        [BookingRouter] as Router_Book
+        [AttendanceRouter] as Router_Att
+        [LogbookRouter] as Router_Log
+        [CertificateRouter] as Router_Cert
+    }
+    
+    package "Capa de Servicios de Dominio (Domain Services)" {
+        [AuthenticationService] as Srv_Auth
+        [TopKRecommendationEngine] as Srv_Rec
+        [BookingTransactionCoordinator] as Srv_Book
+        [QuorumEvaluatorCronService] as Srv_Cron
+        [QRCodeCryptoValidator] as Srv_QR
+        [BitacoraWorkflowService] as Srv_Log
+        [PDFCertificateCompiler] as Srv_Cert
+    }
+    
+    package "Capa de Acceso a Datos e Integraciones (Data & Ports)" {
+        interface "IRepository" as Int_Repo
+        [SQLAlchemyAsyncRepository] as Comp_Repo
+        Comp_Repo -up- Int_Repo
+        
+        interface "IRedisCacheAdapter" as Int_Redis
+        [RedisCacheService] as Comp_RedisAdapter
+        Comp_RedisAdapter -up- Int_Redis
+        
+        interface "ISmtpNotifier" as Int_Smtp
+        [SmtpMailAdapter] as Comp_SmtpAdapter
+        Comp_SmtpAdapter -up- Int_Smtp
+        
+        interface "IObjectStorage" as Int_Storage
+        [SupabaseStorageAdapter] as Comp_StorageAdapter
+        Comp_StorageAdapter -up- Int_Storage
+    }
+}
+
+' Enlace Frontend a Backend
+Comp_ApiClient ..> Int_SecMiddleware : HTTP REST JSON
+
+' Router a Services
+Router_Auth --> Srv_Auth : invoca
+Router_Rec --> Srv_Rec : invoca
+Router_Book --> Srv_Book : invoca
+Router_Att --> Srv_QR : invoca
+Router_Log --> Srv_Log : invoca
+Router_Cert --> Srv_Cert : invoca
+
+' Services a Repositories y Adaptadores
+Srv_Auth ..> Int_Repo
+Srv_Auth ..> Int_Smtp : despacha OTP
+Srv_Rec ..> Int_Redis : lee embeddings
+Srv_Rec ..> Int_Repo : consulta ofertas
+Srv_Book ..> Int_Repo : transacciona aforo
+Srv_Cron ..> Int_Repo : corte T-24h
+Srv_Cron ..> Int_Smtp : notifica contingencia
+Srv_QR ..> Int_Redis : valida token 60s
+Srv_QR ..> Int_Repo : asienta presencia
+Srv_Log ..> Int_Repo : persiste bitácora
+Srv_Cert ..> Int_Repo : valida visado
+Srv_Cert ..> Int_Storage : archiva PDF
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+El diagrama formaliza la separación de capas lógicas y la inversión de dependencias, permitiendo desacoplar los servicios de negocio respecto a los motores de base de datos y plataformas externas de notificación.
+
+---
+
+### 8.10. Diagrama Entidad-Relación Relacional del Sistema Web P2P (PostgreSQL / Supabase)
+
+#### Presentación del Diagrama Entidad-Relación
+El diagrama entidad-relación define el esquema normalizado en Tercera Forma Normal (3FN) para la base de datos PostgreSQL, detallando las entidades maestras, claves primarias, claves foráneas y restricciones de integridad que aseguran la persistencia segura y la trazabilidad de las horas formativas.
+
+#### Diagrama Entidad-Relación
+
+```plantuml
+@startuml
+title Diagrama Entidad-Relación Relacional del Sistema Web P2P\nEPIS - UPT (Línea Base en PostgreSQL / Supabase)
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+' Configuración de entidad relacional
+entity "USUARIO" as usuario {
+    * id_usuario : UUID <<PK>>
+    --
+    * codigo_estudiante : VARCHAR(10) <<UNIQUE>>
+    * correo_institucional : VARCHAR(100) <<UNIQUE>>
+    * nombres : VARCHAR(100)
+    * apellidos : VARCHAR(100)
+    * ciclo_actual : INTEGER
+    * consentimiento_ley29733 : BOOLEAN
+    * fecha_consentimiento : TIMESTAMPTZ
+    * estado_activo : BOOLEAN
+    * fecha_registro : TIMESTAMPTZ
+}
+
+entity "ROL" as rol {
+    * id_rol : INTEGER <<PK>>
+    --
+    * nombre_rol : VARCHAR(30) <<UNIQUE>>
+    * descripcion : VARCHAR(150)
+}
+
+entity "USUARIO_ROL" as usuario_rol {
+    * id_usuario : UUID <<PK, FK>>
+    * id_rol : INTEGER <<PK, FK>>
+    --
+    * fecha_asignacion : TIMESTAMPTZ
+    * asignado_por : VARCHAR(100)
+}
+
+entity "ASIGNATURA_FILTRO" as asignatura {
+    * id_asignatura : INTEGER <<PK>>
+    --
+    * codigo_curso : VARCHAR(15) <<UNIQUE>>
+    * nombre_curso : VARCHAR(100)
+    * ciclo_formativo : INTEGER
+    * es_prioritaria : BOOLEAN
+    * factor_alfa_bonif : NUMERIC(3,2)
+}
+
+entity "TEMA_CONCEPTUAL" as tema {
+    * id_tema : INTEGER <<PK>>
+    --
+    * id_asignatura : INTEGER <<FK>>
+    * nombre_tema : VARCHAR(120)
+    * descripcion_silabo : TEXT
+    * embedding_vector : TEXT
+}
+
+entity "OFERTA_MENTORIA" as oferta {
+    * id_oferta : UUID <<PK>>
+    --
+    * id_mentor : UUID <<FK>>
+    * id_asignatura : INTEGER <<FK>>
+    * id_tema : INTEGER <<FK>>
+    * fecha_sesion : DATE
+    * hora_inicio : TIME
+    * hora_fin : TIME
+    * modalidad : VARCHAR(15)
+    * aforo_maximo : INTEGER
+    * cupos_disponibles : INTEGER
+    * estado_sesion : VARCHAR(25)
+    * created_at : TIMESTAMPTZ
+}
+
+entity "ESPACIO_FISICO" as espacio_fisico {
+    * id_espacio : INTEGER <<PK>>
+    --
+    * id_oferta : UUID <<FK, UNIQUE>>
+    * codigo_aula : VARCHAR(20)
+    * pabellon : VARCHAR(20)
+    * capacidad : INTEGER
+    * verificado_parser : BOOLEAN
+}
+
+entity "ESPACIO_VIRTUAL" as espacio_virtual {
+    * id_virtual : INTEGER <<PK>>
+    --
+    * id_oferta : UUID <<FK, UNIQUE>>
+    * plataforma : VARCHAR(20)
+    * url_reunion : VARCHAR(255)
+    * canal_discord_id : VARCHAR(50)
+}
+
+entity "RESERVA_CUPO" as reserva {
+    * id_reserva : UUID <<PK>>
+    --
+    * id_oferta : UUID <<FK>>
+    * id_mentoreado : UUID <<FK>>
+    * fecha_reserva : TIMESTAMPTZ
+    * fecha_confirmacion : TIMESTAMPTZ
+    * estado_reserva : VARCHAR(25)
+}
+
+entity "TICKET_ASISTENCIA_QR" as ticket_qr {
+    * id_ticket : UUID <<PK>>
+    --
+    * id_reserva : UUID <<FK, UNIQUE>>
+    * token_totp_hash : VARCHAR(64)
+    * expira_at : TIMESTAMPTZ
+    * validado_en_aula : BOOLEAN
+    * fecha_escaneo : TIMESTAMPTZ
+}
+
+entity "BITACORA_SESION" as bitacora {
+    * id_bitacora : UUID <<PK>>
+    --
+    * id_oferta : UUID <<FK, UNIQUE>>
+    * temas_desarrollados : TEXT
+    * observaciones_docentes : TEXT
+    * total_asistentes_reales : INTEGER
+    * fecha_cierre : TIMESTAMPTZ
+    * estado_auditoria : VARCHAR(20)
+    * visado_por_admin : VARCHAR(100)
+    * fecha_visado : TIMESTAMPTZ
+}
+
+entity "ENCUESTA_CALIDAD" as encuesta {
+    * id_encuesta : UUID <<PK>>
+    --
+    * id_reserva : UUID <<FK, UNIQUE>>
+    * puntuacion_csat : INTEGER
+    * comentario_retro : TEXT
+    * hash_alumno_anonimo : VARCHAR(64)
+    * fecha_respuesta : TIMESTAMPTZ
+}
+
+entity "CERTIFICADO_OFICIAL" as certificado {
+    * id_certificado : UUID <<PK>>
+    --
+    * id_mentor : UUID <<FK>>
+    * numero_folio : VARCHAR(30) <<UNIQUE>>
+    * total_horas_oficiales : INTEGER
+    * hash_sha256 : VARCHAR(64) <<UNIQUE>>
+    * ruta_archivo_pdf : VARCHAR(255)
+    * fecha_emision : DATE
+    * emitido_por : VARCHAR(100)
+}
+
+' Relaciones y Cardinalidades
+usuario ||--|{ usuario_rol : "posee"
+rol ||--|{ usuario_rol : "asignado a"
+usuario ||--o{ oferta : "publica como mentor"
+usuario ||--o{ reserva : "inscribe como alumno"
+usuario ||--o{ certificado : "recibe"
+
+asignatura ||--|{ tema : "contiene"
+asignatura ||--o{ oferta : "clasifica"
+tema ||--o{ oferta : "temario de"
+
+oferta ||--o| espacio_fisico : "asigna aula"
+oferta ||--o| espacio_virtual : "aprovisiona sala"
+oferta ||--o{ reserva : "contiene inscritos"
+oferta ||--o| bitacora : "cierra pedagógicamente"
+
+reserva ||--o| ticket_qr : "genera para acceso"
+reserva ||--o| encuesta : "evalúa calidad"
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+El modelo relacional consolida la integridad de datos, garantizando la disociación criptográfica de identidades en encuestas mediante hash SHA-256 (`RN-13`), el control atómico de aforos y el registro inmutable de certificados foliados con fe pública institucional (`RN-14`).
+
+
 
 
 
