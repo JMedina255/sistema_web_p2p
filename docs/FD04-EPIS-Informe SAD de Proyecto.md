@@ -103,9 +103,7 @@ El alcance arquitectónico abarca el diseño técnico integral de la plataforma 
 
 ### 1.3. Definición, siglas y abreviaturas
 
-Para facilitar la interpretación unívoca de los términos técnicos empleados a lo largo del documento, se presenta la siguiente matriz terminológica:
-
-A continuación, se define la terminología técnica, estándares y acrónimos utilizados en la especificación arquitectónica del sistema:
+Para facilitar la interpretación unívoca y el entendimiento compartido entre los miembros del equipo de desarrollo y los evaluadores académicos, se define la terminología técnica, estándares y acrónimos utilizados en la especificación arquitectónica del sistema:
 
 ### Cuadro 1.1: Glosario de Términos, Siglas y Abreviaturas Arquitectónicas
 
@@ -707,15 +705,13 @@ El cumplimiento de los requerimientos no funcionales descritos garantiza que el 
 
 En el modelo canónico de **4+1 Vistas de Philippe Kruchten**, la vista de casos de uso constituye el elemento articulador central ("el +1") que cohesiona, valida e impone los requerimientos arquitectónicos sobre las cuatro vistas estructurales y dinámicas restantes (Lógica, Proceso, Desarrollo y Física). Un caso de uso es **arquitecturalmente significativo** cuando su ejecución introduce desafíos técnicos de alta exigencia, tales como concurrencia masiva, seguridad reforzada de doble factor, transaccionalidad atómica distribuida, cómputo matricial de baja latencia o sellado criptográfico de fe pública.
 
-A continuación, se presenta la especificación gráfica y analítica de los casos de uso nucleares que moldean la arquitectura del Sistema Web P2P en la Escuela Profesional de Ingeniería de Sistemas (EPIS-UPT):
-
-A continuación, se ilustra la interacción entre los actores del sistema y los casos de uso arquitectónicamente significativos, organizados por subsistemas operativos:
+La siguiente especificación gráfica modela las relaciones entre los actores del sistema y los casos de uso arquitectónicamente significativos, agrupados por subsistemas funcionales para guiar el diseño detallado del equipo de desarrollo:
 
 ### Diagrama 5.1: Diagrama de Casos de Uso Arquitectónicos Consolidados - Sistema Web P2P EPIS-UPT
 
 ```plantuml
 @startuml
-title Diagrama de Casos de Uso Arquitectónicos Consolidados\nSistema Web P2P - EPIS UPT (2026)
+title <size:12><b>Diagrama 5.1: Diagrama de Casos de Uso Arquitectónicos Consolidados</b></size>\n<size:10><i>Sistema Web P2P - EPIS UPT (2026)</i></size>
 
 left to right direction
 skinparam packageStyle rectangle
@@ -849,15 +845,13 @@ La **Vista Lógica** formaliza la descomposición funcional del sistema, estruct
 
 ### 6.1. Diagrama Contextual
 
-El Diagrama Contextual establece las fronteras operativas del software, delimitando con precisión los límites del sistema respecto a los actores humanos y los subsistemas externos con los cuales interactúa:
-
-A continuación, se presenta el modelo contextual que ilustra los límites del sistema web y los flujos de datos con su entorno operacional:
+El Diagrama Contextual establece las fronteras operativas de la plataforma, delimitando las interfaces seguras entre el núcleo del software, los actores humanos de la comunidad EPIS y los subsistemas institucionales externos:
 
 ### Diagrama 6.1: Diagrama Contextual del Sistema Web P2P EPIS-UPT (Límites y Entorno Operativo)
 
 ```plantuml
 @startuml
-title Diagrama Contextual del Sistema Web P2P - EPIS UPT\nLímites del Sistema y Entorno Operacional
+title <size:12><b>Diagrama 6.1: Diagrama Contextual del Sistema Web P2P EPIS-UPT</b></size>\n<size:10><i>Límites del Sistema y Entorno Operacional</i></size>
 
 skinparam shadowing false
 skinparam roundcorner 8
@@ -965,15 +959,13 @@ La **Vista de Procesos** aborda los aspectos dinámicos y temporales del sistema
 
 ### 7.1. Diagrama de Proceso Actual
 
-El proceso actual de asesoría académica en la EPIS-UPT se caracteriza por su informalidad, fragmentación y completa ausencia de métricas directivas:
-
-A continuación, se modela el flujo actual de asesoría académica informal identificando sus fallas operacionales y puntos de abandono:
+El diagnóstico de la asesoría académica actual en la EPIS-UPT evidencia un flujo fragmentado, descoordinado e informal, caracterizado por canales no oficiales y la ausencia total de trazabilidad institucional. El siguiente modelo de actividades captura esta línea base operacional (**As-Is**) identificando los puntos críticos de abandono y sobrecarga docente:
 
 ### Diagrama 7.1: Diagrama de Actividades del Proceso Actual de Asesoría Informal en la EPIS-UPT (As-Is)
 
 ```plantuml
 @startuml
-title Diagrama de Actividades del Proceso Actual (Asesoría Académica Informal)\nEPIS - UPT (Línea Base As-Is)
+title <size:12><b>Diagrama 7.1: Diagrama de Actividades del Proceso Actual (As-Is)</b></size>\n<size:10><i>Asesoría Académica Informal — EPIS UPT</i></size>
 
 skinparam shadowing false
 skinparam roundcorner 8
@@ -1023,15 +1015,13 @@ El análisis del proceso As-Is pone en evidencia las siguientes deficiencias est
 
 ### 7.2. Diagrama de Proceso Propuesto
 
-El proceso propuesto (**To-Be**) digitaliza y reestructura el ciclo de mentoría mediante la automatización de reglas de negocio, gobernanza de quórum y acreditación oficial de horas:
-
-A continuación, se detalla el flujo To-Be articulando las calles de responsabilidad de los actores humanos y los servicios autónomos del sistema:
+El proceso propuesto (**To-Be**) digitaliza y reestructura el ciclo de mentoría mediante la automatización de reglas de negocio, gobernanza de quórum y acreditación oficial de horas. El siguiente diagrama de actividades modela este flujo de trabajo optimizado, articulando las calles de responsabilidad (*swimlanes*) entre los actores humanos y los servicios autónomos del sistema:
 
 ### Diagrama 7.2: Diagrama de Actividades del Proceso Propuesto de Mentorías P2P en la EPIS-UPT (To-Be)
 
 ```plantuml
 @startuml
-title Diagrama de Actividades del Proceso Propuesto de Mentorías P2P\nEPIS - UPT (Flujo To-Be)
+title <size:12><b>Diagrama 7.2: Diagrama de Actividades del Proceso Propuesto (To-Be)</b></size>\n<size:10><i>Mentorías Académicas P2P — EPIS UPT</i></size>
 
 skinparam shadowing false
 skinparam roundcorner 8
@@ -1108,15 +1098,13 @@ La **Vista de Despliegue** describe la asignación de los componentes lógicos y
 
 ### 8.1. Diagrama de Contenedor
 
-A continuación, se presenta la arquitectura de contenedores que componen el ecosistema de producción del Sistema Web P2P en la EPIS-UPT:
-
-A continuación, se ilustra la topología de contenedores de software, delimitando el entorno del cliente, el middleware de aplicación, los servicios administrados de datos y las plataformas externas:
+La siguiente topología de contenedores de software delimita formalmente el entorno del cliente, el middleware de aplicación, los servicios administrados de datos y las plataformas externas para guiar el aprovisionamiento de infraestructura:
 
 ### Diagrama 8.1: Diagrama de Contenedores del Sistema Web P2P (Estándar C4 Nivel 2 / UWE)
 
 ```plantuml
 @startuml
-title Diagrama de Contenedores del Sistema Web P2P (Modelo C4 Nivel 2)\nEPIS - UPT (2026)
+title <size:12><b>Diagrama 8.1: Diagrama de Contenedores del Sistema Web P2P (Modelo C4 Nivel 2)</b></size>\n<size:10><i>EPIS - UPT (2026)</i></size>
 
 skinparam packageStyle rectangle
 skinparam shadowing false
@@ -1134,52 +1122,81 @@ skinparam database {
     BorderColor #E65100
 }
 
-' Actores Humanos
-actor "Estudiante Mentoreado\n(I - IV Ciclo)" as Alumno
-actor "Estudiante Mentor\n(VII - X Ciclo)" as Mentor
-actor "Comité de Tutoría\n& Dirección EPIS" as Admin
-
-' Límite del Sistema Web P2P
-rectangle "Límite del Sistema Web P2P" #E3F2FD {
-    [Contenedor 1: Single-Page Application (SPA)\nReact 18 / TypeScript / Vite / Tailwind CSS\n(Se ejecuta en el navegador web del usuario)] as C_SPA
-    
-    [Contenedor 2: Proxy Inverso & WAF\nNGINX Container en Linux Host\n(Terminación SSL TLS 1.3, Rate Limiting, Gzip)] as C_Proxy
-    
-    [Contenedor 3: Backend Core API\nFastAPI / Python 3.11 / Uvicorn ASGI\n(Lógica de negocio, autenticación JWT, orquestador de quórum)] as C_API
-    
-    [Contenedor 4: Motor de Inferencia IA\nEdRecSys Service / NumPy / Scikit-learn\n(Cálculo de similitud coseno vectorial y ranking Top-k)] as C_RecSys
-    
-    database "Contenedor 5: Base de Datos Relacional\nPostgreSQL 15+ (Supabase Managed Cloud)\n(Tablas normalizadas, políticas RLS, transacciones ACID)" as C_Postgres
-    
-    database "Contenedor 6: Almacén en Memoria\nRedis Cloud (High-Speed Memory Cache)\n(Embeddings temáticos, tokens efímeros QR TTL 60s)" as C_Redis
-    
-    [Contenedor 7: Almacenamiento de Objetos\nSupabase Object Storage / S3 Bucket\n(Custodia inmutable de PDFs foliados y evidencias)] as C_Storage
+skinparam actor {
+    BackgroundColor #E9ECEF
+    BorderColor #1D2D44
 }
 
-' Sistemas Institucionales y Externos
-rectangle "Servidor SMTP Institucional\nUniversidad Privada de Tacna (@upt.pe)" as Ext_SMTP #FFFDE7
-rectangle "Google Workspace API\n(Google Meet Provisioning)" as Ext_Meet #E8F5E9
-rectangle "Servidor Discord EPIS\n(Canales de Voz Supervisados)" as Ext_Discord #EDE7F6
-rectangle "Parser Institucional de Horarios\n(Microservicio Extractor PDF/Excel de Aulas)" as Ext_Parser #FCE4EC
+' ===================================================
+' COLUMNA IZQUIERDA: ACTORES HUMANOS
+' ===================================================
+together {
+    actor "Estudiante Mentoreado\n(I - IV Ciclo)" as Alumno
+    actor "Estudiante Mentor\n(VII - X Ciclo)" as Mentor
+    actor "Comité de Tutoría\n& Dirección EPIS" as Admin
+}
 
-' Interacciones de Usuarios hacia SPA
-Alumno --> C_SPA : Accede vía navegador\nHTTPS / Puerto 443
-Mentor --> C_SPA : Accede vía navegador\nHTTPS / Puerto 443
-Admin --> C_SPA : Accede con MFA\nHTTPS / Puerto 443
+Alumno -[hidden]down-> Mentor
+Mentor -[hidden]down-> Admin
 
-' Flujos de Comunicación entre Contenedores
-C_SPA --> C_Proxy : Solicitudes API REST\nJSON over HTTPS (TLS 1.3)
-C_Proxy --> C_API : Enrutamiento no bloqueante\nHTTP / Puerto 8000 (Red Docker interna)
-C_API <--> C_RecSys : Invocación de inferencia\ngRPC / In-Process Async
-C_API --> C_Postgres : Consultas y transacciones ACID\nTCP / Puerto 5432 (SSL Certificado)
-C_API --> C_Redis : Lectura/Escritura rápida (Tokens QR y Caché)\nTCP / Puerto 6379 (TLS / Auth)
-C_API --> C_Storage : Carga y lectura de certificados\nHTTPS / REST S3 API
+' ===================================================
+' COLUMNA CENTRAL: CONTENEDORES DEL SISTEMA (C4 NIVEL 2)
+' ===================================================
+rectangle "Límite del Sistema Web P2P de Mentorías" #E3F2FD {
+    
+    package "Tier de Presentación y Borde Perimetral" as Tier_Edge #FFFFFF {
+        [Contenedor 1: Single-Page Application (SPA)\nReact 18 / TypeScript / Vite / Tailwind CSS\n(Navegador del cliente, puerto 443)] as C_SPA
+        [Contenedor 2: Proxy Inverso & WAF\nNGINX Container en Linux Host\n(TLS 1.3, Rate Limiting, Gzip, Balanceo)] as C_Proxy
+    }
+    
+    package "Tier de Aplicación y Servicios de Dominio" as Tier_App #FFFFFF {
+        [Contenedor 3: Backend Core API\nFastAPI / Python 3.11 / Uvicorn ASGI\n(Controladores, JWT Auth, Orquestador Quórum)] as C_API
+        [Contenedor 4: Motor de Inferencia IA\nEdRecSys Service / NumPy / Scikit-learn\n(Similitud Coseno Vectorial y Ranking Top-k)] as C_RecSys
+    }
+    
+    package "Tier de Persistencia y Almacenamiento Gestionado" as Tier_Data #FFFFFF {
+        database "Contenedor 5: Base de Datos Relacional\nPostgreSQL 15+ (Supabase Cloud)\n(Transacciones ACID, RLS, Tablas Core)" as C_Postgres
+        database "Contenedor 6: Almacén en Memoria\nRedis Cloud (High-Speed Memory Cache)\n(Embeddings, Tokens QR rotativos 60s)" as C_Redis
+        [Contenedor 7: Almacén de Objetos\nSupabase Storage / S3 Bucket\n(Custodia inmutable de PDFs y evidencias)] as C_Storage
+    }
+    
+    Tier_Edge -[hidden]down-> Tier_App
+    Tier_App -[hidden]down-> Tier_Data
+}
 
-' Integraciones Externas
-C_API --> Ext_SMTP : Despacho OTP 2FA y alertas quórum\nSMTP Seguro / Puerto 587 (TLS)
-C_API --> Ext_Meet : Aprovisionamiento de videollamadas\nOAuth 2.0 / REST API
-C_API --> Ext_Discord : Creación de canales de asesoría\nWebSocket / Bot API
-C_API --> Ext_Parser : Consulta de aulas libres en campus\nREST API / JSON
+' ===================================================
+' COLUMNA DERECHA: SISTEMAS INSTITUCIONALES EXTERNOS
+' ===================================================
+together {
+    rectangle "Servidor SMTP Institucional\nCorreo UPT (@upt.pe, Port 587)" as Ext_SMTP #FFFDE7
+    rectangle "Google Workspace API\nProvisioning Google Meet (OAuth 2.0)" as Ext_Meet #E8F5E9
+    rectangle "Servidor Discord EPIS\nCanales Supervisados (Bot API)" as Ext_Discord #EDE7F6
+    rectangle "Parser de Horarios UPT\nExtractor PDF/Excel de Aulas" as Ext_Parser #FCE4EC
+}
+
+Ext_SMTP -[hidden]down-> Ext_Meet
+Ext_Meet -[hidden]down-> Ext_Discord
+Ext_Discord -[hidden]down-> Ext_Parser
+
+' ===================================================
+' FLUJOS DE COMUNICACIÓN
+' ===================================================
+Alumno -right-> C_SPA : HTTPS (TLS 1.3)
+Mentor -right-> C_SPA : HTTPS (TLS 1.3)
+Admin -right-> C_SPA : HTTPS (TLS 1.3 / MFA)
+
+C_SPA -right-> C_Proxy : REST JSON / HTTPS
+C_Proxy -down-> C_API : HTTP / Port 8000 (Red interna)
+C_API <-> C_RecSys : Async In-Process / gRPC
+
+C_API -down-> C_Postgres : TCP 5432 / SSL (SQLAlchemy Async)
+C_API -down-> C_Redis : TCP 6379 / TLS (Tokens QR & Cache)
+C_API -down-> C_Storage : HTTPS / S3 REST (Certificados)
+
+C_API -right-> Ext_SMTP : SMTP Seguro (587 / TLS)
+C_API -right-> Ext_Meet : REST API (OAuth 2.0)
+C_API -right-> Ext_Discord : WebSocket / Bot API
+C_API -right-> Ext_Parser : JSON REST API
 @enduml
 ```
 
@@ -1216,15 +1233,13 @@ La **Vista de Implementación** (o Vista de Desarrollo a nivel estructural) mode
 
 ### 9.1. Diagrama de Componentes
 
-A continuación, se presenta la descomposición del software en componentes modulares acoplados mediante interfaces tipadas:
-
-A continuación, se ilustran los componentes de software del frontend y del backend, sus puertos de interfaz y los adaptadores de persistencia e integración:
+La siguiente descomposición modular modela los componentes ejecutables del frontend y backend, sus puertos de interfaz y los adaptadores de persistencia e integración:
 
 ### Diagrama 9.1: Diagrama de Componentes de Implementación del Sistema Web P2P
 
 ```plantuml
 @startuml
-title Diagrama de Componentes de Implementación del Sistema Web P2P\nEPIS - UPT (2026)
+title <size:12><b>Diagrama 9.1: Diagrama de Componentes de Implementación del Sistema Web P2P</b></size>\n<size:10><i>EPIS - UPT (2026)</i></size>
 
 skinparam componentStyle uml2
 skinparam shadowing false
@@ -1365,15 +1380,13 @@ La **Vista de Datos** modela la estructura lógica y relacional de persistencia 
 
 ### 10.1. Diagrama Entidad Relación
 
-A continuación, se presenta el modelo Entidad-Relación que sustenta todas las transacciones operativas del sistema:
-
-A continuación, se ilustran las entidades maestras, claves primarias, claves foráneas y relaciones de cardinalidad del modelo relacional:
+El modelo Entidad-Relación define la topología de almacenamiento físico y relacional sobre PostgreSQL (Supabase), estructurado bajo la Tercera Forma Normal (3FN) con aislamiento por políticas RLS y anonimización de encuestas:
 
 ### Diagrama 10.1: Diagrama Entidad-Relación Relacional del Sistema Web P2P (PostgreSQL / Supabase)
 
 ```plantuml
 @startuml
-title Diagrama Entidad-Relación Relacional del Sistema Web P2P\nEPIS - UPT (Línea Base en PostgreSQL / Supabase)
+title <size:12><b>Diagrama 10.1: Diagrama Entidad-Relación Físico del Sistema Web P2P</b></size>\n<size:10><i>Línea Base en PostgreSQL / Supabase — EPIS UPT</i></size>
 
 skinparam shadowing false
 skinparam roundcorner 8

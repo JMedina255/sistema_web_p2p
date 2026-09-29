@@ -8554,7 +8554,7 @@ El diagrama de casos de uso arquitectónicos consolidados representa la vista ce
 
 ```plantuml
 @startuml
-title Diagrama de Casos de Uso Arquitectónicos Consolidados\nSistema Web P2P - EPIS UPT (2026)
+title <size:12><b>Diagrama 5.1: Diagrama de Casos de Uso Arquitectónicos Consolidados</b></size>\n<size:10><i>Sistema Web P2P - EPIS UPT (2026)</i></size>
 
 left to right direction
 skinparam packageStyle rectangle
@@ -8752,7 +8752,7 @@ La vista de escenarios articula la síntesis operacional del sistema a través d
 
 ```plantuml
 @startuml
-title Vista de Escenarios Arquitectónicos Nucleares (+1 de Kruchten)\nSistema Web P2P - EPIS UPT (2026)
+title <size:12><b>Diagrama 2.1: Vista de Escenarios Arquitectónicos Nucleares (+1 de Kruchten)</b></size>\n<size:10><i>Sistema Web P2P - EPIS UPT (2026)</i></size>
 
 skinparam shadowing false
 skinparam roundcorner 8
@@ -8819,7 +8819,7 @@ La vista lógica descompone el sistema en tres capas arquitecturales (Presentaci
 
 ```plantuml
 @startuml
-title Vista Lógica en Capas y Subsistemas ECB\nSistema Web P2P - EPIS UPT (2026)
+title <size:12><b>Diagrama 2.2: Vista Lógica en Capas y Subsistemas ECB</b></size>\n<size:10><i>Sistema Web P2P - EPIS UPT (2026)</i></size>
 
 skinparam packageStyle rectangle
 skinparam shadowing false
@@ -8890,7 +8890,7 @@ La vista de procesos describe la interacción dinámica entre hilos concurrentes
 
 ```plantuml
 @startuml
-title Vista de Procesos, Concurrencia y Sincronización\nSistema Web P2P - EPIS UPT (2026)
+title <size:12><b>Diagrama 2.3: Vista de Procesos, Concurrencia y Sincronización</b></size>\n<size:10><i>Sistema Web P2P - EPIS UPT (2026)</i></size>
 
 skinparam shadowing false
 skinparam roundcorner 8
@@ -8961,7 +8961,7 @@ La vista de desarrollo representa la estructura interna de los paquetes del cód
 
 ```plantuml
 @startuml
-title Vista de Desarrollo y Organización de Paquetes\nSistema Web P2P - EPIS UPT (2026)
+title <size:12><b>Diagrama 2.4: Vista de Desarrollo y Organización de Paquetes</b></size>\n<size:10><i>Sistema Web P2P - EPIS UPT (2026)</i></size>
 
 skinparam packageStyle rectangle
 skinparam shadowing false
@@ -9048,7 +9048,7 @@ La vista física define la topología de nodos de cómputo, contenedores Docker 
 
 ```plantuml
 @startuml
-title Vista Física y Topología de Despliegue en Red\nSistema Web P2P - EPIS UPT (2026)
+title <size:12><b>Diagrama 2.5: Vista Física y Topología de Despliegue en Red</b></size>\n<size:10><i>Sistema Web P2P - EPIS UPT (2026)</i></size>
 
 skinparam shadowing false
 skinparam roundcorner 8
@@ -9116,7 +9116,7 @@ El diagrama de contenedores describe la arquitectura en unidades de ejecución d
 
 ```plantuml
 @startuml
-title Diagrama de Contenedores del Sistema Web P2P (Modelo C4 Nivel 2)\nEPIS - UPT (2026)
+title <size:12><b>Diagrama 8.1: Diagrama de Contenedores del Sistema Web P2P (Modelo C4 Nivel 2)</b></size>\n<size:10><i>EPIS - UPT (2026)</i></size>
 
 skinparam packageStyle rectangle
 skinparam shadowing false
@@ -9134,52 +9134,81 @@ skinparam database {
     BorderColor #E65100
 }
 
-' Actores Humanos
-actor "Estudiante Mentoreado\n(I - IV Ciclo)" as Alumno
-actor "Estudiante Mentor\n(VII - X Ciclo)" as Mentor
-actor "Comité de Tutoría\n& Dirección EPIS" as Admin
-
-' Límite del Sistema Web P2P
-rectangle "Límite del Sistema Web P2P" #E3F2FD {
-    [Contenedor 1: Single-Page Application (SPA)\nReact 18 / TypeScript / Vite / Tailwind CSS\n(Se ejecuta en el navegador web del usuario)] as C_SPA
-    
-    [Contenedor 2: Proxy Inverso & WAF\nNGINX Container en Linux Host\n(Terminación SSL TLS 1.3, Rate Limiting, Gzip)] as C_Proxy
-    
-    [Contenedor 3: Backend Core API\nFastAPI / Python 3.11 / Uvicorn ASGI\n(Lógica de negocio, autenticación JWT, orquestador de quórum)] as C_API
-    
-    [Contenedor 4: Motor de Inferencia IA\nEdRecSys Service / NumPy / Scikit-learn\n(Cálculo de similitud coseno vectorial y ranking Top-k)] as C_RecSys
-    
-    database "Contenedor 5: Base de Datos Relacional\nPostgreSQL 15+ (Supabase Managed Cloud)\n(Tablas normalizadas, políticas RLS, transacciones ACID)" as C_Postgres
-    
-    database "Contenedor 6: Almacén en Memoria\nRedis Cloud (High-Speed Memory Cache)\n(Embeddings temáticos, tokens efímeros QR TTL 60s)" as C_Redis
-    
-    [Contenedor 7: Almacenamiento de Objetos\nSupabase Object Storage / S3 Bucket\n(Custodia inmutable de PDFs foliados y evidencias)] as C_Storage
+skinparam actor {
+    BackgroundColor #E9ECEF
+    BorderColor #1D2D44
 }
 
-' Sistemas Institucionales y Externos
-rectangle "Servidor SMTP Institucional\nUniversidad Privada de Tacna (@upt.pe)" as Ext_SMTP #FFFDE7
-rectangle "Google Workspace API\n(Google Meet Provisioning)" as Ext_Meet #E8F5E9
-rectangle "Servidor Discord EPIS\n(Canales de Voz Supervisados)" as Ext_Discord #EDE7F6
-rectangle "Parser Institucional de Horarios\n(Microservicio Extractor PDF/Excel de Aulas)" as Ext_Parser #FCE4EC
+' ===================================================
+' COLUMNA IZQUIERDA: ACTORES HUMANOS
+' ===================================================
+together {
+    actor "Estudiante Mentoreado\n(I - IV Ciclo)" as Alumno
+    actor "Estudiante Mentor\n(VII - X Ciclo)" as Mentor
+    actor "Comité de Tutoría\n& Dirección EPIS" as Admin
+}
 
-' Interacciones de Usuarios hacia SPA
-Alumno --> C_SPA : Accede vía navegador\nHTTPS / Puerto 443
-Mentor --> C_SPA : Accede vía navegador\nHTTPS / Puerto 443
-Admin --> C_SPA : Accede con MFA\nHTTPS / Puerto 443
+Alumno -[hidden]down-> Mentor
+Mentor -[hidden]down-> Admin
 
-' Flujos de Comunicación entre Contenedores
-C_SPA --> C_Proxy : Solicitudes API REST\nJSON over HTTPS (TLS 1.3)
-C_Proxy --> C_API : Enrutamiento no bloqueante\nHTTP / Puerto 8000 (Red Docker interna)
-C_API <--> C_RecSys : Invocación de inferencia\ngRPC / In-Process Async
-C_API --> C_Postgres : Consultas y transacciones ACID\nTCP / Puerto 5432 (SSL Certificado)
-C_API --> C_Redis : Lectura/Escritura rápida (Tokens QR y Caché)\nTCP / Puerto 6379 (TLS / Auth)
-C_API --> C_Storage : Carga y lectura de certificados\nHTTPS / REST S3 API
+' ===================================================
+' COLUMNA CENTRAL: CONTENEDORES DEL SISTEMA (C4 NIVEL 2)
+' ===================================================
+rectangle "Límite del Sistema Web P2P de Mentorías" #E3F2FD {
+    
+    package "Tier de Presentación y Borde Perimetral" as Tier_Edge #FFFFFF {
+        [Contenedor 1: Single-Page Application (SPA)\nReact 18 / TypeScript / Vite / Tailwind CSS\n(Navegador del cliente, puerto 443)] as C_SPA
+        [Contenedor 2: Proxy Inverso & WAF\nNGINX Container en Linux Host\n(TLS 1.3, Rate Limiting, Gzip, Balanceo)] as C_Proxy
+    }
+    
+    package "Tier de Aplicación y Servicios de Dominio" as Tier_App #FFFFFF {
+        [Contenedor 3: Backend Core API\nFastAPI / Python 3.11 / Uvicorn ASGI\n(Controladores, JWT Auth, Orquestador Quórum)] as C_API
+        [Contenedor 4: Motor de Inferencia IA\nEdRecSys Service / NumPy / Scikit-learn\n(Similitud Coseno Vectorial y Ranking Top-k)] as C_RecSys
+    }
+    
+    package "Tier de Persistencia y Almacenamiento Gestionado" as Tier_Data #FFFFFF {
+        database "Contenedor 5: Base de Datos Relacional\nPostgreSQL 15+ (Supabase Cloud)\n(Transacciones ACID, RLS, Tablas Core)" as C_Postgres
+        database "Contenedor 6: Almacén en Memoria\nRedis Cloud (High-Speed Memory Cache)\n(Embeddings, Tokens QR rotativos 60s)" as C_Redis
+        [Contenedor 7: Almacén de Objetos\nSupabase Storage / S3 Bucket\n(Custodia inmutable de PDFs y evidencias)] as C_Storage
+    }
+    
+    Tier_Edge -[hidden]down-> Tier_App
+    Tier_App -[hidden]down-> Tier_Data
+}
 
-' Integraciones Externas
-C_API --> Ext_SMTP : Despacho OTP 2FA y alertas quórum\nSMTP Seguro / Puerto 587 (TLS)
-C_API --> Ext_Meet : Aprovisionamiento de videollamadas\nOAuth 2.0 / REST API
-C_API --> Ext_Discord : Creación de canales de asesoría\nWebSocket / Bot API
-C_API --> Ext_Parser : Consulta de aulas libres en campus\nREST API / JSON
+' ===================================================
+' COLUMNA DERECHA: SISTEMAS INSTITUCIONALES EXTERNOS
+' ===================================================
+together {
+    rectangle "Servidor SMTP Institucional\nCorreo UPT (@upt.pe, Port 587)" as Ext_SMTP #FFFDE7
+    rectangle "Google Workspace API\nProvisioning Google Meet (OAuth 2.0)" as Ext_Meet #E8F5E9
+    rectangle "Servidor Discord EPIS\nCanales Supervisados (Bot API)" as Ext_Discord #EDE7F6
+    rectangle "Parser de Horarios UPT\nExtractor PDF/Excel de Aulas" as Ext_Parser #FCE4EC
+}
+
+Ext_SMTP -[hidden]down-> Ext_Meet
+Ext_Meet -[hidden]down-> Ext_Discord
+Ext_Discord -[hidden]down-> Ext_Parser
+
+' ===================================================
+' FLUJOS DE COMUNICACIÓN
+' ===================================================
+Alumno -right-> C_SPA : HTTPS (TLS 1.3)
+Mentor -right-> C_SPA : HTTPS (TLS 1.3)
+Admin -right-> C_SPA : HTTPS (TLS 1.3 / MFA)
+
+C_SPA -right-> C_Proxy : REST JSON / HTTPS
+C_Proxy -down-> C_API : HTTP / Port 8000 (Red interna)
+C_API <-> C_RecSys : Async In-Process / gRPC
+
+C_API -down-> C_Postgres : TCP 5432 / SSL (SQLAlchemy Async)
+C_API -down-> C_Redis : TCP 6379 / TLS (Tokens QR & Cache)
+C_API -down-> C_Storage : HTTPS / S3 REST (Certificados)
+
+C_API -right-> Ext_SMTP : SMTP Seguro (587 / TLS)
+C_API -right-> Ext_Meet : REST API (OAuth 2.0)
+C_API -right-> Ext_Discord : WebSocket / Bot API
+C_API -right-> Ext_Parser : JSON REST API
 @enduml
 ```
 
@@ -9198,7 +9227,7 @@ El diagrama de componentes de implementación modela la descomposición de la so
 
 ```plantuml
 @startuml
-title Diagrama de Componentes de Implementación del Sistema Web P2P\nEPIS - UPT (2026)
+title <size:12><b>Diagrama 9.1: Diagrama de Componentes de Implementación del Sistema Web P2P</b></size>\n<size:10><i>EPIS - UPT (2026)</i></size>
 
 skinparam componentStyle uml2
 skinparam shadowing false
@@ -9321,7 +9350,7 @@ El diagrama entidad-relación define el esquema normalizado en Tercera Forma Nor
 
 ```plantuml
 @startuml
-title Diagrama Entidad-Relación Relacional del Sistema Web P2P\nEPIS - UPT (Línea Base en PostgreSQL / Supabase)
+title <size:12><b>Diagrama 10.1: Diagrama Entidad-Relación Físico del Sistema Web P2P</b></size>\n<size:10><i>Línea Base en PostgreSQL / Supabase — EPIS UPT</i></size>
 
 skinparam shadowing false
 skinparam roundcorner 8
