@@ -8541,5 +8541,188 @@ Fuente: Elaboración propia.
 
 El diagrama de clases parcial de CUS14 formaliza la infraestructura de analítica institucional y privacidad de datos de la EPIS-UPT. La clase `KpiInstitucionalAcademico` centraliza los agregados OLAP de retención, quórum y satisfacción estudiantil, permitiendo que `AnaliticaInstitucionalService` provea tanto vistas gerenciales instantáneas (`TableroAnaliticoDTO`) como expedientes PDF oficiales. La estricta separación de responsabilidades a través de `AnonimizationPort` y `MapeoAnonimizadoEstudiante` garantiza que la exportación de registros tabulares para propósitos científicos desvincule los identificadores personales de forma unidireccional e irreversible, cumpliendo cabalmente con la Ley N° 29733 de Protección de Datos Personales y la directiva `RN-13`.
 
+---
+
+## 8. Diagramas Arquitectónicos del SAD (FD04)
+
+### 8.1. Diagrama de Casos de Uso Arquitectónicos Consolidados (Modelo 4+1)
+
+#### Presentación del Diagrama de Casos de Uso Arquitectónicos
+El diagrama de casos de uso arquitectónicos consolidados representa la vista central ("+1") del modelo de Kruchten, delimitando los escenarios nucleares que imponen los desafíos de ingeniería más críticos sobre la plataforma (concurrencia transaccional, seguridad de doble factor, corte perentorio de quórum y firma digital SHA-256).
+
+#### Diagrama de Casos de Uso Arquitectónicos Consolidados
+
+```plantuml
+@startuml
+title Diagrama de Casos de Uso Arquitectónicos Consolidados\nSistema Web P2P - EPIS UPT (2026)
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam usecase {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+    ArrowColor #2B3A42
+}
+
+skinparam actor {
+    BackgroundColor #E9ECEF
+    BorderColor #1D2D44
+}
+
+actor "Mentoreado\n(I - IV Ciclo)" as Alumno
+actor "Mentor Académico\n(VII - X Ciclo)" as Mentor
+actor "Administrador / Tutoría\n(Dirección EPIS)" as Admin
+actor "Servicio Cron Backend" as Cron <<Sistema>>
+actor "Servicios Externos\n(Google Meet, Discord)" as Ext <<Sistema Externo>>
+
+rectangle "Sistema Web P2P - Núcleo Arquitectónico" {
+    package "Módulo 1: Seguridad & Gobernanza" {
+        usecase "CUS01: Iniciar Sesión con 2FA\ny Consentimiento Ley 29733" as CUS01
+    }
+
+    package "Módulo 2 & 3: Emparejamiento & Demanda" {
+        usecase "CUS02: Consultar Recomendaciones\nPersonalizadas Top-k" as CUS02
+        usecase "CUS03: Registrar Solicitud\nTemática por Demanda" as CUS03
+        usecase "CUS06: Publicar Oferta de\nMentoría Académica" as CUS06
+    }
+
+    package "Módulo 4: Reservas & Gobernanza de Quórum" {
+        usecase "CUS04: Reservar Cupo de Mentoría\ncon Bloqueo Atómico" as CUS04
+        usecase "CUS24: Confirmar Asistencia\nObligatoria (T >= 24h)" as CUS24
+        usecase "CUS23: Ejecutar Alertas y\nCorte de Quórum (T-24h)" as CUS23
+        usecase "CUS07: Gestionar Sesión ante\nQuórum Insuficiente (<50%)" as CUS07
+    }
+
+    package "Módulo 5 & 6: Trazabilidad, Asistencia & Calidad" {
+        usecase "CUS11: Registrar Asistencia\nmediante Código QR Dinámico" as CUS11
+        usecase "CUS10: Registrar Bitácora\nPedagógica de Sesión" as CUS10
+        usecase "CUS05: Responder Encuesta\nde Calidad Post-Mentoría" as CUS05
+    }
+
+    package "Módulo 7 & 8: Certificación & Fiscalización" {
+        usecase "CUS12: Destacar Asignaturas\nCríticas Prioritarias" as CUS12
+        usecase "CUS22: Auditar Bitácoras y\nVisar Horas Oficiales" as CUS22
+        usecase "CUS13: Parametrizar y Emitir\nCertificados con SHA-256" as CUS13
+        usecase "CUS14: Visualizar Tablero de\nAnalíticas Institucionales" as CUS14
+    }
+}
+
+' Asociaciones del Mentoreado
+Alumno --> CUS01
+Alumno --> CUS02
+Alumno --> CUS03
+Alumno --> CUS04
+Alumno --> CUS24
+Alumno --> CUS11
+Alumno --> CUS05
+
+' Asociaciones del Mentor
+Mentor --> CUS01
+Mentor --> CUS06
+Mentor --> CUS07
+Mentor --> CUS10
+
+' Asociaciones del Administrador Institucional
+Admin --> CUS01
+Admin --> CUS12
+Admin --> CUS22
+Admin --> CUS13
+Admin --> CUS14
+
+' Asociaciones del Sistema Cron
+Cron --> CUS23
+
+' Integraciones con Sistemas Externos
+CUS06 ..> Ext : <<integra>> (Meet API / Discord)
+
+' Relaciones y Dependencias Arquitectónicas
+CUS04 ..> CUS02 : <<precede>>
+CUS24 ..> CUS04 : <<requiere reserva>>
+CUS23 ..> CUS24 : <<evalúa ratificaciones>>
+CUS07 ..> CUS23 : <<extend>> (Quórum < 50%)
+CUS11 ..> CUS24 : <<valida ticket activo>>
+CUS10 ..> CUS11 : <<incluye nómina presencial>>
+CUS05 ..> CUS11 : <<habilita post-asistencia>>
+CUS12 ..> CUS02 : <<bonifica factor alfa (RN-11)>>
+CUS22 ..> CUS10 : <<audita evidencias>>
+CUS13 ..> CUS22 : <<requiere visado previo (RN-14)>>
+CUS14 ..> CUS05 : <<agrega satisfacción anónima (RN-13)>>
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+El diagrama consolida las interacciones críticas de la solución, evidenciando cómo el corte perentorio en $T-24\text{ h}$ (`CUS23`) y el visado de bitácoras (`CUS22`) articulan la gobernanza logística y la fe pública de la acreditación universitaria.
+
+---
+
+### 8.2. Diagrama Contextual del Sistema Web P2P (Límites y Entorno Operativo)
+
+#### Presentación del Diagrama Contextual
+El diagrama contextual define las fronteras del software respecto a los actores humanos y plataformas externas de infraestructura y comunicaciones, garantizando que el diseño arquitectónico preserve un bajo acoplamiento y protocolos estandarizados de interoperabilidad.
+
+#### Diagrama Contextual del Sistema
+
+```plantuml
+@startuml
+title Diagrama Contextual del Sistema Web P2P - EPIS UPT\nLímites del Sistema y Entorno Operacional
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam rectangle {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+}
+
+skinparam interface {
+    BackgroundColor #E9ECEF
+    BorderColor #1D2D44
+}
+
+' Actores Humanos
+actor "Estudiante Mentoreado\n(I - IV Ciclo)" as Alumno
+actor "Estudiante Mentor\n(VII - X Ciclo)" as Mentor
+actor "Comité de Tutoría\n& Dirección EPIS" as Admin
+
+' Límite del Sistema Central
+rectangle "SISTEMA WEB P2P DE MENTORÍAS\n(FastAPI / React SPA / Supabase / Redis)" as Core #E3F2FD {
+    [Motor de Recomendación Top-k] as RecEngine
+    [Gestor de Reservas & Quórum T-24h] as QuorumEngine
+    [Validador de Asistencia QR & Bitácoras] as LogEngine
+    [Módulo de Certificación SHA-256] as CertEngine
+}
+
+' Sistemas Institucionales y Externos
+rectangle "Servidor SMTP Institucional\n(Universidad Privada de Tacna)" as SMTP #FFF3E0
+rectangle "Google Workspace API\n(Google Meet Provisioning)" as MeetAPI #E8F5E9
+rectangle "Servidor Discord EPIS\n(Canales Virtuales de Asesoría)" as DiscordBot #EDE7F6
+rectangle "Parser Institucional de Horarios\n(Procesador PDF/Excel de Aulas)" as Parser #FCE4EC
+
+' Interacciones de Actores Humanos
+Alumno --> Core : HTTPS / TLS 1.3\n(Solicitudes temáticas, reserva de cupos,\nconfirmación T-24h, escaneo QR y encuestas CSAT)
+Mentor --> Core : HTTPS / TLS 1.3\n(Ofertas de mentoría, gestión de quórum,\nbitácoras docentes y descarga de certificados)
+Admin --> Core : HTTPS / TLS 1.3 (MFA)\n(Priorización de cursos, visado de horas,\nparámetros de certificación y analítica institucional)
+
+' Interacciones con Entidades Externas
+Core --> SMTP : SMTP seguro / Port 587\n(Envío de códigos OTP 2FA y alertas perentorias de quórum)
+Core --> MeetAPI : OAuth 2.0 / REST API\n(Creación desatendida de salas virtuales de videoconferencia)
+Core --> DiscordBot : WebSocket / Bot API\n(Aprovisionamiento dinámico de canales de voz supervisados)
+Core --> Parser : REST API / JSON\n(Consulta de franjas horarias y aulas físicas disponibles)
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+El modelo contextual formaliza que el Sistema Web P2P actúa como un intermediario orquestador de alta cohesión, desacoplado de las plataformas de comunicación de terceros y protegido bajo capas criptográficas de transporte (TLS 1.3) y autenticación multifactor.
+
+
 
 

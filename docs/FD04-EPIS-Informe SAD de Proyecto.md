@@ -357,19 +357,382 @@ El cumplimiento de los requerimientos no funcionales descritos garantiza que el 
 
 ## 5. Vistas de Caso de Uso
 
-*(Esta sección se desarrollará en la siguiente parte, detallando la representación gráfica canónica de los casos de uso arquitecturalmente significativos bajo estándar PlantUML).*
+En el modelo canónico de **4+1 Vistas de Philippe Kruchten**, la vista de casos de uso constituye el elemento articulador central ("el +1") que cohesiona, valida e impone los requerimientos arquitectónicos sobre las cuatro vistas estructurales y dinámicas restantes (Lógica, Proceso, Desarrollo y Física). Un caso de uso es **arquitecturalmente significativo** cuando su ejecución introduce desafíos técnicos de alta exigencia, tales como concurrencia masiva, seguridad reforzada de doble factor, transaccionalidad atómica distribuida, cómputo matricial de baja latencia o sellado criptográfico de fe pública.
+
+A continuación, se presenta la especificación gráfica y analítica de los casos de uso nucleares que moldean la arquitectura del Sistema Web P2P en la Escuela Profesional de Ingeniería de Sistemas (EPIS-UPT):
+
+A continuación, se ilustra la interacción entre los actores del sistema y los casos de uso arquitectónicamente significativos, organizados por subsistemas operativos:
+
+### Diagrama 5.1: Diagrama de Casos de Uso Arquitectónicos Consolidados - Sistema Web P2P EPIS-UPT
+
+```plantuml
+@startuml
+title Diagrama de Casos de Uso Arquitectónicos Consolidados\nSistema Web P2P - EPIS UPT (2026)
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam usecase {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+    ArrowColor #2B3A42
+}
+
+skinparam actor {
+    BackgroundColor #E9ECEF
+    BorderColor #1D2D44
+}
+
+actor "Mentoreado\n(I - IV Ciclo)" as Alumno
+actor "Mentor Académico\n(VII - X Ciclo)" as Mentor
+actor "Administrador / Tutoría\n(Dirección EPIS)" as Admin
+actor "Servicio Cron Backend" as Cron <<Sistema>>
+actor "Servicios Externos\n(Google Meet, Discord)" as Ext <<Sistema Externo>>
+
+rectangle "Sistema Web P2P - Núcleo Arquitectónico" {
+    package "Módulo 1: Seguridad & Gobernanza" {
+        usecase "CUS01: Iniciar Sesión con 2FA\ny Consentimiento Ley 29733" as CUS01
+    }
+
+    package "Módulo 2 & 3: Emparejamiento & Demanda" {
+        usecase "CUS02: Consultar Recomendaciones\nPersonalizadas Top-k" as CUS02
+        usecase "CUS03: Registrar Solicitud\nTemática por Demanda" as CUS03
+        usecase "CUS06: Publicar Oferta de\nMentoría Académica" as CUS06
+    }
+
+    package "Módulo 4: Reservas & Gobernanza de Quórum" {
+        usecase "CUS04: Reservar Cupo de Mentoría\ncon Bloqueo Atómico" as CUS04
+        usecase "CUS24: Confirmar Asistencia\nObligatoria (T >= 24h)" as CUS24
+        usecase "CUS23: Ejecutar Alertas y\nCorte de Quórum (T-24h)" as CUS23
+        usecase "CUS07: Gestionar Sesión ante\nQuórum Insuficiente (<50%)" as CUS07
+    }
+
+    package "Módulo 5 & 6: Trazabilidad, Asistencia & Calidad" {
+        usecase "CUS11: Registrar Asistencia\nmediante Código QR Dinámico" as CUS11
+        usecase "CUS10: Registrar Bitácora\nPedagógica de Sesión" as CUS10
+        usecase "CUS05: Responder Encuesta\nde Calidad Post-Mentoría" as CUS05
+    }
+
+    package "Módulo 7 & 8: Certificación & Fiscalización" {
+        usecase "CUS12: Destacar Asignaturas\nCríticas Prioritarias" as CUS12
+        usecase "CUS22: Auditar Bitácoras y\nVisar Horas Oficiales" as CUS22
+        usecase "CUS13: Parametrizar y Emitir\nCertificados con SHA-256" as CUS13
+        usecase "CUS14: Visualizar Tablero de\nAnalíticas Institucionales" as CUS14
+    }
+}
+
+' Asociaciones del Mentoreado
+Alumno --> CUS01
+Alumno --> CUS02
+Alumno --> CUS03
+Alumno --> CUS04
+Alumno --> CUS24
+Alumno --> CUS11
+Alumno --> CUS05
+
+' Asociaciones del Mentor
+Mentor --> CUS01
+Mentor --> CUS06
+Mentor --> CUS07
+Mentor --> CUS10
+
+' Asociaciones del Administrador Institucional
+Admin --> CUS01
+Admin --> CUS12
+Admin --> CUS22
+Admin --> CUS13
+Admin --> CUS14
+
+' Asociaciones del Sistema Cron
+Cron --> CUS23
+
+' Integraciones con Sistemas Externos
+CUS06 ..> Ext : <<integra>> (Meet API / Discord)
+
+' Relaciones y Dependencias Arquitectónicas
+CUS04 ..> CUS02 : <<precede>>
+CUS24 ..> CUS04 : <<requiere reserva>>
+CUS23 ..> CUS24 : <<evalúa ratificaciones>>
+CUS07 ..> CUS23 : <<extend>> (Quórum < 50%)
+CUS11 ..> CUS24 : <<valida ticket activo>>
+CUS10 ..> CUS11 : <<incluye nómina presencial>>
+CUS05 ..> CUS11 : <<habilita post-asistencia>>
+CUS12 ..> CUS02 : <<bonifica factor alfa (RN-11)>>
+CUS22 ..> CUS10 : <<audita evidencias>>
+CUS13 ..> CUS22 : <<requiere visado previo (RN-14)>>
+CUS14 ..> CUS05 : <<agrega satisfacción anónima (RN-13)>>
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+Como se desprende del diagrama anterior, los casos de uso arquitectónicamente significativos establecen una cadena de dependencias funcionales fuertemente acopladas a las reglas de negocio institucionales:
+1. **Cadena de Reserva y Quórum:** La reserva inicial (`CUS04`) no constituye una inscripción definitiva, sino un bloqueo provisional que exige ratificación obligatoria (`CUS24`). El corte desatendido en $T-24\text{ h}$ (`CUS23`) actúa como juez de gobernanza, anidando la extensión condicional hacia la gestión de contingencia del mentor (`CUS07`).
+2. **Cadena de Fe Pública y Certificación:** La validez institucional de las horas formativas demanda una estricta precedencia: asistencia verificada físicamente vía QR (`CUS11`) $\rightarrow$ bitácora docente estructurada (`CUS10`) $\rightarrow$ auditoría y visado por el Comité de Tutoría (`CUS22`) $\rightarrow$ generación del certificado oficial foliado con firma hash SHA-256 (`CUS13`).
+
+A continuación, se detalla el impacto directo que cada caso de uso nuclear ejerce sobre las distintas perspectivas del modelo arquitectónico:
+
+### Cuadro 5.1: Matriz de Casos de Uso Arquitecturalmente Significativos y su Impacto en Vistas 4+1
+
+| Código CUS | Denominación del Caso de Uso | Vista Lógica (ECB) | Vista del Proceso | Vista de Desarrollo | Vista Física / Despliegue |
+| :---: | :--- | :--- | :--- | :--- | :--- |
+| **CUS01** | Iniciar sesión institucional con 2FA | Controlador Auth / Entidad Usuario y Consentimiento | Hilo asíncrono de verificación TOTP y expiración JWT (15 min). | Módulo `app/core/security.py` y librerías `pyotp`, `python-jose`. | Conexión SSL/TLS 1.3 con servidor SMTP institucional UPT. |
+| **CUS02** | Consultar recomendaciones Top-k | Controlador RecSys / Entidad Perfil y Embedding | Cómputo matricial vectorizado con NumPy y consulta paralela en Redis. | Subpaquete `app/services/recsys/` y modelos Scikit-learn. | Servidor backend con aceleración vectorial y clúster Redis en memoria. |
+| **CUS04** | Reservar cupo de mentoría | Controlador Booking / Entidad Reserva y Aforo | Transacción serializable con bloqueo de fila (`FOR UPDATE`) en PostgreSQL. | Componente `BookingView.tsx` y servicio transaccional FastAPI. | Instancia primaria de Supabase con réplica de lectura desacoplada. |
+| **CUS23** | Alertas y corte de quórum (T-24h) | Controlador Cron / Entidad Sesión y Transición | Proceso daemon desatendido con intervalos de escaneo cada 5 minutos. | Tareas programadas con `APScheduler` o Celery Beat en Python. | Worker backend independiente con alta resiliencia y reinicio automático. |
+| **CUS11** | Registrar asistencia por código QR | Controlador Attendance / Entidad AsistenciaQR | Validación criptográfica de tokens efímeros con tolerancia temporal de 60s. | Generador QR en React SPA y validador HMAC-SHA256 en backend. | Sincronización estricta mediante protocolo NTP en nodos de cómputo. |
+| **CUS10** | Registrar bitácora pedagógica | Controlador Logbook / Entidad Bitácora | Escritura transaccional y cambio de estado de sesión a `FINALIZADA`. | Formulario estructurado con validación temporal estricta (< 24h). | Bucket de almacenamiento para evidencias digitales y PostgreSQL. |
+| **CUS13** | Parametrizar y emitir certificados | Controlador Certificate / Entidad Certificado | Pipeline de renderizado PDF en memoria y estampado de firma SHA-256. | Librería `ReportLab` o `WeasyPrint` con sellado digital criptográfico. | Almacenamiento seguro de objetos y CDN con enlaces firmados. |
+| **CUS22** | Auditar bitácoras y visar horas | Controlador Audit / Entidad VisadoHoras | Transacción de doble confirmación con registro inmutable de auditoría. | Panel administrativo con interfaz analítica en React SPA. | Políticas RLS en base de datos para restringir acceso exclusivo a Dirección. |
+
+Fuente: Elaboración propia.
+
+El análisis de la matriz confirma que cada caso de uso arquitectónicamente significativo se traduce en soluciones técnicas concretas distribuidas en todas las vistas de la arquitectura, garantizando la consistencia global del sistema.
 
 ---
 
 ## 6. Vista Lógica
 
-*(Esta sección se desarrollará en la siguiente parte, incorporando el Diagrama Contextual 6.1 en PlantUML y la descomposición en capas ECB).*
+La **Vista Lógica** formaliza la descomposición funcional del sistema, estructurando sus responsabilidades bajo una arquitectura estratificada en tres capas (Presentación, Aplicación/Negocio y Persistencia) y gobernada por el patrón arquitectónico **Entidad-Control-Frontera (ECB)** derivado de las directrices metodológicas de **UWE**.
+
+### 6.1. Diagrama Contextual
+
+El Diagrama Contextual establece las fronteras operativas del software, delimitando con precisión los límites del sistema respecto a los actores humanos y los subsistemas externos con los cuales interactúa:
+
+A continuación, se presenta el modelo contextual que ilustra los límites del sistema web y los flujos de datos con su entorno operacional:
+
+### Diagrama 6.1: Diagrama Contextual del Sistema Web P2P EPIS-UPT (Límites y Entorno Operativo)
+
+```plantuml
+@startuml
+title Diagrama Contextual del Sistema Web P2P - EPIS UPT\nLímites del Sistema y Entorno Operacional
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam rectangle {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+}
+
+skinparam interface {
+    BackgroundColor #E9ECEF
+    BorderColor #1D2D44
+}
+
+' Actores Humanos
+actor "Estudiante Mentoreado\n(I - IV Ciclo)" as Alumno
+actor "Estudiante Mentor\n(VII - X Ciclo)" as Mentor
+actor "Comité de Tutoría\n& Dirección EPIS" as Admin
+
+' Límite del Sistema Central
+rectangle "SISTEMA WEB P2P DE MENTORÍAS\n(FastAPI / React SPA / Supabase / Redis)" as Core #E3F2FD {
+    [Motor de Recomendación Top-k] as RecEngine
+    [Gestor de Reservas & Quórum T-24h] as QuorumEngine
+    [Validador de Asistencia QR & Bitácoras] as LogEngine
+    [Módulo de Certificación SHA-256] as CertEngine
+}
+
+' Sistemas Institucionales y Externos
+rectangle "Servidor SMTP Institucional\n(Universidad Privada de Tacna)" as SMTP #FFF3E0
+rectangle "Google Workspace API\n(Google Meet Provisioning)" as MeetAPI #E8F5E9
+rectangle "Servidor Discord EPIS\n(Canales Virtuales de Asesoría)" as DiscordBot #EDE7F6
+rectangle "Parser Institucional de Horarios\n(Procesador PDF/Excel de Aulas)" as Parser #FCE4EC
+
+' Interacciones de Actores Humanos
+Alumno --> Core : HTTPS / TLS 1.3\n(Solicitudes temáticas, reserva de cupos,\nconfirmación T-24h, escaneo QR y encuestas CSAT)
+Mentor --> Core : HTTPS / TLS 1.3\n(Ofertas de mentoría, gestión de quórum,\nbitácoras docentes y descarga de certificados)
+Admin --> Core : HTTPS / TLS 1.3 (MFA)\n(Priorización de cursos, visado de horas,\nparámetros de certificación y analítica institucional)
+
+' Interacciones con Entidades Externas
+Core --> SMTP : SMTP seguro / Port 587\n(Envío de códigos OTP 2FA y alertas perentorias de quórum)
+Core --> MeetAPI : OAuth 2.0 / REST API\n(Creación desatendida de salas virtuales de videoconferencia)
+Core --> DiscordBot : WebSocket / Bot API\n(Aprovisionamiento dinámico de canales de voz supervisados)
+Core --> Parser : REST API / JSON\n(Consulta de franjas horarias y aulas físicas disponibles)
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+El análisis del Diagrama Contextual clarifica tres aspectos arquitectónicos de vital importancia:
+1. **Límites de Responsabilidad:** El Sistema Web P2P no duplica funciones del ERP institucional ni gestiona matrículas formales; su alcance se concentra estrictamente en la intermediación, trazabilidad pedagógica y certificación del aprendizaje entre pares.
+2. **Protocolos Seguros de Interfaz:** Todas las comunicaciones de usuario se canalizan bajo HTTPS forzado con TLS 1.3, mientras que las integraciones con servicios externos emplean autenticación delegada mediante tokens OAuth 2.0 y secretos institucionales cifrados.
+3. **Aislamiento de Fallos:** Si los servicios de Google Meet o Discord experimentan indisponibilidad externa, el sistema degrada su funcionalidad de aprovisionamiento virtual a la modalidad manual sin interrumpir la persistencia de ofertas ni la asignación de aulas físicas provistas por el parser institucional.
+
+### 6.2. Descomposición en Capas y Patrón Entidad-Control-Frontera (ECB)
+
+Para estructurar la lógica interna del sistema, se adopta el patrón **ECB** (*Entity-Control-Boundary*), distribuyendo las clases en tres estereotipos complementarios:
+- **Objetos Frontera (`Boundary`):** Vistas, modales y formularios React SPA que capturan eventos del usuario y renderizan respuestas.
+- **Objetos de Control (`Control`):** Servicios y controladores FastAPI que ejecutan algoritmos, validan ventanas temporales y orquestan transacciones.
+- **Objetos de Entidad (`Entity`):** Modelos ORM y tablas PostgreSQL que representan el estado persistente y seguro del dominio académico.
+
+A continuación, se presenta la correspondencia de componentes ECB organizada por módulo funcional:
+
+### Cuadro 6.1: Mapeo de Componentes del Patrón ECB por Módulo Funcional
+
+| Módulo | Objeto Frontera (`Boundary`) | Objeto de Control (`Control`) | Objeto de Entidad (`Entity`) |
+| :---: | :--- | :--- | :--- |
+| **MOD-01** | `LoginView`, `TwoFactorModal`, `ConsentModal` | `AuthService`, `TOTPValidator`, `JWTManager` | `Usuario`, `Rol`, `ConsentimientoLegal` |
+| **MOD-02** | `RecommendationView`, `CourseBadgeWidget` | `RecSysEngine`, `CosineSimilarityService` | `PerfilAcademico`, `VectorCompetencia`, `EmbeddingTema` |
+| **MOD-03** | `PublishOfferingForm`, `DemandRequestModal` | `OfferingManager`, `DemandAggregatorService` | `OfertaMentoria`, `SolicitudDemanda`, `AsignaturaFiltro` |
+| **MOD-04** | `BookingModal`, `ConfirmationView`, `QuorumAlertView` | `BookingService`, `QuorumEvaluatorCron`, `CancelService` | `ReservaCupo`, `EstadoReserva`, `EspacioFisico`, `EspacioVirtual` |
+| **MOD-05** | `QRCodeGeneratorView`, `QRScannerView`, `LogbookForm` | `QRCryptoService`, `AttendanceValidator`, `LogbookService` | `TicketAsistenciaQR`, `BitacoraDocente`, `DetalleAsistencia` |
+| **MOD-06** | `CSATSurveyModal`, `GamificationDashboard` | `SurveyProcessor`, `ReputationCalculatorService` | `EncuestaCalidad`, `ReputacionMentor`, `InsigniaOtorgada` |
+| **MOD-07** | `CertificateDownloadView`, `QRVerifierPortal` | `PDFGeneratorService`, `SHA256Signer`, `VerifyService` | `CertificadoOficial`, `FoliadoInstitucional` |
+| **MOD-08** | `AnalyticsDashboard`, `LogbookAuditView`, `PrioritySettings` | `AuditWorkflowService`, `InstitutionalAnalyticsEngine` | `VisadoBitacora`, `ConfiguracionPrioridad`, `MetricaDesercion` |
+
+Fuente: Elaboración propia.
+
+La segregación formal en componentes ECB garantiza un alto desacoplamiento y facilita la construcción de pruebas unitarias automatizadas sobre los controladores sin requerir la presencia de la interfaz gráfica ni la conexión directa a base de datos.
 
 ---
 
 ## 7. Vista de Procesos
 
-*(Esta sección se desarrollará en la siguiente parte, detallando el Diagrama de Proceso Actual As-Is 7.1 y el Diagrama de Proceso Propuesto To-Be 7.2 en PlantUML).*
+La **Vista de Procesos** aborda los aspectos dinámicos y temporales del sistema, describiendo cómo se transforman los flujos operacionales desde el estado informal actual (**As-Is**) hacia el proceso optimizado y trazable (**To-Be**) soportado por la plataforma web.
+
+### 7.1. Diagrama de Proceso Actual
+
+El proceso actual de asesoría académica en la EPIS-UPT se caracteriza por su informalidad, fragmentación y completa ausencia de métricas directivas:
+
+A continuación, se modela el flujo actual de asesoría académica informal identificando sus fallas operacionales y puntos de abandono:
+
+### Diagrama 7.1: Diagrama de Actividades del Proceso Actual de Asesoría Informal en la EPIS-UPT (As-Is)
+
+```plantuml
+@startuml
+title Diagrama de Actividades del Proceso Actual (Asesoría Académica Informal)\nEPIS - UPT (Línea Base As-Is)
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+|Estudiante Mentoreado (I - IV Ciclo)|
+start
+:Identifica debilidad conceptual en cursos filtro\n(Cálculo I/II, Algoritmos, POO, BD);
+:Publica consulta en grupos informales de WhatsApp\no busca ayuda mediante contactos personales;
+
+if (¿Algún compañero sobresaliente responde?) then (No)
+  :Permanece con vacíos pedagógicos;
+  :Acude tardíamente a tutoría docente regular;
+  :Alto riesgo de reprobación y deserción temprana;
+  stop
+else (Sí)
+  |Compañero Informal (VII - X Ciclo)|
+  :Acepta brindar ayuda de forma voluntaria;
+  |Estudiante Mentoreado (I - IV Ciclo)|
+  :Coordina horario tentativa por mensajería privada;
+  
+  |Compañero Informal (VII - X Ciclo)|
+  :Busca aula libre en pabellón empíricamente\no crea enlace improvisado de Meet/Zoom;
+  
+  |Estudiante Mentoreado (I - IV Ciclo)|
+  :Asiste a la reunión pactada;
+  
+  |Compañero Informal (VII - X Ciclo)|
+  :Explica dudas sin guía silábica estructurada\nni control de asistencia efectiva;
+  
+  |Comité de Tutoría & Dirección EPIS|
+  :Sin registro de temas tratados ni asistencia;
+  :Sin métricas de demanda académica real;
+  :Sin convalidación de horas ni incentivos al mentor;
+  stop
+endif
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+El análisis del proceso As-Is pone en evidencia las siguientes deficiencias estructurales:
+1. **Asimetría Informativa y Barrera Social:** El acceso al refuerzo académico depende de la afinidad personal y de las redes de contacto del alumno, excluyendo a estudiantes tímidos o de primeros ciclos que no conocen alumnos mayores.
+2. **Uso Precario e Ineficiente de Infraestructura:** El uso de aulas físicas ocurre sin reserva formal, propiciando desalojos intempestivos cuando coincide con clases oficiales de cátedra.
+3. **Cero Trazabilidad y Desincentivo:** La Dirección de Escuela no posee datos para orientar intervenciones preventivas, y los mentores abandonan el apoyo debido a que sus horas dedicadas no reciben reconocimiento curricular.
+
+### 7.2. Diagrama de Proceso Propuesto
+
+El proceso propuesto (**To-Be**) digitaliza y reestructura el ciclo de mentoría mediante la automatización de reglas de negocio, gobernanza de quórum y acreditación oficial de horas:
+
+A continuación, se detalla el flujo To-Be articulando las calles de responsabilidad de los actores humanos y los servicios autónomos del sistema:
+
+### Diagrama 7.2: Diagrama de Actividades del Proceso Propuesto de Mentorías P2P en la EPIS-UPT (To-Be)
+
+```plantuml
+@startuml
+title Diagrama de Actividades del Proceso Propuesto de Mentorías P2P\nEPIS - UPT (Flujo To-Be)
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+|Estudiante Mentoreado|
+start
+:Inicia sesión institucional (@upt.pe)\ncon código 2FA y acepta Ley N° 29733;
+
+|Estudiante Mentor|
+:Publica oferta de mentoría académica\n(Asignatura, temario, fecha, modalidad);
+
+|Sistema Web P2P (FastAPI / RecSys)|
+:Asigna aula física validada (Parser)\no genera enlace virtual (Meet/Discord);
+:Publica oferta y recalcula ranking Top-k;
+
+|Estudiante Mentoreado|
+:Consulta feed personalizado Top-k\ny formaliza reserva de cupo provisional;
+:Confirma asistencia obligatoria\ndentro de la ventana (hasta T-24h);
+
+|Servicio Cron Desatendido|
+:Ejecuta corte perentorio en T-24h;\nRevoca cupos no confirmados y evalúa aforo;
+
+if (¿Quórum ratificado >= 50%?) then (Sí)
+  |Sistema Web P2P (FastAPI / RecSys)|
+  :Transiciona sesión a CONFIRMADA;\nNotifica a los participantes;
+else (No)
+  |Sistema Web P2P (FastAPI / RecSys)|
+  :Transiciona a QUORUM_INSUFICIENTE;\nEnvía alerta resolutiva al Mentor;
+  |Estudiante Mentor|
+  if (¿Mentor decide dictar excepcionalmente?) then (Sí)
+    :Ratifica sesión excepcional sin penalización;
+  else (No)
+    |Sistema Web P2P (FastAPI / RecSys)|
+    :Cancela sesión, notifica por email\ny libera aula/sala inmediatamente;
+    stop
+  endif
+endif
+
+|Estudiante Mentoreado|
+:Asiste a la sesión y exhibe\ncódigo QR dinámico (vigencia 60s);
+
+|Estudiante Mentor|
+:Escanea código QR y dicta la sesión;\nRegistra bitácora pedagógica (< 24h);
+
+|Estudiante Mentoreado|
+:Responde encuesta de calidad CSAT\nen ventana perentoria de 24 horas;
+
+|Sistema Web P2P (FastAPI / RecSys)|
+:Actualiza score de reputación docente\ny registra horas en estado PROVISIONAL;
+
+|Comité de Tutoría & Dirección EPIS|
+:Audita bitácoras y registros de asistencia;\nVisa horas efectivas (estado OFICIAL);
+if (¿Mentor alcanza umbral semestral parametrizado?) then (Sí)
+  :Autoriza y emite certificado digital PDF\ncon foliado institucional y firma SHA-256;
+endif
+stop
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+El análisis comparativo del flujo To-Be evidencia las siguientes transformaciones sustanciales:
+1. **Gobernanza Automatizada de Recursos:** El corte en $T-24\text{ h}$ y el umbral de quórum del 50% (`RN-08`/`RN-09`) garantizan que ningún aula física ni enlace virtual se reserve en vano, liberando espacios con anticipación suficiente para otros grupos académicos.
+2. **Garantía Antifraude en Asistencia:** La sustitución de firmas manuales en papel por códigos QR dinámicos con semillas temporales de 60 segundos (`CUS11`, `RNF04`) elimina la suplantación de identidad y asegura presencia física fehaciente.
+3. **Cierre de Ciclo Institucional:** La obligatoriedad de la bitácora docente en menos de 24 horas (`RN-12`), combinada con la auditoría del Comité de Tutoría (`RN-14`), confiere pleno valor probatorio a las constancias emitidas para la convalidación de horas de servicio estudiantil según el Art. 40 de la Ley Universitaria N° 30220.
 
 ---
 
