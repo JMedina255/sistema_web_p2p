@@ -197,7 +197,7 @@ A continuación, se representa de manera gráfica la interacción sinóptica de 
 
 ```plantuml
 @startuml
-title Vista de Escenarios Arquitectónicos Nucleares (+1 de Kruchten)\nSistema Web P2P - EPIS UPT (2026)
+title <size:12><b>Diagrama 2.1: Vista de Escenarios Arquitectónicos Nucleares (+1 de Kruchten)</b></size>\n<size:10><i>Sistema Web P2P - EPIS UPT (2026)</i></size>
 
 skinparam shadowing false
 skinparam roundcorner 8
@@ -268,7 +268,7 @@ A continuación, se ilustra la organización en capas y la interacción del patr
 
 ```plantuml
 @startuml
-title Vista Lógica en Capas y Subsistemas ECB\nSistema Web P2P - EPIS UPT (2026)
+title <size:12><b>Diagrama 2.2: Vista Lógica en Capas y Subsistemas ECB</b></size>\n<size:10><i>Sistema Web P2P - EPIS UPT (2026)</i></size>
 
 skinparam packageStyle rectangle
 skinparam shadowing false
@@ -343,7 +343,7 @@ A continuación, se modela la concurrencia entre hilos y la sincronización de p
 
 ```plantuml
 @startuml
-title Vista de Procesos, Concurrencia y Sincronización\nSistema Web P2P - EPIS UPT (2026)
+title <size:12><b>Diagrama 2.3: Vista de Procesos, Concurrencia y Sincronización</b></size>\n<size:10><i>Sistema Web P2P - EPIS UPT (2026)</i></size>
 
 skinparam shadowing false
 skinparam roundcorner 8
@@ -426,7 +426,7 @@ A continuación, se representa la organización de paquetes y dependencias del c
 
 ```plantuml
 @startuml
-title Vista de Desarrollo y Organización de Paquetes\nSistema Web P2P - EPIS UPT (2026)
+title <size:12><b>Diagrama 2.4: Vista de Desarrollo y Organización de Paquetes</b></size>\n<size:10><i>Sistema Web P2P - EPIS UPT (2026)</i></size>
 
 skinparam packageStyle rectangle
 skinparam shadowing false
@@ -520,7 +520,7 @@ A continuación, se detalla la topología de red y los nodos físicos de cómput
 
 ```plantuml
 @startuml
-title Vista Física y Topología de Despliegue en Red\nSistema Web P2P - EPIS UPT (2026)
+title <size:12><b>Diagrama 2.5: Vista Física y Topología de Despliegue en Red</b></size>\n<size:10><i>Sistema Web P2P - EPIS UPT (2026)</i></size>
 
 skinparam shadowing false
 skinparam roundcorner 8

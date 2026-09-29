@@ -36,7 +36,7 @@ Toda la documentación técnica del ciclo de vida del software se encuentra esta
 | **FD03: Informe SRS de Proyecto** | [`docs/FD03-EPIS-Informe SRS de Proyecto.md`](docs/FD03-EPIS-Informe%20SRS%20de%20Proyecto.md) | **Especificación de Requisitos de Software canónica:** Catálogo de 24 CUS, modelos ECB, diagramas de actividades con objetos, diagramas de secuencia y clases parciales. |
 | **FD04: Informe SAD de Proyecto** | [`docs/FD04-EPIS-Informe SAD de Proyecto.md`](docs/FD04-EPIS-Informe%20SAD%20de%20Proyecto.md) | **Documento de Arquitectura de Software:** Representación 4+1 Vistas, objetivos ISO/IEC 25010, análisis de requerimientos y modelado técnico integral. |
 | **Bóveda General de Diagramas** | [`docs/diagramas_general.md`](docs/diagramas_general.md) | **Hardening visual:** Bóveda sincronizada en espejo con más de 70 diagramas PlantUML rigurosamente estandarizados. |
-| **Diagramas de Secuencia (Pruebas)** | [`docs/diagramas_secuencia_pruebas.md`](docs/diagramas_secuencia_pruebas.md) | **Entorno de pruebas de análisis:** Diagramas de secuencia en lenguaje conceptual ECB para los 4 casos de uso núcleo (CUS06, CUS07, CUS23, CUS13). |
+| **Diagramas de Secuencia (SAD Análisis)** | [`docs/diagramas_de_secuencia.md`](docs/diagramas_de_secuencia.md) | **Especificación de Secuencias de Análisis:** Modelación dinámica ECB para los 4 flujos nucleares (Autenticación Ley 29733, Recomendación Top-k, Quórum T-24h, Asistencia QR y Bitácoras). |
 | **Matriz de Inconsistencias** | [`docs/matriz_inconsistencias.md`](docs/matriz_inconsistencias.md) | Registro de auditoría y resolución de discrepancias en requisitos y modelos. |
 | **Catálogo de Pruebas** | [`docs/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx`](docs/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx) | Matriz formal de casos de prueba funcional, criterios de aceptación y verificación QA. |
 | **Reglas de Documentación (Hardening)** | [`reglas_documentacion.md`](reglas_documentacion.md) | Estándares obligatorios de granularidad en análisis, estructura quíntuple de tablas, estándar PlantUML y reglas de sincronización. |
@@ -107,7 +107,7 @@ Proyecto_Sistema_Web_P2P/
 │   ├── matriz_inconsistencias.md             # Matriz de consistencia metodológica de análisis
 │   ├── Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx # Catálogo de pruebas funcionales y de aceptación
 │   ├── Requerimientos.md                     # Cuaderno de trabajo preliminar de requerimientos
-│   ├── diagramas_de_secuencia.md             # Apunte preliminar de secuencias
+│   ├── diagramas_de_secuencia.md             # Diagramas de secuencia en fase de análisis (SAD / ECB)
 │   └── diseño.md                             # Guía preliminar de interfaz y estilos
 ├── frontend/                                  # Maqueta funcional SPA interactiva (React + Vite)
 │   ├── src/

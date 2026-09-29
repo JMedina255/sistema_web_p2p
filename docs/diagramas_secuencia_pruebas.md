@@ -47,7 +47,7 @@ El caso de uso `CUS06` describe la secuencia interactiva mediante la cual un est
 
 ```plantuml
 @startuml
-title Diagrama de Secuencia de Análisis S-01: Recomendación Top-k de Mentores (CUS06)\nLenguaje Conceptual ECB (Entity-Control-Boundary)
+title <size:12><b>Diagrama S-01: Diagrama de Secuencia de Análisis - Búsqueda y Recomendación Inteligente Top-k de Mentores (CUS06)</b></size>\n<size:10><i>Fase de Análisis Conceptual (Modelo ECB) — Sistema Web P2P EPIS-UPT</i></size>
 
 autonumber
 skinparam style strictuml
@@ -122,7 +122,7 @@ El caso de uso `CUS07` modela la secuencia de operaciones requeridas para que un
 
 ```plantuml
 @startuml
-title Diagrama de Secuencia de Análisis S-02: Reserva y Aseguramiento de Cupo (CUS07)\nLenguaje Conceptual ECB (Entity-Control-Boundary)
+title <size:12><b>Diagrama S-02: Diagrama de Secuencia de Análisis - Reserva y Aseguramiento de Cupo en Sesión (CUS07)</b></size>\n<size:10><i>Fase de Análisis Conceptual (Modelo ECB) — Sistema Web P2P EPIS-UPT</i></size>
 
 autonumber
 skinparam style strictuml
@@ -214,7 +214,7 @@ El caso de uso `CUS23` describe la orquestación temporal que se activa de forma
 
 ```plantuml
 @startuml
-title Diagrama de Secuencia de Análisis S-03: Monitoreo y Corte de Quórum en T-24h (CUS23)\nLenguaje Conceptual ECB (Entity-Control-Boundary)
+title <size:12><b>Diagrama S-03: Diagrama de Secuencia de Análisis - Monitoreo y Corte Automático de Quórum en T-24h (CUS23)</b></size>\n<size:10><i>Fase de Análisis Conceptual (Modelo ECB) — Sistema Web P2P EPIS-UPT</i></size>
 
 autonumber
 skinparam style strictuml
@@ -312,7 +312,7 @@ El caso de uso `CUS13` modela el procedimiento mediante el cual se certifica la 
 
 ```plantuml
 @startuml
-title Diagrama de Secuencia de Análisis S-04: Verificación de Asistencia por QR Dinámico (CUS13)\nLenguaje Conceptual ECB (Entity-Control-Boundary)
+title <size:12><b>Diagrama S-04: Diagrama de Secuencia de Análisis - Verificación de Asistencia por Código QR Dinámico (CUS13)</b></size>\n<size:10><i>Fase de Análisis Conceptual (Modelo ECB) — Sistema Web P2P EPIS-UPT</i></size>
 
 autonumber
 skinparam style strictuml
