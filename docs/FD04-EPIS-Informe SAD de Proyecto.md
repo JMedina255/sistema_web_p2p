@@ -1,21 +1,21 @@
 # UNIVERSIDAD PRIVADA DE TACNA
 
-**FACULTAD DE INGENIERÍA**  
+**FACULTAD DE INGENIERÍA**<br>
 **ESCUELA PROFESIONAL DE INGENIERÍA DE SISTEMAS**
 
 # “Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT”
 
-**Curso:**  
+**Curso:**<br>
 Construcción de Software I
 
-**Docente:**  
+**Docente:**<br>
 Dr. RICARDO EDUARDO VALCARCEL ALVARADO
 
-**AUTORES:**  
-- ANTAYHUA MAMANI, Renzo Antonio (2022073504)  
+**AUTORES:**<br>
+- ANTAYHUA MAMANI, Renzo Antonio (2022073504)
 - MEDINA QUISPE, Joan Cristian (2022074255)
 
-**TACNA – PERÚ**  
+**TACNA – PERÚ**<br>
 **2026**
 
 ---
@@ -25,143 +25,147 @@ Dr. RICARDO EDUARDO VALCARCEL ALVARADO
 | Versión | Hecha por | Revisada por | Aprobada por | Fecha | Motivo |
 |:---:|:---:|:---:|:---:|:---:|:---|
 | **1.0** | JCM / RAM | RVA | Dirección EPIS | 28/09/2026 | Versión inicial del Documento de Arquitectura de Software (SAD). Establecimiento de las bases arquitectónicas: Introducción, Representación 4+1, Objetivos y Limitaciones, y Análisis de Requerimientos. |
+| **1.1** | Asistencia de Codex a solicitud del equipo | Pendiente | Pendiente | 28/09/2026 | Alineación de MOD, RF, RNF, RN y CUS con el SRS; trazabilidad arquitectónica y declaración de la fase de análisis. No constituye aprobación institucional. |
 
 # Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT
 
-**Documento de Arquitectura de Software (SAD - Software Architecture Document)**  
-**Versión 1.0 (Línea Base Inicial)**
+**Documento de Arquitectura de Software (SAD - Software Architecture Document)**<br>
+**Versión 1.1 — En elaboración y pendiente de revisión**
+
+**Fase del ciclo de vida:** Análisis — desarrollo del SAD.<br>
+**Fuente de nomenclatura:** SRS FD03 v2.0, tablas 5.1–5.5 y narrativas 6.2.3.<br>
+**Estado de las vistas:** Arquitectura propuesta; su implementación y validación pertenecen a fases posteriores.
 
 ---
 
 ## ÍNDICE GENERAL
 
-1. [Introducción](#1-introducción)  
-   1.1. [Propósito](#11-propósito)  
-   1.2. [Alcance](#12-alcance)  
-   1.3. [Definición, siglas y abreviaturas](#13-definición-siglas-y-abreviaturas)  
-   1.4. [Referencias](#14-referencias)  
-   1.5. [Visión General](#15-visión-general)  
-2. [Representación Arquitectónica](#2-representación-arquitectónica)  
-   2.1. [Escenarios](#21-escenarios)  
-   2.2. [Vista Lógica](#22-vista-lógica)  
-   2.3. [Vista del Proceso](#23-vista-del-proceso)  
-   2.4. [Vista del desarrollo](#24-vista-del-desarrollo)  
-   2.5. [Vista Física](#25-vista-física)  
-3. [Objetivos y limitaciones arquitectónicas](#3-objetivos-y-limitaciones-arquitectónicas)  
-   3.1. [Disponibilidad](#31-disponibilidad)  
-   3.2. [Seguridad](#32-seguridad)  
-   3.3. [Adaptabilidad](#33-adaptabilidad)  
-   3.4. [Rendimiento](#34-rendimiento)  
-4. [Análisis de Requerimientos](#4-análisis-de-requerimientos)  
-   4.1. [Requerimientos funcionales](#41-requerimientos-funcionales)  
-   4.2. [Requerimientos no funcionales](#42-requerimientos-no-funcionales)  
-5. [Vistas de Caso de Uso](#5-vistas-de-caso-de-uso)  
-6. [Vista Lógica](#6-vista-lógica)  
-   6.1. [Diagrama Contextual](#61-diagrama-contextual)  
-7. [Vista de Procesos](#7-vista-de-procesos)  
-   7.1. [Diagrama de Proceso Actual](#71-diagrama-de-proceso-actual)  
-   7.2. [Diagrama de Proceso Propuesto](#72-diagrama-de-proceso-propuesto)  
-8. [Vista de Despliegue](#8-vista-de-despliegue)  
-   8.1. [Diagrama de Contenedor](#81-diagrama-de-contenedor)  
-9. [Vista de Implementación](#9-vista-de-implementación)  
-   9.1. [Diagrama de Componentes](#91-diagrama-de-componentes)  
-10. [Vista de Datos](#10-vista-de-datos)  
-    10.1. [Diagrama Entidad Relación](#101-diagrama-entidad-relación)  
-11. [Calidad](#11-calidad)  
-    11.1. [Escenario de Seguridad](#111-escenario-de-seguridad)  
-    11.2. [Escenario de Usabilidad](#112-escenario-de-usabilidad)  
-    11.3. [Escenario de Adaptabilidad](#113-escenario-de-adaptabilidad)  
-    11.4. [Escenario de Disponibilidad](#114-escenario-de-disponibilidad)  
-    11.5. [Otro Escenario: Escenario de Trazabilidad y Auditoría](#115-otro-escenario-escenario-de-trazabilidad-y-auditoría)  
+1. [Introducción](#1-introducción)
+   1.1. [Propósito](#11-propósito)
+   1.2. [Alcance](#12-alcance)
+   1.3. [Definición, siglas y abreviaturas](#13-definición-siglas-y-abreviaturas)
+   1.4. [Referencias y precedencia](#14-referencias-y-criterio-de-precedencia)
+   1.5. [Visión general y estado del ciclo](#15-visión-general-y-estado-del-ciclo)
+2. [Representación Arquitectónica](#2-representación-arquitectónica)
+   2.1. [Escenarios](#21-escenarios)
+   2.2. [Vista Lógica](#22-vista-lógica)
+   2.3. [Vista del Proceso](#23-vista-del-proceso)
+   2.4. [Vista del desarrollo](#24-vista-del-desarrollo)
+   2.5. [Vista Física](#25-vista-física)
+3. [Objetivos y limitaciones arquitectónicas](#3-objetivos-y-limitaciones-arquitectónicas)
+   3.1. [Disponibilidad](#31-disponibilidad)
+   3.2. [Seguridad](#32-seguridad)
+   3.3. [Adaptabilidad](#33-adaptabilidad)
+   3.4. [Rendimiento](#34-rendimiento)
+4. [Análisis de Requerimientos](#4-análisis-de-requerimientos)
+   4.1. [Requerimientos funcionales](#41-requerimientos-funcionales)
+   4.2. [Requerimientos no funcionales](#42-requerimientos-no-funcionales)
+   4.3. [Trazabilidad SRS–SAD](#43-trazabilidad-hacia-las-vistas-arquitectónicas)
+   4.4. [Reglas de negocio](#44-reglas-de-negocio-y-límites-del-análisis)
+5. [Vistas de Caso de Uso](#5-vistas-de-caso-de-uso)
+6. [Vista Lógica](#6-vista-lógica)
+   6.1. [Diagrama Contextual](#61-diagrama-contextual)
+   6.2. [Descomposición ECB](#62-descomposición-en-capas-y-patrón-ecb)
+7. [Vista de Procesos](#7-vista-de-procesos)
+   7.1. [Diagrama de Proceso Actual](#71-diagrama-de-proceso-actual)
+   7.2. [Diagrama de Proceso Propuesto](#72-diagrama-de-proceso-propuesto)
+8. [Vista de Despliegue](#8-vista-de-despliegue)
+   8.1. [Diagrama de Contenedor](#81-diagrama-de-contenedor)
+9. [Vista de Implementación](#9-vista-de-implementación)
+   9.1. [Diagrama de Componentes](#91-diagrama-de-componentes)
+10. [Vista de Datos](#10-vista-de-datos)
+    10.1. [Diagrama Entidad Relación](#101-diagrama-entidad-relación)
+11. [Calidad](#11-calidad)
+    11.1. [Escenario de Seguridad](#111-escenario-de-seguridad)
+    11.2. [Escenario de Usabilidad](#112-escenario-de-usabilidad)
+    11.3. [Adaptabilidad y rendimiento](#113-escenario-de-adaptabilidad-y-rendimiento-del-recomendador)
+    11.4. [Disponibilidad e interoperabilidad](#114-escenario-de-disponibilidad-e-interoperabilidad)
+    11.5. [Trazabilidad y auditoría](#115-escenario-de-trazabilidad-y-auditoría)
+    11.6. [Integridad transaccional](#116-escenario-de-integridad-transaccional)
 
 ---
 
 ## 1. Introducción
 
-El presente Documento de Arquitectura de Software (**SAD**, por sus siglas en inglés *Software Architecture Document*) formaliza la estructura global, las decisiones tecnológicas fundamentales, los patrones de diseño y los mecanismos de ingeniería que sustentan el **Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT**. La arquitectura ha sido concebida bajo la metodología **UWE** (*UML-based Web Engineering*) y el modelo canónico de **4+1 Vistas de Philippe Kruchten**, asegurando que cada requerimiento funcional y atributo de calidad (ISO/IEC 25010) cuente con una respuesta estructural auditable, resiliente y escalable en el entorno universitario.
+El Documento de Arquitectura de Software (SAD) analiza cómo organizar la solución propuesta para las mentorías académicas entre pares de la EPIS-UPT. Su elaboración forma parte de la **fase de análisis**: relaciona necesidades institucionales y requisitos del SRS con responsabilidades, procesos y alternativas de infraestructura. Las vistas no describen una plataforma productiva ya construida ni acreditan resultados de pruebas.
 
 ### 1.1. Propósito
 
-El propósito fundamental de este documento es:
-1. **Guiar el Diseño y la Construcción:** Proveer a los desarrolladores, arquitectos de software e ingenieros de pruebas una guía fidedigna e inequívoca de la estructura interna del sistema, desacoplando responsabilidades entre la capa de presentación (Frontend SPA), la lógica de negocio y recomendación (Backend API REST / Microservicios) y la capa de persistencia y seguridad relacional (PostgreSQL / Supabase / Redis).
-2. **Garantizar la Satisfacción de Atributos de Calidad:** Demostrar cómo las decisiones arquitectónicas mitigan los riesgos asociados a la seguridad de la información (Ley N° 29733), la alta disponibilidad en periodos críticos de matrícula, la baja latencia en la inferencia algorítmica y la integridad transaccional en la reserva de cupos limitados.
-3. **Facilitar la Auditoría y Mantenibilidad:** Establecer un punto de referencia técnico formal para los comités de evaluación curricular, la Dirección de Escuela de la EPIS y los auditores institucionales de la Universidad Privada de Tacna.
+El SAD debe permitir que el equipo y los evaluadores recorran la relación entre un requisito, el módulo responsable, el caso de uso y la respuesta arquitectónica prevista. Los códigos se conservan desde el SRS; los nombres de servicios y adaptadores son propuestas para organizar la futura construcción. Las decisiones que agreguen alcance o métricas deben identificarse como pendientes y no introducirse como nuevos significados de RF o RNF existentes.
 
 ### 1.2. Alcance
 
-El alcance arquitectónico abarca el diseño técnico integral de la plataforma web en su versión de producción para el semestre 2026-II, comprendiendo los ocho módulos funcionales canónicos:
-- **MOD-01 (Seguridad y Perfiles):** Autenticación federada institucional OAuth 2.0 con segundo factor 2FA (TOTP) y políticas de seguridad a nivel de fila (*Row Level Security* - RLS).
-- **MOD-02 (Motor de Recomendación):** Servicio de inferencia híbrida *Top-k* basado en similitud coseno sobre vectores de perfil académico, afinidad temporal y reputación ponderada con bonificación directiva (`RN-11`).
-- **MOD-03 (Oferta y Demanda):** Gestión del catálogo lectivo de mentorías y captación de solicitudes temáticas por demanda estudiantil.
-- **MOD-04 (Reserva y Quórum):** Bloqueo transaccional de cupos, ratificación obligatoria en ventana perentoria y corte automático de quórum en $T-24\text{ h}$ (`RN-08`/`RN-09`).
-- **MOD-05 (Asistencia y Bitácoras):** Validación presencial mediante códigos QR dinámicos con semilla temporal de 60 segundos (`RNF04`) y registro estructurado de bitácoras docentes en un plazo menor a 24 horas (`RN-12`).
-- **MOD-06 (Calidad y Gamificación):** Encuestas de satisfacción CSAT con disociación criptográfica de identidad (`RN-13`) y cálculo de insignias de reputación.
-- **MOD-07 (Certificación Digital):** Emisión de constancias foliadas con sellado de tiempo y firma hash SHA-256 verificable públicamente (`RN-14`).
-- **MOD-08 (Auditoría y Analítica):** Visado de bitácoras por el Comité de Tutoría y panel directivo de retención académica.
+La solución aborda la coordinación de mentorías para asignaturas formativas críticas —entre ellas Cálculo, Algoritmos y POO— mediante los ocho módulos de la línea base. La siguiente matriz conserva sus denominaciones y vincula el alcance funcional con los requisitos que lo delimitan.
 
-**Exclusiones:** No forman parte del alcance del sistema la gestión de notas curriculares oficiales (competencia exclusiva del ERP institucional de la UPT), el pago de estipendios monetarios ni la administración de plataformas de videoconferencia externas (las cuales se integran mediante URLs parametrizadas de Google Meet / Microsoft Teams).
+### Cuadro 1.1: Módulos canónicos heredados del SRS
+
+| Código | Denominación del SRS | RF asociados |
+| :--- | :--- | :--- |
+| **MOD-01** | Seguridad, Autenticación y Gobernanza | RF01, RF02, RF03 |
+| **MOD-02** | Gestión Curricular y Perfiles Académicos | RF04, RF05 |
+| **MOD-03** | Motor de Recomendación Inteligente (*EdRecSys*) | RF06, RF07 |
+| **MOD-04** | Planificación, Espacios y Agendamiento | RF08, RF09, RF10, RF11 |
+| **MOD-05** | Quórum, Confirmación y Cancelaciones | RF12, RF13, RF14, RF15, RF16 |
+| **MOD-06** | Trazabilidad, Bitácoras y Evaluación | RF17, RF18, RF19, RF20 |
+| **MOD-07** | Gamificación, Reputación y Certificación | RF21, RF22, RF23 |
+| **MOD-08** | Supervisión y Analítica Institucional | RF24, RF25, RF26 |
+
+Fuente: Elaboración propia a partir del SRS FD03 v2.0, secciones 5.1–5.5 y 6.2.3.
+
+Los módulos mantienen su identidad durante el desarrollo del SAD: MOD-02 corresponde a perfiles y currículo, MOD-03 al recomendador, MOD-04 a espacios y agendamiento, MOD-05 a quórum y MOD-06 a bitácoras y evaluación. Esta distribución evita reasignar responsabilidades por cambios de nombres entre vistas.
+
+Se conserva la exclusión de gestión de notas oficiales, pagos y certificación PKI de terceros. El aprovisionamiento de Google Meet y Discord sí forma parte del alcance de RF09 y RN-07; no implica administrar esas plataformas. El parser de horarios es un componente interno de MOD-04 alimentado con archivos institucionales.
 
 ### 1.3. Definición, siglas y abreviaturas
 
-Para facilitar la interpretación unívoca y el entendimiento compartido entre los miembros del equipo de desarrollo y los evaluadores académicos, se define la terminología técnica, estándares y acrónimos utilizados en la especificación arquitectónica del sistema:
+La terminología distingue requisitos de mecanismos de solución para facilitar la revisión entre participantes técnicos y académicos.
 
-### Cuadro 1.1: Glosario de Términos, Siglas y Abreviaturas Arquitectónicas
+### Cuadro 1.2: Términos de arquitectura y trazabilidad
 
-| Sigla / Término | Definición Formal y Significado en el Contexto del Proyecto |
+| Término | Significado en este SAD |
 | :--- | :--- |
-| **SAD** | *Software Architecture Document* (Documento de Arquitectura de Software). Artefacto formal que describe la arquitectura integral del sistema mediante múltiples vistas complementarias. |
-| **UWE** | *UML-based Web Engineering*. Metodología de ingeniería de software orientada a la web que extiende el estándar UML para modelar aspectos navegacionales, presentacionales y lógicos. |
-| **ECB** | *Entity-Control-Boundary* (Entidad-Control-Frontera). Patrón de análisis y diseño arquitectónico que separa objetos de interfaz (Frontera), orquestación de negocio (Control) y persistencia del dominio (Entidad). |
-| **Top-k** | Algoritmo de filtrado y ordenamiento que selecciona los $k$ mejores elementos de una colección evaluada según una función de similitud o scoring multivariable. |
-| **2FA / TOTP** | *Two-Factor Authentication / Time-based One-Time Password*. Mecanismo de autenticación reforzado que genera códigos de un solo uso válidos por ventanas temporales estrictas (RFC 6238). |
-| **RLS** | *Row Level Security*. Característica de seguridad en motores de bases de datos relacionales (PostgreSQL) que restringe el acceso a filas específicas según el rol y contexto del token de sesión. |
-| **SPA** | *Single Page Application*. Aplicación web construida sobre una sola página que carga dinámicamente recursos e interfaces sin recargar el navegador (implementada en React + Vite). |
-| **JWT** | *JSON Web Token*. Estándar abierto (RFC 7519) para la transmisión segura y compacta de información autenticada y firmada digitalmente entre clientes y servicios web. |
-| **CSAT** | *Customer Satisfaction Score*. Métrica estandarizada para evaluar el nivel de satisfacción percibido por el mentoreado respecto a la sesión académica recibida. |
-| **SHA-256** | *Secure Hash Algorithm 256-bit*. Función criptográfica unidireccional que genera un resumen de 64 caracteres hexadecimales para garantizar la integridad de certificados y bitácoras. |
-| **EPIS-UPT** | Escuela Profesional de Ingeniería de Sistemas de la Universidad Privada de Tacna. Unidad académica beneficiaria y entorno institucional del proyecto. |
-| **MoSCoW** | Método de priorización de requerimientos: *Must have* (Obligatorio), *Should have* (Recomendable), *Could have* (Deseable), *Won't have* (Excluido por ahora). |
+| SRS / SAD | Especificación de requisitos / documento que analiza la arquitectura propuesta para atenderlos. |
+| MOD / RF / RNF / RN / CUS | Módulo, requisito funcional, requisito no funcional, regla de negocio y caso de uso; mantienen la identificación del SRS. |
+| ECB / UWE | Entidad-Control-Frontera / UML-based Web Engineering; organizan el análisis de responsabilidades e interacciones. |
+| OTP / JWT | Código de un solo uso enviado al correo institucional, válido hasta 5 minutos / token firmado con HMAC-SHA256 y expiración de 8 horas, según RNF01. |
+| RLS | Políticas de acceso por fila; su efectividad depende de los permisos, del contexto de usuario y de la configuración que se diseñe y pruebe. |
+| Top-k | Selección de candidatos ordenados por afinidad y los criterios de RN-11. |
+| Hash SHA-256 | Resumen para comprobar integridad; por sí solo no equivale a una firma digital ni garantiza anonimato. |
+| Propuesta / pendiente | Alternativa arquitectónica o decisión que requiere análisis posterior; no modifica la línea base de requisitos. |
 
-Fuente: Elaboración propia.
+Fuente: Elaboración propia y definiciones del SRS.
 
-Como se desprende del cuadro anterior, las siglas y términos definidos garantizan una base conceptual común entre los estándares de ingeniería web (UWE, ECB, SPA), la seguridad computacional (2FA, RLS, SHA-256) y el marco institucional de la EPIS-UPT.
+El uso de OTP por correo no se sustituye por TOTP o autenticación federada en este SAD. Tampoco se atribuye al hash la capacidad de eliminar vínculos identificables conservados en el modelo de datos.
 
-### 1.4. Referencias
+### 1.4. Referencias y criterio de precedencia
 
-A continuación, se listan las fuentes normativas, estándares internacionales y documentos canónicos del proyecto que sirven de base para la presente especificación:
+Las siguientes fuentes permiten identificar la procedencia de cada decisión sin declarar aprobaciones ni validaciones que aún no se han realizado.
 
-### Cuadro 1.2: Referencias Normativas, Estándares y Documentos del Proyecto
+### Cuadro 1.3: Fuentes documentales y función
 
-| Identificador | Título del Documento / Norma | Organismo / Fuente | Relevancia Arquitectónica |
-| :--- | :--- | :--- | :--- |
-| **IEEE 830-1998** | *IEEE Recommended Practice for Software Requirements Specifications* | IEEE Computer Society | Estándar de estructuración y calidad para la especificación de requerimientos de software. |
-| **ISO/IEC 25010:2011** | *Systems and software engineering — Systems and software Quality Requirements and Evaluation (SQuaRE)* | ISO / IEC | Marco taxonómico para la evaluación y aseguramiento de los atributos de calidad del sistema. |
-| **Kruchten (1995)** | *The 4+1 View Model of Architecture* | IEEE Software, 12(6) | Modelo canónico de vistas arquitectónicas adoptado en la organización del presente SAD. |
-| **Koch & Kraus (2002)** | *The expressive power of UML-based Web Engineering* | Second International Workshop on Web-oriented Software Technology | Fundamentación metodológica UWE para la ingeniería de modelos en aplicaciones web. |
-| **Ley N° 29733** | *Ley de Protección de Datos Personales del Perú y su Reglamento (D.S. 003-2013-JUS)* | Congreso de la República del Perú | Marco legal vinculante para el consentimiento informado y la disociación criptográfica de identidades. |
-| **Ley N° 30220** | *Ley Universitaria (Art. 40 - Tutoría y Consejería)* | Congreso de la República del Perú | Sustento jurídico para la acreditación de horas de servicio formativo universitario mediante mentorías. |
-| **FD01** | *Informe de Factibilidad del Sistema Web P2P* | EPIS-UPT (2026) | Validación de viabilidad operativa, técnica, económica y de tiempos de desarrollo. |
-| **FD02** | *Informe Visión del Proyecto del Sistema Web P2P* | EPIS-UPT (2026) | Definición de necesidades de stakeholders, usuarios y características del producto. |
-| **FD03** | *Informe SRS de Proyecto (Línea Base v2.0)* | EPIS-UPT (2026) | Especificación exhaustiva de 26 RF, 14 Reglas de Negocio, 10 RNF y 24 Casos de Uso. |
+| Fuente | Uso en esta revisión |
+| :--- | :--- |
+| [FD03 — SRS v2.0](FD03-EPIS-Informe%20SRS%20de%20Proyecto.md) | Secciones 5.1–5.5: módulos, RF, RNF, RN y trazabilidad. Sección 6.2.3: código y nombre de las narrativas CUS. |
+| [Matriz de inconsistencias](matriz_inconsistencias.md) | Decisiones previas sobre parser interno, publicación, estados y alcance de certificados; registro de discrepancias aún abiertas. |
+| [Reglas documentales](../reglas_documentacion.md) | Fase de análisis, PlantUML, contexto de tablas y sincronización documental. |
+| FD01 y FD02 | Viabilidad, contexto institucional, usuarios y alcance de la propuesta. |
+| Kruchten (1995), modelo 4+1; UWE | Organización de perspectivas y modelado web. |
+| ISO/IEC 25010:2011 e IEEE 830-1998, citados por el SRS | Marco de calidad y organización de requisitos adoptado por la línea base; no son resultados de evaluación. |
+| Ley N.° 29733 y Ley N.° 30220, citadas por el SRS | Contexto normativo sujeto a revisión de vigencia y aplicabilidad institucional; este SAD no acredita cumplimiento legal. |
 
-Fuente: Elaboración propia.
+Fuente: Documentación del proyecto.
 
-El conjunto de referencias citado establece un marco normativo sólido que combina estándares de la industria (IEEE, ISO/IEC), metodologías formales de ingeniería de software (Kruchten, UWE) y la legislación vigente peruana (Leyes 29733 y 30220).
+Ante las diferencias internas detectadas en diagramas posteriores del SRS, se conserva la identificación establecida por sus tablas de requisitos y sus narrativas: **CUS10 gestiona roles; CUS11 carga horarios; CUS08 registra bitácora y asistencia; CUS06 publica ofertas; CUS14 presenta analíticas**. Los diagramas discrepantes del SRS quedan registrados para una revisión específica, sin renumerar ni modificar aquí ese documento.
 
-### 1.5. Visión General
+### 1.5. Visión general y estado del ciclo
 
-El presente SAD se organiza de forma sistemática para cubrir integralmente la arquitectura del sistema:
-- La **Sección 2** expone la representación arquitectónica mediante el enfoque de **4+1 Vistas de Kruchten**, explicando cómo cada perspectiva atiende a distintos interesados del sistema.
-- La **Sección 3** detalla los objetivos de calidad y restricciones arquitectónicas en disponibilidad, seguridad, adaptabilidad y rendimiento.
-- La **Sección 4** articula el análisis de requerimientos funcionales y no funcionales que moldean la solución técnica.
-- Las **Secciones 5 a 10** presentan las vistas concretas de modelado (Casos de uso arquitectónicos, Vista lógica contextual, Procesos As-Is/To-Be, Despliegue en contenedores, Componentes de implementación y Modelo Entidad-Relación de datos).
-- La **Sección 11** documenta los escenarios de calidad estandarizados mediante árboles de utilidad y fichas formales de evaluación.
+Las secciones 2 y 3 describen perspectivas, restricciones y decisiones propuestas; la sección 4 conserva la línea base y explicita la trazabilidad; las secciones 5–10 desarrollan escenarios, componentes, procesos, infraestructura y datos; la sección 11 define verificaciones futuras. El repositorio dispone de una maqueta React con datos simulados. FastAPI, persistencia, caché y despliegue se analizan como arquitectura objetivo; no se presentan como servicios implementados.
 
 ---
 
 ## 2. Representación Arquitectónica
 
-La arquitectura del Sistema Web P2P se articula siguiendo el modelo canónico de **4+1 Vistas de Philippe Kruchten**, extendido con los principios de la metodología **UWE** para aplicaciones web centradas en datos y procesos transaccionales. Este enfoque permite separar las preocupaciones arquitectónicas en perspectivas desacopladas pero perfectamente integradas, donde los escenarios de casos de uso operan como el eje conductor ("+1") que valida y cohesiona las demás vistas:
+La arquitectura del Sistema Web P2P se articula siguiendo el modelo canónico de **4+1 Vistas de Philippe Kruchten**, extendido con los principios de la metodología **UWE** para aplicaciones web centradas en datos y procesos transaccionales. Este enfoque permite separar las preocupaciones arquitectónicas en perspectivas desacopladas pero relacionadas mediante la trazabilidad de la sección 4, donde los escenarios de casos de uso operan como el eje conductor ("+1") para revisar las demás vistas:
 
 A continuación, se sintetiza la correspondencia entre los interesados, los artefactos generados y las vistas del modelo arquitectónico:
 
@@ -169,7 +173,7 @@ A continuación, se sintetiza la correspondencia entre los interesados, los arte
 
 | Vista Arquitectónica | Audiencia Principal | Preocupación Fundamental | Artefactos / Diagramas Representativos |
 | :--- | :--- | :--- | :--- |
-| **Escenarios (+1)** | Usuarios finales, Dirección EPIS, Docentes | Validación funcional, satisfacción de reglas de negocio y flujos críticos de valor. | Diagramas de Casos de Uso canónicos, Fichas de Casos de Uso significativos (`CUS01`, `CUS02`, `CUS04`, `CUS23`, `CUS11`, `CUS10`, `CUS13`, `CUS22`). |
+| **Escenarios (+1)** | Usuarios finales, Dirección EPIS, Docentes | Validación funcional, satisfacción de reglas de negocio y flujos críticos de valor. | Diagramas de Casos de Uso canónicos, Fichas de Casos de Uso significativos (`CUS01`, `CUS02`, `CUS04`, `CUS23`, `CUS08`, `CUS13`, `CUS22`). |
 | **Vista Lógica** | Desarrolladores, Diseñadores de software | Organización modular, descomposición funcional, responsabilidades y encapsulamiento. | Diagrama Contextual, Modelos ECB (Entidad-Control-Frontera), Diagramas de Clases Parciales y Diagramas de Paquetes. |
 | **Vista del Proceso** | Integradores, Administradores de sistemas | Concurrencia, sincronización de hilos, transaccionalidad, tareas en segundo plano y cortes perentorios. | Diagramas de Actividades con Objetos, Diagramas de Secuencia, Máquinas de Estado (`SesionMentoria`, `ReservaCupo`, `BitacoraDocente`). |
 | **Vista de Desarrollo** | Ingenieros de software, Líderes técnicos | Estructura del código fuente, dependencias entre módulos, librerías, empaquetado y versionado. | Diagrama de Componentes de Implementación, Árbol de paquetes frontend/backend, Manifiestos de dependencias (`package.json`, `requirements.txt`). |
@@ -177,17 +181,17 @@ A continuación, se sintetiza la correspondencia entre los interesados, los arte
 
 Fuente: Elaboración propia.
 
-Como se observa en el cuadro anterior, cada vista responde a un conjunto específico de inquietudes de ingeniería, asegurando que todos los participantes del proyecto cuenten con una perspectiva clara y adaptada a su rol técnico.
+Como se observa en el cuadro anterior, cada vista responde a un conjunto específico de inquietudes de ingeniería, buscando que todos los participantes del proyecto cuenten con una perspectiva clara y adaptada a su rol técnico.
 
 ### 2.1. Escenarios
 
 La vista de **Escenarios (+1)** materializa el comportamiento del sistema a partir de los casos de uso arquitecturalmente significativos. Estos escenarios constituyen la columna vertebral de la solución, pues imponen los requisitos más exigentes sobre la infraestructura y la lógica de negocio:
-1. **Acceso Seguro con 2FA (`CUS01`):** Autenticación de doble factor obligatoria para resguardar la identidad de los usuarios institucionales bajo la Ley N° 29733.
+1. **Acceso Seguro con 2FA (`CUS01`):** Autenticación mediante OTP institucional para resguardar la identidad de los usuarios institucionales bajo la Ley N° 29733.
 2. **Inferencia Algorítmica *Top-k* (`CUS02`):** Generación en tiempo real del feed personalizado de mentorías, demandando indexación vectorial y bajo tiempo de respuesta.
 3. **Reserva Concurrente y Bloqueo de Cupo (`CUS04`):** Garantía de atomicidad transaccional (ACID) para evitar sobrecupos (*overbooking*) en aulas físicas de capacidad restringida.
-4. **Corte Perentorio y Evaluación de Quórum en $T-24\text{ h}$ (`CUS23`):** Proceso desatendido (Cron) de alta criticidad temporal que reasigna recursos institucionales ante inasistencias.
-5. **Acreditación Presencial mediante QR Efímero (`CUS11`):** Validación en aula en tiempo real que exige sincronización temporal estricta y protección contra falsificaciones.
-6. **Auditoría y Certificación Digital Foliada (`CUS22` / `CUS13`):** Cierre del ciclo formativo con firma criptográfica SHA-256 para emisión de certificados con valor legal académico.
+4. **Corte Perentorio y Evaluación de Quórum en $T-24\text{ h}$ (`CUS23`):** Proceso desatendido que revoca reservas no confirmadas y notifica al mentor cuando el quórum es insuficiente.
+5. **Bitácora y asistencia (`CUS08`):** Registro del mentor sobre los participantes y los contenidos tratados; el escaneo de tickets QR es una alternativa de marcado sujeta a diseño posterior.
+6. **Auditoría y Certificación Digital Foliada (`CUS22` / `CUS13`):** Cierre del ciclo formativo con horas visadas, correlativo y hash de integridad para consulta institucional.
 
 A continuación, se representa de manera gráfica la interacción sinóptica de los escenarios que estructuran la arquitectura del sistema:
 
@@ -223,8 +227,8 @@ rectangle "Escenarios de Alto Impacto Arquitectónico (+1)" {
     usecase "E2: Emparejamiento Híbrido\nTop-k en Tiempo Real (CUS02)" as E2
     usecase "E3: Bloqueo Concurrente de\nCupos Transaccionales (CUS04)" as E3
     usecase "E4: Corte Perentorio de Quórum\nen T-24h Desatendido (CUS23)" as E4
-    usecase "E5: Validación QR Dinámico\nEfímero de 60s (CUS11)" as E5
-    usecase "E6: Acreditación y Firma\nDigital SHA-256 (CUS13/CUS22)" as E6
+    usecase "E5: Bitácora y Asistencia\nQR como alternativa (CUS08)" as E5
+    usecase "E6: Acreditación y Validación\nInstitucional SHA-256 (CUS13/CUS22)" as E6
 }
 
 Alumno --> E1
@@ -249,7 +253,7 @@ E6 ..> E5 : <<audita asistencia>>
 
 Fuente: Elaboración propia.
 
-El análisis de la vista de escenarios demuestra que los flujos operacionales críticos están interconectados secuencialmente, condicionando las capacidades de concurrencia y seguridad de las vistas lógica y física subsiguientes.
+El análisis de la vista de escenarios muestra que los flujos operacionales críticos están interconectados secuencialmente, condicionando las capacidades de concurrencia y seguridad de las vistas lógica y física subsiguientes.
 
 ---
 
@@ -257,7 +261,7 @@ El análisis de la vista de escenarios demuestra que los flujos operacionales cr
 
 La **Vista Lógica** describe la organización funcional del sistema a través de una descomposición estratificada en tres capas desacopladas, reforzadas internamente por el patrón **ECB (Entidad-Control-Frontera)**:
 - **Capa de Presentación (Frontera / Boundary):** Compuesta por componentes React SPA que encapsulan la captura de entradas del usuario, validación reactiva de formularios, renderizado de interfaces accesibles e interactividad asíncrona.
-- **Capa de Aplicación y Negocio (Control):** Orquestada por servicios FastAPI en Python, implementando controladores que aplican rigurosamente las reglas de negocio (`RN-01` a `RN-14`), ejecutan algoritmos de recomendación híbridos y gestionan las transacciones operativas.
+- **Capa de Aplicación y Negocio (Control):** Se propone organizarla mediante servicios FastAPI en Python y controladores que apliquen las reglas de negocio (`RN-01` a `RN-14`), ejecuten algoritmos de recomendación híbridos y gestionen las transacciones operativas.
 - **Capa de Persistencia y Dominio (Entidad):** Modelada en PostgreSQL (Supabase) con tablas normalizadas, restricciones de integridad referencial, disparadores (*triggers*) y políticas de seguridad a nivel de fila (*RLS*), complementada con Redis para almacenamiento en memoria de alta velocidad.
 
 A continuación, se ilustra la organización en capas y la interacción del patrón ECB en el sistema:
@@ -295,7 +299,7 @@ package "Capa de Persistencia y Dominio (Entidad)" #FFF3E0 {
     database "PostgreSQL Relacional (Supabase)" as DB_Postgres {
         [Políticas de Seguridad RLS] as Sec_RLS
         [Tablas Maestras (Usuarios, Sesiones, Reservas)] as Tables_Core
-        [Tablas de Auditoría, Asistencia & Firmas] as Tables_Audit
+        [Tablas de Auditoría, Asistencia & Certificados] as Tables_Audit
     }
     database "Caché en Memoria (Redis Cloud)" as DB_Redis {
         [Caché de Embeddings Curriculares] as Cache_Embeddings
@@ -315,7 +319,7 @@ Ctrl_Rec --> Cache_Embeddings : Búsqueda Rápida
 Ctrl_Rec --> Tables_Core : Consulta de Ofertas
 Ctrl_Booking --> Tables_Core : Transacción ACID
 Ctrl_Quorum --> Tables_Core : Corte en T-24h
-Ctrl_Log --> Cache_Tokens : Validación 60s
+Ctrl_Log --> Cache_Tokens : Validación QR (política por definir)
 Ctrl_Log --> Tables_Audit : Asiento de Presencia
 Ctrl_Cert --> Tables_Audit : Foliado y SHA-256
 Sec_RLS --> Tables_Core : Aislamiento por Fila
@@ -324,16 +328,16 @@ Sec_RLS --> Tables_Core : Aislamiento por Fila
 
 Fuente: Elaboración propia.
 
-La vista lógica asegura un estricto principio de separación de responsabilidades: los componentes de la interfaz de usuario se comunican exclusivamente con los controladores de aplicación mediante contratos de API REST fuertemente tipados, mientras que el acceso a datos está blindado por políticas RLS y acelerado mediante Redis.
+La vista lógica propone separar responsabilidades: los componentes de la interfaz de usuario se comunican exclusivamente con los controladores de aplicación mediante contratos de API REST fuertemente tipados, mientras que el acceso a datos está previsto mediante repositorios, políticas RLS por definir y caché candidata.
 
 ---
 
 ### 2.3. Vista del Proceso
 
 La **Vista del Proceso** aborda los aspectos dinámicos de ejecución, concurrencia y sincronización del sistema. Se estructura en torno a los siguientes hilos de procesamiento:
-- **Procesamiento de Solicitudes HTTP/HTTPS Asíncronas:** El servidor backend (FastAPI / Uvicorn) opera sobre un bucle de eventos asíncrono (*event-loop* con `asyncio`), permitiendo atender cientos de conexiones concurrentes sin bloquear hilos del sistema operativo durante operaciones de I/O a base de datos.
+- **Procesamiento de Solicitudes HTTP/HTTPS Asíncronas:** Se propone un backend FastAPI/Uvicorn con I/O asíncrona. Su capacidad real y la separación del cómputo del recomendador se evaluarán con los escenarios de carga de RNF03 y RNF07.
 - **Tareas Automatizadas en Segundo Plano (Cron Jobs):** Procesos programados que se ejecutan a intervalos regulares para realizar el corte de quórum en $T-24\text{ h}$ (`CUS23`), anulación de reservas no ratificadas y cálculo periódico de embeddings temáticos.
-- **Gestión Transaccional de Aforo:** Mecanismo de bloqueo a nivel de fila (`SELECT ... FOR UPDATE`) o transacciones serializables en PostgreSQL para asegurar la atomicidad e impedir condiciones de carrera durante la reserva masiva de cupos en mentorías de alta demanda.
+- **Gestión Transaccional de Aforo:** Se analizará el bloqueo a nivel de fila (`SELECT ... FOR UPDATE`) y el aislamiento transaccional en PostgreSQL para preservar atomicidad durante la reserva masiva de cupos en mentorías de alta demanda.
 
 A continuación, se modela la concurrencia entre hilos y la sincronización de procesos en el backend:
 
@@ -350,8 +354,7 @@ skinparam fontSize 10
 
 participant "Clientes Concurrentes\n(Navegadores SPA)" as Clients
 participant "Event Loop Asíncrono\n(Uvicorn / FastAPI)" as EventLoop
-participant "Worker de Inferencia IA\n(NumPy / Scikit-learn)" as Worker_AI
-participant "Planificador Cron Daemon\n(APScheduler T-24h)" as Cron_Daemon
+participant "Planificador de corte\n(Tecnología por definir)" as Cron_Daemon
 participant "Pool de Conexiones DB\n(SQLAlchemy AsyncPool)" as DBPool
 database "Motor PostgreSQL\n(Transacciones ACID)" as EngineDB
 
@@ -364,7 +367,7 @@ DBPool -> EngineDB: BEGIN TRANSACTION (ISOLATION LEVEL SERIALIZABLE)
 activate EngineDB
 EngineDB -> EngineDB: SELECT cupos_disponibles FOR UPDATE
 alt Cupos disponibles > 0
-    EngineDB -> EngineDB: INSERT INTO reserva_cupo (Estado: PENDIENTE)
+    EngineDB -> EngineDB: INSERT INTO reserva_cupo (Estado: PENDIENTE_CONFIRMACION)
     EngineDB -> EngineDB: UPDATE oferta_mentoria SET cupos = cupos - 1
     EngineDB --> DBPool: COMMIT TRANSACTION
     DBPool --> EventLoop: Reserva formalizada
@@ -379,18 +382,21 @@ deactivate DBPool
 deactivate EventLoop
 
 == Tarea Programada Desatendida (Corte de Quórum) ==
-Cron_Daemon -> EventLoop: Disparo periódico (cada 5 min en T-24h)
+Cron_Daemon -> EventLoop: Ejecución al corte T-24h (planificación por definir)
 activate EventLoop
-EventLoop -> EngineDB: SELECT sesiones WHERE fecha - NOW() <= 24h AND estado = 'PROGRAMADA'
+EventLoop -> EngineDB: Seleccionar sesiones cuyo corte vence y no fue aplicado
 activate EngineDB
 EngineDB --> EventLoop: Nómina de sesiones por evaluar
 loop Para cada sesión en corte
+    EventLoop -> EngineDB: Bloquear sesión y verificar corte no aplicado
+    EventLoop -> EngineDB: Revocar pendientes a NO_CONFIRMADA y liberar cupos
     alt Confirmados >= 50% del aforo
         EventLoop -> EngineDB: UPDATE oferta_mentoria SET estado = 'CONFIRMADA'
     else Confirmados < 50% del aforo
         EventLoop -> EngineDB: UPDATE oferta_mentoria SET estado = 'QUORUM_INSUFICIENTE'
-        EventLoop -> Clients: Notificación Web Push / Email al Mentor (CUS07)
     end
+    EventLoop -> EngineDB: Registrar corte aplicado y confirmar transacción
+    EventLoop -> Clients: Notificar resultado por correo institucional (CUS07 si falta quórum)
 end
 deactivate EngineDB
 deactivate EventLoop
@@ -399,18 +405,20 @@ deactivate EventLoop
 
 Fuente: Elaboración propia.
 
-El modelado de procesos demuestra que el uso de programación asíncrona combinada con transacciones serializables elimina las condiciones de carrera durante la reserva de vacantes y asegura la ejecución oportuna de los cortes de quórum desatendidos.
+El modelado propone una transacción común para reserva, confirmación y corte, con exclusión sobre la sesión. El diseño posterior deberá precisar aislamiento, reintentos, idempotencia y recuperación de cortes pendientes; el diagrama no constituye una prueba de concurrencia.
 
 ---
 
 ### 2.4. Vista del desarrollo
+
+La estructura de paquetes siguiente es una propuesta para fases posteriores. Solo la maqueta frontend existe actualmente; no se infiere la existencia de servicios, migraciones o pruebas por mencionarlos en esta vista.
 
 La **Vista de Desarrollo** describe la arquitectura del software desde la perspectiva del entorno de construcción, dependencias y estructura de paquetes del código fuente:
 - **Frontend SPA (React + TypeScript + Vite):**
   - `src/components/`: Componentes modulares reutilizables y vistas operativas (`BookingView`, `HomeView`, `GamificationView`, `RecommendationView`, `ConsentModal`).
   - `src/services/`: Clientes HTTP tipados para consumo de la API REST mediante Axios/Fetch con interceptores de tokens JWT.
   - `src/data/`: Tipos, interfaces TypeScript y esquemas de datos mock/reales.
-  - `src/styles/`: Configuración de estilos atómicos con Tailwind CSS.
+  - `src/styles/`: Organización de estilos propuesta; la maqueta actual utiliza archivos CSS.
 - **Backend API (Python + FastAPI):**
   - `app/api/`: Enrutadores de endpoints versionados (`/api/v1/...`).
   - `app/core/`: Configuración global, middleware de seguridad, manejo de JWT y conexión a bases de datos.
@@ -480,7 +488,6 @@ FE_Api ..> BE_Routers : JSON over HTTPS (OpenAPI 3.0)
 ' Dependencias de Backend
 BE_Routers --> BE_Security : Valida Bearer Token
 BE_Routers --> BE_Schemas : Valida Request Body
-BE_Routers --> BE_Services : Delega ejecución
 BE_Routers --> BE_RecSys
 BE_Routers --> BE_Quorum
 BE_Routers --> BE_QR
@@ -498,19 +505,21 @@ BE_Migrations ..> BE_ORM : Versiona esquemas relacionales
 
 Fuente: Elaboración propia.
 
-La vista de desarrollo evidencia que tanto el frontend como el backend mantienen una clara separación interna basada en capas funcionales y modelos de datos tipados, asegurando alta mantenibilidad (RNF09) y facilitando pruebas automatizadas desacopladas.
+La vista de desarrollo propone separar interfaz, lógica y persistencia para atender RNF09. La documentación OpenAPI y la cobertura mínima del 70% se verificarán cuando existan los servicios y sus pruebas.
 
 ---
 
 ### 2.5. Vista Física
 
+El diagrama 2.5 ofrece una alternativa inicial con el recomendador integrado en el backend. La sección 8 compara la separación del recomendador mediante un contrato REST. Son alternativas de análisis: la selección queda pendiente y no implica que ambas topologías deban desplegarse simultáneamente.
+
 La **Vista Física** define la distribución física de los componentes de software en los nodos de hardware y servicios en la nube:
 - **Nodos Clientes:** Navegadores web modernos (Chrome, Firefox, Edge, Safari) ejecutándose en computadoras de escritorio de los laboratorios de la EPIS o dispositivos móviles de mentores y mentoreados, comunicándose exclusivamente vía HTTPS (TLS 1.3).
 - **Servidor de Aplicación (Backend):** Contenedor Docker desplegado en una instancia de servidor Linux, orquestado con reinicio automático y límites de memoria/CPU, exponiendo la API REST detrás de un proxy inverso NGINX que gestiona la terminación SSL y la compresión de respuestas.
 - **Servicios Administrados de Datos (Cloud):**
-  - Clúster de Base de Datos PostgreSQL alojado en Supabase, con réplicas de lectura automáticas y respaldos continuos.
+  - PostgreSQL alojado en Supabase como alternativa; capacidad, respaldo y eventual replicación pendientes de dimensionamiento.
   - Instancia en memoria Redis para caché volátil de sesiones y tokens efímeros.
-  - Bucket de almacenamiento de objetos (Object Storage) para PDFs firmados de certificados y evidencias de bitácoras docentes.
+  - Bucket de almacenamiento de objetos (Object Storage) para PDFs de certificados con hash de integridad y evidencias de bitácoras docentes.
 
 A continuación, se detalla la topología de red y los nodos físicos de cómputo:
 
@@ -532,13 +541,13 @@ skinparam node {
 
 node "Dispositivos Clientes (Red EPIS / Internet)" as Node_Client {
     artifact "Navegador Web Moderno\n(Chrome, Firefox, Edge, Safari)" as App_Client {
-        component "React 18 SPA Build\n(HTML5, CSS3, JS ES2022)" as Comp_SPA
+        component "React SPA Build\n(HTML5, CSS3, JS ES2022)" as Comp_SPA
     }
 }
 
 node "Servidor Cloud de Aplicación (Linux Container Host)" as Node_Server {
     node "Contenedor Proxy Inverso (NGINX)" as Cont_Nginx {
-        component "Terminación SSL TLS 1.3\nCompresión Gzip / Brotli\nRate Limiting & WAF" as Comp_Nginx
+        component "Terminación SSL TLS 1.3\nCompresión Gzip / Brotli\nRate Limiting propuesto" as Comp_Nginx
     }
     node "Contenedor Backend (Python 3.11)" as Cont_FastAPI {
         component "Servidor ASGI Uvicorn\nFastAPI Application Framework\nMotor Algorítmico Scikit-learn" as Comp_FastAPI
@@ -550,7 +559,7 @@ node "Servicios Cloud Administrados (Supabase / AWS)" as Node_Cloud {
         component "Esquema Relacional\nPolíticas RLS Nativas\nÍndices B-Tree & Triggers" as Comp_Postgres
     }
     database "Redis Cloud (In-Memory)" as Node_Redis {
-        component "Caché de Embeddings Top-k\nTokens Efímeros QR (TTL 60s)" as Comp_Redis
+        component "Caché de Embeddings Top-k\nTokens QR (vigencia por definir)" as Comp_Redis
     }
     folder "Cloud Object Storage" as Node_Storage {
         component "Bucket Seguro de Certificados PDF\nEvidencias de Bitácoras Docentes" as Comp_Storage
@@ -573,383 +582,376 @@ Comp_FastAPI --> Srv_SMTP : SMTP Seguro / Port 587 (TLS)
 
 Fuente: Elaboración propia.
 
-El diagrama de despliegue físico ratifica que la solución opera bajo un esquema perimetral seguro: las peticiones externas acceden exclusivamente a través del proxy inverso NGINX con cifrado TLS 1.3, mientras que los datos residen en servicios gestionados de alta disponibilidad con réplicas y políticas RLS que aíslan la información a nivel de fila.
+La topología representa una alternativa de despliegue por evaluar. TLS 1.3 deriva de RNF02; los planes de servicios, permisos RLS, respaldos, réplica y capacidad deberán definirse y verificarse antes de construcción y operación.
 
 
 ---
 
 ## 3. Objetivos y limitaciones arquitectónicas
 
-El diseño de la arquitectura del Sistema Web P2P se encuentra gobernado por un conjunto de objetivos de calidad derivados directamente de la norma **ISO/IEC 25010** y condicionado por restricciones técnicas, institucionales y regulatorias del entorno universitario:
+Los objetivos se heredan del SRS y se mantienen separados de las alternativas de implementación. Durante el análisis se evalúan los costos y dependencias de cada mecanismo sin presentar resultados de rendimiento o disponibilidad como si ya hubieran sido medidos.
 
-A continuación, se presenta la matriz de trade-offs y decisiones de diseño arquitectónico adoptadas para equilibrar los requerimientos de calidad:
+### Cuadro 3.1: Decisiones propuestas y aspectos por resolver
 
-### Cuadro 3.1: Matriz de Decisiones Arquitectónicas y Trade-offs de Calidad
-
-| Decisión Arquitectónica | Objetivo de Calidad Primario | Trade-off / Costo Asociado | Justificación Técnica Institucional |
+| Decisión propuesta | Requisitos de origen | Compensación o límite | Validación posterior |
 | :--- | :--- | :--- | :--- |
-| **Separación Frontend SPA / Backend API REST** | Adaptabilidad y Mantenibilidad | Mayor complejidad en la gestión de estado y autenticación JWT. | Permite evolucionar la interfaz web o incorporar una app móvil nativa sin alterar la lógica de negocio. |
-| **Uso de FastAPI con Python Asíncrono** | Rendimiento y Escalabilidad | Curva de aprendizaje en programación asíncrona (`async`/`await`). | Ofrece tiempos de respuesta inferiores a 100 ms y alto rendimiento en inferencia con librerías numéricas de Python (*NumPy, Scikit-learn*). |
-| **Políticas RLS en PostgreSQL (Supabase)** | Seguridad e Integridad | Sobrecarga de procesamiento por consulta evaluada en el motor de base de datos. | Garantiza seguridad en profundidad: incluso si la API se ve comprometida, ningún usuario accede a filas no autorizadas. |
-| **Tokens QR Dinámicos Efímeros (60s)** | Seguridad y Veracidad de Asistencia | Requiere sincronización horaria precisa (NTP) entre cliente y servidor. | Erradica por completo la suplantación de identidad y el fraude en el registro de asistencias presenciales. |
-| **Caché en Redis para Ranking Top-k** | Rendimiento y Disponibilidad | Necesidad de implementar políticas de invalidación ante cambios curriculares (`RN-11`). | Reduce la carga computacional en un 80% durante picos masivos de consulta de mentorías. |
+| Separar presentación, servicios REST y persistencia | RNF09 | Más contratos y manejo explícito de errores. | Contratos OpenAPI y pruebas de integración. |
+| FastAPI para orquestación y recomendación | RF06, RNF03, RNF09 | El cómputo intensivo exige evaluar aislamiento respecto de las peticiones web. | Comparar módulo interno y servicio separado con carga representativa. |
+| PostgreSQL y políticas RLS | RNF02, RNF07 | Definir roles, permisos y propagación del usuario desde la API; las conexiones privilegiadas requieren control específico. | Pruebas de acceso permitido/denegado y reserva concurrente. |
+| Redis como caché candidata | RF06, RNF03 | Añade invalidación y dependencia operativa. | Medir necesidad, costo y degradación sin caché. |
+| QR como apoyo al marcado de asistencia | RF17, CUS08, RN-12 | Es un flujo alternativo del mentor; no acredita por sí solo presencia física. | Definir emisor, consumo, expiración y controles de reutilización. |
+| PDF, correlativo, hash y portal de consulta | RF22, RF23, RN-14 | Integridad y consulta institucional sin asumir firma PKI. | Verificar documento emitido, horas visadas y acceso público mínimo. |
 
-Fuente: Elaboración propia.
+Fuente: Elaboración propia a partir de los requisitos del SRS.
 
-La matriz anterior evidencia que cada decisión de diseño responde a un análisis consciente de balance entre ventajas arquitectónicas y costos de implementación, priorizando siempre la solidez y confiabilidad del servicio académico.
+Estas decisiones no crean RF ni RNF adicionales. La duración de un QR, la topología de réplicas, el tamaño de caché y los objetivos RTO/RPO requieren especificación posterior. Se retiran como obligaciones del SAD las metas nuevas de 150/200 ms, 200 usuarios, SUS >85, disponibilidad 99.5% y cobertura >80%, pues no corresponden a la tabla canónica de RNF del SRS.
 
 ### 3.1. Disponibilidad
 
-- **Objetivo Arquitectónico:** El sistema debe ofrecer una disponibilidad mínima del **99.5%** durante el horario lectivo ordinario (lunes a sábado de 07:00 a 22:00 horas), con un tiempo medio entre fallos (MTBF) superior a 720 horas continuas.
-- **Mecanismos de Soporte:**
-  - Despliegue en contenedores con políticas de salud (*health checks*) y autoreiniciado ante excepciones no controladas.
-  - Copias de seguridad automáticas diarias en Supabase con capacidad de recuperación ante desastres (*Point-in-Time Recovery* - PITR).
-  - Manejo de degradación elegante en el frontend: si el motor de recomendación experimenta sobrecarga, la plataforma conmuta automáticamente al catálogo ordenado cronológicamente sin interrumpir las reservas.
+RNF06 establece disponibilidad mínima del 99.0% durante el periodo lectivo regular, excluyendo mantenimiento programado. Debe definirse cómo medirla, qué dependencias forman parte del servicio y qué recuperación permite el presupuesto de FD01. Los respaldos y reinicios son mecanismos candidatos; no justifican por sí solos una promesa de RPO cero ni conmutación inmediata.
 
 ### 3.2. Seguridad
 
-- **Objetivo Arquitectónico:** Proteger la confidencialidad, integridad y fe pública de los datos académicos y personales, garantizando el cumplimiento irrestricto de la **Ley N° 29733 (Ley de Protección de Datos Personales del Perú)**.
-- **Mecanismos de Soporte:**
-  - **Autenticación Fuerte:** Acceso mediante correo institucional UPT validado con segundo factor 2FA (RFC 6238 TOTP) para mitigar el robo de credenciales.
-  - **Control de Acceso Basado en Roles y Filas:** Implementación de RBAC combinado con RLS en PostgreSQL, asegurando que los mentoreados solo visualicen sus propias reservas y evaluaciones.
-  - **Cifrado Integral:** Comunicación forzada mediante HTTPS/TLS 1.3 con certificados SSL clase A+, y cifrado AES-256 en reposo para datos sensibles.
-  - **Disociación Criptográfica:** Anonimización irreversible mediante hashing SHA-256 en encuestas de calidad docente (`RN-13`) y almacenamiento seguro de bitácoras.
+RNF01 y RN-01 establecen OTP por correo institucional con vigencia máxima de cinco minutos, seguido de JWT HMAC-SHA256 con expiración de ocho horas. RF02 y RN-02 requieren consentimiento expreso antes del acceso funcional. RNF02 establece TLS 1.3, aislamiento de datos y protección de identificadores. El diseño posterior debe concretar políticas RLS, permisos de cuentas técnicas, revocación y tratamiento de información personal; ni un UUID ni un hash demuestran anonimato por sí solos.
 
 ### 3.3. Adaptabilidad
 
-- **Objetivo Arquitectónico:** Permitir la evolución modular del sistema ante cambios curriculares en la EPIS-UPT, incorporación de nuevos algoritmos de recomendación o integración con sistemas universitarios externos.
-- **Mecanismos de Soporte:**
-  - Arquitectura desacoplada basada en contratos de API REST documentados bajo OpenAPI 3.0 / Swagger.
-  - Patrón Estrategia (*Strategy Pattern*) en el motor de recomendación, posibilitando alternar o combinar inferencia híbrida, filtrado colaborativo o redes neuronales de grafos sin modificar los controladores de consumo.
-  - Diseño responsivo adaptativo que garantiza operatividad fluida en resoluciones desde 360px (smartphones) hasta 4K (monitores de laboratorio).
+RNF09 exige separación entre frontend, backend y persistencia mediante interfaces RESTful, documentación de todos los endpoints y cobertura unitaria mínima del 70%. Un contrato estable para el recomendador permitiría analizar cambios de estrategia sin acoplarlos a la interfaz. La sustitución en caliente y el despliegue sin interrupciones no se consideran capacidades ya acreditadas.
 
 ### 3.4. Rendimiento
 
-- **Objetivo Arquitectónico:** Mantener una latencia de respuesta imperceptible para el usuario y una alta tasa de procesamiento en operaciones críticas de emparejamiento y reserva.
-- **Mecanismos de Soporte:**
-  - Tiempo de respuesta de endpoints de lectura inferior a **150 ms** para el percentil 95 ($P_{95}$) bajo condiciones normales de carga.
-  - Tiempo de generación del ranking *Top-k* inferior a **200 ms**, optimizado mediante precomputación de embeddings curriculares y almacenamiento en caché Redis.
-  - Capacidad para procesar al menos 50 solicitudes de reserva concurrentes por segundo sin incurrir en colisiones ni violaciones de integridad de aforo.
+RNF03 fija procesamiento algorítmico de hasta 500 ms con hasta 50 solicitudes por minuto. RNF04 fija FCP menor de 2 segundos en conexiones de al menos 2 Mbps. Son medidas diferentes: la latencia del algoritmo no equivale a la carga total de la interfaz. Su evaluación debe definir volumen de datos, infraestructura, caché y procedimiento de medición. RNF08 mantiene la referencia de escritorio de 1366 × 768 o superior; ampliar compatibilidad móvil requiere validación adicional.
 
 ---
 
 ## 4. Análisis de Requerimientos
 
-La arquitectura se fundamenta en la especificación formal contenida en el documento SRS (**FD03 - Línea Base v2.0**), articulándose en requerimientos funcionales organizados por módulos y requerimientos no funcionales estandarizados bajo ISO/IEC 25010:
+La fuente de requisitos es el SRS FD03 v2.0. Se preservan los códigos, denominaciones, prioridades, módulos y métricas de sus tablas canónicas. Los componentes de este SAD explican una respuesta propuesta a esos requisitos y no sustituyen su significado.
 
 ### 4.1. Requerimientos funcionales
 
-A continuación, se presenta la síntesis de los requerimientos funcionales del sistema, agrupados por módulo y categorizados según su prioridad arquitectónica (MoSCoW):
+La matriz siguiente conserva las denominaciones y prioridades del Cuadro 5.3 del SRS. Añade la responsabilidad arquitectónica prevista para que cada capacidad institucional tenga un punto de análisis identificable.
 
-### Cuadro 4.1: Matriz de Requerimientos Funcionales y su Impacto Arquitectónico
+### Cuadro 4.1: Requisitos funcionales del SRS y responsabilidades propuestas
 
-| Código | Requerimiento Funcional | Módulo | Prioridad | Impacto en la Arquitectura |
-| :---: | :--- | :---: | :---: | :--- |
-| **RF01** | Autenticación institucional con 2FA | MOD-01 | Must | Middleware de autenticación JWT y validación TOTP. |
-| **RF02** | Gestión de perfiles y roles (Mentor/Mentoreado/Admin) | MOD-01 | Must | Modelo de datos de usuarios y políticas RLS por rol. |
-| **RF03** | Generación de recomendaciones personalizadas *Top-k* | MOD-02 | Must | Pipeline de cálculo vectorial, similitud coseno y caché Redis. |
-| **RF04** | Registro de solicitudes temáticas por demanda | MOD-03 | Should | Endpoints asíncronos y actualización de vectores de demanda. |
-| **RF05** | Publicación de oferta de mentoría individual/grupal | MOD-03 | Must | Validación de franjas horarias y control de aforo por modalidad. |
-| **RF06** | Configuración de disponibilidad horaria del mentor | MOD-03 | Should | Matriz semanal de slots y verificación de cruces de horario. |
-| **RF07** | Búsqueda reactiva y filtrado multicriterio de ofertas | MOD-03 | Must | Índices de texto completo (*Full-Text Search*) en PostgreSQL. |
-| **RF08** | Reserva de cupo de mentoría académica | MOD-04 | Must | Transacciones ACID concurrentes con bloqueo de aforo. |
-| **RF09** | Notificación y recordatorio de sesiones | MOD-04 | Should | Cola de mensajería asíncrona para envíos de alertas push/email. |
-| **RF10** | Confirmación perentoria de asistencia en $T-24\text{ h}$ | MOD-04 | Must | Lógica de estados de reserva (`RN-08`) y verificación de ventana. |
-| **RF11** | Corte automático y evaluación de quórum al 50% | MOD-04 | Must | Proceso desatendido (Cron) de alta prioridad y disparador `RN-09`. |
-| **RF12** | Gestión de sesión ante quórum insuficiente | MOD-04 | Must | Máquina de estados: resolución sin penalización (`RN-10`). |
-| **RF13** | Cancelación justificada de reservas | MOD-04 | Should | Liberación atómica de cupo y recálculo de aforo disponible. |
-| **RF14** | Generación de código QR dinámico de asistencia | MOD-05 | Must | Algoritmo de token efímero TOTP con semilla criptográfica. |
-| **RF15** | Escaneo y validación de código QR en aula | MOD-05 | Must | Endpoint de verificación rápida con ventana de tolerancia de 60s. |
-| **RF16** | Registro de bitácora pedagógica post-mentoría | MOD-05 | Must | Formulario estructurado con validación temporal (< 24h, `RN-12`). |
-| **RF17** | Edición y subsanación de bitácoras observadas | MOD-05 | Should | Flujo de revisión con historial de cambios y plazo de 48h. |
-| **RF18** | Aplicación de encuesta de calidad post-mentoría (CSAT) | MOD-06 | Must | Mecanismo de disociación criptográfica de identidad (`RN-13`). |
-| **RF19** | Asignación automática de insignias y reputación | MOD-06 | Should | Motor de reglas de gamificación y actualización de score. |
-| **RF20** | Visualización de tablero de reputación y medallas | MOD-06 | Could | Componente SPA con cálculo de percentiles y progresión. |
-| **RF21** | Parametrización y emisión de certificados foliados | MOD-07 | Must | Generador de PDFs con firma hash SHA-256 y sellado oficial. |
-| **RF22** | Descarga y verificación pública de certificados | MOD-07 | Must | Portal público de validación criptográfica mediante QR impreso. |
-| **RF23** | Auditoría y visado de bitácoras por Comité Tutoría | MOD-08 | Must | Interfaz administrativa con doble confirmación para horas oficiales. |
-| **RF24** | Destacar mentorías prioritarias institucionales | MOD-08 | Should | Configuración directiva del factor de bonificación $\alpha$ (`RN-11`). |
-| **RF25** | Visualización de tablero de analíticas académicas | MOD-08 | Should | Agregaciones OLAP sobre deserción, asistencia y horas efectivas. |
-| **RF26** | Exportación de reportes institucionales disociados | MOD-08 | Could | Generador de reportes en CSV/PDF bajo estándar Ley N° 29733. |
+| Código | Módulo del SRS | Denominación canónica | Prioridad del SRS | Responsabilidad propuesta |
+| :--- | :--- | :--- | :--- | :--- |
+| **RF01** | MOD-01 Seguridad, Autenticación y Gobernanza | Autenticación institucional multifactor (2FA) | Crítica | AuthenticationService |
+| **RF02** | MOD-01 Seguridad, Autenticación y Gobernanza | Formalización del consentimiento informado digital | Crítica | ConsentService |
+| **RF03** | MOD-01 Seguridad, Autenticación y Gobernanza | Gestión y asignación administrativa de roles de usuario | Alta | RoleService |
+| **RF04** | MOD-02 Gestión Curricular y Perfiles Académicos | Configuración de perfil formativo y matriz de disponibilidad horaria | Alta | AcademicProfileService |
+| **RF05** | MOD-02 Gestión Curricular y Perfiles Académicos | Gestión del catálogo de asignaturas críticas y temarios silábicos | Alta | CurriculumService |
+| **RF06** | MOD-03 Motor de Recomendación Inteligente (*EdRecSys*) | Inferencia de recomendaciones personalizadas y ranking Top-k | Crítica | TopKRecommendationEngine |
+| **RF07** | MOD-03 Motor de Recomendación Inteligente (*EdRecSys*) | Registro y banco de solicitudes temáticas por demanda | Media | DemandService |
+| **RF08** | MOD-04 Planificación, Espacios y Agendamiento | Publicación y parametrización de ofertas de mentoría académica | Alta | OfferingService |
+| **RF09** | MOD-04 Planificación, Espacios y Agendamiento | Aprovisionamiento automatizado de infraestructura y espacios | Alta | SpaceProvisioningService |
+| **RF10** | MOD-04 Planificación, Espacios y Agendamiento | Procesamiento de cronogramas institucionales oficiales (Parser de horarios) | Alta | ScheduleParserService |
+| **RF11** | MOD-04 Planificación, Espacios y Agendamiento | Gestión de imprevistos, reprogramación y cancelación de ofertas por el mentor | Alta | OfferingService |
+| **RF12** | MOD-05 Quórum, Confirmación y Cancelaciones | Reserva de cupos de mentoría con control de aforo | Alta | BookingTransactionCoordinator |
+| **RF13** | MOD-05 Quórum, Confirmación y Cancelaciones | Confirmación anticipada de asistencia a mentoría | Alta | BookingTransactionCoordinator |
+| **RF14** | MOD-05 Quórum, Confirmación y Cancelaciones | Desistimiento voluntario y liberación anticipada de cupos de reserva | Alta | BookingTransactionCoordinator |
+| **RF15** | MOD-05 Quórum, Confirmación y Cancelaciones | Monitoreo desatendido, emisión de recordatorios y evaluación automática de quórum | Crítica | QuorumEvaluatorCronService |
+| **RF16** | MOD-05 Quórum, Confirmación y Cancelaciones | Gestión resolutiva de sesiones ante quórum insuficiente | Alta | QuorumResolutionService |
+| **RF17** | MOD-06 Trazabilidad, Bitácoras y Evaluación | Registro de bitácora pedagógica y control estricto de asistencia efectiva | Alta | BitacoraWorkflowService / QRCodeCryptoValidator |
+| **RF18** | MOD-06 Trazabilidad, Bitácoras y Evaluación | Captura y procesamiento de encuestas de calidad post-mentoría | Alta | SurveyService |
+| **RF19** | MOD-06 Trazabilidad, Bitácoras y Evaluación | Consulta de historial cronológico individual de sesiones y asistencias | Media | HistoryService |
+| **RF20** | MOD-06 Trazabilidad, Bitácoras y Evaluación | Gestión, almacenamiento e intercambio de recursos académicos de sesión | Media | ResourceService |
+| **RF21** | MOD-07 Gamificación, Reputación y Certificación | Cálculo dinámico de reputación y visualización del tablero de insignias | Media | ReputationService |
+| **RF22** | MOD-07 Gamificación, Reputación y Certificación | Parametrización institucional de umbrales y emisión digital de certificados | Media | PDFCertificateCompiler |
+| **RF23** | MOD-07 Gamificación, Reputación y Certificación | Descarga y verificación institucional de certificados de horas de mentoría | Media | CertificateVerificationService |
+| **RF24** | MOD-08 Supervisión y Analítica Institucional | Priorización institucional y realce algorítmico de mentorías críticas | Media | PriorityService |
+| **RF25** | MOD-08 Supervisión y Analítica Institucional | Tablero analítico y métricas de rendimiento académico institucional | Alta | AnalyticsService |
+| **RF26** | MOD-08 Supervisión y Analítica Institucional | Auditoría administrativa de bitácoras, asistencia y validación de horas | Alta | AuditService |
 
-Fuente: Elaboración propia.
+Fuente: Elaboración propia a partir del SRS FD03 v2.0, secciones 5.1–5.5 y 6.2.3.
 
-Como se evidencia en la matriz funcional, los 26 requerimientos funcionales imponen demandas específicas sobre la arquitectura, abarcando desde la capa criptográfica (RF01, RF14, RF21) hasta el procesamiento transaccional concurrente (RF08, RF11) y la analítica directiva (RF24, RF25).
+La matriz cubre RF01–RF26 sin reasignaciones. En particular, RF06 corresponde a recomendaciones, RF12 a reservas, RF17 a bitácora y asistencia, RF22–RF23 a certificados y RF26 a auditoría. La cobertura es documental; no implica que los servicios estén construidos.
 
 ### 4.2. Requerimientos no funcionales
 
-A continuación, se detallan los requerimientos no funcionales del sistema estructurados bajo las características de calidad de la norma **ISO/IEC 25010**:
+Se reproduce la especificación canónica del Cuadro 5.2 del SRS para conservar tanto su identidad como sus medidas de aceptación. La protección de datos descrita constituye un requisito por satisfacer y no una validación del modelo actual.
 
-### Cuadro 4.2: Matriz de Requerimientos No Funcionales (ISO/IEC 25010)
+### Cuadro 4.2: Requisitos no funcionales heredados del SRS
 
-| Código | Característica de Calidad | Descripción Operativa y Métrica de Conformidad | Mecanismo Arquitectónico de Implementación |
-| :---: | :--- | :--- | :--- |
-| **RNF01** | Rendimiento (Tiempo de Respuesta) | El 95% de las peticiones HTTP GET deben responder en un tiempo inferior a **150 ms** bajo carga nominal de 100 usuarios concurrentes. | FastAPI asíncrono, índices B-Tree en PostgreSQL y compresión Gzip/Brotli en NGINX. |
-| **RNF02** | Rendimiento (Inferencia *Top-k*) | El cómputo y ordenamiento de las recomendaciones personalizadas no debe exceder los **200 ms** por solicitud. | Embeddings precomputados, cálculos vectoriales vectorizados con NumPy y caché Redis con TTL. |
-| **RNF03** | Concurrencia y Capacidad | El sistema debe soportar hasta **200 usuarios concurrentes** activos sin pérdida de paquetes ni degradación de servicio. | Servidor ASGI Uvicorn con múltiples *workers* y agrupación de conexiones (*connection pooling*) en base de datos. |
-| **RNF04** | Seguridad (Verificación QR) | El código QR de asistencia debe generarse con un token efímero de un solo uso con ciclo de vida máximo de **60 segundos**. | Algoritmo TOTP basado en secreto compartido con ventana temporal estricta de validación. |
-| **RNF05** | Seguridad (Protección de Datos) | Los datos sensibles y encuestas de calidad deben estar disociados criptográficamente garantizando anonimato bajo la **Ley N° 29733**. | Hash unidireccional SHA-256 con *salt* institucional para disociar identidades de estudiantes. |
-| **RNF06** | Usabilidad (Accesibilidad y Eficiencia) | La interfaz de usuario debe obtener un puntaje superior a **85/100 en la escala SUS** (*System Usability Scale*) y cumplir WCAG 2.1 nivel AA. | Diseño centrado en el usuario, contrastes cromáticos normados y navegación por teclado en React SPA. |
-| **RNF07** | Disponibilidad Operativa | Disponibilidad de servicio no menor a **99.5%** en horario institucional (07:00 a 22:00 horas, lunes a sábado). | Arquitectura en la nube con réplicas gestionadas, autorecuperación en contenedores y monitoreo de uptime. |
-| **RNF08** | Fiabilidad e Integridad de Datos | Pérdida de datos nula ($RPO = 0$ para transacciones confirmadas) y tiempo de recuperación ante fallos ($RTO$) menor a **15 minutos**. | Transacciones ACID, registros WAL (*Write-Ahead Logging*) en PostgreSQL y respaldos continuos PITR. |
-| **RNF09** | Mantenibilidad y Modularidad | El código fuente debe estructurarse modularmente con cobertura de pruebas unitarias superior al **80%** en componentes críticos. | Desacoplamiento por capas, tipado estricto (TypeScript y Pydantic) y pruebas automatizadas con PyTest y Vitest. |
-| **RNF10** | Portabilidad y Responsividad | El sistema debe operar con total fidelidad visual y funcional en Chrome (v110+), Firefox (v110+), Edge (v110+) y Safari móvil (iOS 16+). | Maquetación web con HTML5 semántico, CSS responsivo mediante Tailwind CSS y ausencia de plugins propietarios. |
+| Código | Característica | Denominación | Criterio técnico del SRS | Métrica del SRS |
+| :--- | :--- | :--- | :--- | :--- |
+| **RNF01** | Seguridad | Autenticación multifactor y gestión segura de sesiones | El sistema debe implementar autenticación de doble factor mediante un código de un solo uso (OTP) remitido al correo electrónico institucional con dominio `@upt.pe`. Una vez validado el acceso, la sesión debe gobernarse mediante JSON Web Tokens (JWT) firmados criptográficamente con algoritmo HMAC-SHA256. | Validez máxima del OTP: 5 minutos.<br>Expiración del token JWT: 8 horas continuas. |
+| **RNF02** | Seguridad | Privacidad, aislamiento y protección de datos académicos | Todas las comunicaciones deben estar protegidas mediante cifrado TLS 1.3 en tránsito. La persistencia en PostgreSQL (Supabase) debe aplicar políticas de seguridad a nivel de fila (Row Level Security - RLS) para aislar expedientes, kardex y calificaciones, garantizando la anonimización de identificadores directos mediante identificadores universales (UUID v4) en estricto cumplimiento de la Ley N° 29733. | 100% de consultas filtradas por RLS.<br>0% de exposición de códigos de estudiante en tráfico público. |
+| **RNF03** | Rendimiento y Eficiencia | Latencia de inferencia del motor de recomendación | El microservicio en Python (FastAPI) debe vectorizar el perfil de necesidades y calcular la similitud coseno frente a los mentores candidatos, aplicando el reordenamiento por filtrado colaborativo en un tiempo imperceptible para el usuario. | Tiempo de procesamiento algorítmico $\le 500$ ms bajo carga concurrente de hasta 50 solicitudes por minuto. |
+| **RNF04** | Rendimiento y Eficiencia | Tiempo de respuesta y carga de la interfaz de usuario | La interfaz web React (Single Page Application) debe descargar sus componentes estáticos y renderizar el panel principal de navegación de manera fluida en navegadores de escritorio. | Tiempo de primera pintura con contenido (FCP) $< 2.0$ segundos sobre conexiones de red $\ge 2$ Mbps. |
+| **RNF05** | Usabilidad | Facilidad de aprendizaje y satisfacción ergonómica | El diseño visual y los flujos de interacción de la plataforma deben ser intuitivos para estudiantes de ciclos iniciales (I a IV) y avanzados (VII a X), minimizando la curva de aprendizaje sin requerir manuales de inducción complejos. | Puntuación promedio $> 75$ puntos en la escala estandarizada System Usability Scale (SUS) al cierre de la prueba piloto. |
+| **RNF06** | Fiabilidad y Disponibilidad | Continuidad operativa durante el periodo académico | La plataforma web, el backend analítico y la base de datos cloud deben mantener operación ininterrumpida a lo largo de las 16 semanas del semestre académico 2026-II, tolerando picos de demanda durante los exámenes parciales y finales. | Nivel de disponibilidad del servicio $\ge 99.0\%$ durante el periodo lectivo regular (excluyendo ventanas de mantenimiento programado). |
+| **RNF07** | Fiabilidad e Integridad | Consistencia transaccional en reservas de cupos | El subsistema de persistencia debe ejecutar el bloqueo e inscripción de cupos mediante transacciones ACID con bloqueo optimista/pesimista, garantizando que no existan inconsistencias de sobreasignación ni colisiones de plazas concurrentes. | Tasa de sobreasignación de cupos: estrictamente $0\%$ frente a concurrencia simultánea en el aforo máximo. |
+| **RNF08** | Compatibilidad y Portabilidad | Soporte multiplataforma en navegadores de escritorio | La interfaz web debe ser responsiva y garantizar paridad visual y funcional en los navegadores web modernos utilizados en terminales personales y laboratorios de cómputo de la EPIS-UPT (Google Chrome, Mozilla Firefox, Microsoft Edge y Apple Safari). | Renderizado visual y operativo correcto al 100% en resoluciones de pantalla iguales o superiores a $1366 \times 768$ píxeles. |
+| **RNF09** | Mantenibilidad | Arquitectura desacoplada basada en microservicios RESTful | El código fuente del frontend (React SPA), backend algorítmico (FastAPI) y capa de persistencia (Supabase / PostgreSQL) debe mantener una separación estricta de responsabilidades, comunicándose mediante interfaces de programación RESTful con contratos JSON fuertemente tipados. | Documentación OpenAPI / Swagger al 100% en todos los endpoints expuestos; cobertura de pruebas unitarias $\ge 70\%$. |
+| **RNF10** | Interoperabilidad | Resiliencia ante fallos en servicios externos integrados | El sistema debe implementar políticas de reintento exponencial (*exponential backoff*), degradación elegante y gestión controlada de excepciones frente a indisponibilidades temporales de Google Meet API, Discord API o del servidor de correo SMTP institucional. | Manejo controlado del 100% de tiempos de espera (*timeouts* $\le 5$ s), registrando eventos anómalos en bitácoras de auditoría. |
 
-Fuente: Elaboración propia.
+Fuente: SRS FD03 v2.0, Cuadro 5.2, transcripción de la línea base.
 
-El cumplimiento de los requerimientos no funcionales descritos garantiza que el Sistema Web P2P no solo satisfaga las expectativas operativas de los usuarios, sino que lo haga bajo estándares estrictos de rendimiento, seguridad de datos, accesibilidad universal y alta confiabilidad institucional.
+RNF01 identifica autenticación; RNF02, privacidad; RNF03, inferencia; RNF04, carga de interfaz; RNF05, usabilidad; RNF06, disponibilidad; RNF07, integridad de reservas; RNF08, compatibilidad; RNF09, mantenibilidad; RNF10, interoperabilidad. Esta correspondencia se utiliza en todas las vistas y escenarios del SAD.
+
+### 4.3. Trazabilidad hacia las vistas arquitectónicas
+
+Se conserva íntegramente la asociación RF–MOD–RN–CUS–RNF y la verificación prevista del Cuadro 5.5 del SRS. La columna final permite localizar las secciones del SAD que desarrollan la respuesta propuesta. Los identificadores CUS se interpretan con las narrativas 6.2.3, según el criterio de precedencia de la sección 1.4.
+
+### Cuadro 4.3: Matriz de trazabilidad SRS–SAD
+
+| RF | Requerimiento del SRS | Módulo | RN | CUS | RNF | Verificación futura heredada | Secciones del SAD |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **RF01** | Autenticación institucional multifactor (2FA) | MOD-01 | RN-01 | CUS01 | RNF01, RNF02 | Prueba funcional de autenticación con OTP y expiración de tokens JWT. | 2.2, 6, 9, 10, 11.1 |
+| **RF02** | Formalización del consentimiento informado digital | MOD-01 | RN-02 | CUS01 | RNF02 | Prueba de persistencia legal y bloqueo preventivo ante rechazo de términos. | 2.2, 6, 9, 10, 11.1 |
+| **RF03** | Gestión y asignación administrativa de roles de usuario | MOD-01 | RN-03 | CUS10 | RNF02, RNF09 | Inspección funcional de actualización de privilegios de Mentoreado a Mentor. | 2.2, 6, 9, 10, 11.1 |
+| **RF04** | Configuración de perfil formativo y matriz horaria | MOD-02 | RN-03 | CUS15 | RNF04, RNF08 | Prueba de UI de matriz semanal interactiva y persistencia de competencias. | 6, 7, 9, 10 |
+| **RF05** | Gestión del catálogo de asignaturas y temarios | MOD-02 | — | CUS21 | RNF09 | Prueba de operaciones CRUD sobre jerarquías de cursos filtro y unidades silábicas. | 6, 7, 9, 10 |
+| **RF06** | Inferencia de recomendaciones y ranking Top-k | MOD-03 | RN-04, RN-11 | CUS02 | RNF03 | Prueba algorítmica de precisión (`Precision@k`, `NDCG`) y latencia $\le 500$ ms. | 2.3, 6, 8, 9, 11.3 |
+| **RF07** | Registro y banco de solicitudes por demanda | MOD-03 | RN-04 | CUS03 | RNF04, RNF09 | Prueba funcional de registro temático y visibilidad en catálogo de demanda. | 6, 7, 9, 10 |
+| **RF08** | Publicación y parametrización de ofertas de mentoría | MOD-04 | RN-04, RN-05 | CUS06 | RNF04, RNF09 | Prueba de validación de prerrequisitos docentes y creación de oferta. | 6, 7, 9, 10 |
+| **RF09** | Aprovisionamiento automatizado de infraestructura | MOD-04 | RN-06, RN-07 | CUS06, CUS18 | RNF10 | Prueba de integración con Meet API, Discord Bot y asignación de aulas. | 6, 7, 9, 10 |
+| **RF10** | Procesamiento de cronogramas (Parser de horarios) | MOD-04 | RN-06 | CUS11 | RNF09, RNF10 | Prueba de extracción de celdas libres en archivos PDF y hojas Excel. | 6, 7, 9, 10 |
+| **RF11** | Gestión de imprevistos, reprogramación y cancelación | MOD-04 | RN-10 | CUS18 | RNF09, RNF10 | Prueba funcional de actualización de cronograma y despacho de alertas. | 6, 7, 9, 10 |
+| **RF12** | Reserva de cupos con control de aforo | MOD-05 | RN-05 | CUS04 | RNF07 | Prueba de concurrencia y estrés para verificar $0\%$ de sobreasignación de cupos. | 2.3, 7, 9, 10, 11.6 |
+| **RF13** | Confirmación anticipada de asistencia (hasta $T-24\text{ h}$) | MOD-05 | RN-08 | CUS24 | RNF07, RNF09 | Prueba de transición de estados `PENDIENTE` a `CONFIRMADA` dentro de la ventana. | 2.3, 7, 9, 10, 11.6 |
+| **RF14** | Desistimiento voluntario y liberación anticipada de cupos | MOD-05 | RN-08, RN-10 | CUS17 | RNF07 | Prueba funcional de anulación previa al corte y restitución en aforo. | 2.3, 7, 9, 10, 11.6 |
+| **RF15** | Monitoreo desatendido, alertas y quórum en $T-24\text{ h}$ | MOD-05 | RN-08, RN-09 | CUS23 | RNF06, RNF09 | Prueba de ejecución programada de servicio cron, corte temporal y cálculo de quórum. | 2.3, 7, 9, 10, 11.6 |
+| **RF16** | Gestión resolutiva ante quórum insuficiente | MOD-05 | RN-09, RN-10 | CUS07 | RNF09, RNF10 | Prueba de interfaz de decisión del mentor (continuar excepcional vs. cancelar). | 2.3, 7, 9, 10, 11.6 |
+| **RF17** | Registro de bitácora y control de asistencia efectiva | MOD-06 | RN-12 | CUS08 | RNF02, RNF09 | Prueba funcional de cierre de sesión y marcado obligatorio de asistencias. | 6, 7, 9, 10 |
+| **RF18** | Captura de encuestas de calidad post-mentoría | MOD-06 | RN-12, RN-13 | CUS05 | RNF05, RNF09 | Prueba de validación de formulario (1-5 estrellas) y corte temporal a 24 horas. | 6, 7, 9, 10 |
+| **RF19** | Consulta de historial de sesiones y asistencias | MOD-06 | — | CUS19 | RNF02, RNF04 | Prueba de interfaz con filtros cronológicos y aislamiento de datos por usuario. | 6, 7, 9, 10 |
+| **RF20** | Gestión e intercambio de recursos académicos | MOD-06 | — | CUS20 | RNF02, RNF09 | Prueba funcional de subida de enlaces y descarga restringida a participantes. | 6, 7, 9, 10 |
+| **RF21** | Cálculo dinámico de reputación y tablero de insignias | MOD-07 | RN-13 | CUS16 | RNF05, RNF09 | Prueba de recálculo matemático de reputación y renderizado de insignias. | 6, 7, 9, 10 |
+| **RF22** | Parametrización de umbrales y emisión de certificados | MOD-07 | RN-14 | CUS13 | RNF09 | Prueba de configuración de horas mínimas y generación batch de documentos PDF. | 5, 7, 9, 10, 11.5 |
+| **RF23** | Descarga y verificación institucional de certificados | MOD-07 | RN-14 | CUS09 | RNF02, RNF09 | Prueba de validación de código hash criptográfico y escaneo de código QR. | 5, 7, 9, 10, 11.5 |
+| **RF24** | Priorización institucional de mentorías críticas | MOD-08 | RN-11 | CUS12 | RNF03, RNF05 | Prueba de bonificación algorítmica y despliegue de distintivo en catálogo. | 2.3, 6, 8, 9, 11.3 |
+| **RF25** | Tablero analítico y métricas de rendimiento | MOD-08 | — | CUS14 | RNF02, RNF04 | Prueba de consolidación de indicadores agregados y anonimización de datos. | 6, 7, 9, 10 |
+| **RF26** | Auditoría administrativa de bitácoras y horas | MOD-08 | RN-14 | CUS22 | RNF02, RNF09 | Prueba de flujo de visado y formulación de observaciones sobre horas declaradas. | 5, 7, 9, 10, 11.5 |
+
+Fuente: SRS FD03 v2.0, Cuadro 5.5; localización arquitectónica de elaboración propia.
+
+La mención de `PENDIENTE` en la verificación de RF13 se conserva como transcripción del SRS; las secuencias usan `PENDIENTE_CONFIRMACION` según la narrativa CUS04. Esta diferencia interna se registra como PEN-02 en la matriz de inconsistencias.
+
+Cada fila permite revisar el requisito desde su origen y desde su representación arquitectónica. Las verificaciones son actividades previstas para construcción y pruebas; en la fase actual se comprueba la coherencia de modelos, cobertura y referencias.
+
+### 4.4. Reglas de negocio y límites del análisis
+
+El SAD conserva los catorce identificadores de negocio. Su denominación se muestra para evitar que RN-06 se use como regla de recomendación o que RN-13 se interprete como definición de anonimización.
+
+### Cuadro 4.4: Catálogo de reglas de negocio de referencia
+
+| Regla | Denominación canónica | RF asociados en el SRS |
+| :--- | :--- | :--- |
+| **RN-01** | Acceso Institucional Exclusivo y 2FA | RF01 |
+| **RN-02** | Consentimiento Legal Digital (Ley N° 29733) | RF02 |
+| **RN-03** | Jerarquía de Roles y Verificación de Mérito | RF03, RF04 |
+| **RN-04** | Dinámica de Oferta/Demanda y Antelación de Publicación | RF06, RF07, RF08 |
+| **RN-05** | Control Estricto de Aforos Estándar | RF12 |
+| **RN-06** | Asignación Validada de Espacios Físicos (Parser API) | RF08, RF09, RF10 |
+| **RN-07** | Aprovisionamiento Virtual Automatizado | RF08, RF09 |
+| **RN-08** | Ventana de Confirmación de Asistencia hasta $T-24$ Horas | RF13, RF15 |
+| **RN-09** | Corte Desatendido y Quórum Mínimo del 50% en $T-24$ Horas | RF15, RF16 |
+| **RN-10** | Cancelación Oportuna y Liberación Inmediata de Recursos | RF11, RF14, RF16 |
+| **RN-11** | Criterios de Ponderación y Desempate Algorítmico | RF06, RF24 |
+| **RN-12** | Cierre Formal de Bitácora y Filtro de Evaluación | RF17, RF18 |
+| **RN-13** | Ventana Temporal Perentoria para Encuestas (24h) | RF18, RF21 |
+| **RN-14** | Certificación Parametrizada por Horas Auditadas | RF22, RF23, RF26 |
+
+Fuente: SRS FD03 v2.0, Cuadro 5.4.
+
+RN-04 exige publicación con más de 24 horas de anticipación y recomienda 48; RN-08 cierra confirmaciones en T−24 h; RN-09 reserva al mentor la decisión ante quórum insuficiente; RN-12 exige cierre y asistencia; RN-13 gobierna la ventana de encuesta; RN-14 exige horas auditadas para certificar. El detalle de la bitácora dentro de 24 horas procede de la narrativa CUS08. La fórmula concreta de bonificación y su relación con los desempates de RN-11 queda pendiente, sin imponer un rango alfa nuevo.
 
 ---
 
 ## 5. Vistas de Caso de Uso
 
-En el modelo canónico de **4+1 Vistas de Philippe Kruchten**, la vista de casos de uso constituye el elemento articulador central ("el +1") que cohesiona, valida e impone los requerimientos arquitectónicos sobre las cuatro vistas estructurales y dinámicas restantes (Lógica, Proceso, Desarrollo y Física). Un caso de uso es **arquitecturalmente significativo** cuando su ejecución introduce desafíos técnicos de alta exigencia, tales como concurrencia masiva, seguridad reforzada de doble factor, transaccionalidad atómica distribuida, cómputo matricial de baja latencia o sellado criptográfico de fe pública.
+La vista de escenarios vincula a los actores con las metas funcionales de la plataforma. Conserva los 24 casos de uso y sus nombres de la sección 6.2.3 del SRS, sin crear un CUS independiente para el QR: este es un flujo alternativo de CUS08. Las asociaciones muestran participación; el orden temporal se desarrolla en la vista de procesos.
 
-La siguiente especificación gráfica modela las relaciones entre los actores del sistema y los casos de uso arquitectónicamente significativos, agrupados por subsistemas funcionales para guiar el diseño detallado del equipo de desarrollo:
-
-### Diagrama 5.1: Diagrama de Casos de Uso Arquitectónicos Consolidados - Sistema Web P2P EPIS-UPT
+### Diagrama 5.1: Casos de uso canónicos agrupados por módulo
 
 ```plantuml
 @startuml
-title <size:12><b>Diagrama 5.1: Diagrama de Casos de Uso Arquitectónicos Consolidados</b></size>\n<size:10><i>Sistema Web P2P - EPIS UPT (2026)</i></size>
-
-left to right direction
-skinparam packageStyle rectangle
+title Diagrama 5.1: Casos de uso del SRS — arquitectura propuesta
 skinparam shadowing false
-skinparam roundcorner 8
 skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam usecase {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
+skinparam roundcorner 8
+skinparam defaultFontSize 11
+left to right direction
+actor "Usuario institucional" as Usuario
+actor "Mentoreado" as Alumno
+actor "Mentor" as Mentor
+actor "Administrador / Tutoría" as Admin
+actor "Servicio de planificación" as Cron
+Alumno --|> Usuario
+Mentor --|> Usuario
+Admin --|> Usuario
+rectangle "Sistema Web P2P — casos de uso del SRS" {
+  package "MOD-01: Seguridad, Autenticación y Gobernanza" {
+    usecase "CUS01: Iniciar sesión institucional con 2FA" as CUS01
+    usecase "CUS10: Gestionar asignación de roles de usuario" as CUS10
+  }
+  package "MOD-02: Gestión Curricular y Perfiles Académicos" {
+    usecase "CUS21: Gestionar catálogo curricular y temarios" as CUS21
+    usecase "CUS15: Configurar perfil y disponibilidad horaria" as CUS15
+  }
+  package "MOD-03: Motor de Recomendación Inteligente (EdRecSys)" {
+    usecase "CUS02: Consultar recomendaciones personalizadas Top-k" as CUS02
+    usecase "CUS03: Registrar solicitud temática por demanda" as CUS03
+  }
+  package "MOD-04: Planificación, Espacios y Agendamiento" {
+    usecase "CUS11: Cargar cronograma de horarios oficiales" as CUS11
+    usecase "CUS06: Publicar oferta de mentoría" as CUS06
+    usecase "CUS18: Modificar o cancelar oferta por imprevisto" as CUS18
+  }
+  package "MOD-05: Quórum, Confirmación y Cancelaciones" {
+    usecase "CUS04: Reservar cupo de mentoría" as CUS04
+    usecase "CUS24: Confirmar asistencia a mentoría" as CUS24
+    usecase "CUS17: Cancelar reserva de cupo (Desistimiento)" as CUS17
+    usecase "CUS23: Ejecutar alertas y evaluación automática de quórum" as CUS23
+    usecase "CUS07: Gestionar sesión ante quórum insuficiente" as CUS07
+  }
+  package "MOD-06: Trazabilidad, Bitácoras y Evaluación" {
+    usecase "CUS20: Gestionar recursos académicos de la mentoría" as CUS20
+    usecase "CUS08: Registrar bitácora y control de asistencia" as CUS08
+    usecase "CUS05: Responder encuesta de calidad post-mentoría" as CUS05
+    usecase "CUS19: Consultar historial de sesiones y asistencia" as CUS19
+  }
+  package "MOD-07: Gamificación, Reputación y Certificación" {
+    usecase "CUS16: Consultar tablero de insignias y reputación" as CUS16
+    usecase "CUS13: Parametrizar y emitir certificados" as CUS13
+    usecase "CUS09: Descargar certificado de horas de mentoría" as CUS09
+  }
+  package "MOD-08: Supervisión y Analítica Institucional" {
+    usecase "CUS12: Destacar mentorías prioritarias" as CUS12
+    usecase "CUS14: Visualizar tablero de analíticas institucionales" as CUS14
+    usecase "CUS22: Auditar bitácoras, asistencia y horas de mentoría" as CUS22
+  }
 }
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-
-actor "Mentoreado\n(I - IV Ciclo)" as Alumno
-actor "Mentor Académico\n(VII - X Ciclo)" as Mentor
-actor "Administrador / Tutoría\n(Dirección EPIS)" as Admin
-actor "Servicio Cron Backend" as Cron <<Sistema>>
-actor "Servicios Externos\n(Google Meet, Discord)" as Ext <<Sistema Externo>>
-
-rectangle "Sistema Web P2P - Núcleo Arquitectónico" {
-    package "Módulo 1: Seguridad & Gobernanza" {
-        usecase "CUS01: Iniciar Sesión con 2FA\ny Consentimiento Ley 29733" as CUS01
-    }
-
-    package "Módulo 2 & 3: Emparejamiento & Demanda" {
-        usecase "CUS02: Consultar Recomendaciones\nPersonalizadas Top-k" as CUS02
-        usecase "CUS03: Registrar Solicitud\nTemática por Demanda" as CUS03
-        usecase "CUS06: Publicar Oferta de\nMentoría Académica" as CUS06
-    }
-
-    package "Módulo 4: Reservas & Gobernanza de Quórum" {
-        usecase "CUS04: Reservar Cupo de Mentoría\ncon Bloqueo Atómico" as CUS04
-        usecase "CUS24: Confirmar Asistencia\nObligatoria (T >= 24h)" as CUS24
-        usecase "CUS23: Ejecutar Alertas y\nCorte de Quórum (T-24h)" as CUS23
-        usecase "CUS07: Gestionar Sesión ante\nQuórum Insuficiente (<50%)" as CUS07
-    }
-
-    package "Módulo 5 & 6: Trazabilidad, Asistencia & Calidad" {
-        usecase "CUS11: Registrar Asistencia\nmediante Código QR Dinámico" as CUS11
-        usecase "CUS10: Registrar Bitácora\nPedagógica de Sesión" as CUS10
-        usecase "CUS05: Responder Encuesta\nde Calidad Post-Mentoría" as CUS05
-    }
-
-    package "Módulo 7 & 8: Certificación & Fiscalización" {
-        usecase "CUS12: Destacar Asignaturas\nCríticas Prioritarias" as CUS12
-        usecase "CUS22: Auditar Bitácoras y\nVisar Horas Oficiales" as CUS22
-        usecase "CUS13: Parametrizar y Emitir\nCertificados con SHA-256" as CUS13
-        usecase "CUS14: Visualizar Tablero de\nAnalíticas Institucionales" as CUS14
-    }
-}
-
-' Asociaciones del Mentoreado
-Alumno --> CUS01
+Usuario --> CUS01
+Admin --> CUS10
+Admin --> CUS21
+Usuario --> CUS15
 Alumno --> CUS02
 Alumno --> CUS03
+Admin --> CUS11
+Mentor --> CUS06
+Mentor --> CUS18
 Alumno --> CUS04
 Alumno --> CUS24
-Alumno --> CUS11
-Alumno --> CUS05
-
-' Asociaciones del Mentor
-Mentor --> CUS01
-Mentor --> CUS06
-Mentor --> CUS07
-Mentor --> CUS10
-
-' Asociaciones del Administrador Institucional
-Admin --> CUS01
-Admin --> CUS12
-Admin --> CUS22
-Admin --> CUS13
-Admin --> CUS14
-
-' Asociaciones del Sistema Cron
+Alumno --> CUS17
 Cron --> CUS23
-
-' Integraciones con Sistemas Externos
-CUS06 ..> Ext : <<integra>> (Meet API / Discord)
-
-' Relaciones y Dependencias Arquitectónicas
-CUS04 ..> CUS02 : <<precede>>
-CUS24 ..> CUS04 : <<requiere reserva>>
-CUS23 ..> CUS24 : <<evalúa ratificaciones>>
-CUS07 ..> CUS23 : <<extend>> (Quórum < 50%)
-CUS11 ..> CUS24 : <<valida ticket activo>>
-CUS10 ..> CUS11 : <<incluye nómina presencial>>
-CUS05 ..> CUS11 : <<habilita post-asistencia>>
-CUS12 ..> CUS02 : <<bonifica factor alfa (RN-11)>>
-CUS22 ..> CUS10 : <<audita evidencias>>
-CUS13 ..> CUS22 : <<requiere visado previo (RN-14)>>
-CUS14 ..> CUS05 : <<agrega satisfacción anónima (RN-13)>>
+Mentor --> CUS07
+Usuario --> CUS20
+Mentor --> CUS08
+Alumno --> CUS05
+Usuario --> CUS19
+Mentor --> CUS16
+Admin --> CUS13
+Mentor --> CUS09
+Admin --> CUS12
+Admin --> CUS14
+Admin --> CUS22
 @enduml
 ```
 
-Fuente: Elaboración propia.
+Fuente: Elaboración propia a partir del SRS FD03 v2.0, secciones 5.1–5.5 y 6.2.3.
 
-Como se desprende del diagrama anterior, los casos de uso arquitectónicamente significativos establecen una cadena de dependencias funcionales fuertemente acopladas a las reglas de negocio institucionales:
-1. **Cadena de Reserva y Quórum:** La reserva inicial (`CUS04`) no constituye una inscripción definitiva, sino un bloqueo provisional que exige ratificación obligatoria (`CUS24`). El corte desatendido en $T-24\text{ h}$ (`CUS23`) actúa como juez de gobernanza, anidando la extensión condicional hacia la gestión de contingencia del mentor (`CUS07`).
-2. **Cadena de Fe Pública y Certificación:** La validez institucional de las horas formativas demanda una estricta precedencia: asistencia verificada físicamente vía QR (`CUS11`) $\rightarrow$ bitácora docente estructurada (`CUS10`) $\rightarrow$ auditoría y visado por el Comité de Tutoría (`CUS22`) $\rightarrow$ generación del certificado oficial foliado con firma hash SHA-256 (`CUS13`).
+El diagrama incorpora funciones que quedaban fuera de la síntesis anterior: roles, catálogo curricular, disponibilidad, parser, recursos e historial. Su descomposición por módulo permite revisar el alcance sin confundir publicación de ofertas con descarga de certificados ni asistencia con carga de cronogramas.
 
-A continuación, se detalla el impacto directo que cada caso de uso nuclear ejerce sobre las distintas perspectivas del modelo arquitectónico:
+Para conectar las metas de usuario con los requisitos, se presenta el catálogo de referencias usado por las vistas del SAD.
 
-### Cuadro 5.1: Matriz de Casos de Uso Arquitecturalmente Significativos y su Impacto en Vistas 4+1
+### Cuadro 5.1: Casos de uso y requisitos de origen
 
-| Código CUS | Denominación del Caso de Uso | Vista Lógica (ECB) | Vista del Proceso | Vista de Desarrollo | Vista Física / Despliegue |
-| :---: | :--- | :--- | :--- | :--- | :--- |
-| **CUS01** | Iniciar sesión institucional con 2FA | Controlador Auth / Entidad Usuario y Consentimiento | Hilo asíncrono de verificación TOTP y expiración JWT (15 min). | Módulo `app/core/security.py` y librerías `pyotp`, `python-jose`. | Conexión SSL/TLS 1.3 con servidor SMTP institucional UPT. |
-| **CUS02** | Consultar recomendaciones Top-k | Controlador RecSys / Entidad Perfil y Embedding | Cómputo matricial vectorizado con NumPy y consulta paralela en Redis. | Subpaquete `app/services/recsys/` y modelos Scikit-learn. | Servidor backend con aceleración vectorial y clúster Redis en memoria. |
-| **CUS04** | Reservar cupo de mentoría | Controlador Booking / Entidad Reserva y Aforo | Transacción serializable con bloqueo de fila (`FOR UPDATE`) en PostgreSQL. | Componente `BookingView.tsx` y servicio transaccional FastAPI. | Instancia primaria de Supabase con réplica de lectura desacoplada. |
-| **CUS23** | Alertas y corte de quórum (T-24h) | Controlador Cron / Entidad Sesión y Transición | Proceso daemon desatendido con intervalos de escaneo cada 5 minutos. | Tareas programadas con `APScheduler` o Celery Beat en Python. | Worker backend independiente con alta resiliencia y reinicio automático. |
-| **CUS11** | Registrar asistencia por código QR | Controlador Attendance / Entidad AsistenciaQR | Validación criptográfica de tokens efímeros con tolerancia temporal de 60s. | Generador QR en React SPA y validador HMAC-SHA256 en backend. | Sincronización estricta mediante protocolo NTP en nodos de cómputo. |
-| **CUS10** | Registrar bitácora pedagógica | Controlador Logbook / Entidad Bitácora | Escritura transaccional y cambio de estado de sesión a `FINALIZADA`. | Formulario estructurado con validación temporal estricta (< 24h). | Bucket de almacenamiento para evidencias digitales y PostgreSQL. |
-| **CUS13** | Parametrizar y emitir certificados | Controlador Certificate / Entidad Certificado | Pipeline de renderizado PDF en memoria y estampado de firma SHA-256. | Librería `ReportLab` o `WeasyPrint` con sellado digital criptográfico. | Almacenamiento seguro de objetos y CDN con enlaces firmados. |
-| **CUS22** | Auditar bitácoras y visar horas | Controlador Audit / Entidad VisadoHoras | Transacción de doble confirmación con registro inmutable de auditoría. | Panel administrativo con interfaz analítica en React SPA. | Políticas RLS en base de datos para restringir acceso exclusivo a Dirección. |
+| CUS | Denominación canónica | Módulo | RF de origen |
+| :--- | :--- | :--- | :--- |
+| CUS01 | Iniciar sesión institucional con 2FA | MOD-01 | RF01, RF02 |
+| CUS10 | Gestionar asignación de roles de usuario | MOD-01 | RF03 |
+| CUS21 | Gestionar catálogo curricular y temarios | MOD-02 | RF05 |
+| CUS15 | Configurar perfil y disponibilidad horaria | MOD-02 | RF04 |
+| CUS02 | Consultar recomendaciones personalizadas Top-k | MOD-03 | RF06 |
+| CUS03 | Registrar solicitud temática por demanda | MOD-03 | RF07 |
+| CUS11 | Cargar cronograma de horarios oficiales | MOD-04 | RF10 |
+| CUS06 | Publicar oferta de mentoría | MOD-04 | RF08, RF09 |
+| CUS18 | Modificar o cancelar oferta por imprevisto | MOD-04 | RF09, RF11 |
+| CUS04 | Reservar cupo de mentoría | MOD-05 | RF12 |
+| CUS24 | Confirmar asistencia a mentoría | MOD-05 | RF13 |
+| CUS17 | Cancelar reserva de cupo (Desistimiento) | MOD-05 | RF14 |
+| CUS23 | Ejecutar alertas y evaluación automática de quórum | MOD-05 | RF15 |
+| CUS07 | Gestionar sesión ante quórum insuficiente | MOD-05 | RF16 |
+| CUS20 | Gestionar recursos académicos de la mentoría | MOD-06 | RF20 |
+| CUS08 | Registrar bitácora y control de asistencia | MOD-06 | RF17 |
+| CUS05 | Responder encuesta de calidad post-mentoría | MOD-06 | RF18 |
+| CUS19 | Consultar historial de sesiones y asistencia | MOD-06 | RF19 |
+| CUS16 | Consultar tablero de insignias y reputación | MOD-07 | RF21 |
+| CUS13 | Parametrizar y emitir certificados | MOD-07 | RF22 |
+| CUS09 | Descargar certificado de horas de mentoría | MOD-07 | RF23 |
+| CUS12 | Destacar mentorías prioritarias | MOD-08 | RF24 |
+| CUS14 | Visualizar tablero de analíticas institucionales | MOD-08 | RF25 |
+| CUS22 | Auditar bitácoras, asistencia y horas de mentoría | MOD-08 | RF26 |
 
-Fuente: Elaboración propia.
+Fuente: Elaboración propia a partir del SRS FD03 v2.0, secciones 5.1–5.5 y 6.2.3.
 
-El análisis de la matriz confirma que cada caso de uso arquitectónicamente significativo se traduce en soluciones técnicas concretas distribuidas en todas las vistas de la arquitectura, garantizando la consistencia global del sistema.
+Los escenarios de mayor impacto son acceso y consentimiento (CUS01), recomendación (CUS02), reserva y ratificación (CUS04/CUS24), corte y contingencia (CUS23/CUS07), cierre de bitácora y asistencia (CUS08), auditoría (CUS22) y emisión/descarga de certificados (CUS13/CUS09). El SAD remite al SRS para sus narrativas completas, evitando mantener una segunda definición divergente.
 
 ---
 
 ## 6. Vista Lógica
 
-La **Vista Lógica** formaliza la descomposición funcional del sistema, estructurando sus responsabilidades bajo una arquitectura estratificada en tres capas (Presentación, Aplicación/Negocio y Persistencia) y gobernada por el patrón arquitectónico **Entidad-Control-Frontera (ECB)** derivado de las directrices metodológicas de **UWE**.
+La vista lógica analiza las responsabilidades de presentación, control y dominio sin fijar aún todos los detalles de implementación. El parser pertenece al backend de MOD-04; los servicios externos se limitan al correo institucional y las plataformas de videoconferencia previstas en el SRS.
 
 ### 6.1. Diagrama Contextual
 
-El Diagrama Contextual establece las fronteras operativas de la plataforma, delimitando las interfaces seguras entre el núcleo del software, los actores humanos de la comunidad EPIS y los subsistemas institucionales externos:
+El contexto diferencia a los usuarios institucionales, la frontera de la solución y los sistemas con los que se prevé interoperar.
 
-### Diagrama 6.1: Diagrama Contextual del Sistema Web P2P EPIS-UPT (Límites y Entorno Operativo)
+### Diagrama 6.1: Contexto y límites de responsabilidad
 
 ```plantuml
 @startuml
-title <size:12><b>Diagrama 6.1: Diagrama Contextual del Sistema Web P2P EPIS-UPT</b></size>\n<size:10><i>Límites del Sistema y Entorno Operacional</i></size>
-
+title Diagrama 6.1: Contexto del Sistema Web P2P
 skinparam shadowing false
-skinparam roundcorner 8
 skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam rectangle {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
+skinparam roundcorner 8
+skinparam defaultFontSize 11
+left to right direction
+actor "Mentoreado" as Alumno
+actor "Mentor" as Mentor
+actor "Administrador / Tutoría" as Admin
+rectangle "Sistema Web P2P" as Core {
+  component "Módulos MOD-01 a MOD-08" as Modulos
+  component "Parser interno de horarios\nMOD-04 / RF10 / CUS11" as Parser
+  Modulos --> Parser : Consultar cronogramas procesados
 }
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-
-' ===================================================
-' COLUMNA IZQUIERDA: ACTORES HUMANOS
-' ===================================================
-together {
-    actor "Estudiante Mentoreado\n(I - IV Ciclo)" as Alumno
-    actor "Estudiante Mentor\n(VII - X Ciclo)" as Mentor
-    actor "Comité de Tutoría\n& Dirección EPIS" as Admin
-}
-
-Alumno -[hidden]down-> Mentor
-Mentor -[hidden]down-> Admin
-
-' ===================================================
-' COLUMNA CENTRAL: SISTEMA WEB P2P (NÚCLEO)
-' ===================================================
-rectangle "SISTEMA WEB P2P DE MENTORÍAS\n(FastAPI / React SPA / Supabase / Redis)" as Core #E3F2FD {
-    rectangle "Motor de Recomendación\nTop-k Híbrido" as RecEngine #FFFFFF
-    rectangle "Gestor de Reservas &\nQuórum en T-24h" as QuorumEngine #FFFFFF
-    rectangle "Control de Asistencia QR &\nBitácoras Docentes" as LogEngine #FFFFFF
-    rectangle "Módulo de Certificación\n& Sellado SHA-256" as CertEngine #FFFFFF
-}
-
-' ===================================================
-' COLUMNA DERECHA: SISTEMAS EXTERNOS
-' ===================================================
-together {
-    rectangle "Servidor SMTP Institucional\n(Correo UPT @upt.pe)" as SMTP #FFF3E0
-    rectangle "Google Workspace API\n(Provisioning Google Meet)" as MeetAPI #E8F5E9
-    rectangle "Servidor Discord EPIS\n(Canales Supervisados)" as DiscordBot #EDE7F6
-    rectangle "Parser de Horarios UPT\n(Extractor PDF/Excel)" as Parser #FCE4EC
-}
-
-SMTP -[hidden]down-> MeetAPI
-MeetAPI -[hidden]down-> DiscordBot
-DiscordBot -[hidden]down-> Parser
-
-' ===================================================
-' INTERACCIONES
-' ===================================================
-Alumno -right-> Core : HTTPS / TLS 1.3\n• Reservas de cupos\n• Confirmación T-24h y QR\n• Encuestas CSAT
-Mentor -right-> Core : HTTPS / TLS 1.3\n• Ofertas y quórum\n• Bitácoras y asistencia\n• Descarga certificados
-Admin -right-> Core : HTTPS / TLS 1.3 (MFA)\n• Visado de horas oficiales\n• Parámetros de certificación\n• Analítica directiva
-
-Core -right-> SMTP : SMTP Seguro (587)\n• Códigos OTP 2FA\n• Alertas de quórum
-Core -right-> MeetAPI : REST API\n• Generación de salas Meet
-Core -right-> DiscordBot : Bot API\n• Canales de voz supervisados
-Core -right-> Parser : JSON API\n• Consulta de aulas libres
+cloud "Correo institucional UPT" as SMTP
+cloud "Google Meet / Discord" as Virtual
+Alumno --> Core : Perfil, reserva, confirmación y encuesta
+Mentor --> Core : Oferta, asistencia y bitácora
+Admin --> Core : Roles, carga de horarios y auditoría
+Core --> SMTP : OTP y notificaciones
+Core --> Virtual : Aprovisionar / liberar sala
 @enduml
 ```
 
-Fuente: Elaboración propia.
+Fuente: Elaboración propia a partir de RF01–RF26 y del alcance de integraciones del SRS.
 
-El análisis del Diagrama Contextual clarifica tres aspectos arquitectónicos de vital importancia:
-1. **Límites de Responsabilidad:** El Sistema Web P2P no duplica funciones del ERP institucional ni gestiona matrículas formales; su alcance se concentra estrictamente en la intermediación, trazabilidad pedagógica y certificación del aprendizaje entre pares.
-2. **Protocolos Seguros de Interfaz:** Todas las comunicaciones de usuario se canalizan bajo HTTPS forzado con TLS 1.3, mientras que las integraciones con servicios externos emplean autenticación delegada mediante tokens OAuth 2.0 y secretos institucionales cifrados.
-3. **Aislamiento de Fallos:** Si los servicios de Google Meet o Discord experimentan indisponibilidad externa, el sistema degrada su funcionalidad de aprovisionamiento virtual a la modalidad manual sin interrumpir la persistencia de ofertas ni la asignación de aulas físicas provistas por el parser institucional.
+El archivo de horarios ingresa mediante CUS11 y se procesa dentro de la plataforma. Una falla de Meet, Discord o SMTP se atiende según RNF10 con timeout controlado, reintentos y una respuesta comprensible al usuario; el SAD no presupone una integración externa del parser.
 
-### 6.2. Descomposición en Capas y Patrón Entidad-Control-Frontera (ECB)
+### 6.2. Descomposición en capas y patrón ECB
 
-Para estructurar la lógica interna del sistema, se adopta el patrón **ECB** (*Entity-Control-Boundary*), distribuyendo las clases en tres estereotipos complementarios:
-- **Objetos Frontera (`Boundary`):** Vistas, modales y formularios React SPA que capturan eventos del usuario y renderizan respuestas.
-- **Objetos de Control (`Control`):** Servicios y controladores FastAPI que ejecutan algoritmos, validan ventanas temporales y orquestan transacciones.
-- **Objetos de Entidad (`Entity`):** Modelos ORM y tablas PostgreSQL que representan el estado persistente y seguro del dominio académico.
+La siguiente matriz relaciona cada módulo canónico con fronteras, controles y entidades de análisis. Los nombres de clases y servicios son propuestos y podrán ajustarse en diseño manteniendo esta trazabilidad.
 
-A continuación, se presenta la correspondencia de componentes ECB organizada por módulo funcional:
+### Cuadro 6.1: Responsabilidades ECB por módulo
 
-### Cuadro 6.1: Mapeo de Componentes del Patrón ECB por Módulo Funcional
+| Módulo | Frontera propuesta | Control propuesto | Entidades de análisis |
+| :--- | :--- | :--- | :--- |
+| MOD-01 | Acceso, consentimiento y administración de roles | AuthenticationService, ConsentService, RoleService | Usuario, Rol, ConsentimientoLegal |
+| MOD-02 | Perfil, disponibilidad y catálogo curricular | AcademicProfileService, CurriculumService | PerfilAcademico, Disponibilidad, Asignatura, Tema |
+| MOD-03 | Recomendaciones y solicitudes de demanda | TopKRecommendationEngine, DemandService | VectorCompetencia, SolicitudDemanda, Oferta |
+| MOD-04 | Publicación, carga de horarios y reprogramación | OfferingService, ScheduleParserService, SpaceProvisioningService | SesionMentoria, Cronograma, EspacioFisico, EspacioVirtual |
+| MOD-05 | Reserva, confirmación, desistimiento y contingencia | BookingTransactionCoordinator, QuorumEvaluatorCronService, QuorumResolutionService | ReservaCupo, SesionMentoria |
+| MOD-06 | Bitácora, asistencia, encuestas, historial y recursos | BitacoraWorkflowService, QRCodeCryptoValidator, SurveyService, HistoryService, ResourceService | Bitacora, Asistencia, Encuesta, RecursoAcademico |
+| MOD-07 | Insignias, configuración de certificados y descarga | ReputationService, PDFCertificateCompiler, CertificateVerificationService | Reputacion, Insignia, Certificado, ParametroCertificacion |
+| MOD-08 | Prioridades, analíticas y visado | PriorityService, AnalyticsService, AuditService | Prioridad, Indicador, DictamenAuditoria |
 
-| Módulo | Objeto Frontera (`Boundary`) | Objeto de Control (`Control`) | Objeto de Entidad (`Entity`) |
-| :---: | :--- | :--- | :--- |
-| **MOD-01** | `LoginView`, `TwoFactorModal`, `ConsentModal` | `AuthService`, `TOTPValidator`, `JWTManager` | `Usuario`, `Rol`, `ConsentimientoLegal` |
-| **MOD-02** | `RecommendationView`, `CourseBadgeWidget` | `RecSysEngine`, `CosineSimilarityService` | `PerfilAcademico`, `VectorCompetencia`, `EmbeddingTema` |
-| **MOD-03** | `PublishOfferingForm`, `DemandRequestModal` | `OfferingManager`, `DemandAggregatorService` | `OfertaMentoria`, `SolicitudDemanda`, `AsignaturaFiltro` |
-| **MOD-04** | `BookingModal`, `ConfirmationView`, `QuorumAlertView` | `BookingService`, `QuorumEvaluatorCron`, `CancelService` | `ReservaCupo`, `EstadoReserva`, `EspacioFisico`, `EspacioVirtual` |
-| **MOD-05** | `QRCodeGeneratorView`, `QRScannerView`, `LogbookForm` | `QRCryptoService`, `AttendanceValidator`, `LogbookService` | `TicketAsistenciaQR`, `BitacoraDocente`, `DetalleAsistencia` |
-| **MOD-06** | `CSATSurveyModal`, `GamificationDashboard` | `SurveyProcessor`, `ReputationCalculatorService` | `EncuestaCalidad`, `ReputacionMentor`, `InsigniaOtorgada` |
-| **MOD-07** | `CertificateDownloadView`, `QRVerifierPortal` | `PDFGeneratorService`, `SHA256Signer`, `VerifyService` | `CertificadoOficial`, `FoliadoInstitucional` |
-| **MOD-08** | `AnalyticsDashboard`, `LogbookAuditView`, `PrioritySettings` | `AuditWorkflowService`, `InstitutionalAnalyticsEngine` | `VisadoBitacora`, `ConfiguracionPrioridad`, `MetricaDesercion` |
+Fuente: Elaboración propia a partir del SRS FD03 v2.0, secciones 5.1–5.5 y 6.2.3.
 
-Fuente: Elaboración propia.
-
-La segregación formal en componentes ECB garantiza un alto desacoplamiento y facilita la construcción de pruebas unitarias automatizadas sobre los controladores sin requerir la presencia de la interfaz gráfica ni la conexión directa a base de datos.
+El aislamiento de controles permitiría probar reglas sin depender de las pantallas. El modelo de datos de la sección 10 es parcial y todavía debe representar todas las entidades identificadas aquí; los nombres ECB no implican tablas o clases ya implementadas.
 
 ---
 
@@ -987,16 +989,16 @@ else (Sí)
   :Acepta brindar ayuda de forma voluntaria;
   |Estudiante Mentoreado (I - IV Ciclo)|
   :Coordina horario tentativa por mensajería privada;
-  
+
   |Compañero Informal (VII - X Ciclo)|
   :Busca aula libre en pabellón empíricamente\no crea enlace improvisado de Meet/Zoom;
-  
+
   |Estudiante Mentoreado (I - IV Ciclo)|
   :Asiste a la reunión pactada;
-  
+
   |Compañero Informal (VII - X Ciclo)|
   :Explica dudas sin guía silábica estructurada\nni control de asistencia efectiva;
-  
+
   |Comité de Tutoría & Dirección EPIS|
   :Sin registro de temas tratados ni asistencia;
   :Sin métricas de demanda académica real;
@@ -1036,12 +1038,12 @@ start
 :Publica oferta de mentoría académica\n(Asignatura, temario, fecha, modalidad);
 
 |Sistema Web P2P (FastAPI / RecSys)|
-:Asigna aula física validada (Parser)\no genera enlace virtual (Meet/Discord);
+:Asigna aula física validada (Parser interno CUS11)\no genera enlace virtual (Meet/Discord);
 :Publica oferta y recalcula ranking Top-k;
 
 |Estudiante Mentoreado|
 :Consulta feed personalizado Top-k\ny formaliza reserva de cupo provisional;
-:Confirma asistencia obligatoria\ndentro de la ventana (hasta T-24h);
+:Confirma asistencia obligatoria (CUS24)\nantes del corte T-24h;
 
 |Servicio Cron Desatendido|
 :Ejecuta corte perentorio en T-24h;\nRevoca cupos no confirmados y evalúa aforo;
@@ -1055,29 +1057,33 @@ else (No)
   |Estudiante Mentor|
   if (¿Mentor decide dictar excepcionalmente?) then (Sí)
     :Ratifica sesión excepcional sin penalización;
+    :Sesión en CONFIRMADA_EXCEPCIONAL;
   else (No)
     |Sistema Web P2P (FastAPI / RecSys)|
-    :Cancela sesión, notifica por email\ny libera aula/sala inmediatamente;
+    :Sesión en CANCELADA_QUORUM;\nReservas en CANCELADA_SISTEMA;
+    :Notifica por email y libera aula/sala;
     stop
   endif
 endif
 
 |Estudiante Mentoreado|
-:Asiste a la sesión y exhibe\ncódigo QR dinámico (vigencia 60s);
+:Asiste a la sesión y exhibe\nticket QR (alternativa de CUS08);
 
 |Estudiante Mentor|
-:Escanea código QR y dicta la sesión;\nRegistra bitácora pedagógica (< 24h);
+:Marca asistencia o escanea ticket QR;\nRegistra bitácora dentro de 24h (CUS08);
+|Sistema Web P2P (FastAPI / RecSys)|
+:Finaliza sesión y registra horas PROVISIONALES;
 
 |Estudiante Mentoreado|
 :Responde encuesta de calidad CSAT\nen ventana perentoria de 24 horas;
 
 |Sistema Web P2P (FastAPI / RecSys)|
-:Actualiza score de reputación docente\ny registra horas en estado PROVISIONAL;
+:Registra evaluación; actualiza reputación\nal cierre de la ventana (RN-13);
 
 |Comité de Tutoría & Dirección EPIS|
 :Audita bitácoras y registros de asistencia;\nVisa horas efectivas (estado OFICIAL);
 if (¿Mentor alcanza umbral semestral parametrizado?) then (Sí)
-  :Autoriza y emite certificado digital PDF\ncon foliado institucional y firma SHA-256;
+  :Autoriza y emite certificado digital PDF\ncon foliado institucional y hash SHA-256 de integridad;
 endif
 stop
 @enduml
@@ -1086,15 +1092,15 @@ stop
 Fuente: Elaboración propia.
 
 El análisis comparativo del flujo To-Be evidencia las siguientes transformaciones sustanciales:
-1. **Gobernanza Automatizada de Recursos:** El corte en $T-24\text{ h}$ y el umbral de quórum del 50% (`RN-08`/`RN-09`) garantizan que ningún aula física ni enlace virtual se reserve en vano, liberando espacios con anticipación suficiente para otros grupos académicos.
-2. **Garantía Antifraude en Asistencia:** La sustitución de firmas manuales en papel por códigos QR dinámicos con semillas temporales de 60 segundos (`CUS11`, `RNF04`) elimina la suplantación de identidad y asegura presencia física fehaciente.
-3. **Cierre de Ciclo Institucional:** La obligatoriedad de la bitácora docente en menos de 24 horas (`RN-12`), combinada con la auditoría del Comité de Tutoría (`RN-14`), confiere pleno valor probatorio a las constancias emitidas para la convalidación de horas de servicio estudiantil según el Art. 40 de la Ley Universitaria N° 30220.
+1. **Gobernanza Automatizada de Recursos:** El corte en $T-24\text{ h}$ y el umbral de quórum del 50% (`RN-08`/`RN-09`) permiten evaluar la viabilidad y notificar al mentor. La liberación ocurre al cancelar según RN-10, no por el solo hecho de detectar quórum insuficiente.
+2. **Registro de asistencia:** CUS08 permite al mentor marcar la nómina o escanear tickets QR. El mecanismo técnico y sus controles contra reutilización se deben validar; no se atribuye a RNF04 una duración de 60 segundos.
+3. **Cierre del ciclo institucional:** La bitácora y la asistencia registradas en CUS08 producen horas provisionales. Solo el visado de CUS22 habilita su cómputo para CUS13 y CUS09, de acuerdo con RN-14.
 
 ---
 
 ## 8. Vista de Despliegue
 
-La **Vista de Despliegue** describe la asignación de los componentes lógicos y de software en unidades de ejecución autónomas (contenedores de software) y su distribución sobre la infraestructura en la nube. Conforme a las directrices de modelado arquitectónico **C4 (Nivel 2: Contenedores)** adaptadas a la metodología **UWE**, esta vista delimita las responsabilidades de cada contenedor, las fronteras de red y los protocolos de comunicación que garantizan alta disponibilidad (RNF07), baja latencia (RNF01) y aislamiento perimetral de seguridad (RNF05).
+La **Vista de Despliegue** describe la asignación de los componentes lógicos y de software en unidades de ejecución autónomas (contenedores de software) y su distribución sobre la infraestructura en la nube. Conforme a las directrices de modelado arquitectónico **C4 (Nivel 2: Contenedores)** adaptadas a la metodología **UWE**, esta vista plantea responsabilidades y comunicaciones candidatas para atender RNF06, RNF03 y RNF02. El despliegue definitivo y su capacidad se decidirán después del análisis.
 
 ### 8.1. Diagrama de Contenedor
 
@@ -1143,23 +1149,24 @@ Mentor -[hidden]down-> Admin
 ' COLUMNA CENTRAL: CONTENEDORES DEL SISTEMA (C4 NIVEL 2)
 ' ===================================================
 rectangle "Límite del Sistema Web P2P de Mentorías" #E3F2FD {
-    
+
     package "Tier de Presentación y Borde Perimetral" as Tier_Edge #FFFFFF {
-        [Contenedor 1: Single-Page Application (SPA)\nReact 18 / TypeScript / Vite / Tailwind CSS\n(Navegador del cliente, puerto 443)] as C_SPA
-        [Contenedor 2: Proxy Inverso & WAF\nNGINX Container en Linux Host\n(TLS 1.3, Rate Limiting, Gzip, Balanceo)] as C_Proxy
+        [Contenedor 1: Single-Page Application (SPA)\nReact / TypeScript / Vite / CSS\n(Navegador del cliente, puerto 443)] as C_SPA
+        [Contenedor 2: Proxy Inverso propuesto\nNGINX propuesto\n(TLS 1.3 y limitación de tasa)] as C_Proxy
     }
-    
+
     package "Tier de Aplicación y Servicios de Dominio" as Tier_App #FFFFFF {
         [Contenedor 3: Backend Core API\nFastAPI / Python 3.11 / Uvicorn ASGI\n(Controladores, JWT Auth, Orquestador Quórum)] as C_API
+        [Parser interno de horarios\nMOD-04 / RF10 / CUS11] as C_Parser
         [Contenedor 4: Motor de Inferencia IA\nEdRecSys Service / NumPy / Scikit-learn\n(Similitud Coseno Vectorial y Ranking Top-k)] as C_RecSys
     }
-    
+
     package "Tier de Persistencia y Almacenamiento Gestionado" as Tier_Data #FFFFFF {
         database "Contenedor 5: Base de Datos Relacional\nPostgreSQL 15+ (Supabase Cloud)\n(Transacciones ACID, RLS, Tablas Core)" as C_Postgres
-        database "Contenedor 6: Almacén en Memoria\nRedis Cloud (High-Speed Memory Cache)\n(Embeddings, Tokens QR rotativos 60s)" as C_Redis
-        [Contenedor 7: Almacén de Objetos\nSupabase Storage / S3 Bucket\n(Custodia inmutable de PDFs y evidencias)] as C_Storage
+        database "Contenedor 6: Almacén en Memoria\nRedis Cloud (High-Speed Memory Cache)\n(Embeddings, Tokens QR (política por definir))" as C_Redis
+        [Contenedor 7: Almacén de Objetos\nSupabase Storage / S3 Bucket\n(Custodia con controles por definir de PDFs y evidencias)] as C_Storage
     }
-    
+
     Tier_Edge -[hidden]down-> Tier_App
     Tier_App -[hidden]down-> Tier_Data
 }
@@ -1171,12 +1178,10 @@ together {
     rectangle "Servidor SMTP Institucional\nCorreo UPT (@upt.pe, Port 587)" as Ext_SMTP #FFFDE7
     rectangle "Google Workspace API\nProvisioning Google Meet (OAuth 2.0)" as Ext_Meet #E8F5E9
     rectangle "Servidor Discord EPIS\nCanales Supervisados (Bot API)" as Ext_Discord #EDE7F6
-    rectangle "Parser de Horarios UPT\nExtractor PDF/Excel de Aulas" as Ext_Parser #FCE4EC
 }
 
 Ext_SMTP -[hidden]down-> Ext_Meet
 Ext_Meet -[hidden]down-> Ext_Discord
-Ext_Discord -[hidden]down-> Ext_Parser
 
 ' ===================================================
 ' FLUJOS DE COMUNICACIÓN
@@ -1187,25 +1192,26 @@ Admin -right-> C_SPA : HTTPS (TLS 1.3 / MFA)
 
 C_SPA -right-> C_Proxy : REST JSON / HTTPS
 C_Proxy -down-> C_API : HTTP / Port 8000 (Red interna)
-C_API <-> C_RecSys : Async In-Process / gRPC
+C_API <-> C_RecSys : REST JSON (alternativa separada por evaluar)
 
 C_API -down-> C_Postgres : TCP 5432 / SSL (SQLAlchemy Async)
 C_API -down-> C_Redis : TCP 6379 / TLS (Tokens QR & Cache)
+C_RecSys --> C_Redis : Consulta de caché candidata
 C_API -down-> C_Storage : HTTPS / S3 REST (Certificados)
 
 C_API -right-> Ext_SMTP : SMTP Seguro (587 / TLS)
 C_API -right-> Ext_Meet : REST API (OAuth 2.0)
 C_API -right-> Ext_Discord : WebSocket / Bot API
-C_API -right-> Ext_Parser : JSON REST API
+C_API --> C_Parser : Procesamiento interno (RF10 / CUS11)
 @enduml
 ```
 
 Fuente: Elaboración propia.
 
 El análisis del Diagrama de Contenedores permite deducir los siguientes principios arquitectónicos de operación:
-1. **Aislamiento Perimetral y Protección contra Ataques:** El contenedor NGINX actúa como punto único de entrada para el tráfico externo, aplicando reglas estrictas de limitación de tasa (*rate limiting* para mitigar denegaciones de servicio DDoS) y forzando el protocolo TLS 1.3 antes de delegar las peticiones a la red interna de contenedores.
-2. **Desacoplamiento de Cómputo Intensivo:** El motor de recomendación híbrido (`EdRecSys`) opera de forma asíncrona respecto al servidor web central, apoyándose en la caché en memoria Redis para retornar rankings personalizados en menos de 200 ms (`RNF02`) sin sobrecargar el motor relacional PostgreSQL.
-3. **Persistencia Segura en Profundidad:** La base de datos PostgreSQL ejecuta políticas RLS nativas en cada consulta, asegurando que aún en el caso hipotético de una vulnerabilidad en los controladores del backend, ningún usuario pueda vulnerar el aislamiento de datos protegido por la Ley N° 29733.
+1. **Frontera de acceso:** Se propone un proxy para terminar TLS y controlar tráfico. Se deberán definir sus capacidades y probar la configuración antes de atribuirle protección específica.
+2. **Recomendación:** La separación del motor en un servicio es una alternativa a evaluar frente a RNF03 (≤500 ms y hasta 50 solicitudes/minuto). Su comunicación prevista en esta alternativa es REST JSON, coherente con RNF09.
+3. **Persistencia:** El aislamiento de RNF02 requiere definir permisos, políticas RLS y el contexto de identidad de las conexiones del backend. La presencia de PostgreSQL en un diagrama no demuestra ese aislamiento.
 
 A continuación, se resume la responsabilidad operativa, tecnologías y protocolos de cada contenedor del sistema:
 
@@ -1213,180 +1219,133 @@ A continuación, se resume la responsabilidad operativa, tecnologías y protocol
 
 | Contenedor | Tecnología Principal | Entorno de Ejecución | Responsabilidad Operativa | Protocolo / Interfaz |
 | :--- | :--- | :--- | :--- | :--- |
-| **C1: Frontend SPA** | React 18, TypeScript, Vite, Tailwind CSS | Navegador Web (Cliente) | Renderizado de interfaces reactivas, captura de eventos de usuario y presentación de feeds. | HTTPS (HTML5/CSS3/JS) |
-| **C2: Proxy Inverso** | NGINX Alpine Linux | Contenedor Docker (Host) | Terminación SSL, compresión Brotli/Gzip, balanceo de carga y mitigación WAF/DDoS. | HTTPS (Ext) / HTTP (Int) |
+| **C1: Frontend SPA** | React, TypeScript, Vite, CSS | Navegador Web (Cliente) | Renderizado de interfaces reactivas, captura de eventos de usuario y presentación de feeds. | HTTPS (HTML5/CSS3/JS) |
+| **C2: Proxy Inverso** | NGINX Alpine Linux | Contenedor Docker (Host) | Terminación TLS y control de tráfico propuestos; módulos y configuración pendientes. | HTTPS (Ext) / HTTP (Int) |
 | **C3: Backend Core API** | Python 3.11, FastAPI, Uvicorn | Contenedor Docker (Host) | Gestión de autenticación JWT/2FA, lógica de negocio, reglas RN-01 a RN-14 y orquestación. | RESTful JSON (OpenAPI) |
-| **C4: Motor RecSys** | Scikit-learn, NumPy, SciPy | Subproceso / Worker Python | Indexación de competencias, cálculo de similitud coseno vectorial y ponderación directiva (RN-11). | In-Process Memory / gRPC |
+| **C4: Motor RecSys** | Scikit-learn, NumPy, SciPy | Servicio Python propuesto | Indexación de competencias, cálculo de similitud coseno vectorial y ponderación directiva (RN-11). | REST JSON propuesto |
 | **C5: Base de Datos** | PostgreSQL 15+ (Supabase) | Servicio Cloud Administrado | Persistencia relacional, integridad referencial 3FN, transacciones ACID y control RLS. | TCP 5432 (SSL TLS 1.3) |
-| **C6: Caché en Memoria** | Redis Cloud v7 | Servicio Cloud Administrado | Almacenamiento volátil de embeddings, sesiones activas y tokens efímeros QR (TTL 60s). | TCP 6379 (TLS / Auth) |
-| **C7: Object Storage** | Supabase Storage (S3 API) | Almacén Cloud de Objetos | Custodia inmutable de certificados oficiales PDF foliados y evidencias fotográficas de bitácoras. | HTTPS / REST S3 API |
+| **C6: Caché en Memoria** | Redis Cloud v7 | Servicio Cloud Administrado | Almacenamiento volátil de embeddings, sesiones activas y tokens QR (vigencia por definir). | TCP 6379 (TLS / Auth) |
+| **C7: Object Storage** | Supabase Storage (S3 API) | Almacén Cloud de Objetos | Almacenamiento de certificados PDF y evidencias; permisos, retención y protección contra modificación por definir. | HTTPS / REST S3 API |
 
 Fuente: Elaboración propia.
 
-La matriz evidencia una arquitectura robusta, modular y alineada a los estándares de la industria, garantizando que cada contenedor ejecute tareas altamente cohesivas con dependencias estrictamente controladas.
+La matriz permite revisar la topología candidata. Se debe decidir si la separación del recomendador aporta valor frente a su costo operativo y definir alojamiento, recuperación y observabilidad antes del despliegue.
 
 ---
 
 ## 9. Vista de Implementación
 
-La **Vista de Implementación** (o Vista de Desarrollo a nivel estructural) modela la organización estática del código fuente, los componentes ejecutables, sus puertos e interfaces de comunicación, facilitando la comprensión del flujo de dependencias entre módulos y asegurando la testabilidad unitaria e integración continua del sistema.
+Esta vista conserva el nombre del formato SAD, pero en la fase de análisis representa la organización prevista para la futura implementación. No describe código backend existente. Los contratos definitivos, rutas, modelos ORM y configuración de seguridad se completarán al pasar a diseño y construcción.
 
 ### 9.1. Diagrama de Componentes
 
-La siguiente descomposición modular modela los componentes ejecutables del frontend y backend, sus puertos de interfaz y los adaptadores de persistencia e integración:
+La descomposición cubre los ocho módulos canónicos y muestra las dependencias con puertos de persistencia, notificación y almacenamiento. Los servicios de la matriz 4.1 se agrupan dentro del módulo que corresponde a su RF.
 
-### Diagrama 9.1: Diagrama de Componentes de Implementación del Sistema Web P2P
+### Diagrama 9.1: Componentes propuestos y dependencias
 
 ```plantuml
 @startuml
-title <size:12><b>Diagrama 9.1: Diagrama de Componentes de Implementación del Sistema Web P2P</b></size>\n<size:10><i>EPIS - UPT (2026)</i></size>
-
-skinparam componentStyle uml2
+title Diagrama 9.1: Componentes propuestos — fase de análisis
 skinparam shadowing false
-skinparam roundcorner 8
 skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam component {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
+skinparam roundcorner 8
+skinparam defaultFontSize 11
+package "Presentación propuesta" {
+  component "Vistas de usuario y administración" as UI
+  component "Cliente API" as ApiClient
+  UI --> ApiClient
 }
-
-skinparam interface {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
+package "Backend propuesto" {
+  component "Autenticación y autorización" as Security
+  component "Enrutadores REST" as Routers
+  ApiClient --> Routers : Contratos por definir
+  Routers ..> Security : Validar acceso según operación
+  component "MOD-01\nSeguridad, Autenticación y Gobernanza" as M1
+  Routers --> M1
+  component "MOD-02\nGestión Curricular y Perfiles Académicos" as M2
+  Routers --> M2
+  component "MOD-03\nMotor de Recomendación Inteligente (EdRecSys)" as M3
+  Routers --> M3
+  component "MOD-04\nPlanificación, Espacios y Agendamiento" as M4
+  Routers --> M4
+  component "MOD-05\nQuórum, Confirmación y Cancelaciones" as M5
+  Routers --> M5
+  component "MOD-06\nTrazabilidad, Bitácoras y Evaluación" as M6
+  Routers --> M6
+  component "MOD-07\nGamificación, Reputación y Certificación" as M7
+  Routers --> M7
+  component "MOD-08\nSupervisión y Analítica Institucional" as M8
+  Routers --> M8
+  component "Parser de horarios (RF10 / CUS11)" as Parser
+  M4 --> Parser
+  interface "Repositorio de dominio" as Repo
+  interface "Notificaciones" as Notice
+  interface "Almacenamiento de recursos y certificados" as Storage
+  interface "Caché (candidata)" as Cache
+  M1 ..> Repo
+  M2 ..> Repo
+  M3 ..> Repo
+  M4 ..> Repo
+  M5 ..> Repo
+  M6 ..> Repo
+  M7 ..> Repo
+  M8 ..> Repo
+  M1 ..> Notice
+  M5 ..> Notice
+  M3 ..> Cache
+  M6 ..> Storage
+  M7 ..> Storage
 }
-
-package "Ecosistema Frontend (React 18 SPA / TypeScript)" {
-    [AuthViewComponent] as Comp_UI_Auth
-    [RecommendationComponent] as Comp_UI_Rec
-    [BookingScheduleComponent] as Comp_UI_Book
-    [AttendanceQRComponent] as Comp_UI_QR
-    [LogbookDocComponent] as Comp_UI_Log
-    [CertificateAdminComponent] as Comp_UI_Cert
-    
-    interface "IApiClient" as Int_ApiClient
-    [ApiClient (Axios + JWT Interceptor)] as Comp_ApiClient
-    
-    Comp_UI_Auth ..> Int_ApiClient : consume
-    Comp_UI_Rec ..> Int_ApiClient : consume
-    Comp_UI_Book ..> Int_ApiClient : consume
-    Comp_UI_QR ..> Int_ApiClient : consume
-    Comp_UI_Log ..> Int_ApiClient : consume
-    Comp_UI_Cert ..> Int_ApiClient : consume
-    Comp_ApiClient -up- Int_ApiClient
-}
-
-package "Ecosistema Backend (FastAPI / Python 3.11)" {
-    interface "ISecurityMiddleware" as Int_SecMiddleware
-    [SecurityMiddleware (Bearer Auth)] as Comp_SecMiddleware
-    Comp_SecMiddleware -up- Int_SecMiddleware
-    
-    package "Capa de Enrutamiento y Controladores (API Routers)" {
-        [AuthRouter] as Router_Auth
-        [RecSysRouter] as Router_Rec
-        [BookingRouter] as Router_Book
-        [AttendanceRouter] as Router_Att
-        [LogbookRouter] as Router_Log
-        [CertificateRouter] as Router_Cert
-    }
-    
-    package "Capa de Servicios de Dominio (Domain Services)" {
-        [AuthenticationService] as Srv_Auth
-        [TopKRecommendationEngine] as Srv_Rec
-        [BookingTransactionCoordinator] as Srv_Book
-        [QuorumEvaluatorCronService] as Srv_Cron
-        [QRCodeCryptoValidator] as Srv_QR
-        [BitacoraWorkflowService] as Srv_Log
-        [PDFCertificateCompiler] as Srv_Cert
-    }
-    
-    package "Capa de Acceso a Datos e Integraciones (Data & Ports)" {
-        interface "IRepository" as Int_Repo
-        [SQLAlchemyAsyncRepository] as Comp_Repo
-        Comp_Repo -up- Int_Repo
-        
-        interface "IRedisCacheAdapter" as Int_Redis
-        [RedisCacheService] as Comp_RedisAdapter
-        Comp_RedisAdapter -up- Int_Redis
-        
-        interface "ISmtpNotifier" as Int_Smtp
-        [SmtpMailAdapter] as Comp_SmtpAdapter
-        Comp_SmtpAdapter -up- Int_Smtp
-        
-        interface "IObjectStorage" as Int_Storage
-        [SupabaseStorageAdapter] as Comp_StorageAdapter
-        Comp_StorageAdapter -up- Int_Storage
-    }
-}
-
-' Enlace Frontend a Backend
-Comp_ApiClient ..> Int_SecMiddleware : HTTP REST JSON
-
-' Router a Services
-Router_Auth --> Srv_Auth : invoca
-Router_Rec --> Srv_Rec : invoca
-Router_Book --> Srv_Book : invoca
-Router_Att --> Srv_QR : invoca
-Router_Log --> Srv_Log : invoca
-Router_Cert --> Srv_Cert : invoca
-
-' Services a Repositories y Adaptadores
-Srv_Auth ..> Int_Repo
-Srv_Auth ..> Int_Smtp : despacha OTP
-Srv_Rec ..> Int_Redis : lee embeddings
-Srv_Rec ..> Int_Repo : consulta ofertas
-Srv_Book ..> Int_Repo : transacciona aforo
-Srv_Cron ..> Int_Repo : corte T-24h
-Srv_Cron ..> Int_Smtp : notifica contingencia
-Srv_QR ..> Int_Redis : valida token 60s
-Srv_QR ..> Int_Repo : asienta presencia
-Srv_Log ..> Int_Repo : persiste bitácora
-Srv_Cert ..> Int_Repo : valida visado
-Srv_Cert ..> Int_Storage : archiva PDF
+database "PostgreSQL / Supabase propuesto" as DB
+cloud "SMTP institucional" as SMTP
+cloud "Storage propuesto" as Objects
+database "Redis candidato" as Redis
+cloud "Meet / Discord" as Virtual
+Repo --> DB
+Notice --> SMTP
+Storage --> Objects
+Cache --> Redis
+M4 --> Virtual : Aprovisionamiento / liberación
 @enduml
 ```
 
-Fuente: Elaboración propia.
+Fuente: Elaboración propia a partir de las matrices 4.1, 4.3 y 6.1.
 
-El diseño de componentes formaliza el principio de inversión de dependencias (*Dependency Inversion Principle* - DIP) y la separación de capas:
-1. **Desacoplamiento de Servicios de Dominio:** Los servicios centrales (`Srv_Rec`, `Srv_Book`, `Srv_QR`) no dependen directamente de las librerías de infraestructura (como Redis o Supabase), sino de interfaces y puertos abstractos (`IRepository`, `IRedisCacheAdapter`, `ISmtpNotifier`), permitiendo sustituir o simular (*mockear*) dichos adaptadores en pruebas automatizadas.
-2. **Seguridad Centralizada en el Pipeline:** El componente `SecurityMiddleware` intercepta cada petición entrante, decodifica el token JWT criptográfico, valida su expiración e inyecta el contexto de usuario autenticado en los enrutadores correspondientes antes de ejecutar la lógica de negocio.
+La autorización se evalúa por operación: el inicio de autenticación y la consulta pública de certificados requieren políticas distintas de las operaciones privadas. La identidad de usuario y los permisos deben conservarse hasta persistencia; los trabajos programados necesitan un alcance técnico explícito.
 
-A continuación, se documentan los puertos, interfaces y contratos principales de los componentes de backend:
+Para precisar qué significa cada frontera sin inventar contratos implementados, se explicitan las responsabilidades de sus puertos.
 
-### Cuadro 9.1: Matriz de Componentes de Implementación, Puertos e Interfaces
+### Cuadro 9.1: Puertos y responsabilidades por analizar
 
-| Componente de Implementación | Interfaz / Puerto | Métodos Principales | Módulo Asociado |
-| :--- | :--- | :--- | :---: |
-| **`SecurityMiddleware`** | `ISecurityMiddleware` | `verify_jwt_token()`, `enforce_role_permission()` | MOD-01 |
-| **`AuthenticationService`** | `IAuthService` | `login_institutional()`, `verify_otp_2fa()`, `sign_legal_consent()` | MOD-01 |
-| **`TopKRecommendationEngine`** | `IRecSysService` | `compute_cosine_similarity()`, `generate_top_k_ranking()`, `apply_course_boost()` | MOD-02 |
-| **`BookingTransactionCoordinator`** | `IBookingService` | `lock_seat_atomic()`, `confirm_attendance_window()`, `cancel_reservation()` | MOD-04 |
-| **`QuorumEvaluatorCronService`** | `ICronService` | `evaluate_quorum_t24()`, `trigger_contingency_alert()`, `revoke_unconfirmed()` | MOD-04 |
-| **`QRCodeCryptoValidator`** | `IQRAttendanceService` | `generate_ephemeral_qr()`, `validate_scan_ticket()`, `register_effective_attendance()` | MOD-05 |
-| **`BitacoraWorkflowService`** | `ILogbookService` | `save_session_logbook()`, `submit_quality_survey()`, `calculate_csat()` | MOD-05 / MOD-06 |
-| **`PDFCertificateCompiler`** | `ICertificateService` | `compile_pdf_document()`, `stamp_sha256_hash()`, `verify_public_certificate()` | MOD-07 |
+| Puerto / interfaz propuesta | Responsabilidad | Origen | Pendiente de diseño |
+| :--- | :--- | :--- | :--- |
+| Autenticación y autorización | OTP, consentimiento, rol y sesión | RF01–RF03, RNF01–RNF02 | Contrato de acceso, revocación, permisos y contexto RLS. |
+| Recomendación | Perfil, candidatos y ranking | RF04–RF07, RNF03 | Contrato de entrada/salida, fórmula y estrategia de cómputo. |
+| Planificación y parser | Horarios oficiales, ofertas y recursos | RF08–RF11, RNF10 | Formato de archivos, validación y compensación ante fallos externos. |
+| Repositorio transaccional de reserva | Reserva, confirmación, cancelación y corte | RF12–RF16, RNF07 | Bloqueo compartido, unicidad, idempotencia y reintentos. |
+| Registro pedagógico | Asistencia, bitácora, encuesta, historial y recursos | RF17–RF20 | Permisos, cierre y ventana de encuesta; QR como alternativa de CUS08. |
+| Certificación y reputación | Horas provisionales/visadas, insignias y PDF | RF21–RF23, RN-14 | Cálculo, parámetros, hash y consulta institucional. |
+| Supervisión | Prioridad, analíticas y dictámenes | RF24–RF26 | Acceso administrativo, información agregada y trazabilidad del visado. |
 
-Fuente: Elaboración propia.
+Fuente: Elaboración propia a partir del SRS FD03 v2.0, secciones 5.1–5.5 y 6.2.3.
 
-La estructuración de interfaces formalizada en el cuadro anterior garantiza que cada módulo cumpla estrictamente con el principio de responsabilidad única (*Single Responsibility Principle*), facilitando el mantenimiento y las pruebas de regresión.
+El desarrollo posterior deberá convertir estas responsabilidades en contratos verificables sin renombrar los requisitos que las originan. No se afirma cobertura de pruebas ni existencia de endpoints en esta versión del SAD.
 
 ---
 
 ## 10. Vista de Datos
 
-La **Vista de Datos** modela la estructura lógica y relacional de persistencia de la plataforma, asegurando el cumplimiento de la **Tercera Forma Normal (3FN)**, la integridad referencial relacional en PostgreSQL (Supabase) y la gobernanza estricta de privacidad requerida por la **Ley N° 29733 de Protección de Datos Personales**.
+La **Vista de Datos** presenta un modelo relacional preliminar del núcleo de mentoría. Se conserva como insumo de análisis y no como esquema físico completo ni migración ejecutable. La normalización, los permisos y la cobertura de todas las entidades deben completarse en diseño.
 
 ### 10.1. Diagrama Entidad Relación
 
-El modelo Entidad-Relación define la topología de almacenamiento físico y relacional sobre PostgreSQL (Supabase), estructurado bajo la Tercera Forma Normal (3FN) con aislamiento por políticas RLS y anonimización de encuestas:
+El modelo permite revisar las relaciones entre usuarios, ofertas, reservas, evidencias y certificados. Los tipos son orientativos y no acreditan restricciones SQL ni políticas RLS implementadas.
 
 ### Diagrama 10.1: Diagrama Entidad-Relación Relacional del Sistema Web P2P (PostgreSQL / Supabase)
 
 ```plantuml
 @startuml
-title <size:12><b>Diagrama 10.1: Diagrama Entidad-Relación Físico del Sistema Web P2P</b></size>\n<size:10><i>Línea Base en PostgreSQL / Supabase — EPIS UPT</i></size>
+title <size:12><b>Diagrama 10.1: Modelo Entidad-Relación Preliminar del Sistema Web P2P</b></size>\n<size:10><i>Propuesta parcial de persistencia — EPIS UPT</i></size>
 
 skinparam shadowing false
 skinparam roundcorner 8
@@ -1430,7 +1389,6 @@ entity "ASIGNATURA_FILTRO" as asignatura {
     * nombre_curso : VARCHAR(100)
     * ciclo_formativo : INTEGER
     * es_prioritaria : BOOLEAN
-    * factor_alfa_bonif : NUMERIC(3,2)
 }
 
 entity "TEMA_CONCEPTUAL" as tema {
@@ -1483,7 +1441,7 @@ entity "RESERVA_CUPO" as reserva {
     * id_oferta : UUID <<FK>>
     * id_mentoreado : UUID <<FK>>
     * fecha_reserva : TIMESTAMPTZ
-    * fecha_confirmacion : TIMESTAMPTZ
+    fecha_confirmacion : TIMESTAMPTZ <<nullable>>
     * estado_reserva : VARCHAR(25)
 }
 
@@ -1491,10 +1449,10 @@ entity "TICKET_ASISTENCIA_QR" as ticket_qr {
     * id_ticket : UUID <<PK>>
     --
     * id_reserva : UUID <<FK, UNIQUE>>
-    * token_totp_hash : VARCHAR(64)
+    * token_hash : VARCHAR(64)
     * expira_at : TIMESTAMPTZ
     * validado_en_aula : BOOLEAN
-    * fecha_escaneo : TIMESTAMPTZ
+    fecha_escaneo : TIMESTAMPTZ <<nullable>>
 }
 
 entity "BITACORA_SESION" as bitacora {
@@ -1506,8 +1464,8 @@ entity "BITACORA_SESION" as bitacora {
     * total_asistentes_reales : INTEGER
     * fecha_cierre : TIMESTAMPTZ
     * estado_auditoria : VARCHAR(20)
-    * visado_por_admin : VARCHAR(100)
-    * fecha_visado : TIMESTAMPTZ
+    visado_por_admin : VARCHAR(100) <<nullable>>
+    fecha_visado : TIMESTAMPTZ <<nullable>>
 }
 
 entity "ENCUESTA_CALIDAD" as encuesta {
@@ -1516,7 +1474,7 @@ entity "ENCUESTA_CALIDAD" as encuesta {
     * id_reserva : UUID <<FK, UNIQUE>>
     * puntuacion_csat : INTEGER
     * comentario_retro : TEXT
-    * hash_alumno_anonimo : VARCHAR(64)
+    * identificador_seudonimo : VARCHAR(64)
     * fecha_respuesta : TIMESTAMPTZ
 }
 
@@ -1555,94 +1513,96 @@ reserva ||--o| encuesta : "evalúa calidad"
 
 Fuente: Elaboración propia.
 
-El análisis del modelo relacional revela las siguientes decisiones técnicas de alto valor:
-1. **Normalización y Atomicidad de Aforos:** La tabla `OFERTA_MENTORIA` desacopla la ubicación física (`ESPACIO_FISICO`) de la virtual (`ESPACIO_VIRTUAL`), mientras que la tabla `RESERVA_CUPO` maneja estados canónicos inmutables (`PENDIENTE_CONFIRMACION`, `CONFIRMADA`, `NO_CONFIRMADA`, `CANCELADA_USUARIO`), asegurando que las sumas de cupos se mantengan matemáticamente coherentes ante cancelaciones o cortes desatendidos.
-2. **Garantía Criptográfica Antifraude:** La entidad `TICKET_ASISTENCIA_QR` almacena únicamente el resumen hash SHA-256 del token efímero (`token_totp_hash`) y su marca de tiempo de expiración (`expira_at`), imposibilitando la reutilización de códigos escaneados fuera de la ventana de 60 segundos.
-3. **Disociación según Ley N° 29733:** En la tabla `ENCUESTA_CALIDAD`, la identidad del estudiante no se almacena en texto plano ni mediante clave foránea directa hacia `USUARIO`, sino a través de `hash_alumno_anonimo`, garantizando la imposibilidad de vincular la calificación emitida con el historial académico del evaluador (`RN-13`).
+El análisis del modelo identifica tres condiciones que deben resolverse antes de implementarlo:
+1. **Aforo y estados:** la capacidad se controla con una operación transaccional compartida por reserva, confirmación y corte. Los estados son transiciones del dominio, no datos inmutables. Se deberán concretar restricciones de unicidad y coherencia del contador de cupos.
+2. **Asistencia:** el ticket pertenece al flujo alternativo de CUS08 y RF17. La duración, generación, consumo y prevención de reutilización del token se definirán posteriormente. Fechas de confirmación, escaneo y visado pueden estar vacías mientras el evento aún no ocurre.
+3. **Privacidad:** ENCUESTA_CALIDAD conserva una relación con RESERVA_CUPO y, por ella, con el estudiante. Por tanto, este modelo permite reidentificación autorizada y no demuestra anonimato irreversible. El identificador seudónimo no elimina esa relación. Se requiere decidir la separación de elegibilidad y respuestas, los permisos, la retención y la minimización para satisfacer RNF02.
 
-A continuación, se documenta el diccionario de datos canónico de las entidades relacionales:
+La siguiente matriz relaciona las entidades representadas con sus requisitos de origen y las restricciones por precisar:
 
-### Cuadro 10.1: Diccionario de Datos Canónico de las Entidades Maestras
+### Cuadro 10.1: Entidades del modelo preliminar y trazabilidad
 
-| Entidad | Clave Primaria (PK) | Claves Foráneas (FK) | Restricciones de Integridad y Reglas |
-| :--- | :--- | :--- | :--- |
-| **`USUARIO`** | `id_usuario` (UUID) | — | `codigo_estudiante` y `correo_institucional` únicos. `consentimiento_ley29733 = true` obligatorio para operar (`RN-01`, `RN-02`). |
-| **`ASIGNATURA_FILTRO`** | `id_asignatura` (INT) | — | Cursos formativos (I al IV ciclo). Si `es_prioritaria = true`, aplica `factor_alfa_bonif` $\in [1.05, 1.50]$ (`RN-11`). |
-| **`OFERTA_MENTORIA`** | `id_oferta` (UUID) | `id_mentor`, `id_asignatura`, `id_tema` | `aforo_maximo` $\le 10$ (Presencial) o $\le 20$ (Virtual) (`RN-05`). Publicación con $T \ge 24\text{ h}$ de antelación (`RN-04`). |
-| **`RESERVA_CUPO`** | `id_reserva` (UUID) | `id_oferta`, `id_mentoreado` | Unicidad de par `(id_oferta, id_mentoreado)`. Ratificación obligatoria hasta $T-24\text{ h}$ (`RN-08`). |
-| **`TICKET_ASISTENCIA_QR`** | `id_ticket` (UUID) | `id_reserva` | Vigencia de semilla temporal de 60 segundos (`RNF04`). Actualiza `validado_en_aula = true` en escaneo. |
-| **`BITACORA_SESION`** | `id_bitacora` (UUID) | `id_oferta` | Cierre en plazo $< 24\text{ h}$ post-sesión (`RN-12`). Estado transiciona de `BORRADOR` a `REGISTRADA` y luego `VISADA` (`RN-14`). |
-| **`ENCUESTA_CALIDAD`** | `id_encuesta` (UUID) | `id_reserva` | Ventana temporal de llenado de 24 horas (`RN-13`). Puntuación entera del 1 al 5 y disociación SHA-256. |
-| **`CERTIFICADO_OFICIAL`** | `id_certificado` (UUID)| `id_mentor` | Requiere horas acumuladas $\ge$ umbral semestral y bitácoras `VISADAS`. `hash_sha256` y `numero_folio` únicos (`RN-14`). |
+| Entidades | Requisitos | Restricción o pendiente |
+| :--- | :--- | :--- |
+| USUARIO, ROL, USUARIO_ROL | RF01–RF03, RNF01–RNF02 | Completar consentimiento versionado, historial de roles y permisos. |
+| ASIGNATURA_FILTRO, TEMA_CONCEPTUAL | RF05, RF06, RF24 | Definir representación temática y priorización sin imponer un rango alfa no aprobado. |
+| OFERTA_MENTORIA, ESPACIO_FISICO, ESPACIO_VIRTUAL | RF08–RF11, RN-04–RN-07 | Publicación con más de 24 h; 48 h recomendadas. Completar cronogramas, exclusión de solapamientos y vínculo con sesión. |
+| RESERVA_CUPO | RF12–RF16, RNF07 | Unicidad de sesión y mentoreado; coherencia de estados, cupos y corte T−24 h. |
+| TICKET_ASISTENCIA_QR, BITACORA_SESION | RF17, CUS08, RN-12 | QR alternativo y registro de todos los asistentes; cierre dentro de 24 h según narrativa CUS08. |
+| ENCUESTA_CALIDAD | RF18, RN-13, RNF02 | Solo asistentes, ventana de 24 h y acceso restringido; no afirmar anonimato mientras subsista el enlace a reserva. |
+| CERTIFICADO_OFICIAL | RF22–RF23, RN-14 | Precisar periodo, parámetros, horas fraccionarias, vínculo a bitácoras visadas, correlativo y hash. |
 
-Fuente: Elaboración propia.
+Fuente: Elaboración propia a partir del SRS FD03 v2.0, secciones 5.1–5.5 y 6.2.3.
 
-El diseño de datos formalizado en el cuadro anterior consolida una base relacional íntegra, auditable y directamente transferible a la base de datos PostgreSQL en Supabase.
+La matriz no reemplaza un diccionario de datos completo. Quedan pendientes perfiles y disponibilidad (RF04), demanda (RF07), cronogramas (RF10), recursos académicos (RF20), reputación e insignias (RF21), parámetros de certificación (RF22) y dictámenes/historial de auditoría (RF26). RF19 y RF25 requieren definir consultas y proyecciones sobre esos datos. La vista lógica identifica sus responsabilidades para evitar que la ausencia de tablas preliminares se interprete como exclusión del alcance.
 
 ---
 
 ## 11. Calidad
 
-La calidad arquitectónica del Sistema Web P2P se evalúa bajo el estándar **ISO/IEC 25010** mediante el método formal **ATAM** (*Architecture Tradeoff Analysis Method*, desarrollado por el *Software Engineering Institute* - SEI). Un escenario de calidad describe formalmente la respuesta observable del software ante un estímulo específico bajo condiciones controladas, estructurado en seis dimensiones: **Fuente del Estímulo, Estímulo, Artefacto Impactado, Entorno Operativo, Respuesta del Sistema** y **Medida de la Respuesta**.
+En la fase de análisis se especifican escenarios y verificaciones futuras. Esta sección utiliza fichas de estímulo, entorno, respuesta y medida; no declara una evaluación ATAM ejecutada. El árbol de utilidad, los riesgos priorizados y la discusión de alternativas quedan pendientes de una evaluación arquitectónica posterior.
 
 ### 11.1. Escenario de Seguridad
 
-- **Fuente:** Usuario malintencionado en la red o estudiante no autorizado.
-- **Estímulo:** Intento de reserva de cupo sin autenticación de doble factor, o suplantación de asistencia mediante reutilización de código QR capturado en fotografía.
-- **Artefacto:** `SecurityMiddleware`, `QRCryptoValidator` y políticas RLS de PostgreSQL.
-- **Entorno:** Sistema en operación nominal concurrente en periodo de exámenes.
-- **Respuesta:** El middleware intercepta la petición, verifica la invalidez del token JWT o la expiración del código QR (> 60 segundos), aborta la transacción, emite código HTTP 401/403 y registra el intento fallido en la bitácora inmutable de auditoría.
-- **Medida de Respuesta:** 100% de peticiones no autorizadas bloqueadas; tolerancia temporal máxima de 60 segundos para tokens QR; cero accesos no consentidos bajo la Ley N° 29733.
+- **Fuente y estímulo:** usuario que intenta acceder con OTP vencido, sin consentimiento o a información ajena.
+- **Artefacto y entorno:** acceso institucional, autorización y persistencia en operación normal.
+- **Respuesta prevista:** rechazar el acceso inválido, evitar habilitar funciones sin consentimiento y aplicar restricciones por usuario/rol; registrar el evento sin exponer credenciales.
+- **Medida heredada:** OTP máximo 5 minutos, JWT HMAC-SHA256 de 8 horas (RNF01); TLS 1.3, consultas filtradas por RLS y ausencia de códigos de estudiante en tráfico público (RNF02).
+- **Verificación futura:** pruebas de expiración, consentimiento, permisos y aislamiento, incluyendo conexiones técnicas privilegiadas.
 
 ### 11.2. Escenario de Usabilidad
 
-- **Fuente:** Estudiante mentoreado de primer ciclo con nula experiencia previa en la plataforma.
-- **Estímulo:** El estudiante ingresa para buscar asesoría en Cálculo I, explora el feed de recomendaciones *Top-k* y formaliza una reserva de cupo.
-- **Artefacto:** Interfaz React SPA (`RecommendationView`, `BookingModal`).
-- **Entorno:** Conexión desde smartphone o computadora de escritorio en red móvil 4G/WiFi.
-- **Respuesta:** La interfaz carga el feed personalizado en menos de 2 segundos, resalta con distintivos visuales dorados las mentorías prioritarias institucionales (`RN-11`) y permite culminar la reserva en un máximo de tres interacciones de pantalla con retroalimentación clara.
-- **Medida de Respuesta:** Tasa de éxito en la tarea superior al 95%; tiempo promedio de reserva menor a 45 segundos; puntaje promedio en la escala estandarizada SUS superior a **85/100 puntos** (`RNF06`).
+- **Fuente y estímulo:** estudiante que consulta recomendaciones y reserva una mentoría por primera vez.
+- **Artefacto y entorno:** interfaz React en los navegadores de escritorio del SRS.
+- **Respuesta prevista:** mostrar opciones, disponibilidad y estado provisional de reserva con instrucciones claras para CUS24.
+- **Medida heredada:** SUS promedio >75 (RNF05); FCP <2 segundos con conexión ≥2 Mbps (RNF04); funcionamiento desde 1366 × 768 (RNF08).
+- **Verificación futura:** piloto de usabilidad, medición de carga inicial y matriz de navegadores. No se añaden límites de tres clics ni reserva en 45 segundos.
 
-### 11.3. Escenario de Adaptabilidad
+### 11.3. Escenario de Adaptabilidad y Rendimiento del Recomendador
 
-- **Fuente:** Comité de Tutoría o Equipo de Desarrollo de Software.
-- **Estímulo:** Incorporación de un nuevo modelo de recomendación basado en filtrado colaborativo matricial o ajuste en los factores de ponderación alfa ($\alpha$) para nuevas asignaturas críticas.
-- **Artefacto:** `TopKRecommendationEngine` y archivo de configuración algorítmica.
-- **Entorno:** Sistema en producción con sesiones activas programadas.
-- **Respuesta:** El motor algorítmico, implementado bajo el patrón Estrategia (*Strategy Pattern*), conmuta al nuevo algoritmo mediante inyección de dependencias y actualiza el factor alfa en base de datos sin requerir recompilación del frontend ni reinicio del servidor web.
-- **Medida de Respuesta:** Tiempo de despliegue y conmutación de algoritmo menor a 5 minutos; cero tiempo de inactividad (*zero-downtime*); retrocompatibilidad total con los contratos de API OpenAPI 3.0.
+- **Fuente y estímulo:** equipo que modifica el cálculo de recomendaciones o administrador que establece prioridades institucionales.
+- **Artefacto y entorno:** contrato REST del recomendador y datos de perfiles/ofertas bajo carga de referencia.
+- **Respuesta prevista:** conservar el contrato de consumo y el significado de RF06, RF24 y RN-11; registrar la versión de estrategia que se evalúe.
+- **Medida heredada:** inferencia ≤500 ms con hasta 50 solicitudes/minuto (RNF03); endpoints documentados al 100% y cobertura unitaria ≥70% (RNF09).
+- **Verificación futura:** pruebas del ranking, carga algorítmica y regresión de contratos. La conmutación sin reinicio queda como alternativa, no como requisito satisfecho.
 
-### 11.4. Escenario de Disponibilidad
+### 11.4. Escenario de Disponibilidad e Interoperabilidad
 
-- **Fuente:** Falla en la conectividad del proveedor de infraestructura en la nube o caída de un contenedor backend por sobrecarga de memoria.
-- **Estímulo:** Un proceso experimenta una excepción crítica y el contenedor Docker de FastAPI finaliza de manera imprevista.
-- **Artefacto:** Orquestador de contenedores Docker, proxy inverso NGINX y pool de PostgreSQL.
-- **Entorno:** Periodo de alta demanda previo al corte de quórum en $T-24\text{ h}$.
-- **Respuesta:** El proxy NGINX detecta la falta de respuesta inmediata en el puerto local, conmuta las peticiones a la réplica de contingencia, y la política de salud (*restart: always*) reinicia el contenedor en menos de 10 segundos, reanudando la atención sin pérdida de transacciones ACID en vuelo.
-- **Medida de Respuesta:** Disponibilidad neta superior al **99.5%** en horario lectivo (`RNF07`); tiempo medio de recuperación ($RTO$) menor a 15 segundos; cero inconsistencias de aforo ($RPO = 0$).
+- **Fuente y estímulo:** fallo del backend o indisponibilidad de correo, Meet o Discord.
+- **Artefacto y entorno:** servicios propuestos e integraciones durante el periodo lectivo.
+- **Respuesta prevista:** controlar el fallo, evitar confirmaciones falsas de operaciones y permitir recuperación/reintento conforme a las políticas que se definan.
+- **Medida heredada:** disponibilidad ≥99.0% durante el periodo lectivo regular, excluyendo mantenimiento programado (RNF06); timeouts ≤5 segundos y manejo controlado con registro de eventos (RNF10).
+- **Verificación futura:** monitoreo e inyección de fallos. RTO, RPO, réplicas y presupuesto de recuperación siguen pendientes; no se presupone conmutación en 15 segundos ni se fija aquí un RTO de 15 minutos.
 
-### 11.5. Otro Escenario: Escenario de Trazabilidad y Auditoría
+### 11.5. Escenario de Trazabilidad y Auditoría
 
-- **Fuente:** Comisión de Acreditación Universitaria o Secretaría Académica de la UPT.
-- **Estímulo:** Solicitud de verificación de autenticidad de un certificado digital de 30 horas formativas presentado por un estudiante mentor para la convalidación de créditos extracurriculares.
-- **Artefacto:** Portal público de verificación QR y servicio criptográfico SHA-256 (`CertificateRouter`).
-- **Entorno:** Consulta externa pública vía Internet mediante escaneo del código QR impreso en el certificado físico.
-- **Respuesta:** El validador público extrae el hash SHA-256 del código QR, consulta la tabla inmutable `CERTIFICADO_OFICIAL` en la base de datos de la EPIS-UPT, confronta la bitácora visada por el Comité de Tutoría y despliega en pantalla la constancia fehaciente de autenticidad, detallando fechas de dictado, asistencias reales y horas formalmente convalidadas.
-- **Medida de Respuesta:** Tiempo de verificación criptográfica menor a 1 segundo; certeza probatoria del 100% contra adulteraciones; garantía legal plena bajo el Art. 40 de la Ley Universitaria N° 30220.
+- **Fuente y estímulo:** administrador que visa horas y mentor que solicita un certificado.
+- **Artefacto y entorno:** bitácora, asistencia, dictamen y documento institucional.
+- **Respuesta prevista:** mantener horas provisionales hasta CUS22; emitir únicamente si se alcanza el umbral configurado con horas auditadas; permitir la consulta institucional de CUS09.
+- **Medida heredada:** elegibilidad según RN-14 y RF22–RF23/RF26. No se agregan una latencia de un segundo ni una garantía probatoria del 100%.
+- **Verificación futura:** casos con horas suficientes/insuficientes, bitácoras observadas y documentos alterados. El hash acredita integridad respecto de una referencia confiable, no firma PKI ni cumplimiento legal automático.
 
-A continuación, se resume la matriz consolidada de escenarios de calidad y su prioridad de arquitectura:
+### 11.6. Escenario de Integridad Transaccional
 
-### Cuadro 11.1: Matriz Consolidada de Escenarios de Calidad Arquitectónica (ATAM / ISO 25010)
+- **Fuente y estímulo:** reservas simultáneas sobre la última vacante o confirmación concurrente con el corte.
+- **Artefacto y entorno:** sesión, reserva y planificador de quórum.
+- **Respuesta prevista:** aplicar operaciones consistentes sobre la misma sesión, rechazar sobrecupos y evitar que la repetición del corte duplique efectos.
+- **Medida heredada:** 0% de sobreasignación (RNF07), confirmación hasta el corte RN-08 y decisión del mentor ante quórum insuficiente según RN-09.
+- **Verificación futura:** pruebas concurrentes, reintentos y recuperación de tareas. La estrategia de aislamiento y la periodicidad del planificador se precisarán en diseño.
 
-| Código | Atributo de Calidad | Estímulo Crítico | Mecanismo Arquitectónico de Respuesta | Métrica de Aceptación | Prioridad |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| **ESC-01** | Seguridad | Intento de suplantación QR o bypass de 2FA | Tokens efímeros TOTP de 60s, hashing SHA-256 y políticas RLS nativas en PostgreSQL. | 100% de intrusiones bloqueadas, ventana estricta de 60s. | Alta |
-| **ESC-02** | Usabilidad | Búsqueda y reserva de mentoría por alumno nuevo | Interfaz React SPA simplificada, recomendaciones Top-k resaltadas y diseño accesible WCAG 2.1. | Puntaje SUS > 85/100, tiempo de reserva < 45 segundos. | Alta |
-| **ESC-03** | Adaptabilidad | Modificación de algoritmos o prioridades curriculares | Patrón Estrategia desacoplado, APIs documentadas OpenAPI 3.0 y configuración dinámica. | Conmutación < 5 min sin caída de servicio (Zero-Downtime). | Media |
-| **ESC-04** | Disponibilidad | Caída imprevista de nodo o contenedor backend | Health checks automatizados, políticas de autoreinicio en Docker y balanceo NGINX. | Disponibilidad $\ge 99.5\%$, tiempo de recuperación $RTO < 15\text{ s}$. | Alta |
-| **ESC-05** | Trazabilidad | Verificación institucional de constancias emitidas | Sellado inmutable con firma hash SHA-256, foliado institucional y portal público de validación QR. | Respuesta de verificación < 1s, fe pública 100% inalterable. | Alta |
+La siguiente matriz resume qué atributos se analizarán y cómo se relacionan con la línea base, sin confundir las verificaciones previstas con resultados obtenidos.
 
-Fuente: Elaboración propia.
+### Cuadro 11.1: Escenarios de calidad y origen de sus medidas
 
-La matriz de escenarios ratifica que el Sistema Web P2P cuenta con salvaguardas estructurales, algorítmicas y legales capaces de responder exitosamente a las contingencias más rigurosas de la vida académica universitaria en la EPIS-UPT.
+| Escenario | Atributo | Requisitos de origen | Verificación pendiente |
+| :--- | :--- | :--- | :--- |
+| ESC-01 | Seguridad | RF01–RF03; RNF01–RNF02 | OTP, consentimiento, roles y aislamiento. |
+| ESC-02 | Usabilidad y compatibilidad | RNF04, RNF05, RNF08 | FCP, SUS y navegadores. |
+| ESC-03 | Adaptabilidad y rendimiento | RF06, RF24; RNF03, RNF09 | Ranking, carga, contratos y cobertura. |
+| ESC-04 | Disponibilidad e interoperabilidad | RNF06, RNF10 | Monitoreo, fallos y recuperación. |
+| ESC-05 | Trazabilidad | RF22–RF23, RF26; RN-14 | Elegibilidad por horas visadas y consulta institucional. |
+| ESC-06 | Integridad | RF12–RF16; RNF07; RN-08–RN-09 | Concurrencia de reserva, confirmación y corte. |
 
+Fuente: Elaboración propia a partir del SRS FD03 v2.0, secciones 5.1–5.5 y 6.2.3.
+
+La cobertura documental permite continuar el análisis del SAD. La aprobación de la arquitectura requiere resolver las decisiones pendientes y revisar la coherencia de todas las vistas; la implementación y las pruebas corresponderán a fases posteriores.

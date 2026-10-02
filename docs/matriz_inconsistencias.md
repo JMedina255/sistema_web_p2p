@@ -1,8 +1,8 @@
 # Matriz de Auditoría e Inconsistencias Técnicas y Funcionales
 
-**Proyecto:** Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT  
-**Documento Auditado:** FD03 - Especificación de Requerimientos de Software (SRS) y Artefactos Asociados  
-**Fase:** Auditoría de Calidad y Consistencia Metodológica - Fase de Análisis  
+**Proyecto:** Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT<br>
+**Documento Auditado:** FD03 (SRS), FD04 (SAD) y artefactos asociados; el alcance y estado de cada revisión se distingue por sección.<br>
+**Fase:** Auditoría de Calidad y Consistencia Metodológica - Fase de Análisis<br>
 **Línea Base Oficial Congelada:**
 - **Módulos:** MOD-01 al MOD-08
 - **Requerimientos Funcionales:** RF01 al RF26
@@ -100,3 +100,33 @@ Fuente: Elaboración propia.
   - **MOD-07:** `CUS16` $\rightarrow$ `CUS13` $\rightarrow$ `CUS09`
   - **MOD-08:** `CUS12` $\rightarrow$ `CUS14` $\rightarrow$ `CUS22`
   Se respetó estrictamente la estructura canónica de 4 tablas por CUS (Ficha, Flujo Principal, Flujos Alternativos, Eventos de Excepción) y se sincronizó este orden en la columna "CUS Asociados" del Cuadro 5.1 en FD03 y diagramas_general.md.
+
+
+## 3. Revisión de alineación del SAD con la línea base SRS — 28/09/2026
+
+Esta revisión corresponde a la **fase de análisis — desarrollo del SAD**. A solicitud del equipo se conserva el SRS como fuente de nomenclatura y se adapta el SAD. Las tablas 5.1–5.5 fijan MOD, RF, RNF y RN; las narrativas 6.2.3 fijan los CUS. El SRS no se modifica en este ciclo. Los estados históricos de la sección 1 se conservan como registro de revisiones anteriores y no acreditan que todos los artefactos posteriores permanezcan alineados.
+
+### Cuadro 3.1: Correcciones documentales y pendientes de análisis
+
+| ID | Hallazgo | Acción / referencia | Estado |
+| :--- | :--- | :--- | :--- |
+| SAD-01 | Reasignación de módulos y RF en el SAD. | Cuadros 1.1 y 4.1 conservan denominación, módulo y prioridad del SRS; 4.3 añade trazabilidad a vistas. | Corregido documentalmente. |
+| SAD-02 | RNF renumerados y metas añadidas sin origen. | Cuadro 4.2 transcribe RNF01–RNF10; escenarios de calidad usan sus métricas. | Corregido documentalmente. |
+| SAD-03 | CUS10/CUS11 usados para bitácora/asistencia; códigos divergentes en secuencias. | CUS10: roles; CUS11: horarios; CUS08: bitácora/asistencia. Catálogo de 24 CUS en SAD 5.1 y cuatro secuencias corregidas. | Corregido en SAD y complemento. |
+| SAD-04 | Autenticación descrita como OAuth/TOTP y JWT de 15 minutos. | OTP por correo ≤5 minutos y JWT HMAC-SHA256 de 8 horas según RNF01. S-01 incorpora el desafío OTP. | Corregido documentalmente. |
+| SAD-05 | Parser presentado como sistema externo. | Componente interno de MOD-04, RF10 y CUS11 en contexto, componentes y contenedores. | Corregido documentalmente. |
+| SAD-06 | Reserva confirmada al crear, lista de espera, quórum de dos y cancelación automática al corte en S-03. | Reserva PENDIENTE_CONFIRMACION; CUS24 ratifica; corte 50% según RN-09; CUS07 decide. Inacción T−6 h se remite a E01 del SRS. | Corregido en secuencias. |
+| SAD-07 | Encuesta usada para acreditar horas y QR con rol inverso en S-04. | Mentor marca o escanea ticket del alumno; cierre genera horas provisionales y CUS22 las visa. | Corregido en secuencias. |
+| SAD-08 | Vistas presentadas como implementación o garantía ya probada. | Estado explícito de análisis; propuestas, límites y verificaciones futuras en SAD, README y reglas v1.3. | Corregido documentalmente. |
+| SAD-09 | Anonimato irreversible afirmado pese al vínculo encuesta–reserva–usuario. | Se retira esa garantía y se identifica seudonimización en SAD 10. Diseño de separación, permisos y retención por completar. | Advertencia corregida; diseño pendiente. |
+| SAD-10 | Sincronización incompleta de SAD y bóveda. | Sección 14 de diagramas_general.md con todos los diagramas y cuadros actuales del SAD y complemento de secuencias. | Sincronizado documentalmente. |
+| PEN-01 | Diagramas del SRS 6.3 usan CUS09 para publicación, CUS14 para agenda y CUS10/CUS11 para bitácora/asistencia, en conflicto con 6.2.3. | Revisar esos diagramas y sus copias sin renumerar las narrativas. SRS intacto en este ciclo. | Pendiente en artefactos heredados. |
+| PEN-02 | El Cuadro 5.5 del SRS usa PENDIENTE, mientras CUS04 usa PENDIENTE_CONFIRMACION. | SAD conserva la transcripción de la matriz y usa PENDIENTE_CONFIRMACION en modelos dinámicos según narrativa; conciliar la celda del SRS posteriormente. | Pendiente en SRS. |
+| PEN-03 | RN-11 enumera desempates y RF24 bonificación; modelos posteriores introducen pesos alfa. | Definir fórmula y relación entre prioridad y desempates sin imponer rango numérico nuevo en el SAD. | Pendiente de análisis. |
+| PEN-04 | Modelo ER parcial y topología sin dimensionamiento. | Completar entidades faltantes, contratos, permisos, caché, recuperación y capacidad antes de implementar. | Pendiente de diseño. |
+| PEN-05 | Referencias normativas y afirmaciones legales requieren revisión. | Verificar reglamentación vigente de Ley 29733 y sustento institucional de certificación. El SAD no acredita cumplimiento legal. | Pendiente de revisión normativa. |
+| PEN-06 | Resumen ejecutivo y otros modelos históricos pueden conservar códigos previos. | Revisar propagación del catálogo canónico a resumen_sistema_y_casos_de_uso.md y otros complementos del SRS en un ciclo específico. | Pendiente fuera del alcance de adaptación del SAD. |
+
+Fuente: Comparación documental del SRS, SAD, complemento de secuencias y decisiones previas de esta matriz.
+
+Los elementos corregidos corresponden a coherencia documental, no a software construido o probado. La evolución hacia diseño debe resolver los pendientes sin cambiar silenciosamente códigos o métricas de la línea base. Las verificaciones de sincronización y estructura se realizan sobre los archivos Markdown; el renderizado de PlantUML se valida por separado cuando se dispone de compilador.

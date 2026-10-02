@@ -1,10 +1,10 @@
 # Reglas Estándares de Documentación del Proyecto
 
-**Proyecto:** Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT  
-**Curso:** Construcción de Software I  
-**Institución:** Universidad Privada de Tacna – Escuela Profesional de Ingeniería de Sistemas  
-**Equipo Consultor:** C-SharkTeam  
-**Vigencia:** Semestre 2026-II  
+**Proyecto:** Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT<br>
+**Curso:** Construcción de Software I<br>
+**Institución:** Universidad Privada de Tacna – Escuela Profesional de Ingeniería de Sistemas<br>
+**Equipo Consultor:** C-SharkTeam<br>
+**Vigencia:** Semestre 2026-II<br>
 
 ---
 
@@ -15,6 +15,7 @@
 | **1.0** | Joan Medina / Renzo Antayhua | Dr. Ricardo Valcarcel | Dirección EPIS | 26/09/2026 | Creación de directrices formales: granularidad en fase de análisis, estructura quíntuple de cuadros, estándar PlantUML y sincronización continua con `diagramas_general.md`. |
 | **1.1** | Joan Medina / Renzo Antayhua | Dr. Ricardo Valcarcel | Dirección EPIS | 26/09/2026 | Incorporación de la Regla 6: Estructura canónica y obligatoria de 4 tablas para las narrativas de casos de uso (Sección 6.2.3). |
 | **1.2** | Joan Medina / Renzo Antayhua | Dr. Ricardo Valcarcel | Dirección EPIS | 26/09/2026 | Incorporación de la Regla 7: Sincronización y actualización continua del README principal (`README.md`) ante cualquier evolución de ingeniería o documentación. |
+| **1.3** | Asistencia de Codex a solicitud del equipo | Pendiente | Pendiente | 28/09/2026 | Se explicita fase de análisis y desarrollo del SAD; prevalencia de nomenclatura del SRS y separación entre requisitos, propuestas y resultados de validación. |
 
 ---
 
@@ -27,7 +28,10 @@ Garantizar la máxima calidad, consistencia metodológica, trazabilidad y rigor 
 ## 2. Reglas Fundamentales de Documentación
 
 ### Regla 1: Granularidad en Fase de Análisis (Lenguaje Natural Detallado)
-* **Contexto de Fase:** El proyecto se encuentra formalmente en la **Fase de Análisis**. Por consiguiente, las explicaciones no deben ser telegráficas ni limitarse a descripciones superficiales de alto nivel.
+* **Contexto de Fase:** El proyecto se encuentra formalmente en la **Fase de Análisis — desarrollo del SAD**. Por consiguiente, las explicaciones no deben ser telegráficas ni limitarse a descripciones superficiales de alto nivel.
+
+* **Fuente de Nomenclatura:** El SAD debe conservar los códigos y denominaciones de módulos, RF, RNF y RN de las tablas 5.1–5.5 del SRS FD03. Para los CUS se usan sus narrativas 6.2.3, en concordancia con dichas tablas. Si otros diagramas del SRS difieren, registrar la inconsistencia sin inventar una nueva numeración ni cambiar silenciosamente la línea base.
+* **Estado de la Arquitectura:** Diferenciar requisitos heredados, propuestas arquitectónicas y decisiones pendientes. Las vistas del SAD no prueban implementación, rendimiento, seguridad ni aprobación institucional. Las métricas nuevas requieren justificación y revisión; no deben reemplazar los RNF existentes.
 * **Profundidad Narrativa:** Toda especificación, requisito, flujo de proceso y caso de uso debe desarrollarse mediante una **narrativa exhaustiva y granular en lenguaje natural**, detallando:
   * El contexto institucional dentro de la EPIS-UPT.
   * El problema específico que atiende.
@@ -80,7 +84,7 @@ Como se observa en el cuadro anterior, el parámetro P01 determina... [Explicaci
 
 ### Regla 5: Regla de Sincronización y Hardening (`diagramas_general.md`)
 * **Repositorio Central Sincronizado:** El archivo [`docs/diagramas_general.md`](file:///C:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/docs/diagramas_general.md) actúa como la **bóveda consolidada y de hardening** de todos los artefactos visuales y tabulares del proyecto.
-* **Actualización Automática y Continua:** A medida que se avance, elabore o actualice cualquier diagrama PlantUML, cuadro matricial o esquema dentro del documento SRS ([FD03](file:///C:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/docs/FD03-EPIS-Informe%20SRS%20de%20Proyecto.md)), dicho artefacto **debe agregarse y sincronizarse inmediatamente en `diagramas_general.md`**, garantizando que nunca quede desfasado.
+* **Actualización Automática y Continua:** A medida que se avance, elabore o actualice cualquier diagrama PlantUML, cuadro matricial o esquema dentro del documento SRS ([FD03](file:///C:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/docs/FD03-EPIS-Informe%20SRS%20de%20Proyecto.md)), dicho artefacto **debe agregarse y sincronizarse inmediatamente en `diagramas_general.md`**, manteniendo una copia consistente. Para el SAD y su complemento de secuencias, se sincronizan igualmente los diagramas y cuadros en su sección propia de la bóveda, sin modificar los artefactos heredados del SRS.
 
 ---
 
@@ -149,5 +153,3 @@ Todas las narrativas individuales de casos de uso (desde `CUS01` hasta `CUS24`) 
 | **Hardening de Artefactos** | Regla 5 | Reflejo inmediato en `docs/diagramas_general.md`. |
 | **Narrativas de Casos de Uso (6.2.3)** | Regla 6 | Esquema canónico de 4 tablas (Ficha, Flujo Principal, Alternativos, Excepciones). |
 | **README Principal (`README.md`)** | Regla 7 | Sincronización continua de árbol de directorios, catálogo de entregables, estado de ingeniería e instrucciones de despliegue. |
-
-
