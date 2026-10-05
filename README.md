@@ -39,6 +39,7 @@ La documentación se desarrolla bajo UWE y la estructura de requisitos adoptada 
 | **FD04: Informe SAD de Proyecto** | [`docs/FD04-EPIS-Informe SAD de Proyecto.md`](docs/FD04-EPIS-Informe%20SAD%20de%20Proyecto.md) | **SAD v1.1 en análisis:** Vistas 4+1 propuestas, nomenclatura del SRS, matrices de trazabilidad y decisiones pendientes de diseño. |
 | **Bóveda General de Diagramas** | [`docs/diagramas_general.md`](docs/diagramas_general.md) | Bóveda de artefactos. La sección 14 mantiene copias de los diagramas y cuadros vigentes del SAD y sus secuencias. |
 | **Diagramas de Secuencia (SAD Análisis)** | [`docs/diagramas_de_secuencia.md`](docs/diagramas_de_secuencia.md) | **Secuencias v2.2 en análisis:** Acceso con OTP y consentimiento, Top-k, reserva/confirmación/quórum y bitácora/asistencia/visado; códigos CUS del SRS. |
+| **Flujos por Perfil y Diagrama de Paquetes** | [`docs/flujos_por_perfil_y_diagrama_paquetes.md`](docs/flujos_por_perfil_y_diagrama_paquetes.md) | **Flujos y Arquitectura de Maquetación:** Diagramas de flujo de actividades para Administrador (Ing. Liliana Vega Bernal), Mentor (Joan Medina Q) y Mentoreado (Renzo Antayhua M), con diagrama de paquetes mapeado biunívocamente a los componentes de la interfaz. |
 | **Matriz de Inconsistencias** | [`docs/matriz_inconsistencias.md`](docs/matriz_inconsistencias.md) | Registro de auditoría y resolución de discrepancias en requisitos y modelos. |
 | **Catálogo de Pruebas** | [`docs/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx`](docs/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx) | Matriz formal de casos de prueba funcional, criterios de aceptación y verificación QA. |
 | **Reglas de Documentación (Hardening)** | [`reglas_documentacion.md`](reglas_documentacion.md) | Estándares obligatorios de granularidad en análisis, estructura quíntuple de tablas, estándar PlantUML y reglas de sincronización. |
@@ -122,22 +123,28 @@ Proyecto_Sistema_Web_P2P/
 │   ├── Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx # Catálogo de pruebas funcionales y de aceptación
 │   ├── Requerimientos.md                     # Cuaderno de trabajo preliminar de requerimientos
 │   ├── diagramas_de_secuencia.md             # Diagramas de secuencia en fase de análisis (SAD / ECB)
+│   ├── flujos_por_perfil_y_diagrama_paquetes.md # Diagramas de flujo por actor y diagrama de paquetes con mockups
 │   └── diseño.md                             # Guía preliminar de interfaz y estilos
 ├── frontend/                                  # Maqueta funcional SPA interactiva (React + Vite)
 │   ├── src/
-│   │   ├── components/                        # Componentes UI modulares
-│   │   │   ├── BookingView.tsx                # Interfaz de reserva y selección de horarios
+│   │   ├── components/                        # Componentes UI modulares de la maquetación
+│   │   │   ├── AdminView.tsx                  # Panel de supervisión, analíticas CUS14, visado CUS22 y factor α
+│   │   │   ├── MentorFlowView.tsx             # Panel del mentor: quórum T-24h CUS09/07, escaneo QR CUS11, bitácora CUS10
+│   │   │   ├── MenteeFlowView.tsx             # Panel del mentoreado: Top-k CUS02, ratificación CUS24, ticket QR, CSAT
+│   │   │   ├── LoginView.tsx                  # Autenticación manual institucional RBAC (Ley N° 29733)
+│   │   │   ├── CertificateModal.tsx           # Visualizador de certificado oficial con hash SHA-256 y QR
+│   │   │   ├── BookingView.tsx                # Interfaz de reserva y coordinación de horarios
 │   │   │   ├── ConsentModal.tsx               # Modal de consentimiento informado (Ley N° 29733)
-│   │   │   ├── GamificationView.tsx           # Tablero de medallas, nivel y horas de servicio
-│   │   │   ├── HomeView.tsx                   # Catálogo reactivo y buscador de mentorías
-│   │   │   ├── ImageCarousel.tsx              # Banner institucional rotativo
-│   │   │   ├── LateralDocks.tsx               # Barra lateral de accesos rápidos
-│   │   │   ├── Navigation.tsx                 # Barra superior de navegación institucional
-│   │   │   └── RecommendationView.tsx         # Vista de recomendaciones Top-k con badges
+│   │   │   ├── GamificationView.tsx           # Tablero de insignias, reputación y horas de servicio
+│   │   │   ├── HomeView.tsx                   # Catálogo reactivo y buscador en tiempo real de mentorías
+│   │   │   ├── ImageCarousel.tsx              # Banner institucional rotativo UPT
+│   │   │   ├── LateralDocks.tsx               # Barra lateral de accesos rápidos universitarios
+│   │   │   ├── Navigation.tsx                 # Barra superior institucional con avatar y rol activo
+│   │   │   └── RecommendationView.tsx         # Vista de recomendaciones Top-k con afinidad porcentual
 │   │   ├── data/
-│   │   │   └── mockData.ts                    # Dataset simulado con cursos de la EPIS y métricas
-│   │   ├── App.tsx                            # Orquestador de vistas y estado del cliente
-│   │   ├── index.css                          # Estilos globales de la maqueta
+│   │   │   └── mockData.ts                    # Dataset simulado con cursos EPIS, bitácoras, sesiones y cuentas
+│   │   ├── App.tsx                            # Orquestador principal de vistas, autenticación y estados globales
+│   │   ├── index.css                          # Estilos globales y tokens del Portal Web UPT (docs/diseño.md)
 │   │   └── main.tsx                           # Punto de entrada de la aplicación React
 │   ├── public/                                # Recursos estáticos y vectoriales
 │   ├── package.json                           # Manifiesto de dependencias y scripts de frontend
@@ -151,35 +158,38 @@ Proyecto_Sistema_Web_P2P/
 
 ---
 
-## 🚀 5. Instalación y Ejecución de la Maqueta Web
+## 🚀 5. Maquetación Web: Estado del Desarrollo y Credenciales de Acceso
 
-### Requisitos Previos
-- **Node.js:** Versión 18.0 o superior (recomendado Node.js 20 LTS).
-- **npm:** Gestor de paquetes incluido con Node.js.
-- **Git:** Para control de versiones.
+### 5.1 Estado Actual de la Maquetación
+- **Fase del Proyecto:** Maquetación funcional de alta fidelidad (Frontend SPA) en **React 19 + TypeScript + Vite 8**.
+- **Nivel de Interactividad:** 100% funcional en cliente. Integra navegación reactiva, validaciones de formularios, simulación de corte de quórum a $T-24\text{ h}$, generación de pases QR efímeros, escaneo de tickets, flujo de bitácoras docentes y emisión de diplomas digitales con hash SHA-256.
+- **Seguridad en Acceso:** El acceso a la plataforma es **estrictamente manual** mediante usuario institucional y contraseña (se deshabilitaron accesos automáticos de 1 clic para validar formalmente el flujo de autenticación RBAC y el consentimiento de la Ley N° 29733).
+- **Trazabilidad Arquitectónica:** Cada componente de la interfaz responde directamente a los paquetes lógicos del sistema (`MOD-01` al `MOD-08`), tal como se detalla en [`docs/flujos_por_perfil_y_diagrama_paquetes.md`](docs/flujos_por_perfil_y_diagrama_paquetes.md).
 
-### Pasos de Despliegue Local
-1. **Clonar el repositorio:**
-   ```bash
-   git clone https://github.com/JMedina255/sistema_web_p2p.git
-   cd sistema_web_p2p
-   ```
+### 5.2 Credenciales Oficiales para Evaluación de Flujos
 
-2. **Acceder al directorio del frontend e instalar dependencias:**
+Para validar la experiencia diferenciada por actor institucional, se encuentran preconfiguradas las siguientes tres credenciales:
+
+| Rol Institucional | Nombre del Usuario | Usuario | Contraseña | Vistas y Flujos Habilitados en Maqueta |
+| :--- | :--- | :---: | :---: | :--- |
+| **Administrado (Tutoría)** | **Ing. Liliana Vega Bernal** | `admin` | `admin123` | • Tablero analítico institucional de KPIs y deserción (CUS14).<br>• Auditoría de bitácoras y visado oficial de horas (CUS22).<br>• Emisión de certificados foliados con hash SHA-256 (CUS13).<br>• Calibración del factor $\alpha \in [1.05, 1.50]$ para cursos críticos (CUS12). |
+| **Mentor Académico** | **Joan Medina Q** (VIII Ciclo) | `mentor` | `mentor123` | • Publicación de ofertas en materias aprobadas $\ge 14$ (CUS06/09).<br>• Gestión de citas y corte de quórum en $T-24\text{ h}$ con dictado excepcional (CUS09/07).<br>• Verificación de asistencia en aula por código QR efímero (CUS11).<br>• Rendición docente: registro de bitácora post-sesión (CUS10).<br>• Consulta de horas visadas oficiales y descarga de certificado (CUS16/09). |
+| **Estudiante Mentoreado** | **Renzo Antayhua M** (II Ciclo) | `mentoreado` | `mentoreado123` | • Firma de consentimiento informado digital Ley N° 29733 (RF01).<br>• Consulta del recomendador híbrido Top-k con afinidad temática (CUS02).<br>• Registro de solicitudes temáticas por demanda (CUS03).<br>• Reserva de cupo y ratificación obligatoria en $T-24\text{ h}$ (CUS24).<br>• Visualización de ticket digital con código QR de acceso (CUS11).<br>• Encuesta anónima de calidad pedagógica CSAT post-mentoría (CUS05). |
+
+### 5.3 Despliegue y Ejecución Local
+1. **Instalar dependencias:**
    ```bash
    cd frontend
    npm install
    ```
 
-3. **Iniciar el servidor de desarrollo local:**
+2. **Iniciar servidor de desarrollo:**
    ```bash
    npm run dev
    ```
+   Acceder en el navegador a: **[http://localhost:5173](http://localhost:5173)**.
 
-4. **Acceder a la aplicación:**
-   Abre tu navegador web en [http://localhost:5173](http://localhost:5173).
-
-5. **Compilar para producción:**
+3. **Compilar para producción:**
    ```bash
    npm run build
    ```

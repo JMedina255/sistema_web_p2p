@@ -58,12 +58,19 @@ export interface SessionBooking {
   id: string;
   mentorName: string;
   studentName: string;
+  studentCode?: string;
   subjectName: string;
   topic: string;
   day: string;
   time: string;
-  status: 'PENDIENTE' | 'CONFIRMADA' | 'COMPLETADA';
+  status: 'PENDIENTE' | 'CONFIRMADA' | 'QUORUM_INSUFICIENTE' | 'CONFIRMADA_EXCEPCIONAL' | 'CANCELADA_QUORUM' | 'EN_CURSO' | 'COMPLETADA';
   dateFormatted: string;
+  modality?: string;
+  enrolledStudentsCount?: number;
+  minQuorumRequired?: number; // RN-09: 50%
+  ratifiedT24?: boolean;
+  qrToken?: string;
+  qrScanned?: boolean;
 }
 
 // 1. Carrusel de Imágenes Institucional
@@ -162,7 +169,7 @@ export const MOCK_MENTORS: Mentor[] = [
   },
   {
     id: 'm-02',
-    name: 'Joan Cristian Medina',
+    name: 'Joan Medina Q',
     cycle: 'VIII Ciclo EPIS',
     code: '2022074255',
     email: 'jmedina@upt.pe',
@@ -326,25 +333,75 @@ export const AVAILABLE_MENTORSHIPS: AvailableMentorship[] = [
 export const INITIAL_BOOKINGS: SessionBooking[] = [
   {
     id: 'ses-101',
-    mentorName: 'Renzo Antonio Antayhua',
-    studentName: 'Lucas Mamani (II Ciclo)',
+    mentorName: 'Joan Medina Q',
+    studentName: 'Renzo Antayhua M (II Ciclo)',
+    studentCode: '2025018341',
     subjectName: 'Algoritmos y Estructura de Datos',
     topic: 'Recursividad y Memoria Dinámica en C++',
     day: 'Viernes',
     time: '10:00 - 11:30 AM',
     status: 'CONFIRMADA',
-    dateFormatted: '12 Sep 2026, 10:00 AM'
+    dateFormatted: 'Viernes 10 Octubre, 10:00 AM',
+    modality: 'Presencial (Lab EPIS 2)',
+    enrolledStudentsCount: 5,
+    minQuorumRequired: 3,
+    ratifiedT24: true,
+    qrToken: 'QR-P2P-SI301-2025018341-998',
+    qrScanned: true
   },
   {
     id: 'ses-102',
-    mentorName: 'Joan Cristian Medina',
-    studentName: 'Ana Sofía Ticona (I Ciclo)',
+    mentorName: 'Joan Medina Q',
+    studentName: 'Renzo Antayhua M (II Ciclo)',
+    studentCode: '2025018341',
     subjectName: 'Cálculo I',
-    topic: 'Límites Indeterminados',
+    topic: 'Límites Indeterminados y Asíntotas',
     day: 'Jueves',
     time: '05:00 - 06:30 PM',
     status: 'PENDIENTE',
-    dateFormatted: '11 Sep 2026, 05:00 PM'
+    dateFormatted: 'Jueves 16 Octubre, 05:00 PM',
+    modality: 'Virtual (Google Meet)',
+    enrolledStudentsCount: 3,
+    minQuorumRequired: 3,
+    ratifiedT24: false,
+    qrToken: 'QR-P2P-CB101-2025018341-452',
+    qrScanned: false
+  },
+  {
+    id: 'ses-103',
+    mentorName: 'Joan Medina Q',
+    studentName: 'Ana Sofía Ticona (I Ciclo)',
+    studentCode: '2025019012',
+    subjectName: 'Base de Datos I',
+    topic: 'Normalización 3FN y Consultas SQL con JOIN',
+    day: 'Martes',
+    time: '03:00 - 04:30 PM',
+    status: 'QUORUM_INSUFICIENTE',
+    dateFormatted: 'Martes 14 Octubre, 03:00 PM',
+    modality: 'Presencial (Lab BD)',
+    enrolledStudentsCount: 1,
+    minQuorumRequired: 3,
+    ratifiedT24: false,
+    qrToken: 'QR-P2P-SI402-2025019012-103',
+    qrScanned: false
+  },
+  {
+    id: 'ses-104',
+    mentorName: 'Joan Medina Q',
+    studentName: 'Carlos Paredes (II Ciclo)',
+    studentCode: '2024017721',
+    subjectName: 'Cálculo II',
+    topic: 'Integrales por Partes y Fracciones Parciales',
+    day: 'Jueves',
+    time: '05:00 - 06:30 PM',
+    status: 'COMPLETADA',
+    dateFormatted: 'Ayer, 05:00 PM',
+    modality: 'Virtual (Google Meet)',
+    enrolledStudentsCount: 4,
+    minQuorumRequired: 2,
+    ratifiedT24: true,
+    qrToken: 'QR-P2P-CB201-2024017721-776',
+    qrScanned: true
   }
 ];
 
@@ -374,4 +431,213 @@ export const GAMIFICATION_BADGES = [
     desc: 'Asistencia perfecta en todas las sesiones agendadas.',
     unlocked: true
   }
+];
+
+// 7. Cuentas y Credenciales de Usuario Institucional (CUS01 / RF02)
+export type UserRole = 'admin' | 'mentor' | 'mentee';
+
+export interface UserAccount {
+  username: string;
+  password: string;
+  role: UserRole;
+  name: string;
+  title: string;
+  code: string;
+  email: string;
+  avatar: string;
+  cycle?: string;
+  hasAcceptedConsent: boolean;
+}
+
+export const MOCK_USERS: UserAccount[] = [
+  {
+    username: 'admin',
+    password: 'admin123',
+    role: 'admin',
+    name: 'Ing. Liliana Vega Bernal',
+    title: 'Comité de Tutoría EPIS-UPT',
+    code: 'DOC-EPIS-018',
+    email: 'lvega@upt.pe',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
+    hasAcceptedConsent: true
+  },
+  {
+    username: 'mentor',
+    password: 'mentor123',
+    role: 'mentor',
+    name: 'Joan Medina Q',
+    title: 'Mentor Académico • VIII Ciclo',
+    code: '2022074255',
+    cycle: 'VIII Ciclo EPIS',
+    email: 'jmedina@upt.pe',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
+    hasAcceptedConsent: true
+  },
+  {
+    username: 'mentoreado',
+    password: 'mentoreado123',
+    role: 'mentee',
+    name: 'Renzo Antayhua M',
+    title: 'Estudiante Mentoreado • II Ciclo',
+    code: '2025018341',
+    cycle: 'II Ciclo EPIS',
+    email: 'rantayhua@upt.pe',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80',
+    hasAcceptedConsent: false
+  }
+];
+
+// 8. Bitácoras Pedagógicas Docentes (CUS10 / CUS22 / RN-12 / RN-14)
+export interface PedagogicalLog {
+  id: string;
+  sessionId: string;
+  mentorName: string;
+  mentorCode: string;
+  subjectName: string;
+  topic: string;
+  date: string;
+  durationHours: number;
+  studentsAttended: string[];
+  summary: string;
+  observations: string;
+  status: 'BORRADOR' | 'REGISTRADA' | 'VISADA' | 'OBSERVADA';
+  auditFeedback?: string;
+  auditDate?: string;
+  hashSha256?: string;
+}
+
+export const INITIAL_LOGS: PedagogicalLog[] = [
+  {
+    id: 'log-001',
+    sessionId: 'ses-102',
+    mentorName: 'Joan Medina Q',
+    mentorCode: '2022074255',
+    subjectName: 'Cálculo I',
+    topic: 'Límites Indeterminados 0/0 y Factorización Racional',
+    date: '02 Oct 2026',
+    durationHours: 2.0,
+    studentsAttended: ['Renzo Antayhua M (2025018341)', 'Ana Sofía Ticona (2025019012)'],
+    summary: 'Se reforzó la regla de L\'Hôpital y la racionalización con raíces cúbicas. Los estudiantes resolvieron 4 ejercicios tipo examen parcial.',
+    observations: 'Excelente participación activa y resolución en pizarra virtual.',
+    status: 'REGISTRADA'
+  },
+  {
+    id: 'log-002',
+    sessionId: 'ses-101',
+    mentorName: 'Joan Medina Q',
+    mentorCode: '2022074255',
+    subjectName: 'Algoritmos y Estructura de Datos',
+    topic: 'Recursividad en Árboles Binarios AVL',
+    date: '28 Sep 2026',
+    durationHours: 2.5,
+    studentsAttended: ['Renzo Antayhua M (2025018341)', 'Diego Flores (2024016633)'],
+    summary: 'Implementación del balanceo y rotaciones simples y dobles en C++ con verificación en depurador.',
+    observations: 'Se dejó repositorio con pruebas unitarias en Google Classroom.',
+    status: 'VISADA',
+    auditFeedback: 'Cumple a cabalidad con la trazabilidad pedagógica. Horas validadas oficialmente.',
+    auditDate: '30 Sep 2026',
+    hashSha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+  },
+  {
+    id: 'log-003',
+    sessionId: 'ses-97',
+    mentorName: 'Camila Valeria Ramos',
+    mentorCode: '2023019842',
+    subjectName: 'Programación Orientada a Objetos',
+    topic: 'Polimorfismo e Interfaces en Java',
+    date: '25 Sep 2026',
+    durationHours: 1.5,
+    studentsAttended: ['Valeria Choque (2025018899)'],
+    summary: 'Diferenciación entre clases abstractas e interfaces con ejemplos prácticos de arquitectura en capas.',
+    observations: 'Sesión presencial realizada en Lab EPIS 1.',
+    status: 'VISADA',
+    auditFeedback: 'Validado satisfactoriamente por Comité de Tutoría EPIS.',
+    auditDate: '27 Sep 2026',
+    hashSha256: '4f8b2d1c9a6e3f5b8d7a1c0e2f4a6b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a'
+  }
+];
+
+// 9. Certificados Digitales Foliados con Hash SHA-256 (CUS13 / CUS09 / RN-14)
+export interface DigitalCertificate {
+  folio: string;
+  mentorName: string;
+  mentorCode: string;
+  hoursValidated: number;
+  issueDate: string;
+  semester: string;
+  hashSha256: string;
+  qrVerificationUrl: string;
+  signedBy: string;
+}
+
+export const INITIAL_CERTIFICATES: DigitalCertificate[] = [
+  {
+    folio: 'CERT-EPIS-2026-089',
+    mentorName: 'Joan Medina Q',
+    mentorCode: '2022074255',
+    hoursValidated: 26,
+    issueDate: '01 Octubre 2026',
+    semester: 'Semestre Académico 2026-II',
+    hashSha256: '9f83c6b2d1e4a7c8b0e3f5a2c4d6e8b0a1c3e5f7a9b2d4e6f8a0c2e4b6d8f0a2',
+    qrVerificationUrl: 'https://epis.upt.edu.pe/verificar/CERT-EPIS-2026-089',
+    signedBy: 'Ing. Liliana Vega Bernal — Comité de Tutoría EPIS'
+  }
+];
+
+// 10. Solicitudes Temáticas por Demanda (CUS03 / RF04)
+export interface DemandRequest {
+  id: string;
+  studentName: string;
+  studentCode: string;
+  cycle: string;
+  subjectName: string;
+  topicNeeded: string;
+  description: string;
+  preferredModality: string;
+  dateCreated: string;
+  status: 'ABIERTA' | 'ATENDIDA';
+}
+
+export const INITIAL_DEMAND_REQUESTS: DemandRequest[] = [
+  {
+    id: 'req-01',
+    studentName: 'Renzo Antayhua M',
+    studentCode: '2025018341',
+    cycle: 'II Ciclo',
+    subjectName: 'Programación Orientada a Objetos',
+    topicNeeded: 'Patrón Singleton y Factory en Java',
+    description: 'Tengo dificultades para estructurar las instancias en el proyecto semestral.',
+    preferredModality: 'Virtual (Meet)',
+    dateCreated: '04 Oct 2026',
+    status: 'ABIERTA'
+  },
+  {
+    id: 'req-02',
+    studentName: 'Mariana Condori',
+    studentCode: '2025019801',
+    cycle: 'I Ciclo',
+    subjectName: 'Cálculo I',
+    topicNeeded: 'Optimización de funciones y máximos/mínimos',
+    description: 'Problemas de aplicación geométrica en optimización de áreas y volúmenes.',
+    preferredModality: 'Presencial (Lab EPIS 1)',
+    dateCreated: '03 Oct 2026',
+    status: 'ABIERTA'
+  }
+];
+
+// 11. Ponderación Curricular Directiva (CUS12 / RN-11)
+export interface SubjectPriority {
+  id: string;
+  subjectName: string;
+  criticalFactorAlpha: number; // α entre 1.05 y 1.50 (RN-11)
+  isPriorityBoosted: boolean;
+  failRateEstimated: number;
+}
+
+export const INITIAL_SUBJECT_PRIORITIES: SubjectPriority[] = [
+  { id: 'sub-01', subjectName: 'Algoritmos y Estructura de Datos', criticalFactorAlpha: 1.35, isPriorityBoosted: true, failRateEstimated: 41 },
+  { id: 'sub-02', subjectName: 'Cálculo I', criticalFactorAlpha: 1.50, isPriorityBoosted: true, failRateEstimated: 46 },
+  { id: 'sub-03', subjectName: 'Programación Orientada a Objetos', criticalFactorAlpha: 1.25, isPriorityBoosted: true, failRateEstimated: 32 },
+  { id: 'sub-04', subjectName: 'Base de Datos I', criticalFactorAlpha: 1.20, isPriorityBoosted: true, failRateEstimated: 28 },
+  { id: 'sub-05', subjectName: 'Cálculo II', criticalFactorAlpha: 1.45, isPriorityBoosted: true, failRateEstimated: 44 }
 ];
