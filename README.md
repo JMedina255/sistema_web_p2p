@@ -8,6 +8,7 @@
 > - MEDINA QUISPE, Joan Cristian (2022074255)
 >   
 > **Docente de Cátedra:** Dr. Ricardo Eduardo Valcárcel Alvarado
+>
 > **Semestre Académico:** 2026-II
 
 ---
