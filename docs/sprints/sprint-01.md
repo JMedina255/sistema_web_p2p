@@ -20,7 +20,7 @@ A continuación, se presenta la matriz canónica de asignación y esfuerzo plani
 
 | ID | Actividad | Responsable | Estimación Planificada (h) | Estado Técnico | Hito Asociado |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| **T-01** | Configurar entorno React, FastAPI y Supabase. | Joan | 4 | En curso (H1 verificado) | H1 / H2 |
+| **T-01** | Configurar entorno React, FastAPI y Supabase. | Joan | 4 | Verificado localmente | H1 / H2 |
 | **T-02** | Desarrollar interfaz de acceso y OTP de prueba. | Joan | 2 | Pendiente | H3 |
 | **T-03** | Implementar API de autenticación y OTP de prueba. | Renzo | 4 | Pendiente (Coordinación) | Externo a Joan |
 | **T-06** | Configurar integración continua y pruebas iniciales. | Joan | 3 | Pendiente | H4 |
@@ -29,7 +29,7 @@ A continuación, se presenta la matriz canónica de asignación y esfuerzo plani
 
 Fuente: Elaboración propia con base en el documento canónico de planificación `docs/sprints/PLAN_SPRINTS_Y_TAREAS.md` y tabla 5.2 de la planificación del Grupo 03.
 
-Como se evidencia en el cuadro anterior, el alcance asignado a Joan se descompone en 9 horas distribuidas en T-01, T-02 y T-06. La tarea T-01 se subdivide técnicamente en dos hitos operativos (**H1**: estructura base React–FastAPI y comunicación health; **H2**: conexión técnica inicial con Supabase/PostgreSQL) para garantizar incrementos verificables e independientes.
+Como se evidencia en el cuadro anterior, el alcance asignado a Joan se descompone en 9 horas distribuidas en T-01, T-02 y T-06. La tarea T-01 se subdividió técnicamente en dos hitos operativos (**H1**: estructura base React–FastAPI y comunicación health; **H2**: conexión técnica inicial con Supabase/PostgreSQL) para garantizar incrementos verificables e independientes. Ambos hitos se encuentran formalmente completados y verificados en el entorno de desarrollo local.
 
 ---
 
@@ -69,45 +69,99 @@ El cuadro previo confirma que la solución cumple cabalmente con los criterios d
 
 ---
 
-## 3. Comandos Reproducibles para Puesta en Marcha Local
+## 3. Registro de Ejecución — Hito 2 (H2: T-01, Parte 2)
 
-### Backend (FastAPI):
+### 3.1. Alcance Implementado
+- **Dependencias de persistencia:** Incorporación y fijación de versiones compatibles en `requirements.txt`:
+  - `SQLAlchemy>=2.0.35` (versión instalada: 2.1.5)
+  - `psycopg[binary]>=3.2.0` (versión instalada: 3.3.6 con binarios)
+  - `alembic>=1.13.0` (versión instalada: 1.20.0)
+- **Gestión segura de configuración (`app/core/config.py`):**
+  - Carga segura de `DATABASE_URL` desde `aplicacion/backend/.env`.
+  - Definición con `Field(default=None, repr=False)` para evitar que la cadena de conexión o contraseñas se impriman en logs, trazas o consolas.
+  - Propiedad calculada `sync_database_url` que formatea automáticamente la URL al dialecto `postgresql+psycopg://`.
+  - Configuración del timeout de conexión `DB_CONNECT_TIMEOUT = 5` segundos.
+- **Conexión diferida y gestión de recursos (`app/db/session.py`):**
+  - Creación perezosa (*lazy*) del motor SQLAlchemy en `get_engine()`: FastAPI puede inicializarse aun si no hay base de datos configurada.
+  - Implementación de `close_engine()` para liberar conexiones activas en el evento de cierre (`lifespan` en `app/main.py`).
+  - Función de sanitización de errores `sanitize_db_error()` para prevenir la exposición de credenciales y rutas internas ante fallos de red o autenticación.
+  - Función `test_db_connection()` que ejecuta `SELECT 1` y mide la latencia de respuesta en milisegundos.
+- **Preparación de Alembic (`app/db/migrations` y `alembic.ini`):**
+  - Inicialización sin creación de tablas de negocio (reservadas para T-09 de Renzo) ni ejecución automática de migraciones al arrancar el servidor.
+  - `env.py` configurado para enlazar dinámicamente con `settings.sync_database_url` y `Base.metadata`.
+- **Endpoints de diagnóstico y monitoreo (`app/api/v1/endpoints/health.py`):**
+  - `GET /api/v1/health`: Preservado 100% independiente de la base de datos (HTTP 200 garantizado si el proceso está activo).
+  - `GET /api/v1/health/db`: Disponible únicamente en desarrollo (`APP_ENV=development`). Ejecuta `SELECT 1`, devolviendo HTTP 200 con estado `"connected"` y latencia si es exitoso, HTTP 503 con detalle sanitizado si la conexión falla o falta configuración, y HTTP 404 fuera de desarrollo.
+- **Integración con Frontend React (`aplicacion/frontend`):**
+  - Métodos `fetchHealth()` y `fetchDbHealth()` en `src/services/apiClient.ts`.
+  - Tarjeta de monitoreo en `HealthStatus.tsx` que despliega el estado de conexión del motor PostgreSQL (Supabase - proyecto `p2p-epis-dev`) junto con su latencia en ms.
+
+### 3.2. Comprobaciones Realizadas y Resultados Observados
+
+A continuación, se documentan las pruebas técnicas efectuadas para validar los diferentes escenarios operativos de la capa de persistencia:
+
+### Cuadro 3.1: Matriz de Verificación y Comprobaciones Técnicas del Hito 2
+
+| Escenario Evaluado | Método / Comando de Comprobación | Comportamiento Esperado | Resultado Real Observado | Estado |
+| :--- | :--- | :--- | :--- | :---: |
+| **Conexión Real Supabase** | `test_db_connection()` contra proyecto `p2p-epis-dev` | Ejecutar `SELECT 1` con Session Pooler y devolver 200 | `Connected: True \| Latency: 2828.53 ms` (HTTP 200) | ✅ Exitoso |
+| **Configuración Ausente** | `GET /api/v1/health/db` con `DATABASE_URL=None` | Respuesta controlada HTTP 503 con mensaje sanitizado | `503 error: DATABASE_URL no configurada en el entorno` | ✅ Exitoso |
+| **Fallo Controlado de Conexión** | `GET /api/v1/health/db` ante rechazo de conexión | Respuesta HTTP 503 sin fuga de contraseñas ni URLs | `503 error: Conexión rechazada...` (0 trazas de secretos) | ✅ Exitoso |
+| **Aislamiento de Health** | `GET /api/v1/health` sin base de datos | HTTP 200 independiente del estado de la base de datos | `200 ok` (FastAPI continúa plenamente operativo) | ✅ Exitoso |
+| **Restricción de Entorno** | `GET /api/v1/health/db` con `APP_ENV=production` | Denegar acceso al endpoint de diagnóstico fuera de dev | `HTTP 404 Not Found` | ✅ Exitoso |
+| **Alembic Operativo** | `alembic current` contra PostgreSQL | Detectar dialecto PostgresqlImpl sin errores | `Context impl PostgresqlImpl. Will assume transactional DDL.` | ✅ Exitoso |
+| **Suite de Pruebas Unitarias** | `pytest aplicacion/backend/tests -v` | Validar los 7 casos de prueba automatizados | `7 passed in 1.08s` | ✅ Exitoso |
+| **Frontend Build & Lint** | `npm run lint && npm run build` | Compilar TypeScript y verificar estilos de código | 36 módulos compilados en 1.10s, 0 errores, 0 warnings | ✅ Exitoso |
+
+Fuente: Elaboración propia a partir de las comprobaciones automatizadas y pruebas de consola ejecutadas localmente.
+
+Los resultados verifican que la infraestructura de conexión a Supabase opera conforme a las directrices de seguridad y resiliencia del SAD: no expone credenciales, gestiona tiempos de espera (timeout), desacopla la salud de la API respecto a la persistencia y bloquea accesos no autorizados a rutas de diagnóstico fuera de desarrollo.
+
+---
+
+## 4. Comandos Reproducibles para Puesta en Marcha Local
+
+### Backend (FastAPI + PostgreSQL Supabase):
 ```bash
-# 1. Crear e inicializar entorno virtual
+# 1. Acceder al directorio e inicializar entorno virtual
 cd aplicacion/backend
-python -m venv .venv
 .\.venv\Scripts\activate
 
-# 2. Instalar dependencias
+# 2. Instalar dependencias fijadas
 pip install -r requirements.txt
 
-# 3. Ejecutar pruebas unitarias
+# 3. Comprobar estado de migraciones con Alembic
+alembic current
+
+# 4. Ejecutar suite de pruebas unitarias
 pytest tests/ -v
 
-# 4. Iniciar servidor de desarrollo
+# 5. Iniciar servidor FastAPI
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
-La documentación interactiva OpenAPI queda disponible en `http://localhost:8000/docs`.
+- Endpoint de salud general: `http://localhost:8000/api/v1/health`
+- Endpoint de diagnóstico de base de datos (dev): `http://localhost:8000/api/v1/health/db`
+- Documentación Swagger: `http://localhost:8000/docs`
 
 ### Frontend (React + Vite):
 ```bash
-# 1. Instalar dependencias
+# 1. Acceder al directorio
 cd aplicacion/frontend
-npm install
 
-# 2. Validar linter y construcción
+# 2. Instalar dependencias y validar
+npm install
 npm run lint
 npm run build
 
 # 3. Iniciar servidor de desarrollo
 npm run dev
 ```
-La aplicación queda accesible en `http://localhost:5173/`.
+- Aplicación cliente: `http://localhost:5173/`
 
 ---
 
-## 4. Próximos Pasos y Pendientes
+## 5. Próximos Pasos y Pendientes
 
-1. **Hito 2 (H2: T-01, Parte 2):** Configurar la cadena de conexión a PostgreSQL/Supabase mediante `psycopg 3` y SQLAlchemy, preparar el entorno de migraciones con Alembic e implementar el endpoint de verificación técnica `GET /api/v1/health/db`.
-2. **Hito 3 (H3: T-02):** Implementar la interfaz institucional de acceso con correo `@upt.pe` y OTP temporal de prueba (5 minutos) en `aplicacion/frontend`.
-3. **Hito 4 (H4: T-06):** Configurar el flujo de integración continua en `.github/workflows/ci.yml` con cobertura de pruebas.
+1. **Hito 3 (H3: T-02):** Desarrollar la interfaz institucional de acceso con correo `@upt.pe` y OTP temporal de prueba (5 minutos) en `aplicacion/frontend` conforme a **RF01**, **CUS01** y **RNF01**.
+2. **Hito 4 (H4: T-06):** Configurar el flujo de integración continua en `.github/workflows/ci.yml` ejecutando lint, build y pruebas de ambos componentes con cobertura mínima orientada a RNF09.
+3. **Coordinación externa con Renzo:** Integración posterior de la API OTP real (**T-03**), políticas de seguridad a nivel de fila RLS (**T-07**) y tablas del catálogo curricular (**T-09**).

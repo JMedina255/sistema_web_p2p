@@ -1,12 +1,16 @@
-from typing import List, Union
+from typing import List, Union, Optional
+from pathlib import Path
 import json
-from pydantic import field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
+_ENV_PATH = _BACKEND_DIR / ".env"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(_ENV_PATH, ".env"),
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="ignore",
@@ -20,6 +24,11 @@ class Settings(BaseSettings):
         "http://127.0.0.1:5173",
         "http://localhost:3000",
     ]
+
+    # Cadena de conexión privada a PostgreSQL / Supabase
+    # repr=False previene que el valor sea expuesto en logs o representaciones de texto
+    DATABASE_URL: Optional[str] = Field(default=None, repr=False)
+    DB_CONNECT_TIMEOUT: int = Field(default=5, description="Timeout en segundos para conexión con la BD")
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
@@ -35,6 +44,20 @@ class Settings(BaseSettings):
         elif isinstance(v, list):
             return v
         return [str(v)]
+
+    @property
+    def sync_database_url(self) -> Optional[str]:
+        """
+        Retorna la URL formateada para el dialecto psycopg 3 (postgresql+psycopg://).
+        """
+        if not self.DATABASE_URL:
+            return None
+        url = self.DATABASE_URL.strip()
+        if url.startswith("postgres://"):
+            return url.replace("postgres://", "postgresql+psycopg://", 1)
+        elif url.startswith("postgresql://") and not url.startswith("postgresql+"):
+            return url.replace("postgresql://", "postgresql+psycopg://", 1)
+        return url
 
 
 settings = Settings()

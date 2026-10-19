@@ -1,7 +1,18 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.api import api_router
+from app.db.session import close_engine
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Inicio diferido (lazy): FastAPI arranca sin bloquearse si DATABASE_URL no está disponible
+    yield
+    # Cierre de recursos del pool de conexiones al apagar el servicio
+    close_engine()
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -10,6 +21,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    lifespan=lifespan,
 )
 
 # Configuración de CORS para permitir la comunicación con el frontend React
