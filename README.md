@@ -17,7 +17,7 @@
 
 El **Sistema Web P2P** es una plataforma institucional orientada a conectar a estudiantes de ciclos formativos iniciales (*Mentoreados*, ciclos I al IV) con estudiantes de rendimiento sobresaliente de ciclos superiores (*Mentores*, ciclos VII al X) para mitigar los altos índices de reprobación y deserción en asignaturas filtro críticas (*Cálculo I/II, Algoritmos y Estructuras de Datos, Programación Orientada a Objetos y Base de Datos*) de la Escuela Profesional de Ingeniería de Sistemas de la Universidad Privada de Tacna.
 
-**Estado actual:** Fase de análisis — desarrollo del SAD. El SRS FD03 v2.0 es la fuente de nomenclatura; el SAD v1.1 analiza la arquitectura propuesta y su trazabilidad. La maqueta frontend usa datos simulados; backend, persistencia y despliegue siguen como propuestas para fases posteriores.
+**Estado actual:** Fase de construcción — **Sprint 1** en desarrollo en la rama `feat/sprint-01-base-acceso-ci`. La solución se desarrolla en `aplicacion/` (React SPA + FastAPI RESTful con persistencia en PostgreSQL/Supabase conforme a **RNF09**). Las tareas asignadas a Joan (**T-01**, **T-02** y **T-06**) han sido completadas y verificadas: H1 y H2 (entorno base y conexión técnica a Supabase `p2p-epis-dev`), H3 (interfaz de acceso institucional `@upt.pe` con desafío OTP de prueba temporal mediante adaptador mock en desarrollo, CUS01/RNF01) y H4 (suite de 57 pruebas automatizadas con cobertura de declaraciones >94% en frontend y backend, y pipeline de CI en GitHub Actions verificado exitosamente en el run [`39331555735`](https://github.com/JMedina255/sistema_web_p2p/actions/runs/39331555735), aportando evidencia de pruebas y cobertura frente a la meta de **RNF09** de $\ge 70\%$). La tarea T-02 se mantiene con interfaz de acceso simulado en desarrollo. La API real de autenticación OTP (T-03), las políticas RLS iniciales (T-07) y las tablas del catálogo curricular (T-09) son responsabilidad de Renzo y se encuentran pendientes de integración, por lo que el Sprint 1 continúa en curso y no se declara concluido en su totalidad ni se afirma autenticación institucional implementada en backend. El directorio `frontend/` se conserva como maqueta de referencia visual. El SRS FD03 v2.0 es la fuente canónica de requisitos y el SAD FD04 v1.1 orienta la arquitectura técnica.
 
 ### Pilares Funcionales y Tecnológicos
 1. **Recomendación personalizada:** RF06 y CUS02 analizan afinidad temática, disponibilidad y criterios de RN-11; RF24 incorpora prioridad institucional.
@@ -44,6 +44,8 @@ La documentación se desarrolla bajo UWE y la estructura de requisitos adoptada 
 | **Flujos por Perfil y Diagrama de Paquetes** | [`docs/flujos_por_perfil_y_diagrama_paquetes.md`](docs/flujos_por_perfil_y_diagrama_paquetes.md) | **Flujos y Arquitectura de Maquetación:** Diagramas de flujo de actividades para Administrador (Ing. Liliana Vega Bernal), Mentor (Joan Medina Q) y Mentoreado (Renzo Antayhua M), con diagrama de paquetes mapeado biunívocamente a los componentes de la interfaz. |
 | **Matriz de Inconsistencias** | [`docs/matriz_inconsistencias.md`](docs/matriz_inconsistencias.md) | Registro de auditoría y resolución de discrepancias en requisitos y modelos. |
 | **Catálogo de Pruebas** | [`docs/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx`](docs/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx) | Matriz formal de casos de prueba funcional, criterios de aceptación y verificación QA. |
+| **Plan de Sprints y Tareas** | [`docs/sprints/PLAN_SPRINTS_Y_TAREAS.md`](docs/sprints/PLAN_SPRINTS_Y_TAREAS.md) | **Planificación Scrum:** Desglose del Product Backlog (37 PBI), distribución de capacidad (91 h), cronograma de 8 sprints y asignación de tareas operativas (T-01 a T-51). |
+| **Bitácora de Sprint 1** | [`docs/sprints/sprint-01.md`](docs/sprints/sprint-01.md) | **Registro de Ejecución S1:** Verificación técnica de la base React–FastAPI (T-01), interfaz OTP (T-02), CI (T-06) y seguimiento de pendientes. |
 | **Reglas de Documentación (Hardening)** | [`reglas_documentacion.md`](reglas_documentacion.md) | Estándares obligatorios de granularidad en análisis, estructura quíntuple de tablas, estándar PlantUML y reglas de sincronización. |
 
 ---
@@ -179,22 +181,58 @@ Para validar la experiencia diferenciada por actor institucional, se encuentran 
 | **Estudiante Mentoreado** | **Renzo Antayhua M** (II Ciclo) | `mentoreado` | `mentoreado123` | • Firma de consentimiento informado digital Ley N° 29733 (RF01).<br>• Consulta del recomendador híbrido Top-k con afinidad temática (CUS02).<br>• Registro de solicitudes temáticas por demanda (CUS03).<br>• Reserva de cupo y ratificación obligatoria en $T-24\text{ h}$ (CUS24).<br>• Visualización de ticket digital con código QR de acceso (CUS11).<br>• Encuesta anónima de calidad pedagógica CSAT post-mentoría (CUS05). |
 
 ### 5.3 Despliegue y Ejecución Local
-1. **Instalar dependencias:**
-   ```bash
-   cd frontend
-   npm install
-   ```
 
-2. **Iniciar servidor de desarrollo:**
-   ```bash
+#### A. Aplicación Desacoplada (Sprint 1 — `aplicacion/`)
+1. **Backend API (FastAPI + Python 3.13 — comprobado localmente en `.venv`: Python 3.13.5; antecedente planificado: Python 3.11):**
+   ```powershell
+   cd aplicacion/backend
+   python -m venv .venv
+   .\.venv\Scripts\activate
+   pip install -r requirements.txt
+
+   # Análisis estático (Ruff: 0 errores, 0 advertencias)
+   ruff check .
+   ruff format --check .
+
+   # Pruebas automatizadas y cobertura (Pytest: 23 pruebas pasadas; 94.52% declaraciones)
+   # Nota técnica: 1 advertencia no bloqueante de Starlette registrada; ramas y funciones no medidas
+   pytest
+
+   # Migraciones y servidor de desarrollo
+   alembic current
+   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   ```
+   • API Docs (Swagger): **[http://localhost:8000/docs](http://localhost:8000/docs)**  
+   • Health Check Backend: **[http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)**  
+   • Diagnóstico BD Supabase (dev): **[http://localhost:8000/api/v1/health/db](http://localhost:8000/api/v1/health/db)**
+
+2. **Frontend SPA (React 19 + TypeScript + Vite + Node 22 — comprobado localmente: v22.17.1):**
+   ```powershell
+   cd aplicacion/frontend
+   npm ci
+
+   # Análisis estático (ESLint: 0 errores, 0 advertencias)
+   npm run lint
+
+   # Pruebas unitarias y cobertura (Vitest: 34 pruebas pasadas; 97.34% declaraciones, 88.02% ramas, 88.57% funciones)
+   npm run test:coverage
+   npm run build
+
+   # Servidor de desarrollo
    npm run dev
    ```
-   Acceder en el navegador a: **[http://localhost:5173](http://localhost:5173)**.
+   • Aplicación Web: **[http://localhost:5173](http://localhost:5173)**  
+   • Pestaña *"Acceso & OTP de Prueba (T-02)"*: Permite probar el flujo interactivo de 2 pasos de CUS01/RF01/RNF01 (correo institucional `@upt.pe`, OTP de 6 dígitos conservado como texto, expiración a 5 minutos, cooldown de reenvío de 60s, invalidación de códigos previos y adaptador mock en desarrollo).  
+   • Pestaña *"Monitor de Servicios & BD (T-01)"*: Monitor en tiempo real de FastAPI y diagnóstico de base de datos Supabase (`SELECT 1`).
 
-3. **Compilar para producción:**
-   ```bash
-   npm run build
-   ```
+#### B. Maqueta de Referencia Visual (`frontend/`)
+Para consultar la maqueta de referencia original con datos simulados en memoria:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
 
 ---
 

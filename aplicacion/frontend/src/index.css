@@ -1,0 +1,26 @@
+:root {
+  --primary-navy: #1C2A59;
+  --accent-gold: #B99451;
+  --bg-page: #F8FAFC;
+  --text-primary: #1E293B;
+  --text-muted: #64748B;
+  --border-color: #E2E8F0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: 'Consolas', 'Courier New', monospace;
+}

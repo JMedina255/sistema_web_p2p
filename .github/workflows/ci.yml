@@ -1,0 +1,91 @@
+name: CI - Integración Continua Sprint 1
+
+on:
+  push:
+    branches:
+      - main
+      - feat/sprint-01-base-acceso-ci
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend (React + Vite + Vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: aplicacion/frontend
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: aplicacion/frontend/package-lock.json
+
+      - name: Instalar dependencias reproducibles
+        run: npm ci
+
+      - name: Verificación de estilo y tipos (Lint)
+        run: npm run lint
+
+      - name: Pruebas unitarias y de componentes con cobertura
+        run: npm run test:coverage
+
+      - name: Compilación de producción (Build)
+        run: npm run build
+
+      - name: Subir reporte de cobertura de Frontend
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage-report
+          path: aplicacion/frontend/coverage
+          retention-days: 14
+
+  backend:
+    name: Backend (FastAPI + Pytest + Ruff)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: aplicacion/backend
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: aplicacion/backend/requirements.txt
+
+      - name: Instalar dependencias reproducibles
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verificación de formato y linteo (Ruff)
+        run: |
+          ruff check .
+          ruff format --check .
+
+      - name: Pruebas unitarias y cobertura (Pytest + Coverage)
+        run: pytest
+
+      - name: Subir reporte de cobertura de Backend
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage-report
+          path: aplicacion/backend/coverage.xml
+          retention-days: 14
