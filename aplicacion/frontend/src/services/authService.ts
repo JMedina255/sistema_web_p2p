@@ -54,6 +54,8 @@ export interface VerifyOtpResponse {
   verifiedAt: string;
   mode: 'mock' | 'api';
   message: string;
+  token?: string;
+  tokenType?: string;
 }
 
 export interface ResendOtpPayload {
@@ -271,33 +273,244 @@ class MockAuthAdapter {
 const mockAdapter = new MockAuthAdapter();
 
 // ============================================================================
+// Adaptador de API Real (T-03 / Renzo / FASTAPI REST)
+// ============================================================================
+
+export class ApiAuthAdapter {
+  private apiBaseUrl: string;
+
+  constructor(apiBaseUrl?: string) {
+    const globalProcess = (globalThis as unknown as { process?: { env?: Record<string, string> } }).process;
+    const envUrl = typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL
+      ? (import.meta.env.VITE_API_BASE_URL as string)
+      : globalProcess?.env?.VITE_API_BASE_URL;
+
+    this.apiBaseUrl = apiBaseUrl || envUrl || 'http://localhost:8000';
+  }
+
+  public async requestOtp(email: string): Promise<RequestOtpResponse> {
+    const trimmedEmail = email.trim().toLowerCase();
+
+    // Validación previa de dominio institucional exacto @upt.pe
+    if (!trimmedEmail.endsWith('@upt.pe')) {
+      throw new AuthException(
+        'NON_UPT_DOMAIN',
+        'El correo debe pertenecer estrictamente al dominio institucional oficial @upt.pe.'
+      );
+    }
+
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/api/v1/auth/otp/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ email: trimmedEmail }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        let code: AuthErrorCode = 'NETWORK_ERROR';
+        let message = 'Error en solicitud OTP';
+
+        if (response.status === 429) {
+          code = 'COOLDOWN_ACTIVE';
+        } else if (response.status === 422) {
+          code = 'INVALID_EMAIL';
+        }
+
+        if (data && typeof data.detail === 'object') {
+          code = (data.detail.code as AuthErrorCode) || code;
+          message = data.detail.message || message;
+        } else if (data && typeof data.detail === 'string') {
+          message = data.detail;
+        }
+
+        throw new AuthException(code, message);
+      }
+
+      return data as RequestOtpResponse;
+    } catch (err: unknown) {
+      if (err instanceof AuthException) throw err;
+      throw new AuthException(
+        'NETWORK_ERROR',
+        'No fue posible comunicar con el servidor API de autenticación. Verifica que el backend esté ejecutándose.'
+      );
+    }
+  }
+
+  public async resendOtp(challengeId: string): Promise<RequestOtpResponse> {
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/api/v1/auth/otp/resend`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ challengeId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        let code: AuthErrorCode = 'CHALLENGE_NOT_FOUND';
+        let message = 'Error al reenviar código OTP';
+
+        if (response.status === 429) {
+          code = 'COOLDOWN_ACTIVE';
+        }
+
+        if (data && typeof data.detail === 'object') {
+          code = (data.detail.code as AuthErrorCode) || code;
+          message = data.detail.message || message;
+        } else if (data && typeof data.detail === 'string') {
+          message = data.detail;
+        }
+
+        throw new AuthException(code, message);
+      }
+
+      return data as RequestOtpResponse;
+    } catch (err: unknown) {
+      if (err instanceof AuthException) throw err;
+      throw new AuthException('NETWORK_ERROR', 'No fue posible comunicar con el servidor para reenvío de código.');
+    }
+  }
+
+  public async verifyOtp(challengeId: string, otp: string): Promise<VerifyOtpResponse> {
+    const cleanOtp = otp.trim();
+    if (!/^\d{6}$/.test(cleanOtp)) {
+      throw new AuthException(
+        'OTP_INVALID',
+        'El código OTP debe estar compuesto estrictamente por 6 dígitos numéricos.'
+      );
+    }
+
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/api/v1/auth/otp/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ challengeId, otp: cleanOtp }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        let code: AuthErrorCode = 'OTP_INVALID';
+        let message = 'Error en verificación OTP';
+
+        if (response.status === 404) {
+          code = 'CHALLENGE_NOT_FOUND';
+        }
+
+        if (data && typeof data.detail === 'object') {
+          code = (data.detail.code as AuthErrorCode) || code;
+          message = data.detail.message || message;
+        } else if (data && typeof data.detail === 'string') {
+          message = data.detail;
+        }
+
+        throw new AuthException(code, message);
+      }
+
+      return data as VerifyOtpResponse;
+    } catch (err: unknown) {
+      if (err instanceof AuthException) throw err;
+      throw new AuthException('NETWORK_ERROR', 'No fue posible validar el código OTP contra la API de backend.');
+    }
+  }
+}
+
+const apiAdapter = new ApiAuthAdapter();
+
+// Modo activo del servicio ('mock' por defecto para preservar compatibilidad con pruebas de H3)
+let currentMode: 'mock' | 'api' = 'mock';
+const SESSION_TOKEN_KEY = 'p2p_epis_jwt_token';
+
+// ============================================================================
 // Fachada del Servicio de Autenticación
 // ============================================================================
 
 export const authService = {
   /**
-   * Comprueba si la API real de T-03 está disponible en el backend.
-   * En H3 (T-02), la API de T-03 aún no ha sido implementada por Renzo.
+   * Indica si la API real de T-03 está seleccionada como activa.
+   * Por defecto en las pruebas de Sprint 1 reporta false al estar en modo mock.
    */
   hasRealApi(): boolean {
-    return false;
+    return currentMode === 'api';
+  },
+
+  getMode(): 'mock' | 'api' {
+    return currentMode;
+  },
+
+  setMode(mode: 'mock' | 'api'): void {
+    currentMode = mode;
   },
 
   async requestOtp(payload: RequestOtpPayload): Promise<RequestOtpResponse> {
-    // Si en el futuro existe la API de T-03, se consumirá aquí.
-    // Mientras no esté disponible, se utiliza el adaptador mock explícito.
+    if (currentMode === 'api') {
+      return apiAdapter.requestOtp(payload.email);
+    }
     return mockAdapter.requestOtp(payload.email);
   },
 
   async resendOtp(payload: ResendOtpPayload): Promise<RequestOtpResponse> {
+    if (currentMode === 'api') {
+      return apiAdapter.resendOtp(payload.challengeId);
+    }
     return mockAdapter.resendOtp(payload.challengeId);
   },
 
   async verifyOtp(payload: VerifyOtpPayload): Promise<VerifyOtpResponse> {
-    return mockAdapter.verifyOtp(payload.challengeId, payload.otp);
+    let result: VerifyOtpResponse;
+    if (currentMode === 'api') {
+      result = await apiAdapter.verifyOtp(payload.challengeId, payload.otp);
+    } else {
+      result = await mockAdapter.verifyOtp(payload.challengeId, payload.otp);
+    }
+
+    if (result.success && result.token) {
+      this.saveToken(result.token);
+    }
+
+    return result;
   },
 
   cancelChallenge(): void {
     mockAdapter.cancelChallenge();
+  },
+
+  saveToken(token: string): void {
+    try {
+      sessionStorage.setItem(SESSION_TOKEN_KEY, token);
+    } catch {
+      // Entornos sin sessionStorage
+    }
+  },
+
+  getToken(): string | null {
+    try {
+      return sessionStorage.getItem(SESSION_TOKEN_KEY);
+    } catch {
+      return null;
+    }
+  },
+
+  clearToken(): void {
+    try {
+      sessionStorage.removeItem(SESSION_TOKEN_KEY);
+    } catch {
+      // Ignore
+    }
+  },
+
+  isAuthenticated(): boolean {
+    return Boolean(this.getToken());
   },
 };

@@ -8,6 +8,7 @@ from sqlalchemy import engine_from_config, pool
 # Agregar la raíz del backend al sys.path para importar app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+import app.models  # noqa: F401
 from app.core.config import settings
 from app.db.session import Base
 

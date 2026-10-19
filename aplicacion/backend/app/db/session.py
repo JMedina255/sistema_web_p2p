@@ -50,6 +50,24 @@ def get_session():
         db.close()
 
 
+def get_optional_session():
+    """
+    Generador de sesión opcional que retorna None si la base de datos no está configurada.
+    """
+    try:
+        engine = get_engine()
+        if engine is not None and _SessionLocal is not None:
+            db = _SessionLocal()
+            try:
+                yield db
+            finally:
+                db.close()
+            return
+    except Exception:
+        pass
+    yield None
+
+
 def close_engine():
     """
     Libera los recursos del pool de conexiones al apagar el servicio.

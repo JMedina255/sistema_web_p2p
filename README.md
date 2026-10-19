@@ -17,14 +17,17 @@
 
 El **Sistema Web P2P** es una plataforma institucional orientada a conectar a estudiantes de ciclos formativos iniciales (*Mentoreados*, ciclos I al IV) con estudiantes de rendimiento sobresaliente de ciclos superiores (*Mentores*, ciclos VII al X) para mitigar los altos índices de reprobación y deserción en asignaturas filtro críticas (*Cálculo I/II, Algoritmos y Estructuras de Datos, Programación Orientada a Objetos y Base de Datos*) de la Escuela Profesional de Ingeniería de Sistemas de la Universidad Privada de Tacna.
 
-**Estado actual:** Fase de construcción — **Sprint 1** en desarrollo en la rama `feat/sprint-01-base-acceso-ci`. La solución se desarrolla en `aplicacion/` (React SPA + FastAPI RESTful con persistencia en PostgreSQL/Supabase conforme a **RNF09**). Las tareas asignadas a Joan (**T-01**, **T-02** y **T-06**) han sido completadas y verificadas: H1 y H2 (entorno base y conexión técnica a Supabase `p2p-epis-dev`), H3 (interfaz de acceso institucional `@upt.pe` con desafío OTP de prueba temporal mediante adaptador mock en desarrollo, CUS01/RNF01) y H4 (suite de 57 pruebas automatizadas con cobertura de declaraciones >94% en frontend y backend, y pipeline de CI en GitHub Actions verificado exitosamente en el run [`39331555735`](https://github.com/JMedina255/sistema_web_p2p/actions/runs/39331555735), aportando evidencia de pruebas y cobertura frente a la meta de **RNF09** de $\ge 70\%$). La tarea T-02 se mantiene con interfaz de acceso simulado en desarrollo. La API real de autenticación OTP (T-03), las políticas RLS iniciales (T-07) y las tablas del catálogo curricular (T-09) son responsabilidad de Renzo y se encuentran pendientes de integración, por lo que el Sprint 1 continúa en curso y no se declara concluido en su totalidad ni se afirma autenticación institucional implementada en backend. El directorio `frontend/` se conserva como maqueta de referencia visual. El SRS FD03 v2.0 es la fuente canónica de requisitos y el SAD FD04 v1.1 orienta la arquitectura técnica.
+**Estado actual:** Fase de construcción — **Sprint 1 Culminado y Verificado**. La solución se desarrolla en `aplicacion/` (React SPA + FastAPI RESTful con persistencia en PostgreSQL/Supabase conforme a **RNF09**). La totalidad de las 6 tareas planificadas han sido completadas y verificadas:
+- **Tareas de Joan:** **T-01** (entorno base y conexión técnica a Supabase `p2p-epis-dev`), **T-02** (interfaz de acceso institucional `@upt.pe` con desafío OTP) y **T-06** (suite de pruebas iniciales y flujo de CI en GitHub Actions verificado exitosamente en el run [`39331555735`](https://github.com/JMedina255/sistema_web_p2p/actions/runs/39331555735)).
+- **Tareas de Renzo:** **T-09** (modelos ORM, migración Alembic con datos semilla de las **5 materias filtro**: *Cálculo I, Cálculo II, Algoritmos y Estructuras de Datos, Programación Orientada a Objetos y Base de Datos*, y endpoints RESTful de catálogo curricular), **T-03** (API real de autenticación OTP `/api/v1/auth/otp/*`, adaptador `ApiAuthAdapter` en frontend y emisión de tokens JWT de sesión con algoritmo HS256) y **T-07** (políticas de seguridad Row Level Security RLS en script SQL y guía de configuración para Supabase).
+- **Aseguramiento de Calidad:** Suite consolidada de **94 pruebas automatizadas** (46 en frontend y 48 en backend) con cobertura superior al 85%, superando holgadamente la meta mínima de **RNF09** ($\ge 70\%$). El directorio `frontend/` se conserva como maqueta de referencia visual. El SRS FD03 v2.0 es la fuente canónica de requisitos y el SAD FD04 v1.1 orienta la arquitectura técnica.
 
 ### Pilares Funcionales y Tecnológicos
-1. **Recomendación personalizada:** RF06 y CUS02 analizan afinidad temática, disponibilidad y criterios de RN-11; RF24 incorpora prioridad institucional.
+1. **Recomendación personalizada:** RF06 y CUS02 analizan afinidad temática, disponibilidad y criterios de RN-11; RF24 incorpora prioridad institucional sobre las 5 materias filtro.
 2. **Reserva, confirmación y quórum:** RF12–RF16 distinguen reserva provisional (CUS04), ratificación (CUS24), corte T−24 h (CUS23) y decisión del mentor ante quórum insuficiente (CUS07).
 3. **Asistencia y bitácora:** RF17 y CUS08 permiten registrar asistencia y cerrar la sesión. El QR es una alternativa de marcado por el mentor, cuya política técnica queda pendiente de diseño.
 4. **Auditoría y certificación:** CUS22 visa horas antes de la emisión CUS13 y descarga CUS09, conforme a RN-14; se propone PDF, correlativo, hash de integridad y consulta institucional.
-5. **Acceso y privacidad:** RF01–RF02 y RNF01–RNF02 exigen OTP institucional, consentimiento y protección de datos. Su cumplimiento deberá verificarse al implementar la solución.
+5. **Acceso y privacidad:** RF01–RF02 y RNF01–RNF02 exigen OTP institucional, consentimiento y protección de datos con políticas RLS de PostgreSQL/Supabase.
 
 ---
 
@@ -41,11 +44,12 @@ La documentación se desarrolla bajo UWE y la estructura de requisitos adoptada 
 | **FD04: Informe SAD de Proyecto** | [`docs/FD04-EPIS-Informe SAD de Proyecto.md`](docs/FD04-EPIS-Informe%20SAD%20de%20Proyecto.md) | **SAD v1.1 en análisis:** Vistas 4+1 propuestas, nomenclatura del SRS, matrices de trazabilidad y decisiones pendientes de diseño. |
 | **Bóveda General de Diagramas** | [`docs/diagramas_general.md`](docs/diagramas_general.md) | Bóveda de artefactos. La sección 14 mantiene copias de los diagramas y cuadros vigentes del SAD y sus secuencias. |
 | **Diagramas de Secuencia (SAD Análisis)** | [`docs/diagramas_de_secuencia.md`](docs/diagramas_de_secuencia.md) | **Secuencias v2.2 en análisis:** Acceso con OTP y consentimiento, Top-k, reserva/confirmación/quórum y bitácora/asistencia/visado; códigos CUS del SRS. |
-| **Flujos por Perfil y Diagrama de Paquetes** | [`docs/flujos_por_perfil_y_diagrama_paquetes.md`](docs/flujos_por_perfil_y_diagrama_paquetes.md) | **Flujos y Arquitectura de Maquetación:** Diagramas de flujo de actividades para Administrador (Ing. Liliana Vega Bernal), Mentor (Joan Medina Q) y Mentoreado (Renzo Antayhua M), con diagrama de paquetes mapeado biunívocamente a los componentes de la interfaz. |
+| **Flujos por Perfil y Diagrama de Paquetes** | [`docs/flujos_por_perfil_y_diagrama_paquetes.md`](docs/flujos_por_perfil_y_diagrama_paquetes.md) | **Flujos y Arquitectura de Maquetación:** Diagramas de flujo de actividades para Administrador, Mentor y Mentoreado con mapeo biunívoco a paquetes. |
 | **Matriz de Inconsistencias** | [`docs/matriz_inconsistencias.md`](docs/matriz_inconsistencias.md) | Registro de auditoría y resolución de discrepancias en requisitos y modelos. |
 | **Catálogo de Pruebas** | [`docs/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx`](docs/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx) | Matriz formal de casos de prueba funcional, criterios de aceptación y verificación QA. |
-| **Plan de Sprints y Tareas** | [`docs/sprints/PLAN_SPRINTS_Y_TAREAS.md`](docs/sprints/PLAN_SPRINTS_Y_TAREAS.md) | **Planificación Scrum:** Desglose del Product Backlog (37 PBI), distribución de capacidad (91 h), cronograma de 8 sprints y asignación de tareas operativas (T-01 a T-51). |
-| **Bitácora de Sprint 1** | [`docs/sprints/sprint-01.md`](docs/sprints/sprint-01.md) | **Registro de Ejecución S1:** Verificación técnica de la base React–FastAPI (T-01), interfaz OTP (T-02), CI (T-06) y seguimiento de pendientes. |
+| **Plan de Sprints y Tareas** | [`docs/sprints/PLAN_SPRINTS_Y_TAREAS.md`](docs/sprints/PLAN_SPRINTS_Y_TAREAS.md) | **Planificación Scrum:** Desglose del Product Backlog (37 PBI), capacidad (91 h) y asignación operativa (T-01 a T-51). |
+| **Bitácora de Sprint 1** | [`docs/sprints/sprint-01.md`](docs/sprints/sprint-01.md) | **Registro de Ejecución S1:** Culminación integral de T-01, T-02, T-03, T-06, T-07 y T-09 con 94 pruebas automatizadas. |
+| **Guía de Configuración Supabase** | [`docs/supabase_setup_guide.md`](docs/supabase_setup_guide.md) | **Paso a paso para el usuario:** Conexión con Session Pooler, migración Alembic, RLS script y JWT Secret. |
 | **Reglas de Documentación (Hardening)** | [`reglas_documentacion.md`](reglas_documentacion.md) | Estándares obligatorios de granularidad en análisis, estructura quíntuple de tablas, estándar PlantUML y reglas de sincronización. |
 
 ---
@@ -113,11 +117,39 @@ La secuencia funcional del flujo comprende: acceso y perfil institucional (`MOD-
 
 ```text
 Proyecto_Sistema_Web_P2P/
+├── aplicacion/                                # Aplicación desacoplada oficial (Sprint 1 en adelante)
+│   ├── backend/                               # API RESTful (FastAPI + SQLAlchemy + Alembic + Pytest)
+│   │   ├── app/
+│   │   │   ├── api/v1/endpoints/              # Endpoints RESTful: health.py, auth.py, curriculum.py
+│   │   │   ├── core/                          # Configuración pydantic-settings y seguridad criptográfica JWT/OTP
+│   │   │   ├── db/                            # Conexión diferida, session pooler y migraciones Alembic
+│   │   │   │   └── migrations/versions/       # Migración canónica 001 con catálogo de 5 materias filtro
+│   │   │   ├── models/                        # Modelos ORM: Asignatura, TemaConceptual, AuthChallenge
+│   │   │   ├── schemas/                       # Esquemas Pydantic tipados de entrada y respuesta
+│   │   │   ├── services/                      # Servicios de dominio: AuthService, CurriculumService
+│   │   │   └── main.py                        # Punto de entrada de FastAPI con middleware CORS
+│   │   ├── scripts/
+│   │   │   └── supabase_rls_setup.sql         # Script SQL canónico de Row Level Security (T-07)
+│   │   ├── tests/                             # 48 pruebas unitarias y de integración (85% de cobertura)
+│   │   ├── alembic.ini                        # Configuración de migraciones hacia PostgreSQL
+│   │   ├── pyproject.toml                     # Configuración centralizada de Ruff, Coverage y Pytest
+│   │   └── requirements.txt                   # Dependencias reproducibles fijadas con == (incluye PyJWT)
+│   └── frontend/                              # SPA cliente reactiva (React 19 + TypeScript + Vite + Vitest)
+│       ├── src/
+│       │   ├── components/                    # Componentes UI: LoginOtpView, CurriculumCatalogView, HealthStatus
+│       │   ├── services/                      # Servicios: apiClient.ts, authService.ts (Mock y ApiAuthAdapter)
+│       │   ├── data/                          # Tipos TypeScript de dominio
+│       │   ├── App.tsx                        # Orquestador con selector de pestañas (Auth, Catálogo, Servicios)
+│       │   └── main.tsx                       # Punto de entrada ReactDOM
+│       ├── package.json                       # Dependencias y scripts de prueba y cobertura
+│       └── vite.config.ts                     # Configuración del empaquetador Vite con soporte de Vitest
 ├── docs/                                      # Acervo documental formal de ingeniería de software
+│   ├── sprints/
+│   │   ├── PLAN_SPRINTS_Y_TAREAS.md           # Planificación Scrum canónica (37 PBI, 91 h, S1–S8)
+│   │   └── sprint-01.md                       # Bitácora oficial de ejecución del Sprint 1 (H1 al H7)
+│   ├── supabase_setup_guide.md                # Guía canónica paso a paso para vincular proyecto Supabase
 │   ├── FD01-EPIS-Informe de Factibilidad.md  # Viabilidad operativa, técnica, económica y legal
-│   ├── FD01-EPIS-Informe de Factibilidad.pdf # Versión compilada para revisión académica
 │   ├── FD02-EPIS-Informe Vision de Proyecto.md # Visión, actores, posicionamiento y alcance
-│   ├── FD02-EPIS-Informe Vision de Proyecto.pdf # Versión compilada para revisión directiva
 │   ├── FD03-EPIS-Informe SRS de Proyecto.md  # Especificación formal de requisitos (SRS canónico IEEE 830)
 │   ├── FD04-EPIS-Informe SAD de Proyecto.md  # Documento formal de arquitectura de software (Modelo 4+1)
 │   ├── resumen_sistema_y_casos_de_uso.md     # Síntesis ejecutiva, flujo macro, matriz CUS y reglas de negocio
@@ -125,35 +157,9 @@ Proyecto_Sistema_Web_P2P/
 │   ├── diagramas_secuencia_pruebas.md        # Diagramas de secuencia en lenguaje de análisis (ECB)
 │   ├── matriz_inconsistencias.md             # Matriz de consistencia metodológica de análisis
 │   ├── Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx # Catálogo de pruebas funcionales y de aceptación
-│   ├── Requerimientos.md                     # Cuaderno de trabajo preliminar de requerimientos
-│   ├── diagramas_de_secuencia.md             # Diagramas de secuencia en fase de análisis (SAD / ECB)
 │   ├── flujos_por_perfil_y_diagrama_paquetes.md # Diagramas de flujo por actor y diagrama de paquetes con mockups
 │   └── diseño.md                             # Guía preliminar de interfaz y estilos
-├── frontend/                                  # Maqueta funcional SPA interactiva (React + Vite)
-│   ├── src/
-│   │   ├── components/                        # Componentes UI modulares de la maquetación
-│   │   │   ├── AdminView.tsx                  # Panel de supervisión, analíticas CUS14, visado CUS22 y factor α
-│   │   │   ├── MentorFlowView.tsx             # Panel del mentor: quórum T-24h CUS09/07, escaneo QR CUS11, bitácora CUS10
-│   │   │   ├── MenteeFlowView.tsx             # Panel del mentoreado: Top-k CUS02, ratificación CUS24, ticket QR, CSAT
-│   │   │   ├── LoginView.tsx                  # Autenticación manual institucional RBAC (Ley N° 29733)
-│   │   │   ├── CertificateModal.tsx           # Visualizador de certificado oficial con hash SHA-256 y QR
-│   │   │   ├── BookingView.tsx                # Interfaz de reserva y coordinación de horarios
-│   │   │   ├── ConsentModal.tsx               # Modal de consentimiento informado (Ley N° 29733)
-│   │   │   ├── GamificationView.tsx           # Tablero de insignias, reputación y horas de servicio
-│   │   │   ├── HomeView.tsx                   # Catálogo reactivo y buscador en tiempo real de mentorías
-│   │   │   ├── ImageCarousel.tsx              # Banner institucional rotativo UPT
-│   │   │   ├── LateralDocks.tsx               # Barra lateral de accesos rápidos universitarios
-│   │   │   ├── Navigation.tsx                 # Barra superior institucional con avatar y rol activo
-│   │   │   └── RecommendationView.tsx         # Vista de recomendaciones Top-k con afinidad porcentual
-│   │   ├── data/
-│   │   │   └── mockData.ts                    # Dataset simulado con cursos EPIS, bitácoras, sesiones y cuentas
-│   │   ├── App.tsx                            # Orquestador principal de vistas, autenticación y estados globales
-│   │   ├── index.css                          # Estilos globales y tokens del Portal Web UPT (docs/diseño.md)
-│   │   └── main.tsx                           # Punto de entrada de la aplicación React
-│   ├── public/                                # Recursos estáticos y vectoriales
-│   ├── package.json                           # Manifiesto de dependencias y scripts de frontend
-│   ├── tsconfig.json                          # Configuración de compilación TypeScript
-│   └── vite.config.ts                         # Configuración del bundler Vite
+├── frontend/                                  # Maqueta funcional de referencia visual (conservada)
 ├── reglas_documentacion.md                    # Manual de normas de documentación y hardening (v1.3)
 ├── rules_doc.md                               # Registro histórico de directrices iniciales
 ├── .gitignore                                 # Reglas de exclusión de git
@@ -194,17 +200,19 @@ Para validar la experiencia diferenciada por actor institucional, se encuentran 
    ruff check .
    ruff format --check .
 
-   # Pruebas automatizadas y cobertura (Pytest: 23 pruebas pasadas; 94.52% declaraciones)
-   # Nota técnica: 1 advertencia no bloqueante de Starlette registrada; ramas y funciones no medidas
+   # Aplicar migraciones con datos semilla a Supabase (T-09)
+   alembic upgrade head
+
+   # Pruebas automatizadas y cobertura (Pytest: 48 pruebas pasadas; 85% de cobertura)
    pytest
 
-   # Migraciones y servidor de desarrollo
-   alembic current
+   # Servidor de desarrollo
    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
    ```
    • API Docs (Swagger): **[http://localhost:8000/docs](http://localhost:8000/docs)**  
    • Health Check Backend: **[http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)**  
-   • Diagnóstico BD Supabase (dev): **[http://localhost:8000/api/v1/health/db](http://localhost:8000/api/v1/health/db)**
+   • Diagnóstico BD Supabase (dev): **[http://localhost:8000/api/v1/health/db](http://localhost:8000/api/v1/health/db)**  
+   • Catálogo Curricular: **[http://localhost:8000/api/v1/curriculum/courses](http://localhost:8000/api/v1/curriculum/courses)**
 
 2. **Frontend SPA (React 19 + TypeScript + Vite + Node 22 — comprobado localmente: v22.17.1):**
    ```powershell
@@ -214,7 +222,7 @@ Para validar la experiencia diferenciada por actor institucional, se encuentran 
    # Análisis estático (ESLint: 0 errores, 0 advertencias)
    npm run lint
 
-   # Pruebas unitarias y cobertura (Vitest: 34 pruebas pasadas; 97.34% declaraciones, 88.02% ramas, 88.57% funciones)
+   # Pruebas unitarias y cobertura (Vitest: 46 pruebas pasadas; 93.84% líneas, 77.13% ramas, 78.94% funciones)
    npm run test:coverage
    npm run build
 
@@ -222,7 +230,8 @@ Para validar la experiencia diferenciada por actor institucional, se encuentran 
    npm run dev
    ```
    • Aplicación Web: **[http://localhost:5173](http://localhost:5173)**  
-   • Pestaña *"Acceso & OTP de Prueba (T-02)"*: Permite probar el flujo interactivo de 2 pasos de CUS01/RF01/RNF01 (correo institucional `@upt.pe`, OTP de 6 dígitos conservado como texto, expiración a 5 minutos, cooldown de reenvío de 60s, invalidación de códigos previos y adaptador mock en desarrollo).  
+   • Pestaña *"Acceso & OTP de Prueba (T-02 / T-03)"*: Permite interactuar con el flujo de dos pasos CUS01/RF01 tanto con el adaptador Mock como contra la API real emitiendo tokens JWT de sesión.  
+   • Pestaña *"Catálogo Curricular (T-09)"*: Visualiza interactivamente las 5 materias filtro y sus unidades silábicas.  
    • Pestaña *"Monitor de Servicios & BD (T-01)"*: Monitor en tiempo real de FastAPI y diagnóstico de base de datos Supabase (`SELECT 1`).
 
 #### B. Maqueta de Referencia Visual (`frontend/`)

@@ -30,6 +30,17 @@ class Settings(BaseSettings):
     DATABASE_URL: str | None = Field(default=None, repr=False)
     DB_CONNECT_TIMEOUT: int = Field(default=5, description="Timeout en segundos para conexión con la BD")
 
+    # Configuración de Seguridad y JWT (T-03 / RNF01 / RNF02)
+    JWT_SECRET_KEY: str = Field(
+        default="dev-jwt-secret-key-epis-upt-2026-mentorias-change-in-production",
+        repr=False,
+        description="Clave secreta para firma de tokens JWT (usar el JWT Secret de Supabase en producción)",
+    )
+    JWT_ALGORITHM: str = "HS256"
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 horas
+    OTP_EXPIRE_MINUTES: int = 5  # Ventana de 5 minutos según RNF01
+    OTP_COOLDOWN_SECONDS: int = 60  # Cooldown de 60 segundos según CUS01
+
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: str | list[str]) -> list[str]:

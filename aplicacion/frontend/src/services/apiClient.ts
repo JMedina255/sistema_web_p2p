@@ -46,3 +46,58 @@ export async function fetchDbHealth(): Promise<DbHealthResponse | null> {
 export function getApiBaseUrl(): string {
   return API_BASE_URL;
 }
+
+export interface Course {
+  id_asignatura: number;
+  codigo_curso: string;
+  nombre_curso: string;
+  ciclo_plan: number;
+  creditos: number;
+  es_prioritaria: boolean;
+  factor_ponderacion: number;
+  estado_activo: boolean;
+}
+
+export interface Topic {
+  id_tema: number;
+  id_asignatura: number;
+  nombre_tema: string;
+  descripcion_silabo?: string;
+  unidad_silabica: number;
+  estado_activo: boolean;
+}
+
+export interface CourseDetail extends Course {
+  temas: Topic[];
+}
+
+export async function fetchCourses(onlyPriority: boolean = false, ciclo?: number): Promise<Course[]> {
+  const params = new URLSearchParams();
+  if (onlyPriority) params.append('only_priority', 'true');
+  if (ciclo !== undefined) params.append('ciclo', ciclo.toString());
+
+  const queryString = params.toString() ? `?${params.toString()}` : '';
+  const url = `${API_BASE_URL}/api/v1/curriculum/courses${queryString}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: { 'Accept': 'application/json' },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+export async function fetchCourseDetail(id: number): Promise<CourseDetail> {
+  const url = `${API_BASE_URL}/api/v1/curriculum/courses/${id}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: { 'Accept': 'application/json' },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
+  }
+  return response.json();
+}

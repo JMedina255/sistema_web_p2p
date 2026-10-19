@@ -11,6 +11,7 @@ export const LoginOtpView: React.FC = () => {
   const [verifyResult, setVerifyResult] = useState<VerifyOtpResponse | null>(null);
 
   // Estados de control y feedback
+  const [authMode, setAuthMode] = useState<'mock' | 'api'>(authService.getMode());
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
@@ -155,7 +156,14 @@ export const LoginOtpView: React.FC = () => {
     setStep('email');
   };
 
-  // Helper de escenarios de prueba para Joan
+  // Manejador de cambio entre modo Mock y API real
+  const handleToggleMode = (newMode: 'mock' | 'api') => {
+    setAuthMode(newMode);
+    authService.setMode(newMode);
+    handleReset();
+  };
+
+  // Helper de escenarios de prueba para Joan y Renzo
   const handleLoadTestEmail = (testEmail: string) => {
     setEmail(testEmail);
     setErrorMessage(null);
@@ -177,28 +185,58 @@ export const LoginOtpView: React.FC = () => {
       {/* Banner de Modo de Acceso en Desarrollo */}
       <div
         style={{
-          backgroundColor: '#FFFBEB',
-          borderBottom: '1px solid #FDE68A',
+          backgroundColor: authMode === 'api' ? '#F0FDF4' : '#FFFBEB',
+          borderBottom: authMode === 'api' ? '1px solid #BBF7D0' : '1px solid #FDE68A',
           padding: '0.6rem 1.25rem',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.5rem',
           fontSize: '0.78rem',
-          color: '#B45309',
+          color: authMode === 'api' ? '#15803D' : '#B45309',
           fontWeight: 600,
         }}
       >
-        <span>🧪 Acceso de prueba — Simulación (Hito 3 · T-02)</span>
-        <span
-          style={{
-            background: '#FDE68A',
-            padding: '0.15rem 0.45rem',
-            borderRadius: '4px',
-            fontSize: '0.7rem',
-          }}
-        >
-          Dev Mock
+        <span>
+          {authMode === 'api'
+            ? '⚡ API Real de Autenticación & OTP (T-03 · FastAPI + Supabase)'
+            : '🧪 Acceso de prueba — Simulación (Hito 3 · T-02)'}
         </span>
+        <div style={{ display: 'flex', gap: '0.35rem' }}>
+          <button
+            type="button"
+            onClick={() => handleToggleMode('mock')}
+            style={{
+              background: authMode === 'mock' ? '#FDE68A' : '#FFFFFF',
+              border: '1px solid #FCD34D',
+              borderRadius: '4px',
+              padding: '0.15rem 0.45rem',
+              fontSize: '0.7rem',
+              fontWeight: authMode === 'mock' ? 700 : 500,
+              cursor: 'pointer',
+              color: '#92400E',
+            }}
+          >
+            Dev Mock
+          </button>
+          <button
+            type="button"
+            onClick={() => handleToggleMode('api')}
+            style={{
+              background: authMode === 'api' ? '#BBF7D0' : '#FFFFFF',
+              border: '1px solid #86EFAC',
+              borderRadius: '4px',
+              padding: '0.15rem 0.45rem',
+              fontSize: '0.7rem',
+              fontWeight: authMode === 'api' ? 700 : 500,
+              cursor: 'pointer',
+              color: '#166534',
+            }}
+          >
+            API Real (T-03)
+          </button>
+        </div>
       </div>
 
       <div style={{ padding: '2rem' }}>
@@ -543,8 +581,18 @@ export const LoginOtpView: React.FC = () => {
                 <span style={{ color: '#64748B' }}>Marca de tiempo:</span>{' '}
                 <span>{new Date(verifyResult.verifiedAt).toLocaleTimeString()}</span>
               </div>
+              {verifyResult.token && (
+                <div style={{ marginTop: '0.6rem', padding: '0.6rem', background: '#F1F5F9', borderRadius: '6px', fontSize: '0.74rem' }}>
+                  <span style={{ fontWeight: 700, color: '#1C2A59', display: 'block', marginBottom: '0.2rem' }}>
+                    🔑 Token JWT de Sesión Emitido (T-03 / HS256):
+                  </span>
+                  <code style={{ color: '#0F766E', wordBreak: 'break-all', display: 'block' }}>
+                    {verifyResult.token}
+                  </code>
+                </div>
+              )}
               <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '0.5rem', borderTop: '1px solid #E2E8F0', paddingTop: '0.4rem' }}>
-                📌 <em>Alcance delimitado:</em> El consentimiento legal informado (Ley 29733, T-04/T-05) y la emisión definitiva de tokens JWT institucionales se incorporan en los siguientes sprints.
+                📌 <em>Alcance delimitado:</em> El consentimiento legal informado (Ley 29733, T-04/T-05) y la matriz de perfiles se integran formalmente en el Sprint 2.
               </div>
             </div>
 

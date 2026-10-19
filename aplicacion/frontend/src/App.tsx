@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { CurriculumCatalogView } from './components/CurriculumCatalogView';
 import { HealthStatus } from './components/HealthStatus';
 import { LoginOtpView } from './components/LoginOtpView';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'auth' | 'services'>('auth');
+  const [activeTab, setActiveTab] = useState<'auth' | 'curriculum' | 'services'>('auth');
 
   return (
     <div
@@ -124,6 +125,22 @@ export const App: React.FC = () => {
             🔐 Acceso & OTP de Prueba (T-02)
           </button>
           <button
+            onClick={() => setActiveTab('curriculum')}
+            style={{
+              background: activeTab === 'curriculum' ? '#1C2A59' : '#F1F5F9',
+              color: activeTab === 'curriculum' ? '#FFFFFF' : '#475569',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '0.5rem 1.1rem',
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            📚 Catálogo Curricular (T-09)
+          </button>
+          <button
             onClick={() => setActiveTab('services')}
             style={{
               background: activeTab === 'services' ? '#1C2A59' : '#F1F5F9',
@@ -169,18 +186,28 @@ export const App: React.FC = () => {
           <h2 style={{ fontSize: '1.8rem', color: '#1C2A59', margin: '0 0 0.5rem 0', fontWeight: 800 }}>
             {activeTab === 'auth'
               ? 'Interfaz de Acceso Institucional y Desafío OTP'
+              : activeTab === 'curriculum'
+              ? 'Catálogo Curricular y Materias Filtro EPIS-UPT'
               : 'Infraestructura Base: React + FastAPI + Supabase'}
           </h2>
           <p style={{ margin: '0 auto', maxWidth: '640px', fontSize: '0.92rem', color: '#64748B', lineHeight: 1.6 }}>
             {activeTab === 'auth'
-              ? 'Validación del flujo de dos pasos: comprobación de dominio @upt.pe y desafío OTP temporal de 6 dígitos con vigencia de 5 minutos (RF01 / CUS01 / RNF01).'
+              ? 'Validación del flujo de dos pasos: comprobación de dominio @upt.pe, desafío OTP temporal de 6 dígitos con vigencia de 5 minutos y emisión de JWT de sesión (RF01 / CUS01 / RNF01).'
+              : activeTab === 'curriculum'
+              ? 'Visualización interactiva de las 5 materias críticas y árbol de temas silábicos requeridos para el motor de recomendación Top-k (RF05 / CUS21).'
               : 'Monitoreo de comunicación asíncrona entre la SPA cliente (React 19 / TypeScript / Vite), el backend RESTful (FastAPI) y PostgreSQL (Supabase).'
             }
           </p>
         </div>
 
         {/* Renderizado condicional según pestaña */}
-        {activeTab === 'auth' ? <LoginOtpView /> : <HealthStatus />}
+        {activeTab === 'auth' ? (
+          <LoginOtpView />
+        ) : activeTab === 'curriculum' ? (
+          <CurriculumCatalogView />
+        ) : (
+          <HealthStatus />
+        )}
 
         {/* Bloque informativo de especificaciones del sprint */}
         <div
