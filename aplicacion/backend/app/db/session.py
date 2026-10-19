@@ -1,17 +1,18 @@
-from typing import Optional, Tuple
 import time
+
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import declarative_base, sessionmaker
+
 from app.core.config import settings
 
 Base = declarative_base()
 
-_engine: Optional[Engine] = None
-_SessionLocal: Optional[sessionmaker] = None
+_engine: Engine | None = None
+_SessionLocal: sessionmaker | None = None
 
 
-def get_engine() -> Optional[Engine]:
+def get_engine() -> Engine | None:
     """
     Creación diferida (lazy) del motor SQLAlchemy para PostgreSQL.
     Solo inicializa el engine cuando settings.sync_database_url está configurada.
@@ -79,7 +80,7 @@ def sanitize_db_error(error: Exception) -> str:
     return "Error al establecer comunicación con el servidor de base de datos."
 
 
-def test_db_connection() -> Tuple[bool, Optional[str], Optional[float]]:
+def test_db_connection() -> tuple[bool, str | None, float | None]:
     """
     Ejecuta una comprobación técnica SELECT 1 contra el motor PostgreSQL.
     Retorna (is_ok, detail_or_error, latency_ms).

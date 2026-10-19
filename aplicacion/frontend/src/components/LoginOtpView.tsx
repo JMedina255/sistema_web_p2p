@@ -26,7 +26,7 @@ export const LoginOtpView: React.FC = () => {
     const targetExpire = new Date(challenge.expiresAt).getTime();
     const cooldownTarget = targetExpire - (5 * 60 - challenge.cooldownSeconds) * 1000;
 
-    const interval = setInterval(() => {
+    const updateTimers = () => {
       const now = Date.now();
       const remainingExpire = Math.max(0, Math.floor((targetExpire - now) / 1000));
       const remainingResend = Math.max(0, Math.floor((cooldownTarget - now) / 1000));
@@ -37,7 +37,10 @@ export const LoginOtpView: React.FC = () => {
       if (remainingExpire === 0 && !errorMessage) {
         setErrorMessage('El código OTP ha expirado (5 minutos). Por favor solicita un nuevo código.');
       }
-    }, 500);
+    };
+
+    updateTimers();
+    const interval = setInterval(updateTimers, 500);
 
     return () => clearInterval(interval);
   }, [step, challenge, errorMessage]);

@@ -1,8 +1,8 @@
 from app.db.session import (
     Base,
+    close_engine,
     get_engine,
     get_session,
-    close_engine,
     test_db_connection,
 )
 

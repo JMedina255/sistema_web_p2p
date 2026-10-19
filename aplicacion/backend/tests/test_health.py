@@ -1,7 +1,9 @@
 from unittest.mock import patch
+
 from fastapi.testclient import TestClient
-from app.main import app
+
 from app.core.config import settings
+from app.main import app
 
 client = TestClient(app)
 
@@ -44,7 +46,10 @@ def test_health_db_returns_503_when_unconfigured():
 
 def test_health_db_returns_503_sanitized_on_failure():
     """Valida que los errores de conexión se sanitizan sin exponer secretos."""
-    with patch("app.api.v1.endpoints.health.test_db_connection", return_value=(False, "Conexión rechazada por el servidor de base de datos.", 12.5)):
+    with patch(
+        "app.api.v1.endpoints.health.test_db_connection",
+        return_value=(False, "Conexión rechazada por el servidor de base de datos.", 12.5),
+    ):
         response = client.get("/api/v1/health/db")
         assert response.status_code == 503
         data = response.json()
@@ -58,7 +63,10 @@ def test_health_db_returns_503_sanitized_on_failure():
 
 def test_health_db_returns_200_when_connected():
     """Valida que /api/v1/health/db devuelve 200 cuando SELECT 1 es exitoso."""
-    with patch("app.api.v1.endpoints.health.test_db_connection", return_value=(True, "Conexión a PostgreSQL (Supabase) verificada con éxito", 45.2)):
+    with patch(
+        "app.api.v1.endpoints.health.test_db_connection",
+        return_value=(True, "Conexión a PostgreSQL (Supabase) verificada con éxito", 45.2),
+    ):
         response = client.get("/api/v1/health/db")
         assert response.status_code == 200
         data = response.json()

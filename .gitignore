@@ -12,7 +12,13 @@ aplicacion/backend/**/__pycache__/
 *$py.class
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
+coverage/
+aplicacion/frontend/coverage/
+coverage.xml
+aplicacion/backend/coverage.xml
+*.lcov
 
 # Production build
 dist/

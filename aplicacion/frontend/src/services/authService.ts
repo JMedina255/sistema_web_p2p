@@ -79,11 +79,14 @@ class MockAuthAdapter {
   private challengeCounter: number = 100;
 
   private isDev(): boolean {
+    const globalProcess = (globalThis as unknown as { process?: { env?: Record<string, string> } }).process;
+    if (globalProcess?.env?.NODE_ENV === 'production') {
+      return false;
+    }
     if (typeof import.meta !== 'undefined' && import.meta.env) {
       return Boolean(import.meta.env.DEV);
     }
-    const globalProcess = (globalThis as unknown as { process?: { env?: Record<string, string> } }).process;
-    return globalProcess?.env?.NODE_ENV !== 'production';
+    return true;
   }
 
   public async requestOtp(email: string): Promise<RequestOtpResponse> {

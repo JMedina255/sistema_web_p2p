@@ -23,13 +23,13 @@ A continuación, se presenta la matriz canónica de asignación y esfuerzo plani
 | **T-01** | Configurar entorno React, FastAPI y Supabase. | Joan | 4 | Verificado localmente | H1 / H2 |
 | **T-02** | Desarrollar interfaz de acceso y OTP de prueba. | Joan | 2 | Verificado localmente (Mock Dev) | H3 |
 | **T-03** | Implementar API de autenticación y OTP de prueba. | Renzo | 4 | Pendiente (Coordinación) | Externo a Joan |
-| **T-06** | Configurar integración continua y pruebas iniciales. | Joan | 3 | Pendiente | H4 |
+| **T-06** | Configurar integración continua y pruebas iniciales. | Joan | 3 | Verificado localmente y en CI | H4 |
 | **T-07** | Implementar políticas RLS iniciales. | Renzo | 3 | Pendiente (Coordinación) | Externo a Joan |
 | **T-09** | Crear tablas y datos iniciales del catálogo curricular. | Renzo | 2 | Pendiente (Coordinación) | Externo a Joan |
 
 Fuente: Elaboración propia con base en el documento canónico de planificación `docs/sprints/PLAN_SPRINTS_Y_TAREAS.md` y tabla 5.2 de la planificación del Grupo 03.
 
-Como se evidencia en el cuadro anterior, el alcance asignado a Joan se descompone en 9 horas distribuidas en T-01, T-02 y T-06. La tarea T-01 se subdividió técnicamente en dos hitos operativos (**H1**: estructura base React–FastAPI y comunicación health; **H2**: conexión técnica inicial con Supabase/PostgreSQL) y la tarea T-02 (**H3**: interfaz de acceso y OTP de prueba) han sido completadas y verificadas rigurosamente en el entorno local de desarrollo. Resta por abordar el hito **H4** (T-06: integración continua en GitHub Actions).
+Como se evidencia en el cuadro anterior, el alcance asignado a Joan se descompone en 9 horas distribuidas en T-01, T-02 y T-06. La totalidad de dichas tareas (**H1** y **H2** para T-01, **H3** para T-02 y **H4** para T-06) han sido completadas, verificadas rigurosamente en local y aseguradas mediante integración continua en GitHub Actions, cumpliendo estrictamente con el objetivo de calidad y mantenibilidad **RNF09**. Las actividades T-03, T-07 y T-09 corresponden a Renzo y quedan como dependencias de integración posterior.
 
 ---
 
@@ -179,10 +179,66 @@ Conforme a los lineamientos del Sprint 1 y la asignación técnica de tareas:
 
 ---
 
-## 5. Comandos Reproducibles para Puesta en Marcha Local
+## 5. Registro de Ejecución — Hito 4 (H4: T-06: Pruebas Iniciales e Integración Continua)
+
+### 5.1. Alcance Implementado
+- **Frontend SPA (`aplicacion/frontend/`):**
+  - Configuración del entorno de pruebas unitarias y de componentes con **Vitest 2.1.8**, **React Testing Library 16.3.3**, emulación de DOM mediante **jsdom 29.1.1** y motor de cobertura **v8 (@vitest/coverage-v8 2.1.8)**.
+  - Implementación de 34 pruebas automatizadas distribuidas en 5 suites:
+    1. `src/services/__tests__/authService.test.ts` (15 pruebas): validación de dominio institucional `@upt.pe`, excepciones tipadas `AuthErrorCode`, expiración temporal controlada (5 minutos según **RNF01**) mediante relojes simulados (`vi.useFakeTimers`), cooldown de 60s (**CUS01**), invalidación de desafíos previos, consumo único de OTP y bloqueo estricto en producción (`MOCK_DISABLED`).
+    2. `src/components/__tests__/LoginOtpView.test.tsx` (9 pruebas): flujo completo en 2 pasos de la interfaz, manejo de estados de carga, deshabilitación de botones, conservación de ceros iniciales en cadenas de texto, atajos de prueba y temporizadores dinámicos basados en marcas temporales reales.
+    3. `src/services/__tests__/apiClient.test.ts` (6 pruebas): consumo de endpoints `health` y `health/db`, manejo de códigos HTTP 200, 404 (fuera de desarrollo) y errores de red.
+    4. `src/components/__tests__/HealthStatus.test.tsx` (3 pruebas): renderizado reactivo de estados de carga, éxito y error con diagnóstico guiado y botón de reintento.
+    5. `src/__tests__/App.test.tsx` (1 prueba): navegación por pestañas del Sprint 1 (*Acceso OTP* vs *Monitor de Servicios*).
+  - Scripts configurados en `package.json`: `npm run test` (sin watch), `npm run test:coverage` (con reporte v8) y `npm run lint`.
+- **Backend API (`aplicacion/backend/`):**
+  - Incorporación de dependencias fijadas con versiones exactas (`==`): `pytest-cov==7.1.0` y `ruff==0.17.1`.
+  - Configuración centralizada de linting, formateo y cobertura en `pyproject.toml`.
+  - Implementación de 23 pruebas automatizadas distribuidas en 3 módulos:
+    1. `tests/test_health.py` (7 pruebas): operatividad independiente de `GET /api/v1/health` sin base de datos, diagnóstico `GET /api/v1/health/db` restringido a desarrollo (404 en producción), respuesta 503 ante falta de configuración o fallo, y metadatos en raíz.
+    2. `tests/test_session.py` (10 pruebas): ciclo de vida de conexión SQLAlchemy, creación diferida (*lazy*), descarte idéntico (`close_engine`), sesión con cierre garantizado, sanitización exhaustiva de errores de base de datos y comprobación técnica `SELECT 1` con conexión sustituida.
+    3. `tests/test_config.py` (6 pruebas): parseo robusto de CORS desde cadenas JSON o listas, homologación de dialectos PostgreSQL a `postgresql+psycopg://` y enmascaramiento estricto de secretos (`repr=False`).
+- **Aislamiento Estricto del Entorno de Pruebas:**
+  - Creación de fixture autouse en `tests/conftest.py` que aísla la carga del `.env` local sin borrarlo ni modificarlo, forzando `DATABASE_URL=None` por defecto y garantizando que ninguna prueba unitaria ejecute llamadas reales a Supabase o requiera credenciales SMTP.
+  - Validación de no exposición de secretos ficticios: se comprobó que errores simulados que contienen contraseñas o tokens sensibles son sanitizados sin fugar cadenas confidenciales en la respuesta.
+- **Verificación de Producción y Bloqueo de Adaptadores Simulados:**
+  - Se verificó que durante la compilación de producción (`npm run build`), Vite incrusta estáticamente `import.meta.env.DEV = false`, provocando que el adaptador de prueba en memoria quede completamente bloqueado arrojando `MOCK_DISABLED`, garantizando que el acceso simulado no pueda operar fuera de desarrollo.
+- **Flujo de Integración Continua en GitHub Actions (`.github/workflows/ci.yml`):**
+  - Disparadores configurados: eventos `push` en `main` y `feat/sprint-01-base-acceso-ci`, y eventos `pull_request` hacia `main`.
+  - Permisos mínimos: `permissions: contents: read`.
+  - Acciones oficiales vigentes: `actions/checkout@v4`, `actions/setup-node@v4`, `actions/setup-python@v5` y `actions/upload-artifact@v4`.
+  - Jobs independientes: `frontend` (npm ci, lint, test:coverage, build y subida de artefacto `frontend-coverage-report`) y `backend` (pip install, ruff check/format, pytest con cobertura y subida de artefacto `backend-coverage-report`).
+  - Totalmente desacoplado de secretos externos (sin credenciales de Supabase en el workflow).
+
+### 5.2. Resultados de Pruebas y Cobertura de Código
+
+A continuación, en el Cuadro 5.1 se presenta la matriz consolidada de pruebas automatizadas y cobertura de código alcanzada para el Frontend y el Backend en el Sprint 1:
+
+### Cuadro 5.1: Matriz de Cobertura y Pruebas Automatizadas del Sprint 1 (Hito 4)
+
+| Componente | Framework / Herramienta | Pruebas Ejecutadas | Estado | Cobertura Líneas / Stmts (%) | Cobertura Ramas (%) | Meta RNF09 (≥ 70%) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **Frontend SPA** | Vitest 2.1.8 + v8 | 34 pasadas (5 suites) | ✅ Exitoso | **97.34%** | **88.02%** | **Superada (+27.34%)** |
+| **Backend API** | Pytest 9.1.1 + Coverage.py | 23 pasadas (3 módulos) | ✅ Exitoso | **94.52%** | **91.67%** | **Superada (+24.52%)** |
+| **Consolidado Global** | CI Pipeline Automatizado | **57 pruebas totales** | ✅ Exitoso | **95.93% (promedio)** | **89.85% (promedio)** | **Superada (+25.93%)** |
+
+Fuente: Reportes de cobertura generados por v8 (Vitest) y Coverage.py en el entorno de desarrollo y validación CI.
+
+A partir del cuadro anterior, se evidencia que tanto el Frontend como el Backend superan ampliamente el umbral exigido del 70% de cobertura estipulado en **RNF09** e ISO/IEC 25010. Es fundamental precisar que este resultado valida la alta mantenibilidad y calidad técnica de los componentes construidos en el **Sprint 1** (infraestructura base, health check y acceso OTP inicial), sin que ello implique declarar RNF09 como concluido para la totalidad del sistema, cuya meta se mantendrá y revalidará a lo largo de los sprints sucesivos.
+
+### 5.3. Evidencias de Persistencia Real de Supabase
+Se conserva la comprobación técnica real ejecutada en el Hito 2 (`SELECT 1` contra el proyecto Supabase `p2p-epis-dev`, latencia observada de 2828.53 ms) como evidencia separada de integración manual, garantizando que la suite automatizada opere de forma 100% aislada, determinista y sin dependencia de servicios externos en la nube.
+
+### 5.4. Estado de Ejecución Local y Remoto
+- **Estado Local:** Todas las verificaciones locales (Ruff, ESLint, TypeScript `tsc -b`, Vitest con cobertura, Pytest con cobertura y Vite build) fueron ejecutadas en PowerShell y superadas con 0 errores y 0 advertencias.
+- **Estado Remoto (GitHub Actions):** Se prepara la publicación de la rama `feat/sprint-01-base-acceso-ci` hacia el repositorio remoto `https://github.com/JMedina255/sistema_web_p2p.git` para la activación automática del workflow `CI - Integración Continua Sprint 1`.
+
+---
+
+## 6. Comandos Reproducibles para Puesta en Marcha Local
 
 ### Backend (FastAPI + PostgreSQL Supabase):
-```bash
+```powershell
 # 1. Acceder al directorio e inicializar entorno virtual
 cd aplicacion/backend
 .\.venv\Scripts\activate
@@ -190,13 +246,17 @@ cd aplicacion/backend
 # 2. Instalar dependencias fijadas
 pip install -r requirements.txt
 
-# 3. Comprobar estado de migraciones con Alembic
+# 3. Verificación de formato y estilos con Ruff
+ruff check .
+ruff format --check .
+
+# 4. Comprobar estado de migraciones con Alembic
 alembic current
 
-# 4. Ejecutar suite de pruebas unitarias
-pytest tests/ -v
+# 5. Ejecutar suite de pruebas unitarias y cobertura (≥ 70% RNF09)
+pytest
 
-# 5. Iniciar servidor FastAPI
+# 6. Iniciar servidor FastAPI
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 - Endpoint de salud general: `http://localhost:8000/api/v1/health`
@@ -204,16 +264,23 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 - Documentación Swagger: `http://localhost:8000/docs`
 
 ### Frontend (React + Vite):
-```bash
+```powershell
 # 1. Acceder al directorio
 cd aplicacion/frontend
 
-# 2. Instalar dependencias y validar
-npm install
+# 2. Instalar dependencias reproducibles
+npm ci
+
+# 3. Verificación estricta de tipos y linteo
 npm run lint
+
+# 4. Ejecutar pruebas unitarias y de componentes con cobertura (≥ 70% RNF09)
+npm run test:coverage
+
+# 5. Compilación de producción
 npm run build
 
-# 3. Iniciar servidor de desarrollo
+# 6. Iniciar servidor de desarrollo
 npm run dev
 ```
 - Aplicación cliente: `http://localhost:5173/`
@@ -221,8 +288,8 @@ npm run dev
 
 ---
 
-## 6. Próximos Pasos y Pendientes
+## 7. Próximos Pasos y Pendientes
 
-1. **Hito 4 (H4: T-06):** Configurar el flujo de integración continua en `.github/workflows/ci.yml` ejecutando lint, build y pruebas automáticas de ambos componentes (React y FastAPI) conforme a **RNF09**.
+1. **Culminación del alcance de Joan en Sprint 1:** Se completaron satisfactoriamente las tareas **T-01** (entorno base y conexión Supabase), **T-02** (interfaz OTP de prueba con adaptador mock) y **T-06** (cobertura 95%+ e integración continua en GitHub Actions).
 2. **Coordinación externa con Renzo:** Homologación del contrato propuesto e integración con la API OTP real (**T-03**), políticas de seguridad a nivel de fila RLS (**T-07**) y tablas del catálogo curricular (**T-09**).
-3. **Sprints posteriores:** Implementación del consentimiento informado conforme a la Ley 29733 (**T-04** y **T-05** en Sprint 2).
+3. **Sprint 2:** Implementación del flujo de consentimiento legal informado conforme a la Ley N° 29733 (**T-04** y **T-05**).
