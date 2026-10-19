@@ -17,7 +17,7 @@
 
 El **Sistema Web P2P** es una plataforma institucional orientada a conectar a estudiantes de ciclos formativos iniciales (*Mentoreados*, ciclos I al IV) con estudiantes de rendimiento sobresaliente de ciclos superiores (*Mentores*, ciclos VII al X) para mitigar los altos índices de reprobación y deserción en asignaturas filtro críticas (*Cálculo I/II, Algoritmos y Estructuras de Datos, Programación Orientada a Objetos y Base de Datos*) de la Escuela Profesional de Ingeniería de Sistemas de la Universidad Privada de Tacna.
 
-**Estado actual:** Fase de construcción — **Sprint 1** en desarrollo en la rama `feat/sprint-01-base-acceso-ci`. La solución se desarrolla en `aplicacion/` (React SPA + FastAPI RESTful con persistencia en PostgreSQL/Supabase conforme a **RNF09**). Las tareas asignadas a Joan (**T-01**, **T-02** y **T-06**) han sido culminadas satisfactoriamente: H1 y H2 (entorno base y conexión técnica a Supabase `p2p-epis-dev`), H3 (interfaz de acceso institucional `@upt.pe` con desafío OTP de prueba temporal mediante adaptador mock en desarrollo, CUS01/RNF01) y H4 (suite de 57 pruebas automatizadas con cobertura >94% en frontend y backend, y pipeline de CI en GitHub Actions garantizando **RNF09**). La API real de autenticación OTP (T-03) es responsabilidad de Renzo y se encuentra en desarrollo, por lo que no se declara RF01 completo ni autenticación institucional implementada en backend. El directorio `frontend/` se conserva como maqueta de referencia visual. El SRS FD03 v2.0 es la fuente canónica de requisitos y el SAD FD04 v1.1 orienta la arquitectura técnica.
+**Estado actual:** Fase de construcción — **Sprint 1** en desarrollo en la rama `feat/sprint-01-base-acceso-ci`. La solución se desarrolla en `aplicacion/` (React SPA + FastAPI RESTful con persistencia en PostgreSQL/Supabase conforme a **RNF09**). Las tareas asignadas a Joan (**T-01**, **T-02** y **T-06**) han sido completadas y verificadas: H1 y H2 (entorno base y conexión técnica a Supabase `p2p-epis-dev`), H3 (interfaz de acceso institucional `@upt.pe` con desafío OTP de prueba temporal mediante adaptador mock en desarrollo, CUS01/RNF01) y H4 (suite de 57 pruebas automatizadas con cobertura de declaraciones >94% en frontend y backend, y pipeline de CI en GitHub Actions verificado exitosamente en el run [`39331555735`](https://github.com/JMedina255/sistema_web_p2p/actions/runs/39331555735), aportando evidencia de pruebas y cobertura frente a la meta de **RNF09** de $\ge 70\%$). La tarea T-02 se mantiene con interfaz de acceso simulado en desarrollo. La API real de autenticación OTP (T-03), las políticas RLS iniciales (T-07) y las tablas del catálogo curricular (T-09) son responsabilidad de Renzo y se encuentran pendientes de integración, por lo que el Sprint 1 continúa en curso y no se declara concluido en su totalidad ni se afirma autenticación institucional implementada en backend. El directorio `frontend/` se conserva como maqueta de referencia visual. El SRS FD03 v2.0 es la fuente canónica de requisitos y el SAD FD04 v1.1 orienta la arquitectura técnica.
 
 ### Pilares Funcionales y Tecnológicos
 1. **Recomendación personalizada:** RF06 y CUS02 analizan afinidad temática, disponibilidad y criterios de RN-11; RF24 incorpora prioridad institucional.
@@ -183,16 +183,19 @@ Para validar la experiencia diferenciada por actor institucional, se encuentran 
 ### 5.3 Despliegue y Ejecución Local
 
 #### A. Aplicación Desacoplada (Sprint 1 — `aplicacion/`)
-1. **Backend API (FastAPI + Python 3.13):**
+1. **Backend API (FastAPI + Python 3.13 — comprobado localmente en `.venv`: Python 3.13.5; antecedente planificado: Python 3.11):**
    ```powershell
    cd aplicacion/backend
    python -m venv .venv
    .\.venv\Scripts\activate
    pip install -r requirements.txt
 
-   # Calidad de código y pruebas automatizadas (Cobertura: 94.52%)
+   # Análisis estático (Ruff: 0 errores, 0 advertencias)
    ruff check .
    ruff format --check .
+
+   # Pruebas automatizadas y cobertura (Pytest: 23 pruebas pasadas; 94.52% declaraciones)
+   # Nota técnica: 1 advertencia no bloqueante de Starlette registrada; ramas y funciones no medidas
    pytest
 
    # Migraciones y servidor de desarrollo
@@ -203,13 +206,15 @@ Para validar la experiencia diferenciada por actor institucional, se encuentran 
    • Health Check Backend: **[http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)**  
    • Diagnóstico BD Supabase (dev): **[http://localhost:8000/api/v1/health/db](http://localhost:8000/api/v1/health/db)**
 
-2. **Frontend SPA (React 19 + TypeScript + Vite + Node 22):**
+2. **Frontend SPA (React 19 + TypeScript + Vite + Node 22 — comprobado localmente: v22.17.1):**
    ```powershell
    cd aplicacion/frontend
    npm ci
 
-   # Calidad de código y pruebas automatizadas (Cobertura: 97.34%)
+   # Análisis estático (ESLint: 0 errores, 0 advertencias)
    npm run lint
+
+   # Pruebas unitarias y cobertura (Vitest: 34 pruebas pasadas; 97.34% declaraciones, 88.02% ramas, 88.57% funciones)
    npm run test:coverage
    npm run build
 

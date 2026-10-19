@@ -12,7 +12,7 @@
 
 ## 1. Visión General y Alcance del Sprint 1
 
-El **Sprint 1** tiene como objetivo fundamental sentar la infraestructura base del sistema web P2P de mentorías académicas, desacoplando estrictamente el frontend SPA y el backend API RESTful (conforme a los requerimientos no funcionales de mantenibilidad **RNF09** e ISO/IEC 25010), habilitar la verificación de estado operativa (*health check*) e iniciar los mecanismos de acceso y autenticación institucional de prueba (**RF01**, **CUS01**, **RNF01**).
+El **Sprint 1** tiene como objetivo fundamental sentar la infraestructura base del sistema web P2P de mentorías académicas, desacoplando estrictamente el frontend SPA y el backend API RESTful (conforme a los requerimientos no funcionales de mantenibilidad **RNF09**), habilitar la verificación de estado operativa (*health check*) e iniciar los mecanismos de acceso y autenticación institucional de prueba (**RF01**, **CUS01**, **RNF01**).
 
 A continuación, se presenta la matriz canónica de asignación y esfuerzo planificado para las actividades del Sprint 1, distinguiendo la distribución técnica entre los integrantes del equipo:
 
@@ -23,13 +23,13 @@ A continuación, se presenta la matriz canónica de asignación y esfuerzo plani
 | **T-01** | Configurar entorno React, FastAPI y Supabase. | Joan | 4 | Verificado localmente | H1 / H2 |
 | **T-02** | Desarrollar interfaz de acceso y OTP de prueba. | Joan | 2 | Verificado localmente (Mock Dev) | H3 |
 | **T-03** | Implementar API de autenticación y OTP de prueba. | Renzo | 4 | Pendiente (Coordinación) | Externo a Joan |
-| **T-06** | Configurar integración continua y pruebas iniciales. | Joan | 3 | Verificado localmente y en CI | H4 |
+| **T-06** | Configurar integración continua y pruebas iniciales. | Joan | 3 | Verificado en CI remoto (`8f8a75c`) | H4 |
 | **T-07** | Implementar políticas RLS iniciales. | Renzo | 3 | Pendiente (Coordinación) | Externo a Joan |
 | **T-09** | Crear tablas y datos iniciales del catálogo curricular. | Renzo | 2 | Pendiente (Coordinación) | Externo a Joan |
 
 Fuente: Elaboración propia con base en el documento canónico de planificación `docs/sprints/PLAN_SPRINTS_Y_TAREAS.md` y tabla 5.2 de la planificación del Grupo 03.
 
-Como se evidencia en el cuadro anterior, el alcance asignado a Joan se descompone en 9 horas distribuidas en T-01, T-02 y T-06. La totalidad de dichas tareas (**H1** y **H2** para T-01, **H3** para T-02 y **H4** para T-06) han sido completadas, verificadas rigurosamente en local y aseguradas mediante integración continua en GitHub Actions, cumpliendo estrictamente con el objetivo de calidad y mantenibilidad **RNF09**. Las actividades T-03, T-07 y T-09 corresponden a Renzo y quedan como dependencias de integración posterior.
+Como se evidencia en el cuadro anterior, el alcance asignado a Joan se descompone en 9 horas distribuidas en T-01, T-02 y T-06. La totalidad de dichas tareas (**H1** y **H2** para T-01, **H3** para T-02 y **H4** para T-06) han sido completadas y verificadas tanto localmente como en el flujo de GitHub Actions (run [`39331555735`](https://github.com/JMedina255/sistema_web_p2p/actions/runs/39331555735)), aportando evidencia de pruebas y cobertura para el alcance implementado conforme a la meta de **RNF09** ($\ge 70\%$). La tarea T-02 se mantiene con interfaz de acceso simulado mediante adaptador mock en desarrollo. Las actividades T-03, T-07 y T-09 corresponden a Renzo y quedan como dependencias de integración pendientes, por lo que el Sprint 1 continúa en curso y no se declara concluido en su totalidad.
 
 ---
 
@@ -72,10 +72,11 @@ El cuadro previo confirma que la solución cumple cabalmente con los criterios d
 ## 3. Registro de Ejecución — Hito 2 (H2: T-01, Parte 2)
 
 ### 3.1. Alcance Implementado
-- **Dependencias de persistencia:** Incorporación y fijación de versiones compatibles en `requirements.txt`:
-  - `SQLAlchemy>=2.0.35` (versión instalada: 2.1.5)
-  - `psycopg[binary]>=3.2.0` (versión instalada: 3.3.6 con binarios)
-  - `alembic>=1.13.0` (versión instalada: 1.20.0)
+- **Dependencias de persistencia:** Fijación estricta de versiones exactas (`==`) en `requirements.txt` (antecedente histórico: durante el planteamiento preliminar de H2 se listaron rangos `>=`, los cuales fueron formalmente sustituidos por versiones exactas en el commit `d6bc275` tras su comprobación en el entorno virtual):
+  - `sqlalchemy==2.0.44` (fijada tras comprobación en `.venv`; antecedente de rango: `>=2.0.35`)
+  - `psycopg[binary]==3.3.6` (fijada con binarios; antecedente de rango: `>=3.2.0`)
+  - `alembic==1.20.0` (fijada tras verificación; antecedente de rango: `>=1.13.0`)
+  - Dependencias complementarias exactas: `pydantic==2.12.5`, `pydantic-settings==2.13.1`, `fastapi==0.135.1`, `uvicorn[standard]==0.41.0`, `httpx==0.28.1`, `pytest==9.1.1`, `pytest-cov==7.1.0` y `ruff==0.17.1`.
 - **Gestión segura de configuración (`app/core/config.py`):**
   - Carga segura de `DATABASE_URL` desde `aplicacion/backend/.env`.
   - Definición con `Field(default=None, repr=False)` para evitar que la cadena de conexión o contraseñas se impriman en logs, trazas o consolas.
@@ -201,6 +202,9 @@ Conforme a los lineamientos del Sprint 1 y la asignación técnica de tareas:
 - **Aislamiento Estricto del Entorno de Pruebas:**
   - Creación de fixture autouse en `tests/conftest.py` que aísla la carga del `.env` local sin borrarlo ni modificarlo, forzando `DATABASE_URL=None` por defecto y garantizando que ninguna prueba unitaria ejecute llamadas reales a Supabase o requiera credenciales SMTP.
   - Validación de no exposición de secretos ficticios: se comprobó que errores simulados que contienen contraseñas o tokens sensibles son sanitizados sin fugar cadenas confidenciales en la respuesta.
+- **Entorno de Ejecución Backend:**
+  - Adopción de Python 3.13 en desarrollo local (versión comprobada en consola mediante `.\.venv\Scripts\python.exe --version`: **Python 3.13.5**) y en el pipeline de GitHub Actions (`python-version: "3.13"`).
+  - Esto representa una desviación técnica justificada respecto al plan preliminar de Python 3.11, motivada por la optimización de rendimiento del intérprete y plena compatibilidad con las versiones vigentes de `FastAPI 0.135.1`, `SQLAlchemy 2.0.44`, `psycopg 3.3.6` y `Ruff 0.17.1`. Se conserva el antecedente de Python 3.11 en el plan de tareas para fines de auditoría.
 - **Verificación de Producción y Bloqueo de Adaptadores Simulados:**
   - Se verificó que durante la compilación de producción (`npm run build`), Vite incrusta estáticamente `import.meta.env.DEV = false`, provocando que el adaptador de prueba en memoria quede completamente bloqueado arrojando `MOCK_DISABLED`, garantizando que el acceso simulado no pueda operar fuera de desarrollo.
 - **Flujo de Integración Continua en GitHub Actions (`.github/workflows/ci.yml`):**
@@ -216,22 +220,37 @@ A continuación, en el Cuadro 5.1 se presenta la matriz consolidada de pruebas a
 
 ### Cuadro 5.1: Matriz de Cobertura y Pruebas Automatizadas del Sprint 1 (Hito 4)
 
-| Componente | Framework / Herramienta | Pruebas Ejecutadas | Estado | Cobertura Líneas / Stmts (%) | Cobertura Ramas (%) | Meta RNF09 (≥ 70%) |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Frontend SPA** | Vitest 2.1.8 + v8 | 34 pasadas (5 suites) | ✅ Exitoso | **97.34%** | **88.02%** | **Superada (+27.34%)** |
-| **Backend API** | Pytest 9.1.1 + Coverage.py | 23 pasadas (3 módulos) | ✅ Exitoso | **94.52%** | **91.67%** | **Superada (+24.52%)** |
-| **Consolidado Global** | CI Pipeline Automatizado | **57 pruebas totales** | ✅ Exitoso | **95.93% (promedio)** | **89.85% (promedio)** | **Superada (+25.93%)** |
+| Componente | Framework / Herramienta | Pruebas Ejecutadas | Estado | Cobertura Declaraciones / Líneas (%) | Cobertura Ramas (%) | Cobertura Funciones (%) | Meta RNF09 (≥ 70%) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Frontend SPA** | Vitest 2.1.8 + v8 | 34 pasadas (5 suites) | ✅ Exitoso | **97.34%** | **88.02%** | **88.57%** | Superada (+27.34%) |
+| **Backend API** | Pytest 9.1.1 + Coverage.py | 23 pasadas (3 módulos) | ✅ Exitoso | **94.52%** | *No medidas* | *No medidas* | Superada (+24.52%) |
+| **Total del Proyecto** | Pipeline CI (`ci.yml`) | **57 pruebas pasadas** | ✅ Exitoso | *Medición por componente* | *Medición por componente* | *Medición por componente* | Superada en ambos componentes |
 
-Fuente: Reportes de cobertura generados por v8 (Vitest) y Coverage.py en el entorno de desarrollo y validación CI.
+Fuente: Reportes oficiales de cobertura generados por v8 (Vitest) y Coverage.py en el entorno de desarrollo y validados en GitHub Actions (run 39331555735).
 
-A partir del cuadro anterior, se evidencia que tanto el Frontend como el Backend superan ampliamente el umbral exigido del 70% de cobertura estipulado en **RNF09** e ISO/IEC 25010. Es fundamental precisar que este resultado valida la alta mantenibilidad y calidad técnica de los componentes construidos en el **Sprint 1** (infraestructura base, health check y acceso OTP inicial), sin que ello implique declarar RNF09 como concluido para la totalidad del sistema, cuya meta se mantendrá y revalidará a lo largo de los sprints sucesivos.
+Como se desprende del cuadro anterior, las 57 pruebas automatizadas totales (34 en Frontend y 23 en Backend) alcanzaron un resultado 100% satisfactorio. En cuanto a la cobertura de código, el Frontend registra un 97.34% en líneas/declaraciones, 88.02% en ramas y 88.57% en funciones; en tanto que el Backend alcanza un 94.52% en declaraciones (las ramas y funciones del backend se registran formalmente como *No medidas* al no estar habilitada la instrumentación branch/function en `coverage.py`). Ambos componentes superan de manera holgada la meta mínima del 70% estipulada en el requerimiento no funcional **RNF09** (mantenibilidad y calidad de código). Este resultado provee evidencia empírica de pruebas y cobertura para los módulos construidos en el **Sprint 1** (infraestructura base, diagnóstico health check y flujo de acceso OTP con adaptador de desarrollo), sin que deba interpretarse como una garantía definitiva ni una certificación de RNF09 para el sistema en su totalidad, cuya meta requerirá verificación continua en los sprints posteriores.
 
 ### 5.3. Evidencias de Persistencia Real de Supabase
 Se conserva la comprobación técnica real ejecutada en el Hito 2 (`SELECT 1` contra el proyecto Supabase `p2p-epis-dev`, latencia observada de 2828.53 ms) como evidencia separada de integración manual, garantizando que la suite automatizada opere de forma 100% aislada, determinista y sin dependencia de servicios externos en la nube.
 
-### 5.4. Estado de Ejecución Local y Remoto
-- **Estado Local:** Todas las verificaciones locales (Ruff, ESLint, TypeScript `tsc -b`, Vitest con cobertura, Pytest con cobertura y Vite build) fueron ejecutadas en PowerShell y superadas con 0 errores y 0 advertencias.
-- **Estado Remoto (GitHub Actions):** Se prepara la publicación de la rama `feat/sprint-01-base-acceso-ci` hacia el repositorio remoto `https://github.com/JMedina255/sistema_web_p2p.git` para la activación automática del workflow `CI - Integración Continua Sprint 1`.
+### 5.4. Estado de Verificación Local, Análisis Estático y Remoto en GitHub Actions
+- **Análisis Estático (Linting y Formateo):**
+  - Frontend: ESLint (`npm run lint`) ejecutado sin errores ni advertencias (0 errores, 0 warnings).
+  - Backend: Ruff (`ruff check .` y `ruff format --check .`) ejecutado sin errores ni advertencias (0 errores, 0 warnings).
+- **Ejecución de Pruebas y Observaciones de Runtime:**
+  - Frontend: 34 pruebas pasadas sin advertencias.
+  - Backend: 23 pruebas pasadas con **1 advertencia de ejecución no bloqueante**:
+    `StarletteDeprecationWarning: Using 'httpx' with 'starlette.testclient' is deprecated; install 'httpx2' instead.`
+    Esta advertencia proviene internamente del import de `TestClient` en `fastapi.testclient` sobre `starlette`. Se cataloga explícitamente como un **pendiente técnico no bloqueante** para el seguimiento de la evolución de dependencias upstream, manteniéndose sin modificaciones las versiones exactas fijadas en `requirements.txt`.
+- **Verificación Remota en GitHub Actions:**
+  - La rama `feat/sprint-01-base-acceso-ci` fue publicada hacia el repositorio remoto (`https://github.com/JMedina255/sistema_web_p2p`).
+  - **Workflow:** [CI - Integración Continua Sprint 1](https://github.com/JMedina255/sistema_web_p2p/actions/runs/39331555735)
+  - **Run ID:** `39331555735`
+  - **Commit SHA disparador:** `8f8a75c5d0d75d897c0e306be0f870af99034447` (`8f8a75c`)
+  - **Resultados por Job:**
+    - `Frontend (React + Vite + Vitest)`: `completed` / `success` (duración: 39s).
+    - `Backend (FastAPI + Pytest + Ruff)`: `completed` / `success` (duración: 26s).
+  - **Conclusión General del Workflow:** **`completed / success`** (flujo de CI verificado exitosamente en la nube).
 
 ---
 
@@ -290,6 +309,7 @@ npm run dev
 
 ## 7. Próximos Pasos y Pendientes
 
-1. **Culminación del alcance de Joan en Sprint 1:** Se completaron satisfactoriamente las tareas **T-01** (entorno base y conexión Supabase), **T-02** (interfaz OTP de prueba con adaptador mock) y **T-06** (cobertura 95%+ e integración continua en GitHub Actions).
-2. **Coordinación externa con Renzo:** Homologación del contrato propuesto e integración con la API OTP real (**T-03**), políticas de seguridad a nivel de fila RLS (**T-07**) y tablas del catálogo curricular (**T-09**).
-3. **Sprint 2:** Implementación del flujo de consentimiento legal informado conforme a la Ley N° 29733 (**T-04** y **T-05**).
+1. **Culminación del alcance de Joan en Sprint 1:** Se completaron satisfactoriamente las tareas asignadas a Joan: **T-01** (entorno base y conexión técnica Supabase), **T-02** (interfaz con acceso simulado mediante adaptador mock en desarrollo) y **T-06** (suite de 57 pruebas automatizadas y flujo de CI verificado en GitHub Actions con evidencia de cobertura).
+2. **Sprint 1 en curso y coordinación externa con Renzo:** El Sprint 1 continúa en desarrollo y no se encuentra terminado. Las tareas a cargo de Renzo: API OTP real de autenticación (**T-03**), políticas de seguridad a nivel de fila RLS (**T-07**) y tablas del catálogo curricular (**T-09**) permanecen pendientes de integración.
+3. **Pendiente técnico no bloqueante:** Seguimiento a la advertencia upstream `StarletteDeprecationWarning` observada en `fastapi.testclient` durante la ejecución de Pytest, sin alterar dependencias en esta fase.
+4. **Sprint 2:** Implementación del flujo de consentimiento legal informado conforme a la Ley N° 29733 (**T-04** y **T-05**).

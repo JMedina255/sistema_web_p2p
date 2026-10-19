@@ -3,11 +3,11 @@
 **Proyecto:** Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT.  
 **Repositorio de implementación:** https://github.com/JMedina255/sistema_web_p2p  
 **Equipo:** Grupo 03 — Joan Cristian Medina Quispe y Renzo Antonio Antayhua Mamani.  
-**Versión:** 1.0 — 19/10/2026.  
+**Versión:** 1.1 — 19/10/2026 (Registro de desviación técnica a Python 3.13, fijación estricta de dependencias y conciliación de evidencias de CI).  
 **Ubicación prevista:** `docs/sprints/PLAN_SPRINTS_Y_TAREAS.md`.  
 **Tipo:** contexto operativo para el equipo y el agente de IDE; no es un reporte de ejecución.
 
-> **Alcance activo:** Sprint 1, tareas de Joan **T-01, T-02 y T-06**, mediante cuatro hitos y sus commits. Las tareas de Renzo y los sprints posteriores se incluyen como contexto y dependencias. No implementarlos automáticamente. Ejecutar únicamente el hito solicitado y detenerse al terminarlo.
+> **Alcance activo:** Sprint 1, tareas de Joan **T-01, T-02 y T-06**, mediante cuatro hitos y sus commits. T-01, T-02 y T-06 han sido completadas y verificadas (T-02 con interfaz de acceso simulado y T-06 con workflow de CI en GitHub Actions verificado). Las tareas de Renzo (T-03, T-07, T-09) y los sprints posteriores continúan pendientes de integración. No implementarlos automáticamente. No declarar cerrado todo el Sprint 1.
 
 ## 1. Cómo utilizar este documento
 
@@ -269,8 +269,8 @@ Son 15 h: 7,5 por integrante; T-51 distribuye 0,5 h a cada uno. **Aceptación:**
 
 ### 5.1. Estructura y decisiones de implementación
 
-- `aplicacion/frontend/`: React, TypeScript y Vite; conservar `package-lock.json` y fijar versiones compatibles. Elegir y documentar una versión de Node compatible con Vite; usarla también en CI.
-- `aplicacion/backend/`: Python 3.11, FastAPI, Uvicorn y pydantic-settings; entorno `.venv` y dependencias reproducibles con versiones fijadas.
+- `aplicacion/frontend/`: React, TypeScript y Vite; conservar `package-lock.json` y fijar versiones compatibles. Versión de Node compatible: Node 22 (v22.17.1 comprobada localmente; Node 22 configurada en CI).
+- `aplicacion/backend/`: Python 3.13 (desviación técnica respecto al plan preliminar de Python 3.11; versión comprobada en el entorno virtual local `.venv`: Python 3.13.5; en CI: 3.13), FastAPI, Uvicorn y pydantic-settings; entorno `.venv` y dependencias reproducibles con versiones fijadas exactamente mediante `==` (commit `d6bc275` y `requirements.txt`). Motivo de la desviación: compatibilidad de librerías modernas en el entorno de desarrollo y soporte oficial en GitHub Actions. Se conserva el antecedente de Python 3.11 para trazabilidad.
 - Backend según el SAD: `app/api`, `app/core`, `app/services`, `app/models` y `app/db`. Configuración central en `app/core`; migraciones Alembic en `app/db`; SQLAlchemy y psycopg 3 para PostgreSQL.
 - `docs/sprints/sprint-01.md`: bitácora de ejecución, comandos, decisiones, resultados, evidencias y pendientes. Complementa este plan; no lo sustituye.
 - `.github/workflows/ci.yml`: workflow en la raíz del repositorio, con directorios de trabajo de la nueva aplicación.
@@ -293,6 +293,8 @@ T-01 se divide en dos hitos para separar la base ejecutable de la conexión. Amb
 Fuente: descomposición operativa acordada con Joan para las tareas de la tabla 5.2 de la planificación.
 
 Mantener este orden y un commit de implementación por hito. Si ya existe trabajo, verificarlo y completar solo lo pendiente. Las correcciones posteriores se registran sin borrar commits ni atribuir resultados inexistentes.
+
+*Estado de ejecución (19/10/2026):* Los cuatro hitos asignados a Joan han sido completados en la rama `feat/sprint-01-base-acceso-ci`, culminando con el commit `8f8a75c5d0d75d897c0e306be0f870af99034447` y la ejecución satisfactoria del workflow de GitHub Actions (run ID [`39331555735`](https://github.com/JMedina255/sistema_web_p2p/actions/runs/39331555735), estado `completed / success`). Se cuenta con 57 pruebas automatizadas que aportan evidencia de pruebas y cobertura frente a la meta de RNF09 (≥ 70%) para los componentes construidos. La tarea T-02 opera con acceso simulado mediante adaptador mock en desarrollo y las tareas de Renzo (T-03, T-07 y T-09) permanecen pendientes de integración, por lo que el Sprint 1 no se declara cerrado en su totalidad.
 
 ### 5.3. H1 — Estructura y comunicación React–FastAPI
 
@@ -347,10 +349,10 @@ DATABASE_URL="postgresql+psycopg://postgres.PROJECT_REF:PASSWORD_URL_ENCODED@POO
 3. Las pruebas habituales deben funcionar sin credenciales, SMTP ni llamadas reales a Supabase. Separar la comprobación manual de conexión real.
 4. Configurar `.github/workflows/ci.yml` con jobs independientes de frontend y backend, para `pull_request` y `push` a `main` y `feat/sprint-01-base-acceso-ci`.
 5. Frontend: `npm ci`, lint, pruebas sin watch y build. Backend: instalación reproducible, Ruff y pytest. Utilizar las versiones de Node/Python documentadas localmente.
-6. Generar cobertura de ambos componentes y registrar porcentaje y alcance medido. RNF09 establece una meta mínima del 70%; la cobertura de estos componentes iniciales no acredita todo el sistema.
-7. Documentar resultados locales. Después de subir la rama, verificar GitHub Actions y registrar enlace y resultado reales.
+6. Generar cobertura de ambos componentes y registrar porcentaje y alcance medido. RNF09 establece una meta mínima del 70%; la cobertura de estos componentes iniciales no acredita todo el sistema ni constituye una certificación global de RNF09.
+7. Documentar resultados locales. Se subió la rama `feat/sprint-01-base-acceso-ci` y se verificó la ejecución de GitHub Actions: commit `8f8a75c5d0d75d897c0e306be0f870af99034447`, ejecución en [GitHub Actions run 39331555735](https://github.com/JMedina255/sistema_web_p2p/actions/runs/39331555735), resultado: `completed / success` (jobs de Frontend y Backend exitosos con 57 pruebas totales).
 
-**Aceptación:** comprobaciones locales correctas y workflow preparado. Crear el commit H4 y detenerse. Mantener la ejecución remota como pendiente hasta observarla; no presentar «workflow creado» como «CI remoto aprobado».
+**Aceptación:** comprobaciones locales correctas y workflow ejecutado exitosamente en GitHub Actions. La tarea T-06 queda verificada en CI remoto.
 
 Al finalizar los hitos y revisar sus commits, la subida de la rama acordada se realiza con:
 
@@ -412,3 +414,7 @@ Usar Markdown UTF-8 sin BOM. Mantener presentación, título, tabla, fuente y ex
 El PDF cita el repositorio documental `Sistema_Web_P2P_con_algoritmo_de_recomendaci-n`; el usuario indicó `sistema_web_p2p` como repositorio de implementación para este trabajo. Conservar esa distinción y no cambiar remotos por inferencia.
 
 **Mantenimiento:** al aprobar una replanificación, actualizar versión, fecha y motivo, conservando trazabilidad de IDs, responsables, horas y cambios de alcance. La lectura de este archivo proporciona contexto; el prompt del usuario selecciona el hito que debe ejecutarse.
+
+### Historial de Revisiones del Plan
+- **Versión 1.0 (19/10/2026):** Creación inicial del plan operativo para el Sprint 1, detallando hitos H1 a H4 para las tareas de Joan (T-01, T-02 y T-06) y contextualizando las tareas de Renzo (T-03, T-07 y T-09).
+- **Versión 1.1 (19/10/2026):** Registro formal de la desviación técnica justificada de Python 3.11 a Python 3.13 (versión comprobada en entorno virtual local: Python 3.13.5; en CI: 3.13), formalización de dependencias fijadas con versiones exactas (`==`) en `requirements.txt` y conciliación de evidencias tras la ejecución exitosa del workflow de GitHub Actions (commit `8f8a75c5d0d75d897c0e306be0f870af99034447`, run `39331555735`).
