@@ -1,12 +1,26 @@
 # Dependencies
 node_modules/
 frontend/node_modules/
+aplicacion/frontend/node_modules/
+
+# Python virtual environment & cache
+.venv/
+aplicacion/backend/.venv/
+__pycache__/
+aplicacion/backend/**/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Production build
 dist/
 frontend/dist/
+aplicacion/frontend/dist/
 dist-ssr/
 frontend/dist-ssr/
+aplicacion/frontend/dist-ssr/
 
 # Logs
 *.log
@@ -19,6 +33,11 @@ pnpm-debug.log*
 .env.local
 .env.*.local
 *.local
+aplicacion/backend/.env
+aplicacion/frontend/.env
+!.env.example
+!aplicacion/backend/.env.example
+!aplicacion/frontend/.env.example
 
 # IDE & Editor files
 .vscode/
@@ -26,3 +45,4 @@ pnpm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+

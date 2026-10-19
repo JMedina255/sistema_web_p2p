@@ -17,7 +17,7 @@
 
 El **Sistema Web P2P** es una plataforma institucional orientada a conectar a estudiantes de ciclos formativos iniciales (*Mentoreados*, ciclos I al IV) con estudiantes de rendimiento sobresaliente de ciclos superiores (*Mentores*, ciclos VII al X) para mitigar los altos índices de reprobación y deserción en asignaturas filtro críticas (*Cálculo I/II, Algoritmos y Estructuras de Datos, Programación Orientada a Objetos y Base de Datos*) de la Escuela Profesional de Ingeniería de Sistemas de la Universidad Privada de Tacna.
 
-**Estado actual:** Fase de análisis — desarrollo del SAD. El SRS FD03 v2.0 es la fuente de nomenclatura; el SAD v1.1 analiza la arquitectura propuesta y su trazabilidad. La maqueta frontend usa datos simulados; backend, persistencia y despliegue siguen como propuestas para fases posteriores.
+**Estado actual:** Fase de construcción iniciada — **Sprint 1** en desarrollo en la rama `feat/sprint-01-base-acceso-ci`. La implementación de la solución se desarrolla de forma desacoplada dentro de la carpeta `aplicacion/` (Frontend React SPA y Backend FastAPI RESTful conforme a **RNF09**). El directorio `frontend/` se conserva como maqueta de referencia visual. El SRS FD03 v2.0 es la fuente canónica de requisitos y el SAD FD04 v1.1 orienta la arquitectura técnica del sistema.
 
 ### Pilares Funcionales y Tecnológicos
 1. **Recomendación personalizada:** RF06 y CUS02 analizan afinidad temática, disponibilidad y criterios de RN-11; RF24 incorpora prioridad institucional.
@@ -44,6 +44,8 @@ La documentación se desarrolla bajo UWE y la estructura de requisitos adoptada 
 | **Flujos por Perfil y Diagrama de Paquetes** | [`docs/flujos_por_perfil_y_diagrama_paquetes.md`](docs/flujos_por_perfil_y_diagrama_paquetes.md) | **Flujos y Arquitectura de Maquetación:** Diagramas de flujo de actividades para Administrador (Ing. Liliana Vega Bernal), Mentor (Joan Medina Q) y Mentoreado (Renzo Antayhua M), con diagrama de paquetes mapeado biunívocamente a los componentes de la interfaz. |
 | **Matriz de Inconsistencias** | [`docs/matriz_inconsistencias.md`](docs/matriz_inconsistencias.md) | Registro de auditoría y resolución de discrepancias en requisitos y modelos. |
 | **Catálogo de Pruebas** | [`docs/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx`](docs/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx) | Matriz formal de casos de prueba funcional, criterios de aceptación y verificación QA. |
+| **Plan de Sprints y Tareas** | [`docs/sprints/PLAN_SPRINTS_Y_TAREAS.md`](docs/sprints/PLAN_SPRINTS_Y_TAREAS.md) | **Planificación Scrum:** Desglose del Product Backlog (37 PBI), distribución de capacidad (91 h), cronograma de 8 sprints y asignación de tareas operativas (T-01 a T-51). |
+| **Bitácora de Sprint 1** | [`docs/sprints/sprint-01.md`](docs/sprints/sprint-01.md) | **Registro de Ejecución S1:** Verificación técnica de la base React–FastAPI (T-01), interfaz OTP (T-02), CI (T-06) y seguimiento de pendientes. |
 | **Reglas de Documentación (Hardening)** | [`reglas_documentacion.md`](reglas_documentacion.md) | Estándares obligatorios de granularidad en análisis, estructura quíntuple de tablas, estándar PlantUML y reglas de sincronización. |
 
 ---
@@ -179,22 +181,38 @@ Para validar la experiencia diferenciada por actor institucional, se encuentran 
 | **Estudiante Mentoreado** | **Renzo Antayhua M** (II Ciclo) | `mentoreado` | `mentoreado123` | • Firma de consentimiento informado digital Ley N° 29733 (RF01).<br>• Consulta del recomendador híbrido Top-k con afinidad temática (CUS02).<br>• Registro de solicitudes temáticas por demanda (CUS03).<br>• Reserva de cupo y ratificación obligatoria en $T-24\text{ h}$ (CUS24).<br>• Visualización de ticket digital con código QR de acceso (CUS11).<br>• Encuesta anónima de calidad pedagógica CSAT post-mentoría (CUS05). |
 
 ### 5.3 Despliegue y Ejecución Local
-1. **Instalar dependencias:**
-   ```bash
-   cd frontend
-   npm install
-   ```
 
-2. **Iniciar servidor de desarrollo:**
+#### A. Aplicación Desacoplada (Sprint 1 — `aplicacion/`)
+1. **Backend API (FastAPI):**
    ```bash
+   cd aplicacion/backend
+   python -m venv .venv
+   .\.venv\Scripts\activate
+   pip install -r requirements.txt
+   pytest tests/ -v
+   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   ```
+   • API Docs (Swagger): **[http://localhost:8000/docs](http://localhost:8000/docs)**  
+   • Health Check: **[http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)**
+
+2. **Frontend SPA (React 19 + TypeScript + Vite):**
+   ```bash
+   cd aplicacion/frontend
+   npm install
+   npm run lint
+   npm run build
    npm run dev
    ```
-   Acceder en el navegador a: **[http://localhost:5173](http://localhost:5173)**.
+   • Aplicación Web: **[http://localhost:5173](http://localhost:5173)**
 
-3. **Compilar para producción:**
-   ```bash
-   npm run build
-   ```
+#### B. Maqueta de Referencia Visual (`frontend/`)
+Para consultar la maqueta de referencia original con datos simulados en memoria:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
 
 ---
 
