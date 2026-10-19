@@ -21,7 +21,7 @@ A continuación, se presenta la matriz canónica de asignación y esfuerzo plani
 | ID | Actividad | Responsable | Estimación Planificada (h) | Estado Técnico | Hito Asociado |
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | **T-01** | Configurar entorno React, FastAPI y Supabase. | Joan | 4 | Verificado localmente | H1 / H2 |
-| **T-02** | Desarrollar interfaz de acceso y OTP de prueba. | Joan | 2 | Pendiente | H3 |
+| **T-02** | Desarrollar interfaz de acceso y OTP de prueba. | Joan | 2 | Verificado localmente (Mock Dev) | H3 |
 | **T-03** | Implementar API de autenticación y OTP de prueba. | Renzo | 4 | Pendiente (Coordinación) | Externo a Joan |
 | **T-06** | Configurar integración continua y pruebas iniciales. | Joan | 3 | Pendiente | H4 |
 | **T-07** | Implementar políticas RLS iniciales. | Renzo | 3 | Pendiente (Coordinación) | Externo a Joan |
@@ -29,7 +29,7 @@ A continuación, se presenta la matriz canónica de asignación y esfuerzo plani
 
 Fuente: Elaboración propia con base en el documento canónico de planificación `docs/sprints/PLAN_SPRINTS_Y_TAREAS.md` y tabla 5.2 de la planificación del Grupo 03.
 
-Como se evidencia en el cuadro anterior, el alcance asignado a Joan se descompone en 9 horas distribuidas en T-01, T-02 y T-06. La tarea T-01 se subdividió técnicamente en dos hitos operativos (**H1**: estructura base React–FastAPI y comunicación health; **H2**: conexión técnica inicial con Supabase/PostgreSQL) para garantizar incrementos verificables e independientes. Ambos hitos se encuentran formalmente completados y verificados en el entorno de desarrollo local.
+Como se evidencia en el cuadro anterior, el alcance asignado a Joan se descompone en 9 horas distribuidas en T-01, T-02 y T-06. La tarea T-01 se subdividió técnicamente en dos hitos operativos (**H1**: estructura base React–FastAPI y comunicación health; **H2**: conexión técnica inicial con Supabase/PostgreSQL) y la tarea T-02 (**H3**: interfaz de acceso y OTP de prueba) han sido completadas y verificadas rigurosamente en el entorno local de desarrollo. Resta por abordar el hito **H4** (T-06: integración continua en GitHub Actions).
 
 ---
 
@@ -119,7 +119,67 @@ Los resultados verifican que la infraestructura de conexión a Supabase opera co
 
 ---
 
-## 4. Comandos Reproducibles para Puesta en Marcha Local
+## 4. Registro de Ejecución — Hito 3 (H3: T-02: Interfaz de Acceso y OTP de Prueba)
+
+### 4.1. Alcance Implementado
+- **Componente de Acceso Interactivo (`aplicacion/frontend/src/components/LoginOtpView.tsx`):**
+  - Flujo de autenticación en dos pasos ordenados conforme a **CUS01** y **RF01**:
+    1. **Paso 1 (Identificación Institucional):** Entrada de correo electrónico con validación estricta de terminación `@upt.pe` y formato RFC de usuario. Atajos rápidos de prueba para correos de Joan (`2022074255@upt.pe`), Renzo (`2022073504@upt.pe`) y un correo no institucional (`estudiante@gmail.com`) para pruebas de rechazo.
+    2. **Paso 2 (Desafío OTP Temporal):** Entrada numérica de 6 dígitos conservada estrictamente como texto (`string`) para permitir ceros iniciales (p. ej., `012345`). Incluye cálculo de vigencia restante directamente contra la marca temporal `expiresAt` (ventana máxima de 5 minutos conforme a **RNF01**).
+    3. **Paso 3 (Confirmación Mínima de Acceso):** Vista informativa que certifica la validación exitosa del código, indicando el correo verificado, la estampa de tiempo y el modo utilizado (`Acceso de prueba — simulación`). No implementa consentimiento informado ni paneles de usuario finales (reservados para T-04 y T-05).
+  - **Usabilidad y Accesibilidad:** Etiquetas semánticas vinculadas mediante `htmlFor`, atributos `aria-live="polite"` para alertas, soporte completo de navegación por teclado (`Enter` para avanzar o verificar) y botones con retroalimentación visual de deshabilitación y carga (`disabled` y spinners).
+  - **Control de Ciclo de Vida y Cooldown:** Temporizador regresivo de 60 segundos antes de habilitar el botón de reenvío de código, conforme a **CUS01**. Opción explícita de *"Cambiar correo"* que descarta inmediatamente el desafío activo en el cliente y en el servicio.
+
+### 4.2. Modo de Autenticación y Adaptador Mock en Desarrollo
+- **Servicio Centralizado (`aplicacion/frontend/src/services/authService.ts`):**
+  - **Modo utilizado:** Adaptador MOCK en memoria (`MockAuthAdapter`), activado de manera explícita y exclusiva en entorno de desarrollo local (`import.meta.env.DEV`).
+  - **Aviso visual permanente:** Banner superior de alto contraste con el mensaje *"Acceso de prueba — simulación. La API de autenticación real (T-03) está en desarrollo por Renzo. Los códigos no son enviados a correos reales."*
+  - **Escenarios reproducibles predecibles:** Código válido predeterminado `123456`; código rotativo tras reenvío `654321`; código de prueba rápida de expiración inmediata `000000`.
+  - **Garantías de seguridad:** Cada reenvío o nueva solicitud invalida inmediatamente el código anterior. La verificación exitosa marca el código como consumido impidiendo su reutilización. No emite tokens JWT, no guarda sesiones ficticias en almacenamiento local ni realiza consultas a datos reales de Supabase. El adaptador se desactiva estrictamente fuera de desarrollo arrojando `MOCK_DISABLED` y no opera como fallback silencioso ante caídas de la API real.
+
+### 4.3. Contrato Propuesto de Integración con T-03 (Renzo)
+Debido a que la API de backend (T-03) se encuentra en desarrollo por Renzo, el servicio desacoplado formaliza la propuesta de contrato de comunicación mediante interfaces TypeScript:
+- `POST /api/v1/auth/otp/request`: Recibe `RequestOtpPayload { email: string }` y retorna `RequestOtpResponse { challengeId: string, email: string, expiresAt: string, cooldownSeconds: number, message: string, isMock: boolean }`.
+- `POST /api/v1/auth/otp/verify`: Recibe `VerifyOtpPayload { challengeId: string, otp: string }` y retorna `VerifyOtpResponse { success: boolean, email: string, verifiedAt: string, mode: 'mock' | 'api', message: string }`.
+- `POST /api/v1/auth/otp/resend`: Recibe `ResendOtpPayload { challengeId: string }` y retorna `RequestOtpResponse`.
+- **Excepciones tipadas (`AuthErrorCode`):** `INVALID_EMAIL`, `NON_UPT_DOMAIN`, `CHALLENGE_NOT_FOUND`, `OTP_EXPIRED`, `OTP_INVALID`, `OTP_ALREADY_USED`, `COOLDOWN_ACTIVE`, `NETWORK_ERROR`, `MOCK_DISABLED`.
+
+*Nota de coordinación:* Este contrato queda registrado como propuesta formal para su homologación con Renzo durante la culminación de T-03.
+
+### 4.4. Comprobaciones Realizadas y Resultados Observados
+
+A continuación, se presenta la matriz detallada de los 11 escenarios de prueba ejecutados sobre el servicio de autenticación y la interfaz de usuario:
+
+### Cuadro 4.1: Matriz de Verificación de Escenarios de Acceso y OTP (Hito 3)
+
+| # | Escenario Evaluado | Datos de Entrada / Condición | Comportamiento Esperado | Resultado Real Observado | Estado |
+| :-: | :--- | :--- | :--- | :--- | :---: |
+| **01** | Correo institucional permitido | `2022074255@upt.pe` | Emisión exitosa de desafío de 5 min con cooldown de 60s | Genera `challengeId` (`CHAL-DEV-101-...`), `isMock: true` | ✅ Exitoso |
+| **02** | Dominio no institucional rechazado | `usuario@gmail.com` | Rechazo inmediato con error de dominio no permitido | Excepción `NON_UPT_DOMAIN`: dominio debe ser `@upt.pe` | ✅ Exitoso |
+| **03** | Formato de correo inválido | `@upt.pe` (sin parte local) | Rechazo por formato incorrecto antes del envío | Excepción `INVALID_EMAIL`: formato institucional inválido | ✅ Exitoso |
+| **04** | Código OTP incompleto | Desafío activo, OTP: `"123"` | Rechazo por longitud inferior a 6 caracteres numéricos | Excepción `OTP_INVALID`: código debe contener 6 dígitos | ✅ Exitoso |
+| **05** | Código OTP incorrecto | Desafío activo, OTP: `"999999"` | Rechazo con retroalimentación de código no coincidente | Excepción `OTP_INVALID`: código OTP incorrecto | ✅ Exitoso |
+| **06** | Código OTP vencido | OTP `"000000"` o $t > \text{expiresAt}$ | Rechazo por vencimiento del plazo máximo de 5 min (RNF01) | Excepción `OTP_EXPIRED`: código de verificación ha expirado | ✅ Exitoso |
+| **07** | Código OTP válido | Desafío activo, OTP: `"123456"` | Verificación exitosa en modo mock y confirmación | `success: true`, `mode: 'mock'`, marca temporal registrada | ✅ Exitoso |
+| **08** | Código OTP ya consumido | Reintento con OTP verificado | Rechazo por consumo previo del código | Excepción `OTP_ALREADY_USED`: código ya utilizado previamente | ✅ Exitoso |
+| **09a** | Cooldown de reenvío activo | Reenvío antes de los 60s | Bloqueo temporal informando segundos restantes | Excepción `COOLDOWN_ACTIVE`: espera de cooldown requerida | ✅ Exitoso |
+| **09b** | Invalidación por nueva emisión | Verificación con desafío anterior | Desafío previo invalidado al emitir uno nuevo | Excepción `CHALLENGE_NOT_FOUND`: desafío caducado/descartado | ✅ Exitoso |
+| **10** | Cambio de correo por usuario | Acción *"Cambiar correo"* | Descarte total del desafío en memoria | Excepción `CHALLENGE_NOT_FOUND` al intentar verificarlo | ✅ Exitoso |
+| **11** | Mock fuera de desarrollo | `NODE_ENV=production` | Bloqueo absoluto del adaptador simulado | Excepción `MOCK_DISABLED`: mock deshabilitado fuera de dev | ✅ Exitoso |
+| **12** | Calidad de código Frontend | `npm run lint && npm run build` | Compilación limpia de TypeScript y Vite sin advertencias | 38 módulos transformados en 1.39s, 0 errores, 0 warnings | ✅ Exitoso |
+
+Fuente: Elaboración propia a partir de las pruebas automatizadas y ejecución interactiva en desarrollo.
+
+A partir del cuadro anterior, se evidencia que todos los flujos principales, alternativos y de excepción del caso de uso **CUS01** operan de forma consistente en el frontend. El sistema valida rigurosamente el dominio `@upt.pe`, maneja de forma segura los códigos conservándolos como cadenas de texto, respeta las restricciones temporales de vigencia (5 minutos) y cooldown (60 segundos), e inhabilita estrictamente el uso del adaptador de prueba en entornos productivos.
+
+### 4.5. Delimitación de Alcance y Dependencias
+Conforme a los lineamientos del Sprint 1 y la asignación técnica de tareas:
+- **No se declara RF01 completo ni autenticación institucional implementada:** El envío real de correos electrónicos a través del servidor SMTP institucional de la UPT y los endpoints de verificación en base de datos forman parte de la tarea **T-03**, asignada a Renzo.
+- **Sin paneles ni consentimiento informado:** La confirmación posterior a la verificación es una pantalla mínima de diagnóstico. No se incorporan paneles de control, tablas de perfil ni el flujo legal de consentimiento informado (**T-04** y **T-05**), los cuales se construirán en los hitos correspondientes.
+
+---
+
+## 5. Comandos Reproducibles para Puesta en Marcha Local
 
 ### Backend (FastAPI + PostgreSQL Supabase):
 ```bash
@@ -157,11 +217,12 @@ npm run build
 npm run dev
 ```
 - Aplicación cliente: `http://localhost:5173/`
+- En la interfaz web, seleccionar la pestaña *"Acceso & OTP de Prueba (T-02)"* para interactuar con los escenarios de acceso institucional `@upt.pe`.
 
 ---
 
-## 5. Próximos Pasos y Pendientes
+## 6. Próximos Pasos y Pendientes
 
-1. **Hito 3 (H3: T-02):** Desarrollar la interfaz institucional de acceso con correo `@upt.pe` y OTP temporal de prueba (5 minutos) en `aplicacion/frontend` conforme a **RF01**, **CUS01** y **RNF01**.
-2. **Hito 4 (H4: T-06):** Configurar el flujo de integración continua en `.github/workflows/ci.yml` ejecutando lint, build y pruebas de ambos componentes con cobertura mínima orientada a RNF09.
-3. **Coordinación externa con Renzo:** Integración posterior de la API OTP real (**T-03**), políticas de seguridad a nivel de fila RLS (**T-07**) y tablas del catálogo curricular (**T-09**).
+1. **Hito 4 (H4: T-06):** Configurar el flujo de integración continua en `.github/workflows/ci.yml` ejecutando lint, build y pruebas automáticas de ambos componentes (React y FastAPI) conforme a **RNF09**.
+2. **Coordinación externa con Renzo:** Homologación del contrato propuesto e integración con la API OTP real (**T-03**), políticas de seguridad a nivel de fila RLS (**T-07**) y tablas del catálogo curricular (**T-09**).
+3. **Sprints posteriores:** Implementación del consentimiento informado conforme a la Ley 29733 (**T-04** y **T-05** en Sprint 2).

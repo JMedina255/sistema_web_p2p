@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HealthStatus } from './components/HealthStatus';
+import { LoginOtpView } from './components/LoginOtpView';
 
 export const App: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'auth' | 'services'>('auth');
+
   return (
     <div
       style={{
@@ -67,7 +70,7 @@ export const App: React.FC = () => {
                 border: '1px solid rgba(255, 255, 255, 0.2)',
               }}
             >
-              Sprint 1 · Hito 1 (T-01)
+              Sprint 1 · Hito 3 (T-02)
             </span>
             <a
               href="http://localhost:8000/docs"
@@ -88,6 +91,57 @@ export const App: React.FC = () => {
         </div>
       </header>
 
+      {/* Selector de Vistas / Pestañas de Sprint 1 */}
+      <div
+        style={{
+          backgroundColor: '#FFFFFF',
+          borderBottom: '1px solid #E2E8F0',
+          padding: '0.6rem 2rem',
+        }}
+      >
+        <div
+          style={{
+            maxWidth: '1100px',
+            margin: '0 auto',
+            display: 'flex',
+            gap: '0.75rem',
+          }}
+        >
+          <button
+            onClick={() => setActiveTab('auth')}
+            style={{
+              background: activeTab === 'auth' ? '#1C2A59' : '#F1F5F9',
+              color: activeTab === 'auth' ? '#FFFFFF' : '#475569',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '0.5rem 1.1rem',
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            🔐 Acceso & OTP de Prueba (T-02)
+          </button>
+          <button
+            onClick={() => setActiveTab('services')}
+            style={{
+              background: activeTab === 'services' ? '#1C2A59' : '#F1F5F9',
+              color: activeTab === 'services' ? '#FFFFFF' : '#475569',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '0.5rem 1.1rem',
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            🛰️ Monitor de Servicios & BD (T-01)
+          </button>
+        </div>
+      </div>
+
       {/* Contenido principal */}
       <main
         style={{
@@ -98,7 +152,7 @@ export const App: React.FC = () => {
           padding: '2.5rem 1.5rem',
         }}
       >
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <span
             style={{
               textTransform: 'uppercase',
@@ -110,27 +164,31 @@ export const App: React.FC = () => {
               marginBottom: '0.5rem',
             }}
           >
-            Fase de Construcción · Arquitectura Desacoplada (RNF09)
+            Sprint 1 · Construcción de Software I (2026-II)
           </span>
-          <h2 style={{ fontSize: '1.9rem', color: '#1C2A59', margin: '0 0 0.5rem 0', fontWeight: 800 }}>
-            Infraestructura Base: React + FastAPI
+          <h2 style={{ fontSize: '1.8rem', color: '#1C2A59', margin: '0 0 0.5rem 0', fontWeight: 800 }}>
+            {activeTab === 'auth'
+              ? 'Interfaz de Acceso Institucional y Desafío OTP'
+              : 'Infraestructura Base: React + FastAPI + Supabase'}
           </h2>
-          <p style={{ margin: '0 auto', maxWidth: '640px', fontSize: '0.95rem', color: '#64748B', lineHeight: 1.6 }}>
-            Esta pantalla valida la comunicación asíncrona entre la SPA cliente (React 19 / TypeScript / Vite)
-            y el backend RESTful (FastAPI / Uvicorn), sentando las bases operativas del <strong>Sprint 1</strong>.
+          <p style={{ margin: '0 auto', maxWidth: '640px', fontSize: '0.92rem', color: '#64748B', lineHeight: 1.6 }}>
+            {activeTab === 'auth'
+              ? 'Validación del flujo de dos pasos: comprobación de dominio @upt.pe y desafío OTP temporal de 6 dígitos con vigencia de 5 minutos (RF01 / CUS01 / RNF01).'
+              : 'Monitoreo de comunicación asíncrona entre la SPA cliente (React 19 / TypeScript / Vite), el backend RESTful (FastAPI) y PostgreSQL (Supabase).'
+            }
           </p>
         </div>
 
-        {/* Tarjeta de verificación de salud */}
-        <HealthStatus />
+        {/* Renderizado condicional según pestaña */}
+        {activeTab === 'auth' ? <LoginOtpView /> : <HealthStatus />}
 
-        {/* Bloque informativo de especificaciones del hito */}
+        {/* Bloque informativo de especificaciones del sprint */}
         <div
           style={{
-            maxWidth: '680px',
-            margin: '2rem auto 0 auto',
+            maxWidth: '720px',
+            margin: '2.5rem auto 0 auto',
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
             gap: '1rem',
           }}
         >
@@ -144,10 +202,10 @@ export const App: React.FC = () => {
             }}
           >
             <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              ⚛️ Frontend SPA
+              🎯 Trazabilidad CUS01
             </strong>
             <span style={{ color: '#64748B' }}>
-              React 19, TypeScript estricto, Vite, arquitectura modular orientada a servicios.
+              Dominio exclusivo @upt.pe, OTP numérico de 6 dígitos con soporte de ceros iniciales.
             </span>
           </div>
 
@@ -161,10 +219,10 @@ export const App: React.FC = () => {
             }}
           >
             <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              🐍 Backend API
+              ⏱️ Gobernanza Temporal
             </strong>
             <span style={{ color: '#64748B' }}>
-              FastAPI con Uvicorn, contratos JSON fuertemente tipados con Pydantic, CORS configurado.
+              Vigencia estricta de 5 min (RNF01) calculada desde expires_at y cooldown de reenvío de 60s.
             </span>
           </div>
 
@@ -178,10 +236,10 @@ export const App: React.FC = () => {
             }}
           >
             <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              📐 Trazabilidad SAD
+              🔌 Adaptador Mock Dev
             </strong>
             <span style={{ color: '#64748B' }}>
-              Estructura canónica: app/api, app/core, app/services, app/models y app/db.
+              Simulación explícita para pruebas de Joan; pendiente de integración con API T-03 de Renzo.
             </span>
           </div>
         </div>

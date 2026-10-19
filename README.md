@@ -17,7 +17,7 @@
 
 El **Sistema Web P2P** es una plataforma institucional orientada a conectar a estudiantes de ciclos formativos iniciales (*Mentoreados*, ciclos I al IV) con estudiantes de rendimiento sobresaliente de ciclos superiores (*Mentores*, ciclos VII al X) para mitigar los altos índices de reprobación y deserción en asignaturas filtro críticas (*Cálculo I/II, Algoritmos y Estructuras de Datos, Programación Orientada a Objetos y Base de Datos*) de la Escuela Profesional de Ingeniería de Sistemas de la Universidad Privada de Tacna.
 
-**Estado actual:** Fase de construcción iniciada — **Sprint 1** en desarrollo en la rama `feat/sprint-01-base-acceso-ci`. La solución se desarrolla en `aplicacion/` (React SPA + FastAPI RESTful con persistencia en PostgreSQL/Supabase conforme a **RNF09**). La tarea **T-01** (H1: base React–FastAPI y H2: conexión Supabase `p2p-epis-dev`) se encuentra completada y verificada localmente. El directorio `frontend/` se conserva como maqueta de referencia visual. El SRS FD03 v2.0 es la fuente canónica de requisitos y el SAD FD04 v1.1 orienta la arquitectura técnica.
+**Estado actual:** Fase de construcción iniciada — **Sprint 1** en desarrollo en la rama `feat/sprint-01-base-acceso-ci`. La solución se desarrolla en `aplicacion/` (React SPA + FastAPI RESTful con persistencia en PostgreSQL/Supabase conforme a **RNF09**). Las tareas **T-01** (H1: base React–FastAPI y H2: conexión técnica con Supabase `p2p-epis-dev`) y **T-02** (H3: interfaz de acceso institucional `@upt.pe` con desafío OTP de prueba temporal mediante adaptador mock en desarrollo, CUS01/RNF01) se encuentran completadas y verificadas localmente. La API real de autenticación OTP (T-03) es responsabilidad de Renzo y se encuentra en desarrollo, por lo que no se declara RF01 completo ni autenticación institucional implementada en backend. El directorio `frontend/` se conserva como maqueta de referencia visual. El SRS FD03 v2.0 es la fuente canónica de requisitos y el SAD FD04 v1.1 orienta la arquitectura técnica.
 
 ### Pilares Funcionales y Tecnológicos
 1. **Recomendación personalizada:** RF06 y CUS02 analizan afinidad temática, disponibilidad y criterios de RN-11; RF24 incorpora prioridad institucional.
@@ -205,7 +205,9 @@ Para validar la experiencia diferenciada por actor institucional, se encuentran 
    npm run build
    npm run dev
    ```
-   • Aplicación Web: **[http://localhost:5173](http://localhost:5173)**
+   • Aplicación Web: **[http://localhost:5173](http://localhost:5173)**  
+   • Pestaña *"Acceso & OTP de Prueba (T-02)"*: Permite probar el flujo interactivo de 2 pasos de CUS01/RF01/RNF01 (correo institucional `@upt.pe`, OTP de 6 dígitos conservado como texto, expiración a 5 minutos, cooldown de reenvío de 60s, invalidación de códigos previos y adaptador mock en desarrollo).  
+   • Pestaña *"Monitor de Servicios & BD (T-01)"*: Monitor en tiempo real de FastAPI y diagnóstico de base de datos Supabase (`SELECT 1`).
 
 #### B. Maqueta de Referencia Visual (`frontend/`)
 Para consultar la maqueta de referencia original con datos simulados en memoria:
