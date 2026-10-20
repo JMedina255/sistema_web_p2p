@@ -398,13 +398,34 @@ A continuación, se presenta la matriz consolidada de pruebas unitarias, de inte
 
 | Componente | Framework / Herramienta | Pruebas Ejecutadas | Estado | Cobertura Declaraciones / Líneas (%) | Cobertura Ramas (%) | Cobertura Funciones (%) | Meta RNF09 (≥ 70%) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Frontend SPA** | Vitest 2.1.8 + v8 | **46 pasadas** (7 suites) | ✅ Exitoso | **93.81%** | **76.92%** | **78.94%** | Superada (+23.81%) |
+| **Frontend SPA** | Vitest 5.0.5 + v8 5.0.5 | **46 pasadas** (7 suites) | ✅ Exitoso | **83.47%** | **72.70%** | **79.41%** | Superada (+13.47%) |
 | **Backend API** | Pytest 9.1.1 + Coverage.py | **50 pasadas** (6 módulos) | ✅ Exitoso | **91.62%** | *No medidas* | *No medidas* | Superada (+21.62%) |
 | **Total del Proyecto** | Pipeline de Validación Local | **96 pruebas pasadas** | ✅ Exitoso | *Medición por componente* | *Medición por componente* | *Medición por componente* | Superada ampliamente en ambos |
 
 Fuente: Reportes oficiales generados por v8 (Vitest) y Coverage.py en el entorno de desarrollo del proyecto.
 
 Como se observa en el cuadro anterior, las 96 pruebas automatizadas totales (46 en Frontend y 50 en Backend) alcanzaron un resultado 100% satisfactorio sin registrar fallos. En ambos componentes se superan con holgura los umbrales mínimos del 70% estipulados en el requerimiento no funcional **RNF09**, certificando la calidad del código y la robustez de las interfaces y servicios construidos.
+
+### 9.2. Auditoría y Mitigación de Vulnerabilidades del Ecosistema Frontend
+
+Con el propósito de garantizar la integridad de la cadena de suministro de software y proteger la SPA frente a vectores de ataque en tiempo de desarrollo o ejecución (conforme a los requerimientos no funcionales de seguridad RNF02 y resiliencia RNF09), se ejecutó una actualización integral y coordinada de dependencias en `aplicacion/frontend`. Se eliminaron vulnerabilidades críticas de Prototype Pollution en `tinypool` (GHSA-5gmw-xhrv-c9v3 / GHSA-85c8-ppgw-ccpr), vectores de exposición de peticiones en `esbuild` (GHSA-67mh-4wv8-2f99) y riesgos de Path Traversal en `@vitest/mocker` (GHSA-82fw-gwwq-j7x9), alcanzando una resolución de 0 vulnerabilidades.
+
+A continuación, se detalla la matriz comparativa de dependencias y auditoría de seguridad:
+
+### Cuadro 9.2: Matriz Comparativa de Auditoría y Hardening de Dependencias Frontend
+
+| Paquete / Métrica | Versión Inicial | Versión Mitigada | Severidad Previa | Estado Posterior (`npm audit`) | Impacto Arquitectónico y Corrección |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **`vite`** | `5.4.10` | **`8.3.4`** | Moderada (`esbuild <=0.24.2`) | ✅ 0 vulnerabilidades | Migración a Vite 8 con Rolldown/esbuild actualizado; soporte en `vite.config.ts`. |
+| **`@vitejs/plugin-react`** | `4.3.3` | **`6.1.2`** | — (Alineación) | ✅ 0 vulnerabilidades | Integración optimizada para React 19 y compatibilidad peer con Vite 8. |
+| **`vitest`** | `2.1.8` | **`5.0.5`** | Moderada / Crítica | ✅ 0 vulnerabilidades | Eliminación de dependencias transitivas vulnerables (`tinypool <=2.1.1`). |
+| **`@vitest/coverage-v8`** | `2.1.8` | **`5.0.5`** | Moderada / Crítica | ✅ 0 vulnerabilidades | Desacoplamiento de `test-exclude` y eliminación completa de `glob@10.5.0`. |
+| **`eslint`** | `9.14.0` | **`10.13.0`** | — (Deprecación) | ✅ 0 vulnerabilidades | Actualización a versión activa soportada junto con `typescript-eslint 8.26.0`. |
+| **Total Vulnerabilidades** | **7 reportadas** | **0 reportadas** | 3 Críticas, 1 Alta, 3 Mod. | ✅ **0 vulnerabilidades** | Mitigación total sin banderas `--force` ni `--legacy-peer-deps`. |
+
+Fuente: Registro de ejecución de `npm audit` y `npm audit --json` antes y después de la actualización en `aplicacion/frontend`.
+
+El cuadro precedente demuestra que la actualización coordinada mitigó la totalidad de vulnerabilidades conocidas sin relajar el árbol de resolución de npm. Asimismo, la verificación reproducible mediante `npm ci`, el linteo estático con `npm run lint`, la suite completa de 46 pruebas con `npm run test:coverage` (cobertura del 83.47% en líneas) y la compilación de producción con `npm run build` certifican la estabilidad y continuidad operativa del Frontend institucional.
 
 ---
 

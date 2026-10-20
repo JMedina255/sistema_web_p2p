@@ -234,15 +234,15 @@ Para validar la experiencia diferenciada por actor institucional, se encuentran 
    • Diagnóstico BD Supabase (dev): **[http://localhost:8000/api/v1/health/db](http://localhost:8000/api/v1/health/db)**  
    • Catálogo Curricular: **[http://localhost:8000/api/v1/curriculum/courses](http://localhost:8000/api/v1/curriculum/courses)**
 
-2. **Frontend SPA (React 19 + TypeScript + Vite + Node 22 — comprobado localmente: v22.17.1):**
+2. **Frontend SPA (React 19 + TypeScript + Vite 8 + Vitest 5 + Node 22/24 — comprobado localmente: v24.21.0):**
    ```powershell
    cd aplicacion/frontend
    npm ci
 
-   # Análisis estático (ESLint: 0 errores, 0 advertencias)
+   # Análisis estático (ESLint 10: 0 errores, 0 advertencias)
    npm run lint
 
-   # Pruebas unitarias y cobertura (Vitest: 46 pruebas pasadas; 93.81% líneas, 76.92% ramas, 78.94% funciones)
+   # Pruebas unitarias y cobertura (Vitest 5: 46 pruebas pasadas; 83.47% líneas, 72.70% ramas, 79.41% funciones)
    npm run test:coverage
    npm run build
 
