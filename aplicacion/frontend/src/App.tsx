@@ -4,7 +4,7 @@ import { HealthStatus } from './components/HealthStatus';
 import { LoginOtpView } from './components/LoginOtpView';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'auth' | 'curriculum' | 'services'>('auth');
+  const [activeTab, setActiveTab] = useState<'auth' | 'curriculum' | 'services'>(() => { if (typeof window !== 'undefined' && window.location) { const p = new URLSearchParams(window.location.search).get('tab'); if (p === 'curriculum' || p === 'services' || p === 'auth') return p; } return 'auth'; });
 
   return (
     <div

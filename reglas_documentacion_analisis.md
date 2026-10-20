@@ -1,4 +1,4 @@
-# Reglas Estándares de Documentación del Proyecto
+# Reglas Estándares de Documentación del Proyecto — Fase de Análisis
 
 **Proyecto:** Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT<br>
 **Curso:** Construcción de Software I<br>

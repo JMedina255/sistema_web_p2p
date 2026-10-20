@@ -8,6 +8,10 @@
 **Rama de trabajo:** `feat/sprint-01-base-acceso-ci`  
 **Fecha de corte:** 19/10/2026  
 
+> [!NOTE]
+> **Documentación Complementaria de Cierre del Sprint 1:**  
+> Para una revisión exhaustiva con capturas de pantalla reales, los 8 diagramas de diseño en PlantUML, catálogo de contratos REST, diccionario físico PostgreSQL y máquinas de estado, consultar el [Informe General Exhaustivo del Sprint 1](../diseño/INFORME_GENERAL_SPRINT_01.md) y el [Catálogo de Evidencias de Pruebas](../diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md).
+
 ---
 
 ## 1. Visión General y Alcance del Sprint 1

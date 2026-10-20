@@ -26,15 +26,16 @@ Dr. RICARDO EDUARDO VALCARCEL ALVARADO
 |:---:|:---:|:---:|:---:|:---:|:---|
 | **1.0** | JCM / RAM | RVA | Dirección EPIS | 28/09/2026 | Versión inicial del Documento de Arquitectura de Software (SAD). Establecimiento de las bases arquitectónicas: Introducción, Representación 4+1, Objetivos y Limitaciones, y Análisis de Requerimientos. |
 | **1.1** | Asistencia de Codex a solicitud del equipo | Pendiente | Pendiente | 28/09/2026 | Alineación de MOD, RF, RNF, RN y CUS con el SRS; trazabilidad arquitectónica y declaración de la fase de análisis. No constituye aprobación institucional. |
+| **1.2** | JCM / RAM | Pendiente | Pendiente | 19/10/2026 | Consolidación de la etapa de diseño arquitectónico y cierre del Sprint 1: formalización de modelos de persistencia base (ASIGNATURA_FILTRO, TEMA_CONCEPTUAL, AUTH_CHALLENGES), endpoints REST de catálogo y autenticación OTP, mitigación de riesgos RLS en Supabase y suite de 96 pruebas automatizadas. |
 
 # Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT
 
 **Documento de Arquitectura de Software (SAD - Software Architecture Document)**<br>
-**Versión 1.1 — En elaboración y pendiente de revisión**
+**Versión 1.2 — Etapa de Diseño y Cierre de Arquitectura Base (Sprint 1)**
 
-**Fase del ciclo de vida:** Análisis — desarrollo del SAD.<br>
+**Fase del ciclo de vida:** Diseño y Construcción Inicial — Cierre de Sprint 1.<br>
 **Fuente de nomenclatura:** SRS FD03 v2.0, tablas 5.1–5.5 y narrativas 6.2.3.<br>
-**Estado de las vistas:** Arquitectura propuesta; su implementación y validación pertenecen a fases posteriores.
+**Estado de las vistas:** Arquitectura base implementada y validada en Sprint 1; vistas de matching y reservas en diseño continuo.
 
 ---
 
