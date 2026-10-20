@@ -247,14 +247,14 @@ class CurriculumService:
         """
         if db is not None:
             try:
-                query = db.query(Asignatura).filter(Asignatura.estado_activo.is_(True))
-                if only_priority:
-                    query = query.filter(Asignatura.es_prioritaria.is_(True))
-                if ciclo is not None:
-                    query = query.filter(Asignatura.ciclo_plan == ciclo)
-                courses = query.order_by(Asignatura.ciclo_plan, Asignatura.codigo_curso).all()
-                if courses:
-                    return courses
+                total_courses = db.query(Asignatura).count()
+                if total_courses > 0:
+                    query = db.query(Asignatura).filter(Asignatura.estado_activo.is_(True))
+                    if only_priority:
+                        query = query.filter(Asignatura.es_prioritaria.is_(True))
+                    if ciclo is not None:
+                        query = query.filter(Asignatura.ciclo_plan == ciclo)
+                    return query.order_by(Asignatura.ciclo_plan, Asignatura.codigo_curso).all()
             except Exception:
                 pass
 
@@ -273,13 +273,14 @@ class CurriculumService:
         """
         if db is not None:
             try:
-                course = (
-                    db.query(Asignatura)
-                    .options(selectinload(Asignatura.temas))
-                    .filter(Asignatura.id_asignatura == id_asignatura, Asignatura.estado_activo.is_(True))
-                    .first()
-                )
-                if course:
+                total_courses = db.query(Asignatura).count()
+                if total_courses > 0:
+                    course = (
+                        db.query(Asignatura)
+                        .options(selectinload(Asignatura.temas))
+                        .filter(Asignatura.id_asignatura == id_asignatura, Asignatura.estado_activo.is_(True))
+                        .first()
+                    )
                     return course
             except Exception:
                 pass
@@ -296,17 +297,17 @@ class CurriculumService:
         """
         if db is not None:
             try:
-                topics = (
-                    db.query(TemaConceptual)
-                    .filter(
-                        TemaConceptual.id_asignatura == id_asignatura,
-                        TemaConceptual.estado_activo.is_(True),
+                total_topics = db.query(TemaConceptual).count()
+                if total_topics > 0:
+                    return (
+                        db.query(TemaConceptual)
+                        .filter(
+                            TemaConceptual.id_asignatura == id_asignatura,
+                            TemaConceptual.estado_activo.is_(True),
+                        )
+                        .order_by(TemaConceptual.unidad_silabica, TemaConceptual.id_tema)
+                        .all()
                     )
-                    .order_by(TemaConceptual.unidad_silabica, TemaConceptual.id_tema)
-                    .all()
-                )
-                if topics:
-                    return topics
             except Exception:
                 pass
 

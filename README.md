@@ -20,7 +20,7 @@ El **Sistema Web P2P** es una plataforma institucional orientada a conectar a es
 **Estado actual:** Fase de construcción — **Sprint 1 Culminado y Verificado**. La solución se desarrolla en `aplicacion/` (React SPA + FastAPI RESTful con persistencia en PostgreSQL/Supabase conforme a **RNF09**). La totalidad de las 6 tareas planificadas han sido completadas y verificadas:
 - **Tareas de Joan:** **T-01** (entorno base y conexión técnica a Supabase `p2p-epis-dev`), **T-02** (interfaz de acceso institucional `@upt.pe` con desafío OTP) y **T-06** (suite de pruebas iniciales y flujo de CI en GitHub Actions verificado exitosamente en el run [`39331555735`](https://github.com/JMedina255/sistema_web_p2p/actions/runs/39331555735)).
 - **Tareas de Renzo:** **T-09** (modelos ORM, migración Alembic con datos semilla de las **5 materias filtro**: *Cálculo I, Cálculo II, Algoritmos y Estructuras de Datos, Programación Orientada a Objetos y Base de Datos*, y endpoints RESTful de catálogo curricular), **T-03** (API real de autenticación OTP `/api/v1/auth/otp/*`, adaptador `ApiAuthAdapter` en frontend y emisión de tokens JWT de sesión con algoritmo HS256) y **T-07** (políticas de seguridad Row Level Security RLS en script SQL y guía de configuración para Supabase).
-- **Aseguramiento de Calidad:** Suite consolidada de **94 pruebas automatizadas** (46 en frontend y 48 en backend) con cobertura superior al 85%, superando holgadamente la meta mínima de **RNF09** ($\ge 70\%$). El directorio `frontend/` se conserva como maqueta de referencia visual. El SRS FD03 v2.0 es la fuente canónica de requisitos y el SAD FD04 v1.1 orienta la arquitectura técnica.
+- **Aseguramiento de Calidad:** Suite consolidada de **96 pruebas automatizadas** (46 en frontend y 50 en backend) con cobertura superior al 91%, superando holgadamente la meta mínima de **RNF09** ($\ge 70\%$). El directorio `frontend/` se conserva como maqueta de referencia visual. El SRS FD03 v2.0 es la fuente canónica de requisitos y el SAD FD04 v1.1 orienta la arquitectura técnica.
 
 ### Pilares Funcionales y Tecnológicos
 1. **Recomendación personalizada:** RF06 y CUS02 analizan afinidad temática, disponibilidad y criterios de RN-11; RF24 incorpora prioridad institucional sobre las 5 materias filtro.
@@ -48,7 +48,7 @@ La documentación se desarrolla bajo UWE y la estructura de requisitos adoptada 
 | **Matriz de Inconsistencias** | [`docs/matriz_inconsistencias.md`](docs/matriz_inconsistencias.md) | Registro de auditoría y resolución de discrepancias en requisitos y modelos. |
 | **Catálogo de Pruebas** | [`docs/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx`](docs/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx) | Matriz formal de casos de prueba funcional, criterios de aceptación y verificación QA. |
 | **Plan de Sprints y Tareas** | [`docs/sprints/PLAN_SPRINTS_Y_TAREAS.md`](docs/sprints/PLAN_SPRINTS_Y_TAREAS.md) | **Planificación Scrum:** Desglose del Product Backlog (37 PBI), capacidad (91 h) y asignación operativa (T-01 a T-51). |
-| **Bitácora de Sprint 1** | [`docs/sprints/sprint-01.md`](docs/sprints/sprint-01.md) | **Registro de Ejecución S1:** Culminación integral de T-01, T-02, T-03, T-06, T-07 y T-09 con 94 pruebas automatizadas. |
+| **Bitácora de Sprint 1** | [`docs/sprints/sprint-01.md`](docs/sprints/sprint-01.md) | **Registro de Ejecución S1:** Culminación integral de T-01, T-02, T-03, T-06, T-07 y T-09 con 96 pruebas automatizadas. |
 | **Guía de Configuración Supabase** | [`docs/supabase_setup_guide.md`](docs/supabase_setup_guide.md) | **Paso a paso para el usuario:** Conexión con Session Pooler, migración Alembic, RLS script y JWT Secret. |
 | **Reglas de Documentación (Hardening)** | [`reglas_documentacion.md`](reglas_documentacion.md) | Estándares obligatorios de granularidad en análisis, estructura quíntuple de tablas, estándar PlantUML y reglas de sincronización. |
 
@@ -203,7 +203,7 @@ Para validar la experiencia diferenciada por actor institucional, se encuentran 
    # Aplicar migraciones con datos semilla a Supabase (T-09)
    alembic upgrade head
 
-   # Pruebas automatizadas y cobertura (Pytest: 48 pruebas pasadas; 85% de cobertura)
+   # Pruebas automatizadas y cobertura (Pytest: 50 pruebas pasadas; 91.62% de cobertura)
    pytest
 
    # Servidor de desarrollo
@@ -222,7 +222,7 @@ Para validar la experiencia diferenciada por actor institucional, se encuentran 
    # Análisis estático (ESLint: 0 errores, 0 advertencias)
    npm run lint
 
-   # Pruebas unitarias y cobertura (Vitest: 46 pruebas pasadas; 93.84% líneas, 77.13% ramas, 78.94% funciones)
+   # Pruebas unitarias y cobertura (Vitest: 46 pruebas pasadas; 93.81% líneas, 76.92% ramas, 78.94% funciones)
    npm run test:coverage
    npm run build
 

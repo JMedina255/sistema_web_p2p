@@ -14,6 +14,13 @@ from app.schemas.auth import RequestOtpResponse, VerifyOtpResponse
 _memory_challenges: dict[str, dict] = {}
 
 
+def _ensure_utc(dt: datetime) -> datetime:
+    """Garantiza que un objeto datetime sea consciente de zona horaria (UTC) para comparaciones seguras."""
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC)
+
+
 class AuthService:
     @staticmethod
     def _get_challenge(db: Session | None, challenge_id: str) -> AuthChallenge | dict | None:
@@ -36,19 +43,18 @@ class AuthService:
                     .filter(
                         AuthChallenge.email == email,
                         AuthChallenge.consumed.is_(False),
-                        AuthChallenge.expires_at > now,
                     )
                     .order_by(AuthChallenge.created_at.desc())
                     .first()
                 )
-                if challenge:
+                if challenge and _ensure_utc(challenge.expires_at) > now:
                     return challenge
             except Exception:
                 pass
 
         # Búsqueda en memoria
         for c in _memory_challenges.values():
-            if c["email"] == email and not c["consumed"] and c["expires_at"] > now:
+            if c["email"] == email and not c["consumed"] and _ensure_utc(c["expires_at"]) > now:
                 return c
         return None
 
@@ -60,7 +66,7 @@ class AuthService:
         # 1. Comprobación de cooldown de 60 segundos (CUS01)
         active = AuthService._find_active_by_email(db, clean_email)
         if active:
-            resend_at = (
+            resend_at = _ensure_utc(
                 active.resend_available_at
                 if isinstance(active, AuthChallenge)
                 else active["resend_available_at"]
@@ -74,6 +80,20 @@ class AuthService:
                         "message": f"Debes esperar {remaining} segundos antes de solicitar un nuevo código.",
                     },
                 )
+
+        # 2. Invalidación estricta de cualquier desafío previo activo (CUS01 / RN-01)
+        if db is not None:
+            try:
+                db.query(AuthChallenge).filter(
+                    AuthChallenge.email == clean_email,
+                    AuthChallenge.consumed.is_(False),
+                ).update({"consumed": True})
+                db.commit()
+            except Exception:
+                db.rollback()
+        for c in _memory_challenges.values():
+            if c["email"] == clean_email and not c["consumed"]:
+                c["consumed"] = True
 
         # 2. Generación del código OTP y marcas de tiempo
         # Usamos código predecible en testing/dev si aplica, o aleatorio seguro
@@ -143,12 +163,14 @@ class AuthService:
             )
 
         now = datetime.now(UTC)
-        resend_at = (
+        resend_at = _ensure_utc(
             challenge.resend_available_at
             if isinstance(challenge, AuthChallenge)
             else challenge["resend_available_at"]
         )
-        expires_at = challenge.expires_at if isinstance(challenge, AuthChallenge) else challenge["expires_at"]
+        expires_at = _ensure_utc(
+            challenge.expires_at if isinstance(challenge, AuthChallenge) else challenge["expires_at"]
+        )
 
         if now < resend_at and now < expires_at:
             remaining = max(1, int((resend_at - now).total_seconds()))
@@ -172,6 +194,9 @@ class AuthService:
         else:
             challenge["consumed"] = True
 
+        if challenge_id in _memory_challenges:
+            _memory_challenges[challenge_id]["consumed"] = True
+
         return AuthService.request_otp(db, email)
 
     @staticmethod
@@ -189,7 +214,7 @@ class AuthService:
 
         now = datetime.now(UTC)
         is_obj = isinstance(challenge, AuthChallenge)
-        expires_at = challenge.expires_at if is_obj else challenge["expires_at"]
+        expires_at = _ensure_utc(challenge.expires_at if is_obj else challenge["expires_at"])
         consumed = challenge.consumed if is_obj else challenge["consumed"]
         code_hash = challenge.code_hash if is_obj else challenge["code_hash"]
         code_salt = challenge.code_salt if is_obj else challenge["code_salt"]
@@ -226,6 +251,9 @@ class AuthService:
             else:
                 challenge["attempts"] += 1
 
+            if challenge_id in _memory_challenges:
+                _memory_challenges[challenge_id]["attempts"] += 1
+
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
@@ -244,6 +272,9 @@ class AuthService:
                     db.rollback()
         else:
             challenge["consumed"] = True
+
+        if challenge_id in _memory_challenges:
+            _memory_challenges[challenge_id]["consumed"] = True
 
         # Emisión de Token JWT de Sesión (T-03 / RNF01 / RNF02)
         role = "administrador" if email.startswith("admin") else "estudiante"

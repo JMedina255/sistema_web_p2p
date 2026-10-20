@@ -37,7 +37,7 @@ class Settings(BaseSettings):
         description="Clave secreta para firma de tokens JWT (usar el JWT Secret de Supabase en producción)",
     )
     JWT_ALGORITHM: str = "HS256"
-    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 horas
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 horas continuas según RNF01
     OTP_EXPIRE_MINUTES: int = 5  # Ventana de 5 minutos según RNF01
     OTP_COOLDOWN_SECONDS: int = 60  # Cooldown de 60 segundos según CUS01
 

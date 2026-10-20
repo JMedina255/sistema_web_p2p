@@ -38,9 +38,10 @@ Como se observa en el cuadro anterior, la cadena de conexión debe emplear el **
 ### Paso 1: Obtención de la Cadena de Conexión (Session Pooler)
 1. Inicie sesión en la consola web de [Supabase](https://supabase.com/dashboard).
 2. Seleccione su proyecto activo.
-3. En la barra lateral izquierda, haga clic en **Project Settings** (ícono de engranaje) y luego en **Database**.
-4. Diríjase a la sección **Connection string**, seleccione la pestaña **URI** y elija el modo **Session pooler** (puerto `5432`).
-5. Copie la cadena provista. Reemplace `[YOUR-PASSWORD]` por la contraseña maestra de PostgreSQL que asignó al crear su proyecto. Si su contraseña contiene caracteres como `@`, `:`, `#` o `/`, debe codificarlos (por ejemplo, `@` se codifica como `%40`).
+3. Puede obtener la cadena de conexión por dos vías:
+   - **Vía Rápida (Botón Connect):** En la barra superior de su proyecto, haga clic en el botón verde **Connect** → pestaña **ORM** (o **URI**) → seleccione **Session Pooler** (puerto `5432`, IPv4).
+   - **Vía Configuración del Proyecto:** En la barra lateral izquierda, haga clic en **Project Settings** (ícono de engranaje) → **Database** → sección **Connection string** → pestaña **URI** → elija **Session pooler** (puerto `5432`).
+4. Copie la cadena provista. Reemplace `[YOUR-PASSWORD]` por la contraseña maestra de PostgreSQL que asignó al crear su proyecto. Si su contraseña contiene caracteres especiales como `@`, `:`, `#` o `/`, debe codificarlos en formato URL (por ejemplo, `@` se codifica como `%40`).
 
 ### Paso 2: Configuración del Archivo `.env` del Backend
 1. Abra el archivo `aplicacion/backend/.env` (o copie desde `.env.example`).
@@ -51,15 +52,15 @@ APP_ENV=development
 PROJECT_NAME="Sistema Web P2P - EPIS UPT"
 BACKEND_CORS_ORIGINS=["http://localhost:5173","http://127.0.0.1:5173"]
 
-# Cadena de conexión Session Pooler de Supabase
+# Cadena de conexión Session Pooler de Supabase (puerto 5432)
 DATABASE_URL="postgresql+psycopg://postgres.TU_PROJECT_REF:TU_PASSWORD_CODIFICADO@TU_POOLER_HOST:5432/postgres?sslmode=require"
 
-# Secreto JWT copiado de Supabase Dashboard (Project Settings -> API -> JWT Secret)
+# Secreto JWT copiado de Supabase Dashboard (Project Settings -> API -> JWT Settings -> JWT Secret)
 JWT_SECRET_KEY="tu-supabase-jwt-secret-de-32-caracteres-o-mas"
 ```
 
 ### Paso 3: Aplicación de Migraciones de Base de Datos (Alembic)
-Para crear las tablas de catálogo curricular (`asignaturas`, `temas_conceptuales`), la tabla de auditoría OTP (`auth_challenges`) y cargar automáticamente las **5 materias filtro** con sus temas silábicos:
+Para crear las tablas de catálogo curricular (`asignaturas`, `temas_conceptuales`), la tabla de auditoría OTP (`auth_challenges`), cargar automáticamente las **5 materias filtro** con sus temas silábicos y sincronizar la secuencia de claves primarias:
 
 ```powershell
 # Desde la raíz del backend:
@@ -72,7 +73,7 @@ cd aplicacion/backend
 alembic upgrade head
 ```
 
-*Resultado esperado:* Alembic ejecutará la revisión `20261019_001`, creará las 3 tablas con sus índices e insertará los registros semilla de *Cálculo I, Cálculo II, Algoritmos y Estructuras de Datos, Programación Orientada a Objetos y Base de Datos*.
+*Resultado esperado:* Alembic ejecutará la revisión `20261019_001`, creará las 3 tablas con sus índices, insertará los registros semilla de *Cálculo I, Cálculo II, Algoritmos y Estructuras de Datos, Programación Orientada a Objetos y Base de Datos*, y sincronizará automáticamente la secuencia autoincremental `asignaturas_id_asignatura_seq` para garantizar inserciones futuras sin colisión de claves primarias.
 
 ### Paso 4: Activación de Políticas RLS (Row Level Security - T-07)
 1. En el Dashboard de Supabase de su proyecto, abra la sección **SQL Editor** en la barra lateral.
@@ -81,10 +82,11 @@ alembic upgrade head
 4. Haga clic en el botón verde **Run** (Ejecutar).
 
 *Efecto de seguridad:*
-- Se habilita `ROW LEVEL SECURITY` estricto en las tablas `asignaturas`, `temas_conceptuales` y `auth_challenges`.
+- Se habilita `ROW LEVEL SECURITY` en las tablas `asignaturas`, `temas_conceptuales` y `auth_challenges`.
+- Se otorgan permisos explícitos de tabla (`GRANT SELECT`, `GRANT ALL`) para roles `anon`, `authenticated` y `service_role`.
 - Se autoriza la **lectura pública** del catálogo de cursos y temas silábicos para la SPA React.
-- Se restringen las operaciones de inserción y modificación de cursos exclusivamente a usuarios con rol `administrador`.
-- Se blinda la tabla `auth_challenges` permitiendo la emisión únicamente para correos `@upt.pe` y evitando la lectura de códigos por usuarios no autorizados.
+- Se restringen las operaciones de inserción y modificación de cursos exclusivamente a usuarios con rol `administrador` o conexiones autenticadas con `service_role`.
+- Se blinda la tabla `auth_challenges` permitiendo la emisión únicamente para correos con dominio oficial `@upt.pe` y evitando la lectura de códigos por usuarios no autorizados.
 
 ### Paso 5: Comprobación de Conectividad y Salud
 1. Inicie el servidor FastAPI:

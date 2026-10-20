@@ -69,6 +69,8 @@ describe('HealthStatus Component (T-01 / RNF09)', () => {
     const refreshBtn = screen.getByRole('button', { name: /Reintentar/i });
     fireEvent.click(refreshBtn);
 
-    expect(fetchHealthSpy).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(fetchHealthSpy).toHaveBeenCalledTimes(2);
+    });
   });
 });

@@ -29,7 +29,7 @@ A continuación, se presenta la matriz canónica de asignación y esfuerzo plani
 
 Fuente: Elaboración propia con base en el documento canónico de planificación `docs/sprints/PLAN_SPRINTS_Y_TAREAS.md` y tabla 5.2 de la planificación del Grupo 03.
 
-Como se evidencia en el cuadro anterior, el alcance total planificado para el Sprint 1 (18 horas distribuidas equitativamente: 9 horas para Joan en T-01, T-02 y T-06; y 9 horas para Renzo en T-03, T-07 y T-09) ha sido completado y verificado en su integridad. La totalidad de los hitos técnicos (**H1** y **H2** para T-01, **H3** para T-02, **H4** para T-06, **H5** para T-09, **H6** para T-03 y **H7** para T-07) cuentan con artefactos ejecutables, migraciones reproducibles, políticas RLS de seguridad, adaptadores integrados y una suite de 94 pruebas automatizadas que superan holgadamente la meta de mantenibilidad de **RNF09** ($\ge 70\%$).
+Como se evidencia en el cuadro anterior, el alcance total planificado para el Sprint 1 (18 horas distribuidas equitativamente: 9 horas para Joan en T-01, T-02 y T-06; y 9 horas para Renzo en T-03, T-07 y T-09) ha sido completado y verificado en su integridad. La totalidad de los hitos técnicos (**H1** y **H2** para T-01, **H3** para T-02, **H4** para T-06, **H5** para T-09, **H6** para T-03 y **H7** para T-07) cuentan con artefactos ejecutables, migraciones reproducibles, políticas RLS de seguridad, adaptadores integrados y una suite de 96 pruebas automatizadas que superan holgadamente la meta de mantenibilidad de **RNF09** ($\ge 70\%$).
 
 ---
 
@@ -293,6 +293,7 @@ A continuación, se presenta la matriz de verificación técnica efectuada para 
 | **Detalle con Temario** | `test_get_course_detail_success` | Cargar asignatura ID 1 con sus unidades silábicas | HTTP 200, incluye árbol de temas (Límites, Derivadas, etc.) | ✅ Exitoso |
 | **Asignatura Inexistente** | `test_get_course_detail_not_found` | Denegar acceso con ID no existente (ej. 999) | HTTP 404 Not Found con mensaje descriptivo | ✅ Exitoso |
 | **Temas por Asignatura** | `test_get_course_topics_success` | Listar temas de Algoritmos (ID 3) | HTTP 200, incluye Punteros, Recursividad, Estructuras | ✅ Exitoso |
+| **Persistencia ORM en BD** | `test_curriculum_service_with_real_db_session` | Consultar Asignatura y Temas con sesión real SQLAlchemy (selectinload) | Relaciones ORM cargadas, filtros exactos sin fallback forzado | ✅ Exitoso |
 | **Interfaz Frontend** | `CurriculumCatalogView.test.tsx` (3 pruebas) | Renderizado reactivo de tarjetas y selección de temas | 3 passed en Vitest, selección de tarjetas y filtros OK | ✅ Exitoso |
 
 Fuente: Elaboración propia a partir de las pruebas automatizadas de Pytest y Vitest ejecutadas localmente.
@@ -307,11 +308,11 @@ El cuadro anterior demuestra que el catálogo curricular de asignaturas crítica
 - **Criptografía y Gobernanza de Seguridad (`app/core/security.py`):**
   - Generación aleatoria criptográficamente segura de códigos numéricos de 6 dígitos con relleno de ceros a la izquierda mediante `secrets.randbelow()` (conservación estricta de formato `string`).
   - Hashing salado mediante SHA-256 para almacenamiento protegido de códigos en la tabla `auth_challenges`.
-  - Emisión de tokens de sesión **JWT (JSON Web Token)** firmados bajo el estándar **HS256** utilizando `JWT_SECRET_KEY` (compatible con el JWT Secret de Supabase), con expiración de 24 horas y emisor institucional `sistema-p2p-epis-upt`.
+  - Emisión de tokens de sesión **JWT (JSON Web Token)** firmados bajo el estándar **HS256** utilizando `JWT_SECRET_KEY` (compatible con el JWT Secret de Supabase), con expiración de 8 horas continuas (480 minutos) conforme a **RNF01** y **SAD-04**, y emisor institucional `sistema-p2p-epis-upt`.
 - **Servicio y Endpoints RESTful de Autenticación (`app/api/v1/endpoints/auth.py`):**
-  - `POST /api/v1/auth/otp/request`: validación estricta de correo `@upt.pe`, verificación de cooldown de 60 segundos (HTTP 429 ante solicitudes repetitivas conforme a **CUS01**), persistencia de desafío con ventana de vigencia de 5 minutos (**RNF01**) y respuesta normalizada.
+  - `POST /api/v1/auth/otp/request`: validación estricta de correo `@upt.pe`, verificación de cooldown de 60 segundos (HTTP 429 ante solicitudes repetitivas conforme a **CUS01**), persistencia de desafío con ventana de vigencia de 5 minutos (**RNF01**), invalidación atómica de desafíos previos del mismo usuario y respuesta normalizada.
   - `POST /api/v1/auth/otp/resend`: invalidación del código previo y emisión de un nuevo desafío respetando la restricción de cooldown.
-  - `POST /api/v1/auth/otp/verify`: comprobación de formato de 6 dígitos, validación de caducidad temporal, prevención de ataques de repetición (**anti-replay** marcando el código como consumido), y emisión del JWT de sesión de prueba.
+  - `POST /api/v1/auth/otp/verify`: comprobación de formato de 6 dígitos, validación de caducidad temporal con sincronización UTC, prevención de ataques de repetición (**anti-replay** marcando el código como consumido), y emisión del JWT de sesión de prueba.
 - **Adaptador de API Real en Frontend (`ApiAuthAdapter` en `src/services/authService.ts`):**
   - Implementación completa de `ApiAuthAdapter` que consume los endpoints RESTful reales vía `fetch`.
   - Mapeo bidireccional de excepciones tipadas (`AuthException`) ante códigos HTTP 400, 404, 422 y 429.
@@ -339,6 +340,7 @@ A continuación, se documenta la matriz de pruebas automatizadas ejecutadas para
 | **11** | Verificación exitosa + JWT | `test_verify_otp_success_and_jwt_token_issued` | Retornar éxito y emitir token firmado HS256 | HTTP 200, JWT decodificable con sub y rol | ✅ Exitoso |
 | **12** | Código reutilizado (anti-replay) | `test_verify_otp_already_used` | Bloquear segundo intento con código ya consumido | HTTP 400 Bad Request (`OTP_ALREADY_USED`) | ✅ Exitoso |
 | **13** | Pruebas de Adaptador en Frontend | `apiAuthAdapter.test.ts` (9 pruebas) | Integración frontend con mapping de errores y JWT | 9 passed en Vitest, persistencia en sessionStorage | ✅ Exitoso |
+| **14** | Persistencia y anti-replay en BD | `test_auth_service_with_real_db_session` | Persistir desafío en BD, evaluar cooldown en BD, verificar sin error de zonas horarias e invalidar desafíos previos | Sesión ORM verificada, anti-replay confirmado y `consumed=true` en BD | ✅ Exitoso |
 
 Fuente: Elaboración propia a partir de las pruebas automatizadas ejecutadas en los suites `test_auth.py` y `apiAuthAdapter.test.ts`.
 
@@ -392,13 +394,13 @@ A continuación, se presenta la matriz consolidada de pruebas unitarias, de inte
 
 | Componente | Framework / Herramienta | Pruebas Ejecutadas | Estado | Cobertura Declaraciones / Líneas (%) | Cobertura Ramas (%) | Cobertura Funciones (%) | Meta RNF09 (≥ 70%) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Frontend SPA** | Vitest 2.1.8 + v8 | **46 pasadas** (7 suites) | ✅ Exitoso | **93.84%** | **77.13%** | **78.94%** | Superada (+23.84%) |
-| **Backend API** | Pytest 9.1.1 + Coverage.py | **48 pasadas** (6 módulos) | ✅ Exitoso | **85.00%** | *No medidas* | *No medidas* | Superada (+15.00%) |
-| **Total del Proyecto** | Pipeline de Validación Local | **94 pruebas pasadas** | ✅ Exitoso | *Medición por componente* | *Medición por componente* | *Medición por componente* | Superada ampliamente en ambos |
+| **Frontend SPA** | Vitest 2.1.8 + v8 | **46 pasadas** (7 suites) | ✅ Exitoso | **93.81%** | **76.92%** | **78.94%** | Superada (+23.81%) |
+| **Backend API** | Pytest 9.1.1 + Coverage.py | **50 pasadas** (6 módulos) | ✅ Exitoso | **91.62%** | *No medidas* | *No medidas* | Superada (+21.62%) |
+| **Total del Proyecto** | Pipeline de Validación Local | **96 pruebas pasadas** | ✅ Exitoso | *Medición por componente* | *Medición por componente* | *Medición por componente* | Superada ampliamente en ambos |
 
 Fuente: Reportes oficiales generados por v8 (Vitest) y Coverage.py en el entorno de desarrollo del proyecto.
 
-Como se observa en el cuadro anterior, las 94 pruebas automatizadas totales (46 en Frontend y 48 en Backend) alcanzaron un resultado 100% satisfactorio sin registrar fallos. En ambos componentes se superan con holgura los umbrales mínimos del 70% estipulados en el requerimiento no funcional **RNF09**, certificando la calidad del código y la robustez de las interfaces y servicios construidos.
+Como se observa en el cuadro anterior, las 96 pruebas automatizadas totales (46 en Frontend y 50 en Backend) alcanzaron un resultado 100% satisfactorio sin registrar fallos. En ambos componentes se superan con holgura los umbrales mínimos del 70% estipulados en el requerimiento no funcional **RNF09**, certificando la calidad del código y la robustez de las interfaces y servicios construidos.
 
 ---
 
@@ -461,5 +463,5 @@ npm run dev
 
 ## 11. Conclusiones y Próximos Pasos
 
-1. **Culminación Integral del Sprint 1:** Se concluyeron con éxito las 6 tareas planificadas para el Sprint 1: las asignadas a Joan (**T-01**, **T-02**, **T-06**) y las asignadas a Renzo (**T-03**, **T-07**, **T-09**). El sistema cuenta con infraestructura operativa, catálogo curricular con las 5 materias filtro sembradas, API de autenticación con JWT de sesión, políticas de seguridad RLS documentadas y 94 pruebas automatizadas con cobertura superior al 70% (**RNF09**).
+1. **Culminación Integral del Sprint 1:** Se concluyeron con éxito las 6 tareas planificadas para el Sprint 1: las asignadas a Joan (**T-01**, **T-02**, **T-06**) y las asignadas a Renzo (**T-03**, **T-07**, **T-09**). El sistema cuenta con infraestructura operativa, catálogo curricular con las 5 materias filtro sembradas, API de autenticación con JWT de sesión, políticas de seguridad RLS documentadas y 96 pruebas automatizadas con cobertura superior al 91% (**RNF09**).
 2. **Habilitación para el Sprint 2:** Con la persistencia base y la autenticación operativa, el equipo se encuentra expedito para abordar el **Sprint 2** (Roles, currículo y perfiles), iniciando con el desarrollo del formulario de consentimiento informado digital (**T-04** y **T-05**) en cumplimiento de la Ley N° 29733 de Protección de Datos Personales del Perú.

@@ -307,6 +307,16 @@ def upgrade() -> None:
         ],
     )
 
+    # 5. Sincronización de secuencia autoincremental en PostgreSQL (Supabase)
+    context = op.get_context()
+    if context.dialect.name == "postgresql":
+        op.execute(
+            sa.text(
+                "SELECT setval(pg_get_serial_sequence('asignaturas', 'id_asignatura'), "
+                "COALESCE((SELECT MAX(id_asignatura) FROM asignaturas), 1));"
+            )
+        )
+
 
 def downgrade() -> None:
     op.drop_index(op.f("ix_auth_challenges_email"), table_name="auth_challenges")

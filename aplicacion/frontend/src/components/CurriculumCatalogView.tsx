@@ -16,21 +16,25 @@ export const CurriculumCatalogView: React.FC = () => {
     try {
       const data = await fetchCourses(onlyPriority, selectedCiclo);
       setCourses(data);
-      if (data.length > 0 && !selectedCourse) {
-        // Cargar el detalle del primer curso por defecto
-        try {
-          const detail = await fetchCourseDetail(data[0].id_asignatura);
-          setSelectedCourse(detail);
-        } catch {
-          // Ignorar fallo de detalle inicial
-        }
+      if (data.length > 0) {
+        setSelectedCourse((current) => {
+          const stillValid = current && data.some((c) => c.id_asignatura === current.id_asignatura);
+          if (!stillValid) {
+            fetchCourseDetail(data[0].id_asignatura)
+              .then(setSelectedCourse)
+              .catch(() => {});
+          }
+          return current;
+        });
+      } else {
+        setSelectedCourse(null);
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al consultar catálogo curricular.');
     } finally {
       setIsLoading(false);
     }
-  }, [onlyPriority, selectedCiclo, selectedCourse]);
+  }, [onlyPriority, selectedCiclo]);
 
   useEffect(() => {
     loadCourses();

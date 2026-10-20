@@ -9,10 +9,19 @@ ALTER TABLE IF EXISTS asignaturas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS temas_conceptuales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS auth_challenges ENABLE ROW LEVEL SECURITY;
 
--- Forzar RLS incluso para propietarios de tablas excepto superusuario
-ALTER TABLE IF EXISTS asignaturas FORCE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS temas_conceptuales FORCE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS auth_challenges FORCE ROW LEVEL SECURITY;
+-- Garantizar que RLS aplique a clientes PostgREST/anon/authenticated sin bloquear al propietario de BD (postgres)
+ALTER TABLE IF EXISTS asignaturas NO FORCE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS temas_conceptuales NO FORCE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth_challenges NO FORCE ROW LEVEL SECURITY;
+
+-- Concesión de permisos de tabla requeridos para que RLS pueda operar
+GRANT SELECT ON asignaturas TO anon, authenticated;
+GRANT SELECT ON temas_conceptuales TO anon, authenticated;
+GRANT ALL ON asignaturas TO service_role;
+GRANT ALL ON temas_conceptuales TO service_role;
+
+GRANT SELECT, INSERT, UPDATE ON auth_challenges TO anon, authenticated;
+GRANT ALL ON auth_challenges TO service_role;
 
 -- ============================================================================
 -- 2. Políticas para el Catálogo Curricular (asignaturas y temas_conceptuales)
@@ -35,32 +44,44 @@ USING (estado_activo = true);
 DROP POLICY IF EXISTS "p2p_curriculum_asignaturas_admin_all" ON asignaturas;
 CREATE POLICY "p2p_curriculum_asignaturas_admin_all"
 ON asignaturas FOR ALL
-TO authenticated
+TO authenticated, service_role
 USING (
     coalesce(auth.jwt() ->> 'role', '') = 'administrador'
     OR coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin'
+    OR current_user = 'service_role'
 )
 WITH CHECK (
     coalesce(auth.jwt() ->> 'role', '') = 'administrador'
     OR coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin'
+    OR current_user = 'service_role'
 );
 
 DROP POLICY IF EXISTS "p2p_curriculum_temas_admin_all" ON temas_conceptuales;
 CREATE POLICY "p2p_curriculum_temas_admin_all"
 ON temas_conceptuales FOR ALL
-TO authenticated
+TO authenticated, service_role
 USING (
     coalesce(auth.jwt() ->> 'role', '') = 'administrador'
     OR coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin'
+    OR current_user = 'service_role'
 )
 WITH CHECK (
     coalesce(auth.jwt() ->> 'role', '') = 'administrador'
     OR coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin'
+    OR current_user = 'service_role'
 );
 
 -- ============================================================================
 -- 3. Políticas para Desafíos OTP y Autenticación (auth_challenges)
 -- ============================================================================
+
+-- Acceso irrestricto para operaciones backend directas mediante clave service_role
+DROP POLICY IF EXISTS "p2p_auth_challenges_service_all" ON auth_challenges;
+CREATE POLICY "p2p_auth_challenges_service_all"
+ON auth_challenges FOR ALL
+TO service_role
+USING (true)
+WITH CHECK (true);
 
 -- Inserción de desafíos: Solo permitida para correos con terminación estricta @upt.pe
 DROP POLICY IF EXISTS "p2p_auth_challenges_insert_upt" ON auth_challenges;
@@ -96,7 +117,7 @@ WITH CHECK (
 );
 
 -- ============================================================================
--- Verificación de estado de políticas
+-- 4. Verificación de estado de políticas
 -- ============================================================================
 SELECT 
     schemaname, 

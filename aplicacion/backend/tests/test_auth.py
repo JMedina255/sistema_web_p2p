@@ -156,3 +156,73 @@ def test_verify_otp_already_used():
     )
     assert res3.status_code == 400
     assert "OTP_ALREADY_USED" in res3.text
+
+
+def test_auth_service_with_real_db_session():
+    import pytest
+    from fastapi import HTTPException
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    from app.db.session import Base
+    from app.models.auth import AuthChallenge
+    from app.services.auth_service import AuthService
+
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    SessionLocal = sessionmaker(bind=engine)
+    db = SessionLocal()
+
+    email = "dbuser@upt.pe"
+
+    # 1. Solicitar OTP persistido en BD
+    req_res = AuthService.request_otp(db, email)
+    assert req_res.challengeId.startswith("CHAL-API-")
+
+    chal = db.query(AuthChallenge).filter_by(id_challenge=req_res.challengeId).first()
+    assert chal is not None
+    assert chal.email == email
+    assert chal.consumed is False
+
+    # 2. Cooldown de 60 segundos evaluado en BD
+    with pytest.raises(HTTPException) as exc_cooldown:
+        AuthService.request_otp(db, email)
+    assert exc_cooldown.value.status_code == 429
+    assert exc_cooldown.value.detail["code"] == "COOLDOWN_ACTIVE"
+
+    # 3. Verificación con fecha y zona horaria desde BD sin error de tipos
+    code = req_res.mockCodeHint
+    verify_res = AuthService.verify_otp(db, req_res.challengeId, code)
+    assert verify_res.success is True
+    assert verify_res.token is not None
+
+    db.refresh(chal)
+    assert chal.consumed is True
+
+    # 4. Anti-replay contra BD
+    with pytest.raises(HTTPException) as exc_replay:
+        AuthService.verify_otp(db, req_res.challengeId, code)
+    assert exc_replay.value.status_code == 400
+    assert exc_replay.value.detail["code"] == "OTP_ALREADY_USED"
+
+    # 5. Invalidación de desafío anterior al emitir una nueva solicitud tras cooldown
+    chal.resend_available_at = datetime.now(UTC) - timedelta(seconds=10)
+    chal.consumed = False
+    db.commit()
+
+    req_res2 = AuthService.request_otp(db, email)
+    db.refresh(chal)
+    assert chal.consumed is True  # El anterior fue invalidado automáticamente
+
+    # 6. Reenvío en BD
+    chal2 = db.query(AuthChallenge).filter_by(id_challenge=req_res2.challengeId).first()
+    chal2.resend_available_at = datetime.now(UTC) - timedelta(seconds=10)
+    db.commit()
+
+    resend_res = AuthService.resend_otp(db, req_res2.challengeId)
+    assert resend_res.challengeId != req_res2.challengeId
+    db.refresh(chal2)
+    assert chal2.consumed is True
+
+    db.close()
+    engine.dispose()
