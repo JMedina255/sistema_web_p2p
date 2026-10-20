@@ -39,12 +39,13 @@ La documentación del proyecto se encuentra formalmente organizada en dos etapas
 
 | Entregable / Documento | Ubicación | Descripción y Alcance Metodológico |
 | :--- | :--- | :--- |
+| **INFORME ACADÉMICO SPRINT 1** | [docs/diseño/G03_EPIS_Informe_Sprint_01.md](docs/diseño/G03_EPIS_Informe_Sprint_01.md) | **Informe Canónico del Sprint 01:** Elaborado bajo la plantilla oficial institucional, detallando objetivos, balance de los 5 PBI, secuencia de hitos, 7 figuras de evidencia, matrices de pruebas, contratos y dependencias hacia S2. |
 | **INFORME GENERAL SPRINT 1** | [docs/diseño/INFORME_GENERAL_SPRINT_01.md](docs/diseño/INFORME_GENERAL_SPRINT_01.md) | **Reporte Maestro Exhaustivo:** Ficha técnica, 8 diagramas PlantUML, 7 capturas de pantalla reales, especificación de contratos REST, diccionario físico DDL + RLS, máquinas de estado, ADRs y certificación DoD. |
 | **EVIDENCIA DE PRUEBAS S1** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md) | **Catálogo de Calidad Automatizada:** Desglose de las 13 suites, 96 pruebas superadas (50 backend / 46 frontend), fixtures y reportes de cobertura (>91% global por **RNF09**). |
 | **FD04: Informe SAD (Diseño v2.0)** | [docs/diseño/FD04-EPIS-Informe SAD de Proyecto.md](docs/diseño/FD04-EPIS-Informe%20SAD%20de%20Proyecto.md) | **Arquitectura de Software en Diseño:** Vistas 4+1 prescriptivas, contratos de endpoints, diccionario físico PostgreSQL, políticas RLS, máquinas de estado del dominio y ADRs. |
 | **FD03: Informe SRS (Diseño v2.1)** | [docs/diseño/FD03-EPIS-Informe SRS de Proyecto.md](docs/diseño/FD03-EPIS-Informe%20SRS%20de%20Proyecto.md) | **Requerimientos con Trazabilidad:** Especificación alineada a la arquitectura desacoplada y los endpoints construidos. |
-| **Reglas de Diseño (Hardening D-1..D-10)** | [
-eglas_documentacion_diseño.md](reglas_documentacion_diseño.md) | Estándares obligatorios de diseño prescriptivo: contratos REST, diccionario físico, diagramas técnicos PlantUML, máquinas de estado, mapeo entre capas, variables .env y ADRs. |
+| **Reglas de Diseño (Hardening D-1..D-10)** | [reglas_documentacion_diseño.md](reglas_documentacion_diseño.md) | Estándares obligatorios de diseño prescriptivo: contratos REST, diccionario físico, diagramas técnicos PlantUML, máquinas de estado, mapeo entre capas, variables .env y ADRs. |
+
 
 ### 2.2. Gestión de Sprints y Despliegue (docs/sprints/ y Raíz)
 
