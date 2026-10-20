@@ -33,24 +33,44 @@ El **Sistema Web P2P** es una plataforma institucional orientada a conectar a es
 
 ## 📚 2. Mapa de Documentación Oficial de Ingeniería de Software
 
-La documentación se desarrolla bajo UWE y la estructura de requisitos adoptada en el SRS. La revisión actual alinea el SAD y sus secuencias; las discrepancias heredadas de otros artefactos se registran en la matriz de inconsistencias:
+La documentación del proyecto se encuentra formalmente organizada en dos etapas metodológicas consecutivas: la **Fase de Análisis** (línea base original congelada) y la **Fase de Diseño Técnico** (etapa prescriptiva actual bajo las 10 reglas de diseño):
+
+### 2.1. Fase de Diseño Técnico y Cierre del Sprint 1 (docs/diseño/)
 
 | Entregable / Documento | Ubicación | Descripción y Alcance Metodológico |
 | :--- | :--- | :--- |
-| **Resumen Ejecutivo del Sistema** | [`docs/resumen_sistema_y_casos_de_uso.md`](docs/resumen_sistema_y_casos_de_uso.md) | **Lectura recomendada:** Visión concisa, flujo macro de 5 fases, matriz de 17 CUS críticos, relaciones de precedencia, máquinas de estado y síntesis de reglas de negocio. |
-| **FD01: Informe de Factibilidad** | [`docs/FD01-EPIS-Informe de Factibilidad.md`](docs/FD01-EPIS-Informe%20de%20Factibilidad.md) | Evaluación exhaustiva de viabilidad operativa, técnica, económica y legal en el ámbito universitario de la UPT. |
-| **FD02: Informe Visión del Proyecto** | [`docs/FD02-EPIS-Informe Vision de Proyecto.md`](docs/FD02-EPIS-Informe%20Vision%20de%20Proyecto.md) | Oportunidades de negocio, definición de stakeholders, posicionamiento del producto y características principales. |
-| **FD03: Informe SRS de Proyecto** | [`docs/FD03-EPIS-Informe SRS de Proyecto.md`](docs/FD03-EPIS-Informe%20SRS%20de%20Proyecto.md) | **Especificación de Requisitos de Software canónica:** Catálogo de 24 CUS, modelos ECB, diagramas de actividades con objetos, diagramas de secuencia y clases parciales. |
-| **FD04: Informe SAD de Proyecto** | [`docs/FD04-EPIS-Informe SAD de Proyecto.md`](docs/FD04-EPIS-Informe%20SAD%20de%20Proyecto.md) | **SAD v1.1 en análisis:** Vistas 4+1 propuestas, nomenclatura del SRS, matrices de trazabilidad y decisiones pendientes de diseño. |
-| **Bóveda General de Diagramas** | [`docs/diagramas_general.md`](docs/diagramas_general.md) | Bóveda de artefactos. La sección 14 mantiene copias de los diagramas y cuadros vigentes del SAD y sus secuencias. |
-| **Diagramas de Secuencia (SAD Análisis)** | [`docs/diagramas_de_secuencia.md`](docs/diagramas_de_secuencia.md) | **Secuencias v2.2 en análisis:** Acceso con OTP y consentimiento, Top-k, reserva/confirmación/quórum y bitácora/asistencia/visado; códigos CUS del SRS. |
-| **Flujos por Perfil y Diagrama de Paquetes** | [`docs/flujos_por_perfil_y_diagrama_paquetes.md`](docs/flujos_por_perfil_y_diagrama_paquetes.md) | **Flujos y Arquitectura de Maquetación:** Diagramas de flujo de actividades para Administrador, Mentor y Mentoreado con mapeo biunívoco a paquetes. |
-| **Matriz de Inconsistencias** | [`docs/matriz_inconsistencias.md`](docs/matriz_inconsistencias.md) | Registro de auditoría y resolución de discrepancias en requisitos y modelos. |
-| **Catálogo de Pruebas** | [`docs/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx`](docs/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx) | Matriz formal de casos de prueba funcional, criterios de aceptación y verificación QA. |
-| **Plan de Sprints y Tareas** | [`docs/sprints/PLAN_SPRINTS_Y_TAREAS.md`](docs/sprints/PLAN_SPRINTS_Y_TAREAS.md) | **Planificación Scrum:** Desglose del Product Backlog (37 PBI), capacidad (91 h) y asignación operativa (T-01 a T-51). |
-| **Bitácora de Sprint 1** | [`docs/sprints/sprint-01.md`](docs/sprints/sprint-01.md) | **Registro de Ejecución S1:** Culminación integral de T-01, T-02, T-03, T-06, T-07 y T-09 con 96 pruebas automatizadas. |
-| **Guía de Configuración Supabase** | [`docs/supabase_setup_guide.md`](docs/supabase_setup_guide.md) | **Paso a paso para el usuario:** Conexión con Session Pooler, migración Alembic, RLS script y JWT Secret. |
-| **Reglas de Documentación (Hardening)** | [`reglas_documentacion.md`](reglas_documentacion.md) | Estándares obligatorios de granularidad en análisis, estructura quíntuple de tablas, estándar PlantUML y reglas de sincronización. |
+| **INFORME GENERAL SPRINT 1** | [docs/diseño/INFORME_GENERAL_SPRINT_01.md](docs/diseño/INFORME_GENERAL_SPRINT_01.md) | **Reporte Maestro Exhaustivo:** Ficha técnica, 8 diagramas PlantUML, 7 capturas de pantalla reales, especificación de contratos REST, diccionario físico DDL + RLS, máquinas de estado, ADRs y certificación DoD. |
+| **EVIDENCIA DE PRUEBAS S1** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md) | **Catálogo de Calidad Automatizada:** Desglose de las 13 suites, 96 pruebas superadas (50 backend / 46 frontend), fixtures y reportes de cobertura (>91% global por **RNF09**). |
+| **FD04: Informe SAD (Diseño v2.0)** | [docs/diseño/FD04-EPIS-Informe SAD de Proyecto.md](docs/diseño/FD04-EPIS-Informe%20SAD%20de%20Proyecto.md) | **Arquitectura de Software en Diseño:** Vistas 4+1 prescriptivas, contratos de endpoints, diccionario físico PostgreSQL, políticas RLS, máquinas de estado del dominio y ADRs. |
+| **FD03: Informe SRS (Diseño v2.1)** | [docs/diseño/FD03-EPIS-Informe SRS de Proyecto.md](docs/diseño/FD03-EPIS-Informe%20SRS%20de%20Proyecto.md) | **Requerimientos con Trazabilidad:** Especificación alineada a la arquitectura desacoplada y los endpoints construidos. |
+| **Reglas de Diseño (Hardening D-1..D-10)** | [
+eglas_documentacion_diseño.md](reglas_documentacion_diseño.md) | Estándares obligatorios de diseño prescriptivo: contratos REST, diccionario físico, diagramas técnicos PlantUML, máquinas de estado, mapeo entre capas, variables .env y ADRs. |
+
+### 2.2. Gestión de Sprints y Despliegue (docs/sprints/ y Raíz)
+
+| Entregable / Documento | Ubicación | Descripción y Alcance Metodológico |
+| :--- | :--- | :--- |
+| **Plan de Sprints y Tareas** | [docs/sprints/PLAN_SPRINTS_Y_TAREAS.md](docs/sprints/PLAN_SPRINTS_Y_TAREAS.md) | **Planificación Scrum:** Desglose del Product Backlog (37 PBI), capacidad (91 h) y asignación operativa (T-01 a T-51). |
+| **Bitácora de Sprint 1** | [docs/sprints/sprint-01.md](docs/sprints/sprint-01.md) | **Registro de Ejecución S1:** Culminación integral de T-01, T-02, T-03, T-06, T-07 y T-09 con 96 pruebas automatizadas. |
+| **Snapshot Congelado Sprint 1** | [sprints/sprint-01/](sprints/sprint-01/) | **Respaldo Inmutable:** Código limpio y documentos congelados al cierre formal del Sprint 1 (commit 3cda166). |
+| **Guía de Configuración Supabase** | [docs/supabase_setup_guide.md](docs/supabase_setup_guide.md) | **Paso a paso para el usuario:** Conexión con Session Pooler, migración Alembic, script RLS y JWT Secret. |
+
+### 2.3. Fase de Análisis Histórica (docs/analisis/)
+
+| Entregable / Documento | Ubicación | Descripción y Alcance Metodológico |
+| :--- | :--- | :--- |
+| **Resumen Ejecutivo del Sistema** | [docs/analisis/resumen_sistema_y_casos_de_uso.md](docs/analisis/resumen_sistema_y_casos_de_uso.md) | Visión concisa, flujo macro de 5 fases, matriz de 17 CUS críticos, relaciones de precedencia y síntesis analítica. |
+| **FD01: Informe de Factibilidad** | [docs/analisis/FD01-EPIS-Informe de Factibilidad.md](docs/analisis/FD01-EPIS-Informe%20de%20Factibilidad.md) | Evaluación exhaustiva de viabilidad operativa, técnica, económica y legal en el ámbito universitario de la UPT. |
+| **FD02: Informe Visión del Proyecto** | [docs/analisis/FD02-EPIS-Informe Vision de Proyecto.md](docs/analisis/FD02-EPIS-Informe%20Vision%20de%20Proyecto.md) | Oportunidades de negocio, definición de stakeholders, posicionamiento del producto y características principales. |
+| **FD03: SRS Canónico (v2.0)** | [docs/analisis/FD03-EPIS-Informe SRS de Proyecto.md](docs/analisis/FD03-EPIS-Informe%20SRS%20de%20Proyecto.md) | Línea base oficial de requisitos: 24 CUS, modelos ECB, diagramas de actividades y clases preliminares. |
+| **FD04: SAD Preliminar (v1.1)** | [docs/analisis/FD04-EPIS-Informe SAD de Proyecto.md](docs/analisis/FD04-EPIS-Informe%20SAD%20de%20Proyecto.md) | SAD preliminar de la fase de análisis con identificación de decisiones abiertas. |
+| **Bóveda General de Diagramas** | [docs/analisis/diagramas_general.md](docs/analisis/diagramas_general.md) | Bóveda histórica de diagramas PlantUML de análisis. |
+| **Diagramas de Secuencia (Análisis)** | [docs/analisis/diagramas_de_secuencia.md](docs/analisis/diagramas_de_secuencia.md) | Secuencias v2.2 de análisis con códigos CUS del SRS. |
+| **Flujos por Perfil y Paquetes** | [docs/analisis/flujos_por_perfil_y_diagrama_paquetes.md](docs/analisis/flujos_por_perfil_y_diagrama_paquetes.md) | Flujos por Administrador, Mentor y Mentoreado con mapeo biunívoco a paquetes. |
+| **Matriz de Inconsistencias** | [docs/analisis/matriz_inconsistencias.md](docs/analisis/matriz_inconsistencias.md) | Registro de auditoría y resolución de discrepancias en requisitos y modelos. |
+| **Catálogo de Pruebas (Análisis)** | [docs/analisis/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx](docs/analisis/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx) | Matriz formal de casos de prueba funcional de análisis. |
+| **Reglas de Análisis (Regla 1..7)** | [
+eglas_documentacion_analisis.md](reglas_documentacion_analisis.md) | Normas de granularidad en análisis, estructura quíntuple de tablas y sincronización continua. |
 
 ---
 
