@@ -252,8 +252,8 @@ El Cuadro 5.1 muestra la evolución progresiva del incremento: los hitos H1 a H4
   1. Configuración del proyecto backend FastAPI con arquitectura modular (`app/core`, `app/api`, `app/db`, `app/models`, `app/services`).
   2. Implementación de la gestión de configuración en `app/core/config.py` con Pydantic Settings, soporte para archivo `.env` y enmascaramiento estricto de secretos (`repr=False`).
   3. Creación del motor SQLAlchemy en `app/db/session.py` con descarte de conexiones obsoletas (`pool_pre_ping=True`) y función de sanitización de errores de red (`sanitize_db_error()`).
-  4. Desarrollo del componente visual React [HealthStatus.tsx](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/frontend/src/components/HealthStatus.tsx) para consultar la salud de la API (`/api/v1/health`) y la latencia del Session Pooler de Supabase (`/api/v1/health/db`).
-* **Artefactos generados:** [`aplicacion/backend/app/db/session.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/app/db/session.py), [`aplicacion/backend/app/api/v1/endpoints/health.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/app/api/v1/endpoints/health.py), [`aplicacion/frontend/src/components/HealthStatus.tsx`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/frontend/src/components/HealthStatus.tsx).
+  4. Desarrollo del componente visual React [HealthStatus.tsx](../../aplicacion/frontend/src/components/HealthStatus.tsx) para consultar la salud de la API (`/api/v1/health`) y la latencia del Session Pooler de Supabase (`/api/v1/health/db`).
+* **Artefactos generados:** [`session.py`](../../aplicacion/backend/app/db/session.py), [`health.py`](../../aplicacion/backend/app/api/v1/endpoints/health.py), [`HealthStatus.tsx`](../../aplicacion/frontend/src/components/HealthStatus.tsx).
 * **Procedimiento reproducible:**
   ```powershell
   # Backend:
@@ -282,11 +282,11 @@ La siguiente figura documenta la interfaz de monitoreo de servicios operando en 
 * **Responsable y periodo:** Joan Medina (14/10/2026–16/10/2026).
 * **Precondiciones:** Servidor de desarrollo Vite activo en `http://localhost:5173`.
 * **Pasos realizados:**
-  1. Diseño del componente interactivo de autenticación de dos pasos [LoginOtpView.tsx](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/frontend/src/components/LoginOtpView.tsx).
+  1. Diseño del componente interactivo de autenticación de dos pasos [LoginOtpView.tsx](../../aplicacion/frontend/src/components/LoginOtpView.tsx).
   2. Implementación de validación sintáctica de correo mediante expresión regular restringida a cuentas `@upt.pe`.
   3. Programación de temporizadores dinámicos para la vigencia del código (300 segundos) y el tiempo de espera de reenvío (*cooldown* de 60 segundos).
   4. Creación del patrón adaptador en `authService.ts` desacoplando la UI mediante `IAuthService`, permitiendo alternar entre `MockAuthAdapter` y `ApiAuthAdapter`.
-* **Artefactos generados:** [`aplicacion/frontend/src/components/LoginOtpView.tsx`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/frontend/src/components/LoginOtpView.tsx), [`aplicacion/frontend/src/services/authService.ts`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/frontend/src/services/authService.ts).
+* **Artefactos generados:** [`LoginOtpView.tsx`](../../aplicacion/frontend/src/components/LoginOtpView.tsx), [`authService.ts`](../../aplicacion/frontend/src/services/authService.ts).
 * **Resultado observado:** Transición reactiva de Paso 1 (solicitud de correo) a Paso 2 (digitación de código de 6 dígitos) y notificación de sesión iniciada (Paso 3).
 * **Estado de verificación:** Aprobado ✅. Modo interactivo mixto (soporta simulación mock y conexión API REST real).
 
@@ -319,8 +319,8 @@ Las siguientes figuras documentan las dos fases del flujo de acceso instituciona
   2. Creación de la migración versionada con Alembic `001_initial_curriculum_and_auth.py` incorporando claves foráneas con eliminación en cascada (`ON DELETE CASCADE`) e índices B-Tree sobre `codigo_curso`.
   3. Sembrado transaccional de las 5 materias filtro (*Cálculo I, Cálculo II, Algoritmos y Estructuras de Datos, Programación Orientada a Objetos, Base de Datos*) con 15 unidades temáticas extraídas de los sílabos oficiales de la EPIS-UPT.
   4. Sincronización explícita de la secuencia PostgreSQL `asignaturas_id_asignatura_seq` mediante `setval` para garantizar inserciones futuras sin colisión de identificadores.
-  5. Creación de endpoints REST paginados en `app/api/v1/endpoints/curriculum.py` y vista cliente interactiva en [CurriculumCatalogView.tsx](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/frontend/src/components/CurriculumCatalogView.tsx).
-* **Artefactos generados:** [`aplicacion/backend/app/models/curriculum.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/app/models/curriculum.py), [`aplicacion/backend/app/db/migrations/versions/001_initial_curriculum_and_auth.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/app/db/migrations/versions/001_initial_curriculum_and_auth.py), [`aplicacion/frontend/src/components/CurriculumCatalogView.tsx`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/frontend/src/components/CurriculumCatalogView.tsx).
+  5. Creación de endpoints REST paginados en `app/api/v1/endpoints/curriculum.py` y vista cliente interactiva en [CurriculumCatalogView.tsx](../../aplicacion/frontend/src/components/CurriculumCatalogView.tsx).
+* **Artefactos generados:** [`curriculum.py`](../../aplicacion/backend/app/models/curriculum.py), [`001_initial_curriculum_and_auth.py`](../../aplicacion/backend/app/db/migrations/versions/001_initial_curriculum_and_auth.py), [`CurriculumCatalogView.tsx`](../../aplicacion/frontend/src/components/CurriculumCatalogView.tsx).
 * **Resultado observado:** Consulta `SELECT COUNT(*) FROM asignaturas` retornando exactamente 5 registros activos con sus temas asociados.
 * **Estado de verificación:** Aprobado ✅. Persistencia real en Supabase.
 
@@ -344,8 +344,8 @@ La siguiente figura ilustra el catálogo curricular interactivo desplegando los 
   1. Implementación de los endpoints `/api/v1/auth/otp/request`, `/verify` y `/resend` en `app/api/v1/endpoints/auth.py`.
   2. Implementación de la lógica de negocio en `AuthService` (`app/services/auth_service.py`): validación sintáctica de email, generación criptográfica de OTP de 6 dígitos numéricos, cálculo de expiración en 5 minutos con marcas temporales UTC obligatorias e invalidación atómica de desafíos previos.
   3. Firma y codificación de tokens de sesión **JWT HS256** en `app/core/security.py` con una validez estricta de 480 minutos (8 horas continuas) conforme a `RNF01`.
-  4. Desarrollo del adaptador [ApiAuthAdapter.ts](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/frontend/src/services/authService.ts) en el frontend para consumir los endpoints REST reales.
-* **Artefactos generados:** [`aplicacion/backend/app/api/v1/endpoints/auth.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/app/api/v1/endpoints/auth.py), [`aplicacion/backend/app/services/auth_service.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/app/services/auth_service.py), [`aplicacion/backend/app/core/security.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/app/core/security.py).
+  4. Desarrollo del adaptador [`authService.ts`](../../aplicacion/frontend/src/services/authService.ts) (`ApiAuthAdapter`) en el frontend para consumir los endpoints REST reales.
+* **Artefactos generados:** [`auth.py`](../../aplicacion/backend/app/api/v1/endpoints/auth.py), [`auth_service.py`](../../aplicacion/backend/app/services/auth_service.py), [`security.py`](../../aplicacion/backend/app/core/security.py).
 * **Resultado observado:** Solicitud exitosa retornando `challenge_id` en formato UUIDv4 y verificación exitosa retornando `access_token` JWT HS256 con `expires_in: 28800`.
 * **Estado de verificación:** Aprobado ✅. Modo real de backend con despacho de códigos por consola/mock_code para desarrollo.
 
@@ -366,13 +366,13 @@ La siguiente figura muestra la documentación interactiva OpenAPI / Swagger gene
 * **Responsable y periodo:** Renzo Antayhua (18/10/2026–19/10/2026).
 * **Precondiciones:** Acceso al SQL Editor de Supabase y tablas migradas.
 * **Pasos realizados:**
-  1. Redacción del script canónico de seguridad [`aplicacion/backend/scripts/supabase_rls_setup.sql`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/scripts/supabase_rls_setup.sql).
+  1. Redacción del script canónico de seguridad [`supabase_rls_setup.sql`](../../aplicacion/backend/scripts/supabase_rls_setup.sql).
   2. Activación explícita de `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` en las tablas `asignaturas`, `temas_conceptuales` y `auth_challenges`.
   3. Configuración de políticas permisivas de lectura pública (`SELECT`) para roles `anon` y `authenticated` en las tablas del catálogo formativo.
   4. Restricción total de escritura en el catálogo curricular exclusivamente para identidades autenticadas con `service_role`.
   5. Blindaje de la tabla `auth_challenges`: denegación por defecto de consultas `SELECT` públicas para impedir que un usuario intercepte códigos de otros estudiantes, reservando la administración de desafíos al servicio backend.
-  6. Redacción de la guía exhaustiva de configuración para el usuario y evaluador en [`docs/supabase_setup_guide.md`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/docs/supabase_setup_guide.md).
-* **Artefactos generados:** [`aplicacion/backend/scripts/supabase_rls_setup.sql`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/scripts/supabase_rls_setup.sql), [`docs/supabase_setup_guide.md`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/docs/supabase_setup_guide.md).
+  6. Redacción de la guía exhaustiva de configuración para el usuario y evaluador en [`supabase_setup_guide.md`](../supabase_setup_guide.md).
+* **Artefactos generados:** [`supabase_rls_setup.sql`](../../aplicacion/backend/scripts/supabase_rls_setup.sql), [`supabase_setup_guide.md`](../supabase_setup_guide.md).
 * **Resultado observado:** Script SQL ejecutado sin errores sintácticos en el motor PostgreSQL, con privilegios concedidos formalmente según roles de conexión.
 * **Estado de verificación:** Aprobado ✅. Seguridad declarada y aprovisionada en base de datos.
 
@@ -383,13 +383,13 @@ La siguiente figura muestra la documentación interactiva OpenAPI / Swagger gene
 * **Responsable y periodo:** Joan Medina (15/10/2026 y 19/10/2026).
 * **Precondiciones:** Suites de pruebas unitarias implementadas en frontend y backend.
 * **Pasos realizados:**
-  1. Configuración del workflow de integración continua [`.github/workflows/ci.yml`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/.github/workflows/ci.yml) para ejecutar en paralelo el análisis estático y pruebas en cada `push` hacia `main`.
+  1. Configuración del workflow de integración continua [`ci.yml`](../../.github/workflows/ci.yml) para ejecutar en paralelo el análisis estático y pruebas en cada `push` hacia `main`.
   2. Verificación de la suite de 50 pruebas en el backend mediante Pytest y Coverage.py, alcanzando un **91.62% de cobertura de declaraciones**.
   3. Verificación de la suite de 46 pruebas en el frontend mediante Vitest, alcanzando un **83.47% de cobertura en líneas**.
   4. Auditoría de seguridad del ecosistema frontend: detección inicial de 7 vulnerabilidades en `npm audit` derivadas de versiones transitivas antiguas (`tinypool <=2.1.1` con riesgo de Remote Code Execution por prototype pollution, `esbuild <=0.24.2` y `@vitest/mocker <=4.1.10`).
   5. Ejecución del plan de hardening: actualización coordinada de `vite` a `8.3.4`, `@vitejs/plugin-react` a `6.1.2`, `vitest` y `@vitest/coverage-v8` a `5.0.5`, y `eslint` a `10.13.0`, eliminando completamente la dependencia vulnerable `glob@10.5.0` sin requerir banderas `--force` ni `--legacy-peer-deps`.
-  6. Adaptación técnica en [vite.config.ts](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/frontend/vite.config.ts) (`import { defineConfig } from 'vitest/config'`) y [eslint.config.js](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/frontend/eslint.config.js) para asegurar compilación limpia en TypeScript 5.6 y ESLint 10.
-* **Artefactos generados:** [`.github/workflows/ci.yml`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/.github/workflows/ci.yml), `package.json`, `package-lock.json`, `vite.config.ts`, `eslint.config.js`.
+  6. Adaptación técnica en [vite.config.ts](../../aplicacion/frontend/vite.config.ts) (`import { defineConfig } from 'vitest/config'`) y [eslint.config.js](../../aplicacion/frontend/eslint.config.js) para asegurar compilación limpia en TypeScript 5.6 y ESLint 10.
+* **Artefactos generados:** [`ci.yml`](../../.github/workflows/ci.yml), `package.json`, `package-lock.json`, `vite.config.ts`, `eslint.config.js`.
 * **Resultado observado:** Ejecución exitosa de `npm ci`, `npm audit` (0 vulnerabilidades), `npm run lint` (0 errores, 0 advertencias), `npm run test:coverage` (46 pruebas pasadas) y `npm run build`. En backend, 50 pruebas superadas al 100%.
 * **Estado de verificación:** Aprobado ✅. Homologado localmente y en GitHub Actions.
 
@@ -415,7 +415,7 @@ Las siguientes figuras documentan las terminales de ejecución de pruebas y repo
 
 ### 5.3. Diseño y documentación técnica relacionados
 
-En cumplimiento estricto de las directrices normadas en [`reglas_documentacion_diseño.md`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/reglas_documentacion_diseño.md) (**Reglas D-1 a D-10**), el incremento del Sprint 01 fue respaldado con los siguientes artefactos de diseño técnico formalmente vinculados:
+En cumplimiento estricto de las directrices normadas en [`reglas_documentacion_diseño.md`](../../reglas_documentacion_diseño.md) (**Reglas D-1 a D-10**), el incremento del Sprint 01 fue respaldado con los siguientes artefactos de diseño técnico formalmente vinculados:
 1. **Contratos de API REST (Regla D-3):** Los 8 endpoints construidos (`/health`, `/health/db`, `/auth/otp/request`, `/verify`, `/resend`, `/curriculum/courses`, `/courses/{id}`, `/courses/{id}/topics`) se encuentran especificados a nivel de esquemas JSON tipados Pydantic, métodos HTTP y códigos canónicos de error en la Sección 5 de [`docs/diseño/INFORME_GENERAL_SPRINT_01.md`](INFORME_GENERAL_SPRINT_01.md).
 2. **Diccionario Físico de Datos y RLS (Regla D-4):** Las estructuras DDL de las tablas `asignaturas`, `temas_conceptuales` y `auth_challenges`, junto con sus índices B-Tree, restricciones de integridad y políticas RLS se detallan en la Sección 6 de `INFORME_GENERAL_SPRINT_01.md`.
 3. **Mapeo de Transformación de Datos y Errores (Regla D-8):** La correspondencia biunívoca de campos entre columnas PostgreSQL, modelos SQLAlchemy, esquemas Pydantic, contratos JSON, interfaces TypeScript y estados React se encuentra tabulada en el Cuadro 7.1 del informe general.
@@ -436,18 +436,18 @@ A continuación, se presenta la matriz de trazabilidad que relaciona las suites 
 
 | ID del catálogo / prueba técnica | Tarea / PBI / requisito | Escenario y tipo de prueba | Resultado esperado | Resultado observado y estado | Evidencia / reporte |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `CP-AUT-01` (Mapeo técnico) | `T-03` / `PB-002` / `RF01` | Petición con correo institucional `@upt.pe` válido. Unitaria API. | HTTP 200 con `challenge_id`, `expires_at` y cooldown de 60 s. | HTTP 200 retornado con UUIDv4 válido. Aprobado ✅. | [`tests/test_auth.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/tests/test_auth.py) |
-| `CP-AUT-02` (Mapeo técnico) | `T-03` / `PB-002` / `RF01` | Petición con dominio no institucional (ej. `@gmail.com`). Regla. | HTTP 400 con código interno `NON_UPT_DOMAIN`. | HTTP 400 Bad Request verificado. Aprobado ✅. | [`tests/test_auth.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/tests/test_auth.py) |
-| `CP-AUT-03` (Mapeo técnico) | `T-03` / `PB-002` / `CUS01` | Reenvío de código antes de cumplir los 60 s. Lógica de negocio. | HTTP 400 con código interno `COOLDOWN_ACTIVE`. | HTTP 400 verificado; reenvío bloqueado. Aprobado ✅. | [`tests/test_auth.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/tests/test_auth.py) |
-| `CP-AUT-04` (Mapeo técnico) | `T-03` / `PB-002` / `RN-01` | Verificación de código OTP expirado ($T > 5\text{ min}$). Lógica. | HTTP 400 con código interno `OTP_EXPIRED`. | HTTP 400 verificado. Aprobado ✅. | [`tests/test_auth.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/tests/test_auth.py) |
-| `CP-AUT-05` (Mapeo técnico) | `T-03` / `PB-002` / `RN-01` | Intento de reutilizar un código OTP ya consumido. Seguridad. | HTTP 400 con código interno `OTP_ALREADY_USED`. | HTTP 400 verificado; token reusado rechazado. Aprobado ✅. | [`tests/test_auth.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/tests/test_auth.py) |
-| `CP-AUT-06` (Mapeo técnico) | `T-03` / `PB-002` / `RNF01` | Verificación exitosa de código numérico válido y vigente. API. | HTTP 200 con JWT HS256 y `expires_in: 28800` (8 h). | HTTP 200 retornado con token válido. Aprobado ✅. | [`tests/test_auth.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/tests/test_auth.py) |
-| `CP-CAT-01` (Mapeo técnico) | `T-09` / `PB-006` / `RF05` | Consulta de materias formativas activas. Integración ORM. | Array con exactamente las 5 materias filtro formativas. | 5 materias recuperadas (`CI-101` a `BD-402`). Aprobado ✅. | [`tests/test_curriculum.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/tests/test_curriculum.py) |
-| `CP-CAT-02` (Mapeo técnico) | `T-09` / `PB-006` / `CUS21` | Consulta de temario silábico de una materia por ID. Integración. | Array con los temas conceptuales de la asignatura. | Temas conceptuales silábicos devueltos con éxito. Aprobado ✅. | [`tests/test_curriculum.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/tests/test_curriculum.py) |
-| `CP-INF-01` (Mapeo técnico) | `T-01` / `PB-001` / `RNF09` | Comprobación de salud de base de datos (`/health/db`). Integración. | HTTP 200, `database: connected` y latencia en ms. | HTTP 200 verificado contra Supabase. Aprobado ✅. | [`tests/test_health.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/tests/test_health.py) |
-| `CP-SEC-01` (Mapeo técnico) | `T-03` / `PB-002` / `RNF01` | Decodificación de token JWT alterado o firma espuria. Criptografía. | Función retorna `None` sin colapsar el servicio. | Token adulterado rechazado de forma segura. Aprobado ✅. | [`tests/test_security.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/tests/test_security.py) |
-| `CP-UI-01` (Mapeo técnico) | `T-02` / `PB-002` / `RF01` | Renderizado interactivo y validación de correo `@upt.pe`. Componente. | Mensaje de error visual si el correo es inválido. | Validación en DOM virtual reactiva. Aprobado ✅. | [`src/components/__tests__/LoginOtpView.test.tsx`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/frontend/src/components/__tests__/LoginOtpView.test.tsx) |
-| `CP-UI-02` (Mapeo técnico) | `T-09` / `PB-006` / `RF05` | Selección interactiva de curso y visualización de temas. Componente. | Renderiza lista de temas al pulsar en una materia. | Temario silábico desplegado en UI. Aprobado ✅. | [`src/components/__tests__/CurriculumCatalogView.test.tsx`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/frontend/src/components/__tests__/CurriculumCatalogView.test.tsx) |
+| `CP-AUT-01` (Mapeo técnico) | `T-03` / `PB-002` / `RF01` | Petición con correo institucional `@upt.pe` válido. Unitaria API. | HTTP 200 con `challenge_id`, `expires_at` y cooldown de 60 s. | HTTP 200 retornado con UUIDv4 válido. Aprobado ✅. | [`test_auth.py`](../../aplicacion/backend/tests/test_auth.py) |
+| `CP-AUT-02` (Mapeo técnico) | `T-03` / `PB-002` / `RF01` | Petición con dominio no institucional (ej. `@gmail.com`). Regla. | HTTP 400 con código interno `NON_UPT_DOMAIN`. | HTTP 400 Bad Request verificado. Aprobado ✅. | [`test_auth.py`](../../aplicacion/backend/tests/test_auth.py) |
+| `CP-AUT-03` (Mapeo técnico) | `T-03` / `PB-002` / `CUS01` | Reenvío de código antes de cumplir los 60 s. Lógica de negocio. | HTTP 400 con código interno `COOLDOWN_ACTIVE`. | HTTP 400 verificado; reenvío bloqueado. Aprobado ✅. | [`test_auth.py`](../../aplicacion/backend/tests/test_auth.py) |
+| `CP-AUT-04` (Mapeo técnico) | `T-03` / `PB-002` / `RN-01` | Verificación de código OTP expirado ($T > 5\text{ min}$). Lógica. | HTTP 400 con código interno `OTP_EXPIRED`. | HTTP 400 verificado. Aprobado ✅. | [`test_auth.py`](../../aplicacion/backend/tests/test_auth.py) |
+| `CP-AUT-05` (Mapeo técnico) | `T-03` / `PB-002` / `RN-01` | Intento de reutilizar un código OTP ya consumido. Seguridad. | HTTP 400 con código interno `OTP_ALREADY_USED`. | HTTP 400 verificado; token reusado rechazado. Aprobado ✅. | [`test_auth.py`](../../aplicacion/backend/tests/test_auth.py) |
+| `CP-AUT-06` (Mapeo técnico) | `T-03` / `PB-002` / `RNF01` | Verificación exitosa de código numérico válido y vigente. API. | HTTP 200 con JWT HS256 y `expires_in: 28800` (8 h). | HTTP 200 retornado con token válido. Aprobado ✅. | [`test_auth.py`](../../aplicacion/backend/tests/test_auth.py) |
+| `CP-CAT-01` (Mapeo técnico) | `T-09` / `PB-006` / `RF05` | Consulta de materias formativas activas. Integración ORM. | Array con exactamente las 5 materias filtro formativas. | 5 materias recuperadas (`CI-101` a `BD-402`). Aprobado ✅. | [`test_curriculum.py`](../../aplicacion/backend/tests/test_curriculum.py) |
+| `CP-CAT-02` (Mapeo técnico) | `T-09` / `PB-006` / `CUS21` | Consulta de temario silábico de una materia por ID. Integración. | Array con los temas conceptuales de la asignatura. | Temas conceptuales silábicos devueltos con éxito. Aprobado ✅. | [`test_curriculum.py`](../../aplicacion/backend/tests/test_curriculum.py) |
+| `CP-INF-01` (Mapeo técnico) | `T-01` / `PB-001` / `RNF09` | Comprobación de salud de base de datos (`/health/db`). Integración. | HTTP 200, `database: connected` y latencia en ms. | HTTP 200 verificado contra Supabase. Aprobado ✅. | [`test_health.py`](../../aplicacion/backend/tests/test_health.py) |
+| `CP-SEC-01` (Mapeo técnico) | `T-03` / `PB-002` / `RNF01` | Decodificación de token JWT alterado o firma espuria. Criptografía. | Función retorna `None` sin colapsar el servicio. | Token adulterado rechazado de forma segura. Aprobado ✅. | [`test_security.py`](../../aplicacion/backend/tests/test_security.py) |
+| `CP-UI-01` (Mapeo técnico) | `T-02` / `PB-002` / `RF01` | Renderizado interactivo y validación de correo `@upt.pe`. Componente. | Mensaje de error visual si el correo es inválido. | Validación en DOM virtual reactiva. Aprobado ✅. | [`LoginOtpView.test.tsx`](../../aplicacion/frontend/src/components/__tests__/LoginOtpView.test.tsx) |
+| `CP-UI-02` (Mapeo técnico) | `T-09` / `PB-006` / `RF05` | Selección interactiva de curso y visualización de temas. Componente. | Renderiza lista de temas al pulsar en una materia. | Temario silábico desplegado en UI. Aprobado ✅. | [`CurriculumCatalogView.test.tsx`](../../aplicacion/frontend/src/components/__tests__/CurriculumCatalogView.test.tsx) |
 
 Fuente: Hoja de ruta del catálogo de pruebas (`docs/analisis/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx`) y suites de prueba automatizadas en `aplicacion/backend/tests/` y `aplicacion/frontend/src/`.
 
@@ -645,8 +645,8 @@ El Cuadro 11.1 certifica que el inventario de evidencias visuales está completo
 
 * **Reporte de Cobertura Backend:** Generado automáticamente por pytest-cov en `aplicacion/backend/coverage.xml` (50 pruebas, 91.62% cobertura).
 * **Reporte de Cobertura Frontend:** Generado automáticamente por @vitest/coverage-v8 en `aplicacion/frontend/coverage/` (46 pruebas, 83.47% líneas).
-* **Script de Seguridad de Base de Datos:** [`aplicacion/backend/scripts/supabase_rls_setup.sql`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/scripts/supabase_rls_setup.sql) (DDL y políticas RLS).
-* **Migración de Base de Datos:** [`aplicacion/backend/app/db/migrations/versions/001_initial_curriculum_and_auth.py`](file:///C:/Users/HP/Desktop/sistemap2p/sistema_web_p2p/aplicacion/backend/app/db/migrations/versions/001_initial_curriculum_and_auth.py).
+* **Script de Seguridad de Base de Datos:** [`supabase_rls_setup.sql`](../../aplicacion/backend/scripts/supabase_rls_setup.sql) (DDL y políticas RLS).
+* **Migración de Base de Datos:** [`001_initial_curriculum_and_auth.py`](../../aplicacion/backend/app/db/migrations/versions/001_initial_curriculum_and_auth.py).
 * **Evidencias de Integración Continua:** Registro del Workflow en [GitHub Actions Run 39331555735](https://github.com/JMedina255/sistema_web_p2p/actions/runs/39331555735).
 
 ### 11.3. Revisión antes de presentar
