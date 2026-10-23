@@ -2,9 +2,20 @@ import React, { useState } from 'react';
 import { CurriculumCatalogView } from './components/CurriculumCatalogView';
 import { HealthStatus } from './components/HealthStatus';
 import { LoginOtpView } from './components/LoginOtpView';
+import { ConsentModalView } from './components/ConsentModalView';
+import { ProfileAvailabilityView } from './components/ProfileAvailabilityView';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'auth' | 'curriculum' | 'services'>(() => { if (typeof window !== 'undefined' && window.location) { const p = new URLSearchParams(window.location.search).get('tab'); if (p === 'curriculum' || p === 'services' || p === 'auth') return p; } return 'auth'; });
+  type NavTab = 'auth' | 'consent' | 'curriculum' | 'profile' | 'services';
+  const [activeTab, setActiveTab] = useState<NavTab>(() => {
+    if (typeof window !== 'undefined' && window.location) {
+      const p = new URLSearchParams(window.location.search).get('tab');
+      if (p === 'curriculum' || p === 'services' || p === 'auth' || p === 'consent' || p === 'profile') {
+        return p;
+      }
+    }
+    return 'auth';
+  });
 
   return (
     <div
@@ -71,7 +82,7 @@ export const App: React.FC = () => {
                 border: '1px solid rgba(255, 255, 255, 0.2)',
               }}
             >
-              Sprint 1 · Hito 3 (T-02)
+              Sprint 2 · Tareas de Joan (T-04, T-10, T-11)
             </span>
             <a
               href="http://localhost:8000/docs"
@@ -92,7 +103,7 @@ export const App: React.FC = () => {
         </div>
       </header>
 
-      {/* Selector de Vistas / Pestañas de Sprint 1 */}
+      {/* Selector de Vistas / Pestañas de Sprint 2 */}
       <div
         style={{
           backgroundColor: '#FFFFFF',
@@ -105,56 +116,98 @@ export const App: React.FC = () => {
             maxWidth: '1100px',
             margin: '0 auto',
             display: 'flex',
-            gap: '0.75rem',
+            gap: '0.5rem',
+            flexWrap: 'wrap',
           }}
         >
           <button
+            type="button"
             onClick={() => setActiveTab('auth')}
             style={{
               background: activeTab === 'auth' ? '#1C2A59' : '#F1F5F9',
               color: activeTab === 'auth' ? '#FFFFFF' : '#475569',
               border: 'none',
               borderRadius: '6px',
-              padding: '0.5rem 1.1rem',
-              fontSize: '0.84rem',
+              padding: '0.5rem 1rem',
+              fontSize: '0.82rem',
               fontWeight: 600,
               cursor: 'pointer',
               transition: 'all 0.2s',
             }}
           >
-            🔐 Acceso & OTP de Prueba (T-02)
+            🔐 Acceso & OTP (T-02)
           </button>
+
           <button
+            type="button"
+            onClick={() => setActiveTab('consent')}
+            style={{
+              background: activeTab === 'consent' ? '#1C2A59' : '#F1F5F9',
+              color: activeTab === 'consent' ? '#FFFFFF' : '#475569',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '0.5rem 1rem',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            ⚖️ Consentimiento Ley 29733 (T-04)
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab('curriculum')}
             style={{
               background: activeTab === 'curriculum' ? '#1C2A59' : '#F1F5F9',
               color: activeTab === 'curriculum' ? '#FFFFFF' : '#475569',
               border: 'none',
               borderRadius: '6px',
-              padding: '0.5rem 1.1rem',
-              fontSize: '0.84rem',
+              padding: '0.5rem 1rem',
+              fontSize: '0.82rem',
               fontWeight: 600,
               cursor: 'pointer',
               transition: 'all 0.2s',
             }}
           >
-            📚 Catálogo Curricular (T-09)
+            📚 Catálogo Curricular (T-10)
           </button>
+
           <button
+            type="button"
+            onClick={() => setActiveTab('profile')}
+            style={{
+              background: activeTab === 'profile' ? '#1C2A59' : '#F1F5F9',
+              color: activeTab === 'profile' ? '#FFFFFF' : '#475569',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '0.5rem 1rem',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            👤 Perfil & Disponibilidad (T-11)
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab('services')}
             style={{
               background: activeTab === 'services' ? '#1C2A59' : '#F1F5F9',
               color: activeTab === 'services' ? '#FFFFFF' : '#475569',
               border: 'none',
               borderRadius: '6px',
-              padding: '0.5rem 1.1rem',
-              fontSize: '0.84rem',
+              padding: '0.5rem 1rem',
+              fontSize: '0.82rem',
               fontWeight: 600,
               cursor: 'pointer',
               transition: 'all 0.2s',
             }}
           >
-            🛰️ Monitor de Servicios & BD (T-01)
+            🛰️ Monitor de Servicios (T-01)
           </button>
         </div>
       </div>
@@ -166,7 +219,7 @@ export const App: React.FC = () => {
           maxWidth: '1100px',
           width: '100%',
           margin: '0 auto',
-          padding: '2.5rem 1.5rem',
+          padding: '2rem 1.5rem',
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -181,21 +234,29 @@ export const App: React.FC = () => {
               marginBottom: '0.5rem',
             }}
           >
-            Sprint 1 · Construcción de Software I (2026-II)
+            Sprint 2 · Construcción de Software I (2026-II)
           </span>
-          <h2 style={{ fontSize: '1.8rem', color: '#1C2A59', margin: '0 0 0.5rem 0', fontWeight: 800 }}>
+          <h2 style={{ fontSize: '1.75rem', color: '#1C2A59', margin: '0 0 0.5rem 0', fontWeight: 800 }}>
             {activeTab === 'auth'
               ? 'Interfaz de Acceso Institucional y Desafío OTP'
+              : activeTab === 'consent'
+              ? 'Consentimiento Informado Digital — Ley N° 29733 (T-04)'
               : activeTab === 'curriculum'
-              ? 'Catálogo Curricular y Materias Filtro EPIS-UPT'
+              ? 'Consulta Avanzada del Catálogo Curricular EPIS-UPT (T-10)'
+              : activeTab === 'profile'
+              ? 'Configuración de Perfil Formativo y Disponibilidad Horaria (T-11)'
               : 'Infraestructura Base: React + FastAPI + Supabase'}
           </h2>
-          <p style={{ margin: '0 auto', maxWidth: '640px', fontSize: '0.92rem', color: '#64748B', lineHeight: 1.6 }}>
+          <p style={{ margin: '0 auto', maxWidth: '680px', fontSize: '0.88rem', color: '#64748B', lineHeight: 1.6 }}>
             {activeTab === 'auth'
-              ? 'Validación del flujo de dos pasos: comprobación de dominio @upt.pe, desafío OTP temporal de 6 dígitos con vigencia de 5 minutos y emisión de JWT de sesión (RF01 / CUS01 / RNF01).'
+              ? 'Validación del flujo de dos pasos: comprobación de dominio @upt.pe y desafío OTP temporal de 6 dígitos con emisión de JWT.'
+              : activeTab === 'consent'
+              ? 'Formalización obligatoria de la política institucional de privacidad y tratamiento de datos personales conforme a la Ley N° 29733 (RF02 / CUS01 / RN-02).'
               : activeTab === 'curriculum'
-              ? 'Visualización interactiva de las 5 materias críticas y árbol de temas silábicos requeridos para el motor de recomendación Top-k (RF05 / CUS21).'
-              : 'Monitoreo de comunicación asíncrona entre la SPA cliente (React 19 / TypeScript / Vite), el backend RESTful (FastAPI) y PostgreSQL (Supabase).'
+              ? 'Búsqueda en tiempo real por materias filtro, código y temas silábicos para el motor de recomendación Top-k (RF05 / CUS21).'
+              : activeTab === 'profile'
+              ? 'Selección de intereses/fortalezas y agenda semanal en bloques de 1 hora con validación de mérito RN-03 (RF04 / CUS15).'
+              : 'Monitoreo de comunicación asíncrona entre la SPA cliente (React 19 / TypeScript / Vite), FastAPI y Supabase.'
             }
           </p>
         </div>
@@ -203,19 +264,23 @@ export const App: React.FC = () => {
         {/* Renderizado condicional según pestaña */}
         {activeTab === 'auth' ? (
           <LoginOtpView />
+        ) : activeTab === 'consent' ? (
+          <ConsentModalView />
         ) : activeTab === 'curriculum' ? (
           <CurriculumCatalogView />
+        ) : activeTab === 'profile' ? (
+          <ProfileAvailabilityView />
         ) : (
           <HealthStatus />
         )}
 
-        {/* Bloque informativo de especificaciones del sprint */}
+        {/* Bloque informativo de especificaciones del sprint 2 */}
         <div
           style={{
-            maxWidth: '720px',
+            maxWidth: '920px',
             margin: '2.5rem auto 0 auto',
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
             gap: '1rem',
           }}
         >
@@ -229,10 +294,10 @@ export const App: React.FC = () => {
             }}
           >
             <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              🎯 Trazabilidad CUS01
+              ⚖️ T-04: Ley N° 29733 (RF02 / RN-02)
             </strong>
             <span style={{ color: '#64748B' }}>
-              Dominio exclusivo @upt.pe, OTP numérico de 6 dígitos con soporte de ceros iniciales.
+              Consentimiento legal previo, libre e informado. El rechazo bloquea preventivamente el acceso a la plataforma.
             </span>
           </div>
 
@@ -246,10 +311,10 @@ export const App: React.FC = () => {
             }}
           >
             <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              ⏱️ Gobernanza Temporal
+              🔍 T-10: Catálogo Avanzado (RF05 / CUS21)
             </strong>
             <span style={{ color: '#64748B' }}>
-              Vigencia estricta de 5 min (RNF01) calculada desde expires_at y cooldown de reenvío de 60s.
+              Buscador en tiempo real con filtrado profundo por código, nombre y unidades temáticas silábicas oficiales.
             </span>
           </div>
 
@@ -263,10 +328,10 @@ export const App: React.FC = () => {
             }}
           >
             <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              🔌 Adaptador Mock Dev
+              📅 T-11: Perfiles & Agenda (RF04 / CUS15)
             </strong>
             <span style={{ color: '#64748B' }}>
-              Simulación explícita para pruebas de Joan; pendiente de integración con API T-03 de Renzo.
+              Matriz interactiva semanal (L-S) y validación de mérito RN-03 (mentores en ciclos VII a X).
             </span>
           </div>
         </div>
