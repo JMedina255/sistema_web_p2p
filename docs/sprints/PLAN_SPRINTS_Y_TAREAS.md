@@ -3,11 +3,11 @@
 **Proyecto:** Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT.  
 **Repositorio de implementación:** https://github.com/JMedina255/sistema_web_p2p  
 **Equipo:** Grupo 03 — Joan Cristian Medina Quispe y Renzo Antonio Antayhua Mamani.  
-**Versión:** 1.1 — 19/10/2026 (Registro de desviación técnica a Python 3.13, fijación estricta de dependencias y conciliación de evidencias de CI).  
+**Versión:** 1.2 — 23/10/2026 (Registro de culminación y verificación de tareas de Joan T-04, T-10 y T-11 en Sprint 2).  
 **Ubicación prevista:** `docs/sprints/PLAN_SPRINTS_Y_TAREAS.md`.  
 **Tipo:** contexto operativo para el equipo y el agente de IDE; no es un reporte de ejecución.
 
-> **Alcance activo:** Sprint 1, tareas de Joan **T-01, T-02 y T-06**, mediante cuatro hitos y sus commits. T-01, T-02 y T-06 han sido completadas y verificadas (T-02 con interfaz de acceso simulado y T-06 con workflow de CI en GitHub Actions verificado). Las tareas de Renzo (T-03, T-07, T-09) y los sprints posteriores continúan pendientes de integración. No implementarlos automáticamente. No declarar cerrado todo el Sprint 1.
+> **Alcance activo:** Sprint 2, tareas de Joan **T-04, T-10 y T-11**, en la rama feat/sprint-02-roles-curriculo-perfiles (commit 3766a08). T-04 (formulario de consentimiento Ley N° 29733 con bloqueo por rechazo RN-02), T-10 (buscador curricular en tiempo real y temarios silábicos) y T-11 (perfil formativo con validación de mérito RN-03 y matriz semanal de disponibilidad 6×11) han sido completadas y verificadas con 66 pruebas en Vitest (cobertura 91.1%). Las tareas de Renzo (T-05, T-08, T-12 y T-13) continúan pendientes de integración en el backend. No declarar cerrado todo el Sprint 2.
 
 ## 1. Cómo utilizar este documento
 
@@ -418,3 +418,4 @@ El PDF cita el repositorio documental `Sistema_Web_P2P_con_algoritmo_de_recomend
 ### Historial de Revisiones del Plan
 - **Versión 1.0 (19/10/2026):** Creación inicial del plan operativo para el Sprint 1, detallando hitos H1 a H4 para las tareas de Joan (T-01, T-02 y T-06) y contextualizando las tareas de Renzo (T-03, T-07 y T-09).
 - **Versión 1.1 (19/10/2026):** Registro formal de la desviación técnica justificada de Python 3.11 a Python 3.13 (versión comprobada en entorno virtual local: Python 3.13.5; en CI: 3.13), formalización de dependencias fijadas con versiones exactas (`==`) en `requirements.txt` y conciliación de evidencias tras la ejecución exitosa del workflow de GitHub Actions (commit `8f8a75c5d0d75d897c0e306be0f870af99034447`, run `39331555735`).
+- **Versión 1.2 (23/10/2026):** Culminación y verificación de las tareas de Joan para el Sprint 2 (T-04, T-10 y T-11) en la rama feat/sprint-02-roles-curriculo-perfiles, alcanzando 66 pruebas automatizadas en Vitest con 91.1% de cobertura y publicación al repositorio remoto (commit 3766a08).
