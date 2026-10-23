@@ -3,7 +3,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { CurriculumCatalogView } from '../CurriculumCatalogView';
 import * as apiClient from '../../services/apiClient';
 
-describe('CurriculumCatalogView Component (T-09 / CUS21 / RF05)', () => {
+describe('CurriculumCatalogView Component (T-09 / T-10 / CUS21 / RF05)', () => {
   const mockCourses: apiClient.Course[] = [
     {
       id_asignatura: 1,
@@ -96,7 +96,24 @@ describe('CurriculumCatalogView Component (T-09 / CUS21 / RF05)', () => {
     });
   });
 
-  it('3. Muestra mensaje de error amigable cuando la llamada al API falla', async () => {
+  it('3. Filtra interactivamente por campo de búsqueda textual (T-10 / RF05)', async () => {
+    vi.spyOn(apiClient, 'fetchCourses').mockResolvedValue(mockCourses);
+    vi.spyOn(apiClient, 'fetchCourseDetail').mockResolvedValue(mockDetail);
+
+    render(<CurriculumCatalogView />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Algoritmos y Estructuras de Datos')).toBeInTheDocument();
+    });
+
+    const searchInput = screen.getByLabelText(/Buscar por curso/i);
+    fireEvent.change(searchInput, { target: { value: 'CALC' } });
+
+    expect(screen.getAllByText('Cálculo I').length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText('Algoritmos y Estructuras de Datos')).not.toBeInTheDocument();
+  });
+
+  it('4. Muestra mensaje de error amigable cuando la llamada al API falla', async () => {
     vi.spyOn(apiClient, 'fetchCourses').mockRejectedValue(new Error('Fallo de conexión'));
 
     render(<CurriculumCatalogView />);
