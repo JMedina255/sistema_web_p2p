@@ -22,11 +22,12 @@ MEDINA QUISPE, Joan Cristian (2022074255)
 | **1.0** | JCM / RAM | RVA | RVA | 11/09/2026 | Versión 1.0 preliminar de levantamiento y especificación inicial. |
 | **2.0** | JCM / RAM | RVA | Dirección EPIS | 26/09/2026 | Consolidación y congelamiento de la línea base analítica oficial (MOD-01 al MOD-08, RF01 al RF26, RN-01 al RN-14, RNF01 al RNF10, CUS01 al CUS24). Reorganización modular de narrativas por dependencia operativa, supresión de reglas ocultas, alineamiento estricto de estados canónicos con el modelo lógico y hardening continuo. |
 | **2.1** | JCM / RAM | Dr. Ricardo Valcarcel | Dirección EPIS | 19/10/2026 | Refinamiento y trazabilidad en Fase de Diseño (SRS v2.1): alineamiento técnico con la arquitectura desacoplada y cierre de requerimientos del Sprint 1 (RF01, RF05, RNF01, RNF02, RNF09, CUS01, CUS21, RN-01) respaldados empíricamente con 96 pruebas automatizadas en CI. |
+| **2.2** | JCM / RAM | Dr. Ricardo Valcarcel | Dirección EPIS | 23/10/2026 | Consolidación de Fase de Diseño y Construcción del Sprint 2 (SRS v2.2): formalización técnica y verificación empírica de Consentimiento digital bajo Ley N° 29733 (RF02, RN-02, CUS01), administración de roles y mérito académico (RF03, RN-03, CUS10), perfiles formativos y matriz de disponibilidad horaria semanal 6×11 (RF04, RNF04, RNF08, CUS15), búsqueda avanzada en catálogo curricular con temarios silábicos (RF05, CUS21) y aislamiento multiusuario con Row Level Security (RNF02), respaldados por 150 pruebas automatizadas sin fallos (>90% de cobertura en frontend y backend). |
 
 # Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT
 
 **Documento de Especificación de Requerimientos de Software**  
-**Versión 2.1 — Fase de Diseño Técnico y Trazabilidad de Construcción**
+**Versión 2.2 — Fase de Diseño Técnico y Trazabilidad de Construcción (Cierre Sprint 2)**
 
 ---
 
@@ -610,6 +611,27 @@ La matriz de trazabilidad bidireccional demuestra que el modelo de requisitos de
 1. **Ausencia de Requisitos Huérfanos:** Cada uno de los 26 requerimientos funcionales está respaldado por al menos una regla de negocio o caso de uso del sistema, y cuenta con un método de verificación formal explícito para su futura validación en la fase de pruebas (FASE 4).
 2. **Cobertura Total de Casos de Uso:** Todos los casos de uso consolidados (CUS01 al CUS24) disponen de las capacidades funcionales necesarias para su ejecución, eliminando vacíos conceptuales que pudieran retrasar la fase de construcción.
 3. **Alineamiento con Atributos de Calidad (ISO/IEC 25010):** Se formaliza cómo las políticas de seguridad (RNF01, RNF02), el rendimiento algorítmico (RNF03), la usabilidad ergonómica (RNF05) y la consistencia transaccional (RNF07) impactan de manera directa en cada componente funcional del software.
+
+### Cuadro 5.6: Estado de Verificación y Madurez de Requerimientos en Fase de Diseño y Construcción (Sprints 1 y 2)
+
+A continuación, se documenta el estado de implementación y verificación empírica de los requerimientos abordados al cierre del Sprint 2:
+
+| Código | Requerimiento Funcional / No Funcional | Sprint de Construcción | Estado Técnico Actual | Evidencia Empírica de Verificación |
+| :---: | :--- | :---: | :---: | :--- |
+| **RF01** | Autenticación institucional multifactor (2FA) | Sprint 1 | **Construido y Verificado** ✅ | Flujo OTP con correo `@upt.pe`, cooldown 60 s, expiración 5 min y token JWT 8 h (13 pruebas Pytest / 15 pruebas Vitest). |
+| **RF02** | Formalización del consentimiento informado digital | Sprint 2 | **Construido y Verificado** ✅ | Modal accesible bajo Ley N° 29733 (`ConsentModalView.tsx`), marcas UTC e IP en BD (`consentimientos_legales`) y bloqueo perentorio RN-02 (9 tests Vitest / 5 tests Pytest). |
+| **RF03** | Gestión y asignación administrativa de roles de usuario | Sprint 2 | **Construido y Verificado** ✅ | Asignación de rol `mentoreado`, verificación estricta de mérito académico RN-03 (`ciclo >= 7`) y bloqueo de autopromoción (7 tests Pytest). |
+| **RF04** | Configuración de perfil formativo y matriz horaria | Sprint 2 | **Construido y Verificado** ✅ | Vista `ProfileAvailabilityView.tsx`, matriz semanal 6×11 (08:00 a 20:00), reemplazo atómico en BD y validación de mérito en cliente (10 tests Vitest / 11 tests Pytest). |
+| **RF05** | Gestión del catálogo de asignaturas y temarios | Sprints 1 y 2 | **Construido y Verificado** ✅ | 5 materias filtro formativas en PostgreSQL, buscador reactivo en tiempo real y exploración profunda de unidades silábicas (4 tests Vitest / 8 tests Pytest). |
+| **RNF01**| Seguridad: Autenticación multifactor y tokens JWT | Sprint 1 | **Construido y Verificado** ✅ | Tokens JWT HS256 con vigencia de 480 min (8 horas) e invalidación atómica de códigos previos. |
+| **RNF02**| Seguridad: Privacidad, aislamiento y protección RLS | Sprints 1 y 2 | **Construido y Verificado** ✅ | Row Level Security activo en 8 tablas PostgreSQL/Supabase, denegación de acceso cruzado (HTTP 403) y 0% fuga de credenciales. |
+| **RNF04**| Rendimiento: Granularidad horaria y tiempos de carga | Sprint 2 | **Construido y Verificado** ✅ | Bloques horarios estrictos de 1 hora y renderizado fluido sin latencias perceptibles. |
+| **RNF08**| Ergonomía y compatibilidad multiplataforma | Sprint 2 | **Construido y Verificado** ✅ | Atajos de selección masiva en matriz semanal (*Mañanas*, *Tardes*, *Limpiar*), diseño accesible y responsivo. |
+| **RNF09**| Calidad y cobertura de pruebas unitarias ($\ge 70\%$) | Sprints 1 y 2 | **Construido y Verificado** ✅ | **150 pruebas automatizadas sin fallos (84 backend / 66 frontend)** con cobertura superior al **90%** en ambas capas. |
+
+Fuente: Elaboración propia a partir de `docs/diseño/INFORME_GENERAL_SPRINT_02.md` y `docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_02.md`.
+
+El Cuadro 5.6 acredita que la línea base de requerimientos de los Módulos MOD-01 y MOD-02 se encuentra plenamente satisfecha en la fase de construcción, proporcionando la base de datos, los roles de usuario y las agendas horarias requeridas para acometer los algoritmos de recomendación del Sprint 3.
 
 # 6. Fase de Desarrollo
 

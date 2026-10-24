@@ -28,16 +28,17 @@ Dr. RICARDO EDUARDO VALCARCEL ALVARADO
 | **1.1** | Asistencia de Codex a solicitud del equipo | Pendiente | Pendiente | 28/09/2026 | Alineación de MOD, RF, RNF, RN y CUS con el SRS; trazabilidad arquitectónica y declaración de la fase de análisis. No constituye aprobación institucional. |
 | **1.2** | JCM / RAM | Pendiente | Pendiente | 19/10/2026 | Consolidación de la etapa de diseño arquitectónico y cierre del Sprint 1: formalización de modelos de persistencia base (ASIGNATURA_FILTRO, TEMA_CONCEPTUAL, AUTH_CHALLENGES), endpoints REST de catálogo y autenticación OTP, mitigación de riesgos RLS en Supabase y suite de 96 pruebas automatizadas. |
 | **2.0** | JCM / RAM | Dr. Ricardo Valcarcel | Dirección EPIS | 19/10/2026 | Emisión formal del Documento de Arquitectura de Software en Fase de Diseño (SAD v2.0): integración de las 10 reglas de diseño (reglas_documentacion_diseño.md), contratos exhaustivos de endpoints REST, diccionario físico PostgreSQL con DDL y RLS, máquinas de estado del dominio, mapeo entre capas, variables .env y ADRs. |
+| **2.1** | JCM / RAM | Dr. Ricardo Valcarcel | Dirección EPIS | 23/10/2026 | Consolidación arquitectónica del Sprint 2 (SAD v2.1): integración de 5 nuevas tablas en el Diccionario Físico de Datos (consentimientos_legales, roles, usuario_roles, perfiles_academicos, disponibilidades_horarias), especificación de políticas RLS para aislamiento multiusuario, contratos de endpoints de consentimiento, roles y perfiles, máquinas de estado de consentimiento y jerarquía de mérito (RN-03), registro de ADR-005 a ADR-008, y acreditación empírica con 150 pruebas automatizadas sin fallos (>90% de cobertura en ambas capas). |
 
 # Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT
 
 **Documento de Arquitectura de Software (SAD - Software Architecture Document)**<br>
-**Versión 2.0 — Fase de Diseño Técnico de Software (Cierre Sprint 1 / Inicio Sprint 2)**
+**Versión 2.1 — Fase de Diseño Técnico de Software (Cierre Sprint 2 / Preparación Sprint 3)**
 
 **Fase del ciclo de vida:** Diseño Técnico de Software y Construcción Incremental.<br>
-**Fuente de nomenclatura:** SRS FD03 v2.0, tablas 5.1–5.5 y narrativas 6.2.3.<br>
+**Fuente de nomenclatura:** SRS FD03 v2.2, tablas 5.1–5.6 y narrativas 6.2.3.<br>
 **Normativa de diseño:** Directrices de diseño prescriptivo `reglas_documentacion_diseño.md` (Reglas D-1 a D-10).<br>
-**Estado de las vistas:** Arquitectura base construida, verificada empíricamente con 96 pruebas automatizadas y desplegada con Supabase RLS.
+**Estado de las vistas:** Arquitectura construida e integrada con roles, perfiles y gobernanza, verificada empíricamente con 150 pruebas automatizadas y desplegada con Supabase RLS.
 
 ---
 
@@ -1584,9 +1585,9 @@ Fuente: Elaboración propia a partir del esquema DDL de Alembic.
 
 ### 10.3. Políticas de Seguridad a Nivel de Fila (RLS) en Supabase
 
-En cumplimiento de la **Regla D-4** y el requerimiento **RNF02**, la base de datos PostgreSQL en Supabase opera con `ROW LEVEL SECURITY` habilitado en todas sus tablas, aislando el acceso mediante roles granulares:
+En cumplimiento de la **Regla D-4** y el requerimiento **RNF02**, la base de datos PostgreSQL en Supabase opera con `ROW LEVEL SECURITY` habilitado en todas sus tablas, aislando el acceso mediante roles granulares y claims de identidad de tokens JWT:
 
-#### Cuadro 10.5: Matriz de Políticas RLS Activas en PostgreSQL
+#### Cuadro 10.5: Matriz de Políticas RLS Consolidadas en PostgreSQL (Sprints 1 y 2)
 
 | Tabla Relacional | Política RLS | Comando | Rol Objetivo | Expresión USING / WITH CHECK |
 | :--- | :--- | :---: | :--- | :--- |
@@ -1596,8 +1597,117 @@ En cumplimiento de la **Regla D-4** y el requerimiento **RNF02**, la base de dat
 | `temas_conceptuales`| `temas_admin_all` | `ALL` | `service_role` | `USING (true)` (Control total exclusivo de backend). |
 | `auth_challenges` | `auth_challenges_service_all` | `ALL` | `service_role` | `USING (true)` (Gestión de OTP restringida al backend). |
 | `auth_challenges` | `auth_challenges_deny_public`| `SELECT` | `anon`, `authenticated` | Acceso denegado: ningún cliente público puede leer códigos OTP. |
+| `consentimientos_legales` | `consent_user_isolation` | `ALL` | `authenticated` | `USING (email = (auth.jwt() ->> 'email'))` |
+| `consentimientos_legales` | `consent_service_all` | `ALL` | `service_role` | `USING (true)` |
+| `roles` | `roles_read_authenticated` | `SELECT` | `authenticated` | `USING (true)` |
+| `roles` | `roles_admin_all` | `ALL` | `service_role` | `USING (true)` |
+| `usuario_roles` | `usuario_roles_select_owner`| `SELECT` | `authenticated` | `USING (email = (auth.jwt() ->> 'email'))` |
+| `usuario_roles` | `usuario_roles_service_all` | `ALL` | `service_role` | `USING (true)` |
+| `perfiles_academicos` | `perfiles_select_owner` | `SELECT` | `authenticated` | `USING (email = (auth.jwt() ->> 'email'))` |
+| `perfiles_academicos` | `perfiles_update_owner` | `UPDATE` | `authenticated` | `USING (email = (auth.jwt() ->> 'email'))` |
+| `perfiles_academicos` | `perfiles_service_all` | `ALL` | `service_role` | `USING (true)` |
+| `disponibilidades_horarias` | `disponibilidad_owner_all` | `ALL` | `authenticated` | `USING (email = (auth.jwt() ->> 'email'))` |
+| `disponibilidades_horarias` | `disponibilidad_service_all`| `ALL` | `service_role` | `USING (true)` |
 
-Fuente: Elaboración propia a partir de `aplicacion/backend/scripts/supabase_rls_setup.sql`.
+Fuente: Elaboración propia a partir de `aplicacion/backend/scripts/supabase_rls_setup.sql` y `supabase_rls_sprint02.sql`.
+
+Como se observa en el Cuadro 10.5, las 8 tablas de la base de datos cuentan con aislamiento de filas, impidiendo que peticiones forjadas en clientes públicos accedan a perfiles, consentimientos o agendas de otros estudiantes.
+
+---
+
+### 10.4. Diccionario Físico de Datos de Tablas del Sprint 2
+
+En cumplimiento de la **Regla D-4**, a continuación se documenta la especificación física y relacional de las 5 tablas creadas en PostgreSQL 16 mediante la migración `002_roles_and_profiles.py` de Alembic:
+
+La tabla de consentimientos legales formaliza la manifestación de voluntad previa, libre e informada del estudiante en estricta conformidad con la Ley N° 29733 de Protección de Datos Personales de la República del Perú.
+
+#### Cuadro 10.6: Diccionario Físico — Tabla `consentimientos_legales`
+
+| Columna | Tipo PostgreSQL | Nulo | Clave | Default / Restricción | Propósito y Regla |
+| :--- | :--- | :---: | :---: | :--- | :--- |
+| `id_consentimiento` | `INTEGER` | NO | PK | `serial sequence` | Identificador único secuencial del registro de consentimiento. |
+| `email` | `VARCHAR(255)` | NO | — | Índice B-Tree | Correo institucional del estudiante titular. |
+| `terms_version` | `VARCHAR(50)` | NO | — | `DEFAULT '2026-II-v1.0'` | Versión normativa de las cláusulas y términos informados. |
+| `accepted` | `BOOLEAN` | NO | — | — | Estado de conformidad (`True`) o rechazo/revocación (`False`) (**RN-02**). |
+| `consented_at` | `TIMESTAMPTZ` | SÍ | — | Zona horaria UTC | Estampa temporal de formalización probatoria ante la ANPPD. |
+| `ip_address` | `VARCHAR(45)` | SÍ | — | Soporte IPv4 e IPv6 | Dirección IP de auditoría capturada al momento del consentimiento. |
+| `user_agent` | `TEXT` | SÍ | — | — | Cadena identificadora del cliente para trazabilidad legal. |
+| `created_at` | `TIMESTAMPTZ` | NO | — | `DEFAULT now()` | Marca temporal de inserción del registro en UTC. |
+
+Fuente: Elaboración propia a partir de `002_roles_and_profiles.py`.
+
+El Cuadro 10.6 especifica las columnas de trazabilidad legal requeridas para auditorías de privacidad: la persistencia de la dirección IP y la estampa UTC constituyen evidencia forense concluyente ante la Autoridad Nacional de Protección de Datos Personales, respaldando la ejecución del bloqueo perentorio establecido en la regla RN-02.
+
+A continuación, se define el catálogo maestro de roles institucionales permitidos en la plataforma para gobernar las capacidades de mentores, mentoreados y personal administrativo.
+
+#### Cuadro 10.7: Diccionario Físico — Tabla `roles`
+
+| Columna | Tipo PostgreSQL | Nulo | Clave | Default / Restricción | Propósito y Regla |
+| :--- | :--- | :---: | :---: | :--- | :--- |
+| `id_rol` | `INTEGER` | NO | PK | `serial sequence` | Identificador único del rol institucional. |
+| `nombre_rol` | `VARCHAR(50)` | NO | UNIQUE | Índice B-Tree | Denominación única (`mentoreado`, `mentor`, `administrador`). |
+| `descripcion` | `TEXT` | SÍ | — | — | Glosa de alcance de privilegios y responsabilidades. |
+
+Fuente: Elaboración propia a partir de `002_roles_and_profiles.py`.
+
+El Cuadro 10.7 estructura los tres roles canónicos del sistema (`mentoreado`, `mentor` y `administrador`), sirviendo como catálogo tipado para las relaciones de privilegios y garantizando que no se admitan denominaciones arbitrarias en las asignaciones de usuario.
+
+A continuación, se documenta la tabla intermedia asociativa que materializa la asignación de privilegios a los usuarios con control de vigencia y autor de acreditación.
+
+#### Cuadro 10.8: Diccionario Físico — Tabla `usuario_roles`
+
+| Columna | Tipo PostgreSQL | Nulo | Clave | Default / Restricción | Propósito y Regla |
+| :--- | :--- | :---: | :---: | :--- | :--- |
+| `id_usuario_rol` | `INTEGER` | NO | PK | `serial sequence` | Identificador primario de asignación de rol. |
+| `email` | `VARCHAR(255)` | NO | — | Índice B-Tree | Correo institucional del usuario titular. |
+| `id_rol` | `INTEGER` | NO | FK | `REFERENCES roles(id_rol) ON DELETE CASCADE` | Llave foránea hacia roles institucionales con integridad referencial. |
+| `fecha_asignacion`| `TIMESTAMPTZ` | NO | — | `DEFAULT now()` | Estampa temporal de acreditación del rol. |
+| `asignado_por` | `VARCHAR(255)` | SÍ | — | — | Correo del administrador responsable de la acreditación. |
+| `activo` | `BOOLEAN` | NO | — | `DEFAULT TRUE` | Bandera de vigencia (permite suspensión o revocación lógica). |
+
+Fuente: Elaboración propia. Restricción de unicidad: `CONSTRAINT uq_usuario_roles_email_rol UNIQUE(email, id_rol)`.
+
+El Cuadro 10.8 garantiza la trazabilidad administrativa al registrar quién y cuándo otorgó o revocó cada privilegio. La restricción de unicidad compuesta `uq_usuario_roles_email_rol` previene la duplicación accidental de roles para un mismo estudiante.
+
+A continuación, se formaliza la entidad de persistencia del perfil académico formativo del estudiante, incluyendo sus materias filtro seleccionadas, avance de ciclo y modalidad preferida.
+
+#### Cuadro 10.9: Diccionario Físico — Tabla `perfiles_academicos`
+
+| Columna | Tipo PostgreSQL | Nulo | Clave | Default / Restricción | Propósito y Regla |
+| :--- | :--- | :---: | :---: | :--- | :--- |
+| `id_perfil` | `INTEGER` | NO | PK | `serial sequence` | Identificador primario secuencial del perfil. |
+| `email` | `VARCHAR(255)` | NO | UNIQUE | Índice B-Tree | Correo institucional del estudiante titular. |
+| `codigo_estudiante`| `VARCHAR(20)` | SÍ | — | — | Código oficial de matrícula en la EPIS-UPT. |
+| `nombres` | `VARCHAR(100)` | SÍ | — | — | Nombres del estudiante. |
+| `apellidos` | `VARCHAR(100)` | SÍ | — | — | Apellidos paterno y materno. |
+| `ciclo_actual` | `INTEGER` | NO | — | `CHECK(ciclo BETWEEN 1 AND 10)` | Semestre lectivo actual cursado por el estudiante. |
+| `rol_postulacion` | `VARCHAR(30)` | NO | — | `DEFAULT 'mentoreado'` | Rol pretendido (`mentoreado` o `mentor`) (**RN-03**). |
+| `materias_interes`| `JSONB / TEXT` | SÍ | — | Array estructurado | Códigos de asignaturas filtro seleccionadas para tutoría. |
+| `temas_seleccionados`|`JSONB / TEXT`| SÍ | — | Array estructurado | Unidades temáticas silábicas específicas de interés formativo. |
+| `biografia` | `TEXT` | SÍ | — | — | Semblanza académica y fortalezas pedagógicas. |
+| `modalidad_preferida`|`VARCHAR(30)`| NO | — | `DEFAULT 'presencial'` | Modalidad de tutoría (`presencial`, `virtual`, `hibrida`). |
+| `updated_at` | `TIMESTAMPTZ` | NO | — | `DEFAULT now()` | Marca temporal de la última actualización del perfil. |
+
+Fuente: Elaboración propia a partir de `002_roles_and_profiles.py`.
+
+El Cuadro 10.9 detalla los atributos del perfil formativo que alimentan el algoritmo de recomendación Top-k del Sprint 3. La restricción `CHECK(ciclo_actual BETWEEN 1 AND 10)` asegura la integridad de dominio del ciclo académico en el propio motor PostgreSQL.
+
+A continuación, se define la estructura de almacenamiento de las franjas horarias semanales de disponibilidad para mentores y mentoreados.
+
+#### Cuadro 10.10: Diccionario Físico — Tabla `disponibilidades_horarias`
+
+| Columna | Tipo PostgreSQL | Nulo | Clave | Default / Restricción | Propósito y Regla |
+| :--- | :--- | :---: | :---: | :--- | :--- |
+| `id_disponibilidad`| `INTEGER` | NO | PK | `serial sequence` | Identificador primario de la franja horaria. |
+| `email` | `VARCHAR(255)` | NO | — | Índice B-Tree | Correo institucional del estudiante. |
+| `dia_semana` | `INTEGER` | NO | — | `CHECK(dia BETWEEN 1 AND 6)` | Día semanal (1 = Lunes a 6 = Sábado). |
+| `hora_inicio` | `VARCHAR(10)` | NO | — | Formato `HH:MM` (24h) | Hora de inicio del bloque comprometido. |
+| `hora_fin` | `VARCHAR(10)` | NO | — | Formato `HH:MM` (24h) | Hora de término del bloque comprometido. |
+| `created_at` | `TIMESTAMPTZ` | NO | — | `DEFAULT now()` | Timestamp de inserción del bloque horario. |
+
+Fuente: Elaboración propia a partir de `002_roles_and_profiles.py`.
+
+El Cuadro 10.10 estructura las franjas de disponibilidad semanal con una granularidad estricta de 1 hora, restringiendo los días mediante `CHECK(dia_semana BETWEEN 1 AND 6)`. La sustitución atómica integral de estos registros bajo una misma transacción previene la generación de agendas parciales inconsistentes.
 
 ---
 
@@ -1650,13 +1760,106 @@ Fuente: Elaboración propia.
 
 ---
 
+### 11.2. Máquina de Estados del Consentimiento Legal Informado (Ley N° 29733)
+
+El registro de consentimiento de la tabla `consentimientos_legales` transita por tres estados normativos en observancia de la Ley N° 29733 y la regla **RN-02**:
+
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundCorner 8
+
+state "PENDIENTE / NO_REGISTRADO\n[has_consented == False]" as C_Pendiente #FEF3C7
+state "OTORGADO / ACTIVO\n[has_consented == True && accepted == True]" as C_Otorgado #DCFCE7
+state "REVOCADO / BLOQUEADO\n[has_consented == False && accepted == False]" as C_Revocado #FEE2E2
+
+[*] --> C_Pendiente : Estudiante inicia sesión por primera vez
+C_Pendiente --> C_Otorgado : Estudiante marca checkbox y pulsa 'Aceptar'\n[POST /api/v1/consent/accept]
+C_Otorgado --> C_Revocado : Estudiante ejerce derecho de revocación\n[POST /api/v1/consent/revoke]
+C_Revocado --> C_Otorgado : Estudiante renueva conformidad expresa\n[POST /api/v1/consent/accept]
+
+C_Revocado --> [*] : Bloqueo preventivo RN-02 activo
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+A continuación, se documenta la matriz de transiciones válidas y guardas lógicas que gobiernan el ciclo de vida del consentimiento legal bajo la Ley N° 29733:
+
+#### Cuadro 11.2: Transiciones Válidas de Consentimiento Legal
+
+| Estado Origen | Estado Destino | Evento Disparador | Condición de Guarda | Actor / Componente |
+| :--- | :--- | :--- | :--- | :--- |
+| `PENDIENTE` | `OTORGADO` | Clic en "Aceptar y Continuar" | Checkbox marcado Y correo `@upt.pe` | Estudiante / `ConsentService` |
+| `OTORGADO` | `REVOCADO` | Clic en "Rechazar y Salir" | Invocación de revocación voluntaria | Estudiante / `ConsentService` |
+| `REVOCADO` | `OTORGADO` | Reaceptación de términos | Checkbox marcado Y correo `@upt.pe` | Estudiante / `ConsentService` |
+
+Fuente: Elaboración propia.
+
+El Cuadro 11.2 establece las condiciones deterministas para la adquisición y pérdida del consentimiento informado, asegurando que la revocación voluntaria surta efecto bloqueante inmediato sobre las transacciones del estudiante.
+
+**Transiciones Prohibidas:**
+* `PENDIENTE` $\rightarrow$ `REVOCADO`: No se admite revocación sin mediar otorgamiento previo.
+* `REVOCADO` $\rightarrow$ Acceso a funcionalidades del sistema: La regla **RN-02** bloquea de forma perentoria toda consulta formativa si el consentimiento no está activo.
+
+---
+
+### 11.3. Máquina de Estados de Jerarquía de Roles y Mérito Académico (RN-03)
+
+La asignación de privilegios en `usuario_roles` y `perfiles_academicos` está normada por la regla de mérito **RN-03**:
+
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundCorner 8
+
+state "MENTOREADO_BASE\n[rol == 'mentoreado']" as R_Mentoreado #DBEAFE
+state "POSTULANTE_A_MENTOR\n[rol_postulacion == 'mentor']" as R_Postulante #FEF3C7
+state "MENTOR_ACREDITADO\n[rol == 'mentor' && activo == True]" as R_Mentor #DCFCE7
+state "MENTOR_REVOCADO\n[rol == 'mentor' && activo == False]" as R_Revocado #FEE2E2
+
+[*] --> R_Mentoreado : Registro automático al verificar OTP
+R_Mentoreado --> R_Postulante : Estudiante declara intención en perfil formativo
+R_Postulante --> R_Mentor : Promoción administrativa validada\n[ciclo_actual >= 7 (RN-03)]
+R_Mentor --> R_Revocado : Revocación administrativa de tutoría\n[POST /api/v1/roles/revoke-mentor]
+R_Revocado --> R_Mentor : Readmisión supervisada por Dirección EPIS
+@enduml
+```
+
+Fuente: Elaboración propia.
+
+A continuación, se presenta la matriz formal de transiciones válidas de la jerarquía de roles sujeta a mérito formativo:
+
+#### Cuadro 11.3: Transiciones Válidas de Roles y Mérito
+
+| Estado Origen | Estado Destino | Evento Disparador | Condición de Guarda | Actor / Componente |
+| :--- | :--- | :--- | :--- | :--- |
+| `MENTOREADO` | `POSTULANTE` | Guardado en perfil formativo | Registro de perfil en UI | Estudiante en cliente |
+| `POSTULANTE` | `MENTOR` | Promoción administrativa | `ciclo_actual >= 7` verificado (**RN-03**) | Administrador EPIS / Backend |
+| `MENTOR` | `REVOCADO` | Revocación de privilegios | Acción administrativa motivada | Administrador EPIS |
+| `REVOCADO` | `MENTOR` | Readmisión de tutoría | Autorización de Dirección EPIS | Administrador EPIS |
+
+Fuente: Elaboración propia.
+
+El Cuadro 11.3 garantiza que la transición al rol de mentor quede condicionada a la verificación determinista de la regla RN-03, evitando la asignación no autorizada de responsabilidades docentes entre pares.
+
+**Transiciones Prohibidas:**
+* `POSTULANTE` $\rightarrow$ `MENTOR`: Estrictamente prohibido si `ciclo_actual < 7` (**RN-03**). Retorna HTTP 400 `MERIT_RULE_VIOLATION`.
+* `MENTOREADO` $\rightarrow$ `MENTOR`: Prohibida la autopromoción directa sin supervisión administrativa (`SELF_PROMOTION_FORBIDDEN`, HTTP 403).
+
+---
+
 ## 12. Mapeo de Transformación de Datos entre Capas y Catálogo de Errores
 
 En cumplimiento de la **Regla D-8**, se establece el mapeo determinista de datos a través de las 6 capas de la solución y el catálogo centralizado de códigos de error.
 
 ### 12.1. Transformación de Campos entre Capas Arquitectónicas
 
-#### Cuadro 12.1: Mapeo de Tipos y Campos a través de las Capas de Software
+A continuación, se detalla la matriz de correspondencia de campos y tipos de datos a través de las 6 capas arquitectónicas para los módulos base:
+
+#### Cuadro 12.1: Mapeo de Tipos y Campos — Módulos Base (Sprint 1)
 
 | Concepto | Columna PostgreSQL | Atributo SQLAlchemy | Campo Pydantic | JSON Payload | Interface TypeScript | Estado React |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -1669,22 +1872,56 @@ En cumplimiento de la **Regla D-8**, se establece el mapeo determinista de datos
 
 Fuente: Elaboración propia.
 
-### 12.2. Catálogo Centralizado de Errores Internos
+El Cuadro 12.1 formaliza las transformaciones de tipos entre la base de datos y la interfaz gráfica de usuario para el flujo de autenticación y el catálogo base, garantizando la consistencia de tipos en todo el stack.
 
-#### Cuadro 12.2: Catálogo de Códigos de Error del Backend
+A continuación, se documenta el mapeo exhaustivo entre capas para las entidades introducidas en el Sprint 2:
 
-| Código Canónico | HTTP Status | Causa Técnica | Mensaje al Usuario en Frontend |
-| :--- | :---: | :--- | :--- |
-| `INVALID_EMAIL` | 400 | Sintaxis no conforme a RFC 5322. | "Ingrese una dirección de correo electrónico válida." |
-| `NON_UPT_DOMAIN` | 400 | Dominio no coincide con `@upt.pe`. | "Acceso exclusivo para miembros institucionales @upt.pe." |
-| `COOLDOWN_ACTIVE` | 400 | Solicitud dentro de la ventana de 60 segundos. | "Debe esperar 60 segundos antes de solicitar otro código." |
-| `OTP_INVALID` | 400 | Código provisto no coincide con el registrado. | "El código de verificación es incorrecto." |
-| `OTP_EXPIRED` | 400 | `now(UTC) >= expires_at`. | "El código OTP ha expirado (5 min). Solicite uno nuevo." |
-| `OTP_ALREADY_USED` | 400 | Bandera `consumed` en verdadero. | "Este código de verificación ya ha sido utilizado." |
-| `CHALLENGE_NOT_FOUND` | 404 | UUID inexistente en base de datos. | "Desafío de verificación no encontrado." |
-| `COURSE_NOT_FOUND` | 404 | `id_asignatura` no existe en catálogo. | "La asignatura curricular no existe." |
+#### Cuadro 12.2: Mapeo de Tipos y Campos — Roles, Perfiles y Consentimiento (Sprint 2)
+
+| Concepto | Columna PostgreSQL | Atributo SQLAlchemy | Campo Pydantic | JSON Payload | Interface TypeScript | Estado React |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Email Titular** | `email` (VARCHAR(255)) | `email: Mapped[str]` | `email: EmailStr` | `"email": "est@upt.pe"` | `email: string` | `profile.email` |
+| **Consentimiento**| `accepted` (BOOLEAN) | `accepted: Mapped[bool]` | `accepted: bool` | `"has_consented": true`| `hasConsented: boolean`| `consentStatus.hasConsented` |
+| **Versión Términos**| `terms_version` (VARCHAR) | `terms_version: Mapped[str]`| `terms_version: str` | `"terms_version": "..."`| `termsVersion: string` | `termsVersion` |
+| **Estampa Consent.**| `consented_at` (TIMESTAMPTZ)| `consented_at: datetime` | `consented_at: datetime`| `"consented_at": "..."` | `consentedAt: string` | `formattedConsentDate` |
+| **Ciclo Formativo** | `ciclo_actual` (INTEGER) | `ciclo_actual: Mapped[int]` | `ciclo_actual: int` | `"ciclo_actual": 7` | `cicloActual: number` | `profile.cicloActual` |
+| **Rol Postulación**| `rol_postulacion` (VARCHAR) | `rol_postulacion: str` | `rol_postulacion: Literal`| `"rol_postulacion": "mentor"`| `rolPostulacion: string`| `selectedRole` |
+| **Día de Semana** | `dia_semana` (INTEGER) | `dia_semana: Mapped[int]` | `dia_semana: int` | `"dia_semana": 1` | `diaSemana: number` | `slot.diaSemana` |
+| **Hora Inicio** | `hora_inicio` (VARCHAR(10))| `hora_inicio: Mapped[str]`| `hora_inicio: str` | `"hora_inicio": "08:00"`| `horaInicio: string` | `slot.horaInicio` |
 
 Fuente: Elaboración propia.
+
+El Cuadro 12.2 elimina cualquier ambigüedad de nombrado o formato para roles, perfiles y disponibilidad horaria, permitiendo que el desarrollador identifique con precisión los tipos de datos en frontend y backend.
+
+---
+
+### 12.2. Catálogo Centralizado de Errores Internos
+
+A continuación, se formaliza el catálogo centralizado de códigos de error unificados que garantiza respuestas uniformes en toda la API:
+
+#### Cuadro 12.3: Catálogo de Códigos de Error del Backend (Consolidado Sprints 1 y 2)
+
+| Código Canónico | HTTP Status | Causa Técnica | Mensaje al Usuario en Frontend | Regla Vinculada |
+| :--- | :---: | :--- | :--- | :---: |
+| `INVALID_EMAIL` | 400 | Sintaxis no conforme a RFC 5322. | "Ingrese una dirección de correo electrónico válida." | `RF01` |
+| `NON_UPT_DOMAIN` | 400 | Dominio no coincide con `@upt.pe`. | "Acceso exclusivo para miembros institucionales @upt.pe." | `RN-01` |
+| `COOLDOWN_ACTIVE` | 400 | Solicitud dentro de la ventana de 60 segundos. | "Debe esperar 60 segundos antes de solicitar otro código." | `CUS01` |
+| `OTP_INVALID` | 400 | Código provisto no coincide con el registrado. | "El código de verificación es incorrecto." | `RN-01` |
+| `OTP_EXPIRED` | 400 | `now(UTC) >= expires_at`. | "El código OTP ha expirado (5 min). Solicite uno nuevo." | `RN-01` |
+| `OTP_ALREADY_USED` | 400 | Bandera `consumed` en verdadero. | "Este código de verificación ya ha sido utilizado." | `RN-01` |
+| `MERIT_RULE_VIOLATION` | 400 | Intento de promoción a mentor con `ciclo_actual < 7`. | "Para ser mentor debe cursar el séptimo ciclo o superior (ciclo_actual >= 7)." | `RN-03` |
+| `SELF_PROMOTION_FORBIDDEN` | 403 | Autopromoción directa sin rol de administrador. | "No puede autopromoverse a mentor sin supervisión administrativa." | `RF03`, `RNF02` |
+| `FORBIDDEN_CROSS_ACCESS` | 403 | Intento de consultar o alterar perfiles ajenos. | "Acceso denegado: no tiene privilegios para acceder a los datos de otro usuario." | `RNF02` |
+| `CONSENT_REVOKED` | 403 | Petición transaccional con consentimiento revocado. | "Operación bloqueada: debe aceptar el consentimiento informado Ley N° 29733." | `RN-02` |
+| `UNAUTHORIZED_TOKEN` | 401 | Token JWT ausente, expirado o con firma espuria. | "Sesión inválida o expirada. Por favor inicie sesión nuevamente." | `RNF01` |
+| `CHALLENGE_NOT_FOUND` | 404 | UUID de desafío inexistente en persistencia. | "Desafío de verificación no encontrado." | `RF01` |
+| `COURSE_NOT_FOUND` | 404 | `id_asignatura` inexistente en catálogo oficial. | "La asignatura curricular solicitada no existe." | `RF05` |
+| `INVALID_TIME_RANGE` | 422 | `hora_inicio >= hora_fin` o formato horario ilegal. | "Rango horario inválido: la hora de inicio debe preceder a la de fin." | `RNF04` |
+| `OVERLAPPING_TIME_SLOTS`| 422 | Solapamiento de bloques en el mismo día. | "No se admiten franjas horarias duplicadas o solapadas." | `RNF04` |
+
+Fuente: Elaboración propia.
+
+El Cuadro 12.3 asegura que toda denegación o rechazo transaccional retorne un payload predecible con código canónico y mensaje en lenguaje natural comprensible por el estudiante.
 
 ---
 
@@ -1716,8 +1953,14 @@ En cumplimiento de la **Regla D-10**, se formalizan las decisiones de arquitectu
 * **ADR-002 (Autenticación OTP Institucional con Tokens JWT HS256):** Desafío numérico temporal de 6 dígitos sin contraseñas persistentes, emitiendo JWT con expiración de 8 horas (**RNF01**). Cumple con la Ley N° 29733 de Protección de Datos Personales.
 * **ADR-003 (Persistencia PostgreSQL en Supabase con RLS):** Base de datos PostgreSQL 16 con políticas de seguridad a nivel de fila (`ROW LEVEL SECURITY`), aislando el acceso entre roles públicos y el backend (`service_role`).
 * **ADR-004 (Migraciones Declarativas Versionadas con Alembic):** Control de versiones del esquema DDL con sincronización automática de secuencias PostgreSQL (`setval`) tras la inserción de semillas curriculares.
+* **ADR-005 (Gobernanza de Consentimiento Digital Desacoplado bajo Ley N° 29733):** Persistencia en `consentimientos_legales` con marcas UTC, IP de auditoría y versión normativa (`2026-II-v1.0`), vinculada al bloqueo preventivo **RN-02**.
+* **ADR-006 (Control Estricto de Mérito Académico RN-03 en Capa de Servicios):** Verificación determinista en `RoleService.promote_to_mentor()` que exige `ciclo_actual >= 7` y rechaza con HTTP 400 `MERIT_RULE_VIOLATION`.
+* **ADR-007 (Persistencia Atómica por Reemplazo Completo de Matriz Horaria):** Sustitución integral de la agenda semanal en una sola transacción ACID (`DELETE WHERE email` seguido de inserción en bloque) para prevenir inconsistencias intermedias.
+* **ADR-008 (Defensa en Profundidad: Autorización Dual JWT y Supabase RLS):** Validación de sujeto titular en endpoints de FastAPI combinada con políticas RLS `USING (email = (auth.jwt() ->> 'email'))` en PostgreSQL.
 
-### 14.2. Transaccionalidad de la Operación "Solicitar Nuevo OTP"
+### 14.2. Transaccionalidad de Operaciones Críticas
+
+En concordancia con la Regla D-10.2, a continuación se desglosa la secuencia transaccional de la emisión de desafíos temporales OTP, garantizando la invalidación atómica de solicitudes previas y el respeto del tiempo de enfriamiento (cooldown).
 
 #### Cuadro 14.1: Matriz de Transaccionalidad — Solicitud de Desafío OTP
 
@@ -1732,25 +1975,51 @@ En cumplimiento de la **Regla D-10**, se formalizan las decisiones de arquitectu
 
 Fuente: Elaboración propia.
 
+El Cuadro 14.1 evidencia que la invalidación de códigos OTP anteriores y la persistencia del nuevo desafío operan bajo una única transacción relacional en PostgreSQL, garantizando la observancia de la regla de negocio RN-01 y evitando la existencia de múltiples credenciales activas simultáneas.
+
+---
+
+A continuación, se documenta la transaccionalidad de la actualización de la matriz semanal de disponibilidad horaria, detallando la estrategia de sustitución atómica orientada a prevenir estados intermedios inconsistentes.
+
+#### Cuadro 14.2: Matriz de Transaccionalidad — Actualización de Matriz de Disponibilidad Semanal
+
+| Paso | Operación Realizada | Ámbito Transaccional | Comportamiento ante Fallo |
+| :---: | :--- | :---: | :--- |
+| **1** | Validación sintáctica y de rango (`HH:MM`, día 1..6, inicio < fin) | Lógica en memoria | Retorna HTTP 422; no abre transacción. |
+| **2** | Verificación de identidad y autorización de sujeto (Bearer JWT) | Router FastAPI | Retorna HTTP 401 / 403; no abre transacción. |
+| **3** | Apertura de transacción relacional (`session.begin()`) | Transacción DB | Si falla, aborta la operación limpiamente. |
+| **4** | Purga de franjas horarias previas (`DELETE WHERE email = ...`) | Escritura en Tx | Rollback automático completo. |
+| **5** | Inserción por lotes de nuevos bloques semanales | Escritura en Tx | Rollback completo si cualquier slot es inválido. |
+| **6** | Confirmación transaccional (`session.commit()`) | Commit | Si falla el commit, los registros previos se restauran. |
+
+Fuente: Elaboración propia.
+
+El Cuadro 14.2 corrobora que el reemplazo de las franjas horarias semanales se ejecuta de forma atómica e íntegra, de modo que ante cualquier falla en la validación o escritura de un bloque individual, la base de datos revierte automáticamente al estado previo sin pérdida de información.
+
 ---
 
 ## 15. Calidad y Métricas de Verificación Empírica
 
-A diferencia de la fase de análisis (donde los escenarios de calidad constituían verificaciones hipotéticas futuras), en la **fase de diseño y cierre del Sprint 1** las métricas han sido **demostradas y verificadas empíricamente mediante 96 pruebas automatizadas**:
+Al cierre del Sprint 2, la totalidad de los atributos de calidad de software y requerimientos no funcionales han sido **demostrados y acreditados empíricamente mediante 150 pruebas automatizadas**:
 
-#### Cuadro 15.1: Matriz de Verificación Empírica de Atributos de Calidad
+#### Cuadro 15.1: Matriz de Verificación Empírica de Atributos de Calidad (Sprint 2 Consolidado)
 
-| Atributo de Calidad | Métrica Exigida | Evidencia Empírica Obtenida en Sprint 1 | Dictamen |
+| Atributo de Calidad | Métrica Exigida | Evidencia Empírica Obtenida al Cierre del Sprint 2 | Dictamen |
 | :--- | :--- | :--- | :---: |
 | **Seguridad de Acceso (RNF01)** | OTP $\le 5\text{ min}$, JWT de 8 h continuas. | Verificado en `test_auth.py` y `test_security.py` con tokens de 480 min. | ✅ Cumplido |
-| **Privacidad de Datos (RNF02)** | Aislamiento RLS en PostgreSQL/Supabase. | Script `supabase_rls_setup.sql` aplicado con bloqueo de lectura a anónimos. | ✅ Cumplido |
-| **Mantenibilidad y Calidad (RNF09)**| Cobertura de pruebas unitarias $\ge 70.0\%$. | **Backend: 91.62%** · **Frontend: 93.81%** (96 tests aprobados en CI). | ✅ Superado |
-| **Disponibilidad de API (RNF06)** | Tolerancia a fallos de persistencia. | Verificado en `test_health.py`: `/health` opera con HTTP 200 sin base de datos. | ✅ Cumplido |
-| **Sanitización de Errores (RNF02)** | Cero fuga de credenciales en trazas. | Verificado en `test_session.py`: passwords enmascaradas con `***`. | ✅ Cumplido |
-| **Integridad de Código** | Cero infracciones de linteo y compilación. | 0 errores en Ruff (Python), 0 en ESLint y Vite build exitoso en 595 ms. | ✅ Cumplido |
+| **Privacidad y Aislamiento (RNF02)**| Row Level Security en PostgreSQL/Supabase. | Verificado en `test_authorization.py` (11 tests): rechazo 403 en acceso cruzado y RLS activo en 8 tablas. | ✅ Cumplido |
+| **Mantenibilidad y Calidad (RNF09)**| Cobertura de pruebas automatizadas $\ge 70.0\%$. | **Backend: 90.64%** (84 tests) · **Frontend: 91.10%** (66 tests). Total: **150 pruebas sin fallos**. | ✅ Superado (+20.8%) |
+| **Rendimiento de Interfaz (RNF04)** | Granularidad horaria y fluidez de UI. | Matriz 6×11 de 1 hora renderizada fluidamente y procesada en lote mediante reemplazo atómico en BD. | ✅ Cumplido |
+| **Ergonomía de Uso (RNF08)** | Usabilidad en selección de disponibilidad. | Atajos rápidos (*Mañanas*, *Tardes*, *Limpiar*) verificados en `ProfileAvailabilityView.test.tsx`. | ✅ Cumplido |
+| **Disponibilidad de API (RNF06)** | Tolerancia a fallos de persistencia. | Verificado en `test_health.py`: `/health` opera con HTTP 200 sin base de datos conectada. | ✅ Cumplido |
+| **Sanitización de Errores** | Cero fuga de credenciales en trazas. | Verificado en `test_session.py`: passwords enmascaradas con `***`. | ✅ Cumplido |
+| **Calidad Estática de Código** | 0 infracciones de linteo y formato. | 0 errores en Ruff (49 archivos formateados) y 0 errores en ESLint 9. | ✅ Cumplido |
+| **Compilación de Producción** | Empaquetado limpio sin errores de tipado. | `tsc -b && vite build` ejecutado en 602 ms (43 módulos transformados). | ✅ Cumplido |
 
-Fuente: Elaboración propia a partir de suites de pruebas ejecutadas en GitHub Actions.
+Fuente: Elaboración propia a partir de suites de pruebas ejecutadas en Vitest y Pytest.
+
+El Cuadro 15.1 ratifica la consistencia arquitectónica y la madurez técnica del sistema al término del Sprint 2, certificando que los requerimientos no funcionales de seguridad, disponibilidad, mantenibilidad y ergonomía cuentan con verificación empírica auditable y reproducible.
 
 ---
-*Fin del documento — Documento de Arquitectura de Software (SAD - Versión 2.0 / Fase de Diseño).*
+*Fin del documento — Documento de Arquitectura de Software (SAD - Versión 2.1 / Fase de Diseño y Construcción).*
 

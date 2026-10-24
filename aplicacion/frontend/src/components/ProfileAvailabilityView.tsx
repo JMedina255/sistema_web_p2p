@@ -40,7 +40,13 @@ export const ProfileAvailabilityView: React.FC<ProfileAvailabilityViewProps> = (
   const [profile, setProfile] = useState<AcademicProfile | null>(null);
   const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
-  const [activeSection, setActiveSection] = useState<'profile' | 'schedule'>('profile');
+  const [activeSection, setActiveSection] = useState<'profile' | 'schedule'>(() => {
+    if (typeof window !== 'undefined' && window.location) {
+      const s = new URLSearchParams(window.location.search).get('section');
+      if (s === 'schedule' || s === 'profile') return s;
+    }
+    return 'profile';
+  });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [notification, setNotification] = useState<{ text: string; type: 'success' | 'error' | 'warning' } | null>(null);
@@ -62,7 +68,13 @@ export const ProfileAvailabilityView: React.FC<ProfileAvailabilityViewProps> = (
         ]);
 
         if (isMounted) {
-          setProfile(profData);
+          const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+          const initialRole = urlParams?.get('role');
+          if (profData && (initialRole === 'mentor' || initialRole === 'mentoreado')) {
+            setProfile({ ...profData, rol_postulacion: initialRole });
+          } else {
+            setProfile(profData);
+          }
           setSlots(slotsData);
           setCourses(coursesData);
         }
