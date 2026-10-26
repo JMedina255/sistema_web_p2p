@@ -5,7 +5,7 @@
 **Institución:** Universidad Privada de Tacna — Escuela Profesional de Ingeniería de Sistemas  
 **Equipo:** Grupo 03 / C-SharkTeam (Joan Cristian Medina Quispe y Renzo Antonio Antayhua Mamani)  
 **Normativa de Diseño:** `reglas_documentacion_diseño.md` (Regla D-5: Sincronización continua de diagramas)  
-**Estado:** Sincronizado y Homologado tras el Cierre del Sprint 2
+**Estado:** Sincronizado y Homologado tras el Cierre del Sprint 3 (209 pruebas passing, 0 fallos)
 
 ---
 
@@ -966,6 +966,346 @@ state "Máquina de Estados: Jerarquía de Roles y Mérito (RN-03)" as SM_Roles {
     R_Revocado --> R_Mentor : Readmisión supervisada por Dirección EPIS
 }
 
+@enduml
+```
+
+---
+
+## 3. Diagramas de Diseño Técnico — Sprint 3
+
+### 3.1. Arquitectura y Despliegue Físico de Componentes (Sprint 3)
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundCorner 8
+skinparam linetype ortho
+
+skinparam node {
+    BackgroundColor #F8FAFC
+    BorderColor #1E293B
+    FontColor #0F172A
+}
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #3B82F6
+    FontColor #1E293B
+}
+skinparam database {
+    BackgroundColor #FEF3C7
+    BorderColor #D97706
+    FontColor #78350F
+}
+
+title Diagrama 3.1: Arquitectura y Despliegue Físico — Sprint 3 (EPIS-UPT)
+
+node "Navegador Web del Estudiante / Mentor" as ClientNode {
+    component "SPA React 19 + TypeScript\n(Vite Dev Server :5173 / dist)" as ReactApp {
+        portin "Web Interface" as WebPort
+        component "OfferPublishView.tsx\n(T-14: Publicación RN-04/RN-05)" as UIOffer
+        component "offerService.ts\n(Cliente Tipado & Validaciones)" as FEService
+        component "CurriculumCatalogView.tsx\n(Catálogo Filtro CUS21)" as UICatalog
+        component "ProfileAvailabilityView.tsx\n(Perfil & Grilla 6x11)" as UIProfile
+    }
+}
+
+node "Servidor de Aplicación (Host Local / Contenedor)" as BackendNode {
+    component "FastAPI REST Server\n(Uvicorn ASGI :8000)" as FastApiApp {
+        portin "REST Router\n/api/v1/*" as ApiPort
+        component "OffersRouter\n(/api/v1/offers)" as RouterOffers
+        component "RecommendationsRouter\n(/api/v1/recommendations/*)" as RouterRecs
+        component "OfferService\n(Validación RN-03/04/05)" as SvcOffers
+        component "RecommendationService\n(Motor EdRecSys v1.0)" as SvcRecs
+        component "SimulationService\n(Testbench & Casos Frontera)" as SvcSim
+        component "SQLAlchemy 2.0 Engine\n(Session Pooler & Transacciones)" as SqlEngine
+    }
+}
+
+node "Nube Supabase (PostgreSQL 16 en AWS us-east-1)" as CloudNode {
+    database "PostgreSQL Relacional\n(p2p-epis-dev)" as SupabaseDb {
+        component "Políticas RLS Activas\n(Row Level Security)" as RlsEngine
+        component "Tabla sesiones_mentoria\n(Migración Alembic 003)" as TableOffers
+        component "Tablas del Catálogo:\nasignaturas\ntemas_conceptuales" as TableCatalog
+        component "Tablas de Perfiles:\nperfiles_academicos\ndisponibilidad_horaria" as TableProfiles
+    }
+}
+
+WebPort --> FEService
+FEService --> ApiPort : HTTPS / JSON [Bearer JWT]
+ApiPort --> RouterOffers
+ApiPort --> RouterRecs
+RouterOffers --> SvcOffers
+RouterRecs --> SvcRecs
+RouterRecs --> SvcSim
+SvcOffers --> SqlEngine
+SvcRecs --> SqlEngine
+SqlEngine --> TableOffers : INSERT / SELECT
+SqlEngine --> TableCatalog : SELECT temas / asignaturas
+SqlEngine --> TableProfiles : SELECT perfiles / agendas
+TableOffers --> RlsEngine : Aplicación de Políticas
+@enduml
+```
+
+### 3.2. Secuencia Técnica: Publicación de Oferta de Mentoría (T-14 / T-15 / T-16)
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+autonumber
+
+actor "Mentor Académico\n(2022073504@upt.pe)" as Mentor
+participant "OfferPublishView.tsx\n(React Component)" as View
+participant "offerService.ts\n(Client Service)" as Client
+participant "offers.py\n(FastAPI Router)" as Router
+participant "OfferService\n(Backend Domain)" as Svc
+database "sesiones_mentoria\n(PostgreSQL)" as DB
+
+Mentor -> View : Selecciona curso, tema, modalidad, fecha y aula
+activate View
+
+View -> View : validateOfferPayload(payload)\nEvalúa RN-04 (T > 24h) y aforo inmutable RN-05
+alt Validación fallida en cliente (T <= 24h o campos incompletos)
+    View --> Mentor : Muestra banner rojo de infracción de RN-04\ny deshabilita botón de envío
+else Validación conforme en cliente
+    View -> Client : publishOffer(payload)
+    activate Client
+    Client -> Router : POST /api/v1/offers\nAuthorization: Bearer <JWT_mentor>\nBody: PublishOfferPayload
+    activate Router
+
+    Router -> Router : _resolve_authenticated_email(token)\nVerifica firma HS256 y extrae email
+
+    Router -> Svc : publish_offer(db, payload, mentor_email)
+    activate Svc
+
+    Svc -> Svc : validate_mentor_eligibility(RN-03)\nSELECT ciclo_actual FROM perfiles WHERE email = mentor
+    alt Mentor con ciclo < 7 (Infracción de Mérito RN-03)
+        Svc --> Router : HTTPException(400, "MERIT_RULE_VIOLATION")
+        Router --> Client : HTTP 400 Bad Request
+        Client --> View : Error: Mérito insuficiente
+        View --> Mentor : Alerta de rechazo institucional
+    else Mentor Elegible (ciclo >= 7)
+        Svc -> Svc : validate_advance_hours(RN-04)\nadvance = (start_time - now).hours > 24.0
+        Svc -> Svc : force_standard_capacity(RN-05)\nPresencial -> 10, Virtual -> 20
+
+        Svc -> DB : INSERT INTO sesiones_mentoria (codigo_sesion, mentor_email, ...)\nVALUES ('SES-XXXX', '2022073504@upt.pe', ...)
+        activate DB
+        DB --> Svc : Row Inserted (id_sesion=42, created_at=now())
+        deactivate DB
+
+        Svc --> Router : PublishOfferResponse (success=true, code='SES-XXXX')
+        deactivate Svc
+        Router --> Client : HTTP 201 Created (JSON Payload)
+        deactivate Router
+        Client --> View : PublishOfferResponse tipado
+        deactivate Client
+        View --> Mentor : Tarjeta verde de confirmación con código de sesión
+    end
+end
+deactivate View
+@enduml
+```
+
+### 3.3. Secuencia Técnica: Recomendación Top-k de Mentores y Ofertas (EdRecSys v1.0)
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+autonumber
+
+actor "Estudiante Mentoreado\n(2022074255@upt.pe)" as Mentee
+participant "EdRecSys Client / UI" as UI
+participant "recommendations.py\n(FastAPI Router)" as Router
+participant "RecommendationService\n(Engine v1.0)" as Engine
+database "PostgreSQL / Supabase" as DB
+
+Mentee -> UI : Solicita recomendaciones para Asignatura (top_k = 5)
+activate UI
+UI -> Router : GET /api/v1/recommendations/offers?mentee_email=...&id_asignatura=3&top_k=5
+activate Router
+
+Router -> Engine : recommend_offers(db, mentee_email, id_asignatura, top_k)
+activate Engine
+
+Engine -> DB : SELECT * FROM perfiles_academicos WHERE email = mentee_email
+Engine -> DB : SELECT * FROM disponibilidad_horaria WHERE email = mentee_email
+DB --> Engine : Perfil mentoreado (materias, modalidad, agenda 6x11)
+
+Engine -> DB : SELECT * FROM sesiones_mentoria WHERE estado = 'PUBLICADA' AND id_asignatura = 3
+DB --> Engine : Lista de ofertas activas registradas
+
+loop Para cada oferta activa 'o' con mentor 'm'
+    Engine -> Engine : verify_merit(m) -> Eligible(RN-03: ciclo >= 7)
+    alt Eligible == False
+        Engine -> Engine : score = 0.0 (Exclusión automática)
+    else Eligible == True
+        Engine -> Engine : compute_jaccard(T_mentee, T_oferta) -> S_tema
+        Engine -> Engine : compute_schedule_overlap(H_mentee, H_oferta) -> S_horario
+        Engine -> Engine : compute_modality_match(M_mentee, M_oferta) -> S_modalidad
+        Engine -> Engine : get_critical_multiplier(c) -> W_curso (1.0x - 1.3x)
+        Engine -> Engine : S_total = round((0.40*S_tema + 0.35*S_horario + 0.15*S_modalidad + 0.10*S_afinidad) * W_curso, 4)
+    end
+end
+
+Engine -> Engine : sort(candidates, key=(-S_total, -W_curso, -ciclo, -solapamiento, email))
+Engine -> Engine : slice[:top_k]
+
+Engine --> Router : RecommendationListResponse[OfferRecommendationItem]
+deactivate Engine
+
+Router --> UI : HTTP 200 OK (Ranking ordenado con explicabilidad)
+deactivate Router
+UI --> Mentee : Visualización del ranking Top-k con badges de compatibilidad
+deactivate UI
+@enduml
+```
+
+### 3.4. Diagrama de Clases del Dominio de Ofertas y Recomendación
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+
+class SesionMentoria {
+    + id_sesion : int <<PK>>
+    + codigo_sesion : str <<Unique>>
+    + mentor_email : str <<FK>>
+    + id_asignatura : int <<FK>>
+    + id_tema : int <<FK>>
+    + fecha_inicio : datetime
+    + duracion_minutos : int (60, 90)
+    + modalidad : str ('presencial', 'virtual')
+    + aforo_maximo : int (10, 20)
+    + espacio_asignado : str
+    + notas_adicionales : str
+    + estado : str
+    + created_at : datetime
+}
+
+class OfferService {
+    + publish_offer(db, payload, caller_email) : PublishOfferResponse
+    + list_active_offers(db, filters) : List[OfferResponse]
+    + get_offer_by_code(db, codigo_sesion) : OfferResponse
+    - _validate_mentor_merit(db, mentor_email) : bool
+    - _compute_advance_hours(start_time) : float
+}
+
+class RecommendationService {
+    + recommend_mentors(db, mentee_email, top_k) : RecommendationListResponse
+    + recommend_offers(db, mentee_email, id_asignatura, top_k) : RecommendationListResponse
+    + explain_recommendation(db, req) : RecommendationExplainResponse
+    + compute_jaccard(set_a, set_b) : float
+    + compute_dice(set_a, set_b) : float
+    + compute_schedule_overlap(grid_a, grid_b) : float
+    + get_course_multiplier(course_id) : float
+}
+
+class SimulationService {
+    + generate_synthetic_cohorts(size) : List[SyntheticStudent]
+    + evaluate_edge_cases() : EdgeCaseEvaluationReport
+    + evaluate_determinism(iterations) : DeterminismReport
+    + run_latency_benchmark() : BenchmarkMetrics
+}
+
+SesionMentoria <-- OfferService : gestiona y persiste
+OfferService ..> RecommendationService : provee ofertas activas
+RecommendationService ..> SimulationService : sometido a testbench
+@enduml
+```
+
+### 3.5. Máquina de Estados del Ciclo de Vida de la Sesión de Mentoría (sesiones_mentoria)
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundCorner 8
+
+state "Máquina de Estados: Ciclo de Vida de Sesión de Mentoría (sesiones_mentoria)" as SM_Oferta {
+    state "PUBLICADA\n[Visible en recomendador y catálogo]" as S_Publicada #DBEAFE
+    state "PENDIENTE_CONFIRMACION\n[Ventana T-24h con quórum insuficiente]" as S_Pendiente #FEF3C7
+    state "CONFIRMADA\n[Quórum alcanzado o ratificado por mentor]" as S_Confirmada #DCFCE7
+    state "CANCELADA_SISTEMA\n[Corte T-24h sin quórum mínimo (RN-09)]" as S_CancSistema #FEE2E2
+    state "CANCELADA_MENTOR\n[Cancelada voluntariamente por mentor]" as S_CancMentor #FEE2E2
+    state "FINALIZADA\n[Sesión impartida y asistencia registrada]" as S_Finalizada #E2E8F0
+
+    [*] --> S_Publicada : Mentor publica oferta con antelación > 24h (RN-04)
+    
+    S_Publicada --> S_Confirmada : Inscripciones alcanzan quórum mínimo (CUS24)
+    S_Publicada --> S_Pendiente : Arribo a ventana T-24h con quórum insuficiente (CUS23)
+    S_Publicada --> S_CancMentor : Mentor cancela clase con antelación debida (CUS07)
+
+    S_Pendiente --> S_Confirmada : Mentor decide ratificar clase con quórum reducido
+    S_Pendiente --> S_CancSistema : Expiración de ventana de gracia sin ratificación (RN-09)
+
+    S_Confirmada --> S_Finalizada : Clase ejecutada y bitácora docente firmada (CUS08)
+    S_Confirmada --> S_CancMentor : Fuerza mayor con notificación a inscritos
+
+    S_CancSistema --> [*] : Cupos liberados y notificación automática
+    S_CancMentor --> [*] : Cupos liberados y notificación automática
+    S_Finalizada --> [*] : Horas computadas para certificación de servicio
+}
+@enduml
+```
+
+### 3.6. Componentes del Motor EdRecSys v1.0 y Pipeline de Scoring
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam componentStyle rectangle
+
+package "Pipeline EdRecSys v1.0" {
+    component "Filtro de Mérito (RN-03)\nciclo_actual >= 7" as C_Merit
+    component "Similitud Temática\nJaccard / Dice (40%)" as C_Tema
+    component "Compatibilidad Horaria\nGrilla Semanal 6x11 (35%)" as C_Hora
+    component "Alineación Modalidad\nPresencial / Virtual / Híbrida (15%)" as C_Mod
+    component "Afinidad Curricular\nIntereses Formativos (10%)" as C_Afin
+    component "Multiplicador Crítico\nW_curso (1.0x - 1.3x)" as C_Mult
+    component "Ranker & Tie-Breaker\nDeterminista" as C_Rank
+}
+
+[Candidato / Oferta] --> C_Merit
+C_Merit --> C_Tema : Elegible == True
+C_Merit --> [Exclusión Score 0.0] : Elegible == False
+C_Tema --> C_Rank
+C_Hora --> C_Rank
+C_Mod --> C_Rank
+C_Afin --> C_Rank
+C_Rank --> C_Mult
+C_Mult --> [Top-k Lista Ordenada]
+@enduml
+```
+
+### 3.7. Flujo del Testbench Algorítmico y Casos Frontera (T-18)
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundCorner 8
+
+start
+:Generar cohorte sintética (10 ciclos EPIS-UPT);
+partition "Evaluación de Casos Frontera" {
+    :Caso 1: Solapamiento horario = 0 (|Hm ∩ Hk| = 0);
+    note right: S_horario = 0.0000 (sin colapso)
+    :Caso 2: Temas silábicos disjuntos;
+    note right: Jaccard = 0.0000, Dice = 0.0000
+    :Caso 3: Asignatura sin ofertas en catálogo;
+    note right: items: [] con HTTP 200 OK
+    :Caso 4: Exclusión de mérito RN-03 (ciclo < 7);
+    note right: Score = 0.0, Fuga = 0.00%
+}
+partition "Test de Determinismo" {
+    :Ejecutar 5 iteraciones barajando candidatos;
+    :Comparar tuplas Top-k resultantes;
+    note right: 100% idénticas byte a byte
+}
+partition "Benchmark de Latencia (RNF03)" {
+    :Evaluar latencia sobre 24 pares;
+    note right: Latencia media = 35.8 µs / candidato\nTotal = 0.86 ms (< 50 ms)
+}
+:Emitir reporte formal en /simulation/testbench;
+stop
 @enduml
 ```
 

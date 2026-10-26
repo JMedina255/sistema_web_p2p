@@ -17,15 +17,16 @@
 
 El **Sistema Web P2P** es una plataforma institucional orientada a conectar a estudiantes de ciclos formativos iniciales (*Mentoreados*, ciclos I al IV) con estudiantes de rendimiento sobresaliente de ciclos superiores (*Mentores*, ciclos VII al X) para mitigar los altos índices de reprobación y deserción en asignaturas filtro críticas (*Cálculo I/II, Algoritmos y Estructuras de Datos, Programación Orientada a Objetos y Base de Datos*) de la Escuela Profesional de Ingeniería de Sistemas de la Universidad Privada de Tacna.
 
-**Estado actual:** Fase de construcción — **Sprint 3 en Desarrollo**. La solución se desarrolla en `aplicacion/` (React 19 SPA + FastAPI RESTful con persistencia en PostgreSQL/Supabase conforme a **RNF09**).
+**Estado actual:** Fase de construcción — **Sprint 3 Culminado, Verificado y Homologado**. La solución se desarrolla en `aplicacion/` (React 19 SPA + FastAPI RESTful con persistencia en PostgreSQL/Supabase conforme a **RNF09**).
 
 - **Sprint 1 (Base Técnica y Acceso Inicial):** **Culminado y Verificado** (96 pruebas automatizadas). Integración de React con FastAPI, conexión a Supabase (`p2p-epis-dev`), flujo OTP de acceso institucional (`@upt.pe`), catálogo curricular inicial y pipeline de CI en GitHub Actions.
 - **Sprint 2 (Roles, Currículo y Perfiles):** **Culminado y Verificado** (150 pruebas automatizadas). Formulario accesible de consentimiento digital bajo la **Ley N° 29733** (**RF02** / **RN-02**), buscador avanzado en tiempo real con temarios silábicos (**RF05** / **CUS21**), configuración de perfil formativo y matriz semanal 6×11 de disponibilidad con regla de mérito **RN-03** (**RF04** / **CUS15**), administración de roles y políticas de seguridad multi-usuario RLS (**RNF02**).
-- **Sprint 3 (Publicación de Ofertas — En Desarrollo):**
-  - **Tarea de Joan:** **T-14** (Formulario de publicación de ofertas de mentoría — **Implementada y Verificada en Frontend**). Formulario reactivo accesible con selección de materias filtro y unidades silábicas oficiales, validación estricta de antelación obligatoria $> 24\text{ h}$ y recomendada $\ge 48\text{ h}$ (**RN-04**), aforo estándar inmutable de 10 estudiantes en presencial y 20 en virtual (**RN-05**), bloques lectivos de 60 y 90 minutos, y asignación de recintos físicos EPIS (**RN-06**) o salas virtuales Meet/Discord (**RN-07**).
-  - **Tareas de Renzo:** **T-15** (API básica de gestión de ofertas) y **T-16** (Estructura de datos y relaciones de ofertas) permanecen **pendientes de integración en el backend**.
-  - **Modo de Operación:** La interfaz opera actualmente mediante un adaptador mock explícito de desarrollo debidamente señalizado como **«Modo de prueba local — Backend pendiente»**, garantizando que no se simule falsamente persistencia remota mientras la API no esté integrada.
-- **Aseguramiento de Calidad Global:** Batería consolidada de **171 pruebas automatizadas** (87 en frontend con Vitest y 84 en backend con Pytest) con 0 fallos, superando holgadamente el umbral mínimo de **RNF09** ($\ge 70\%$) con **92.52% de cobertura en frontend** y **91.00% en backend**. Análisis estático limpio con ESLint y Ruff (0 errores), y empaquetado de producción de Vite 100% exitoso.
+- **Sprint 3 (Publicación de Ofertas, Motor EdRecSys y Testbench):** **Culminado y Verificado** (209 pruebas automatizadas consolidadas).
+  - **T-14 (Frontend — Joan):** Formulario reactivo accesible de publicación de ofertas con carga dinámica silábica (`OfferPublishView.tsx`, `offerService.ts`), validación estricta de antelación obligatoria $> 24\text{ h}$ y recomendada $\ge 48\text{ h}$ (**RN-04**), aforo reglamentario inmutable de 10 presencial y 20 virtual (**RN-05**), y asignación de aulas EPIS (**RN-06**) o Meet institucional (**RN-07**).
+  - **T-15 (Backend — Renzo):** Motor de recomendación inteligente *Top-k* multifactorial (**EdRecSys v1.0**) combinando similitud temático-silábica (Jaccard/Dice $40\%$), compatibilidad horaria semanal 6×11 ($35\%$), modalidad ($15\%$), afinidad curricular ($10\%$) y multiplicadores de materias filtro ($1.0\text{x}$ a $1.3\text{x}$) con exclusión forzada de mérito (**RN-03**).
+  - **T-16 (Backend — Renzo):** Entidad relacional física `sesiones_mentoria`, migración Alembic `003_mentoring_offers.py`, endpoints REST bajo `/api/v1/offers` y `/api/v1/recommendations/*` con esquemas Pydantic v2 tipados y políticas RLS activas.
+  - **T-18 (Backend — Renzo):** Servicio `SimulationService` y testbench algorítmico evaluando 4 casos frontera (solapamiento 0, temas disjuntos, catálogo vacío, postulantes ciclo $< 7$), determinismo al 100% y latencia media de $35.8\text{ µs}$ por candidato ($0.86\text{ ms}$ total, superando **RNF03** $< 50\text{ ms}$).
+- **Aseguramiento de Calidad Global:** Batería consolidada de **209 pruebas automatizadas** (87 en frontend con Vitest y 122 en backend con Pytest) distribuidas en 26 suites con 0 fallos (100% éxito), superando ampliamente el umbral normativo del 70% de **RNF09** con **92.52% de cobertura en frontend** y **91.83% en backend**. Análisis estático limpio con ESLint 9 y Ruff 0.9 (0 errores), y empaquetado de producción de Vite limpio (`dist/`) en 653 ms.
 
 ### Pilares Funcionales y Tecnológicos
 1. **Acceso y privacidad:** RF01–RF02 y RNF01–RNF02 exigen OTP institucional, consentimiento informado bajo la Ley N° 29733 y protección de datos con políticas RLS de PostgreSQL/Supabase.
@@ -51,6 +52,8 @@ La documentación del proyecto se encuentra formalmente organizada en dos etapas
 | **EVIDENCIA DE PRUEBAS S1** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md) | **Catálogo de Calidad Automatizada S1:** Desglose de las 13 suites, 96 pruebas superadas (50 backend / 46 frontend) y reportes de cobertura (>91%). |
 | **EVIDENCIA DE PRUEBAS S2** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_02.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_02.md) | **Catálogo de Calidad Automatizada S2:** Consolidación de 150 pruebas (84 backend / 66 frontend), aislamiento RLS y matrices de cobertura (>90%). |
 | **INFORME GENERAL SPRINT 2** | [docs/diseño/INFORME_GENERAL_SPRINT_02.md](docs/diseño/INFORME_GENERAL_SPRINT_02.md) | **Reporte Maestro Exhaustivo S2:** Roles, consentimiento Ley 29733, matriz semanal 6×11, catálogo avanzado y cierre DoD del Sprint 2. |
+| **INFORME GENERAL SPRINT 3** | [docs/diseño/INFORME_GENERAL_SPRINT_03.md](docs/diseño/INFORME_GENERAL_SPRINT_03.md) | **Reporte Maestro Exhaustivo S3:** Publicación de ofertas (T-14), motor EdRecSys v1.0 (T-15), persistencia relacional `sesiones_mentoria` (T-16), testbench algorítmico (T-18), 7 diagramas PlantUML, 7 capturas de pantalla y certificación DoD de 209 pruebas. |
+| **EVIDENCIA DE PRUEBAS S3** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_03.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_03.md) | **Catálogo de Calidad Automatizada S3:** Consolidación de 209 pruebas (122 backend / 87 frontend), desglose de las 26 suites, matrices de cobertura (>91% en ambos subsistemas), testbench algorítmico y comandos reproducibles. |
 | **FD04: Informe SAD (Diseño v2.0)** | [docs/diseño/FD04-EPIS-Informe SAD de Proyecto.md](docs/diseño/FD04-EPIS-Informe%20SAD%20de%20Proyecto.md) | **Arquitectura de Software en Diseño:** Vistas 4+1 prescriptivas, contratos de endpoints, diccionario físico PostgreSQL, políticas RLS, máquinas de estado del dominio y ADRs. |
 | **FD03: Informe SRS (Diseño v2.1)** | [docs/diseño/FD03-EPIS-Informe SRS de Proyecto.md](docs/diseño/FD03-EPIS-Informe%20SRS%20de%20Proyecto.md) | **Requerimientos con Trazabilidad:** Especificación alineada a la arquitectura desacoplada y los endpoints construidos. |
 | **Reglas de Diseño (Hardening D-1..D-10)** | [reglas_documentacion_diseño.md](reglas_documentacion_diseño.md) | Estándares obligatorios de diseño prescriptivo: contratos REST, diccionario físico, diagramas técnicos PlantUML, máquinas de estado, variables .env y ADRs. |
@@ -62,7 +65,7 @@ La documentación del proyecto se encuentra formalmente organizada en dos etapas
 | **Plan de Sprints y Tareas** | [docs/sprints/PLAN_SPRINTS_Y_TAREAS.md](docs/sprints/PLAN_SPRINTS_Y_TAREAS.md) | **Planificación Scrum:** Desglose del Product Backlog (37 PBI), capacidad (91 h) y asignación operativa (T-01 a T-51). |
 | **Bitácora de Sprint 1** | [docs/sprints/sprint-01.md](docs/sprints/sprint-01.md) | **Registro de Ejecución S1:** Culminación integral de T-01, T-02, T-03, T-06, T-07 y T-09 con 96 pruebas automatizadas. |
 | **Bitácora de Sprint 2** | [docs/sprints/sprint-02.md](docs/sprints/sprint-02.md) | **Registro de Ejecución S2:** Culminación integral de T-04, T-05, T-08, T-10, T-11, T-12 y T-13 con 150 pruebas y cierre DoD. |
-| **Bitácora de Sprint 3** | [docs/sprints/sprint-03.md](docs/sprints/sprint-03.md) | **Registro de Ejecución S3:** Avance de T-14 (formulario de ofertas, antelación RN-04, aforo RN-05) con 171 pruebas consolidadas. |
+| **Bitácora de Sprint 3** | [docs/sprints/sprint-03.md](docs/sprints/sprint-03.md) | **Registro de Ejecución S3:** Culminación integral de T-14, T-15, T-16 y T-18 con 209 pruebas consolidadas, motor EdRecSys v1.0 y testbench. |
 | **Guía de Configuración Supabase** | [docs/supabase_setup_guide.md](docs/supabase_setup_guide.md) | **Paso a paso para el usuario:** Conexión con Session Pooler, migraciones Alembic, scripts RLS y JWT Secret. |
 
 ### 2.3. Fase de Análisis Histórica (docs/analisis/)
@@ -127,16 +130,17 @@ Proyecto_Sistema_Web_P2P/
 ├── aplicacion/                                # Aplicación desacoplada oficial
 │   ├── backend/                               # API RESTful (FastAPI + SQLAlchemy + Alembic + Pytest)
 │   │   ├── app/
-│   │   │   ├── api/v1/endpoints/              # Endpoints RESTful: health, auth, consent, curriculum, profiles, roles
+│   │   │   ├── api/v1/endpoints/              # Endpoints: health, auth, consent, curriculum, profiles, roles, offers, recommendations
 │   │   │   ├── core/                          # Configuración pydantic-settings y seguridad JWT/OTP
 │   │   │   ├── db/                            # Conexión diferida, session pooler y migraciones Alembic
-│   │   │   │   └── migrations/versions/       # Migraciones 001 (catálogo) y 002 (roles y perfiles)
-│   │   │   ├── models/                        # Modelos ORM: Asignatura, TemaConceptual, AuthChallenge, Consent, Profile, Role
-│   │   │   ├── schemas/                       # Esquemas Pydantic tipados de entrada y respuesta
-│   │   │   ├── services/                      # Servicios: AuthService, CurriculumService, ConsentService, ProfileService, RoleService
+│   │   │   │   └── migrations/versions/       # Migraciones 001 (catálogo), 002 (roles/perfiles) y 003 (sesiones_mentoria)
+│   │   │   ├── models/                        # Modelos ORM: Asignatura, TemaConceptual, AuthChallenge, Consent, Profile, Role, SesionMentoria
+│   │   │   ├── schemas/                       # Esquemas Pydantic tipados (auth, consent, curriculum, profile, roles, offer, recommendation)
+│   │   │   ├── services/                      # Servicios: AuthService, CurriculumService, ConsentService, ProfileService, RoleService,
+│   │   │   │                                  #            OfferService, RecommendationService (EdRecSys v1.0), SimulationService
 │   │   │   └── main.py                        # Punto de entrada de FastAPI con middleware CORS
-│   │   ├── scripts/                           # Scripts SQL de RLS para Supabase
-│   │   ├── tests/                             # 84 pruebas unitarias, de integración y de seguridad RLS
+│   │   ├── scripts/                           # Scripts SQL de RLS para Supabase y generadores de evidencias
+│   │   ├── tests/                             # 122 pruebas automatizadas (unitarias, integración, EdRecSys y testbench algorítmico)
 │   │   ├── alembic.ini                        # Configuración de migraciones hacia PostgreSQL
 │   │   ├── pyproject.toml                     # Configuración centralizada de Ruff, Coverage y Pytest
 │   │   └── requirements.txt                   # Dependencias reproducibles fijadas con ==
@@ -149,23 +153,30 @@ Proyecto_Sistema_Web_P2P/
 │       │   ├── data/                          # Tipos TypeScript de dominio
 │       │   ├── App.tsx                        # Orquestador con navegación (Auth, Consent, Catálogo, Perfil, Ofertas, Servicios)
 │       │   └── main.tsx                       # Punto de entrada ReactDOM
-│       ├── package.json                       # Dependencias y scripts de prueba y cobertura
+│       ├── package.json                       # Dependencias y scripts de prueba y cobertura (87 pruebas, 92.52% cobertura)
 │       └── vite.config.ts                     # Configuración del empaquetador Vite con soporte de Vitest
 ├── docs/                                      # Acervo documental formal de ingeniería de software
 │   ├── sprints/
 │   │   ├── PLAN_SPRINTS_Y_TAREAS.md           # Planificación Scrum canónica (37 PBI, 91 h, S1–S8)
 │   │   ├── sprint-01.md                       # Bitácora oficial de ejecución del Sprint 1
 │   │   ├── sprint-02.md                       # Bitácora oficial de ejecución del Sprint 2
-│   │   └── sprint-03.md                       # Bitácora oficial de ejecución del Sprint 3 (Avance T-14)
+│   │   └── sprint-03.md                       # Bitácora oficial de ejecución del Sprint 3 (Cierre integral T-14..T-18)
+│   ├── diseño/                                # Documentación de diseño prescriptivo (Hardening D-1..D-10)
+│   │   ├── INFORME_GENERAL_SPRINT_01.md       # Informe de cierre exhaustivo del Sprint 1
+│   │   ├── INFORME_GENERAL_SPRINT_02.md       # Informe de cierre exhaustivo del Sprint 2
+│   │   ├── INFORME_GENERAL_SPRINT_03.md       # Informe de cierre exhaustivo del Sprint 3 (EdRecSys, Ofertas, Testbench)
+│   │   ├── EVIDENCIA_PRUEBAS_SPRINT_01.md     # Catálogo de pruebas S1 (96 pruebas, >91% cov)
+│   │   ├── EVIDENCIA_PRUEBAS_SPRINT_02.md     # Catálogo de pruebas S2 (150 pruebas, >90% cov)
+│   │   ├── EVIDENCIA_PRUEBAS_SPRINT_03.md     # Catálogo de pruebas S3 (209 pruebas, >91% cov)
+│   │   └── imagenes/sprint-03/                # 7 capturas de pantalla de alta fidelidad (>100KB)
 │   ├── supabase_setup_guide.md                # Guía canónica paso a paso para vincular proyecto Supabase
 │   ├── FD01-EPIS-Informe de Factibilidad.md  # Viabilidad operativa, técnica, económica y legal
 │   ├── FD02-EPIS-Informe Vision de Proyecto.md # Visión, actores, posicionamiento y alcance
 │   ├── FD03-EPIS-Informe SRS de Proyecto.md  # Especificación formal de requisitos (SRS canónico IEEE 830)
 │   ├── FD04-EPIS-Informe SAD de Proyecto.md  # Documento formal de arquitectura de software (Modelo 4+1)
 │   ├── resumen_sistema_y_casos_de_uso.md     # Síntesis ejecutiva, flujo macro, matriz CUS y reglas de negocio
-│   ├── diagramas_general.md                  # Bóveda consolidada y de hardening de diagramas PlantUML
-│   ├── Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx # Catálogo de pruebas funcionales y de aceptación
-│   └── flujos_por_perfil_y_diagrama_paquetes.md # Diagramas de flujo por actor y diagrama de paquetes
+│   ├── diagramas_general.md                  # Bóveda consolidada de diagramas PlantUML sincronizada
+│   └── Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx # Catálogo de pruebas funcionales y de aceptación
 ├── frontend/                                  # Maqueta funcional de referencia visual (conservada)
 ├── reglas_documentacion.md                    # Manual de normas de documentación y hardening (v1.3)
 └── README.md                                  # Mapa central de navegación del proyecto (este archivo)
@@ -187,18 +198,24 @@ pip install -r requirements.txt
 ruff check .
 ruff format --check .
 
-# Aplicar migraciones a PostgreSQL / Supabase
+# Aplicar migraciones a PostgreSQL / Supabase (001, 002 y 003)
 alembic upgrade head
 
-# Ejecución de pruebas automatizadas con reporte de cobertura (84 pruebas, 91% de cobertura)
+# Ejecución de pruebas automatizadas con reporte de cobertura (122 pruebas, 91.83% de cobertura)
 pytest tests/ --cov=app --cov-report=term-missing
+
+# Ejecución del banco de evaluación algorítmica y casos frontera (T-18)
+pytest tests/test_simulation.py -v -s
 
 # Servidor de desarrollo
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
-- **Swagger API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Health Check:** [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)
-- **Catálogo Curricular:** [http://localhost:8000/api/v1/curriculum/courses](http://localhost:8000/api/v1/curriculum/courses)
+- **Swagger API Docs interactivo:** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Health Check & DB:** [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) | [/db](http://localhost:8000/api/v1/health/db)
+- **Catálogo de Ofertas de Mentoría:** [http://localhost:8000/api/v1/offers](http://localhost:8000/api/v1/offers)
+- **Recomendación Top-k de Mentores:** [http://localhost:8000/api/v1/recommendations/mentors](http://localhost:8000/api/v1/recommendations/mentors)
+- **Recomendación Top-k de Ofertas:** [http://localhost:8000/api/v1/recommendations/offers](http://localhost:8000/api/v1/recommendations/offers)
+- **Testbench Algorítmico EdRecSys:** [http://localhost:8000/api/v1/recommendations/simulation/testbench](http://localhost:8000/api/v1/recommendations/simulation/testbench)
 
 ### 5.2. Comandos para Validación y Ejecución del Frontend
 
