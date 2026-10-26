@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { App } from '../App';
 
-describe('App Component (Sprint 2 Navigation)', () => {
-  it('permite alternar entre las pestañas de Acceso, Consentimiento Ley 29733, Catálogo y Perfil', async () => {
+describe('App Component (Sprint Navigation)', () => {
+  it('permite alternar entre las pestañas de Acceso, Consentimiento, Catálogo, Perfil y Publicar Ofertas', async () => {
     render(<App />);
 
     // 1. Por defecto inicia en pestaña de acceso (T-02)
@@ -31,7 +31,16 @@ describe('App Component (Sprint 2 Navigation)', () => {
       expect(screen.getByText(/1. Perfil Formativo Académico/i)).toBeInTheDocument();
     });
 
-    // 5. Cambiar a Monitor de Servicios (T-01)
+    // 5. Cambiar a Publicar Ofertas (T-14)
+    const offersTab = screen.getByRole('button', { name: /Publicar Ofertas/i });
+    fireEvent.click(offersTab);
+    await waitFor(() => {
+      expect(screen.getByText(/Publicar Nueva Oferta de Mentoría/i)).toBeInTheDocument();
+      expect(screen.getByText(/Modo de prueba local — Backend pendiente/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Asignatura formativa/i)).toBeInTheDocument();
+    });
+
+    // 6. Cambiar a Monitor de Servicios (T-01)
     const monitorTab = screen.getByRole('button', { name: /Monitor de Servicios/i });
     fireEvent.click(monitorTab);
     await waitFor(() => {

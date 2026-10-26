@@ -4,13 +4,21 @@ import { HealthStatus } from './components/HealthStatus';
 import { LoginOtpView } from './components/LoginOtpView';
 import { ConsentModalView } from './components/ConsentModalView';
 import { ProfileAvailabilityView } from './components/ProfileAvailabilityView';
+import { OfferPublishView } from './components/OfferPublishView';
 
 export const App: React.FC = () => {
-  type NavTab = 'auth' | 'consent' | 'curriculum' | 'profile' | 'services';
+  type NavTab = 'auth' | 'consent' | 'curriculum' | 'profile' | 'offers' | 'services';
   const [activeTab, setActiveTab] = useState<NavTab>(() => {
     if (typeof window !== 'undefined' && window.location) {
       const p = new URLSearchParams(window.location.search).get('tab');
-      if (p === 'curriculum' || p === 'services' || p === 'auth' || p === 'consent' || p === 'profile') {
+      if (
+        p === 'curriculum' ||
+        p === 'services' ||
+        p === 'auth' ||
+        p === 'consent' ||
+        p === 'profile' ||
+        p === 'offers'
+      ) {
         return p;
       }
     }
@@ -82,7 +90,7 @@ export const App: React.FC = () => {
                 border: '1px solid rgba(255, 255, 255, 0.2)',
               }}
             >
-              Sprint 2 · Tareas de Joan (T-04, T-10, T-11)
+              Sprint 3 · Publicación de Ofertas (T-14)
             </span>
             <a
               href="http://localhost:8000/docs"
@@ -103,7 +111,7 @@ export const App: React.FC = () => {
         </div>
       </header>
 
-      {/* Selector de Vistas / Pestañas de Sprint 2 */}
+      {/* Selector de Vistas / Pestañas de Navegación */}
       <div
         style={{
           backgroundColor: '#FFFFFF',
@@ -194,6 +202,24 @@ export const App: React.FC = () => {
 
           <button
             type="button"
+            onClick={() => setActiveTab('offers')}
+            style={{
+              background: activeTab === 'offers' ? '#1C2A59' : '#F1F5F9',
+              color: activeTab === 'offers' ? '#FFFFFF' : '#475569',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '0.5rem 1rem',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            🏷️ Publicar Ofertas (T-14)
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab('services')}
             style={{
               background: activeTab === 'services' ? '#1C2A59' : '#F1F5F9',
@@ -234,7 +260,7 @@ export const App: React.FC = () => {
               marginBottom: '0.5rem',
             }}
           >
-            Sprint 2 · Construcción de Software I (2026-II)
+            Sprint 3 · Construcción de Software I (2026-II)
           </span>
           <h2 style={{ fontSize: '1.75rem', color: '#1C2A59', margin: '0 0 0.5rem 0', fontWeight: 800 }}>
             {activeTab === 'auth'
@@ -245,6 +271,8 @@ export const App: React.FC = () => {
               ? 'Consulta Avanzada del Catálogo Curricular EPIS-UPT (T-10)'
               : activeTab === 'profile'
               ? 'Configuración de Perfil Formativo y Disponibilidad Horaria (T-11)'
+              : activeTab === 'offers'
+              ? 'Publicación y Parametrización de Ofertas de Mentoría (T-14)'
               : 'Infraestructura Base: React + FastAPI + Supabase'}
           </h2>
           <p style={{ margin: '0 auto', maxWidth: '680px', fontSize: '0.88rem', color: '#64748B', lineHeight: 1.6 }}>
@@ -256,6 +284,8 @@ export const App: React.FC = () => {
               ? 'Búsqueda en tiempo real por materias filtro, código y temas silábicos para el motor de recomendación Top-k (RF05 / CUS21).'
               : activeTab === 'profile'
               ? 'Selección de intereses/fortalezas y agenda semanal en bloques de 1 hora con validación de mérito RN-03 (RF04 / CUS15).'
+              : activeTab === 'offers'
+              ? 'Programación de sesiones de mentoría con validación de antelación obligatoria RN-04 (>24h), aforos estándar inmutables RN-05 (10 presencial / 20 virtual) y asignación de infraestructura (RF08 / CUS06).'
               : 'Monitoreo de comunicación asíncrona entre la SPA cliente (React 19 / TypeScript / Vite), FastAPI y Supabase.'
             }
           </p>
@@ -270,11 +300,13 @@ export const App: React.FC = () => {
           <CurriculumCatalogView />
         ) : activeTab === 'profile' ? (
           <ProfileAvailabilityView />
+        ) : activeTab === 'offers' ? (
+          <OfferPublishView />
         ) : (
           <HealthStatus />
         )}
 
-        {/* Bloque informativo de especificaciones del sprint 2 */}
+        {/* Bloque informativo de especificaciones */}
         <div
           style={{
             maxWidth: '920px',
@@ -332,6 +364,23 @@ export const App: React.FC = () => {
             </strong>
             <span style={{ color: '#64748B' }}>
               Matriz interactiva semanal (L-S) y validación de mérito RN-03 (mentores en ciclos VII a X).
+            </span>
+          </div>
+
+          <div
+            style={{
+              background: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '8px',
+              padding: '1rem',
+              fontSize: '0.82rem',
+            }}
+          >
+            <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
+              🏷️ T-14: Ofertas de Mentoría (RF08 / CUS06)
+            </strong>
+            <span style={{ color: '#64748B' }}>
+              Publicación con antelación reglamentaria &gt; 24 h (RN-04) y aforos estándar inmutables de 10 (presencial) o 20 (virtual) cupos (RN-05).
             </span>
           </div>
         </div>
