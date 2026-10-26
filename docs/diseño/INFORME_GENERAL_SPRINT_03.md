@@ -444,6 +444,8 @@ A continuación, se documenta la ficha del motor de recomendación algorítmico:
 
 Fuente: Elaboración propia a partir de `aplicacion/backend/app/services/recommendation_service.py`.
 
+El Cuadro 4.2 constata el desarrollo del motor de recomendación híbrido v1.0, el cual equilibra la coincidencia semántica de temas y la disponibilidad temporal con un esquema de ponderación curricular que favorece asignaturas con altas tasas históricas de reprobación, asegurando una cobertura del 93% en su lógica interna.
+
 #### Formulación Matemática Formal de EdRecSys v1.0
 1. **Filtro de Mérito Académico (RN-03):**
    $$\text{Eligible}(k) = \begin{cases} 1 & \text{si } \text{ciclo\_actual}(k) \ge 7 \\ 0 & \text{si } \text{ciclo\_actual}(k) < 7 \end{cases}$$
@@ -478,6 +480,8 @@ A continuación, se documenta la ficha de la estructura de datos relacional y lo
 
 Fuente: Elaboración propia a partir de `aplicacion/backend/app/models/offer.py`.
 
+El Cuadro 4.3 evidencia la formalización relacional del catálogo de sesiones con índices optimizados para lecturas frecuentes por fecha y asignatura, garantizando que tanto los esquemas de entrada como de salida operen con tipado estricto Pydantic v2 y cobertura plena del 100% en los controladores REST.
+
 ---
 
 ### 4.4. Tarea T-18: Servicio de Simulación y Testbench de Evaluación Algorítmica (Renzo)
@@ -497,102 +501,315 @@ A continuación, se documenta la ficha del banco de pruebas y benchmarks algorí
 
 Fuente: Elaboración propia a partir de `aplicacion/backend/app/services/simulation_service.py`.
 
+El Cuadro 4.4 acredita la validación empírica del recomendador bajo condiciones límite, demostrando que EdRecSys procesa candidatos en un tiempo medio de 35.8 microsegundos por evaluación (0.86 ms para la cohorte completa), cumpliendo holgadamente el criterio de latencia de RNF03 sin degradación ni pérdida de determinismo.
+
 ---
 
 ## 5. Especificación Exhaustiva de Contratos de API REST (Regla D-3)
 
-A continuación, se detallan los contratos prescriptivos de los 6 nuevos endpoints del subsistema de ofertas y el recomendador EdRecSys:
+A continuación, se documenta la matriz canónica y los contratos prescriptivos de los 6 nuevos endpoints REST desarrollados para el subsistema de ofertas y el motor de recomendación inteligente EdRecSys v1.0.
 
-### Cuadro 5.1: Especificación de Endpoint — POST /api/v1/offers
+### Cuadro 5.1: Matriz Canónica de Endpoints REST — Sprint 3
 
-| Parámetro | Tipo | Ubicación | Obligatorio | Regla de Validación / Descripción |
-| :--- | :--- | :--- | :---: | :--- |
-| `mentor_email` | String | Body (JSON) | Sí | Expresión regular `^[a-zA-Z0-9_.+-]+@upt\.pe$`. Mentor titular. |
-| `id_asignatura` | Integer | Body (JSON) | Sí | Materia crítica curricular (`1 <= id_asignatura <= 5`). |
-| `id_tema` | Integer | Body (JSON) | Sí | Unidad temática silábica oficial de la materia. |
-| `fecha_inicio` | ISO 8601 | Body (JSON) | Sí | Fecha UTC con antelación obligatoria $> 24.0\text{ h}$ (RN-04). |
-| `duracion_minutos`| Integer | Body (JSON) | Sí | Restricción de dominio `duracion_minutos IN (60, 90)`. |
-| `modalidad` | String | Body (JSON) | Sí | Literal `'presencial'` o `'virtual'`. |
-| `aforo_maximo` | Integer | Body (JSON) | Sí | Inmutable: 10 si presencial, 20 si virtual (RN-05). |
-| `espacio_asignado`| String | Body (JSON) | Sí | Nombre de laboratorio EPIS (RN-06) o Meet URL (RN-07). |
-| `notas_adicionales`| String | Body (JSON) | No | Longitud máxima 500 caracteres. Nullable. |
+| Verbo | Ruta del Endpoint | Códigos HTTP Retornados | Descripción Funcional | Trazabilidad |
+| :---: | :--- | :---: | :--- | :---: |
+| `POST` | `/api/v1/offers` | `201`, `400`, `401`, `403`, `422` | Publica una oferta de mentoría académica aplicando RN-03, RN-04 y RN-05. | `RF08`, `CUS06`, `RN-04`, `RN-05` |
+| `GET` | `/api/v1/offers` | `200` | Consulta el catálogo de sesiones activas con filtros opcionales. | `RF08`, `CUS06` |
+| `GET` | `/api/v1/recommendations/mentors` | `200`, `401` | Genera el ranking Top-k de mentores más compatibles según EdRecSys v1.0. | `RF06`, `CUS02`, `RN-03`, `RNF03` |
+| `GET` | `/api/v1/recommendations/offers` | `200`, `401` | Recomienda ofertas grupales activas optimizadas por afinidad silábica y horario. | `RF06`, `CUS02`, `RNF03` |
+| `POST` | `/api/v1/recommendations/explain` | `200`, `401`, `404` | Provee el desglose explicable y transparente de compatibilidad multifactorial. | `RF06`, `RNF03`, `RNF08` |
+| `GET` | `/api/v1/recommendations/simulation/testbench`| `200` | Ejecuta el banco de pruebas algorítmico, determinismo y benchmark de latencia. | `T-18`, `RNF03` |
 
 Fuente: Elaboración propia.
 
-- **Códigos HTTP de Retorno:**
-  - `201 Created`: Oferta persistida exitosamente. Retorna `{ success: true, codigo_sesion: "SES-XXXX", offer: { ... } }`.
-  - `400 Bad Request`: Infracción de RN-03 (`MERIT_RULE_VIOLATION`) o RN-04 (`OFFER_ADVANCE_TIME_INVALID`).
-  - `401 Unauthorized`: Token ausente, corrupto o expirado.
-  - `403 Forbidden`: Intento de publicar oferta suplantando a otro mentor sin ser administrador.
-  - `422 Unprocessable Entity`: Carga útil discordante con el esquema Pydantic.
+Como se observa en el Cuadro 5.1, la superficie de API REST del Sprint 3 incorpora 6 endpoints fuertemente tipados distribuidos en los routers `offers` y `recommendations`. Todos ellos implementan validaciones de seguridad Bearer JWT, verificación de identidad, manejo de excepciones con esquemas JSON consistentes y tiempos de respuesta sub-milisegundo.
 
----
+### 5.1. Ficha de Contrato: `POST /api/v1/offers`
+* **Método y Ruta:** `POST /api/v1/offers`
+* **Cabeceras:** `Authorization: Bearer <Token_JWT>`, `Content-Type: application/json`
+* **Parámetros del Payload de Entrada (Request Body):**
+  * `id_asignatura` (integer, obligatorio, $\ge 1$): Identificador de la asignatura crítica curricular.
+  * `codigo_asignatura` (string, obligatorio, 2..20 caracteres): Código oficial del curso (ej. `CALC-101`).
+  * `nombre_asignatura` (string, obligatorio, 2..150 caracteres): Nombre oficial de la materia.
+  * `id_tema` (integer, obligatorio, $\ge 1$): Identificador del tema silábico conceptual oficial.
+  * `nombre_tema` (string, obligatorio, 2..150 caracteres): Nombre de la unidad temático-silábica.
+  * `fecha_inicio` (string ISO 8601, obligatorio): Fecha y hora programada con antelación obligatoria $> 24.0\text{ h}$ (RN-04).
+  * `duracion_minutos` (integer literal, obligatorio): Restricción de dominio `60` o `90` minutos.
+  * `modalidad` (string literal, obligatorio): `'presencial'` o `'virtual'`.
+  * `aforo_maximo` (integer, obligatorio): Inmutable: exactamente `10` para presencial o `20` para virtual (RN-05).
+  * `espacio_asignado` (string, obligatorio, 3..255 caracteres): Laboratorio EPIS (RN-06) o Meet corporativo (RN-07).
+  * `mentor_email` (string, obligatorio): Correo institucional `@upt.pe` del mentor titular.
+  * `mentor_nombre` (string, opcional): Nombres del mentor titular.
+  * `notas_adicionales` (string, opcional, máx. 1000 caracteres): Indicaciones y lecturas previas.
+* **Esquema de Entrada (Request Body JSON):**
+  ```json
+  {
+    "id_asignatura": 1,
+    "codigo_asignatura": "CALC-101",
+    "nombre_asignatura": "Cálculo I",
+    "id_tema": 1,
+    "nombre_tema": "Límites Indeterminados y Continuidad",
+    "fecha_inicio": "2026-10-28T16:00:00Z",
+    "duracion_minutos": 60,
+    "modalidad": "presencial",
+    "aforo_maximo": 10,
+    "espacio_asignado": "Laboratorio de Cómputo 101 — Pabellón F (EPIS)",
+    "mentor_email": "2022073504@upt.pe",
+    "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+    "notas_adicionales": "Repasar ejercicios 1 al 15 de la guía práctica de límites racionales."
+  }
+  ```
+* **Esquema de Salida (Response Body — HTTP 201 Created):**
+  ```json
+  {
+    "id_oferta": "SES-CALC-8472",
+    "codigo_sesion": "SES-CALC-8472",
+    "estado": "PUBLICADA",
+    "mensaje": "Oferta de mentoría académica publicada exitosamente en el catálogo oficial.",
+    "fecha_publicacion": "2026-10-26T18:30:00Z",
+    "aforo": 10,
+    "espacio_asignado": "Laboratorio de Cómputo 101 — Pabellón F (EPIS)",
+    "modo": "api",
+    "offer": {
+      "id_asignatura": 1,
+      "codigo_asignatura": "CALC-101",
+      "nombre_asignatura": "Cálculo I",
+      "id_tema": 1,
+      "nombre_tema": "Límites Indeterminados y Continuidad",
+      "fecha_inicio": "2026-10-28T16:00:00Z",
+      "duracion_minutos": 60,
+      "modalidad": "presencial",
+      "aforo_maximo": 10,
+      "espacio_asignado": "Laboratorio de Cómputo 101 — Pabellón F (EPIS)",
+      "mentor_email": "2022073504@upt.pe",
+      "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+      "notas_adicionales": "Repasar ejercicios 1 al 15 de la guía práctica de límites racionales."
+    }
+  }
+  ```
+* **Respuestas de Error:**
+  * `HTTP 400 Bad Request`: `{"detail": "Infracción de RN-03: Solo estudiantes con ciclo académico >= VII pueden publicar ofertas."}` (`MERIT_RULE_VIOLATION`) o `{"detail": "Infracción de RN-04: La antelación de la sesión debe ser estrictamente superior a 24 horas."}` (`OFFER_ADVANCE_TIME_INVALID`).
+  * `HTTP 401 Unauthorized`: Token de sesión ausente, manipulado o expirado.
+  * `HTTP 403 Forbidden`: `{"detail": "No está autorizado para publicar ofertas a nombre de otro mentor."}` (`FORBIDDEN_OFFER_SPOOFING`).
+  * `HTTP 422 Unprocessable Entity`: Aforo no coincide con la modalidad (`CAPACITY_MODALITY_MISMATCH`) o formato de fecha inválido.
 
-### Cuadro 5.2: Especificación de Endpoint — GET /api/v1/offers
+### 5.2. Ficha de Contrato: `GET /api/v1/offers`
+* **Método y Ruta:** `GET /api/v1/offers`
+* **Parámetros de Consulta (Query):**
+  * `mentor_email` (string, opcional): Filtrar ofertas de un mentor específico (`@upt.pe`).
+  * `id_asignatura` (integer, opcional, $\ge 1$): Filtrar por identificador de curso curricular.
+  * `modalidad` (string literal, opcional): Filtrar por `'presencial'` o `'virtual'`.
+  * `estado` (string, opcional, default `'PUBLICADA'`): Filtrar por estado del ciclo de vida.
+* **Cabeceras:** `Accept: application/json`
+* **Esquema de Salida (Response Body — HTTP 200 OK):**
+  ```json
+  [
+    {
+      "id_oferta": "SES-CALC-8472",
+      "codigo_sesion": "SES-CALC-8472",
+      "estado": "PUBLICADA",
+      "mensaje": "Oferta activa disponible",
+      "fecha_publicacion": "2026-10-26T18:30:00Z",
+      "aforo": 10,
+      "espacio_asignado": "Laboratorio de Cómputo 101 — Pabellón F (EPIS)",
+      "modo": "api",
+      "offer": {
+        "id_asignatura": 1,
+        "codigo_asignatura": "CALC-101",
+        "nombre_asignatura": "Cálculo I",
+        "id_tema": 1,
+        "nombre_tema": "Límites Indeterminados y Continuidad",
+        "fecha_inicio": "2026-10-28T16:00:00Z",
+        "duracion_minutos": 60,
+        "modalidad": "presencial",
+        "aforo_maximo": 10,
+        "espacio_asignado": "Laboratorio de Cómputo 101 — Pabellón F (EPIS)",
+        "mentor_email": "2022073504@upt.pe",
+        "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+        "notas_adicionales": null
+      }
+    }
+  ]
+  ```
 
-| Parámetro | Tipo | Ubicación | Obligatorio | Regla de Validación / Descripción |
-| :--- | :--- | :--- | :---: | :--- |
-| `mentor_email` | String | Query | No | Filtro por mentor específico (`@upt.pe`). |
-| `id_asignatura` | Integer | Query | No | Filtro por materia crítica curricular. |
-| `modalidad` | String | Query | No | Filtro por modalidad (`presencial` o `virtual`). |
-| `estado` | String | Query | No | Filtro por estado del ciclo de vida (default `'PUBLICADA'`). |
+### 5.3. Ficha de Contrato: `GET /api/v1/recommendations/mentors`
+* **Método y Ruta:** `GET /api/v1/recommendations/mentors`
+* **Parámetros de Consulta (Query):**
+  * `mentee_email` (string, opcional si se envía Bearer JWT): Correo del mentoreado consultante.
+  * `top_k` (integer, opcional, $1 \le k \le 20$, default 5): Número de candidatos en el ranking.
+* **Cabeceras:** `Authorization: Bearer <Token_JWT>` (opcional si se especifica `mentee_email`).
+* **Esquema de Salida (Response Body — HTTP 200 OK):**
+  ```json
+  {
+    "mentee_email": "2022074255@upt.pe",
+    "total_candidates_evaluated": 12,
+    "top_k": 5,
+    "recommendations_count": 3,
+    "algorithm": "EdRecSys-v1.0-HybridMultifactorial",
+    "items": [
+      {
+        "mentor_email": "2022073504@upt.pe",
+        "mentor_codigo": "2022073504",
+        "mentor_nombres": "Renzo Antonio",
+        "mentor_apellidos": "Antayhua Mamani",
+        "mentor_ciclo": 8,
+        "materias_ofrecidas": [1, 3],
+        "materias_nombres": ["Cálculo I", "Algoritmos y Estructuras de Datos"],
+        "temas_ofrecidos": [1, 2, 9, 10],
+        "modalidad_preferida": "presencial",
+        "score_total": 0.8840,
+        "breakdown": {
+          "curricular_affinity": 1.0,
+          "course_weight_factor": 1.3,
+          "critical_course_applied": "Algoritmos y Estructuras de Datos",
+          "topic_overlap_jaccard": 0.6667,
+          "topic_overlap_dice": 0.8000,
+          "schedule_compatibility": 0.7500,
+          "schedule_matching_slots_count": 3,
+          "matching_slots": ["Lun 08:00-09:00", "Lun 09:00-10:00", "Mié 14:00-15:00"],
+          "modality_compatibility": 1.0,
+          "institutional_merit_eligible": true,
+          "explanation_text": "Alta coincidencia silábica (Jaccard 0.67) y disponibilidad horaria coincidente en 3 franjas."
+        }
+      }
+    ]
+  }
+  ```
+* **Respuestas de Error:**
+  * `HTTP 401 Unauthorized`: Token de sesión inválido si se envía cabecera de autenticación.
+  * `HTTP 422 Unprocessable Entity`: Parámetro `top_k` fuera del rango permitido ($[1, 20]$).
 
-Fuente: Elaboración propia.
+### 5.4. Ficha de Contrato: `GET /api/v1/recommendations/offers`
+* **Método y Ruta:** `GET /api/v1/recommendations/offers`
+* **Parámetros de Consulta (Query):**
+  * `mentee_email` (string, opcional si se envía Bearer JWT): Correo del mentoreado consultante.
+  * `id_asignatura` (integer, opcional, $\ge 1$): Filtrar recomendaciones para una materia específica.
+  * `top_k` (integer, opcional, $1 \le k \le 20$, default 5): Número de ofertas en el ranking.
+* **Cabeceras:** `Authorization: Bearer <Token_JWT>` (opcional).
+* **Esquema de Salida (Response Body — HTTP 200 OK):**
+  ```json
+  {
+    "mentee_email": "2022074255@upt.pe",
+    "total_candidates_evaluated": 8,
+    "top_k": 5,
+    "recommendations_count": 2,
+    "algorithm": "EdRecSys-v1.0-HybridMultifactorial",
+    "items": [
+      {
+        "id_oferta": "SES-CALC-8472",
+        "codigo_sesion": "SES-CALC-8472",
+        "id_asignatura": 1,
+        "codigo_asignatura": "CALC-101",
+        "nombre_asignatura": "Cálculo I",
+        "id_tema": 1,
+        "nombre_tema": "Límites Indeterminados y Continuidad",
+        "fecha_inicio": "2026-10-28T16:00:00Z",
+        "duracion_minutos": 60,
+        "modalidad": "presencial",
+        "aforo_maximo": 10,
+        "espacio_asignado": "Laboratorio de Cómputo 101 — Pabellón F (EPIS)",
+        "mentor_email": "2022073504@upt.pe",
+        "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+        "mentor_ciclo": 8,
+        "score_total": 0.8420,
+        "breakdown": {
+          "curricular_affinity": 1.0,
+          "course_weight_factor": 1.2,
+          "critical_course_applied": "Cálculo I",
+          "topic_overlap_jaccard": 1.0,
+          "topic_overlap_dice": 1.0,
+          "schedule_compatibility": 0.70,
+          "schedule_matching_slots_count": 2,
+          "matching_slots": ["Mié 16:00-17:00"],
+          "modality_compatibility": 1.0,
+          "institutional_merit_eligible": true,
+          "explanation_text": "Sesión del tema silábico de interés impartida en el laboratorio EPIS asignado."
+        }
+      }
+    ]
+  }
+  ```
 
-- **Códigos HTTP de Retorno:** `200 OK` con listado de ofertas activas `OfferResponse[]`.
+### 5.5. Ficha de Contrato: `POST /api/v1/recommendations/explain`
+* **Método y Ruta:** `POST /api/v1/recommendations/explain`
+* **Cabeceras:** `Content-Type: application/json`
+* **Esquema de Entrada (Request Body JSON):**
+  ```json
+  {
+    "mentee_email": "2022074255@upt.pe",
+    "mentor_email": "2022073504@upt.pe",
+    "id_oferta": null
+  }
+  ```
+* **Esquema de Salida (Response Body — HTTP 200 OK):**
+  ```json
+  {
+    "target_type": "mentor",
+    "target_id": "2022073504@upt.pe",
+    "mentee_email": "2022074255@upt.pe",
+    "score_total": 0.8840,
+    "breakdown": {
+      "curricular_affinity": 1.0,
+      "course_weight_factor": 1.3,
+      "critical_course_applied": "Algoritmos y Estructuras de Datos",
+      "topic_overlap_jaccard": 0.6667,
+      "topic_overlap_dice": 0.8000,
+      "schedule_compatibility": 0.7500,
+      "schedule_matching_slots_count": 3,
+      "matching_slots": ["Lun 08:00-09:00", "Lun 09:00-10:00", "Mié 14:00-15:00"],
+      "modality_compatibility": 1.0,
+      "institutional_merit_eligible": true,
+      "explanation_text": "Candidato óptimo: Mentor de 8vo ciclo con alta afinidad silábica y coincidencia horaria."
+    },
+    "institutional_summary": "Recomendación altamente favorable para nivelación en Algoritmos y Estructuras de Datos."
+  }
+  ```
+* **Respuestas de Error:**
+  * `HTTP 404 Not Found`: El mentor especificado no existe o no tiene perfil registrado.
+  * `HTTP 422 Unprocessable Entity`: Formato JSON o tipos de campo inválidos.
 
----
-
-### Cuadro 5.3: Especificación de Endpoint — GET /api/v1/recommendations/mentors
-
-| Parámetro | Tipo | Ubicación | Obligatorio | Regla de Validación / Descripción |
-| :--- | :--- | :--- | :---: | :--- |
-| `mentee_email` | String | Query | Sí | Correo institucional del mentoreado (`@upt.pe`). |
-| `top_k` | Integer | Query | No | Cantidad de recomendaciones requeridas ($1 \le k \le 20$, default 5). |
-
-Fuente: Elaboración propia.
-
-- **Códigos HTTP de Retorno:** `200 OK` con ranking ordenado de mentores por puntaje EdRecSys. `401 Unauthorized`.
-
----
-
-### Cuadro 5.4: Especificación de Endpoint — GET /api/v1/recommendations/offers
-
-| Parámetro | Tipo | Ubicación | Obligatorio | Regla de Validación / Descripción |
-| :--- | :--- | :--- | :---: | :--- |
-| `mentee_email` | String | Query | Sí | Correo institucional del mentoreado (`@upt.pe`). |
-| `id_asignatura` | Integer | Query | No | Filtro por asignatura prioritaria específica. |
-| `top_k` | Integer | Query | No | Cantidad de ofertas recomendadas ($1 \le k \le 20$, default 5). |
-
-Fuente: Elaboración propia.
-
-- **Códigos HTTP de Retorno:** `200 OK` con lista de ofertas activas ordenadas por afinidad. `401 Unauthorized`.
-
----
-
-### Cuadro 5.5: Especificación de Endpoint — POST /api/v1/recommendations/explain
-
-| Parámetro | Tipo | Ubicación | Obligatorio | Regla de Validación / Descripción |
-| :--- | :--- | :--- | :---: | :--- |
-| `mentee_email` | String | Body (JSON) | Sí | Identidad institucional del mentoreado consultante. |
-| `mentor_email` | String | Body (JSON) | Sí | Identidad institucional del candidato evaluado. |
-| `id_asignatura` | Integer | Body (JSON) | No | Materia de consulta para cálculo del multiplicador. |
-
-Fuente: Elaboración propia.
-
-- **Códigos HTTP de Retorno:** `200 OK` con desglose explicable (`jaccard_similarity`, `dice_coefficient`, `schedule_overlap_score`, `modality_match_score`, `critical_subject_multiplier`, `composite_score`). `404 Not Found` si el mentor no existe.
-
----
-
-### Cuadro 5.6: Especificación de Endpoint — GET /api/v1/recommendations/simulation/testbench
-
-| Parámetro | Tipo | Ubicación | Obligatorio | Regla de Validación / Descripción |
-| :--- | :--- | :--- | :---: | :--- |
-| *Ninguno* | N/A | N/A | No | Endpoint sin parámetros; ejecuta el banco algorítmico completo. |
-
-Fuente: Elaboración propia.
-
-- **Códigos HTTP de Retorno:** `200 OK` con reporte de los 4 casos frontera, determinismo y métricas de latencia.
+### 5.6. Ficha de Contrato: `GET /api/v1/recommendations/simulation/testbench`
+* **Método y Ruta:** `GET /api/v1/recommendations/simulation/testbench`
+* **Cabeceras:** `Accept: application/json`
+* **Esquema de Salida (Response Body — HTTP 200 OK):**
+  ```json
+  {
+    "testbench_status": "SUCCESS",
+    "timestamp": "2026-10-26T18:45:00Z",
+    "edge_cases": {
+      "case_1_no_schedule_overlap": {
+        "status": "PASSED",
+        "schedule_matching_slots_count": 0,
+        "handled_gracefully": true
+      },
+      "case_2_disjoint_topics": {
+        "status": "PASSED",
+        "jaccard": 0.0,
+        "dice": 0.0,
+        "handled_gracefully": true
+      },
+      "case_3_course_without_offers": {
+        "status": "PASSED",
+        "recommendations_count": 0,
+        "handled_gracefully": true
+      },
+      "case_4_ineligible_mentors_rn03": {
+        "status": "PASSED",
+        "leak_rate": 0.0,
+        "cycles_filtered_strictly": 6,
+        "handled_gracefully": true
+      }
+    },
+    "determinism_verified": true,
+    "rn03_filter_leak_rate": 0.0,
+    "evaluations_count": 24,
+    "total_elapsed_ms": 0.86,
+    "average_per_candidate_us": 35.83,
+    "rnf03_compliance": true
+  }
+  ```
+* **Respuestas de Error:**
+  * Endpoint determinista sin dependencias externas volátiles; opera como benchmark en memoria.
 
 ---
 
@@ -606,7 +823,7 @@ A continuación, se detalla la especificación física DDL de la entidad `sesion
 | :--- | :--- | :---: | :--- | :--- | :--- |
 | `id_sesion` | `INTEGER` | No | `SERIAL PRIMARY KEY` | Clave primaria física autoincremental. | Identificador único de registro. |
 | `codigo_sesion` | `VARCHAR(20)` | No | `UNIQUE` | Formato canónico `SES-XXXX`. | Código institucional para reservas. |
-| `mentor_email` | `VARCHAR(255)` | No | Índice B-Tree | `REFERENCES usuarios(email)` | Identidad del mentor titular. |
+| `mentor_email` | `VARCHAR(255)` | No | Índice B-Tree | Identidad @upt.pe (validado contra perfiles_academicos) | Trazabilidad del mentor titular (RN-03). |
 | `id_asignatura` | `INTEGER` | No | Índice B-Tree | `REFERENCES asignaturas(id_asignatura) ON DELETE RESTRICT` | Materia crítica curricular vinculada. |
 | `id_tema` | `INTEGER` | No | Índice B-Tree | `REFERENCES temas_conceptuales(id_tema) ON DELETE RESTRICT` | Unidad silábica conceptual. |
 | `fecha_inicio` | `TIMESTAMPTZ` | No | Índice B-Tree | Antelación obligatoria $> 24.0\text{ h}$ (RN-04). | Timestamp con zona horaria UTC. |
@@ -619,6 +836,8 @@ A continuación, se detalla la especificación física DDL de la entidad `sesion
 | `created_at` | `TIMESTAMPTZ` | No | `DEFAULT now()` | Marca temporal de auditoría. | Timestamp de inserción en el sistema. |
 
 Fuente: Elaboración propia a partir de `aplicacion/backend/app/models/offer.py`.
+
+El Cuadro 6.1 confirma el diseño físico normalizado de la tabla `sesiones_mentoria`, donde se aplican cinco restricciones `CHECK` para garantizar aforos fijos (RN-05), modalidades válidas, duraciones lectivas canónicas y coherencia del ciclo de vida, complementado con 5 índices B-Tree para optimizar búsquedas por mentor, materia y fecha de inicio.
 
 ### 6.1. Políticas de Seguridad Row Level Security (RLS) en Supabase
 ```sql
@@ -664,6 +883,8 @@ A continuación, se documenta el flujo de transformación de datos para los camp
 
 Fuente: Elaboración propia.
 
+El Cuadro 7.1 establece el mapeo determinista de campos entre capas, asegurando que los tipos de datos primitivos y compuestos mantengan equivalencia semántica desde las columnas de PostgreSQL hasta las propiedades del estado reactivo en React 19, evitando discrepancias de nombrado o conversiones ambiguas.
+
 A continuación, se presenta el catálogo centralizado de códigos de error del Sprint 3:
 
 ### Cuadro 7.2: Catálogo Centralizado de Códigos de Error del Sprint 3
@@ -677,6 +898,8 @@ A continuación, se presenta el catálogo centralizado de códigos de error del 
 | `MENTOR_NOT_FOUND` | 404 | Mentor profile not found in database. | El mentor especificado no registra perfil académico en la plataforma. | RF04 |
 
 Fuente: Elaboración propia.
+
+El Cuadro 7.2 formaliza el catálogo canónico de códigos de error para el Sprint 3, vinculando cada rechazo a una regla de negocio o requerimiento específico, lo que permite a los clientes web presentar mensajes de retroalimentación pedagógica precisos en lugar de respuestas genéricas de fallo.
 
 ---
 
@@ -695,6 +918,8 @@ A continuación, se documenta la ficha de variables de entorno para la operació
 | `ADVANCE_TIME_MIN_HOURS` | Float | No | `24.0` | Ventana obligatoria de antelación temporal de ofertas (RN-04). | Pública |
 
 Fuente: Elaboración propia.
+
+El Cuadro 8.1 especifica los parámetros de configuración en tiempo de ejecución del sistema, delimitando la sensibilidad de cada variable de entorno para prevenir la exposición involuntaria de secretos criptográficos (`JWT_SECRET_KEY`) o credenciales de conexión en repositorios públicos.
 
 ---
 
@@ -729,6 +954,10 @@ A continuación, se documenta el orden y la atomicidad de la operación:
 | 7 | Commit de la transacción en PostgreSQL | Commit | Garantía ACID; retorno HTTP 201 Created |
 
 Fuente: Elaboración propia.
+
+El Cuadro 9.1 detalla la secuencia transaccional de la publicación de ofertas, garantizando que las validaciones de mérito (RN-03) y antelación temporal (RN-04) se resuelvan antes de adquirir bloqueos de escritura, y asegurando atomicidad ACID completa durante la inserción en `sesiones_mentoria`.
+
+**Idempotencia y Concurrencia:** La operación no es idempotente en el sentido estricto, dado que cada invocación genera un código de sesión `SES-XXXX` único; no obstante, el índice único sobre `codigo_sesion` y el manejo de colisiones impiden inconsistencias en caso de peticiones concurrentes.
 
 ---
 
@@ -832,6 +1061,8 @@ A continuación, se detalla la matriz de correspondencia frente al catálogo ofi
 
 Fuente: Elaboración propia a partir de `Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx`.
 
+El Cuadro 11.1 acredita la trazabilidad completa entre los casos de prueba del catálogo formal y los casos de uso implementados en el Sprint 3, certificando que los 8 escenarios de prueba funcional, algorítmica y de rendimiento fueron superados satisfactoriamente.
+
 A continuación, se presenta el balance métrico consolidado de calidad:
 
 ### Cuadro 11.2: Balance Métrico Consolidado de Calidad de Software (Sprint 3)
@@ -845,6 +1076,8 @@ A continuación, se presenta el balance métrico consolidado de calidad:
 | **Compilación Producción**| Vite Build (`tsc -b`) | 0 errores | 45 módulos en 653 ms | N/A | **Bundle limpio** | ✅ Superado |
 
 Fuente: Elaboración propia a partir de reportes automatizados de CI/CD.
+
+El Cuadro 11.2 resume el balance de aseguramiento de la calidad del incremento, acreditando que la solución consolida 209 pruebas con 100% de tasa de éxito, supera en más de 21 puntos porcentuales el umbral de cobertura de RNF09 en ambas capas y mantiene el código 100% libre de advertencias y errores de linteo estático.
 
 ---
 

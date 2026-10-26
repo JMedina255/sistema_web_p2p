@@ -771,12 +771,48 @@ def generate_03_capacity_control():
     </div>
   </div>
 
-  <div style="background:#FFFFFF; border:1px solid #E2E8F0; padding:1.1rem 1.4rem; border-radius:8px; margin-top:1.5rem; font-size:0.85rem; color:#475569; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+  <div style="background:#FFFFFF; border:1px solid #CBD5E1; border-radius:8px; margin-top:1.25rem; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+    <div style="background:#1C2A59; color:#fff; font-size:0.85rem; font-weight:700; padding:0.6rem 1rem;">
+      📋 Cuadro Comparativo de Restricciones Normativas por Modalidad (Reglas RN-05, RN-06 y RN-07)
+    </div>
+    <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left;">
+      <thead>
+        <tr style="background:#F1F5F9; border-bottom:1px solid #CBD5E1; color:#1E293B;">
+          <th style="padding:0.55rem 1rem;">Parámetro de Control</th>
+          <th style="padding:0.55rem 1rem;">Modalidad Presencial (RN-06)</th>
+          <th style="padding:0.55rem 1rem;">Modalidad Virtual (RN-07)</th>
+          <th style="padding:0.55rem 1rem;">Mecanismo de Exigibilidad Técnica</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #E2E8F0;">
+          <td style="padding:0.5rem 1rem; font-weight:600;">Aforo Máximo Permitido</td>
+          <td style="padding:0.5rem 1rem; color:#1E40AF; font-weight:700;">10 Estudiantes (Fijo)</td>
+          <td style="padding:0.5rem 1rem; color:#3730A3; font-weight:700;">20 Estudiantes (Fijo)</td>
+          <td style="padding:0.5rem 1rem;"><code>CHECK (aforo_maximo IN (10, 20))</code> en PostgreSQL / Alembic 003</td>
+        </tr>
+        <tr style="border-bottom:1px solid #E2E8F0; background:#F8FAFC;">
+          <td style="padding:0.5rem 1rem; font-weight:600;">Infraestructura Requerida</td>
+          <td style="padding:0.5rem 1rem;">Laboratorio EPIS (101, 202, Aula Magna)</td>
+          <td style="padding:0.5rem 1rem;">Enlace institucional Google Meet (@upt.pe)</td>
+          <td style="padding:0.5rem 1rem;">Validación de dominio y catálogo de aulas en <code>offerService.ts</code></td>
+        </tr>
+        <tr>
+          <td style="padding:0.5rem 1rem; font-weight:600;">Comportamiento en UI</td>
+          <td style="padding:0.5rem 1rem;">Campo aforo inmutable (<code>readOnly</code>)</td>
+          <td style="padding:0.5rem 1rem;">Campo aforo inmutable (<code>readOnly</code>)</td>
+          <td style="padding:0.5rem 1rem;">Estado reactivo <code>STANDARD_CAPACITY[modality]</code> en React 19</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background:#FFFFFF; border:1px solid #E2E8F0; padding:1.1rem 1.4rem; border-radius:8px; margin-top:1.25rem; font-size:0.85rem; color:#475569; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
     <strong>Trazabilidad y Cumplimiento Normativo:</strong> Implementa formalmente el Caso de Uso <strong>CUS06 (Publicar Oferta de Mentoría)</strong>, satisfaciendo los criterios de verificación unitaria <code>CUS06-U02</code> en frontend (Vitest), la restricción relacional <code>CHECK (aforo_maximo IN (10, 20))</code> en la migración Alembic 003 de PostgreSQL/Supabase, y el estándar institucional de aforo docente de la Escuela Profesional de Ingeniería de Sistemas.
   </div>
 </body>
 </html>"""
-    render_html_to_png(html, output_png, 1280, 940, 1000)
+    render_html_to_png(html, output_png, 1280, 1080, 1000)
 
 
 # ---------------------------------------------------------------------------

@@ -1309,5 +1309,119 @@ stop
 @enduml
 ```
 
+### 3.8. Diagrama Entidad-Relación Físico de Base de Datos (Sprint 3)
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundCorner 8
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #1E293B
+    HeaderBackgroundColor #F1F5F9
+}
+
+entity "asignaturas" as ASIG {
+    * id_asignatura : INTEGER <<PK>>
+    --
+    codigo_curso : VARCHAR(20) <<Unique>>
+    nombre_curso : VARCHAR(150)
+    ciclo_plan : INTEGER
+    creditos : INTEGER
+    factor_ponderacion : NUMERIC(3,1)
+}
+
+entity "temas_conceptuales" as TEMA {
+    * id_tema : INTEGER <<PK>>
+    --
+    * id_asignatura : INTEGER <<FK>>
+    nombre_tema : VARCHAR(150)
+    unidad_silabica : INTEGER
+}
+
+entity "sesiones_mentoria" as SES {
+    * id_sesion : INTEGER <<PK, autoincrement>>
+    --
+    * codigo_sesion : VARCHAR(20) <<Unique, B-Tree>>
+    * mentor_email : VARCHAR(255) <<B-Tree>>
+    * id_asignatura : INTEGER <<FK, B-Tree>>
+    * id_tema : INTEGER <<FK, B-Tree>>
+    * fecha_inicio : TIMESTAMPTZ <<B-Tree>>
+    * duracion_minutos : INTEGER <<CHECK (60, 90)>>
+    * modalidad : VARCHAR(20) <<CHECK ('presencial', 'virtual')>>
+    * aforo_maximo : INTEGER <<CHECK (10, 20)>>
+    * espacio_asignado : VARCHAR(255)
+    notas_adicionales : TEXT
+    * estado : VARCHAR(30) <<CHECK ('PUBLICADA', 'CONFIRMADA', ...)>>
+    * created_at : TIMESTAMPTZ <<DEFAULT now()>>
+}
+
+entity "perfiles_academicos" as PERF {
+    * id_perfil : INTEGER <<PK>>
+    --
+    * email : VARCHAR(255) <<Unique, B-Tree>>
+    codigo_estudiante : VARCHAR(20)
+    nombres : VARCHAR(100)
+    apellidos : VARCHAR(100)
+    * ciclo_actual : INTEGER <<CHECK (1..10)>>
+    rol_postulacion : VARCHAR(20)
+    materias_interes : JSONB
+    temas_seleccionados : JSONB
+    modalidad_preferida : VARCHAR(20)
+}
+
+entity "disponibilidad_horaria" as DISP {
+    * id_disponibilidad : INTEGER <<PK>>
+    --
+    * email : VARCHAR(255) <<FK, B-Tree>>
+    * dia_semana : INTEGER <<CHECK (1..6)>>
+    * hora_inicio : VARCHAR(5)
+    * hora_fin : VARCHAR(5)
+}
+
+ASIG ||..o{ TEMA : "1 a N (temario)"
+ASIG ||..o{ SES : "id_asignatura [RESTRICT]"
+TEMA ||..o{ SES : "id_tema [RESTRICT]"
+PERF ||..o{ DISP : "email [CASCADE]"
+PERF ||..o{ SES : "mentor_email (RN-03: ciclo >= 7)"
+@enduml
+```
+
+### 3.9. Diagrama de Casos de Uso del Sprint 3
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+left to right direction
+
+actor "Mentor Académico\n(Ciclo VII-X)" as Mentor #DBEAFE
+actor "Estudiante Mentoreado\n(Ciclo I-IV)" as Mentee #DCFCE7
+actor "Sistema P2P\n(Cron Job T-24h)" as System #FEE2E2
+
+rectangle "Sistema Web P2P — Casos de Uso Sprint 3" {
+    usecase "CUS06: Publicar Oferta de Mentoría\n(RN-04 >24h, RN-05 Aforo)" as UC_Publish
+    usecase "CUS02: Recomendación Top-k de Mentores y Ofertas\n(EdRecSys v1.0)" as UC_Rec
+    usecase "CUS21: Consulta Silábica Avanzada\n(Filtro de Materias I-IV)" as UC_Catalog
+    usecase "CUS23: Corte de Antelación y Quórum T-24h\n(Evaluación Automática RN-08/RN-09)" as UC_Cron
+    usecase "Validar Mérito Académico\n(RN-03: ciclo >= 7)" as UC_Merit
+    usecase "Asignar Recinto Físico o Meet\n(RN-06 Lab EPIS / RN-07 Google Meet)" as UC_Infra
+}
+
+Mentor --> UC_Publish
+Mentor --> UC_Catalog
+Mentee --> UC_Rec
+Mentee --> UC_Catalog
+System --> UC_Cron
+
+UC_Publish ..> UC_Merit : <<include>>
+UC_Publish ..> UC_Infra : <<include>>
+UC_Publish ..> UC_Catalog : <<include>>
+UC_Rec ..> UC_Merit : <<include>> (Score 0.0 si ciclo < 7)
+UC_Cron ..> UC_Publish : <<extends>> (Transición de estado)
+@enduml
+```
+
 ---
 *Fin del repositorio — Bóveda Centralizada de Diagramas de Diseño Técnico.*

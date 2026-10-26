@@ -105,6 +105,8 @@ A continuación, se detalla el catálogo de pruebas específicas construidas par
 
 Fuente: Elaboración propia a partir de `tests/test_offers.py`, `tests/test_recommendations.py` y `tests/test_simulation.py`.
 
+El Cuadro 3.1 certifica que las 26 pruebas nuevas del backend blindan los tres componentes críticos del Sprint 3: la API de publicación de ofertas con validación de antelación temporal (RN-04) y aforos inmutables (RN-05), el motor de recomendación EdRecSys v1.0 con filtrado estricto de mérito (RN-03) y multiplicadores curriculares, y el banco de simulación algorítmica con evaluación de casos frontera y determinismo matemático.
+
 ---
 
 ### 3.2. Suites Preexistentes del Backend Preservadas (96 Pruebas)
@@ -128,6 +130,8 @@ A continuación, se documenta la certificación de no-regresión en las suites h
 
 Fuente: Elaboración propia a partir de las ejecuciones en `aplicacion/backend/tests/`.
 
+El Cuadro 3.2 evidencia la preservación íntegra de las 96 pruebas preexistentes construidas en los Sprints 1 y 2, confirmando cero regresiones en los subsistemas de autenticación OTP institucional, consentimiento informado bajo la Ley N° 29733, catálogo curricular, gestión de roles y sesiones transaccionales de SQLAlchemy.
+
 ---
 
 ## 4. Desglose Exhaustivo de Suites de Prueba de Frontend (87 Pruebas en 13 Suites)
@@ -146,6 +150,8 @@ A continuación, se detalla la matriz de pruebas del frontend para la tarea T-14
 | **SUBTOTAL OFERTAS T-14** | **21** | **Formulario React, Validaciones RN-04/RN-05 y Adaptador de Servicio** | **91.89% Líneas** |
 
 Fuente: Elaboración propia a partir de `src/services/__tests__/offerService.test.ts` y `src/components/__tests__/OfferPublishView.test.tsx`.
+
+El Cuadro 4.1 constata que el módulo cliente de ofertas T-14 alcanza un 91.89% de cobertura promedio ponderada en frontend, verificando el comportamiento reactivo de la interfaz frente a antelaciones insuficientes, la asignación inalterable de aforos reglamentarios y la comunicación asíncrona tipada con el backend.
 
 ---
 
@@ -170,6 +176,8 @@ A continuación, se documentan las suites cliente preexistentes que certifican l
 | **SUBTOTAL HEREDADO FRONTEND** | **66** | **11 suites de prueba unitarias y de componentes (S1 y S2)** | **91.10% Líneas** |
 
 Fuente: Elaboración propia a partir de las suites en `aplicacion/frontend/src/`.
+
+El Cuadro 4.2 ratifica la estabilidad del subsistema frontend con 66 pruebas heredadas superadas al 100%, garantizando que la incorporación de la pestaña de publicación de ofertas no alteró los flujos de inicio de sesión, consentimiento legal ni el catálogo curricular avanzado.
 
 ---
 
@@ -204,6 +212,8 @@ A continuación, se documenta la desagregación de cobertura en ambas capas de c
 
 Fuente: Reporte de `pytest tests/ --cov=app --cov-report=term-missing`.
 
+El Cuadro 5.1 demuestra que los 49 archivos evaluados del backend superan con creces el umbral del 70% de RNF09, registrando una cobertura global de 91.83% con cobertura perfecta (100%) en los routers de ofertas y recomendaciones, en los modelos relacionales y en los esquemas Pydantic v2.
+
 ![Backend Pytest Coverage](/docs/diseño/imagenes/sprint-03/05_backend_pytest_coverage_sprint03.png)  
 *Figura 5.1: Terminal de ejecución de 122 pruebas de backend con 91.83% de cobertura.*
 
@@ -231,6 +241,8 @@ A continuación, se documenta la desagregación de cobertura en el frontend:
 
 Fuente: Reporte de `npm run test:coverage` (Vitest v8).
 
+El Cuadro 5.2 certifica una cobertura global del 92.52% en las líneas del frontend, superando en 22.52 puntos porcentuales el requisito normativo institucional, con coberturas individuales superiores al 86% en los servicios de ofertas y autenticación, y 97.32% en el formulario reactivo T-14.
+
 ![Frontend Vitest Coverage](/docs/diseño/imagenes/sprint-03/06_frontend_vitest_coverage_sprint03.png)  
 *Figura 5.2: Terminal de ejecución de 87 pruebas de frontend con 92.52% de cobertura.*
 
@@ -252,6 +264,8 @@ A continuación, se presentan los resultados empíricos obtenidos al someter el 
 | **Latencia de cómputo (RNF03)** | Evaluación de 24 pares mentoreado-mentor. | Tiempo medio por candidato $< 50\text{ ms}$. | **35.8 µs / candidato (0.86 ms total)** | ✅ Superado |
 
 Fuente: Elaboración propia a partir de `pytest tests/test_simulation.py -v -s` y `/api/v1/recommendations/simulation/testbench`.
+
+El Cuadro 6.1 confirma la robustez operativa de EdRecSys v1.0, evidenciando cero fallos ante entradas atípicas, ausencia absoluta de fugas en la regla de mérito RN-03 (100% de exclusión de postulantes de ciclos formativos I a VI), determinismo invariable en el ranking Top-k y una latencia media de 35.8 µs por candidato (0.86 ms total), pulverizando el límite máximo de 50 ms estipulado en RNF03.
 
 ![Algorithmic Testbench](/docs/diseño/imagenes/sprint-03/07_algorithmic_testbench_cases.png)  
 *Figura 6.1: Terminal del testbench algorítmico de EdRecSys v1.0 certificando robustez y latencia sub-milisegundo.*

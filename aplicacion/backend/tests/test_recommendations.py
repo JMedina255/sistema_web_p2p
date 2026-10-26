@@ -265,6 +265,7 @@ def test_recommendation_service_with_real_db_session():
         assert top_cand.breakdown.schedule_matching_slots_count == 1
     finally:
         db.close()
+        engine.dispose()
 
 
 def test_get_recommended_offers_with_bearer_jwt():
@@ -420,3 +421,4 @@ def test_get_candidate_mentors_empty_db_returns_empty_list_no_leak():
         assert len(mentors) == 0
     finally:
         db.close()
+        engine.dispose()

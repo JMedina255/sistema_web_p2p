@@ -328,6 +328,7 @@ def test_offer_service_with_real_db_session():
         assert len(offers_db) >= 1
     finally:
         db.close()
+        engine.dispose()
 
 
 def test_publish_offer_rejects_external_email_validation():
@@ -381,6 +382,7 @@ def test_get_offers_empty_db_returns_empty_list_no_leak():
         assert len(offers) == 0
     finally:
         db.close()
+        engine.dispose()
 
 
 def test_publish_offer_exact_24_hours_boundary():
