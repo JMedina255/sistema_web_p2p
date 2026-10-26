@@ -65,17 +65,17 @@ La tarea **T-14** fue desarrollada por Joan respetando los estándares de diseñ
    - Selector de duración en bloques pedagógicos de **60 minutos** (1 hora pedagógica) o **90 minutos** (1.5 horas pedagógicas), calculando automáticamente la hora estimada de término de la sesión.
 
 5. **Infraestructura Físico-Virtual Diferenciada:**
-   - **Presencial (RN-06):** Asignación y sugerencia de recintos académicos libres validados contra la carga lectiva regular (*Laboratorio de Cómputo 101*, *Lab Redes 202*, *Aula Magna 104*).
-   - **Virtual (RN-07):** Generación automática de enlace seguro institucional de teleconferencia en Google Meet (`https://meet.google.com/upt-[codigo]-[hash]`) con opción de regeneración de enlace.
+   - **Presencial (RN-06):** Selección y sugerencia de recintos académicos del catálogo institucional de la EPIS (*Laboratorio de Cómputo 101*, *Lab Redes 202*, *Aula Magna 104*). La interfaz presenta estos espacios como aulas sugeridas preliminares; la validación y verificación automatizada de disponibilidad en tiempo real contra la carga lectiva regular (RN-06) corresponde al subsistema backend mediante el procesamiento de horarios.
+   - **Virtual (RN-07):** Generación simulada en cliente de enlace de demostración con formato institucional Google Meet (`https://meet.google.com/upt-[codigo]-[hash]`) con opción de regeneración interactiva. La provisión desatendida y creación real de la sala de videoconferencia en el servicio institucional corresponde a la integración de backend (RN-07).
 
 6. **Control de Flujo, Feedback y Prevención de Duplicados:**
    - Deshabilitación de envíos concurrentes mediante bandera `isSubmitting`.
-   - Confirmación visual destacada tras la publicación, emitiendo el código oficial de sesión (`SES-XXXX`), estado `PUBLICADA` y tarjeta resumen.
+   - Confirmación visual destacada tras la publicación, emitiendo un identificador simulado de sesión (`SES-XXXX`), estado `PUBLICADA` y tarjeta resumen en el almacenamiento local temporal.
    - Historial de ofertas publicadas por el mentor durante la sesión de trabajo.
 
 ### 2.2. Arquitectura de Software y Contratos TypeScript
 
-Se diseñó el servicio tipado [`aplicacion/frontend/src/services/offerService.ts`](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/aplicacion/frontend/src/services/offerService.ts), estructurado bajo el patrón fachada con separación de adaptadores:
+Se diseñó el servicio tipado [`aplicacion/frontend/src/services/offerService.ts`](../../aplicacion/frontend/src/services/offerService.ts), estructurado bajo el patrón fachada con separación de adaptadores:
 
 ```typescript
 export type SessionModality = 'presencial' | 'virtual';
@@ -116,13 +116,14 @@ export interface PublishOfferResponse {
 > **Diferenciación de Entorno y Persistencia:**
 > - **Comportamiento Actual (Modo Mock):** Las ofertas creadas mediante `OfferPublishView.tsx` se procesan a través del adaptador local `MockOfferAdapter`, almacenándose en memoria y en la clave `p2p_offers_mock_sprint03` del `localStorage` del navegador. La interfaz despliega de manera permanente y accesible el banner:
 >   **«Modo de prueba local — Backend pendiente (T-14 · Joan)»**.
+>   Los identificadores emitidos (formato `SES-XXXX`) corresponden exclusivamente a identificadores simulados de demostración local para el ciclo de vida del cliente, no a claves primarias ni secuencias relacionales persistidas.
 > - **Persistencia Real en Base de Datos:** **No se encuentra activa.** La inserción física de registros en la tabla relacional `sesiones_mentoria` de PostgreSQL/Supabase depende estrictamente de la finalización de las tareas **T-15** y **T-16** asignadas a Renzo. El sistema no simula falsamente que los datos han sido replicados en el servidor.
 
 ---
 
 ## 3. Catálogo de Pruebas Automatizadas y Evidencias de Calidad (T-14)
 
-El desarrollo de T-14 se contrastó frente a los casos de prueba estipulados en el catálogo oficial del proyecto ([`docs/analisis/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx`](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/docs/analisis/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx)), implementando 21 pruebas automatizadas nuevas en Vitest.
+El desarrollo de T-14 se contrastó frente a los casos de prueba estipulados en el catálogo oficial del proyecto ([`docs/analisis/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx`](../analisis/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx)), implementando 21 pruebas automatizadas nuevas en Vitest.
 
 A continuación, se detalla la matriz de correspondencia y resultados empíricos obtenidos:
 
@@ -132,8 +133,8 @@ A continuación, se detalla la matriz de correspondencia y resultados empíricos
 | :---: | :---: | :--- | :--- | :--- | :---: |
 | **CUS06-U01** | Unitaria / Componente | Validación de campos obligatorios en el servicio y formulario. | Rechazar payload carente de asignatura, tema, fecha, modalidad o infraestructura; listar mensajes de error específicos. | Errores detectados en `validateOfferPayload`, botón de envío deshabilitado en formulario. | ✅ Superado |
 | **CUS06-U02** | Unitaria / Componente | Asignación de aforo automático por defecto según modalidad (RN-05). | Aplicar estrictamente 10 cupos para presencial y 20 para virtual; rechazar valores discordantes. | Aforo inmutable fijado en `STANDARD_CAPACITY`, actualizado reactivamente en el DOM. | ✅ Superado |
-| **CUS06-F01** | Funcional / Sistema | Flujo interactivo de publicación con sugerencia de aula física (RN-06). | Permitir seleccionar curso, tema silábico, recinto de laboratorio EPIS y registrar la oferta con código `SES-XXXX`. | Oferta publicada exitosamente, tarjeta verde de confirmación y registro en historial. | ✅ Superado |
-| **CUS06-F02** | Funcional / Sistema | Flujo de publicación virtual y validación de antelación temporal (RN-04 / RN-07). | Generar enlace Meet institucional (@upt.pe); alertar y bloquear si antelación es $\le 24\text{ h}$; avisar si $< 48\text{ h}$. | Bloqueo perentorio con antelación $\le 24\text{ h}$, badge de recomendación con $36\text{ h}$, enlace Meet generado. | ✅ Superado |
+| **CUS06-F01** | Funcional / Sistema | Flujo interactivo de publicación con sugerencia de aula física (RN-06). | Permitir seleccionar curso, tema silábico, aula sugerida de laboratorio EPIS y registrar la oferta en modo mock con código `SES-XXXX`. | Oferta publicada exitosamente, tarjeta verde de confirmación y registro en historial. | ✅ Superado |
+| **CUS06-F02** | Funcional / Sistema | Flujo de publicación virtual y validación de antelación temporal (RN-04 / RN-07). | Generar enlace Meet de demostración con formato institucional (@upt.pe); alertar y bloquear si antelación es $\le 24\text{ h}$; avisar si $< 48\text{ h}$. | Bloqueo perentorio con antelación $\le 24\text{ h}$, badge de recomendación con $36\text{ h}$, enlace Meet generado. | ✅ Superado |
 
 Fuente: Elaboración propia a partir de `Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx` y ejecución de suites en `aplicacion/frontend/src/services/__tests__/offerService.test.ts` y `aplicacion/frontend/src/components/__tests__/OfferPublishView.test.tsx`.
 
@@ -153,13 +154,18 @@ A continuación, se detalla el balance de pruebas automatizadas, cobertura y an�
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Suites de Prueba** | Vitest 2.1.8 / Pytest 9.1.1 | 100% aprobadas | 13 suites | 10 suites | **23 suites aprobadas** | ✅ Superado |
 | **Pruebas Automatizadas** | Vitest / Pytest | 100% aprobadas | **87 pruebas** (0 fallos) | **84 pruebas** (0 fallos) | **171 pruebas aprobadas** | ✅ Superado |
-| **Cobertura en Líneas** | Vitest v8 / Pytest-Cov | $\ge 70.0\%$ | **92.52%** | **91.00%** | **~91.8% ponderado** | ✅ Superado |
+| **Cobertura Frontend (Líneas)** | Vitest v8 | $\ge 70.0\%$ | **92.52%** | N/A | **92.52%** | ✅ Superado |
+| **Cobertura Backend (Líneas)** | Pytest-Cov | $\ge 70.0\%$ | N/A | **91.00%** | **91.00%** | ✅ Superado |
 | **Cobertura de T-14** | Vitest v8 | $\ge 70.0\%$ | `OfferPublishView.tsx`: **97.32%**<br>`offerService.ts`: **86.46%** | N/A (Backend pendiente) | **> 90% en módulo** | ✅ Superado |
 | **Linteo Estático** | ESLint 9 / Ruff 0.9 | 0 errores | 0 errores, 0 warnings | 0 errores (All checks passed!) | **0 defectos estáticos** | ✅ Superado |
 | **Formato de Código** | Prettier / Ruff format | 100% estándar | Código formateado | 49 archivos conformes | **100% estandarizado** | ✅ Superado |
 | **Compilación de Producción** | Vite Build (`tsc -b`) | 0 errores tipado | 45 módulos en 1.30 s (`dist/`) | N/A | **Empaquetado limpio** | ✅ Superado |
 
 Fuente: Elaboración propia a partir de las ejecuciones de `npm run test:coverage`, `npm run lint`, `npm run build` en `aplicacion/frontend` y `pytest tests/ --cov=app`, `ruff check .`, `ruff format --check .` en `aplicacion/backend`.
+
+> [!NOTE]
+> **Metodología de Reporte de Cobertura (Regla 3.2.7):**
+> De conformidad con las directrices de documentación de software, las métricas de cobertura de frontend (Vitest v8) y backend (Pytest-Cov) se reportan de forma estrictamente independiente. No se presentan valores promediados ni agregados sin una metodología unificada de instrumentación que consolide líneas físicas ejecutadas. Ambos subsistemas superan individualmente con amplio margen el umbral normativo del 70.0% estipulado en el RNF09.
 
 Los resultados confirman que el incremento mantiene los altos estándares de calidad institucional, incrementando la batería de pruebas de 150 a 171 pruebas automatizadas sin incurrir en regresiones sobre las funcionalidades de los sprints anteriores.
 
