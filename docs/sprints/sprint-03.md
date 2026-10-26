@@ -8,16 +8,19 @@
 **Rama de trabajo:** `main`  
 **Fecha de corte documental:** 26/10/2026  
 **Commits de desarrollo del Sprint 3:**
-- [`6de5653`](https://github.com/JMedina255/sistema_web_p2p/commit/6de5653) — `feat(s3-frontend): implementar servicio tipado y validaciones de ofertas [T-14]`
-- [`148d12d`](https://github.com/JMedina255/sistema_web_p2p/commit/148d12d) — `feat(s3-frontend): desarrollar formulario reactivo de publicacion de ofertas [T-14]`
-- [`e197efb`](https://github.com/JMedina255/sistema_web_p2p/commit/e197efb) — `feat(s3-frontend): integrar publicacion de ofertas en navegacion principal [T-14]`
-- [`b3d4f81`](https://github.com/JMedina255/sistema_web_p2p/commit/b3d4f81) — `feat(s3-backend): modelar SesionMentoria, migracion Alembic 003 y API de ofertas [T-15/T-16]`
-- [`9e2c7a4`](https://github.com/JMedina255/sistema_web_p2p/commit/9e2c7a4) — `feat(s3-backend): implementar motor EdRecSys Top-k multifactorial y endpoints REST [T-15/T-16]`
-- [`7a11f20`](https://github.com/JMedina255/sistema_web_p2p/commit/7a11f20) — `feat(s3-backend): implementar servicio de simulacion y testbench algoritmico [T-18]`
+- [`6de5653`](https://github.com/JMedina255/sistema_web_p2p/commit/6de5653) — `feat(s3-frontend): implementar servicio tipado y validaciones de ofertas [T-14]` (Joan)
+- [`148d12d`](https://github.com/JMedina255/sistema_web_p2p/commit/148d12d) — `feat(s3-frontend): desarrollar formulario reactivo de publicacion de ofertas [T-14]` (Joan)
+- [`e197efb`](https://github.com/JMedina255/sistema_web_p2p/commit/e197efb) — `feat(s3-frontend): integrar publicacion de ofertas en navegacion principal [T-14]` (Joan)
+- [`46892df`](https://github.com/JMedina255/sistema_web_p2p/commit/46892df) — `docs(sprint-03): registrar avance T-14 y actualizar README [T-14]` (Joan)
+- [`6db7c3d`](https://github.com/JMedina255/sistema_web_p2p/commit/6db7c3d) — `docs: estandarizar directrices de informes academicos de sprint en rules_doc` (Joan)
+- [`af65fc7`](https://github.com/JMedina255/sistema_web_p2p/commit/af65fc7) — `docs(sprint-03): precisar alcance tecnico de infraestructura, mocks y coberturas` (Joan)
+- [`741256b`](https://github.com/JMedina255/sistema_web_p2p/commit/741256b) — `feat(sprints): crear snapshot de cierre del sprint 2 con aplicacion, documentacion y SNAPSHOT_INFO.md` (Renzo)
+- [`094c9fb`](https://github.com/JMedina255/sistema_web_p2p/commit/094c9fb) — `feat(sprint-03): culminar backend, motor EdRecSys v1.0, testbench y documentacion formal de diseno [T-14, T-15, T-16, T-18]` (Renzo)
+- [`fea566c`](https://github.com/JMedina255/sistema_web_p2p/commit/fea566c) — `docs(sprint-03): estandarizar contratos REST, diagramas y cuadros quintuplos D-2 [T-14, T-15, T-16, T-18]` (Renzo)
 
 > [!IMPORTANT]
 > **Culminación Integral del Sprint 3 (26/10/2026):**
-> El presente documento registra la finalización técnica, acoplamiento arquitectónico y verificación exhaustiva de todas las tareas del Sprint 3: **T-14** (Formulario de publicación de ofertas en frontend, Joan), **T-15** (Motor de recomendación *EdRecSys* y API de ofertas, Renzo), **T-16** (Modelo relacional `SesionMentoria`, migración Alembic 003 y endpoints REST tipados Pydantic v2, Renzo) y **T-18** (Servicio de simulación de sesiones y testbench de evaluación algorítmica, Renzo). La plataforma cuenta con 209 pruebas automatizadas (87 en frontend y 122 en backend), linteo estático con cero errores y cobertura de 92.52% en frontend y 91.83% en backend, superando los umbrales de calidad del **RNF09**. **El Sprint 3 se declara formalmente CULMINADO Y APROBADO AL 100%.**
+> El presente documento registra la finalización técnica, acoplamiento arquitectónico y verificación exhaustiva de todas las tareas del Sprint 3: **T-14** (Formulario de publicación de ofertas en frontend, Joan), **T-15** (Motor de recomendación *EdRecSys* y API de ofertas, Renzo), **T-16** (Modelo relacional `SesionMentoria`, migración Alembic 003 y endpoints REST tipados Pydantic v2, Renzo) y **T-18** (Servicio de simulación de sesiones y testbench de evaluación algorítmica, Renzo). La plataforma cuenta con 209 pruebas automatizadas (87 en frontend y 122 en backend), linteo estático con cero errores y cobertura de 92.52% en frontend y 92.14% en backend (91.83% en corte preliminar con 1676 sentencias), superando ampliamente los umbrales de calidad del **RNF09**. **El Sprint 3 se declara formalmente CULMINADO Y APROBADO AL 100%.**
 
 ---
 
@@ -110,7 +113,7 @@ A continuación, se detalla el balance de pruebas automatizadas, cobertura y an�
 | **Suites de Prueba** | Vitest 2.1.8 / Pytest 9.1.1 | 100% aprobadas | 13 suites | 13 suites | **26 suites aprobadas** | ✅ Superado |
 | **Pruebas Automatizadas** | Vitest / Pytest | 100% aprobadas | **87 pruebas** (0 fallos) | **122 pruebas** (0 fallos) | **209 pruebas aprobadas** | ✅ Superado |
 | **Cobertura Frontend (Líneas)** | Vitest v8 | $\ge 70.0\%$ | **92.52%** | N/A | **92.52%** | ✅ Superado |
-| **Cobertura Backend (Líneas)** | Pytest-Cov | $\ge 70.0\%$ | N/A | **91.83%** | **91.83%** | ✅ Superado |
+| **Cobertura Backend (Líneas)** | Pytest-Cov | $\ge 70.0\%$ | N/A | **92.14%** (preliminar 91.83%) | **92.14%** | ✅ Superado |
 | **Linteo Estático** | ESLint 9 / Ruff 0.9 | 0 errores | 0 errores, 0 warnings | 0 errores (All checks passed!) | **0 defectos estáticos** | ✅ Superado |
 | **Formato de Código** | Prettier / Ruff format | 100% estándar | Código formateado | 61 archivos conformes | **100% estandarizado** | ✅ Superado |
 | **Compilación de Producción** | Vite Build (`tsc -b`) | 0 errores tipado | 45 módulos en 600 ms (`dist/`) | N/A | **Empaquetado limpio** | ✅ Superado |
@@ -366,7 +369,7 @@ A continuación, se presenta el balance consolidado de ejecución y cumplimiento
 | **Tareas del Sprint** | 4 tareas | 1 tarea (T-14) | 3 tareas (T-15, T-16, T-18) | **100.0%** |
 | **Esfuerzo Estimado** | 11.0 horas | 2.0 horas | 9.0 horas | **100.0%** |
 | **Pruebas Automatizadas** | $\ge 150$ | 87 pruebas frontend | 122 pruebas backend | **209 pruebas (100% pasando)** |
-| **Cobertura de Código** | $\ge 70.0\%$ | 92.52% (Líneas) | 91.83% (Líneas) | **Superado en ambos subsistemas** |
+| **Cobertura de Código** | $\ge 70.0\%$ | 92.52% (Líneas) | 92.14% (Líneas) | **Superado en ambos subsistemas** |
 | **Linteo y Formato** | 0 defectos | ESLint 0 err / Prettier OK | Ruff 0 err / Format OK | **100% limpio y estandarizado** |
 | **Definition of Done (DoD)** | 6 criterios | Criterios UI y Accesibilidad | Persistencia, API y Testbench | **100% Cumplido** |
 
