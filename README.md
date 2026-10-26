@@ -6,7 +6,7 @@
 > **Autores:**
 > - ANTAYHUA MAMANI, Renzo Antonio (2022073504)
 > - MEDINA QUISPE, Joan Cristian (2022074255)
->   
+>
 > **Docente de Cátedra:** Dr. Ricardo Eduardo Valcárcel Alvarado
 >
 > **Semestre Académico:** 2026-II
@@ -17,17 +17,24 @@
 
 El **Sistema Web P2P** es una plataforma institucional orientada a conectar a estudiantes de ciclos formativos iniciales (*Mentoreados*, ciclos I al IV) con estudiantes de rendimiento sobresaliente de ciclos superiores (*Mentores*, ciclos VII al X) para mitigar los altos índices de reprobación y deserción en asignaturas filtro críticas (*Cálculo I/II, Algoritmos y Estructuras de Datos, Programación Orientada a Objetos y Base de Datos*) de la Escuela Profesional de Ingeniería de Sistemas de la Universidad Privada de Tacna.
 
-**Estado actual:** Fase de construcción — **Sprint 1 Culminado y Verificado**. La solución se desarrolla en `aplicacion/` (React SPA + FastAPI RESTful con persistencia en PostgreSQL/Supabase conforme a **RNF09**). La totalidad de las 6 tareas planificadas han sido completadas y verificadas:
-- **Tareas de Joan:** **T-01** (entorno base y conexión técnica a Supabase `p2p-epis-dev`), **T-02** (interfaz de acceso institucional `@upt.pe` con desafío OTP) y **T-06** (suite de pruebas iniciales y flujo de CI en GitHub Actions verificado exitosamente en el run [`39331555735`](https://github.com/JMedina255/sistema_web_p2p/actions/runs/39331555735)).
-- **Tareas de Renzo:** **T-09** (modelos ORM, migración Alembic con datos semilla de las **5 materias filtro**: *Cálculo I, Cálculo II, Algoritmos y Estructuras de Datos, Programación Orientada a Objetos y Base de Datos*, y endpoints RESTful de catálogo curricular), **T-03** (API real de autenticación OTP `/api/v1/auth/otp/*`, adaptador `ApiAuthAdapter` en frontend y emisión de tokens JWT de sesión con algoritmo HS256) y **T-07** (políticas de seguridad Row Level Security RLS en script SQL y guía de configuración para Supabase).
-- **Aseguramiento de Calidad:** Suite consolidada de **96 pruebas automatizadas** (46 en frontend y 50 en backend) con cobertura superior al 91%, superando holgadamente la meta mínima de **RNF09** ($\ge 70\%$). El directorio `frontend/` se conserva como maqueta de referencia visual. El SRS FD03 v2.0 es la fuente canónica de requisitos y el SAD FD04 v1.1 orienta la arquitectura técnica.
+**Estado actual:** Fase de construcción — **Sprint 3 en Desarrollo**. La solución se desarrolla en `aplicacion/` (React 19 SPA + FastAPI RESTful con persistencia en PostgreSQL/Supabase conforme a **RNF09**).
+
+- **Sprint 1 (Base Técnica y Acceso Inicial):** **Culminado y Verificado** (96 pruebas automatizadas). Integración de React con FastAPI, conexión a Supabase (`p2p-epis-dev`), flujo OTP de acceso institucional (`@upt.pe`), catálogo curricular inicial y pipeline de CI en GitHub Actions.
+- **Sprint 2 (Roles, Currículo y Perfiles):** **Culminado y Verificado** (150 pruebas automatizadas). Formulario accesible de consentimiento digital bajo la **Ley N° 29733** (**RF02** / **RN-02**), buscador avanzado en tiempo real con temarios silábicos (**RF05** / **CUS21**), configuración de perfil formativo y matriz semanal 6×11 de disponibilidad con regla de mérito **RN-03** (**RF04** / **CUS15**), administración de roles y políticas de seguridad multi-usuario RLS (**RNF02**).
+- **Sprint 3 (Publicación de Ofertas — En Desarrollo):**
+  - **Tarea de Joan:** **T-14** (Formulario de publicación de ofertas de mentoría — **Implementada y Verificada en Frontend**). Formulario reactivo accesible con selección de materias filtro y unidades silábicas oficiales, validación estricta de antelación obligatoria $> 24\text{ h}$ y recomendada $\ge 48\text{ h}$ (**RN-04**), aforo estándar inmutable de 10 estudiantes en presencial y 20 en virtual (**RN-05**), bloques lectivos de 60 y 90 minutos, y asignación de recintos físicos EPIS (**RN-06**) o salas virtuales Meet/Discord (**RN-07**).
+  - **Tareas de Renzo:** **T-15** (API básica de gestión de ofertas) y **T-16** (Estructura de datos y relaciones de ofertas) permanecen **pendientes de integración en el backend**.
+  - **Modo de Operación:** La interfaz opera actualmente mediante un adaptador mock explícito de desarrollo debidamente señalizado como **«Modo de prueba local — Backend pendiente»**, garantizando que no se simule falsamente persistencia remota mientras la API no esté integrada.
+- **Aseguramiento de Calidad Global:** Batería consolidada de **171 pruebas automatizadas** (87 en frontend con Vitest y 84 en backend con Pytest) con 0 fallos, superando holgadamente el umbral mínimo de **RNF09** ($\ge 70\%$) con **92.52% de cobertura en frontend** y **91.00% en backend**. Análisis estático limpio con ESLint y Ruff (0 errores), y empaquetado de producción de Vite 100% exitoso.
 
 ### Pilares Funcionales y Tecnológicos
-1. **Recomendación personalizada:** RF06 y CUS02 analizan afinidad temática, disponibilidad y criterios de RN-11; RF24 incorpora prioridad institucional sobre las 5 materias filtro.
-2. **Reserva, confirmación y quórum:** RF12–RF16 distinguen reserva provisional (CUS04), ratificación (CUS24), corte T−24 h (CUS23) y decisión del mentor ante quórum insuficiente (CUS07).
-3. **Asistencia y bitácora:** RF17 y CUS08 permiten registrar asistencia y cerrar la sesión. El QR es una alternativa de marcado por el mentor, cuya política técnica queda pendiente de diseño.
-4. **Auditoría y certificación:** CUS22 visa horas antes de la emisión CUS13 y descarga CUS09, conforme a RN-14; se propone PDF, correlativo, hash de integridad y consulta institucional.
-5. **Acceso y privacidad:** RF01–RF02 y RNF01–RNF02 exigen OTP institucional, consentimiento y protección de datos con políticas RLS de PostgreSQL/Supabase.
+1. **Acceso y privacidad:** RF01–RF02 y RNF01–RNF02 exigen OTP institucional, consentimiento informado bajo la Ley N° 29733 y protección de datos con políticas RLS de PostgreSQL/Supabase.
+2. **Currículo y perfiles:** RF04–RF05 administran las materias formativas críticas, los temarios silábicos oficiales y las agendas semanales de disponibilidad con validación de mérito en ciclos VII al X (RN-03).
+3. **Oferta docente de mentoría:** RF08 y CUS06 permiten a los mentores programar clases grupales con control estricto de antelación (RN-04) y aforos estándar inmutables (RN-05).
+4. **Recomendación personalizada:** RF06 y CUS02 analizan afinidad temática silábica, coincidencia horaria y balance de carga con el algoritmo *Top-k* (Sprint 4).
+5. **Reserva, confirmación y quórum:** RF12–RF16 distinguen reserva provisional (CUS04), ratificación (CUS24), corte T−24 h (CUS23) y decisión del mentor ante quórum insuficiente (CUS07).
+6. **Asistencia y bitácora:** RF17 y CUS08 permiten registrar asistencia y bitácora docente post-sesión.
+7. **Auditoría y certificación:** CUS22 visa horas antes de la emisión CUS13 de constancias digitales con hash de integridad institucional.
 
 ---
 
@@ -39,13 +46,14 @@ La documentación del proyecto se encuentra formalmente organizada en dos etapas
 
 | Entregable / Documento | Ubicación | Descripción y Alcance Metodológico |
 | :--- | :--- | :--- |
-| **INFORME ACADÉMICO SPRINT 1** | [docs/diseño/G03_EPIS_Informe_Sprint_01.md](docs/diseño/G03_EPIS_Informe_Sprint_01.md) | **Informe Canónico del Sprint 01:** Elaborado bajo la plantilla oficial institucional, detallando objetivos, balance de los 5 PBI, secuencia de hitos, 7 figuras de evidencia, matrices de pruebas, contratos y dependencias hacia S2. |
-| **INFORME GENERAL SPRINT 1** | [docs/diseño/INFORME_GENERAL_SPRINT_01.md](docs/diseño/INFORME_GENERAL_SPRINT_01.md) | **Reporte Maestro Exhaustivo:** Ficha técnica, 8 diagramas PlantUML, 7 capturas de pantalla reales, especificación de contratos REST, diccionario físico DDL + RLS, máquinas de estado, ADRs y certificación DoD. |
-| **EVIDENCIA DE PRUEBAS S1** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md) | **Catálogo de Calidad Automatizada:** Desglose de las 13 suites, 96 pruebas superadas (50 backend / 46 frontend), fixtures y reportes de cobertura (>91% global por **RNF09**). |
+| **INFORME ACADÉMICO SPRINT 1** | [docs/diseño/G03_EPIS_Informe_Sprint_01.md](docs/diseño/G03_EPIS_Informe_Sprint_01.md) | **Informe Canónico del Sprint 01:** Elaborado bajo la plantilla oficial institucional, detallando objetivos, balance de los 5 PBI, secuencia de hitos, figuras de evidencia, matrices de pruebas, contratos y dependencias hacia S2. |
+| **INFORME GENERAL SPRINT 1** | [docs/diseño/INFORME_GENERAL_SPRINT_01.md](docs/diseño/INFORME_GENERAL_SPRINT_01.md) | **Reporte Maestro Exhaustivo:** Ficha técnica, diagramas PlantUML, capturas de pantalla, especificación de contratos REST, diccionario físico DDL + RLS, máquinas de estado, ADRs y certificación DoD. |
+| **EVIDENCIA DE PRUEBAS S1** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md) | **Catálogo de Calidad Automatizada S1:** Desglose de las 13 suites, 96 pruebas superadas (50 backend / 46 frontend) y reportes de cobertura (>91%). |
+| **EVIDENCIA DE PRUEBAS S2** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_02.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_02.md) | **Catálogo de Calidad Automatizada S2:** Consolidación de 150 pruebas (84 backend / 66 frontend), aislamiento RLS y matrices de cobertura (>90%). |
+| **INFORME GENERAL SPRINT 2** | [docs/diseño/INFORME_GENERAL_SPRINT_02.md](docs/diseño/INFORME_GENERAL_SPRINT_02.md) | **Reporte Maestro Exhaustivo S2:** Roles, consentimiento Ley 29733, matriz semanal 6×11, catálogo avanzado y cierre DoD del Sprint 2. |
 | **FD04: Informe SAD (Diseño v2.0)** | [docs/diseño/FD04-EPIS-Informe SAD de Proyecto.md](docs/diseño/FD04-EPIS-Informe%20SAD%20de%20Proyecto.md) | **Arquitectura de Software en Diseño:** Vistas 4+1 prescriptivas, contratos de endpoints, diccionario físico PostgreSQL, políticas RLS, máquinas de estado del dominio y ADRs. |
 | **FD03: Informe SRS (Diseño v2.1)** | [docs/diseño/FD03-EPIS-Informe SRS de Proyecto.md](docs/diseño/FD03-EPIS-Informe%20SRS%20de%20Proyecto.md) | **Requerimientos con Trazabilidad:** Especificación alineada a la arquitectura desacoplada y los endpoints construidos. |
-| **Reglas de Diseño (Hardening D-1..D-10)** | [reglas_documentacion_diseño.md](reglas_documentacion_diseño.md) | Estándares obligatorios de diseño prescriptivo: contratos REST, diccionario físico, diagramas técnicos PlantUML, máquinas de estado, mapeo entre capas, variables .env y ADRs. |
-
+| **Reglas de Diseño (Hardening D-1..D-10)** | [reglas_documentacion_diseño.md](reglas_documentacion_diseño.md) | Estándares obligatorios de diseño prescriptivo: contratos REST, diccionario físico, diagramas técnicos PlantUML, máquinas de estado, variables .env y ADRs. |
 
 ### 2.2. Gestión de Sprints y Despliegue (docs/sprints/ y Raíz)
 
@@ -53,8 +61,9 @@ La documentación del proyecto se encuentra formalmente organizada en dos etapas
 | :--- | :--- | :--- |
 | **Plan de Sprints y Tareas** | [docs/sprints/PLAN_SPRINTS_Y_TAREAS.md](docs/sprints/PLAN_SPRINTS_Y_TAREAS.md) | **Planificación Scrum:** Desglose del Product Backlog (37 PBI), capacidad (91 h) y asignación operativa (T-01 a T-51). |
 | **Bitácora de Sprint 1** | [docs/sprints/sprint-01.md](docs/sprints/sprint-01.md) | **Registro de Ejecución S1:** Culminación integral de T-01, T-02, T-03, T-06, T-07 y T-09 con 96 pruebas automatizadas. |
-| **Snapshot Congelado Sprint 1** | [sprints/sprint-01/](sprints/sprint-01/) | **Respaldo Inmutable:** Código limpio y documentos congelados al cierre formal del Sprint 1 (commit 3cda166). |
-| **Guía de Configuración Supabase** | [docs/supabase_setup_guide.md](docs/supabase_setup_guide.md) | **Paso a paso para el usuario:** Conexión con Session Pooler, migración Alembic, script RLS y JWT Secret. |
+| **Bitácora de Sprint 2** | [docs/sprints/sprint-02.md](docs/sprints/sprint-02.md) | **Registro de Ejecución S2:** Culminación integral de T-04, T-05, T-08, T-10, T-11, T-12 y T-13 con 150 pruebas y cierre DoD. |
+| **Bitácora de Sprint 3** | [docs/sprints/sprint-03.md](docs/sprints/sprint-03.md) | **Registro de Ejecución S3:** Avance de T-14 (formulario de ofertas, antelación RN-04, aforo RN-05) con 171 pruebas consolidadas. |
+| **Guía de Configuración Supabase** | [docs/supabase_setup_guide.md](docs/supabase_setup_guide.md) | **Paso a paso para el usuario:** Conexión con Session Pooler, migraciones Alembic, scripts RLS y JWT Secret. |
 
 ### 2.3. Fase de Análisis Histórica (docs/analisis/)
 
@@ -65,19 +74,15 @@ La documentación del proyecto se encuentra formalmente organizada en dos etapas
 | **FD02: Informe Visión del Proyecto** | [docs/analisis/FD02-EPIS-Informe Vision de Proyecto.md](docs/analisis/FD02-EPIS-Informe%20Vision%20de%20Proyecto.md) | Oportunidades de negocio, definición de stakeholders, posicionamiento del producto y características principales. |
 | **FD03: SRS Canónico (v2.0)** | [docs/analisis/FD03-EPIS-Informe SRS de Proyecto.md](docs/analisis/FD03-EPIS-Informe%20SRS%20de%20Proyecto.md) | Línea base oficial de requisitos: 24 CUS, modelos ECB, diagramas de actividades y clases preliminares. |
 | **FD04: SAD Preliminar (v1.1)** | [docs/analisis/FD04-EPIS-Informe SAD de Proyecto.md](docs/analisis/FD04-EPIS-Informe%20SAD%20de%20Proyecto.md) | SAD preliminar de la fase de análisis con identificación de decisiones abiertas. |
-| **Bóveda General de Diagramas** | [docs/analisis/diagramas_general.md](docs/analisis/diagramas_general.md) | Bóveda histórica de diagramas PlantUML de análisis. |
-| **Diagramas de Secuencia (Análisis)** | [docs/analisis/diagramas_de_secuencia.md](docs/analisis/diagramas_de_secuencia.md) | Secuencias v2.2 de análisis con códigos CUS del SRS. |
-| **Flujos por Perfil y Paquetes** | [docs/analisis/flujos_por_perfil_y_diagrama_paquetes.md](docs/analisis/flujos_por_perfil_y_diagrama_paquetes.md) | Flujos por Administrador, Mentor y Mentoreado con mapeo biunívoco a paquetes. |
+| **Bóveda General de Diagramas** | [docs/diagramas_general.md](docs/diagramas_general.md) | Bóveda consolidada y de hardening de diagramas PlantUML. |
 | **Matriz de Inconsistencias** | [docs/analisis/matriz_inconsistencias.md](docs/analisis/matriz_inconsistencias.md) | Registro de auditoría y resolución de discrepancias en requisitos y modelos. |
 | **Catálogo de Pruebas (Análisis)** | [docs/analisis/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx](docs/analisis/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx) | Matriz formal de casos de prueba funcional de análisis. |
-| **Reglas de Análisis (Regla 1..7)** | [
-eglas_documentacion_analisis.md](reglas_documentacion_analisis.md) | Normas de granularidad en análisis, estructura quíntuple de tablas y sincronización continua. |
 
 ---
 
 ## 🏛️ 3. Módulos Funcionales del Sistema
 
-La arquitectura del sistema se estructura en 8 módulos interconectados que orquestan el flujo integral de mentoría entre pares, desde la autenticación federada y priorización de cursos, hasta el control de asistencia, certificación con firma digital y supervisión institucional:
+La arquitectura del sistema se estructura en 8 módulos interconectados que orquestan el flujo integral de mentoría entre pares:
 
 ```text
 ┌────────────────────────────────────────────────────────┐
@@ -113,61 +118,45 @@ La arquitectura del sistema se estructura en 8 módulos interconectados que orqu
        └──────────────┘            └──────────────┘
 ```
 
-Los módulos conservan la denominación canónica del Cuadro 5.1 del SRS y se relacionan directamente con sus requisitos funcionales (`RF01` al `RF26`), sirviendo como base de entrada a la matriz de trazabilidad del SAD:
-
-### Cuadro 3.1: Módulos canónicos del SRS
-
-| Código | Módulo | RF |
-| :--- | :--- | :--- |
-| **MOD-01** | Seguridad, Autenticación y Gobernanza | RF01, RF02, RF03 |
-| **MOD-02** | Gestión Curricular y Perfiles Académicos | RF04, RF05 |
-| **MOD-03** | Motor de Recomendación Inteligente (*EdRecSys*) | RF06, RF07 |
-| **MOD-04** | Planificación, Espacios y Agendamiento | RF08, RF09, RF10, RF11 |
-| **MOD-05** | Quórum, Confirmación y Cancelaciones | RF12, RF13, RF14, RF15, RF16 |
-| **MOD-06** | Trazabilidad, Bitácoras y Evaluación | RF17, RF18, RF19, RF20 |
-| **MOD-07** | Gamificación, Reputación y Certificación | RF21, RF22, RF23 |
-| **MOD-08** | Supervisión y Analítica Institucional | RF24, RF25, RF26 |
-
-Fuente: SRS FD03 v2.0, cuadros 5.1 y 5.3.
-
-La secuencia funcional del flujo comprende: acceso y perfil institucional (`MOD-01`), gestión de cursos prioritarios y perfiles (`MOD-02`), recomendación algorítmica *Top-k* (`MOD-03`), agendamiento de franjas y reserva de espacios (`MOD-04`), control perentorio de quórum a $T-24\text{ h}$ (`MOD-05`), registro pedagógico de bitácoras y asistencia por QR (`MOD-06`), reconocimiento por gamificación y certificación digital SHA-256 (`MOD-07`), y supervisión directiva por el Comité de Tutoría de la EPIS (`MOD-08`).
-
 ---
 
 ## 📁 4. Estructura del Repositorio
 
 ```text
 Proyecto_Sistema_Web_P2P/
-├── aplicacion/                                # Aplicación desacoplada oficial (Sprint 1 en adelante)
+├── aplicacion/                                # Aplicación desacoplada oficial
 │   ├── backend/                               # API RESTful (FastAPI + SQLAlchemy + Alembic + Pytest)
 │   │   ├── app/
-│   │   │   ├── api/v1/endpoints/              # Endpoints RESTful: health.py, auth.py, curriculum.py
-│   │   │   ├── core/                          # Configuración pydantic-settings y seguridad criptográfica JWT/OTP
+│   │   │   ├── api/v1/endpoints/              # Endpoints RESTful: health, auth, consent, curriculum, profiles, roles
+│   │   │   ├── core/                          # Configuración pydantic-settings y seguridad JWT/OTP
 │   │   │   ├── db/                            # Conexión diferida, session pooler y migraciones Alembic
-│   │   │   │   └── migrations/versions/       # Migración canónica 001 con catálogo de 5 materias filtro
-│   │   │   ├── models/                        # Modelos ORM: Asignatura, TemaConceptual, AuthChallenge
+│   │   │   │   └── migrations/versions/       # Migraciones 001 (catálogo) y 002 (roles y perfiles)
+│   │   │   ├── models/                        # Modelos ORM: Asignatura, TemaConceptual, AuthChallenge, Consent, Profile, Role
 │   │   │   ├── schemas/                       # Esquemas Pydantic tipados de entrada y respuesta
-│   │   │   ├── services/                      # Servicios de dominio: AuthService, CurriculumService
+│   │   │   ├── services/                      # Servicios: AuthService, CurriculumService, ConsentService, ProfileService, RoleService
 │   │   │   └── main.py                        # Punto de entrada de FastAPI con middleware CORS
-│   │   ├── scripts/
-│   │   │   └── supabase_rls_setup.sql         # Script SQL canónico de Row Level Security (T-07)
-│   │   ├── tests/                             # 48 pruebas unitarias y de integración (85% de cobertura)
+│   │   ├── scripts/                           # Scripts SQL de RLS para Supabase
+│   │   ├── tests/                             # 84 pruebas unitarias, de integración y de seguridad RLS
 │   │   ├── alembic.ini                        # Configuración de migraciones hacia PostgreSQL
 │   │   ├── pyproject.toml                     # Configuración centralizada de Ruff, Coverage y Pytest
-│   │   └── requirements.txt                   # Dependencias reproducibles fijadas con == (incluye PyJWT)
+│   │   └── requirements.txt                   # Dependencias reproducibles fijadas con ==
 │   └── frontend/                              # SPA cliente reactiva (React 19 + TypeScript + Vite + Vitest)
 │       ├── src/
-│       │   ├── components/                    # Componentes UI: LoginOtpView, CurriculumCatalogView, HealthStatus
-│       │   ├── services/                      # Servicios: apiClient.ts, authService.ts (Mock y ApiAuthAdapter)
+│       │   ├── components/                    # Componentes UI: LoginOtpView, ConsentModalView, CurriculumCatalogView,
+│       │   │                                  #                 ProfileAvailabilityView, OfferPublishView, HealthStatus
+│       │   ├── services/                      # Servicios: apiClient.ts, authService.ts, consentService.ts,
+│       │   │                                  #            profileService.ts, offerService.ts
 │       │   ├── data/                          # Tipos TypeScript de dominio
-│       │   ├── App.tsx                        # Orquestador con selector de pestañas (Auth, Catálogo, Servicios)
+│       │   ├── App.tsx                        # Orquestador con navegación (Auth, Consent, Catálogo, Perfil, Ofertas, Servicios)
 │       │   └── main.tsx                       # Punto de entrada ReactDOM
 │       ├── package.json                       # Dependencias y scripts de prueba y cobertura
 │       └── vite.config.ts                     # Configuración del empaquetador Vite con soporte de Vitest
 ├── docs/                                      # Acervo documental formal de ingeniería de software
 │   ├── sprints/
 │   │   ├── PLAN_SPRINTS_Y_TAREAS.md           # Planificación Scrum canónica (37 PBI, 91 h, S1–S8)
-│   │   └── sprint-01.md                       # Bitácora oficial de ejecución del Sprint 1 (H1 al H7)
+│   │   ├── sprint-01.md                       # Bitácora oficial de ejecución del Sprint 1
+│   │   ├── sprint-02.md                       # Bitácora oficial de ejecución del Sprint 2
+│   │   └── sprint-03.md                       # Bitácora oficial de ejecución del Sprint 3 (Avance T-14)
 │   ├── supabase_setup_guide.md                # Guía canónica paso a paso para vincular proyecto Supabase
 │   ├── FD01-EPIS-Informe de Factibilidad.md  # Viabilidad operativa, técnica, económica y legal
 │   ├── FD02-EPIS-Informe Vision de Proyecto.md # Visión, actores, posicionamiento y alcance
@@ -175,101 +164,74 @@ Proyecto_Sistema_Web_P2P/
 │   ├── FD04-EPIS-Informe SAD de Proyecto.md  # Documento formal de arquitectura de software (Modelo 4+1)
 │   ├── resumen_sistema_y_casos_de_uso.md     # Síntesis ejecutiva, flujo macro, matriz CUS y reglas de negocio
 │   ├── diagramas_general.md                  # Bóveda consolidada y de hardening de diagramas PlantUML
-│   ├── diagramas_secuencia_pruebas.md        # Diagramas de secuencia en lenguaje de análisis (ECB)
-│   ├── matriz_inconsistencias.md             # Matriz de consistencia metodológica de análisis
 │   ├── Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx # Catálogo de pruebas funcionales y de aceptación
-│   ├── flujos_por_perfil_y_diagrama_paquetes.md # Diagramas de flujo por actor y diagrama de paquetes con mockups
-│   └── diseño.md                             # Guía preliminar de interfaz y estilos
+│   └── flujos_por_perfil_y_diagrama_paquetes.md # Diagramas de flujo por actor y diagrama de paquetes
 ├── frontend/                                  # Maqueta funcional de referencia visual (conservada)
 ├── reglas_documentacion.md                    # Manual de normas de documentación y hardening (v1.3)
-├── rules_doc.md                               # Registro histórico de directrices iniciales
-├── .gitignore                                 # Reglas de exclusión de git
 └── README.md                                  # Mapa central de navegación del proyecto (este archivo)
 ```
 
 ---
 
-## 🚀 5. Maquetación Web: Estado del Desarrollo y Credenciales de Acceso
+## 🚀 5. Despliegue y Ejecución Local de la Aplicación
 
-### 5.1 Estado Actual de la Maquetación
-- **Fase del Proyecto:** Maquetación funcional de alta fidelidad (Frontend SPA) en **React 19 + TypeScript + Vite 8**.
-- **Nivel de Interactividad:** 100% funcional en cliente. Integra navegación reactiva, validaciones de formularios, simulación de corte de quórum a $T-24\text{ h}$, generación de pases QR efímeros, escaneo de tickets, flujo de bitácoras docentes y emisión de diplomas digitales con hash SHA-256.
-- **Seguridad en Acceso:** El acceso a la plataforma es **estrictamente manual** mediante usuario institucional y contraseña (se deshabilitaron accesos automáticos de 1 clic para validar formalmente el flujo de autenticación RBAC y el consentimiento de la Ley N° 29733).
-- **Trazabilidad Arquitectónica:** Cada componente de la interfaz responde directamente a los paquetes lógicos del sistema (`MOD-01` al `MOD-08`), tal como se detalla en [`docs/flujos_por_perfil_y_diagrama_paquetes.md`](docs/flujos_por_perfil_y_diagrama_paquetes.md).
+### 5.1. Comandos para Validación y Ejecución del Backend
 
-### 5.2 Credenciales Oficiales para Evaluación de Flujos
+```powershell
+cd aplicacion/backend
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
 
-Para validar la experiencia diferenciada por actor institucional, se encuentran preconfiguradas las siguientes tres credenciales:
+# Análisis estático y verificación de formato (Ruff: 0 errores)
+ruff check .
+ruff format --check .
 
-| Rol Institucional | Nombre del Usuario | Usuario | Contraseña | Vistas y Flujos Habilitados en Maqueta |
-| :--- | :--- | :---: | :---: | :--- |
-| **Administrado (Tutoría)** | **Ing. Liliana Vega Bernal** | `admin` | `admin123` | • Tablero analítico institucional de KPIs y deserción (CUS14).<br>• Auditoría de bitácoras y visado oficial de horas (CUS22).<br>• Emisión de certificados foliados con hash SHA-256 (CUS13).<br>• Calibración del factor $\alpha \in [1.05, 1.50]$ para cursos críticos (CUS12). |
-| **Mentor Académico** | **Joan Medina Q** (VIII Ciclo) | `mentor` | `mentor123` | • Publicación de ofertas en materias aprobadas $\ge 14$ (CUS06/09).<br>• Gestión de citas y corte de quórum en $T-24\text{ h}$ con dictado excepcional (CUS09/07).<br>• Verificación de asistencia en aula por código QR efímero (CUS11).<br>• Rendición docente: registro de bitácora post-sesión (CUS10).<br>• Consulta de horas visadas oficiales y descarga de certificado (CUS16/09). |
-| **Estudiante Mentoreado** | **Renzo Antayhua M** (II Ciclo) | `mentoreado` | `mentoreado123` | • Firma de consentimiento informado digital Ley N° 29733 (RF01).<br>• Consulta del recomendador híbrido Top-k con afinidad temática (CUS02).<br>• Registro de solicitudes temáticas por demanda (CUS03).<br>• Reserva de cupo y ratificación obligatoria en $T-24\text{ h}$ (CUS24).<br>• Visualización de ticket digital con código QR de acceso (CUS11).<br>• Encuesta anónima de calidad pedagógica CSAT post-mentoría (CUS05). |
+# Aplicar migraciones a PostgreSQL / Supabase
+alembic upgrade head
 
-### 5.3 Despliegue y Ejecución Local
+# Ejecución de pruebas automatizadas con reporte de cobertura (84 pruebas, 91% de cobertura)
+pytest tests/ --cov=app --cov-report=term-missing
 
-#### A. Aplicación Desacoplada (Sprint 1 — `aplicacion/`)
-1. **Backend API (FastAPI + Python 3.13 — comprobado localmente en `.venv`: Python 3.13.5; antecedente planificado: Python 3.11):**
-   ```powershell
-   cd aplicacion/backend
-   python -m venv .venv
-   .\.venv\Scripts\activate
-   pip install -r requirements.txt
+# Servidor de desarrollo
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+- **Swagger API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Health Check:** [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)
+- **Catálogo Curricular:** [http://localhost:8000/api/v1/curriculum/courses](http://localhost:8000/api/v1/curriculum/courses)
 
-   # Análisis estático (Ruff: 0 errores, 0 advertencias)
-   ruff check .
-   ruff format --check .
+### 5.2. Comandos para Validación y Ejecución del Frontend
 
-   # Aplicar migraciones con datos semilla a Supabase (T-09)
-   alembic upgrade head
+```powershell
+cd aplicacion/frontend
+npm ci
 
-   # Pruebas automatizadas y cobertura (Pytest: 50 pruebas pasadas; 91.62% de cobertura)
-   pytest
+# Análisis estático (ESLint 9: 0 errores, 0 advertencias)
+npm run lint
 
-   # Servidor de desarrollo
-   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   ```
-   • API Docs (Swagger): **[http://localhost:8000/docs](http://localhost:8000/docs)**  
-   • Health Check Backend: **[http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)**  
-   • Diagnóstico BD Supabase (dev): **[http://localhost:8000/api/v1/health/db](http://localhost:8000/api/v1/health/db)**  
-   • Catálogo Curricular: **[http://localhost:8000/api/v1/curriculum/courses](http://localhost:8000/api/v1/curriculum/courses)**
+# Ejecución de pruebas unitarias y cobertura (Vitest: 87 pruebas, 92.52% de cobertura)
+npm run test:coverage
 
-2. **Frontend SPA (React 19 + TypeScript + Vite 8 + Vitest 5 + Node 22/24 — comprobado localmente: v24.21.0):**
-   ```powershell
-   cd aplicacion/frontend
-   npm ci
+# Compilación de producción limpia
+npm run build
 
-   # Análisis estático (ESLint 10: 0 errores, 0 advertencias)
-   npm run lint
-
-   # Pruebas unitarias y cobertura (Vitest 5: 46 pruebas pasadas; 83.47% líneas, 72.70% ramas, 79.41% funciones)
-   npm run test:coverage
-   npm run build
-
-   # Servidor de desarrollo
-   npm run dev
-   ```
-   • Aplicación Web: **[http://localhost:5173](http://localhost:5173)**  
-   • Pestaña *"Acceso & OTP de Prueba (T-02 / T-03)"*: Permite interactuar con el flujo de dos pasos CUS01/RF01 tanto con el adaptador Mock como contra la API real emitiendo tokens JWT de sesión.  
-   • Pestaña *"Catálogo Curricular (T-09)"*: Visualiza interactivamente las 5 materias filtro y sus unidades silábicas.  
-   • Pestaña *"Monitor de Servicios & BD (T-01)"*: Monitor en tiempo real de FastAPI y diagnóstico de base de datos Supabase (`SELECT 1`).
-
-#### B. Maqueta de Referencia Visual (`frontend/`)
-Para consultar la maqueta de referencia original con datos simulados en memoria:
-```bash
-cd frontend
-npm install
+# Servidor de desarrollo
 npm run dev
 ```
-
+- **Aplicación Web:** [http://localhost:5173](http://localhost:5173)
+- **Pestaña `🔐 Acceso & OTP (T-02)`:** Flujo de acceso institucional de 2 pasos con dominio `@upt.pe`.
+- **Pestaña `⚖️ Consentimiento Ley 29733 (T-04)`:** Formulario formal de consentimiento informado con bloqueo reactivo ante rechazo.
+- **Pestaña `📚 Catálogo Curricular (T-10)`:** Buscador reactivo por código, nombre y unidades temáticas silábicas.
+- **Pestaña `👤 Perfil & Disponibilidad (T-11)`:** Declaración de fortalezas/debilidades, validación de mérito RN-03 y grilla semanal 6×11.
+- **Pestaña `🏷️ Publicar Ofertas (T-14)`:** Formulario para mentores con validación de antelación obligatoria RN-04 ($> 24\text{ h}$), aforos estándar inmutables RN-05 (10 presencial / 20 virtual) y asignación de infraestructura física o virtual.
+- **Pestaña `🛰️ Monitor de Servicios (T-01)`:** Monitoreo en tiempo real de FastAPI y Supabase (`SELECT 1`).
 
 ---
 
 ## 🛡️ 6. Normas de Calidad y Reglas de Hardening
 
 El proyecto opera bajo directrices de aseguramiento de la calidad registradas en [`reglas_documentacion.md`](reglas_documentacion.md):
-- **Regla 1:** Fase de análisis y desarrollo del SAD; nomenclatura del SRS y separación de requisitos, propuestas y validaciones futuras.
+- **Regla 1:** Separación estricta de análisis y diseño; trazabilidad biunívoca con el SRS y SAD.
 - **Regla 2:** Estructura quíntuple estándar en toda tabla (Presentación → Título → Tabla MD → Fuente → Análisis/Conclusión).
 - **Regla 3:** Uso exclusivo de diagramas PlantUML limpios, ejecutables y mantenibles.
 - **Regla 4:** Codificación UTF-8 estricta en archivos Markdown.
@@ -281,8 +243,7 @@ El proyecto opera bajo directrices de aseguramiento de la calidad registradas en
 
 ## ⚖️ 7. Marco Legal y Ético
 
-El SRS establece el siguiente contexto normativo para el análisis. Su vigencia, aplicabilidad y cumplimiento institucional deben revisarse antes de producción:
-- **Ley N° 29733 (Ley de Protección de Datos Personales del Perú):** Principio de consentimiento previo, expreso e informado; derecho de revocación; protección de identidad en métricas y encuestas. El modelo preliminar aún requiere resolver la separación de respuestas y datos identificables.
+- **Ley N° 29733 (Ley de Protección de Datos Personales del Perú):** Principio de consentimiento previo, expreso e informado; derecho de revocación y protección de identidad académica en el tratamiento de notas y perfiles.
 - **Ley Universitaria N° 30220 (Art. 40 - Tutoría y Consejería):** Reconocimiento formal de la mentoría académica entre pares como actividad formativa y solidaria computable para la convalidación de horas de servicio estudiantil ante la Dirección de Escuela de la EPIS-UPT.
 
 ---
