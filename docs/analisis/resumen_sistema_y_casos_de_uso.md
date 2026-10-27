@@ -98,6 +98,9 @@ El catálogo canónico se estructura en torno a los casos de uso neurálgicos qu
 | **CUS09** | Descargar y verificar certificado | MOD-07 | Fe pública y custodia digital | Descarga privada por mentor; validación pública vía QR | RNF09 (Criptografía SHA-256) |
 | **CUS14** | Visualizar analíticas institucionales | MOD-08 | Inteligencia académica gerencial | Agrega datos de todos los CUS; exporta CSV disociado | RF25, RN-13 (Ley N° 29733) |
 
+> [!NOTE]
+> Para un desglose técnico exhaustivo, arquitectura ECB, reglas de negocio y trazabilidad detallada hacia SRS (FD03) y SAD (FD04) de la fase de oferta, consulte el [Documento de Trazabilidad Técnica: Publicación de Ofertas (CUS06 / RF08)](trazabilidad_publicacion_ofertas.md).
+
 ---
 
 ## 4. Diagrama de Relaciones entre Casos de Uso Neurálgicos
