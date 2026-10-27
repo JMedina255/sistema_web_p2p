@@ -1,3 +1,7 @@
+> [!NOTE]
+> **Versión Canónica Actualizada del Sprint 02:**  
+> El informe académico canónico consolidado y con trazabilidad verificada se encuentra disponible en [docs/sprints/sprint-02/03-informe/INFORME_ACADEMICO_G03_SPRINT_02.md](../sprints/sprint-02/03-informe/INFORME_ACADEMICO_G03_SPRINT_02.md).
+
 # Informe de desarrollo y resultados — Sprint 02
 
 ## «Gobernanza de Consentimiento Digital (Ley N° 29733), Jerarquía de Roles y Mérito Académico, Catálogo Avanzado y Perfiles con Matriz de Disponibilidad Horaria Semanal»
@@ -202,7 +206,7 @@ Se diseñó la grilla semanal interactiva con **6 días (Lunes a Sábado) × 11 
 *(Fuente: Servidor Uvicorn/FastAPI en http://localhost:8000/docs; captura tomada el 23/10/2026).*
 
 ### 5.3. Diseño técnico, diagramas y contratos relacionados
-El diseño técnico del Sprint 02 se encuentra documentado exhaustivamente en [`docs/diseño/TRAZABILIDAD_SPRINT_02.md`](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/docs/diseño/TRAZABILIDAD_SPRINT_02.md), respaldado por 7 diagramas PlantUML renderizados en alta resolución:
+El diseño técnico del Sprint 02 se encuentra documentado exhaustivamente en [`docs/diseño/TRAZABILIDAD_SPRINT_02.md`](../sprints/sprint-02/02-trazabilidad/MATRIZ_TRAZABILIDAD_SPRINT_02.md), respaldado por 7 diagramas PlantUML renderizados en alta resolución:
 - **Diagrama 3.4:** Casos de Uso del Sprint 02 (Roles, Currículo y Perfiles).
 - **Diagrama 5:** Secuencia Técnica del Consentimiento Informado (T-04 / T-05 / RN-02).
 - **Diagrama 6:** Secuencia Técnica de Roles y Mérito Académico (T-08 / RN-03).

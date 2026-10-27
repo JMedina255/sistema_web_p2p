@@ -1,3 +1,7 @@
+> [!IMPORTANT]
+> **Aviso de Auditoría y Versión Corregida:**  
+> Este documento contiene el borrador inicial con inconsistencias detectadas en la auditoría (referencias a Vue.js, rutas antiguas app/routers/, HTTP 403 por mérito y autores apócrifos). La versión oficial, depurada y corregida para la sustentación se encuentra en [docs/sprints/sprint-02/04-presentacion/GUION_EXPOSICION_CORREGIDO.md](../sprints/sprint-02/04-presentacion/GUION_EXPOSICION_CORREGIDO.md).
+
 # GUION DE EXPOSICIÓN TÉCNICA, PRESENTACIÓN FORMAL Y DEFENSA DE ARQUITECTURA
 ## SPRINT 02: ROLES, CURRÍCULO, PERFILES Y CONSENTIMIENTO INFORMADO (LEY N° 29733)
 
