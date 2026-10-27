@@ -43,15 +43,18 @@ El **Sistema Web P2P** es una plataforma institucional orientada a conectar a es
 
 La documentación del proyecto se encuentra formalmente organizada en dos etapas metodológicas consecutivas: la **Fase de Análisis** (línea base original congelada) y la **Fase de Diseño Técnico** (etapa prescriptiva actual bajo las 10 reglas de diseño):
 
-### 2.1. Fase de Diseño Técnico y Cierre del Sprint 1 (docs/diseño/)
+### 2.1. Fase de Diseño Técnico y Cierre de Sprints (docs/diseño/)
 
 | Entregable / Documento | Ubicación | Descripción y Alcance Metodológico |
 | :--- | :--- | :--- |
 | **INFORME ACADÉMICO SPRINT 1** | [docs/diseño/G03_EPIS_Informe_Sprint_01.md](docs/diseño/G03_EPIS_Informe_Sprint_01.md) | **Informe Canónico del Sprint 01:** Elaborado bajo la plantilla oficial institucional, detallando objetivos, balance de los 5 PBI, secuencia de hitos, figuras de evidencia, matrices de pruebas, contratos y dependencias hacia S2. |
 | **INFORME GENERAL SPRINT 1** | [docs/diseño/INFORME_GENERAL_SPRINT_01.md](docs/diseño/INFORME_GENERAL_SPRINT_01.md) | **Reporte Maestro Exhaustivo:** Ficha técnica, diagramas PlantUML, capturas de pantalla, especificación de contratos REST, diccionario físico DDL + RLS, máquinas de estado, ADRs y certificación DoD. |
 | **EVIDENCIA DE PRUEBAS S1** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md) | **Catálogo de Calidad Automatizada S1:** Desglose de las 13 suites, 96 pruebas superadas (50 backend / 46 frontend) y reportes de cobertura (>91%). |
-| **EVIDENCIA DE PRUEBAS S2** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_02.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_02.md) | **Catálogo de Calidad Automatizada S2:** Consolidación de 150 pruebas (84 backend / 66 frontend), aislamiento RLS y matrices de cobertura (>90%). |
+| **INFORME ACADÉMICO SPRINT 2** | [docs/diseño/G03_EPIS_Informe_Sprint_02.md](docs/diseño/G03_EPIS_Informe_Sprint_02.md) | **Informe Canónico del Sprint 02:** Elaborado bajo la estructura institucional de 11 secciones: roles, mérito académico (RN-03), consentimiento Ley 29733, matriz semanal 6×11, 7 diagramas Kroki PNG/SVG, matrices y balance de 150 pruebas. |
 | **INFORME GENERAL SPRINT 2** | [docs/diseño/INFORME_GENERAL_SPRINT_02.md](docs/diseño/INFORME_GENERAL_SPRINT_02.md) | **Reporte Maestro Exhaustivo S2:** Roles, consentimiento Ley 29733, matriz semanal 6×11, catálogo avanzado y cierre DoD del Sprint 2. |
+| **TRAZABILIDAD SPRINT 2** | [docs/diseño/TRAZABILIDAD_SPRINT_02.md](docs/diseño/TRAZABILIDAD_SPRINT_02.md) | **Matriz Bidireccional de Trazabilidad S2:** Matriz de 12 columnas (Requerimientos, Reglas de negocio, HU Gherkin, CUS, Diagramas SRS/SAD, Código, DDL, RLS, Pruebas y Evidencias) con cobertura auditada. |
+| **GUION DE EXPOSICIÓN S2** | [docs/diseño/GUION_EXPOSICION_SPRINT_02.md](docs/diseño/GUION_EXPOSICION_SPRINT_02.md) | **Guion de Exposición Técnica y Presentación:** Estructura en 9 eslabones, propuesta de 11 diapositivas con notas del orador, FAQ técnica fundamentada y glosario normativo. |
+| **EVIDENCIA DE PRUEBAS S2** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_02.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_02.md) | **Catálogo de Calidad Automatizada S2:** Consolidación de 150 pruebas (84 backend / 66 frontend), aislamiento RLS y matrices de cobertura (>90%). |
 | **INFORME GENERAL SPRINT 3** | [docs/diseño/INFORME_GENERAL_SPRINT_03.md](docs/diseño/INFORME_GENERAL_SPRINT_03.md) | **Reporte Maestro Exhaustivo S3:** Publicación de ofertas (T-14), motor EdRecSys v1.0 (T-15), persistencia relacional `sesiones_mentoria` (T-16), testbench algorítmico (T-18), 7 diagramas PlantUML, 7 capturas de pantalla y certificación DoD de 209 pruebas. |
 | **INFORME ACADÉMICO SPRINT 3** | [docs/diseño/G03_EPIS_Informe_Sprint_03.md](docs/diseño/G03_EPIS_Informe_Sprint_03.md) | **Informe Canónico del Sprint 03:** Elaborado bajo la estructura institucional de 11 secciones, detallando publicación de ofertas (T-14), persistencia relacional (T-16), motor EdRecSys v1.0 (T-15), testbench algorítmico (T-18), balance de PBI y acreditación de 209 pruebas. |
 | **EVIDENCIA DE PRUEBAS S3** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_03.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_03.md) | **Catálogo de Calidad Automatizada S3:** Consolidación de 209 pruebas (122 backend / 87 frontend), desglose de las 26 suites, matrices de cobertura (>91% en ambos subsistemas), testbench algorítmico y comandos reproducibles. |
@@ -81,6 +84,7 @@ La documentación del proyecto se encuentra formalmente organizada en dos etapas
 | **Bóveda General de Diagramas** | [docs/diagramas_general.md](docs/diagramas_general.md) | Bóveda consolidada y de hardening de diagramas PlantUML. |
 | **Matriz de Inconsistencias** | [docs/analisis/matriz_inconsistencias.md](docs/analisis/matriz_inconsistencias.md) | Registro de auditoría y resolución de discrepancias en requisitos y modelos. |
 | **Catálogo de Pruebas (Análisis)** | [docs/analisis/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx](docs/analisis/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx) | Matriz formal de casos de prueba funcional de análisis. |
+| **Trazabilidad Sprint 2 (Análisis)** | [docs/analisis/trazabilidad_sprint_02.md](docs/analisis/trazabilidad_sprint_02.md) | Espejo metodológico de trazabilidad de requisitos, casos de uso y modelos analíticos del Sprint 02. |
 
 ---
 
