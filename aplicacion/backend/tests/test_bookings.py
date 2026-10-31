@@ -521,93 +521,96 @@ def test_concurrent_multithreaded_booking_real_db_rnf07():
     Verifica que el coordinador BookingService mantenga consistencia ACID estricta
     bajo ráfagas concurrentes de hilos sobre persistencia relacional.
     """
-    from sqlalchemy.pool import StaticPool
+    import os
+    import tempfile
 
-    engine = create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    Base.metadata.create_all(engine)
-    session_factory = sessionmaker(bind=engine)
-    db = session_factory()
-
-    try:
-        now = datetime.now(UTC)
-        asig = Asignatura(
-            id_asignatura=1,
-            codigo_curso="CALC-101",
-            nombre_curso="Cálculo I",
-            ciclo_plan=1,
-            creditos=4,
-            factor_ponderacion=1.2,
+    with tempfile.TemporaryDirectory() as tmpdir:
+        db_file = os.path.join(tmpdir, "test_rnf07_concurrency.db")
+        engine = create_engine(
+            f"sqlite:///{db_file}",
+            connect_args={"timeout": 30},
         )
-        tema = TemaConceptual(id_tema=1, id_asignatura=1, nombre_tema="Límites", unidad_silabica=1)
-        db.add_all([asig, tema])
+        Base.metadata.create_all(engine)
+        session_factory = sessionmaker(bind=engine)
+        db = session_factory()
 
-        sesion = SesionMentoria(
-            id_sesion=99,
-            codigo_sesion="SES-CONC-DB-99",
-            mentor_email="mentor.db@upt.pe",
-            id_asignatura=1,
-            id_tema=1,
-            fecha_inicio=now + timedelta(days=3),
-            duracion_minutos=60,
-            modalidad="presencial",
-            aforo_maximo=10,
-            espacio_asignado="Laboratorio 101",
-            estado="PUBLICADA",
-        )
-        db.add(sesion)
-        db.commit()
+        try:
+            now = datetime.now(UTC)
+            asig = Asignatura(
+                id_asignatura=1,
+                codigo_curso="CALC-101",
+                nombre_curso="Cálculo I",
+                ciclo_plan=1,
+                creditos=4,
+                factor_ponderacion=1.2,
+            )
+            tema = TemaConceptual(id_tema=1, id_asignatura=1, nombre_tema="Límites", unidad_silabica=1)
+            db.add_all([asig, tema])
 
-        # Pre-ocupar 9 cupos
-        for i in range(9):
-            res_prev = ReservaCupo(
-                codigo_reserva=f"RES-DB-{i}",
+            sesion = SesionMentoria(
                 id_sesion=99,
-                estudiante_email=f"base_db_{i}@upt.pe",
-                estado="CONFIRMADA",
-                fecha_reserva=now,
+                codigo_sesion="SES-CONC-DB-99",
+                mentor_email="mentor.db@upt.pe",
+                id_asignatura=1,
+                id_tema=1,
+                fecha_inicio=now + timedelta(days=3),
+                duracion_minutos=60,
+                modalidad="presencial",
+                aforo_maximo=10,
+                espacio_asignado="Laboratorio 101",
+                estado="PUBLICADA",
             )
-            db.add(res_prev)
-        db.commit()
+            db.add(sesion)
+            db.commit()
 
-        # Lanzar 20 hilos disputando la última plaza sobre la base de datos
-        results = []
+            # Pre-ocupar 9 cupos
+            for i in range(9):
+                res_prev = ReservaCupo(
+                    codigo_reserva=f"RES-DB-{i}",
+                    id_sesion=99,
+                    estudiante_email=f"base_db_{i}@upt.pe",
+                    estado="CONFIRMADA",
+                    fecha_reserva=now,
+                )
+                db.add(res_prev)
+            db.commit()
 
-        def worker(idx: int):
-            worker_db = session_factory()
-            try:
-                p = BookingCreatePayload(id_sesion=99, estudiante_email=f"aspirante_{idx}@upt.pe")
-                BookingService.reserve_seat(db=worker_db, payload=p)
-                return 201
-            except Exception as e:
-                if hasattr(e, "status_code"):
-                    return e.status_code
-                return 500
-            finally:
-                worker_db.close()
+            # Lanzar 20 hilos disputando la última plaza sobre la base de datos
+            results = []
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
-            futures = [executor.submit(worker, i) for i in range(20)]
-            for f in concurrent.futures.as_completed(futures):
-                results.append(f.result())
+            def worker(idx: int):
+                worker_db = session_factory()
+                try:
+                    p = BookingCreatePayload(id_sesion=99, estudiante_email=f"aspirante_{idx}@upt.pe")
+                    BookingService.reserve_seat(db=worker_db, payload=p)
+                    return 201
+                except Exception as e:
+                    if hasattr(e, "status_code"):
+                        return e.status_code
+                    return 500
+                finally:
+                    worker_db.close()
 
-        assert results.count(201) == 1
-        assert results.count(409) == 19
+            with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+                futures = [executor.submit(worker, i) for i in range(20)]
+                for f in concurrent.futures.as_completed(futures):
+                    results.append(f.result())
 
-        final_count = (
-            db.query(ReservaCupo)
-            .filter(
-                ReservaCupo.id_sesion == 99, ReservaCupo.estado.in_(["PENDIENTE_CONFIRMACION", "CONFIRMADA"])
+            assert results.count(201) == 1
+            assert results.count(409) == 19
+
+            final_count = (
+                db.query(ReservaCupo)
+                .filter(
+                    ReservaCupo.id_sesion == 99,
+                    ReservaCupo.estado.in_(["PENDIENTE_CONFIRMACION", "CONFIRMADA"]),
+                )
+                .count()
             )
-            .count()
-        )
-        assert final_count == 10
-    finally:
-        db.close()
-        engine.dispose()
+            assert final_count == 10
+        finally:
+            db.close()
+            engine.dispose()
 
 
 def test_db_backed_student_and_session_reservations():

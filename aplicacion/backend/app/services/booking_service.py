@@ -174,20 +174,6 @@ class BookingService:
                     detail="No tiene autorización para registrar reservas a nombre de otro estudiante.",
                 )
 
-        # Validación de consentimiento de datos personales (Ley 29733 / RN-02)
-        consent_status = ConsentService.get_consent_status(db, clean_email)
-        if not consent_status.has_consented:
-            # En producción se exige consentimiento previo; en test/dev se valida ante revocación explícita
-            if (
-                settings.APP_ENV not in ("development", "test", "testing")
-                or clean_email.startswith("sin_consentimiento")
-                or clean_email.startswith("revocado")
-            ):
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="CONSENT_REQUIRED: Debes aceptar los términos de tratamiento de datos personales conforme a la Ley N° 29733 (RN-02).",
-                )
-
         now_utc = datetime.now(UTC)
 
         # Adquisición del candado pesimista con timeout parametrizable (BOOKING_TIMEOUT_SECONDS)
@@ -200,6 +186,19 @@ class BookingService:
             )
 
         try:
+            # Validación de consentimiento de datos personales (Ley 29733 / RN-02)
+            consent_status = ConsentService.get_consent_status(db, clean_email)
+            if not consent_status.has_consented:
+                # En producción se exige consentimiento previo; en test/dev se valida ante revocación explícita
+                if (
+                    settings.APP_ENV not in ("development", "test", "testing")
+                    or clean_email.startswith("sin_consentimiento")
+                    or clean_email.startswith("revocado")
+                ):
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="CONSENT_REQUIRED: Debes aceptar los términos de tratamiento de datos personales conforme a la Ley N° 29733 (RN-02).",
+                    )
             # ------------------------------------------------------------------
             # Camino 1: Ejecución en Base de Datos Relacional con Bloqueo Pesimista
             # ------------------------------------------------------------------
