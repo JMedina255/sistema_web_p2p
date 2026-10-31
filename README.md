@@ -66,6 +66,7 @@ La documentación del proyecto se encuentra formalmente organizada en dos etapas
 | **Bitácora de Sprint 1** | [docs/sprints/sprint-01.md](docs/sprints/sprint-01.md) | **Registro de Ejecución S1:** Culminación integral de T-01, T-02, T-03, T-06, T-07 y T-09 con 96 pruebas automatizadas. |
 | **Bitácora de Sprint 2** | [docs/sprints/sprint-02.md](docs/sprints/sprint-02.md) | **Registro de Ejecución S2:** Culminación integral de T-04, T-05, T-08, T-10, T-11, T-12 y T-13 con 150 pruebas y cierre DoD. |
 | **Bitácora de Sprint 3** | [docs/sprints/sprint-03.md](docs/sprints/sprint-03.md) | **Registro de Ejecución S3:** Culminación integral de T-14, T-15, T-16 y T-18 con 209 pruebas consolidadas, motor EdRecSys v1.0 y testbench. |
+| **Bitácora de Sprint 4** | [docs/sprints/sprint-04.md](docs/sprints/sprint-04.md) | **Especificación Técnica y Planificación S4:** Recomendación Top-k, feed interactivo, reservas transaccionales con bloqueo pesimista `SELECT ... FOR UPDATE` (RNF07), control de aforo (RN-05), trazabilidad integral (RF09–RF16, RN-08–RN-13) y banco de pruebas de concurrencia. |
 | **Guía de Configuración Supabase** | [docs/supabase_setup_guide.md](docs/supabase_setup_guide.md) | **Paso a paso para el usuario:** Conexión con Session Pooler, migraciones Alembic, scripts RLS y JWT Secret. |
 
 ### 2.3. Fase de Análisis Histórica (docs/analisis/)

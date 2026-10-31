@@ -81,6 +81,9 @@ class OfferRecommendationItem(BaseModel):
     duracion_minutos: int
     modalidad: str
     aforo_maximo: int
+    aforo_disponible: int = Field(
+        default=10, description="Plazas disponibles para reserva (aforo_maximo - cupos ocupados)."
+    )
     espacio_asignado: str
     mentor_email: str
     mentor_nombre: str | None = None

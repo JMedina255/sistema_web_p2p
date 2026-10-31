@@ -1,3 +1,5 @@
+from datetime import UTC, datetime, timedelta
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -422,3 +424,480 @@ def test_get_candidate_mentors_empty_db_returns_empty_list_no_leak():
     finally:
         db.close()
         engine.dispose()
+
+
+# ==============================================================================
+# Batería de Pruebas T-17 / T-19: Ordenamiento Determinista y Empates Top-k (ORD-01 a ORD-05)
+# ==============================================================================
+
+
+def test_ord_01_deterministic_tie_breaking_stability():
+    """
+    ORD-01: Desempate ante puntaje multifactorial idéntico (S_total).
+    Aplica desempate determinista por mayor vacante disponible y menor timestamp de inicio.
+    Verifica estabilidad idéntica en 10 iteraciones consecutivas.
+    """
+    from datetime import UTC, datetime, timedelta
+
+    from app.services.booking_service import _memory_bookings, clear_bookings_in_memory
+    from app.services.offer_service import _memory_offers
+
+    clear_offers_in_memory()
+    clear_bookings_in_memory()
+
+    now = datetime.now(UTC)
+    t1 = now + timedelta(days=3)
+
+    # Sesión A: 10 cupos, 0 ocupados -> 10 disponibles, timestamp t1
+    # Sesión B: 10 cupos, 5 ocupados -> 5 disponibles, timestamp t1
+    # Ambas para la misma asignatura, tema y mentor (mismo puntaje base)
+    _memory_offers.extend(
+        [
+            {
+                "id_sesion": 101,
+                "codigo_sesion": "SES-101",
+                "mentor_email": "2022073504@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites",
+                "fecha_inicio": t1.isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Laboratorio 101",
+                "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+                "estado": "PUBLICADA",
+            },
+            {
+                "id_sesion": 102,
+                "codigo_sesion": "SES-102",
+                "mentor_email": "2022073504@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites",
+                "fecha_inicio": t1.isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Laboratorio 102",
+                "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+                "estado": "PUBLICADA",
+            },
+        ]
+    )
+
+    # Simular 5 reservas en SES-102 para que tenga menor aforo disponible
+    for i in range(5):
+        _memory_bookings.append(
+            {
+                "id_reserva": 200 + i,
+                "codigo_reserva": f"RES-{200 + i}",
+                "id_sesion": 102,
+                "estudiante_email": f"estudiante{i}@upt.pe",
+                "estado": "CONFIRMADA",
+            }
+        )
+
+    # Ejecutar 10 iteraciones y verificar estabilidad exacta del orden
+    first_order = None
+    for _ in range(10):
+        recs = RecommendationService.recommend_offers(
+            mentee_email="2022074255@upt.pe",
+            top_k=5,
+            db=None,
+        )
+        codes = [item.codigo_sesion for item in recs.items]
+        if first_order is None:
+            first_order = codes
+            # SES-101 debe preceder a SES-102 por tener mayor vacante disponible (10 vs 5)
+            assert codes[0] == "SES-101"
+            assert codes[1] == "SES-102"
+        else:
+            assert codes == first_order
+
+
+def test_ord_02_exclusion_of_sessions_under_24_hours_rn04():
+    """
+    ORD-02: Exclusión de sesiones con antelación <= 24 h (RN-04).
+    Omitir automáticamente del feed toda sesión que haya entrado en la ventana de corte de quórum.
+    """
+    from datetime import UTC, datetime, timedelta
+
+    from app.services.booking_service import clear_bookings_in_memory
+    from app.services.offer_service import _memory_offers
+
+    clear_offers_in_memory()
+    clear_bookings_in_memory()
+
+    now = datetime.now(UTC)
+    t_vencida = now + timedelta(hours=12)  # Incompatible con RN-04
+    t_valida = now + timedelta(hours=48)  # Válida
+
+    _memory_offers.extend(
+        [
+            {
+                "id_sesion": 201,
+                "codigo_sesion": "SES-201-VENCIDA",
+                "mentor_email": "2022073504@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites",
+                "fecha_inicio": t_vencida.isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Aula 101",
+                "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+                "estado": "PUBLICADA",
+            },
+            {
+                "id_sesion": 202,
+                "codigo_sesion": "SES-202-VALIDA",
+                "mentor_email": "2022073504@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites",
+                "fecha_inicio": t_valida.isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Aula 102",
+                "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+                "estado": "PUBLICADA",
+            },
+        ]
+    )
+
+    recs = RecommendationService.recommend_offers(
+        mentee_email="2022074255@upt.pe",
+        top_k=5,
+        db=None,
+    )
+    codes = [item.codigo_sesion for item in recs.items]
+    assert "SES-202-VALIDA" in codes
+    assert "SES-201-VENCIDA" not in codes
+    assert len(recs.items) == 1
+
+
+def test_ord_03_exclusion_of_sessions_with_zero_available_capacity():
+    """
+    ORD-03: Exclusión de sesiones con aforo agotado (Aforo_disp = 0).
+    No incluir en el Top-k sesiones con 10/10 plazas ocupadas.
+    """
+    from datetime import UTC, datetime, timedelta
+
+    from app.services.booking_service import _memory_bookings, clear_bookings_in_memory
+    from app.services.offer_service import _memory_offers
+
+    clear_offers_in_memory()
+    clear_bookings_in_memory()
+
+    now = datetime.now(UTC)
+    t = now + timedelta(days=3)
+
+    _memory_offers.append(
+        {
+            "id_sesion": 301,
+            "codigo_sesion": "SES-301-LLENA",
+            "mentor_email": "2022073504@upt.pe",
+            "id_asignatura": 1,
+            "codigo_asignatura": "CALC-101",
+            "nombre_asignatura": "Cálculo I",
+            "id_tema": 1,
+            "nombre_tema": "Límites",
+            "fecha_inicio": t.isoformat(),
+            "duracion_minutos": 60,
+            "modalidad": "presencial",
+            "aforo_maximo": 10,
+            "espacio_asignado": "Laboratorio 101",
+            "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+            "estado": "PUBLICADA",
+        }
+    )
+
+    # Ocupar los 10 cupos
+    for i in range(10):
+        _memory_bookings.append(
+            {
+                "id_reserva": 300 + i,
+                "codigo_reserva": f"RES-{300 + i}",
+                "id_sesion": 301,
+                "estudiante_email": f"alumno{i}@upt.pe",
+                "estado": "PENDIENTE_CONFIRMACION",
+            }
+        )
+
+    recs = RecommendationService.recommend_offers(
+        mentee_email="2022074255@upt.pe",
+        top_k=5,
+        db=None,
+    )
+    assert len(recs.items) == 0
+
+
+def test_ord_04_top_k_parameterizable_boundary():
+    """
+    ORD-04: Límite k parametrizable en query string (top_k=1, top_k=2).
+    Retornar exactamente min(k, |Ofertas|) respetando el ordenamiento.
+    """
+    from datetime import UTC, datetime, timedelta
+
+    from app.services.booking_service import clear_bookings_in_memory
+    from app.services.offer_service import _memory_offers
+
+    clear_offers_in_memory()
+    clear_bookings_in_memory()
+
+    now = datetime.now(UTC)
+    for i in range(1, 6):
+        _memory_offers.append(
+            {
+                "id_sesion": 400 + i,
+                "codigo_sesion": f"SES-40{i}",
+                "mentor_email": "2022073504@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites",
+                "fecha_inicio": (now + timedelta(days=2 + i)).isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": f"Aula {i}",
+                "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+                "estado": "PUBLICADA",
+            }
+        )
+
+    r1 = client.get("/api/v1/recommendations/offers?top_k=1")
+    assert r1.status_code == 200
+    assert len(r1.json()["items"]) == 1
+
+    r3 = client.get("/api/v1/recommendations/offers?top_k=3")
+    assert r3.status_code == 200
+    assert len(r3.json()["items"]) == 3
+
+
+def test_ord_05_critical_course_multiplier_algo202_priority():
+    """
+    ORD-05: Aplicación del multiplicador 1.3x en Algoritmos y Estructuras de Datos.
+    El score de la sesión sobrepasa a materias estándar aun con menor solapamiento horario.
+    """
+    # Comparar score de oferta en Algoritmos (ID 3, peso 1.3) vs Materia no crítica (peso 1.0)
+    score_algo, bd_algo = RecommendationService.compute_candidate_score(
+        mentee_courses=None,
+        mentee_topics={9},
+        mentee_slots=None,
+        mentee_modality="presencial",
+        candidate_courses={3},  # Algoritmos
+        candidate_topics={9},
+        candidate_slots=None,
+        candidate_modality="presencial",
+        candidate_cycle=8,
+        offer_time=datetime.now(UTC) + timedelta(days=3),
+    )
+
+    score_standard, bd_standard = RecommendationService.compute_candidate_score(
+        mentee_courses=None,
+        mentee_topics={9},
+        mentee_slots=None,
+        mentee_modality="presencial",
+        candidate_courses={99},  # Materia estándar sin factor
+        candidate_topics={9},
+        candidate_slots=None,
+        candidate_modality="presencial",
+        candidate_cycle=8,
+        offer_time=datetime.now(UTC) + timedelta(days=3),
+    )
+
+    assert bd_algo.course_weight_factor == 1.3
+    assert bd_algo.critical_course_applied == "ALGO-202"
+    assert bd_standard.course_weight_factor == 1.0
+    assert score_algo > score_standard
+    assert round(score_algo, 2) == round(score_standard * 1.3, 2)
+
+
+def test_ord_01_b_deterministic_tie_breaking_by_fecha_inicio():
+    """
+    ORD-01b: Desempate determinista por fecha_inicio (menor timestamp).
+    Ante puntaje multifactorial y aforo disponible idénticos, la sesión con inicio más cercano precede.
+    """
+    from datetime import UTC, datetime, timedelta
+
+    from app.services.booking_service import clear_bookings_in_memory
+    from app.services.offer_service import _memory_offers
+
+    clear_offers_in_memory()
+    clear_bookings_in_memory()
+
+    now = datetime.now(UTC)
+    t_early = now + timedelta(days=2, hours=10)
+    t_late = now + timedelta(days=5, hours=10)
+
+    _memory_offers.extend(
+        [
+            {
+                "id_sesion": 501,
+                "codigo_sesion": "SES-501-LATE",
+                "mentor_email": "2022073504@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites",
+                "fecha_inicio": t_late.isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Aula 501",
+                "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+                "estado": "PUBLICADA",
+            },
+            {
+                "id_sesion": 502,
+                "codigo_sesion": "SES-502-EARLY",
+                "mentor_email": "2022073504@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites",
+                "fecha_inicio": t_early.isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Aula 502",
+                "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+                "estado": "PUBLICADA",
+            },
+        ]
+    )
+
+    recs = RecommendationService.recommend_offers("2022074255@upt.pe", top_k=5, db=None)
+    codes = [item.codigo_sesion for item in recs.items]
+    assert len(codes) == 2
+    # La sesión más temprana debe aparecer primero
+    assert codes[0] == "SES-502-EARLY"
+    assert codes[1] == "SES-501-LATE"
+
+
+def test_ord_01_c_deterministic_tie_breaking_by_codigo_sesion():
+    """
+    ORD-01c: Desempate determinista por codigo_sesion (orden lexicográfico canónico).
+    Ante igualdad total en score, factor, aforo disponible y fecha de inicio.
+    """
+    from datetime import UTC, datetime, timedelta
+
+    from app.services.booking_service import clear_bookings_in_memory
+    from app.services.offer_service import _memory_offers
+
+    clear_offers_in_memory()
+    clear_bookings_in_memory()
+
+    now = datetime.now(UTC)
+    t_exact = now + timedelta(days=3)
+
+    _memory_offers.extend(
+        [
+            {
+                "id_sesion": 602,
+                "codigo_sesion": "SES-Z-602",
+                "mentor_email": "2022073504@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites",
+                "fecha_inicio": t_exact.isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Aula 602",
+                "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+                "estado": "PUBLICADA",
+            },
+            {
+                "id_sesion": 601,
+                "codigo_sesion": "SES-A-601",
+                "mentor_email": "2022073504@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites",
+                "fecha_inicio": t_exact.isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Aula 601",
+                "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+                "estado": "PUBLICADA",
+            },
+        ]
+    )
+
+    recs = RecommendationService.recommend_offers("2022074255@upt.pe", top_k=5, db=None)
+    codes = [item.codigo_sesion for item in recs.items]
+    assert len(codes) == 2
+    # SES-A-601 debe preceder lexicográficamente a SES-Z-602
+    assert codes[0] == "SES-A-601"
+    assert codes[1] == "SES-Z-602"
+
+
+def test_ord_01_d_permutation_invariance_stability():
+    """
+    ORD-01d: Invarianza ante permutación del orden de entrada de candidatos en BD/memoria.
+    El resultado del ranking es estrictamente determinista independientemente del orden en que se lean.
+    """
+    import random
+    from datetime import UTC, datetime, timedelta
+
+    from app.services.booking_service import clear_bookings_in_memory
+    from app.services.offer_service import _memory_offers
+
+    now = datetime.now(UTC)
+    base_offers = [
+        {
+            "id_sesion": 700 + i,
+            "codigo_sesion": f"SES-STABLE-{i:02d}",
+            "mentor_email": "2022073504@upt.pe",
+            "id_asignatura": 1,
+            "codigo_asignatura": "CALC-101",
+            "nombre_asignatura": "Cálculo I",
+            "id_tema": 1,
+            "nombre_tema": "Límites",
+            "fecha_inicio": (now + timedelta(days=2, hours=i)).isoformat(),
+            "duracion_minutos": 60,
+            "modalidad": "presencial",
+            "aforo_maximo": 10,
+            "espacio_asignado": f"Aula {i}",
+            "mentor_nombre": "Renzo Antonio Antayhua Mamani",
+            "estado": "PUBLICADA",
+        }
+        for i in range(1, 6)
+    ]
+
+    expected_order = None
+    for _ in range(5):
+        clear_offers_in_memory()
+        clear_bookings_in_memory()
+        shuffled = list(base_offers)
+        random.shuffle(shuffled)
+        _memory_offers.extend(shuffled)
+
+        res = RecommendationService.recommend_offers("2022074255@upt.pe", top_k=5, db=None)
+        order = [item.codigo_sesion for item in res.items]
+
+        if expected_order is None:
+            expected_order = order
+        else:
+            assert order == expected_order, f"Orden no determinista detectado: {order} != {expected_order}"

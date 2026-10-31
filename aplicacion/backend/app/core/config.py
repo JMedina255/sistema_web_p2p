@@ -41,6 +41,24 @@ class Settings(BaseSettings):
     OTP_EXPIRE_MINUTES: int = 5  # Ventana de 5 minutos según RNF01
     OTP_COOLDOWN_SECONDS: int = 60  # Cooldown de 60 segundos según CUS01
 
+    # Variables de entorno para Reservas, Concurrencia y Quórum (Sprint 4 / Cuadro 4.9 / Regla D-9)
+    BOOKING_TIMEOUT_SECONDS: int = Field(
+        default=5,
+        description="Tiempo límite en segundos para adquisición del candado pesimista FOR UPDATE antes de abortar.",
+    )
+    QUORUM_MINIMUM_PERCENTAGE: int = Field(
+        default=50,
+        description="Porcentaje mínimo normativo de alumnos confirmados respecto al aforo para declarar sesión confirmada (RN-09).",
+    )
+    QUORUM_CUTOFF_HOURS: int = Field(
+        default=24,
+        description="Horas de antelación obligatoria para el cierre de confirmaciones y cálculo desatendido de quórum (RN-08).",
+    )
+    ENABLE_CONCURRENCY_STRESS_TEST: bool = Field(
+        default=False,
+        description="Habilita endpoints de prueba de simulación multihilo para auditoría de concurrencia y validación de RNF07.",
+    )
+
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: str | list[str]) -> list[str]:

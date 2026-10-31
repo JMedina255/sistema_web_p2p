@@ -2,11 +2,13 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     auth,
+    bookings,
     consent,
     curriculum,
     health,
     offers,
     profiles,
+    quorum,
     recommendations,
     roles,
 )
@@ -22,3 +24,5 @@ api_router.include_router(offers.router, prefix="/offers", tags=["Ofertas de Men
 api_router.include_router(
     recommendations.router, prefix="/recommendations", tags=["Motor de Recomendación EdRecSys"]
 )
+api_router.include_router(bookings.router, prefix="/bookings", tags=["Reservas de Cupos"])
+api_router.include_router(quorum.router, prefix="/quorum", tags=["Evaluación de Quórum"])

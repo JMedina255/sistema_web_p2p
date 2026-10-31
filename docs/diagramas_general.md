@@ -5,7 +5,7 @@
 **Institución:** Universidad Privada de Tacna — Escuela Profesional de Ingeniería de Sistemas  
 **Equipo:** Grupo 03 / C-SharkTeam (Joan Cristian Medina Quispe y Renzo Antonio Antayhua Mamani)  
 **Normativa de Diseño:** `reglas_documentacion_diseño.md` (Regla D-5: Sincronización continua de diagramas)  
-**Estado:** Sincronizado y Homologado tras el Cierre del Sprint 3 (209 pruebas passing, 0 fallos)
+**Estado:** Sincronizado y Homologado con los Diagramas Técnicos del Sprint 4 (Recomendación Top-k, Reservas Transaccionales y Quórum)
 
 ---
 
@@ -1420,6 +1420,191 @@ UC_Publish ..> UC_Infra : <<include>>
 UC_Publish ..> UC_Catalog : <<include>>
 UC_Rec ..> UC_Merit : <<include>> (Score 0.0 si ciclo < 7)
 UC_Cron ..> UC_Publish : <<extends>> (Transición de estado)
+@enduml
+```
+
+---
+
+## 4. Diagramas de Diseño Técnico — Sprint 4
+
+### 4.1. Diagrama de Casos de Uso del Sprint 4
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+left to right direction
+
+actor "Estudiante Mentoreado\n(Ciclo I-IV)" as Mentee #DCFCE7
+actor "Estudiante Mentor\n(Ciclo VII-X)" as Mentor #DBEAFE
+actor "Sistema P2P\n(Demonio Cron T-24h)" as System #FEE2E2
+
+rectangle "Sistema Web P2P — Casos de Uso Sprint 4" {
+    usecase "CUS02: Explorar Feed de Recomendaciones Top-k\n(EdRecSys v1.0 + XAI)" as UC_Feed
+    usecase "CUS04: Reservar Cupo con Control de Aforo\n(Bloqueo Pesimista ACID)" as UC_Booking
+    usecase "CUS03: Registrar Solicitud Temática por Demanda\n(Empty-State en Catálogo)" as UC_Demand
+    usecase "CUS12: Visualizar Prioridad Curricular EPIS\n(Multiplicador 1.0x-1.3x)" as UC_Priority
+    usecase "CUS24: Confirmar Asistencia Anticipada\n(Ventana T-24h / Pre-Sprint 5)" as UC_Confirm
+    usecase "CUS23: Evaluar Corte de Antelación y Quórum\n(Mínimo 50% / Pre-Sprint 6)" as UC_Quorum
+}
+
+Mentee --> UC_Feed
+Mentee --> UC_Booking
+Mentee --> UC_Demand
+Mentee --> UC_Confirm
+Mentor --> UC_Demand : atiende demanda
+System --> UC_Quorum
+
+UC_Feed ..> UC_Priority : <<include>>
+UC_Booking ..> UC_Feed : <<extends>>
+UC_Demand ..> UC_Feed : <<extends>> (anteposterior lista vacía)
+UC_Confirm ..> UC_Booking : <<precede>> (estado PENDIENTE_CONFIRMACION)
+UC_Quorum ..> UC_Confirm : <<evalúa>> (cómputo de ratificados)
+@enduml
+```
+
+### 4.2. Modelo Entidad-Relación Físico — Reservas y Sesiones de Mentoría (Sprint 4)
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundCorner 8
+skinparam linetype ortho
+
+title Modelo Entidad-Relación — Sprint 4: Reservas y Quórum (EPIS-UPT)
+
+entity "usuarios" as USR {
+    * email : VARCHAR(255) <<PK>>
+    --
+    rol_principal : VARCHAR(20)
+    created_at : TIMESTAMPTZ
+}
+
+entity "sesiones_mentoria" as SES {
+    * id_sesion : INTEGER <<PK>>
+    --
+    * codigo_sesion : VARCHAR(20) <<Unique>>
+    * mentor_email : VARCHAR(255) <<FK>>
+    * id_asignatura : INTEGER <<FK>>
+    * id_tema : INTEGER <<FK>>
+    * fecha_inicio : TIMESTAMPTZ
+    * duracion_minutos : INTEGER
+    * modalidad : VARCHAR(20)
+    * aforo_maximo : INTEGER <<10 o 20 (RN-05)>>
+    * espacio_asignado : VARCHAR(255)
+    * estado : VARCHAR(30)
+}
+
+entity "reservas_cupo" as RES {
+    * id_reserva : INTEGER <<PK>>
+    --
+    * codigo_reserva : VARCHAR(20) <<Unique>>
+    * id_sesion : INTEGER <<FK, B-Tree>>
+    * estudiante_email : VARCHAR(255) <<FK, B-Tree>>
+    * estado : VARCHAR(30) <<CHECK>>
+    * fecha_reserva : TIMESTAMPTZ
+    fecha_ratificacion : TIMESTAMPTZ
+    motivo_cancelacion : TEXT
+    ticket_hash : VARCHAR(64)
+}
+
+entity "solicitudes_demanda" as DEM {
+    * id_demanda : INTEGER <<PK>>
+    --
+    * estudiante_email : VARCHAR(255) <<FK>>
+    * id_asignatura : INTEGER <<FK>>
+    * id_tema : INTEGER <<FK>>
+    observaciones : TEXT
+    * estado : VARCHAR(20)
+    * created_at : TIMESTAMPTZ
+}
+
+USR ||..o{ SES : "dicta como mentor (RN-03)"
+USR ||..o{ RES : "inscribe cupo como mentoreado"
+USR ||..o{ DEM : "registra necesidad formativa (CUS03)"
+SES ||..o{ RES : "aloja hasta aforo_maximo (RN-05 / RNF07)"
+@enduml
+```
+
+### 4.3. Diagrama de Ciclo de Vida y Máquina de Estados — Entidad `reservas_cupo` (Sprint 4)
+```plantuml
+@startuml
+title Ciclo de Vida y Transiciones de la Entidad ReservaCupo (Sistema Web P2P EPIS-UPT)
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 8
+
+[*] --> PENDIENTE_CONFIRMACION : 1. Reserva formalizada\n[Cupo libre en aforo RN-05]
+
+PENDIENTE_CONFIRMACION --> CONFIRMADA : 2. Ratificación voluntaria\n[now() < fecha_inicio - 24h (RN-08)]
+PENDIENTE_CONFIRMACION --> CANCELADA_USUARIO : 3. Desistimiento voluntario\n[now() < fecha_inicio - 24h (RN-10)]
+PENDIENTE_CONFIRMACION --> NO_CONFIRMADA : 4. Corte automático T-24h\n[now() >= fecha_inicio - 24h sin ratificar]
+
+CONFIRMADA --> CANCELADA_USUARIO : 5. Desistimiento extraordinario\n[Antes del inicio de la sesión]
+CONFIRMADA --> CANCELADA_SISTEMA : 6. Sesión cancelada por falta de quórum\n[Mentor resuelve cancelar (CUS07/RN-10)]
+CONFIRMADA --> ASISTIDA : 7. Asistencia presencial/virtual registrada\n[Mentor cierra bitácora CUS08]
+CONFIRMADA --> INASISTENCIA : 8. Inasistencia constatada\n[Mentor marca falta en CUS08/RN-12]
+
+CANCELADA_USUARIO --> [*]
+NO_CONFIRMADA --> [*]
+CANCELADA_SISTEMA --> [*]
+ASISTIDA --> [*]
+INASISTENCIA --> [*]
+@enduml
+```
+
+### 4.4. Diagrama de Secuencia Técnica entre Capas — Reserva Transaccional Concurrente (Sprint 4)
+```plantuml
+@startuml
+autonumber
+skinparam style strictuml
+skinparam BoxPadding 10
+skinparam ParticipantPadding 10
+skinparam defaultFontName Arial
+
+box "Capa de Presentación (React SPA)" #E8EEF5
+participant "BookingModalView\n(React Component)" as UI
+participant "bookingService\n(TypeScript API Client)" as FEService
+end box
+
+box "Capa de API & Dominio (FastAPI)" #FAF5E8
+participant "BookingsRouter\n(/api/v1/bookings)" as Router
+participant "BookingService\n(Transaction Coordinator)" as BEService
+end box
+
+box "Persistencia (PostgreSQL / Supabase)" #F5E8E8
+database "sesiones_mentoria\n(PostgreSQL Table)" as DBSesion
+database "reservas_cupo\n(PostgreSQL Table)" as DBReserva
+end box
+
+== Flujo de Reserva Transaccional Concurrente (T-21 a T-24 / CUS04 / RF12) ==
+UI -> FEService : reserveSeat(sessionId, studentEmail)
+FEService -> Router : POST /api/v1/bookings/reserve [Bearer JWT]
+Router -> BEService : reserve_seat(db, payload, caller_email)
+
+group Transacción ACID Aislada (session.begin())
+    BEService -> DBSesion : SELECT * FROM sesiones_mentoria WHERE id_sesion = :id FOR UPDATE
+    note right: Candado pesimista de fila.\nEncola peticiones concurrentes.
+    DBSesion --> BEService : Fila de sesión bloqueada (aforo_maximo: 10 o 20)
+    
+    BEService -> BEService : Validar reglas de guarda\n- estado == 'PUBLICADA'\n- fecha_inicio > now() + 24h (RN-04)\n- studentEmail != mentor_email
+    
+    BEService -> DBReserva : SELECT COUNT(*) FROM reservas_cupo\nWHERE id_sesion = :id AND estado IN ('PENDIENTE_CONFIRMACION', 'CONFIRMADA')
+    DBReserva --> BEService : n_ocupados
+    
+    alt n_ocupados < aforo_maximo (Vacante Disponible)
+        BEService -> DBReserva : INSERT INTO reservas_cupo (codigo, id_sesion, email, estado='PENDIENTE_CONFIRMACION')
+        DBReserva --> BEService : Inserción exitosa (id_reserva, codigo='RES-XXXX')
+        BEService -> DBSesion : Commit de transacción (libera candado FOR UPDATE)
+        BEService --> Router : BookingResponse (HTTP 201 Created)
+        Router --> FEService : 201 Created JSON
+        FEService --> UI : Desplegar ticket de confirmación provisional y advertencia T-24h
+    else n_ocupados >= aforo_maximo (Sobrecupo Evitado)
+        BEService -> DBSesion : Rollback de transacción (libera candado)
+        BEService --> Router : HTTP 409 Conflict (CAPACITY_EXCEEDED)
+        Router --> FEService : 409 Conflict JSON
+        FEService --> UI : Notificar aforo completo y sugerir registrar demanda (CUS03)
+    end
+end
 @enduml
 ```
 

@@ -1,4 +1,5 @@
 from app.services.auth_service import AuthService
+from app.services.booking_service import BookingService
 from app.services.consent_service import ConsentService
 from app.services.curriculum_service import CurriculumService
 from app.services.offer_service import OfferService
@@ -16,4 +17,5 @@ __all__ = [
     "OfferService",
     "RecommendationService",
     "SimulationService",
+    "BookingService",
 ]

@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -11,6 +11,7 @@ from app.schemas.recommendation import (
     RecommendationListResponse,
     ScoreBreakdown,
 )
+from app.services.booking_service import BookingService
 from app.services.offer_service import OfferService
 from app.services.profile_service import ProfileService, get_profile_in_memory
 
@@ -227,10 +228,13 @@ class RecommendationService:
         else:
             curricular_affinity = 1.0 if common_courses else 0.0
 
-        # Ponderador de asignatura crítica / filtro
+        # Ponderador de asignatura crítica / filtro (RF24 / RN-11)
         course_weight = 1.0
         applied_course_code = None
-        for c in common_courses:
+        target_courses = (
+            common_courses if common_courses else (c_courses if offer_time is not None else set())
+        )
+        for c in target_courses:
             w = CRITICAL_COURSE_WEIGHTS.get(c, 1.0)
             if w > course_weight:
                 course_weight = w
@@ -521,7 +525,8 @@ class RecommendationService:
             mentee_courses = {id_asignatura}
 
         offers = OfferService.get_offers(db, id_asignatura=id_asignatura, estado="PUBLICADA")
-        scored_offers: list[tuple[float, float, int, int, str, OfferRecommendationItem]] = []
+        scored_offers: list[tuple[float, float, int, float, str, OfferRecommendationItem]] = []
+        now_utc = datetime.now(UTC)
 
         for off in offers:
             o_data = off.offer
@@ -532,7 +537,27 @@ class RecommendationService:
                 if f_inicio.tzinfo is None:
                     f_inicio = f_inicio.replace(tzinfo=UTC)
             except Exception:
-                f_inicio = datetime.now(UTC)
+                f_inicio = now_utc + timedelta(hours=48)
+
+            # Filtro 1 (RN-04 / ORD-02): Exclusión de sesiones vencidas o con antelación <= 24h
+            if f_inicio <= now_utc + timedelta(hours=24):
+                continue
+
+            # Filtro 2 (RN-05 / ORD-03): Exclusión de sesiones con aforo agotado (Aforo_disp = 0)
+            ses_id_int = None
+            try:
+                ses_id_int = int(off.id_oferta)
+            except Exception:
+                pass
+
+            occupied_seats = (
+                BookingService.count_active_bookings(db, ses_id_int)
+                if ses_id_int is not None
+                else BookingService.count_active_bookings(db, 0)
+            )
+            aforo_disponible = max(0, o_data.aforo_maximo - occupied_seats)
+            if aforo_disponible <= 0:
+                continue
 
             # Resolver ciclo del mentor
             mentor_profile = ProfileService.get_profile(db, o_data.mentor_email)
@@ -571,6 +596,7 @@ class RecommendationService:
                 duracion_minutos=o_data.duracion_minutos,
                 modalidad=o_data.modalidad,
                 aforo_maximo=o_data.aforo_maximo,
+                aforo_disponible=aforo_disponible,
                 espacio_asignado=o_data.espacio_asignado,
                 mentor_email=o_data.mentor_email,
                 mentor_nombre=o_data.mentor_nombre
@@ -580,12 +606,14 @@ class RecommendationService:
                 breakdown=breakdown,
             )
 
+            # Clave de ordenamiento determinista quíntuple (T-17 / T-19 / ORD-01):
+            # (-score, -weight, -aforo_disponible, f_inicio_timestamp, codigo_sesion)
             scored_offers.append(
                 (
                     -round(score, 4),
                     -round(breakdown.course_weight_factor, 2),
-                    -mentor_cycle,
-                    -breakdown.schedule_matching_slots_count,
+                    -aforo_disponible,
+                    f_inicio.timestamp(),
                     off.codigo_sesion,
                     rec_item,
                 )
