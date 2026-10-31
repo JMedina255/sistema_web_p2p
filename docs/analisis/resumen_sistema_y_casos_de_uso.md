@@ -19,6 +19,10 @@ El sistema opera bajo un flujo continuo gobernado por eventos y cortes perentori
 
 A continuación, se ilustra la interacción integral de los tres actores humanos principales y los componentes autónomos del sistema a lo largo del ciclo formativo:
 
+![Figura 2.1: Flujo Macro del Ciclo de Mentoría P2P - EPIS UPT](imagenes/01_flujo_macro_ciclo_mentoria.png)
+
+*Figura 2.1: Diagrama de interacción y flujo macro por fases del ciclo formativo de mentoría P2P.*
+
 ```plantuml
 @startuml
 title Flujo Macro del Ciclo de Mentoría P2P - EPIS UPT
@@ -94,11 +98,18 @@ El catálogo canónico se estructura en torno a los casos de uso neurálgicos qu
 | **CUS09** | Descargar y verificar certificado | MOD-07 | Fe pública y custodia digital | Descarga privada por mentor; validación pública vía QR | RNF09 (Criptografía SHA-256) |
 | **CUS14** | Visualizar analíticas institucionales | MOD-08 | Inteligencia académica gerencial | Agrega datos de todos los CUS; exporta CSV disociado | RF25, RN-13 (Ley N° 29733) |
 
+> [!NOTE]
+> Para un desglose técnico exhaustivo, arquitectura ECB, reglas de negocio y trazabilidad detallada hacia SRS (FD03) y SAD (FD04) de la fase de oferta, consulte el [Documento de Trazabilidad Técnica: Publicación de Ofertas (CUS06 / RF08)](trazabilidad_publicacion_ofertas.md).
+
 ---
 
 ## 4. Diagrama de Relaciones entre Casos de Uso Neurálgicos
 
 El siguiente diagrama formaliza las relaciones de dependencia (`<<include>>`), extensión ante excepciones (`<<extend>>`) y precedencia funcional entre los módulos centrales:
+
+![Figura 4.1: Relaciones Funcionales entre Casos de Uso Clave](imagenes/02_relaciones_casos_de_uso_clave.png)
+
+*Figura 4.1: Mapa relacional de casos de uso del Sistema Web P2P (EPIS-UPT).*
 
 ```plantuml
 @startuml
@@ -175,6 +186,10 @@ CUS14 ..> CUS05 : <<agrega satisfacción (RN-13)>>
 ## 5. Máquina de Estados del Ciclo de Vida de la Mentoría
 
 El control transaccional de la plataforma garantiza la integridad de los datos a través de tres máquinas de estado acopladas:
+
+![Figura 5.1: Transición de Estados: Sesión, Reserva y Bitácora](imagenes/03_maquina_estados_sesion_reserva_bitacora.png)
+
+*Figura 5.1: Diagrama de máquinas de estado acopladas (Sesión de Mentoría, Reserva de Cupo y Bitácora Docente).*
 
 ```plantuml
 @startuml

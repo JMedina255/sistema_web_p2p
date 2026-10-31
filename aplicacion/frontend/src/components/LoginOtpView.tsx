@@ -412,6 +412,35 @@ export const LoginOtpView: React.FC = () => {
                   Cambiar correo
                 </button>
               </div>
+              {challenge.mockCodeHint && (
+                <div
+                  style={{
+                    marginTop: '0.6rem',
+                    paddingTop: '0.5rem',
+                    borderTop: '1px dashed #CBD5E1',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ color: '#0F766E', fontSize: '0.8rem', fontWeight: 600 }}>
+                    🔑 Código OTP para pruebas:
+                  </span>
+                  <strong
+                    style={{
+                      color: '#0F766E',
+                      fontFamily: 'monospace',
+                      fontSize: '1.05rem',
+                      letterSpacing: '0.15em',
+                      backgroundColor: '#CCFBF1',
+                      padding: '0.15rem 0.5rem',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    {challenge.mockCodeHint}
+                  </strong>
+                </div>
+              )}
             </div>
 
             <div style={{ marginBottom: '1.25rem' }}>

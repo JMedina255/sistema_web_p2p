@@ -43,16 +43,24 @@ El **Sistema Web P2P** es una plataforma institucional orientada a conectar a es
 
 La documentación del proyecto se encuentra formalmente organizada en dos etapas metodológicas consecutivas: la **Fase de Análisis** (línea base original congelada) y la **Fase de Diseño Técnico** (etapa prescriptiva actual bajo las 10 reglas de diseño):
 
-### 2.1. Fase de Diseño Técnico y Cierre del Sprint 1 (docs/diseño/)
+### 2.1. Fase de Diseño Técnico y Cierre de Sprints (docs/diseño/)
 
 | Entregable / Documento | Ubicación | Descripción y Alcance Metodológico |
 | :--- | :--- | :--- |
 | **INFORME ACADÉMICO SPRINT 1** | [docs/diseño/G03_EPIS_Informe_Sprint_01.md](docs/diseño/G03_EPIS_Informe_Sprint_01.md) | **Informe Canónico del Sprint 01:** Elaborado bajo la plantilla oficial institucional, detallando objetivos, balance de los 5 PBI, secuencia de hitos, figuras de evidencia, matrices de pruebas, contratos y dependencias hacia S2. |
 | **INFORME GENERAL SPRINT 1** | [docs/diseño/INFORME_GENERAL_SPRINT_01.md](docs/diseño/INFORME_GENERAL_SPRINT_01.md) | **Reporte Maestro Exhaustivo:** Ficha técnica, diagramas PlantUML, capturas de pantalla, especificación de contratos REST, diccionario físico DDL + RLS, máquinas de estado, ADRs y certificación DoD. |
 | **EVIDENCIA DE PRUEBAS S1** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_01.md) | **Catálogo de Calidad Automatizada S1:** Desglose de las 13 suites, 96 pruebas superadas (50 backend / 46 frontend) y reportes de cobertura (>91%). |
-| **EVIDENCIA DE PRUEBAS S2** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_02.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_02.md) | **Catálogo de Calidad Automatizada S2:** Consolidación de 150 pruebas (84 backend / 66 frontend), aislamiento RLS y matrices de cobertura (>90%). |
-| **INFORME GENERAL SPRINT 2** | [docs/diseño/INFORME_GENERAL_SPRINT_02.md](docs/diseño/INFORME_GENERAL_SPRINT_02.md) | **Reporte Maestro Exhaustivo S2:** Roles, consentimiento Ley 29733, matriz semanal 6×11, catálogo avanzado y cierre DoD del Sprint 2. |
+| **PAQUETE CANÓNICO SPRINT 2** | [docs/sprints/sprint-02/README.md](docs/sprints/sprint-02/README.md) | **Paquete Oficial y Canónico del Sprint 02:** Estructura modular autónoma con planificación, trazabilidad, informes G03 y técnico, presentación PPTX/PDF, evidencias visuales, matriz de pruebas y actas. |
+| **INFORME ACADÉMICO SPRINT 2** | [docs/sprints/sprint-02/03-informe/INFORME_ACADEMICO_G03_SPRINT_02.md](docs/sprints/sprint-02/03-informe/INFORME_ACADEMICO_G03_SPRINT_02.md) | **Informe Canónico del Sprint 02 (G03):** Elaborado bajo la estructura institucional de 11 secciones: roles, mérito académico (RN-03), consentimiento Ley 29733, matriz semanal 6×11, 7 diagramas Kroki PNG/SVG, matrices y balance de 150 pruebas. |
+| **INFORME GENERAL SPRINT 2** | [docs/sprints/sprint-02/03-informe/INFORME_GENERAL_TECNICO_SPRINT_02.md](docs/sprints/sprint-02/03-informe/INFORME_GENERAL_TECNICO_SPRINT_02.md) | **Reporte Maestro Exhaustivo S2:** Roles, consentimiento Ley 29733, matriz semanal 6×11, catálogo avanzado y cierre DoD del Sprint 2 (1,494 líneas con enlaces portables). |
+| **TRAZABILIDAD SPRINT 2** | [docs/sprints/sprint-02/02-trazabilidad/MATRIZ_TRAZABILIDAD_SPRINT_02.md](docs/sprints/sprint-02/02-trazabilidad/MATRIZ_TRAZABILIDAD_SPRINT_02.md) | **Matriz Oficial de Trazabilidad S2:** Matriz canónica de 12 eslabones (PBI, Requerimientos, Reglas, HU Gherkin, CUS, Narrativas, Diagramas SRS/SAD, Código, Pruebas y Evidencias). |
+| **REGISTRO INCONSISTENCIAS S2** | [docs/sprints/sprint-02/02-trazabilidad/REGISTRO_INCONSISTENCIAS_SPRINT_02.md](docs/sprints/sprint-02/02-trazabilidad/REGISTRO_INCONSISTENCIAS_SPRINT_02.md) | **Auditoría de Inconsistencias S2:** Registro de 9 inconsistencias detectadas y resueltas (Vue vs React, app/routers vs v1, RF04 vs RF05, HTTP 400 vs 403, autores y precedencia). |
+| **PRESENTACIÓN OFICIAL S2** | [docs/sprints/sprint-02/04-presentacion/PRESENTACION_OFICIAL_SPRINT_02.pptx](docs/sprints/sprint-02/04-presentacion/PRESENTACION_OFICIAL_SPRINT_02.pptx) / [.pdf](docs/sprints/sprint-02/04-presentacion/PRESENTACION_OFICIAL_SPRINT_02.pdf) | **Presentación Formal PPTX y PDF:** 20 diapositivas 16:9 con diseño académico, evidencias auténticas del incremento, diagramas oficiales y recorrido demostrativo. |
+| **GUION DE EXPOSICIÓN S2** | [docs/sprints/sprint-02/04-presentacion/GUION_EXPOSICION_CORREGIDO.md](docs/sprints/sprint-02/04-presentacion/GUION_EXPOSICION_CORREGIDO.md) | **Guion Técnico Corregido:** Cadena de trazabilidad, notas del orador para 20 diapositivas, FAQ técnica fundamentada y guion para demo en vivo. |
+| **EVIDENCIA DE PRUEBAS S2** | [docs/sprints/sprint-02/06-pruebas/EVIDENCIA_PRUEBAS_AUTOMATIZADAS.md](docs/sprints/sprint-02/06-pruebas/EVIDENCIA_PRUEBAS_AUTOMATIZADAS.md) | **Catálogo de Calidad Automatizada S2:** Consolidación de 150 pruebas (84 backend / 66 frontend), aislamiento RLS y matrices de cobertura (>90%). |
+| **MATRIZ PRUEBAS EXCEL S2** | [docs/sprints/sprint-02/06-pruebas/MATRIZ_PRUEBAS_CATALOGO_OFICIAL.md](docs/sprints/sprint-02/06-pruebas/MATRIZ_PRUEBAS_CATALOGO_OFICIAL.md) | **Homologación con Catálogo Excel:** Mapeo de casos CUS01, CUS10, CUS15, CUS21 hacia suites de Pytest y Vitest (positivas y negativas). |
 | **INFORME GENERAL SPRINT 3** | [docs/diseño/INFORME_GENERAL_SPRINT_03.md](docs/diseño/INFORME_GENERAL_SPRINT_03.md) | **Reporte Maestro Exhaustivo S3:** Publicación de ofertas (T-14), motor EdRecSys v1.0 (T-15), persistencia relacional `sesiones_mentoria` (T-16), testbench algorítmico (T-18), 7 diagramas PlantUML, 7 capturas de pantalla y certificación DoD de 209 pruebas. |
+| **INFORME ACADÉMICO SPRINT 3** | [docs/diseño/G03_EPIS_Informe_Sprint_03.md](docs/diseño/G03_EPIS_Informe_Sprint_03.md) | **Informe Canónico del Sprint 03:** Elaborado bajo la estructura institucional de 11 secciones, detallando publicación de ofertas (T-14), persistencia relacional (T-16), motor EdRecSys v1.0 (T-15), testbench algorítmico (T-18), balance de PBI y acreditación de 209 pruebas. |
 | **EVIDENCIA DE PRUEBAS S3** | [docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_03.md](docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_03.md) | **Catálogo de Calidad Automatizada S3:** Consolidación de 209 pruebas (122 backend / 87 frontend), desglose de las 26 suites, matrices de cobertura (>91% en ambos subsistemas), testbench algorítmico y comandos reproducibles. |
 | **FD04: Informe SAD (Diseño v2.0)** | [docs/diseño/FD04-EPIS-Informe SAD de Proyecto.md](docs/diseño/FD04-EPIS-Informe%20SAD%20de%20Proyecto.md) | **Arquitectura de Software en Diseño:** Vistas 4+1 prescriptivas, contratos de endpoints, diccionario físico PostgreSQL, políticas RLS, máquinas de estado del dominio y ADRs. |
 | **FD03: Informe SRS (Diseño v2.1)** | [docs/diseño/FD03-EPIS-Informe SRS de Proyecto.md](docs/diseño/FD03-EPIS-Informe%20SRS%20de%20Proyecto.md) | **Requerimientos con Trazabilidad:** Especificación alineada a la arquitectura desacoplada y los endpoints construidos. |
@@ -64,7 +72,7 @@ La documentación del proyecto se encuentra formalmente organizada en dos etapas
 | :--- | :--- | :--- |
 | **Plan de Sprints y Tareas** | [docs/sprints/PLAN_SPRINTS_Y_TAREAS.md](docs/sprints/PLAN_SPRINTS_Y_TAREAS.md) | **Planificación Scrum:** Desglose del Product Backlog (37 PBI), capacidad (91 h) y asignación operativa (T-01 a T-51). |
 | **Bitácora de Sprint 1** | [docs/sprints/sprint-01.md](docs/sprints/sprint-01.md) | **Registro de Ejecución S1:** Culminación integral de T-01, T-02, T-03, T-06, T-07 y T-09 con 96 pruebas automatizadas. |
-| **Bitácora de Sprint 2** | [docs/sprints/sprint-02.md](docs/sprints/sprint-02.md) | **Registro de Ejecución S2:** Culminación integral de T-04, T-05, T-08, T-10, T-11, T-12 y T-13 con 150 pruebas y cierre DoD. |
+| **Bitácora de Sprint 2** | [docs/sprints/sprint-02/01-planificacion/BITACORA_EJECUCION_SPRINT_02.md](docs/sprints/sprint-02/01-planificacion/BITACORA_EJECUCION_SPRINT_02.md) | **Registro de Ejecución S2:** Culminación integral de T-04, T-05, T-08, T-10, T-11, T-12 y T-13 con 150 pruebas y cierre DoD (también disponible en [docs/sprints/sprint-02.md](docs/sprints/sprint-02.md)). |
 | **Bitácora de Sprint 3** | [docs/sprints/sprint-03.md](docs/sprints/sprint-03.md) | **Registro de Ejecución S3:** Culminación integral de T-14, T-15, T-16 y T-18 con 209 pruebas consolidadas, motor EdRecSys v1.0 y testbench. |
 | **Bitácora de Sprint 4** | [docs/sprints/sprint-04.md](docs/sprints/sprint-04.md) | **Especificación Técnica y Planificación S4:** Recomendación Top-k, feed interactivo, reservas transaccionales con bloqueo pesimista `SELECT ... FOR UPDATE` (RNF07), control de aforo (RN-05), trazabilidad integral (RF09–RF16, RN-08–RN-13) y banco de pruebas de concurrencia. |
 | **Guía de Configuración Supabase** | [docs/supabase_setup_guide.md](docs/supabase_setup_guide.md) | **Paso a paso para el usuario:** Conexión con Session Pooler, migraciones Alembic, scripts RLS y JWT Secret. |
@@ -81,6 +89,7 @@ La documentación del proyecto se encuentra formalmente organizada en dos etapas
 | **Bóveda General de Diagramas** | [docs/diagramas_general.md](docs/diagramas_general.md) | Bóveda consolidada y de hardening de diagramas PlantUML. |
 | **Matriz de Inconsistencias** | [docs/analisis/matriz_inconsistencias.md](docs/analisis/matriz_inconsistencias.md) | Registro de auditoría y resolución de discrepancias en requisitos y modelos. |
 | **Catálogo de Pruebas (Análisis)** | [docs/analisis/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx](docs/analisis/Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx) | Matriz formal de casos de prueba funcional de análisis. |
+| **Trazabilidad Sprint 2 (Canónica)** | [docs/sprints/sprint-02/02-trazabilidad/MATRIZ_TRAZABILIDAD_SPRINT_02.md](docs/sprints/sprint-02/02-trazabilidad/MATRIZ_TRAZABILIDAD_SPRINT_02.md) | Matriz oficial de 12 eslabones canónicos, requisitos, casos de uso y modelos de arquitectura del Sprint 02 (espejo histórico en [docs/analisis/trazabilidad_sprint_02.md](docs/analisis/trazabilidad_sprint_02.md)). |
 
 ---
 
@@ -160,7 +169,15 @@ Proyecto_Sistema_Web_P2P/
 │   ├── sprints/
 │   │   ├── PLAN_SPRINTS_Y_TAREAS.md           # Planificación Scrum canónica (37 PBI, 91 h, S1–S8)
 │   │   ├── sprint-01.md                       # Bitácora oficial de ejecución del Sprint 1
-│   │   ├── sprint-02.md                       # Bitácora oficial de ejecución del Sprint 2
+│   │   ├── sprint-02/                         # Paquete canónico oficial del Sprint 02 (01 al 07)
+│   │   │   ├── 01-planificacion/              # Plan de trabajo y bitácora de ejecución
+│   │   │   ├── 02-trazabilidad/               # Matriz de 12 eslabones y registro de inconsistencias
+│   │   │   ├── 03-informe/                    # Informes académicos formales (G03 y Técnico)
+│   │   │   ├── 04-presentacion/               # Presentación formal (PPTX, PDF) y guion técnico
+│   │   │   ├── 05-evidencias/                 # 7 capturas y 7 diagramas oficiales en alta resolución
+│   │   │   ├── 06-pruebas/                    # Mapeo de catálogo Excel y acreditación de 150 tests
+│   │   │   └── 07-actas/                      # Acta de cierre y declaraciones de limitación
+│   │   ├── sprint-02.md                       # Bitácora histórica de ejecución del Sprint 2
 │   │   └── sprint-03.md                       # Bitácora oficial de ejecución del Sprint 3 (Cierre integral T-14..T-18)
 │   ├── diseño/                                # Documentación de diseño prescriptivo (Hardening D-1..D-10)
 │   │   ├── INFORME_GENERAL_SPRINT_01.md       # Informe de cierre exhaustivo del Sprint 1

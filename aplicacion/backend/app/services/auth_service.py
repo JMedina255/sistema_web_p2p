@@ -139,6 +139,8 @@ class AuthService:
         # Proveemos hint de código en desarrollo para facilitar pruebas reproducibles
         is_dev = settings.APP_ENV == "development"
         mock_hint = code if is_dev else None
+        if is_dev:
+            print(f"[AUTH DEV] >>> CÓDIGO OTP EMITIDO PARA {clean_email}: {code} <<<")
 
         return RequestOtpResponse(
             challengeId=challenge_id,

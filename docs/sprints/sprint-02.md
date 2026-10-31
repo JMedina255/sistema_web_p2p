@@ -12,6 +12,9 @@
 > [!NOTE]
 > **Alcance de la Sesión de Cierre del Sprint 2 (23/10/2026):**  
 > En esta sesión se culminó la totalidad del alcance planificado para el Sprint 2: las tres tareas de cliente asignadas a Joan (**T-04**, **T-10** y **T-11**) y las cuatro tareas de persistencia, lógica de negocio y seguridad asignadas a Renzo (**T-05**, **T-08**, **T-12** y **T-13**). Se validaron 150 pruebas automatizadas (66 en frontend con Vitest y 84 en backend con Pytest) con 0 fallas y una cobertura superior al 90%, cerrando formalmente el ciclo mediante el Definition of Done (DoD).
+>
+> **Estructura Canónica Reorganizada del Sprint 02:**  
+> Para consultar el paquete canónico y autónomo de entrega formal, visite [docs/sprints/sprint-02/README.md](sprint-02/README.md), el cual contiene la planificación detallada, la matriz de trazabilidad en 12 eslabones, el informe académico de 11 secciones, las evidencias visuales auténticas, la presentación formal (PPTX/PDF), el guion técnico corregido y las actas de cierre.
 
 ---
 

@@ -1,0 +1,24 @@
+# Índice de Diagramas Oficiales de Análisis y Diseño — Sprint 02
+
+**Proyecto:** Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT  
+**Sprint:** 02 — Roles, Currículo, Perfiles y Consentimiento Informado (Ley N° 29733)  
+**Ubicación canónica:** `docs/sprints/sprint-02/05-evidencias/diagramas/`  
+**Fuentes maestras:** `docs/analisis/FD03-EPIS-Informe SRS de Proyecto.md` y `docs/diseño/FD04-EPIS-Informe SAD de Proyecto.md`
+
+---
+
+## Catálogo de Diagramas Oficiales del Incremento
+
+| N° | Archivo PNG | Archivo Vectorial SVG | Tipo de Diagrama / Vista 4+1 | Requisitos / Reglas Asociadas | Decisión Arquitectónica Justificada | Componente de Implementación |
+| :---: | :--- | :--- | :--- | :---: | :--- | :--- |
+| **08** | [`08_diagrama_casos_de_uso_sprint02.png`](08_diagrama_casos_de_uso_sprint02.png) | [`08_diagrama_casos_de_uso_sprint02.svg`](08_diagrama_casos_de_uso_sprint02.svg) | **Casos de Uso del Sprint 02** (Vista de Casos de Uso) | **RF02, RF03, RF04, RF05**<br>**CUS01, CUS10, CUS15, CUS21** | Delimitación estricta de responsabilidades entre actores (Mentoreado, Mentor, Administrador) y alcance funcional del Sprint 2. | Frontend UI y controladores API REST de S2. |
+| **09** | [`09_secuencia_consentimiento_ley29733.png`](09_secuencia_consentimiento_ley29733.png) | [`09_secuencia_consentimiento_ley29733.svg`](09_secuencia_consentimiento_ley29733.svg) | **Diagrama de Secuencia** (Vista Lógica / Proceso) | **RF02, RNF02, RN-02**<br>**CUS01** | Gatekeeper legal obligatorio: el rechazo bloquea la emisión de JWT institucional; la aceptación persiste versión, IP y timestamp UTC inmutable. | `ConsentModalView.tsx`, `consent.py`, `consent_service.py`, tabla `consentimientos_legales`. |
+| **10** | [`10_secuencia_roles_merito_rn03.png`](10_secuencia_roles_merito_rn03.png) | [`10_secuencia_roles_merito_rn03.svg`](10_secuencia_roles_merito_rn03.svg) | **Diagrama de Secuencia** (Vista Lógica / Proceso) | **RF03, RN-03**<br>**CUS10** | Verificación de mérito en dos niveles: validación previa en cliente y denegación estricta en servidor con HTTP 400 `MERIT_RULE_VIOLATION` si ciclo $< 7$; bloqueo de autopromoción con HTTP 403 Forbidden. | `ProfileAvailabilityView.tsx`, `roles.py`, `role_service.py`, tabla `usuario_roles`. |
+| **11** | [`11_secuencia_perfil_disponibilidad_atomic.png`](11_secuencia_perfil_disponibilidad_atomic.png) | [`11_secuencia_perfil_disponibilidad_atomic.svg`](11_secuencia_perfil_disponibilidad_atomic.svg) | **Diagrama de Secuencia** (Vista Lógica / Proceso) | **RF04, RNF07**<br>**CUS15** | Consistencia transaccional ACID: reemplazo atómico de franjas horarias semanales (`DELETE` de bloques previos + `INSERT` masivo de la matriz 6×11) en una única transacción de base de datos. | `profileService.ts`, `profiles.py`, `profile_service.py`, tabla `disponibilidades_horarias`. |
+| **12** | [`12_secuencia_seguridad_multiusuario_rls.png`](12_secuencia_seguridad_multiusuario_rls.png) | [`12_secuencia_seguridad_multiusuario_rls.svg`](12_secuencia_seguridad_multiusuario_rls.svg) | **Diagrama de Secuencia** (Vista de Desarrollo / Seguridad) | **RNF02, RNF01**<br>**CUS01, CUS15** | Seguridad en profundidad (Defense-in-Depth): filtrado a nivel de fila (*Row Level Security*) en Supabase PostgreSQL basado en el claim criptográfico `auth.jwt() ->> 'email'`, previniendo accesos cruzados incluso ante fallos en la capa de aplicación. | Script `supabase_rls_sprint02.sql`, middleware de autenticación, políticas RLS en 5 tablas. |
+| **13** | [`13_maquina_estados_consentimiento_roles.png`](13_maquina_estados_consentimiento_roles.png) | [`13_maquina_estados_consentimiento_roles.svg`](13_maquina_estados_consentimiento_roles.svg) | **Máquina de Estados Finitos** (Vista Lógica / Dominio) | **RF02, RF03, RN-02, RN-03** | Ciclo de vida determinista: el consentimiento transita entre `PENDIENTE`, `ACEPTADO`, `RECHAZADO` y `REVOCADO`. El rol de usuario transita de `ESTUDIANTE` a `POSTULANTE_MENTOR` y de ahí a `MENTOR_ACTIVO` o `RECHAZADO_MERITO`. | Lógica de estados en Pydantic schemas, `consent_service.py` y `role_service.py`. |
+| **14** | [`14_diagrama_entidad_relacion_sprint02.png`](14_diagrama_entidad_relacion_sprint02.png) | [`14_diagrama_entidad_relacion_sprint02.svg`](14_diagrama_entidad_relacion_sprint02.svg) | **Modelo Entidad-Relación Físico** (Vista de Datos) | **RF02, RF03, RF04, RF05** | Esquema relacional normalizado en 3FN con 5 tablas integradas en migración Alembic `002_roles_and_profiles.py`: claves foráneas en cascada, índices de búsqueda y restricciones `CHECK`. | Modelos SQLAlchemy: `consent.py`, `roles.py`, `profile.py`. |
+
+---
+
+*Nota de integridad:* Todos los diagramas fueron renderizados a partir del código canónico PlantUML conservado en `docs/diagramas_general.md` y concuerdan plenamente con las especificaciones del SRS v2.0/v2.2 y SAD v2.1.
