@@ -93,7 +93,9 @@ def _extract_caller_and_admin_status(
 )
 def confirm_booking_attendance(
     id_reserva: int,
-    student_email: str | None = Query(None, description="Correo del estudiante en entorno de pruebas si no se envía Bearer JWT"),
+    student_email: str | None = Query(
+        None, description="Correo del estudiante en entorno de pruebas si no se envía Bearer JWT"
+    ),
     authorization: str | None = Header(None),
     db: Session | None = Depends(get_optional_session),
 ) -> BookingDetailResponse:
@@ -102,9 +104,7 @@ def confirm_booking_attendance(
     antes del corte perentorio de T-24h (RN-08), pasando el estado a CONFIRMADA
     para el cómputo del quórum regulatorio institucional (RN-09).
     """
-    caller_email, is_admin = _extract_caller_and_admin_status(
-        authorization, explicit_email=student_email
-    )
+    caller_email, is_admin = _extract_caller_and_admin_status(authorization, explicit_email=student_email)
 
     return BookingService.confirm_attendance(
         db=db,
@@ -123,7 +123,9 @@ def confirm_booking_attendance(
 def cancel_booking_reservation(
     id_reserva: int,
     payload: BookingCancelPayload | None = None,
-    student_email: str | None = Query(None, description="Correo del estudiante en entorno de pruebas si no se envía Bearer JWT"),
+    student_email: str | None = Query(
+        None, description="Correo del estudiante en entorno de pruebas si no se envía Bearer JWT"
+    ),
     authorization: str | None = Header(None),
     db: Session | None = Depends(get_optional_session),
 ) -> BookingDetailResponse:
@@ -132,9 +134,7 @@ def cancel_booking_reservation(
     antes de la ventana de corte perentorio de T-24h (RN-10), liberando atómicamente el cupo
     asignado y permitiendo que otros estudiantes lo reserven de forma inmediata (RN-05).
     """
-    caller_email, is_admin = _extract_caller_and_admin_status(
-        authorization, explicit_email=student_email
-    )
+    caller_email, is_admin = _extract_caller_and_admin_status(authorization, explicit_email=student_email)
 
     return BookingService.cancel_reservation(
         db=db,

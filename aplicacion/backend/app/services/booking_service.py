@@ -587,7 +587,11 @@ class BookingService:
                         )
 
                     clean_caller = (caller_email or "").strip().lower()
-                    if not is_admin and clean_caller and clean_caller != reserva.estudiante_email.strip().lower():
+                    if (
+                        not is_admin
+                        and clean_caller
+                        and clean_caller != reserva.estudiante_email.strip().lower()
+                    ):
                         raise HTTPException(
                             status_code=status.HTTP_403_FORBIDDEN,
                             detail="FORBIDDEN: No tiene autorización para ratificar una reserva que no le pertenece.",
@@ -694,7 +698,11 @@ class BookingService:
                 )
 
             clean_caller = (caller_email or "").strip().lower()
-            if not is_admin and clean_caller and clean_caller != target_booking["estudiante_email"].strip().lower():
+            if (
+                not is_admin
+                and clean_caller
+                and clean_caller != target_booking["estudiante_email"].strip().lower()
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="FORBIDDEN: No tiene autorización para ratificar una reserva que no le pertenece.",
@@ -804,7 +812,11 @@ class BookingService:
                         )
 
                     clean_caller = (caller_email or "").strip().lower()
-                    if not is_admin and clean_caller and clean_caller != reserva.estudiante_email.strip().lower():
+                    if (
+                        not is_admin
+                        and clean_caller
+                        and clean_caller != reserva.estudiante_email.strip().lower()
+                    ):
                         raise HTTPException(
                             status_code=status.HTTP_403_FORBIDDEN,
                             detail="FORBIDDEN: No tiene autorización para cancelar una reserva que no le pertenece.",
@@ -901,7 +913,11 @@ class BookingService:
                 )
 
             clean_caller = (caller_email or "").strip().lower()
-            if not is_admin and clean_caller and clean_caller != target_booking.get("estudiante_email", "").strip().lower():
+            if (
+                not is_admin
+                and clean_caller
+                and clean_caller != target_booking.get("estudiante_email", "").strip().lower()
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="FORBIDDEN: No tiene autorización para cancelar una reserva que no le pertenece.",

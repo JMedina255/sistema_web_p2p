@@ -1332,11 +1332,15 @@ def test_confirm_attendance_success_in_real_db():
     try:
         now = datetime.now(UTC)
         # Crear asignatura, tema y sesión
-        asig = Asignatura(codigo_curso="CC-301", nombre_curso="Estructuras de Datos", ciclo_plan=3, creditos=4)
+        asig = Asignatura(
+            codigo_curso="CC-301", nombre_curso="Estructuras de Datos", ciclo_plan=3, creditos=4
+        )
         db.add(asig)
         db.flush()
 
-        tema = TemaConceptual(id_asignatura=asig.id_asignatura, nombre_tema="Grafos y Dijkstra", unidad_silabica=1)
+        tema = TemaConceptual(
+            id_asignatura=asig.id_asignatura, nombre_tema="Grafos y Dijkstra", unidad_silabica=1
+        )
         db.add(tema)
         db.flush()
 
@@ -1680,7 +1684,9 @@ def test_cancel_reservation_success_in_real_db():
         db.add(asig)
         db.flush()
 
-        tema = TemaConceptual(id_asignatura=asig.id_asignatura, nombre_tema="Concurrencia ACID y Bloqueos", unidad_silabica=2)
+        tema = TemaConceptual(
+            id_asignatura=asig.id_asignatura, nombre_tema="Concurrencia ACID y Bloqueos", unidad_silabica=2
+        )
         db.add(tema)
         db.flush()
 
@@ -1821,6 +1827,3 @@ def test_concurrent_cancellation_and_rebooking_rnf07():
         if b["id_sesion"] == sesion_id and b["estado"] in ["PENDIENTE_CONFIRMACION", "CONFIRMADA"]
     )
     assert final_active <= aforo_max
-
-
-
