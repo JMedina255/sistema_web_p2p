@@ -1,5 +1,5 @@
 # Documento de Evidencia y Catálogo de Pruebas Automatizadas: Sprint 05
-## «Ratificación de Asistencia, Desistimiento Voluntario, Liberación Atómica de Cupos y Aislamiento de Identidad (443 Pruebas Automatizadas)»
+## «Ratificación de Asistencia, Desistimiento Voluntario, Liberación Atómica de Cupos y Aislamiento de Identidad (452 Pruebas Automatizadas)»
 
 **Proyecto:** Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT
 **Curso:** Construcción de Software I (2026-II)
@@ -8,8 +8,8 @@
 **Docente de Cátedra:** Dr. Ricardo Eduardo Valcárcel Alvarado
 **Fecha de Cierre:** 02 de Noviembre de 2026
 **Rama Base de Integración:** `main`
-**Commit Oficial de Cierre:** [`1ed8a046e0b214082042a3172b12d2c98b3d0b90`](https://github.com/JMedina255/sistema_web_p2p/commit/1ed8a04) (Commit corto: `1ed8a04`)
-**Estado:** **443 de 443 Pruebas Superadas (100% Satisfactorio, 0 Fallos, Coberturas: 90.40% Backend / 83.25% Frontend) — Pendiente de Revisión Académica y Validación en Staging**
+**Commits Oficiales de Cierre:** [`9cceaaa`](https://github.com/JMedina255/sistema_web_p2p/commit/9cceaaa) y [`b85da9e`](https://github.com/JMedina255/sistema_web_p2p/commit/b85da9e)
+**Estado:** **452 de 452 Pruebas Superadas (100% Satisfactorio, 0 Fallos, Coberturas: 90.40% Backend / 83.25% Frontend) — Pendiente de Revisión Académica y Validación en Staging**
 
 ---
 
@@ -23,6 +23,7 @@ A continuación, se presenta la tabla formal de control de versiones del documen
 | :---: | :--- | :--- | :--- | :---: | :--- |
 | **1.0** | Joan Medina / Renzo Antayhua | Revisión interna Grupo 03 | Pendiente de revisión de cátedra (Dr. Ricardo Valcárcel) | 02/11/2026 | Emisión inicial del catálogo de evidencias de pruebas automatizadas del Sprint 05. |
 | **1.1** | Joan Medina / Renzo Antayhua | Auditoría interna Grupo 03 | Pendiente de revisión académica y Dirección EPIS | 02/11/2026 | Corrección y sincronización de rutas reales (`src/components/`, `src/services/`), ajuste de conteos exactos (42 pruebas en `StudentBookingsView.test.tsx` y 42 en `bookingService.test.ts`), unificación de 46 pruebas en `test_bookings.py` sin doble cómputo de concurrencia, desglose de las 21 suites frontend (265 pruebas) y 11 backend (178 pruebas), alineación de contratos Pydantic v2 y delimitación de persistencia SQLite vs PostgreSQL. |
+| **1.2** | Joan Medina / Renzo Antayhua | Consolidación Técnica Grupo 03 | Pendiente de revisión académica y Dirección EPIS | 02/11/2026 | Consolidación definitiva de cierre del Sprint 5: incorporación de 9 nuevas pruebas de seguridad en `test_authorization.py` (22 pruebas totales en la suite), actualización de pruebas de backend a 187 (452 totales en CI, 35 suites), adición de commits `9cceaaa` y `b85da9e`, y verificación de workflow exitoso en GitHub Actions (Run ID 41524635510). |
 
 Fuente: Elaboración propia.
 
@@ -55,8 +56,8 @@ A continuación, se resume el estado general de calidad del software alcanzado a
 
 | Métrica / Parámetro | Valor Obtenido en Frontend | Valor Obtenido en Backend | Consolidado Global | Estado Normativo |
 | :--- | :---: | :---: | :---: | :---: |
-| **Suites de Pruebas Ejecutadas** | 21 suites | 11 suites | **32 suites** | **100% Superadas** |
-| **Casos de Prueba Aprobados** | 265 casos | 178 casos | **443 casos** | **100% Éxito (0 Fallos)** |
+| **Suites de Pruebas Ejecutadas** | 21 suites | 14 suites | **35 suites** | **100% Superadas** |
+| **Casos de Prueba Aprobados** | 265 casos | 187 casos | **452 casos** | **100% Éxito (0 Fallos)** |
 | **Casos Fallidos / Con Error** | 0 fallos | 0 fallos | **0 fallos** | **Conforme** |
 | **Cobertura de Líneas / Sentencias** | **83.25%** | **90.40%** (2195 / 2428 stmts) | Evaluado Independiente | **Supera RNF09 ($\ge 70\%$)** |
 | **Tiempo Total de Ejecución** | ~4.8 segundos | ~8.7 segundos | ~13.5 segundos | **Óptimo para CI/CD** |
@@ -177,7 +178,7 @@ El Cuadro 6.1 confirma que la plataforma garantiza la confidencialidad e integri
 ## 7. Delimitación Técnica de Persistencia en el Entorno de Pruebas
 
 En estricta observancia de los principios de transparencia académica de [`rules_doc.md`](../../rules_doc.md), se hace constar formalmente:
-- **Entorno de Pruebas Automatizadas:** Las 178 pruebas del backend se ejecutaron utilizando **SQLite en memoria (`sqlite:///:memory:`) y en archivos temporales aislados**, gestionados a través de SQLAlchemy 2.0.
+- **Entorno de Pruebas Automatizadas:** Las 187 pruebas del backend se ejecutaron utilizando **SQLite en memoria (`sqlite:///:memory:`) y en archivos temporales aislados**, gestionados a través de SQLAlchemy 2.0.
 - **Mecanismo de Concurrencia:** Debido a que SQLite carece del bloqueo pesimista nativo `SELECT ... FOR UPDATE` de PostgreSQL, la sincronización concurrente en las pruebas se garantizó mediante el cerrojo multihilo de aplicación `_booking_lock = threading.Lock()`.
 - **Producción:** La persistencia final está concebida para **PostgreSQL en Supabase**, cuya migración Alembic `004_booking_and_reservations.py` y políticas de RLS han sido modeladas pero no probadas activamente en vivo contra la base de datos en la nube durante el Sprint 05. Esta actividad se registrará como pendiente técnico para la homologación en Staging.
 
@@ -196,7 +197,7 @@ cd aplicacion/backend
 python -m pytest -v --cov=app tests/
 
 # Salida esperada:
-# 178 passed, 1 warning in ~8.7s
+# 187 passed, 1 warning in ~8.7s
 # Required test coverage of 70.0% reached. Total coverage: 90.40%
 ```
 

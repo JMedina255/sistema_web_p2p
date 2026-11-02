@@ -10,7 +10,7 @@
 * Renzo Antonio Antayhua Mamani (Código: 2022073504) — Rol: Arquitectura Backend, Transaccionalidad ACID y Seguridad (T-26, T-28)
 **Fecha de Cierre:** 02 de Noviembre de 2026
 **Rama Base de Integración:** `main`
-**Estado:** **100% Concluido y Verificado en CI (443 Pruebas, 0 Fallos, Coberturas: 90.40% Backend / 83.25% Frontend) — Pendiente de Aprobación de Cátedra y Validación Staging PostgreSQL**
+**Estado:** **100% Concluido y Verificado en CI (452 Pruebas, 0 Fallos, Coberturas: 90.40% Backend / 83.25% Frontend) — Pendiente de Aprobación de Cátedra y Validación Staging PostgreSQL**
 
 ---
 
@@ -24,6 +24,7 @@ A continuación, se detalla el historial formal de versiones del presente inform
 | :---: | :--- | :--- | :--- | :---: | :--- |
 | **1.0** | Joan Medina / Renzo Antayhua | Revisión interna Grupo 03 | Pendiente de revisión académica (Dr. Ricardo Valcárcel) | 02/11/2026 | Emisión inicial del informe técnico de cierre del Sprint 05. |
 | **1.1** | Joan Medina / Renzo Antayhua | Auditoría interna Grupo 03 | Pendiente de revisión de cátedra y Dirección EPIS | 02/11/2026 | Corrección de rutas canónicas (`src/components/StudentBookingsView.tsx`), eliminación de tipos externos no existentes, alineación exacta con contratos Pydantic v2 (`BookingDetailResponse`, `id_reserva: int`, `estado`, `fecha_ratificacion`, `{ "motivo": "..." }`), ajuste de pruebas a 42 en vista y 42 en servicio, unificación de 46 pruebas en `test_bookings.py`, referencia canónica a `.github/workflows/ci.yml` y delimitación formal de persistencia SQLite vs PostgreSQL. |
+| **1.2** | Joan Medina / Renzo Antayhua | Consolidación Técnica Grupo 03 | Pendiente de revisión de cátedra y Dirección EPIS | 02/11/2026 | Cierre formal definitivo: incorporación del blindaje de autorización anti-suplantación en `POST /api/v1/bookings/reserve`, actualización de suites a 452 pruebas automatizadas (187 Pytest / 265 Vitest, 0 fallos), integración de commits `9cceaaa` y `b85da9e`, y certificación del workflow de CI aprobado en GitHub Actions (Run ID 41524635510). |
 
 Fuente: Elaboración propia.
 
@@ -46,7 +47,7 @@ A continuación, se presenta la ficha técnica de control de gestión del Sprint
 | **Requerimientos Trazados** | `RF13` (Ratificación de asistencia), `RF14` (Desistimiento de reserva), `RNF02` (Autenticación y aislamiento de identidad), `RNF05` (Accesibilidad WCAG 2.1 AA), `RNF07` (Atomicidad y 0% sobrecupo), `RNF09` (Cobertura de pruebas $\ge 70\%$). |
 | **Casos de Uso Abordados** | `CUS24` (Confirmar Asistencia Anticipada, catálogo `CUS04-U03`) y `CUS17` (Cancelar Reserva de Mentoría, catálogo `CUS17-U01`). |
 | **Reglas de Negocio Implementadas**| `RN-05` (Aforo reglamentario inmutable: 10 presencial / 20 virtual), `RN-08` (Corte de ratificación hasta $T-24\text{ h}$), `RN-09` (Quórum mínimo institucional del 50%), `RN-10` (Desistimiento hasta $T-24\text{ h}$). |
-| **Suites de Pruebas Automatizadas** | **443 pruebas pasando con 0 fallos** (178 en Pytest Backend / 265 en Vitest Frontend) distribuidas en 32 suites. |
+| **Suites de Pruebas Automatizadas** | **452 pruebas pasando con 0 fallos** (187 en Pytest Backend / 265 en Vitest Frontend) distribuidas en 35 suites. |
 | **Cobertura de Código Lograda** | **Backend: 90.40%** (2428 sentencias / 233 perdidas) — **Frontend: 83.25%** líneas. Ambas métricas superan de forma independiente el umbral del 70.0% (**RNF09**). |
 | **Linteo y Formato de Código** | 0 defectos en Ruff (Python, formateo consolidado en `370766f`) — 0 advertencias y 0 errores en ESLint 9 (React 19 / TypeScript 5.6). |
 | **Compilación Frontend** | Compilación limpia de TypeScript (`tsc -b`) y empaquetamiento óptimo en Vite (`dist/`). |
@@ -178,7 +179,7 @@ A continuación, se desglosa el acervo consolidado de 443 pruebas automatizadas 
 | :---: | :--- | :---: | :---: | :---: | :--- |
 | **1** | `tests/test_bookings.py` | Backend | 46 | 81% (servicio) / 100% (router) | Ciclo completo de reservas, confirmación anticipada (T-26), corte temporal $T-24\text{ h}$, desistimiento voluntario (T-28), restitución atómica, concurrencia multihilo (RNF07) y aislamiento de usuario (RNF02). |
 | **2** | `tests/test_auth.py` | Backend | 13 | 100% | Autenticación institucional, emisión y verificación de OTP. |
-| **3** | `tests/test_authorization.py` | Backend | 13 | 100% | Control de acceso basado en roles (RBAC) y tokens JWT. |
+| **3** | `tests/test_authorization.py` | Backend | 22 | 100% | Control de acceso basado en roles (RBAC), tokens JWT y protección anti-suplantación en reservas (RNF02). |
 | **4** | `tests/test_recommendations.py` | Backend | 27 | 93% | Algoritmo *EdRecSys v1.0*, cálculo de similitud y ponderación curricular. |
 | **5** | `tests/test_offers.py` | Backend | 14 | 85% | Publicación de ofertas, aforos inmutables y antelación $>24\text{ h}$. |
 | **6** | `tests/test_profiles.py` | Backend | 11 | 75% | Perfiles académicos, historial formativo y habilidades. |
@@ -194,7 +195,7 @@ A continuación, se desglosa el acervo consolidado de 443 pruebas automatizadas 
 | **16** | `src/services/__tests__/recommendationService.test.ts` | Frontend | 21 | 91.00% | Adaptador de servicio Top-k y mapeo de afinidades. |
 | **17** | `src/services/__tests__/authService.test.ts` / `apiAuthAdapter.test.ts` | Frontend | 24 | 93.00% | Flujo OTP, almacenamiento seguro de tokens y headers. |
 | **18** | Resto de Suites Frontend (OfferPublish, Consent, App, etc.) | Frontend | 100 | 81.30% – 95% | Publicación de ofertas, perfiles, catálogo, integración. |
-| **TOTAL**| **32 Suites de Prueba (11 BE / 21 FE)** | **Global** | **443** | **FE: 83.25% / BE: 90.40%** | **Cero fallos, 100% éxito automatizado.** |
+| **TOTAL**| **35 Suites de Prueba (14 BE / 21 FE)** | **Global** | **452** | **FE: 83.25% / BE: 90.40%** | **Cero fallos, 100% éxito automatizado.** |
 
 Fuente: Registro de ejecución de Pytest 9.1.1 y Vitest 2.1.2 en commit `1ed8a04`.
 

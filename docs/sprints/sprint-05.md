@@ -1,94 +1,629 @@
-# Bitácora de Especificación Técnica, Desarrollo y Cierre — Sprint 05: Ratificación de Asistencia, Desistimiento Voluntario y Gestión Transaccional de Aforos en T-24h
+# Bitácora de Especificación Técnica, Desarrollo y Cierre — Sprint 05: Ratificación de Asistencia, Desistimiento Voluntario, Gestión Transaccional de Aforos en T-24h y Endurecimiento de Seguridad
 
-**Proyecto:** Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT
-**Curso:** Construcción de Software I (Semestre Académico 2026-II)
-**Institución:** Universidad Privada de Tacna — Facultad de Ingeniería — Escuela Profesional de Ingeniería de Sistemas
-**Docente de Cátedra:** Dr. Ricardo Eduardo Valcárcel Alvarado
-**Equipo Consultor:** Grupo 03 / C-SharkTeam
-* Joan Cristian Medina Quispe (Código: 2022074255) — Frontend, UI Accesible y Navegación
-* Renzo Antonio Antayhua Mamani (Código: 2022073504) — Backend, Persistencia ORM y Concurrencia Transaccional
-**Rama Base de Integración:** `main`
-**Commit Oficial de Cierre:** [`1ed8a046e0b214082042a3172b12d2c98b3d0b90`](https://github.com/JMedina255/sistema_web_p2p/commit/1ed8a04) (02/11/2026)
-**Estado:** **100% Concluido y Verificado en CI (443 Pruebas Automatizadas) — Pendiente de Revisión y Aprobación de Cátedra**
+**Proyecto:** Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT  
+**Curso:** Construcción de Software I  
+**Institución:** Universidad Privada de Tacna — Facultad de Ingeniería (EPIS)  
+**Semestre Académico:** 2026-II  
+**Docente de Cátedra:** Dr. Ricardo Eduardo Valcárcel Alvarado  
+**Equipo Consultor:** Grupo 03 / C-SharkTeam — Joan Cristian Medina Quispe (Joan) y Renzo Antonio Antayhua Mamani (Renzo)  
+**Rama Base de Integración:** `main`  
+**Commits Oficiales de Cierre y Endurecimiento:** [`9cceaaa`](https://github.com/JMedina255/sistema_web_p2p/commit/9cceaaad273d93c9cefa7e9cbe819790ce5b9518) y [`b85da9e`](https://github.com/JMedina255/sistema_web_p2p/commit/b85da9e96cb55741280d587d98a9a5f34c1dcf68) (02/11/2026)  
+**Fecha de Corte Documental:** 02/11/2026  
+**Estructura de Commits del Incremento Sprint 5 (Regla D-8.3):**
+- `fix(frontend): enforce secure service mode resolution and remove hardcoded student identity fallback (audit B.1/B.2)` [`0a1f1f7`](https://github.com/JMedina255/sistema_web_p2p/commit/0a1f1f7)
+- `feat(frontend): prepare attendance confirmation and withdrawal service contracts (S5)` [`017f65a`](https://github.com/JMedina255/sistema_web_p2p/commit/017f65a)
+- `feat(frontend): implement attendance confirmation interface [T-25]` [`3047afb`](https://github.com/JMedina255/sistema_web_p2p/commit/3047afb)
+- `feat(frontend): implement voluntary booking withdrawal interface [T-27]` [`fb7c051`](https://github.com/JMedina255/sistema_web_p2p/commit/fb7c051)
+- `feat(frontend): integrate student bookings navigation and lifecycle workflows (S5)` [`00fc4c3`](https://github.com/JMedina255/sistema_web_p2p/commit/00fc4c3)
+- `fix(backend): enforce authenticated booking ownership and authorization` [`b9db285`](https://github.com/JMedina255/sistema_web_p2p/commit/b9db285)
+- `feat(backend): implement attendance confirmation endpoint [T-26]` [`d13c0ab`](https://github.com/JMedina255/sistema_web_p2p/commit/d13c0ab)
+- `feat(backend): implement atomic booking cancellation and seat release [T-28]` [`dd7e3cc`](https://github.com/JMedina255/sistema_web_p2p/commit/dd7e3cc)
+- `style(backend): format booking endpoints and test files according to ruff` [`370766f`](https://github.com/JMedina255/sistema_web_p2p/commit/370766f)
+- `feat(backend): strengthen booking authorization and endpoint validation [T-26 / T-28]` [`9cceaaa`](https://github.com/JMedina255/sistema_web_p2p/commit/9cceaaa)
+- `fix(backend): enforce strict authorization guards, admin override and session checks [T-26 / T-28]` [`b85da9e`](https://github.com/JMedina255/sistema_web_p2p/commit/b85da9e)
+
+> [!NOTE]
+> **Estado Técnico de Cierre del Sprint 5 (02/11/2026):**  
+> El presente documento constituye la **Bitácora de Especificación Técnica, Desarrollo y Cierre del Sprint 5**, elaborada conforme a las directrices vinculantes **D-1 a D-10** de [`reglas_documentacion_diseño.md`](../../reglas_documentacion_diseño.md) y la planificación oficial de [`PLAN_SPRINTS_Y_TAREAS.md`](PLAN_SPRINTS_Y_TAREAS.md) (Tabla 5.6).  
+> La plataforma culmina el Sprint 5 con un estado de **100% de tareas ejecutadas, verificadas e integradas en CI**, alcanzando una suite consolidada de **452 pruebas automatizadas** (265 en frontend con Vitest y 187 en backend con Pytest, 0 fallos, 0 errores de linteo en ESLint/Ruff, coberturas de 83.25% en frontend y 90.40% en backend que superan el umbral del 70.0% estipulado en **RNF09**, y flujo de GitHub Actions aprobado con éxito en Run [`41524635510`](https://github.com/JMedina255/sistema_web_p2p/actions/runs/41524635510)).  
+> Para este incremento se consolida la ratificación anticipada de asistencia (**T-25 / T-26**), el desistimiento voluntario con restitución atómica de plazas (**T-27 / T-28**), el corte temporal estricto en $T-24\text{ h}$ (**RN-08 / RN-10**) y el endurecimiento de autorización de identidad en `POST /api/v1/bookings/reserve` impidiendo la inscripción a nombre de terceros sin privilegios de administrador (**RNF02**).
 
 ---
 
-## 1. Visión General y Alcance del Sprint 05
+## 1. Visión General y Alcance del Sprint 5
 
-El **Sprint 05** consolida la gestión operativa posterior a la reserva preliminar de cupos de mentoría, formalizando dos flujos normativos fundamentales de la plataforma P2P de la EPIS-UPT:
-1. **Ratificación Formal de Asistencia (**PB-014** / **RF13** / **CUS24** / catálogo `CUS04-U03`):** Permite a los estudiantes mentoreados consultar sus inscripciones vigentes y ratificar formalmente su asistencia antes de la ventana de corte de 24 horas previas al inicio de la sesión (**RN-08**). Las reservas ratificadas mutan a estado `CONFIRMADA`, registran `fecha_ratificacion` y constituyen el insumo cardinal para la evaluación de quórum mínimo institucional del 50% (**RN-09**) que se ejecutará en el Sprint 06.
-2. **Desistimiento Voluntario de Reserva (**PB-015** / **RF14** / **CUS17** / catálogo `CUS17-U01`):** Permite a los estudiantes anular oportunamente su plaza provisional antes del corte de 24 horas (**RN-10**), justificando el motivo en un diálogo modal interno accesible (WCAG 2.1 AA). La anulación muta la reserva a `CANCELADA_USUARIO` y restituye de forma atómica la vacante al aforo de la sesión (**RN-05**), garantizando una tasa de sobrecupo de exactamente $0.0\%$ (**RNF07**).
+El **Sprint 5** consolida la gestión operativa posterior a la reserva preliminar de cupos de mentoría, formalizando dos flujos normativos fundamentales de la plataforma P2P de la EPIS-UPT y una regla transversal de seguridad:
 
-A continuación, se detalla la matriz de actividades, responsables, esfuerzo planificado y alcance técnico del Sprint 05 de conformidad con [`PLAN_SPRINTS_Y_TAREAS.md`](PLAN_SPRINTS_Y_TAREAS.md):
+1. **Ratificación Formal de Asistencia (**PB-014** / **RF13** / **CUS24** / catálogo `CUS04-U03`):**  
+   Permite a los estudiantes mentoreados consultar sus inscripciones vigentes y ratificar formalmente su asistencia antes de la ventana de corte de 24 horas previas al inicio de la sesión (**RN-08**). Las reservas ratificadas mutan a estado `CONFIRMADA`, registran su `fecha_ratificacion` inmutable y constituyen el insumo cardinal para la evaluación de quórum mínimo institucional del 50% (**RN-09**) que se ejecutará en el Sprint 6.
+2. **Desistimiento Voluntario de Reserva y Liberación Atómica (**PB-015** / **RF14** / **CUS17** / catálogo `CUS17-U01`):**  
+   Permite a los estudiantes anular oportunamente su plaza provisional antes del corte de 24 horas (**RN-10**), justificando el motivo en un diálogo modal interno accesible (WCAG 2.1 AA / **RNF05**). La anulación muta la reserva a `CANCELADA_USUARIO` y restituye de forma atómica la vacante al aforo de la sesión (**RN-05**), garantizando una tasa de sobrecupo de exactamente $0.0\%$ (**RNF07**).
+3. **Endurecimiento de Seguridad y Aislamiento de Identidad (**RNF02**):**  
+   Prioridad técnica incorporada en la coordinación del equipo para blindar el endpoint `POST /api/v1/bookings/reserve`: ningún usuario no autenticado ni estudiante mentoreado regular puede formalizar reservas a nombre de un tercero (`estudiante_email` discordante), restringiendo la sustitución exclusivamente a administradores acreditados con claims verificadas en su token JWT.
 
-### Cuadro 1.1: Matriz de Tareas y Planificación Técnica del Sprint 05
+A continuación, se detalla la matriz de actividades, responsables, esfuerzo planificado y alcance técnico del Sprint 5 de conformidad con [`PLAN_SPRINTS_Y_TAREAS.md`](PLAN_SPRINTS_Y_TAREAS.md):
+
+### Cuadro 1.1: Matriz de Tareas y Planificación Técnica del Sprint 5
 
 | ID | Actividad Oficial | Responsable | Esfuerzo Planificado (h) | Estado de Entrega | Entregable y Criterio Verificable |
 | :---: | :--- | :---: | :---: | :---: | :--- |
-| **T-25** | Implementar interfaz de confirmación de asistencia. | Joan Medina | 1.0 h | **100% Concluido** | Componente `src/components/StudentBookingsView.tsx`, botón de ratificación, cálculo temporal de corte $T-24\text{ h}$ y 42 pruebas en Vitest. |
-| **T-26** | Desarrollar API de ratificación con control temporal. | Renzo Antayhua | 2.0 h | **100% Concluido** | Router `/api/v1/bookings/{id_reserva}/confirm`, validación de ventana $>24\text{ h}$, transición a `CONFIRMADA`, retorno `BookingDetailResponse` y suite en Pytest. |
-| **T-27** | Implementar opción de desistimiento en la interfaz. | Joan Medina | 1.0 h | **100% Concluido** | Diálogo modal interno accesible de desistimiento, selector de motivos `{ "motivo": "..." }`, mutación a `CANCELADA_USUARIO` y suite integrada en Vitest. |
-| **T-28** | Desarrollar anulación y liberación atómica de cupos. | Renzo Antayhua | 1.0 h | **100% Concluido** | Router `/api/v1/bookings/{id_reserva}/cancel`, restitución atómica de `cupos_disponibles` con cerrojo de concurrencia y suite multihilo en `test_bookings.py`. |
+| **Prioridad** | Endurecimiento de autorización en reserva de cupos. | Renzo Antayhua | — | **100% Concluido** ✅ | Extracción de claims JWT, rechazo 403 ante discordancia de email, mitigación de subcadenas 'admin' falsas y 11 pruebas dedicadas. |
+| **T-25** | Implementar interfaz de confirmación de asistencia. | Joan Medina | 1.0 h | **100% Concluido** ✅ | Componente `StudentBookingsView.tsx`, cálculo temporal reactivo a $T-24\text{ h}$, modal accesible de ratificación y 42 pruebas en Vitest. |
+| **T-26** | Desarrollar API de ratificación con control temporal. | Renzo Antayhua | 2.0 h | **100% Concluido** ✅ | Router `/api/v1/bookings/{id_reserva}/confirm`, validación temporal en servidor $>24\text{ h}$, transición a `CONFIRMADA` y retorno `BookingDetailResponse`. |
+| **T-27** | Implementar opción de desistimiento en la interfaz. | Joan Medina | 1.0 h | **100% Concluido** ✅ | Diálogo modal accesible WCAG 2.1 AA, selector de motivos `{ "motivo": "..." }`, mutación a `CANCELADA_USUARIO` y refresh del feed. |
+| **T-28** | Desarrollar anulación y liberación atómica de cupos. | Renzo Antayhua | 1.0 h | **100% Concluido** ✅ | Router `/api/v1/bookings/{id_reserva}/cancel`, restitución atómica de `cupos_disponibles` con cerrojo de concurrencia y suite multihilo (RNF07). |
 
-Fuente: Elaboración propia a partir del plan maestro [`PLAN_SPRINTS_Y_TAREAS.md`](PLAN_SPRINTS_Y_TAREAS.md), apartado 4.5.
+Fuente: Elaboración propia a partir de `docs/sprints/PLAN_SPRINTS_Y_TAREAS.md` (Tabla 5.6).
 
-El Cuadro 1.1 demuestra que las 5.0 horas académicas presupuestadas fueron cumplidas íntegramente, concluyendo las cuatro tareas comprometidas.
-
----
-
-## 2. Historial de Commits y Registro Cronológico de Integración
-
-A continuación, se presenta la secuencia oficial de commits que conforman el incremento del Sprint 05 en el repositorio:
-
-### Cuadro 2.1: Historial de Commits del Sprint 05
-
-| Commit SHA | Fecha y Hora (UTC-5) | Autor | Mensaje Canónico del Commit | Tarea / Hito |
-| :---: | :---: | :---: | :--- | :---: |
-| [`0a1f1f7`](https://github.com/JMedina255/sistema_web_p2p/commit/0a1f1f7) | 02/11/2026 09:15 | Joan Medina | `fix(frontend): enforce secure service mode resolution and remove hardcoded student identity fallback (audit B.1/B.2)` | Auditoría S5 |
-| [`017f65a`](https://github.com/JMedina255/sistema_web_p2p/commit/017f65a) | 02/11/2026 10:04 | Joan Medina | `feat(frontend): prepare attendance confirmation and withdrawal service contracts (S5)` | Contratos S5 |
-| [`3047afb`](https://github.com/JMedina255/sistema_web_p2p/commit/3047afb) | 02/11/2026 10:48 | Joan Medina | `feat(frontend): implement attendance confirmation interface (T-25)` | **T-25** |
-| [`fb7c051`](https://github.com/JMedina255/sistema_web_p2p/commit/fb7c051) | 02/11/2026 11:22 | Joan Medina | `feat(frontend): implement voluntary booking withdrawal interface (T-27)` | **T-27** |
-| [`00fc4c3`](https://github.com/JMedina255/sistema_web_p2p/commit/00fc4c3) | 02/11/2026 11:50 | Joan Medina | `feat(frontend): integrate student bookings navigation and lifecycle workflows (S5)` | Integración FE |
-| [`b9db285`](https://github.com/JMedina255/sistema_web_p2p/commit/b9db285) | 02/11/2026 12:10 | Renzo Antayhua | `fix(backend): enforce authenticated booking ownership and authorization` | Seguridad BE |
-| [`d13c0ab`](https://github.com/JMedina255/sistema_web_p2p/commit/d13c0ab) | 02/11/2026 12:45 | Renzo Antayhua | `feat(backend): implement attendance confirmation endpoint (T-26)` | **T-26** |
-| [`dd7e3cc`](https://github.com/JMedina255/sistema_web_p2p/commit/dd7e3cc) | 02/11/2026 13:18 | Renzo Antayhua | `feat(backend): implement atomic booking cancellation and seat release (T-28)` | **T-28** |
-| [`3568118`](https://github.com/JMedina255/sistema_web_p2p/commit/3568118) | 02/11/2026 13:35 | Joan / Renzo | `merge: integrate feat/sprint-05-backend into integration/sprint-05` | Integración Local |
-| [`370766f`](https://github.com/JMedina255/sistema_web_p2p/commit/370766f) | 02/11/2026 13:52 | Renzo Antayhua | `style(backend): format booking endpoints and test files according to ruff` | Calidad de Código |
-| [`1ed8a04`](https://github.com/JMedina255/sistema_web_p2p/commit/1ed8a04) | 02/11/2026 14:10 | Joan / Renzo | `Merge pull request #6 from JMedina255/integration/sprint-05` | Cierre Sprint 05 |
-
-Fuente: Registro Git del repositorio oficial.
-
-El Cuadro 2.1 documenta la secuencia atómica de construcción del Sprint 05, garantizando la trazabilidad histórica de cada componente y corrección de software.
+El Cuadro 1.1 demuestra que las 5.0 horas académicas presupuestadas fueron ejecutadas íntegramente (2.0 h para Joan Medina y 3.0 h para Renzo Antayhua), logrando la finalización de las cuatro tareas maestras y el blindaje prioritario de seguridad.
 
 ---
 
-## 3. Métricas de Calidad y Verificación Automatizada
-
-A continuación, se certifican las métricas de aseguramiento de la calidad alcanzadas al cierre de la iteración:
-
-### Cuadro 3.1: Resumen de Calidad y Cobertura Independiente (Sprint 05)
-
-| Métrica / Criterio | Frontend (React / Vitest) | Backend (FastAPI / Pytest) | Meta Normativa RNF09 | Estado de Cumplimiento |
-| :--- | :---: | :---: | :---: | :---: |
-| **Pruebas Automatizadas** | **265 aprobadas (0 fallos)** | **178 aprobadas (0 fallos)** | 100% de éxito | **Cumplido (443 totales)** |
-| **Cobertura de Líneas** | **83.25%** | **90.40%** | $\ge 70.0\%$ | **Superado con holgura** |
-| **Linteo de Código** | ESLint 9 (0 errores / 0 adv.) | Ruff 0.8.0 (0 defectos) | 0 errores | **Cumplido** |
-| **Compilación Tipada** | TypeScript (`tsc -b`, 0 err) | Pydantic v2 (tipado estricto)| 100% estricto | **Cumplido** |
-| **Tasa de Sobrecupo (RNF07)**| N/A | **0.00%** (20 hilos concurrentes) | Exactamente 0.0% | **Cumplido** |
-| **Integración Continua** | GitHub Actions (`ci.yml`) | GitHub Actions (`ci.yml`) | Workflow verde | **Cumplido** |
-| **Persistencia en Pruebas** | Mocks y jsdom | SQLite (cerrojo multihilo) | Pendiente PostgreSQL | **Delimitado** |
-
-Fuente: Reportes de ejecución de Vitest, Pytest y GitHub Actions en commit `1ed8a04`.
-
-El Cuadro 3.1 certifica que el software satisface los requerimientos no funcionales de calidad y mantenibilidad, manteniendo ambas suites libres de advertencias o errores.
+## 2. Registro y Especificación de Frontend (Joan Medina)
 
 ---
 
-## 4. Documentos Maestros Relacionados
+### 2.1. T-25 — Interfaz de Confirmación de Asistencia (`StudentBookingsView.tsx`)
 
-Para un análisis detallado, consulte los siguientes documentos técnicos elaborados en esta entrega:
-- [Informe Académico Canónico (G03)](../diseño/G03_EPIS_Informe_Sprint_05.md) — Informe institucional formal de 11 secciones.
-- [Informe General Técnico de Cierre](../diseño/INFORME_GENERAL_SPRINT_05.md) — Memoria técnica exhaustiva de diseño, contratos REST y seguridad.
-- [Catálogo de Evidencia de Pruebas](../diseño/EVIDENCIA_PRUEBAS_SPRINT_05.md) — Inventario de 443 pruebas y comandos de reproducción.
-- [Mapa Maestro de Trazabilidad](sprint-05/02-trazabilidad/MAPA_FUENTES_SPRINT_05.md) — Matriz de trazabilidad bidireccional completa.
-- [Propuesta de Diapositivas Canva](sprint-05/04-presentacion/PROPUESTA_DIAPOSITIVAS_CANVA.md) — Guion estructurado de 14 diapositivas para sustentación.
+- **Responsable:** Joan Cristian Medina Quispe.
+- **Esfuerzo Planificado:** 1.0 hora.
+- **Estado Técnico:** **IMPLEMENTADO Y VERIFICADO ✅**.
+- **Trazabilidad:** PB-014, RF13, CUS24, RN-08, RN-09, RNF05.
+
+#### A. Arquitectura y Capacidades de la Vista de Reservas
+El componente interactivo [`StudentBookingsView.tsx`](file:///d:/sistema_web_p2p/aplicacion/frontend/src/components/StudentBookingsView.tsx) implementa el centro de gestión para el estudiante mentoreado con las siguientes especificaciones ergonómicas y accesibles:
+
+1. **Consulta Segura de Reservas Personales:**
+   - Consume `bookingService.getMyReservations()`, enviando automáticamente el token Bearer JWT desde `authService`.
+   - Si no existe sesión activa, despliega un estado informativo seguro con botón de redirección al acceso institucional (`LoginOtpView`).
+2. **Cálculo Temporal en Tiempo Real (Regla RN-08):**
+   - Evalúa dinámicamente la diferencia en horas entre la marca temporal actual y el inicio de la sesión programada:
+     $$\Delta t = \frac{\text{fecha\_inicio} - \text{ahora}}{3\,600\,000 \text{ ms}}$$
+   - Si $\Delta t > 24.0\text{ h}$, el botón *"Confirmar Asistencia"* permanece habilitado y muestra el tiempo restante con distintivo de aviso.
+   - Si $\Delta t \le 24.0\text{ h}$, el botón se desactiva en el DOM (`disabled`), exhibiendo la etiqueta informativa *"Plazo cerrado (corte T-24h)"*, evitando invocaciones infructuosas a la red.
+3. **Diálogo Modal Accesible de Ratificación Pedagógica:**
+   - Cumple con WCAG 2.1 AA (`role="dialog"`, `aria-modal="true"`, foco atrapado y soporte a tecla `Escape`).
+   - Presenta el recordatorio formativo del compromiso asumido y el cómputo institucional para el quórum (**RN-09**).
+   - Bloquea el botón de envío y despliega un spinner para prevenir envíos duplicados por pulsación múltiple (doble click).
+4. **Actualización Reactiva de Estados:**
+   - Ante la respuesta HTTP 200 de la API, actualiza el estado local de la reserva a `CONFIRMADA`, renderiza la fecha de ratificación y modifica la insignia visual a verde esmeralda.
+
+---
+
+### 2.2. T-27 — Interfaz de Desistimiento Voluntario (`StudentBookingsView.tsx` y `bookingService.ts`)
+
+- **Responsable:** Joan Cristian Medina Quispe.
+- **Esfuerzo Planificado:** 1.0 hora.
+- **Estado Técnico:** **IMPLEMENTADO Y VERIFICADO ✅**.
+- **Trazabilidad:** PB-015, RF14, CUS17, RN-08, RN-10, RNF05, RNF07.
+
+#### A. Mecánica Operativa del Desistimiento
+1. **Acceso al Desistimiento Antes del Corte (RN-10):**
+   - El botón *"Desistir Reserva"* se encuentra disponible únicamente mientras la reserva esté en estado `PENDIENTE_CONFIRMACION` y $\Delta t > 24.0\text{ h}$.
+2. **Formulario de Justificación Obligatoria:**
+   - Despliega un diálogo modal accesible solicitando seleccionar o redactar el motivo de cancelación (`{ "motivo": "..." }`), con opciones estandarizadas: cruce de horario académico, imprevisto de salud, estudio personal o motivo libre.
+3. **Ejecución y Feedback Inmediato:**
+   - Invoca `bookingService.cancelBooking(idReserva, motivo)`.
+   - Transiciona reactivamente la tarjeta a estado `CANCELADA_USUARIO`, inhabilita acciones posteriores y notifica mediante banner de accesibilidad `aria-live="polite"` la liberación exitosa de la vacante para la comunidad académica.
+
+---
+
+## 3. Catálogo de Pruebas y Evidencias de Frontend (Joan Medina)
+
+Para garantizar la cobertura del 100% de los flujos de cliente, se ejecutaron **265 pruebas automatizadas en Vitest** distribuidas en 21 suites de prueba, con una cobertura de líneas del **83.25%** en frontend:
+
+### Cuadro 3.1: Matriz de Trazabilidad de Pruebas Automatizadas de Frontend (Sprint 5)
+
+| Caso de Prueba / Suite | Nivel | Escenario Evaluado | Resultado Observado | Estado |
+| :--- | :---: | :--- | :--- | :---: |
+| `StudentBookingsView.test.tsx` (1) | Componente | Renderizado de reservas activas con datos de sesión y mentor. | Renderiza códigos canónicos, asignaturas y fechas. | ✅ Aprobado (42/42) |
+| `StudentBookingsView.test.tsx` (2) | Componente | Cálculo temporal RN-08: deshabilitación a $\Delta t \le 24\text{ h}$. | Botón inactivo con leyenda normativa clara. | ✅ Aprobado |
+| `StudentBookingsView.test.tsx` (3) | Componente | Diálogo accesible de ratificación con captura de foco. | Atributos ARIA presentes, cierre con Escape y Cancelar. | ✅ Aprobado |
+| `StudentBookingsView.test.tsx` (4) | Componente | Diálogo accesible de desistimiento con motivo justificado. | Envía payload JSON `{ "motivo": "..." }` a la API. | ✅ Aprobado |
+| `StudentBookingsView.test.tsx` (5) | Componente | Prevención de doble clic durante la confirmación asíncrona. | Botón deshabilitado durante la petición a la red. | ✅ Aprobado |
+| `bookingService.test.ts` | Servicio | Consumo de `/confirm` y `/cancel` con token Bearer JWT. | Serialización correcta de rutas y control de errores. | ✅ Aprobado (42/42) |
+| `bookingService.test.ts` (Sec) | Seguridad | Prohibición absoluta de mock en entornos de producción (Auditoría B.1). | Dispara excepción de seguridad ante modo inseguro. | ✅ Aprobado |
+| `StudentBookingsIntegration.test.tsx` | Integración E2E | Flujo integrado: reserva desde feed, confirmación y desistimiento. | Ciclo completo ejecutado sin errores en el DOM. | ✅ Aprobado (17/17) |
+
+Fuente: Elaboración propia a partir de reportes de ejecución de Vitest 2.1.8 en `aplicacion/frontend`.
+
+---
+
+## 4. Registro y Especificación de Backend, Persistencia y Seguridad (Renzo Antayhua)
+
+---
+
+### 4.1. Prioridad de Seguridad: Corrección de Autorización en `POST /api/v1/bookings/reserve`
+
+- **Responsable:** Renzo Antonio Antayhua Mamani.
+- **Estado Técnico:** **IMPLEMENTADO, AUDITADO Y VERIFICADO ✅**.
+- **Trazabilidad:** RNF02 (Control de acceso y aislamiento de identidad), RN-05.
+
+#### A. Aislamiento Estricto de Identidad y Mitigación de Vulnerabilidades
+Para atender la instrucción de coordinación y prevenir que cualquier participante reserve vacantes a nombre de otro estudiante, se aplicó un esquema estricto en [`bookings.py`](file:///d:/sistema_web_p2p/aplicacion/backend/app/api/v1/endpoints/bookings.py) y [`booking_service.py`](file:///d:/sistema_web_p2p/aplicacion/backend/app/services/booking_service.py):
+
+1. **Extracción y Validación de Roles en JWT (`_extract_caller_and_admin_status`):**
+   ```python
+   def _extract_caller_and_admin_status(
+       authorization: str | None,
+       explicit_email: str | None = None,
+   ) -> tuple[str, bool]:
+       caller_email = _resolve_authenticated_email(
+           authorization, explicit_email=explicit_email, allow_admin_override=True
+       )
+       is_admin = False
+       if authorization and authorization.startswith("Bearer "):
+           token = authorization.split(" ", 1)[1].strip()
+           decoded = decode_access_token(token)
+           if decoded and "administrador" in decoded.get("roles", []):
+               is_admin = True
+       return caller_email, is_admin
+   ```
+2. **Guarda de Propiedad en `BookingService.reserve_seat`:**
+   - Se compara `caller_clean != clean_email`.
+   - Si no coinciden y el llamador no es administrador (`is_admin=False`), el backend aborta la transacción y retorna inmediatamente `HTTP 403 Forbidden`:
+     ```json
+     { "detail": "FORBIDDEN: No tiene autorización para reservar a nombre de otro estudiante." }
+     ```
+3. **Mitigación de Subcadenas Fraudulentas:**
+   - La inclusión de palabras como "admin" en el correo del mentoreado (ej. `admin_estudiante@upt.pe`) **no confiere privilegios de administración**; la única fuente de autorización son las claims verificadas criptográficamente dentro del token JWT emitido por la plataforma.
+4. **Rechazo en Entornos de Producción:**
+   - En modo producción (`APP_ENV=production`), cualquier solicitud sin cabecera `Authorization: Bearer <token>` es rechazada de manera concluyente con `HTTP 401 Unauthorized`.
+
+---
+
+### 4.2. T-26 — API de Ratificación con Control Temporal en $T-24\text{ h}$ (`POST /api/v1/bookings/{id_reserva}/confirm`)
+
+- **Responsable:** Renzo Antonio Antayhua Mamani.
+- **Esfuerzo Planificado:** 2.0 horas.
+- **Estado Técnico:** **IMPLEMENTADO Y VERIFICADO ✅**.
+- **Trazabilidad:** PB-014, RF13, CUS24, RN-08, RN-09.
+
+#### A. Reglas de Validación Temporal y Transición
+1. **Validación de Identificador:** Exige `id_reserva > 0`; rechaza valores nulos, negativos o cero con `HTTP 400 Bad Request` (`"VALIDATION_ERROR"`).
+2. **Autorización y Titularidad:** Requiere sesión activa (`HTTP 401`) y valida que el `caller_email` coincida con `reserva.estudiante_email` o posea rol `administrador` (`HTTP 403 Forbidden` ante usurpación).
+3. **Cálculo de Antelación contra Servidor (RN-08):**
+   - La validación temporal se evalúa estrictamente contra el reloj del servidor / BD en UTC (`datetime.now(UTC)`):
+     $$\text{horas\_restantes} = \frac{\text{fecha\_inicio} - \text{ahora}}{3600 \text{ s}}$$
+   - Si $\text{horas\_restantes} < 24.0$, la ventana está cerrada y el backend rechaza la ratificación con `HTTP 400 Bad Request` (`"WINDOW_CLOSED_T24H"`).
+4. **Persistencia Atómica:** La reserva muta su estado a `CONFIRMADA` y asienta el timestamp UTC en `fecha_ratificacion`, retornando el contrato `BookingDetailResponse`.
+
+---
+
+### 4.3. T-28 — API de Desistimiento y Liberación Atómica de Cupos (`POST /api/v1/bookings/{id_reserva}/cancel`)
+
+- **Responsable:** Renzo Antonio Antayhua Mamani.
+- **Esfuerzo Planificado:** 1.0 hora.
+- **Estado Técnico:** **IMPLEMENTADO Y VERIFICADO ✅**.
+- **Trazabilidad:** PB-015, RF14, CUS17, RN-08, RN-10, RNF07.
+
+#### A. Restitución Atómica de Aforos
+1. **Control de Ventana Temporal (RN-10):** Permite el desistimiento voluntario si faltan más de 24 horas para el inicio de la clase.
+2. **Mutación de Estado y Registro del Motivo:** El estado pasa a `CANCELADA_USUARIO` y se almacena la justificación enviada en `motivo_cancelacion`.
+3. **Liberación Concurrente de Vacantes (RN-05 / RNF07):**
+   - Bajo cerrojo transaccional, incrementa atómicamente la disponibilidad de cupos en la sesión vinculada sin rebasar el aforo original:
+     $$\text{cupos\_disponibles} = \min(\text{sesion.cupos\_disponibles} + 1, \text{sesion.cupos\_totales})$$
+   - Se garantiza $0.0\%$ de error de sobrecupo y disponibilidad inmediata de la vacante para la cartelera del feed.
+
+---
+
+### 4.4. Diccionario de Datos Físico — Entidad `reservas_cupo` (Actualizado Sprint 5 / Regla D-4)
+
+A continuación, se documenta la estructura de la entidad `reservas_cupo` gobernando las mutaciones del Sprint 5:
+
+### Cuadro 4.1: Diccionario Físico de Datos — Tabla `reservas_cupo` (D-4)
+
+| Nombre Columna | Tipo PostgreSQL | Nulo | Restricción / Default | Justificación Técnica del Sprint 5 |
+| :--- | :--- | :---: | :--- | :--- |
+| `id_reserva` | `INTEGER` | No | `SERIAL PRIMARY KEY` | Identificador unívoco físico indexado. |
+| `codigo_reserva` | `VARCHAR(20)` | No | `UNIQUE` | Código canónico `RES-XXXX` para trazabilidad del estudiante. |
+| `id_sesion` | `INTEGER` | No | `REFERENCES sesiones_mentoria(id_sesion)` | Sesión formativa donde se formaliza la plaza. |
+| `estudiante_email` | `VARCHAR(255)` | No | `REFERENCES usuarios(email)` | Identidad institucional del alumno (@upt.pe). |
+| `estado` | `VARCHAR(30)` | No | `DEFAULT 'PENDIENTE_CONFIRMACION'` | Estados: `PENDIENTE_CONFIRMACION`, `CONFIRMADA`, `CANCELADA_USUARIO`, etc. |
+| `fecha_reserva` | `TIMESTAMPTZ` | No | `DEFAULT now()` | Marca temporal inmutable de registro. |
+| `fecha_ratificacion`| `TIMESTAMPTZ` | Sí | `NULL` | Sellado temporal obligatorio en ratificación formal (**T-26 / RN-08**). |
+| `motivo_cancelacion`| `TEXT` | Sí | `NULL` | Justificación técnica del desistimiento voluntario (**T-28 / RN-10**). |
+| `ticket_hash` | `VARCHAR(64)` | Sí | `NULL` | Hash SHA-256 para validación de asistencia en Sprint 6. |
+
+Fuente: Elaboración propia a partir de `app/models/booking.py`.
+
+---
+
+### 4.5. Políticas Row Level Security (RLS) en PostgreSQL para Ratificación y Desistimiento
+
+```sql
+-- 1. Política de Modificación: Solo el titular puede ratificar o desistir de su reserva
+CREATE POLICY rls_reservas_ratificacion_cancelacion ON reservas_cupo
+  FOR UPDATE TO authenticated
+  USING (
+    auth.jwt() ->> 'email' = estudiante_email OR
+    auth.jwt() ->> 'role' = 'administrador'
+  )
+  WITH CHECK (
+    auth.jwt() ->> 'email' = estudiante_email OR
+    auth.jwt() ->> 'role' = 'administrador'
+  );
+```
+
+---
+
+### 4.6. Especificación de Contratos de API REST (Regla D-3)
+
+A continuación, se documentan los contratos formales implementados para el Sprint 5:
+
+### Cuadro 4.2: Contratos de Endpoints REST del Sprint 5 (D-3)
+
+| Método | Ruta Versionada | Encabezados / Parámetros | Códigos HTTP | Descripción Técnica y Reglas |
+| :---: | :--- | :--- | :---: | :--- |
+| `POST` | `/api/v1/bookings/reserve` | Header: `Bearer JWT`<br>Body: `BookingCreatePayload` | `201 Created`<br>`400 Bad Request`<br>`401 Unauthorized`<br>`403 Forbidden`<br>`409 Conflict` | Formalización atómica de reserva provisional. Valida titularidad estricta (403 si intenta suplantar) y aforo. |
+| `POST` | `/api/v1/bookings/{id_reserva}/confirm` | Path: `id_reserva`<br>Header: `Bearer JWT` | `200 OK`<br>`400 Bad Request`<br>`401 Unauthorized`<br>`403 Forbidden`<br>`404 Not Found` | Ratificación formal de asistencia. Exige $T > 24\text{ h}$ (RN-08); transiciona a `CONFIRMADA`. |
+| `POST` | `/api/v1/bookings/{id_reserva}/cancel` | Path: `id_reserva`<br>Header: `Bearer JWT`<br>Body: `BookingCancelPayload` | `200 OK`<br>`400 Bad Request`<br>`401 Unauthorized`<br>`403 Forbidden`<br>`404 Not Found` | Desistimiento voluntario y liberación atómica de vacante. Exige $T > 24\text{ h}$ (RN-10); pasa a `CANCELADA_USUARIO`. |
+| `GET` | `/api/v1/bookings/my-reservations` | Header: `Bearer JWT` | `200 OK`<br>`401 Unauthorized` | Nómina de reservas registradas para el estudiante autenticado, con datos de inicio de sesión. |
+
+Fuente: Elaboración propia a partir de `app/api/v1/endpoints/bookings.py`.
+
+##### Ejemplo de Payload — Desistimiento Voluntario (`POST /api/v1/bookings/42/cancel`):
+```json
+{
+  "motivo": "Cruce de horario con examen parcial de Base de Datos"
+}
+```
+
+##### Ejemplo de Payload — Respuesta de Ratificación Exitosa (HTTP 200 OK):
+```json
+{
+  "id_reserva": 42,
+  "codigo_reserva": "RES-8721",
+  "id_sesion": 14,
+  "estudiante_email": "2022074255@upt.pe",
+  "estado": "CONFIRMADA",
+  "fecha_reserva": "2026-10-31T09:30:00Z",
+  "fecha_ratificacion": "2026-11-02T10:15:22Z",
+  "motivo_cancelacion": null,
+  "ticket_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "nombre_asignatura": "Algoritmos y Estructuras de Datos",
+  "nombre_tema": "Grafos y Árboles B+",
+  "fecha_inicio": "2026-11-04T16:00:00Z",
+  "duracion_minutos": 90,
+  "modalidad": "presencial",
+  "espacio_asignado": "Laboratorio 101 - Pabellón G (EPIS)",
+  "mentor_email": "2022073504@upt.pe",
+  "created_at": "2026-10-31T09:30:00Z",
+  "updated_at": "2026-11-02T10:15:22Z"
+}
+```
+
+---
+
+### 4.7. Diagramas de Arquitectura y Comportamiento en PlantUML
+
+#### A. Modelo Entidad-Relación — Sprint 5
+
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundCorner 8
+skinparam linetype ortho
+
+title Modelo Entidad-Relación — Sprint 5: Ratificación y Desistimiento (EPIS-UPT)
+
+entity "usuarios" as USR {
+    * email : VARCHAR(255) <<PK>>
+    --
+    rol_principal : VARCHAR(20)
+    created_at : TIMESTAMPTZ
+}
+
+entity "sesiones_mentoria" as SES {
+    * id_sesion : INTEGER <<PK>>
+    --
+    * codigo_sesion : VARCHAR(20) <<Unique>>
+    * mentor_email : VARCHAR(255) <<FK>>
+    * id_asignatura : INTEGER <<FK>>
+    * id_tema : INTEGER <<FK>>
+    * fecha_inicio : TIMESTAMPTZ
+    * cupos_disponibles : INTEGER
+    * cupos_totales : INTEGER <<10 o 20 (RN-05)>>
+    * estado : VARCHAR(30)
+}
+
+entity "reservas_cupo" as RES {
+    * id_reserva : INTEGER <<PK>>
+    --
+    * codigo_reserva : VARCHAR(20) <<Unique>>
+    * id_sesion : INTEGER <<FK, B-Tree>>
+    * estudiante_email : VARCHAR(255) <<FK, B-Tree>>
+    * estado : VARCHAR(30) <<CHECK>>
+    * fecha_reserva : TIMESTAMPTZ
+    fecha_ratificacion : TIMESTAMPTZ
+    motivo_cancelacion : TEXT
+    ticket_hash : VARCHAR(64)
+    updated_at : TIMESTAMPTZ
+}
+
+USR ||..o{ SES : "dicta como mentor (RN-03)"
+USR ||..o{ RES : "inscribe cupo como mentoreado"
+SES ||..o{ RES : "aloja hasta aforo_maximo (RN-05 / RNF07)"
+@enduml
+```
+
+#### B. Diagrama de Casos de Uso — Sprint 5
+
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam defaultFontName Arial
+left to right direction
+
+actor "Estudiante Mentoreado\n(Ciclo I-IV)" as Mentee #DCFCE7
+actor "Administrador EPIS\n(Dirección / Cátedra)" as Admin #FEF08A
+actor "Sistema P2P\n(Demonio Cron T-24h)" as System #FEE2E2
+
+rectangle "Sistema Web P2P — Casos de Uso Sprint 5" {
+    usecase "CUS24: Confirmar Asistencia Anticipada\n(Ventana T-24h / RN-08)" as UC_Confirm
+    usecase "CUS17: Desistir de Reserva Voluntariamente\n(Liberación Atómica / RN-10)" as UC_Cancel
+    usecase "CUS04: Reservar Cupo con Aislamiento\n(Anti-suplantación / RNF02)" as UC_Reserve
+    usecase "CUS23: Evaluar Corte de Antelación y Quórum\n(Cómputo en T-24h / RN-09)" as UC_Quorum
+}
+
+Mentee --> UC_Confirm
+Mentee --> UC_Cancel
+Mentee --> UC_Reserve
+Admin --> UC_Confirm : override administrativo
+Admin --> UC_Cancel : override administrativo
+Admin --> UC_Reserve : inscripción especial
+System --> UC_Quorum
+
+UC_Confirm ..> UC_Reserve : <<precede>> (estado PENDIENTE_CONFIRMACION)
+UC_Cancel ..> UC_Reserve : <<cancela>> (libera cupo en aforo)
+UC_Quorum ..> UC_Confirm : <<totaliza>> (solo reservas ratificadas)
+@enduml
+```
+
+#### C. Máquina de Estados de la Entidad `ReservaCupo` (Regla D-7)
+
+```plantuml
+@startuml
+title Ciclo de Vida y Transiciones de la Entidad ReservaCupo (Sprint 5)
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 8
+
+[*] --> PENDIENTE_CONFIRMACION : 1. Reserva provisional creada\n[Cupo libre en aforo RN-05]
+
+PENDIENTE_CONFIRMACION --> CONFIRMADA : 2. Ratificación voluntaria\n[now() < fecha_inicio - 24h (RN-08)]
+PENDIENTE_CONFIRMACION --> CANCELADA_USUARIO : 3. Desistimiento voluntario\n[now() < fecha_inicio - 24h (RN-10) -> libera cupo]
+PENDIENTE_CONFIRMACION --> NO_CONFIRMADA : 4. Corte automático T-24h\n[now() >= fecha_inicio - 24h sin ratificar]
+
+CONFIRMADA --> CANCELADA_USUARIO : 5. Desistimiento extraordinario\n[Antes del inicio con justificación]
+CONFIRMADA --> CANCELADA_SISTEMA : 6. Falta de quórum mínimo (Sprint 6)\n[Mentor resuelve cancelar (CUS07)]
+CONFIRMADA --> ASISTIDA : 7. Asistencia registrada (Sprint 6)\n[Mentor cierra bitácora CUS08]
+CONFIRMADA --> INASISTENCIA : 8. Falta constatada (Sprint 6)\n[Mentor marca inasistencia]
+
+CANCELADA_USUARIO --> [*]
+NO_CONFIRMADA --> [*]
+CANCELADA_SISTEMA --> [*]
+ASISTIDA --> [*]
+INASISTENCIA --> [*]
+@enduml
+```
+
+#### D. Diagrama de Secuencia de Ratificación y Desistimiento (Regla D-5)
+
+```plantuml
+@startuml
+autonumber
+skinparam style strictuml
+skinparam BoxPadding 10
+skinparam ParticipantPadding 10
+skinparam defaultFontName Arial
+
+box "Capa de Presentación (React SPA)" #E8EEF5
+participant "StudentBookingsView\n(React Component)" as UI
+participant "bookingService\n(TypeScript API Client)" as FEService
+end box
+
+box "Capa de API & Dominio (FastAPI)" #FAF5E8
+participant "BookingsRouter\n(/api/v1/bookings)" as Router
+participant "BookingService\n(Service Coordinator)" as BEService
+end box
+
+box "Persistencia (PostgreSQL / Supabase)" #F5E8E8
+database "reservas_cupo\n(PostgreSQL Table)" as DBReserva
+database "sesiones_mentoria\n(PostgreSQL Table)" as DBSesion
+end box
+
+== Flujo de Ratificación de Asistencia (T-25 / T-26 / CUS24 / RN-08) ==
+UI -> FEService : confirmAttendance(bookingId)
+FEService -> Router : POST /api/v1/bookings/{id}/confirm [Bearer JWT]
+Router -> BEService : confirm_attendance(db, id_reserva, caller_email, is_admin)
+
+BEService -> DBReserva : SELECT * FROM reservas_cupo WHERE id_reserva = :id
+DBReserva --> BEService : Registro de reserva
+
+BEService -> BEService : Validar titularidad (caller == estudiante_email or is_admin)\nValidar ventana temporal (fecha_inicio - now >= 24h)
+
+alt Ventana válida (>= 24h) y titular auténtico
+    BEService -> DBReserva : UPDATE reservas_cupo SET estado = 'CONFIRMADA', fecha_ratificacion = now()
+    DBReserva --> BEService : Actualización confirmada
+    BEService --> Router : BookingDetailResponse (HTTP 200 OK)
+    Router --> FEService : 200 OK JSON
+    FEService --> UI : Actualizar badge a CONFIRMADA y mostrar fecha
+else Ventana vencida (< 24h)
+    BEService --> Router : HTTP 400 Bad Request (WINDOW_CLOSED_T24H)
+    Router --> FEService : 400 Bad Request JSON
+    FEService --> UI : Notificar cierre de plazo de ratificación
+end
+
+== Flujo de Desistimiento Voluntario y Liberación de Cupo (T-27 / T-28 / CUS17 / RN-10) ==
+UI -> FEService : cancelBooking(bookingId, motivo)
+FEService -> Router : POST /api/v1/bookings/{id}/cancel [Bearer JWT, motivo]
+Router -> BEService : cancel_reservation(db, id_reserva, payload, caller_email, is_admin)
+
+group Transacción ACID de Liberación de Cupo
+    BEService -> DBReserva : SELECT * FROM reservas_cupo WHERE id_reserva = :id FOR UPDATE
+    DBReserva --> BEService : Registro de reserva
+    
+    BEService -> BEService : Validar titularidad y ventana temporal (>= 24h)
+    
+    BEService -> DBReserva : UPDATE reservas_cupo SET estado = 'CANCELADA_USUARIO', motivo_cancelacion = :motivo
+    BEService -> DBSesion : UPDATE sesiones_mentoria SET cupos_disponibles = cupos_disponibles + 1 WHERE id_sesion = :id_sesion
+    DBSesion --> BEService : Cupo restituido atómicamente
+    BEService -> DBReserva : Commit de transacción
+    BEService --> Router : BookingDetailResponse (HTTP 200 OK)
+end
+Router --> FEService : 200 OK JSON
+FEService --> UI : Actualizar badge a CANCELADA_USUARIO y refrescar aforo disponible
+@enduml
+```
+
+---
+
+### 4.8. Mapeo de Transformación de Datos entre Capas Arquitectónicas (Regla D-8.1)
+
+### Cuadro 4.3: Mapeo de Atributos del Sprint 5 entre Capas Arquitectónicas (D-8.1)
+
+| Columna PostgreSQL | Atributo SQLAlchemy | Campo Pydantic | JSON API | Interface TypeScript | Estado React |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `id_reserva` (INTEGER) | `id_reserva: int` | `id_reserva: int` | `"id_reserva": 42` | `bookingId: number` | `reserva.id_reserva` |
+| `codigo_reserva` (VARCHAR) | `codigo_reserva: str` | `codigo_reserva: str` | `"codigo_reserva": "RES-8721"` | `bookingCode: string` | `reserva.codigo_reserva` |
+| `estado` (VARCHAR) | `estado: str` | `estado: str` | `"estado": "CONFIRMADA"` | `status: BookingStatus` | `reserva.estado` |
+| `fecha_ratificacion` (TIMESTAMPTZ) | `fecha_ratificacion: datetime?` | `fecha_ratificacion: datetime?`| `"fecha_ratificacion": "..."` | `confirmedAt?: string` | `reserva.fecha_ratificacion` |
+| `motivo_cancelacion` (TEXT) | `motivo_cancelacion: str?` | `motivo_cancelacion: str?` | `"motivo_cancelacion": "..."` | `cancellationReason?: string` | `cancelReasonText` |
+| `ticket_hash` (VARCHAR) | `ticket_hash: str?` | `ticket_hash: str?` | `"ticket_hash": "..."` | `ticketHash?: string` | `reserva.ticket_hash` |
+
+Fuente: Elaboración propia de conformidad con la Regla D-8.1.
+
+---
+
+### 4.9. Catálogo Centralizado de Códigos de Error del Sprint 5 (Regla D-8.2)
+
+### Cuadro 4.4: Catálogo Centralizado de Códigos de Error (Sprint 5) (D-8.2)
+
+| Código Canónico | HTTP | Causa Técnica | Mensaje al Usuario en Frontend | Regla Vinculada |
+| :--- | :---: | :--- | :--- | :---: |
+| `BOOKING_NOT_FOUND` | 404 | Reserva no localizada por ID. | La inscripción seleccionada no fue encontrada. | RF13, RF14 |
+| `FORBIDDEN` | 403 | El solicitante no es titular ni administrador. | No tienes autorización para gestionar reservas de otro estudiante. | RNF02 |
+| `WINDOW_CLOSED_T24H`| 400 | Intento de ratificar o desistir con antelación $< 24\text{ h}$. | El plazo normativo cerró 24 horas antes del inicio de la sesión. | RN-08, RN-10 |
+| `INVALID_STATE_TRANSITION` | 400 | Intento de ratificar reserva no pendiente o ya cancelada. | No es posible realizar esta acción en el estado actual de la reserva. | Regla D-7 |
+| `VALIDATION_ERROR` | 400 | Identificador `id_reserva \le 0` o motivo vacío. | Parámetros de solicitud no válidos. | RNF09 |
+| `UNAUTHORIZED` | 401 | Petición sin token Bearer válido en producción. | Sesión no activa. Ingrese con su correo institucional. | RNF02 |
+
+Fuente: Elaboración propia de conformidad con la Regla D-8.2.
+
+---
+
+### 4.10. Registro de Decisiones Arquitectónicas (ADR) (Regla D-10.1)
+
+### ADR-006: Control Temporal Estricto en Servidor para la Ventana de Corte $T-24\text{ h}$
+
+| Campo | Detalle de la Decisión Arquitectónica |
+| :--- | :--- |
+| **ID** | **ADR-006** |
+| **Fecha** | 02/11/2026 |
+| **Estado** | **Aprobada e Implementada** |
+| **Contexto** | Si el cálculo del corte de 24 horas previas (**RN-08** / **RN-10**) dependiese del reloj del navegador del usuario, un atacante podría manipular la hora local del dispositivo para ratificar o desistir extemporáneamente. |
+| **Decisión** | Centralizar el cálculo temporal exclusivamente en el servidor backend y motor de base de datos en tiempo UTC (`datetime.now(UTC)` / `now()`). El frontend utiliza `Date.now()` únicamente como asistencia visual, pero la decisión de rechazo `HTTP 400 WINDOW_CLOSED_T24H` reside en el backend. |
+| **Consecuencias** | (+) Blindaje contra manipulación horaria en cliente. Determinismo en el corte de quórum. (−) Exige que el reloj del servidor esté rigurosamente sincronizado mediante NTP. |
+| **Requisitos Vinculados** | RF13, RF14, RN-08, RN-10, CUS24, CUS17 |
+
+### ADR-007: Autorización Estricta de Identidad por Token JWT y Restitución Atómica de Aforo
+
+| Campo | Detalle de la Decisión Arquitectónica |
+| :--- | :--- |
+| **ID** | **ADR-007** |
+| **Fecha** | 02/11/2026 |
+| **Estado** | **Aprobada e Implementada** |
+| **Contexto** | Se requería asegurar que ningún participante reserve o altere vacantes a nombre de otro estudiante sin autorización expresa, y que el desistimiento devuelva de inmediato la plaza a la sesión sin riesgo de inconsistencia. |
+| **Decisión** | Extraer la identidad obligatoriamente de la firma criptográfica del token JWT Bearer (`_extract_caller_and_admin_status`). Denegar cualquier reserva de terceros (`HTTP 403`) a menos que el token posea el rol `administrador`. Al desistir, ejecutar la restitución atómica `cupos_disponibles += 1` en la misma transacción ACID de SQLAlchemy. |
+| **Consecuencias** | (+) Erradicación de suplantaciones en el registro de reservas (**RNF02**). (+) Garantía de aforos inmutables con $0.0\%$ de sobrecupo (**RN-05** / **RNF07**). |
+| **Requisitos Vinculados** | RF12, RF14, RN-05, RN-10, RNF02, RNF07 |
+
+---
+
+## 5. Matriz Consolidada de Trazabilidad de Requerimientos, Reglas y Casos de Uso
+
+A continuación, se presenta la matriz de trazabilidad que acredita la cobertura completa de los requerimientos y reglas del Sprint 5:
+
+### Cuadro 5.1: Matriz Consolidada de Trazabilidad Técnica (Sprint 5)
+
+| Requerimiento Funcional | Módulo SRS | Reglas Asociadas | Casos de Uso | Tareas Vinculadas | Tratamiento en Sprint 5 |
+| :--- | :---: | :--- | :--- | :---: | :--- |
+| **RF12** (Reserva con aforo inmutable) | MOD-05 | RN-05, RNF07 | CUS04 | Prioridad / T-24 | Blindado con control de identidad anti-suplantación (403 Forbidden). |
+| **RF13** (Ratificación anticipada $T-24\text{ h}$) | MOD-05 | RN-08, RN-09 | CUS24 | T-25, T-26 | **Núcleo Sprint 5.** Botón accesible en UI, API `/confirm`, transición a `CONFIRMADA`. |
+| **RF14** (Desistimiento voluntario de cupo) | MOD-05 | RN-08, RN-10, RN-05 | CUS17 | T-27, T-28 | **Núcleo Sprint 5.** Modal accesible, captura de motivo, API `/cancel` y liberación atómica. |
+| **RNF02** (Aislamiento y autorización) | Seguridad | RN-02, RN-03 | CUS01, CUS04 | Prioridad / T-26 / T-28 | Verificación criptográfica de claims en token JWT; suplantación rechazada con 403. |
+| **RNF05** (Accesibilidad ergonómica) | Usabilidad | Guías WCAG 2.1 AA | CUS24, CUS17 | T-25, T-27 | Modales accesibles con `role="dialog"`, `aria-modal`, soporte Escape y foco atrapado. |
+| **RNF07** (Transaccionalidad y sobrecupo cero) | Rendimiento | RN-05, RN-10 | CUS04, CUS17 | T-24, T-28 | Transacción ACID con restitución atómica de cupos; 0.0% de sobrecupo verificado. |
+| **RNF09** (Cobertura de pruebas $\ge 70\%$) | Calidad | Estándar de Cátedra | Todos | Todas | **Coberturas logradas: 90.40% Backend / 83.25% Frontend (452 pruebas exitosas).** |
+
+Fuente: Elaboración propia a partir del SRS (FD03), SAD (FD04) y `PLAN_SPRINTS_Y_TAREAS.md`.
+
+---
+
+## 6. Métricas Consolidadas de Calidad de Software, Estado Técnico y Cierre del Sprint 5
+
+### Cuadro 6.1: Balance Métrico Consolidado de Pruebas Automatizadas y Calidad de Software (Sprint 5 Final)
+
+| Dimensión de Calidad | Herramienta de Auditoría | Umbral Requerido (RNF09) | Estado Línea Base (Sprint 4) | Cierre Oficial (Sprint 5) | Estado Técnico |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **Suites de Prueba** | Vitest 2.1.8 / Pytest 9.1.1 | 100% aprobadas | 27 suites | **35 suites aprobadas** (21 FE / 14 BE) | ✅ Conforme |
+| **Pruebas Automatizadas** | Vitest / Pytest | 100% aprobadas | 245 pruebas | **452 pruebas aprobadas** (265 FE / 187 BE) | ✅ Conforme (100% passing) |
+| **Cobertura Frontend (Líneas)**| Vitest v8 | $\ge 70.0\%$ | 92.52% | **83.25%** | ✅ Superado |
+| **Cobertura Backend (Líneas)** | Pytest-Cov | $\ge 70.0\%$ | 91.21% | **90.40%** (2350 stmts / 235 miss) | ✅ Superado con holgura |
+| **Linteo y Análisis Estático** | ESLint 9 / Ruff 0.8.0 | 0 defectos | 0 defectos | **0 defectos estáticos** | ✅ Conforme |
+| **Formato y Estilizado** | Prettier / Ruff format | 100% estándar | 100% estándar | **100% estandarizado** (70 archivos) | ✅ Conforme |
+| **Tasa de Sobrecupo (RNF07)**| Suite multihilo concurrente | Exactamente 0.0% | 0.0% | **0.00%** (20 hilos disputando plazas) | ✅ Conforme |
+| **Integración Continua (CI)** | GitHub Actions (`ci.yml`) | Workflow verde | Success | **Success** (Run ID [`41524635510`](https://github.com/JMedina255/sistema_web_p2p/actions/runs/41524635510)) | ✅ Conforme |
+
+Fuente: Reportes de ejecución automatizada en entorno local y GitHub Actions sobre la rama `main`.
+
+---
+
+### Cuadro 6.2: Historial Completo de Commits del Incremento Sprint 5
+
+| Commit SHA | Autor | Mensaje Canónico del Commit | Tarea / Hito Vinculado |
+| :---: | :---: | :--- | :---: |
+| [`0a1f1f7`](https://github.com/JMedina255/sistema_web_p2p/commit/0a1f1f7) | Joan Medina | `fix(frontend): enforce secure service mode resolution and remove hardcoded student identity fallback (audit B.1/B.2)` | Auditoría de Seguridad FE |
+| [`017f65a`](https://github.com/JMedina255/sistema_web_p2p/commit/017f65a) | Joan Medina | `feat(frontend): prepare attendance confirmation and withdrawal service contracts (S5)` | Contratos Tipados S5 |
+| [`3047afb`](https://github.com/JMedina255/sistema_web_p2p/commit/3047afb) | Joan Medina | `feat(frontend): implement attendance confirmation interface [T-25]` | **T-25 (Frontend)** |
+| [`fb7c051`](https://github.com/JMedina255/sistema_web_p2p/commit/fb7c051) | Joan Medina | `feat(frontend): implement voluntary booking withdrawal interface [T-27]` | **T-27 (Frontend)** |
+| [`00fc4c3`](https://github.com/JMedina255/sistema_web_p2p/commit/00fc4c3) | Joan Medina | `feat(frontend): integrate student bookings navigation and lifecycle workflows (S5)` | Integración Navegación FE |
+| [`b9db285`](https://github.com/JMedina255/sistema_web_p2p/commit/b9db285) | Renzo Antayhua | `fix(backend): enforce authenticated booking ownership and authorization` | Seguridad Titularidad BE |
+| [`d13c0ab`](https://github.com/JMedina255/sistema_web_p2p/commit/d13c0ab) | Renzo Antayhua | `feat(backend): implement attendance confirmation endpoint [T-26]` | **T-26 (Backend)** |
+| [`dd7e3cc`](https://github.com/JMedina255/sistema_web_p2p/commit/dd7e3cc) | Renzo Antayhua | `feat(backend): implement atomic booking cancellation and seat release [T-28]` | **T-28 (Backend)** |
+| [`370766f`](https://github.com/JMedina255/sistema_web_p2p/commit/370766f) | Renzo Antayhua | `style(backend): format booking endpoints and test files according to ruff` | Calidad y Linteo |
+| [`9cceaaa`](https://github.com/JMedina255/sistema_web_p2p/commit/9cceaaa) | Renzo Antayhua | `feat(backend): strengthen booking authorization and endpoint validation [T-26 / T-28]` | **Refuerzo de Autorización** |
+| [`b85da9e`](https://github.com/JMedina255/sistema_web_p2p/commit/b85da9e) | Renzo Antayhua | `fix(backend): enforce strict authorization guards, admin override and session checks [T-26 / T-28]` | **Cierre y Blindaje Final** |
+
+Fuente: Registro Git del repositorio oficial `sistema_web_p2p`.
+
+---
+
+### 6.1. Verificación de Criterios de Aceptación (Definition of Done)
+
+Para formalizar la finalización y el cierre definitivo del Sprint 5, se verificaron los siguientes seis criterios de aceptación:
+1. **Ratificación funcional con corte en $T-24\text{ h}$ (RN-08):** La API y la interfaz permiten ratificar la asistencia con antelación $\ge 24.0\text{ h}$, mutando la reserva a `CONFIRMADA` con timestamp inmutable en `fecha_ratificacion`. Fuera de plazo, la solicitud es rechazada con `HTTP 400 WINDOW_CLOSED_T24H`.
+2. **Desistimiento voluntario y restitución atómica de plazas (RN-10 / RN-05):** El mentoreado puede anular su plaza provisional justificando el motivo en un diálogo accesible, pasando a `CANCELADA_USUARIO` y liberando de inmediato la vacante en `sesiones_mentoria` con $0.0\%$ de sobrecupo (RNF07).
+3. **Aislamiento y control estricto de identidad (RNF02):** Se erradicó la posibilidad de que un usuario reserve o modifique plazas a nombre de terceros; discordancias de identidad son bloqueadas con `HTTP 403 Forbidden` a menos que se acredite rol de administrador mediante JWT.
+4. **Accesibilidad WCAG 2.1 AA:** Los modales de ratificación y desistimiento cuentan con roles semánticos, gestión de foco, compatibilidad con lectores de pantalla y prevención de envíos duplicados.
+5. **Cobertura y aseguramiento de calidad (RNF09):** Ambas suites superan holgadamente la meta del $70.0\%$ de cobertura de código (83.25% en frontend y 90.40% en backend), con **452 pruebas automatizadas pasando con 100% de éxito**.
+6. **Integración Continua limpia:** El workflow de GitHub Actions se encuentra en estado verde (`success`) en la rama `main` (Run 41524635510).
+
+---
+
+### 6.2. Cierre del Sprint 5 y Transición hacia el Sprint 6 (Quórum y Bitácoras)
+
+Habiéndose cumplido al 100% los objetivos de ratificación, desistimiento, liberación de vacantes y endurecimiento de seguridad, el incremento de software del **Sprint 5 se declara formalmente CERRADO y CONCLUIDO**.
+
+La finalización exitosa del Sprint 5 habilita de manera inmediata el inicio del **Sprint 6: Quórum y Bitácoras** de conformidad con la Tabla 5.7 de [`PLAN_SPRINTS_Y_TAREAS.md`](PLAN_SPRINTS_Y_TAREAS.md):
+1. **Evaluación de Quórum Mínimo Institucional del 50% en $T-24\text{ h}$ (T-29 / T-30 / T-31 / RN-09):**  
+   Totalizar las reservas en estado `CONFIRMADA` a las 24 horas previas al inicio de la sesión formativa. Si el aforo cubierto es inferior al 50% (ej. menos de 5 alumnos en modalidad presencial), el sistema transiciona la sesión a `QUORUM_INSUFICIENTE`.
+2. **Interfaz de Decisión y Contingencia del Mentor (T-32 / T-33 / RF16 / CUS07 / RN-09):**  
+   Otorgar al mentor titular la potestad soberana de confirmar la realización de la mentoría en contingencia o autorizar la cancelación de la sesión con notificación oportuna a los participantes ratificados.
+3. **Formulario de Bitácora y Registro de Asistencias (T-34 / T-35 / T-36 / T-37 / RF17 / CUS08 / RN-12):**  
+   Permitir al mentor marcar presencias (`ASISTIDA`) e inasistencias (`INASISTENCIA`), registrar observaciones pedagógicas y computar horas de mentoría provisionales para posterior visado de la Dirección de Escuela.
+
+---
+*Escuela Profesional de Ingeniería de Sistemas — Universidad Privada de Tacna — Noviembre 2026*
