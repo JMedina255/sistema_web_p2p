@@ -99,8 +99,8 @@ export const App: React.FC = () => {
       const rawId = String(offer.id_oferta || '').trim();
       let sesionId: number | null = null;
 
-      if (typeof (offer as { id_sesion?: unknown }).id_sesion === 'number') {
-        const directNum = (offer as { id_sesion: number }).id_sesion;
+      if (typeof offer.id_sesion === 'number') {
+        const directNum = offer.id_sesion;
         if (Number.isInteger(directNum) && directNum > 0) {
           sesionId = directNum;
         }

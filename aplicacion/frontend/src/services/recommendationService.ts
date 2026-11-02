@@ -46,6 +46,7 @@ export interface ScoreBreakdown {
  */
 export interface OfferRecommendationItem {
   id_oferta: string;
+  id_sesion?: number;
   codigo_sesion: string;
   id_asignatura: number;
   codigo_asignatura: string;
