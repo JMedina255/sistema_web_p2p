@@ -25,6 +25,9 @@ router = APIRouter()
 )
 def reserve_booking(
     payload: BookingCreatePayload,
+    student_email: str | None = Query(
+        None, description="Correo del estudiante en entorno de pruebas si no se envía Bearer JWT"
+    ),
     authorization: str | None = Header(None),
     db: Session | None = Depends(get_optional_session),
 ) -> BookingResponse:
@@ -32,8 +35,9 @@ def reserve_booking(
     Formaliza de manera atómica una reserva provisional bajo bloqueo pesimista
     SELECT ... FOR UPDATE en PostgreSQL, asegurando 0.0% de sobrecupo (RNF07).
     """
+    effective_caller = student_email or payload.estudiante_email
     caller_email = _resolve_authenticated_email(
-        authorization, explicit_email=payload.estudiante_email, allow_admin_override=True
+        authorization, explicit_email=effective_caller, allow_admin_override=True
     )
 
     return BookingService.reserve_seat(

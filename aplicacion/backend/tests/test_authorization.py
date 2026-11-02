@@ -211,6 +211,16 @@ def test_production_unauthenticated_request_rejected(monkeypatch):
     assert res_reserve.status_code == 401
     assert "entornos de producción se requiere cabecera Authorization" in res_reserve.json()["detail"]
 
+    # Intento de ratificar asistencia en producción sin token
+    res_confirm = client.post("/api/v1/bookings/1/confirm")
+    assert res_confirm.status_code == 401
+    assert "Authorization: Bearer <token>" in res_confirm.json()["detail"]
+
+    # Intento de desistir en producción sin token
+    res_cancel = client.post("/api/v1/bookings/1/cancel")
+    assert res_cancel.status_code == 401
+    assert "Authorization: Bearer <token>" in res_cancel.json()["detail"]
+
 
 def test_reserve_booking_admin_substring_in_email_does_not_grant_admin_privileges():
     """Valida que un correo que contenga la subcadena 'admin' no obtenga privilegios ilegítimos."""
@@ -240,3 +250,96 @@ def test_reserve_booking_with_verified_admin_role_permits_override():
     )
     assert res.status_code == 201
     assert res.json()["estudiante_email"] == target_student
+
+
+def test_reserve_booking_unauthenticated_different_student_rejected_403():
+    """Valida que un solicitante sin token no pueda reservar a nombre de otro estudiante usando student_email."""
+    res = client.post(
+        "/api/v1/bookings/reserve?student_email=atacante@upt.pe",
+        json={"id_sesion": 1, "estudiante_email": "victima2026@upt.pe"},
+    )
+    assert res.status_code == 403
+    assert "No tiene autorización" in res.json()["detail"] or "no tiene permisos" in res.json()["detail"]
+
+
+def test_confirm_attendance_admin_override_permitted():
+    """Valida que un administrador autenticado pueda ratificar la asistencia de cualquier estudiante."""
+    from datetime import UTC, datetime, timedelta
+
+    from app.services.booking_service import _memory_bookings
+
+    now = datetime.now(UTC)
+    student = "estudiante_confirm_admin@upt.pe"
+    _memory_bookings.append(
+        {
+            "id_reserva": 709,
+            "codigo_reserva": "RES-MEM-709",
+            "id_sesion": 1,
+            "estudiante_email": student,
+            "estado": "PENDIENTE_CONFIRMACION",
+            "fecha_reserva": (now - timedelta(hours=2)).isoformat(),
+            "fecha_inicio": (now + timedelta(hours=48)).isoformat(),
+        }
+    )
+
+    admin_token = create_access_token({"sub": "admin.coordinador@upt.pe", "roles": ["administrador"]})
+    res = client.post(
+        "/api/v1/bookings/709/confirm",
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert res.status_code == 200
+    assert res.json()["estado"] == "CONFIRMADA"
+    assert res.json()["fecha_ratificacion"] is not None
+
+
+def test_confirm_attendance_invalid_id_zero_or_negative_400():
+    """Valida que identificadores de reserva no positivos sean rechazados con 400 Bad Request."""
+    token = create_access_token({"sub": "estudiante@upt.pe", "roles": ["mentoreado"]})
+    res_zero = client.post("/api/v1/bookings/0/confirm", headers={"Authorization": f"Bearer {token}"})
+    assert res_zero.status_code == 400
+    assert "VALIDATION_ERROR" in res_zero.json()["detail"]
+
+    res_neg = client.post("/api/v1/bookings/-5/confirm", headers={"Authorization": f"Bearer {token}"})
+    assert res_neg.status_code == 400
+    assert "VALIDATION_ERROR" in res_neg.json()["detail"]
+
+
+def test_cancel_reservation_invalid_id_zero_or_negative_400():
+    """Valida que identificadores de reserva no positivos sean rechazados con 400 Bad Request en cancelación."""
+    token = create_access_token({"sub": "estudiante@upt.pe", "roles": ["mentoreado"]})
+    res_zero = client.post("/api/v1/bookings/0/cancel", headers={"Authorization": f"Bearer {token}"})
+    assert res_zero.status_code == 400
+    assert "VALIDATION_ERROR" in res_zero.json()["detail"]
+
+    res_neg = client.post("/api/v1/bookings/-1/cancel", headers={"Authorization": f"Bearer {token}"})
+    assert res_neg.status_code == 400
+    assert "VALIDATION_ERROR" in res_neg.json()["detail"]
+
+
+def test_confirm_attendance_admin_substring_rejected_403():
+    """Valida que un correo con 'admin' en la subcadena no pueda ratificar una reserva ajena sin rol de admin."""
+    from datetime import UTC, datetime, timedelta
+
+    from app.services.booking_service import _memory_bookings
+
+    now = datetime.now(UTC)
+    victim = "victima_sub@upt.pe"
+    _memory_bookings.append(
+        {
+            "id_reserva": 710,
+            "codigo_reserva": "RES-MEM-710",
+            "id_sesion": 1,
+            "estudiante_email": victim,
+            "estado": "PENDIENTE_CONFIRMACION",
+            "fecha_reserva": (now - timedelta(hours=2)).isoformat(),
+            "fecha_inicio": (now + timedelta(hours=48)).isoformat(),
+        }
+    )
+
+    fake_admin_token = create_access_token({"sub": "admin_student@upt.pe", "roles": ["mentoreado"]})
+    res = client.post(
+        "/api/v1/bookings/710/confirm",
+        headers={"Authorization": f"Bearer {fake_admin_token}"},
+    )
+    assert res.status_code == 403
+    assert "FORBIDDEN" in res.json()["detail"]
