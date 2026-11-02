@@ -722,11 +722,12 @@ describe('Batería T-19: Ordenamiento Determinista y Empates Top-k (ORD-01 a ORD
       const topKSelect = screen.getByLabelText(/Candidatos Top-k:/i) as HTMLSelectElement;
       expect(topKSelect.value).toBe('5');
 
-      // Comprobar las opciones disponibles
+      // Comprobar las opciones estrictamente acotadas a la especificación normativa SRS RF06 (k entre 3 y 5)
       const options = Array.from(topKSelect.options).map((opt) => opt.value);
       expect(options).toContain('3');
+      expect(options).toContain('4');
       expect(options).toContain('5');
-      expect(options).toContain('10');
+      expect(options.every((val) => Number(val) >= 3 && Number(val) <= 5)).toBe(true);
     });
   });
 });

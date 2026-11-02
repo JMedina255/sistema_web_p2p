@@ -912,8 +912,8 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
               }}
             >
               <option value={3}>Top 3</option>
-              <option value={5}>Top 5 (Estándar)</option>
-              <option value={10}>Top 10</option>
+              <option value={4}>Top 4</option>
+              <option value={5}>Top 5 (Estándar SRS)</option>
             </select>
           </div>
         </div>
