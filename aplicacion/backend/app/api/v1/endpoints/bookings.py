@@ -30,11 +30,9 @@ def reserve_booking(
     Formaliza de manera atómica una reserva provisional bajo bloqueo pesimista
     SELECT ... FOR UPDATE en PostgreSQL, asegurando 0.0% de sobrecupo (RNF07).
     """
-    caller_email = None
-    if authorization:
-        caller_email = _resolve_authenticated_email(
-            authorization, explicit_email=payload.estudiante_email, allow_admin_override=True
-        )
+    caller_email = _resolve_authenticated_email(
+        authorization, explicit_email=payload.estudiante_email, allow_admin_override=True
+    )
 
     return BookingService.reserve_seat(
         db=db,

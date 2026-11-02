@@ -165,14 +165,19 @@ class BookingService:
         """
         clean_email = payload.estudiante_email.strip().lower()
 
-        # Validación de autorización: usuario no puede reservar para otro a menos que sea admin
+        # Validación estricta de propiedad de reserva: solo el estudiante o admin verificado
         if caller_email:
             caller_clean = caller_email.strip().lower()
-            if caller_clean != clean_email and "admin" not in caller_clean:
+            if caller_clean != clean_email:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="No tiene autorización para registrar reservas a nombre de otro estudiante.",
                 )
+        elif settings.APP_ENV not in ("development", "test", "testing"):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Se requiere autenticación institucional válida para formalizar reservas.",
+            )
 
         now_utc = datetime.now(UTC)
 
