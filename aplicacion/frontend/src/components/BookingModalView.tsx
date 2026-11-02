@@ -35,6 +35,8 @@ export interface BookingModalViewProps {
   onConfirmReservation: (offer: OfferRecommendationItem) => void | Promise<void>;
   /** Callback opcional para redirigir a solicitudes por demanda si no hay aforo */
   onDemandRedirect?: () => void;
+  /** Callback opcional para navegar hacia la vista de Mis Reservas tras formalizar una reserva */
+  onViewBookings?: () => void;
 }
 
 /**
@@ -104,6 +106,7 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
   onClose,
   onConfirmReservation,
   onDemandRedirect,
+  onViewBookings,
 }) => {
   const componentId = useId();
   const titleId = `booking-modal-title-${componentId}`;
@@ -561,22 +564,49 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
                 )}
               </div>
 
-              <button
-                type="button"
-                onClick={onClose}
+              <div
                 style={{
-                  backgroundColor: '#1C2A59',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '0.65rem 1.5rem',
-                  fontSize: '0.88rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
+                  display: 'flex',
+                  gap: '0.75rem',
+                  justifyContent: 'center',
+                  flexWrap: 'wrap',
                 }}
               >
-                Entendido, Cerrar
-              </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  style={{
+                    backgroundColor: '#1C2A59',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '0.65rem 1.5rem',
+                    fontSize: '0.88rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Entendido, Cerrar
+                </button>
+                {onViewBookings && (
+                  <button
+                    type="button"
+                    onClick={onViewBookings}
+                    style={{
+                      backgroundColor: '#B99451',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '0.65rem 1.5rem',
+                      fontSize: '0.88rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Ver Mis Reservas 📅
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             <>
