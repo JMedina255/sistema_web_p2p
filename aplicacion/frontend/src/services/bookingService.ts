@@ -802,11 +802,14 @@ export class MockBookingAdapter {
       );
     }
 
-    // Estados no cancelables por ser terminales o ejecutados
-    if (booking.estado === 'ASISTIDA' || booking.estado === 'INASISTENCIA') {
+    // Estados no cancelables por ser terminales, ejecutados o expirados (solo PENDIENTE_CONFIRMACION o CONFIRMADA)
+    if (
+      booking.estado !== 'PENDIENTE_CONFIRMACION' &&
+      booking.estado !== 'CONFIRMADA'
+    ) {
       throw new BookingException(
         'INVALID_STATUS_TRANSITION',
-        `INVALID_STATUS_TRANSITION: No se puede desistir de una sesión en estado ${booking.estado}.`,
+        `INVALID_STATUS_TRANSITION: No se puede desistir de una reserva en estado ${booking.estado}.`,
         400
       );
     }

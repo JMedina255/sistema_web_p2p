@@ -1,15 +1,19 @@
 /**
- * Componente: Bandeja de Reservas Personales y Ratificación de Asistencia (T-25)
+ * Componente: Bandeja de Reservas Personales, Ratificación y Desistimiento Voluntario (T-25 / T-27)
  * Módulo MOD-05: Quórum, Confirmación y Cancelaciones.
  *
  * Trazabilidad:
  * - Requerimiento Funcional: RF13 / CUS24 (Confirmación anticipada de asistencia a mentoría)
- * - Compromiso de Participación: PB-014 (Compromiso formativo del mentoreado)
+ * - Requerimiento Funcional: RF14 / CUS17 (Desistimiento voluntario y liberación anticipada de cupos)
+ * - Compromiso de Participación: PB-014 (Compromiso formativo de asistencia)
+ * - Compromiso Formativo: PB-015 (Conducta ética de liberación responsable del cupo)
+ * - Regla de Negocio RN-05: Aforos estándar inmutables (10 presencial / 20 virtual)
  * - Regla de Negocio RN-08: Ventana de confirmación de asistencia hasta T-24 horas
- * - Regla de Negocio RN-09: Cómputo del quórum regulatorio del 50%
- * - Regla de Negocio RN-10: Política de desistimiento antes de T-24 horas
+ * - Regla de Negocio RN-09: Cómputo del quórum regulatorio del 50% (5 presencial / 10 virtual)
+ * - Regla de Negocio RN-10: Política de desistimiento antes de T-24 horas sin penalización
  * - Requerimiento No Funcional: RNF05 (Accesibilidad WAI-ARIA y diseño responsive)
- * - Requerimiento No Funcional: RNF09 (Mantenibilidad y cobertura de pruebas)
+ * - Requerimiento No Funcional: RNF07 (Integridad y concurrencia transaccional en backend)
+ * - Requerimiento No Funcional: RNF09 (Mantenibilidad y cobertura de pruebas automatizadas)
  */
 
 import React, { useState, useEffect, useCallback, useId, useRef } from 'react';
@@ -22,7 +26,7 @@ import {
 import { authService } from '../services/authService';
 
 /**
- * Propiedades del componente StudentBookingsView (T-25 / RF13 / CUS24).
+ * Propiedades del componente StudentBookingsView (T-25 / T-27 / RF13 / RF14).
  */
 export interface StudentBookingsViewProps {
   /** Correo institucional del estudiante mentoreado (se resuelve desde JWT si se omite) */
@@ -86,7 +90,7 @@ function formatDateTime(isoString?: string | null): string {
 }
 
 /**
- * Evalúa preventivamente en cliente la regla de negocio RN-08 (corte a T-24h).
+ * Evalúa preventivamente en cliente las reglas de negocio temporales RN-08 y RN-10 (corte a T-24h).
  */
 function evaluateT24Window(
   sessionStartIso?: string | null,
@@ -143,7 +147,7 @@ function evaluateT24Window(
       hoursRemaining,
       cutoffIso,
       message:
-        'Ventana de ratificación cerrada (RN-08): El corte perentorio se cumplió a las 24 horas previas al inicio.',
+        'Ventana de ratificación y desistimiento cerrada (RN-08 / RN-10): El corte perentorio se cumplió a las 24 horas previas al inicio.',
     };
   }
 
@@ -152,7 +156,7 @@ function evaluateT24Window(
     isPast: false,
     hoursRemaining,
     cutoffIso,
-    message: `Ventana de ratificación abierta: Restan aproximadamente ${hoursRemaining} horas para el inicio de la clase.`,
+    message: `Ventana abierta (RN-08 / RN-10): Restan aproximadamente ${hoursRemaining} horas para el inicio de la clase.`,
   };
 }
 
@@ -261,14 +265,22 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
   const [confirmingBooking, setConfirmingBooking] = useState<BookingDetailResponse | null>(null);
   const [isSubmittingConfirm, setIsSubmittingConfirm] = useState<boolean>(false);
   const [confirmError, setConfirmError] = useState<string | null>(null);
+
+  // Estado del diálogo modal de desistimiento voluntario (T-27 / RF14 / CUS17 / RN-10)
+  const [cancellingBooking, setCancellingBooking] = useState<BookingDetailResponse | null>(null);
+  const [cancelReason, setCancelReason] = useState<string>('');
+  const [isSubmittingCancel, setIsSubmittingCancel] = useState<boolean>(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+
+  // Mensaje de notificación global
   const [notificationMessage, setNotificationMessage] = useState<{
     type: 'success' | 'info' | 'error';
     text: string;
   } | null>(null);
 
-  // Referencias para accesibilidad y focus trap en el diálogo
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const cancelBtnRef = useRef<HTMLButtonElement>(null);
+  // Referencias para accesibilidad y focus trap en diálogos
+  const confirmCancelBtnRef = useRef<HTMLButtonElement>(null);
+  const cancelDismissBtnRef = useRef<HTMLButtonElement>(null);
 
   /**
    * Carga las reservas del estudiante autenticado desde el servicio activo.
@@ -283,7 +295,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
       setIsLoading(true);
       setErrorMessage(null);
 
-      // Si se definió un tiempo simulado en props, sincronizarlo en el mockAdapter para pruebas
+      // Sincronizar tiempo simulado si se suministra por props
       if (typeof currentTime === 'number') {
         bookingService.setCurrentTime(currentTime);
       }
@@ -309,46 +321,21 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
     loadBookings();
   }, [loadBookings]);
 
-  /**
-   * Cierra el diálogo de ratificación descartando cambios.
-   */
-  const handleCloseDialog = useCallback(() => {
+  // ==========================================================================
+  // Manejadores del Diálogo de Ratificación (T-25)
+  // ==========================================================================
+
+  const handleCloseConfirmDialog = useCallback(() => {
     setConfirmingBooking(null);
     setConfirmError(null);
     setIsSubmittingConfirm(false);
   }, []);
 
-  /**
-   * Abre el diálogo accesible de ratificación pedagógica.
-   */
   const handleOpenConfirmDialog = (booking: BookingDetailResponse) => {
     setConfirmingBooking(booking);
     setConfirmError(null);
   };
 
-  // Manejo de foco accesible cuando se abre el diálogo
-  useEffect(() => {
-    if (confirmingBooking) {
-      setTimeout(() => {
-        cancelBtnRef.current?.focus();
-      }, 50);
-    }
-  }, [confirmingBooking]);
-
-  // Manejo de tecla Escape para cerrar el diálogo
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && confirmingBooking && !isSubmittingConfirm) {
-        handleCloseDialog();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [confirmingBooking, isSubmittingConfirm, handleCloseDialog]);
-
-  /**
-   * Ejecuta la ratificación de asistencia consumiendo bookingService.confirmAttendance (T-25 / RF13).
-   */
   const handleExecuteConfirmation = async () => {
     if (!confirmingBooking) return;
 
@@ -361,19 +348,16 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
         effectiveEmail ?? undefined
       );
 
-      // Éxito en la ratificación
       setNotificationMessage({
         type: 'success',
         text: `¡Asistencia ratificada con éxito para ${updated.nombre_asignatura || 'la sesión'}! Tu cupo está asegurado en la evaluación de quórum.`,
       });
 
-      handleCloseDialog();
-      // Recargar lista para refrescar estados desde la fuente de datos activa
+      handleCloseConfirmDialog();
       await loadBookings();
     } catch (err: unknown) {
       if (err instanceof BookingException) {
         if (err.code === 'ENDPOINT_NOT_IMPLEMENTED') {
-          // Explicación pedagógica cuando el backend de Renzo (T-26) está en desarrollo
           setConfirmError(
             'ℹ️ Integración pendiente en backend (T-26): El servicio de ratificación en el servidor FastAPI está en desarrollo por Renzo. La interfaz está lista y conectada contractualmente.'
           );
@@ -398,6 +382,112 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
     }
   };
 
+  // ==========================================================================
+  // Manejadores del Diálogo de Desistimiento Voluntario (T-27 / RF14 / CUS17)
+  // ==========================================================================
+
+  const handleCloseCancelDialog = useCallback(() => {
+    setCancellingBooking(null);
+    setCancelReason('');
+    setCancelError(null);
+    setIsSubmittingCancel(false);
+  }, []);
+
+  const handleOpenCancelDialog = (booking: BookingDetailResponse) => {
+    setCancellingBooking(booking);
+    setCancelReason('');
+    setCancelError(null);
+  };
+
+  const handleExecuteCancel = async () => {
+    if (!cancellingBooking) return;
+
+    try {
+      setIsSubmittingCancel(true);
+      setCancelError(null);
+
+      const cleanReason = cancelReason.trim();
+      const updated = await bookingService.cancelReservation(
+        cancellingBooking.id_reserva,
+        cleanReason || undefined,
+        effectiveEmail ?? undefined
+      );
+
+      setNotificationMessage({
+        type: 'success',
+        text: `¡Reserva ${updated.codigo_reserva} cancelada con éxito! La vacante ha sido liberada en el sistema para tus compañeros.`,
+      });
+
+      handleCloseCancelDialog();
+      await loadBookings();
+    } catch (err: unknown) {
+      if (err instanceof BookingException) {
+        if (err.code === 'ENDPOINT_NOT_IMPLEMENTED') {
+          setCancelError(
+            'ℹ️ Integración pendiente en backend (T-28): El servicio de desistimiento y restitución atómica de cupo en el servidor FastAPI está en desarrollo por Renzo. La interfaz está conectada contractualmente.'
+          );
+        } else if (err.code === 'WINDOW_CLOSED_T24H') {
+          setCancelError(
+            'Infracción de RN-10: El desistimiento voluntario solo está permitido con más de 24 horas de anticipación al inicio de la sesión.'
+          );
+        } else if (err.code === 'ALREADY_CANCELLED') {
+          setCancelError('Esta reserva ya fue cancelada con anterioridad.');
+        } else if (err.code === 'INVALID_STATUS_TRANSITION') {
+          setCancelError('No es posible desistir de una sesión en el estado actual.');
+        } else if (err.code === 'FORBIDDEN') {
+          setCancelError('No tienes autorización para cancelar una reserva de otro estudiante.');
+        } else if (err.code === 'NETWORK_ERROR') {
+          setCancelError('No fue posible contactar al servidor. Verifica tu conectividad institucional.');
+        } else {
+          setCancelError(err.message);
+        }
+      } else {
+        setCancelError('Error imprevisto al procesar el desistimiento voluntario.');
+      }
+    } finally {
+      setIsSubmittingCancel(false);
+    }
+  };
+
+  // Gestión de foco accesible para diálogos
+  useEffect(() => {
+    if (confirmingBooking) {
+      setTimeout(() => {
+        confirmCancelBtnRef.current?.focus();
+      }, 50);
+    }
+  }, [confirmingBooking]);
+
+  useEffect(() => {
+    if (cancellingBooking) {
+      setTimeout(() => {
+        cancelDismissBtnRef.current?.focus();
+      }, 50);
+    }
+  }, [cancellingBooking]);
+
+  // Manejo de tecla Escape para cerrar diálogos
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (confirmingBooking && !isSubmittingConfirm) {
+          handleCloseConfirmDialog();
+        } else if (cancellingBooking && !isSubmittingCancel) {
+          handleCloseCancelDialog();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    confirmingBooking,
+    isSubmittingConfirm,
+    cancellingBooking,
+    isSubmittingCancel,
+    handleCloseConfirmDialog,
+    handleCloseCancelDialog,
+  ]);
+
   // Filtrado reactivo de reservas
   const filteredBookings = bookings.filter((b) => {
     if (statusFilter === 'TODAS') return true;
@@ -416,7 +506,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
   });
 
   // ==========================================================================
-  // Renderizado: Caso sin autenticación institucional
+  // Renderizado: Caso sin autenticación institucional (RN-01)
   // ==========================================================================
   if (!effectiveEmail) {
     return (
@@ -447,7 +537,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
             Acceso Restringido a Mis Reservas (RN-01)
           </h2>
           <p style={{ color: '#4B5563', fontSize: '14px', maxWidth: '520px', margin: '0 auto 20px auto' }}>
-            Para consultar tus cupos inscritos y ratificar formalmente tu asistencia, debes iniciar sesión
+            Para consultar tus cupos inscritos, ratificar asistencia o desistir de una reserva, debes iniciar sesión
             con tu cuenta institucional de la <strong>Universidad Privada de Tacna (@upt.pe)</strong>.
           </p>
           {onLoginRedirect && (
@@ -778,7 +868,9 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
             const timeCheck = evaluateT24Window(booking.fecha_inicio, currentTime);
             const isPending = booking.estado === 'PENDIENTE_CONFIRMACION';
             const isConfirmed = booking.estado === 'CONFIRMADA';
+            const isCancelEligible = isPending || isConfirmed;
             const canConfirm = isPending && timeCheck.isOpen;
+            const canCancel = isCancelEligible && timeCheck.isOpen;
 
             return (
               <article
@@ -903,7 +995,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                 {/* Explicación Pedagógica del Estado y Plazos */}
                 <div style={{ marginBottom: '14px', fontSize: '12px' }}>
                   <p style={{ color: '#475569', margin: '0 0 6px 0' }}>{statusConfig.description}</p>
-                  {isPending && (
+                  {isCancelEligible && (
                     <div
                       style={{
                         backgroundColor: timeCheck.isOpen ? '#FFFBEB' : '#FEF2F2',
@@ -914,7 +1006,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                       }}
                     >
                       <span aria-hidden="true">{timeCheck.isOpen ? '⏳ ' : '⛔ '}</span>
-                      <strong>Límite RN-08:</strong> {timeCheck.message}
+                      <strong>Plazo RN-08 / RN-10:</strong> {timeCheck.message}
                       {timeCheck.cutoffIso && (
                         <div style={{ marginTop: '2px', fontSize: '11px' }}>
                           Corte definitivo: <strong>{formatDateTime(timeCheck.cutoffIso)}</strong>
@@ -952,7 +1044,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                   )}
                 </div>
 
-                {/* Barra de Acciones de la Tarjeta */}
+                {/* Barra de Acciones de la Tarjeta (T-25 Ratificación / T-27 Desistimiento) */}
                 <div
                   style={{
                     display: 'flex',
@@ -961,9 +1053,11 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                     gap: '10px',
                     borderTop: '1px solid #F1F5F9',
                     paddingTop: '12px',
+                    alignItems: 'center',
                   }}
                 >
-                  {isPending ? (
+                  {/* Botón de Ratificación (Solo para PENDIENTE_CONFIRMACION) */}
+                  {isPending && (
                     canConfirm ? (
                       <button
                         onClick={() => handleOpenConfirmDialog(booking)}
@@ -1003,7 +1097,10 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                         Plazo Vencido (T-24h cerrado)
                       </button>
                     )
-                  ) : isConfirmed ? (
+                  )}
+
+                  {/* Insignia para reservas ya confirmadas */}
+                  {isConfirmed && (
                     <span
                       style={{
                         fontSize: '12px',
@@ -1016,7 +1113,54 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                     >
                       ✓ Asistencia Confirmada
                     </span>
-                  ) : (
+                  )}
+
+                  {/* Botón de Desistimiento Voluntario (T-27 / RF14 / CUS17 / RN-10) */}
+                  {isCancelEligible && (
+                    canCancel ? (
+                      <button
+                        onClick={() => handleOpenCancelDialog(booking)}
+                        aria-label={`Cancelar reserva / Desistir de ${booking.codigo_reserva}`}
+                        style={{
+                          backgroundColor: '#FFFFFF',
+                          color: '#DC2626',
+                          border: '1px solid #DC2626',
+                          borderRadius: '6px',
+                          padding: '9px 16px',
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          transition: 'background-color 0.15s ease',
+                        }}
+                      >
+                        <span aria-hidden="true">✕</span> Cancelar Reserva / Desistir
+                      </button>
+                    ) : (
+                      <button
+                        disabled
+                        aria-disabled="true"
+                        title="El desistimiento voluntario no está permitido a menos de 24 horas del inicio (RN-10)."
+                        style={{
+                          backgroundColor: '#F1F5F9',
+                          color: '#94A3B8',
+                          border: '1px solid #E2E8F0',
+                          borderRadius: '6px',
+                          padding: '9px 16px',
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          cursor: 'not-allowed',
+                        }}
+                      >
+                        Desistimiento Cerrado (T-24h)
+                      </button>
+                    )
+                  )}
+
+                  {/* Estado terminal para reservas no activas */}
+                  {!isCancelEligible && (
                     <span
                       style={{
                         fontSize: '12px',
@@ -1055,16 +1199,15 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget && !isSubmittingConfirm) {
-              handleCloseDialog();
+              handleCloseConfirmDialog();
             }
           }}
         >
           <div
-            ref={dialogRef}
             role="dialog"
             aria-modal="true"
-            aria-labelledby={`${componentId}-modal-title`}
-            aria-describedby={`${componentId}-modal-desc`}
+            aria-labelledby={`${componentId}-confirm-modal-title`}
+            aria-describedby={`${componentId}-confirm-modal-desc`}
             style={{
               backgroundColor: '#FFFFFF',
               borderRadius: '10px',
@@ -1104,7 +1247,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                   {confirmingBooking.codigo_reserva}
                 </span>
                 <h3
-                  id={`${componentId}-modal-title`}
+                  id={`${componentId}-confirm-modal-title`}
                   style={{
                     fontSize: '18px',
                     fontWeight: 700,
@@ -1116,7 +1259,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                 </h3>
               </div>
               <button
-                onClick={handleCloseDialog}
+                onClick={handleCloseConfirmDialog}
                 disabled={isSubmittingConfirm}
                 aria-label="Cerrar diálogo de ratificación"
                 style={{
@@ -1133,10 +1276,10 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
               </button>
             </div>
 
-            {/* Cuerpo del Diálogo con Información Pedagógica */}
+            {/* Cuerpo del Diálogo */}
             <div style={{ padding: '24px' }}>
               <div
-                id={`${componentId}-modal-desc`}
+                id={`${componentId}-confirm-modal-desc`}
                 style={{
                   backgroundColor: '#F8FAFC',
                   border: '1px solid #E2E8F0',
@@ -1178,15 +1321,13 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                 <ul style={{ margin: 0, paddingLeft: '18px', lineHeight: 1.4 }}>
                   <li>
                     Al ratificar, tu cupo pasa a estado <strong>CONFIRMADA</strong> y se contabiliza en el quórum
-                    mínimo del 50% requerido para habilitar el dictado de la clase.
+                    mínimo del 50% requerido (5 estudiantes en presencial / 10 en virtual) para habilitar el dictado de la clase.
                   </li>
                   <li>
-                    Recuerda que si surge algún inconveniente, tienes la opción de desistir voluntariamente
-                    hasta 24 horas antes del inicio sin penalización (RN-10).
+                    Si surge algún imprevisto, puedes desistir voluntariamente hasta 24 horas antes del inicio sin penalización académica (RN-10).
                   </li>
                   <li>
-                    <em>Aviso institucional:</em> La ratificación individual no asegura el dictado definitivo si la
-                    sesión general no alcanza el 50% de cupos confirmados al corte de T-24h (RN-09).
+                    <em>Aviso institucional:</em> La ratificación individual no asegura el dictado definitivo si la sesión general no alcanza el quórum del 50% al corte de T-24h (RN-09).
                   </li>
                 </ul>
               </div>
@@ -1219,9 +1360,9 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                 }}
               >
                 <button
-                  ref={cancelBtnRef}
+                  ref={confirmCancelBtnRef}
                   type="button"
-                  onClick={handleCloseDialog}
+                  onClick={handleCloseConfirmDialog}
                   disabled={isSubmittingConfirm}
                   style={{
                     backgroundColor: '#FFFFFF',
@@ -1255,6 +1396,271 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                   }}
                 >
                   {isSubmittingConfirm ? 'Ratificando asistencia...' : '✓ Confirmar Asistencia'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ====================================================================== */}
+      {/* Diálogo Modal Accesible: Desistimiento Voluntario (T-27 / RF14 / CUS17) */}
+      {/* ====================================================================== */}
+      {cancellingBooking && (
+        <div
+          role="presentation"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.65)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '16px',
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isSubmittingCancel) {
+              handleCloseCancelDialog();
+            }
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`${componentId}-cancel-modal-title`}
+            aria-describedby={`${componentId}-cancel-modal-desc`}
+            style={{
+              backgroundColor: '#FFFFFF',
+              borderRadius: '10px',
+              maxWidth: '540px',
+              width: '100%',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+              overflow: 'hidden',
+              animation: 'fadeIn 0.15s ease-out',
+            }}
+          >
+            {/* Cabecera del Diálogo de Desistimiento */}
+            <div
+              style={{
+                backgroundColor: '#991B1B',
+                color: '#FFFFFF',
+                padding: '18px 24px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <div>
+                <span
+                  style={{
+                    backgroundColor: '#FEE2E2',
+                    color: '#991B1B',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    marginRight: '8px',
+                  }}
+                >
+                  T-27 · CUS17
+                </span>
+                <span style={{ fontSize: '13px', color: '#FCA5A5' }}>
+                  {cancellingBooking.codigo_reserva}
+                </span>
+                <h3
+                  id={`${componentId}-cancel-modal-title`}
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: 700,
+                    margin: '4px 0 0 0',
+                    color: '#FFFFFF',
+                  }}
+                >
+                  Desistimiento Voluntario de Cupo
+                </h3>
+              </div>
+              <button
+                onClick={handleCloseCancelDialog}
+                disabled={isSubmittingCancel}
+                aria-label="Cerrar diálogo de desistimiento"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#FFFFFF',
+                  fontSize: '20px',
+                  cursor: isSubmittingCancel ? 'not-allowed' : 'pointer',
+                  padding: '4px 8px',
+                  lineHeight: 1,
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Cuerpo del Diálogo */}
+            <div style={{ padding: '24px' }}>
+              <div
+                id={`${componentId}-cancel-modal-desc`}
+                style={{
+                  backgroundColor: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '6px',
+                  padding: '14px',
+                  marginBottom: '16px',
+                  fontSize: '13px',
+                }}
+              >
+                <div style={{ color: '#002147', fontWeight: 700, fontSize: '15px', marginBottom: '4px' }}>
+                  {cancellingBooking.nombre_asignatura || 'Asignatura Formativa'}
+                </div>
+                <div style={{ color: '#475569', marginBottom: '8px' }}>
+                  Tema: <strong>{cancellingBooking.nombre_tema || 'Contenido curricular'}</strong>
+                </div>
+                <div style={{ color: '#0F172A', fontSize: '12px' }}>
+                  📅 Horario: <strong>{formatDateTime(cancellingBooking.fecha_inicio)}</strong>
+                </div>
+                <div style={{ color: '#0F172A', fontSize: '12px' }}>
+                  Modalidad: <strong>{cancellingBooking.modalidad === 'virtual' ? '🌐 Virtual' : '🏛️ Presencial'}</strong>
+                </div>
+                <div style={{ color: '#0F172A', fontSize: '12px' }}>
+                  Estado actual: <strong>{getStatusConfig(cancellingBooking.estado).label}</strong>
+                </div>
+              </div>
+
+              {/* Advertencia Institucional RN-10 y PB-015 */}
+              <div
+                style={{
+                  backgroundColor: '#FEF2F2',
+                  borderLeft: '4px solid #DC2626',
+                  padding: '12px 14px',
+                  borderRadius: '0 6px 6px 0',
+                  marginBottom: '16px',
+                  fontSize: '12px',
+                  color: '#7F1D1D',
+                }}
+              >
+                <p style={{ margin: '0 0 6px 0', fontWeight: 700 }}>
+                  ⚠️ Política de Desistimiento y Liberación de Cupo (RN-10 / PB-015):
+                </p>
+                <ul style={{ margin: 0, paddingLeft: '18px', lineHeight: 1.4 }}>
+                  <li>
+                    Al desistir voluntariamente con más de 24 horas de antelación, tu vacante será cancelada sin penalización en tu historial formativo institucional.
+                  </li>
+                  <li>
+                    <em>Liberación efectiva del aforo:</em> La vacante se restituye al catálogo de mentorías únicamente cuando el servidor procesa y confirma la transacción de manera atómica (RN-05 / RNF07).
+                  </li>
+                  <li>
+                    Esta acción es irreversible. Para volver a inscribirte deberás reservar nuevamente desde la cartelera si aún quedan vacantes disponibles.
+                  </li>
+                </ul>
+              </div>
+
+              {/* Campo Opcional para Motivo de Desistimiento */}
+              <div style={{ marginBottom: '16px' }}>
+                <label
+                  htmlFor={`${componentId}-cancel-reason`}
+                  style={{
+                    display: 'block',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: '#334155',
+                    marginBottom: '6px',
+                  }}
+                >
+                  Motivo de desistimiento (opcional):
+                </label>
+                <textarea
+                  id={`${componentId}-cancel-reason`}
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value.slice(0, 300))}
+                  maxLength={300}
+                  rows={3}
+                  placeholder="Describe brevemente el motivo (ej. cruce de horario académico, imprevisto de salud...)"
+                  disabled={isSubmittingCancel}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '6px',
+                    border: '1px solid #CBD5E1',
+                    fontSize: '13px',
+                    boxSizing: 'border-box',
+                    resize: 'vertical',
+                    fontFamily: 'inherit',
+                  }}
+                />
+                <div style={{ textAlign: 'right', fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                  {cancelReason.length} / 300 caracteres
+                </div>
+              </div>
+
+              {/* Errores dentro del Diálogo */}
+              {cancelError && (
+                <div
+                  role="alert"
+                  style={{
+                    backgroundColor: cancelError.includes('ℹ️') ? '#EFF6FF' : '#FEF2F2',
+                    border: `1px solid ${cancelError.includes('ℹ️') ? '#93C5FD' : '#FCA5A5'}`,
+                    borderRadius: '6px',
+                    padding: '10px 14px',
+                    marginBottom: '16px',
+                    color: cancelError.includes('ℹ️') ? '#1E40AF' : '#991B1B',
+                    fontSize: '12px',
+                  }}
+                >
+                  {cancelError}
+                </div>
+              )}
+
+              {/* Botones de Acción */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '12px',
+                  marginTop: '10px',
+                }}
+              >
+                <button
+                  ref={cancelDismissBtnRef}
+                  type="button"
+                  onClick={handleCloseCancelDialog}
+                  disabled={isSubmittingCancel}
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    color: '#475569',
+                    border: '1px solid #CBD5E1',
+                    borderRadius: '6px',
+                    padding: '9px 18px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: isSubmittingCancel ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  Volver
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExecuteCancel}
+                  disabled={isSubmittingCancel}
+                  style={{
+                    backgroundColor: isSubmittingCancel ? '#9CA3AF' : '#DC2626',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '9px 20px',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: isSubmittingCancel ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  {isSubmittingCancel ? 'Procesando desistimiento...' : 'Confirmar Desistimiento'}
                 </button>
               </div>
             </div>

@@ -260,7 +260,7 @@ describe('StudentBookingsView Component (T-25 / RF13 / CUS24 / RN-08 / RN-09 / R
 
       const disabledBtn = screen.getByRole('button', { name: /Plazo Vencido/i });
       expect(disabledBtn).toBeDisabled();
-      expect(screen.getByText(/Ventana de ratificación cerrada/i)).toBeInTheDocument();
+      expect(screen.getByText(/Ventana.*cerrada/i)).toBeInTheDocument();
     });
 
     it('deshabilita el botón cuando la antelación es menor a 24 horas (T=12h)', async () => {
@@ -355,7 +355,7 @@ describe('StudentBookingsView Component (T-25 / RF13 / CUS24 / RN-08 / RN-09 / R
       fireEvent.click(screen.getByRole('button', { name: /Confirmar Asistencia/i }));
       expect(screen.getByRole('dialog')).toBeInTheDocument();
 
-      const cancelBtn = screen.getByRole('button', { name: /Cancelar/i });
+      const cancelBtn = screen.getByRole('button', { name: /^Cancelar$/i });
       fireEvent.click(cancelBtn);
 
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -603,6 +603,417 @@ describe('StudentBookingsView Component (T-25 / RF13 / CUS24 / RN-08 / RN-09 / R
       });
 
       expect(spyGet).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  // ==========================================================================
+  // 7. Desistimiento Voluntario de Reservas (T-27 / RF14 / CUS17 / RN-10 / PB-015)
+  // ==========================================================================
+  describe('7. Desistimiento Voluntario de Reservas (T-27 / RF14 / CUS17 / RN-10 / PB-015)', () => {
+    it('muestra el botón Cancelar Reserva / Desistir habilitado en reserva pendiente dentro de plazo', async () => {
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([samplePendingBooking]);
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
+      });
+
+      const cancelBtn = screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i });
+      expect(cancelBtn).toBeEnabled();
+    });
+
+    it('muestra el botón Cancelar Reserva / Desistir habilitado en reserva confirmada dentro de plazo', async () => {
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([sampleConfirmedBooking]);
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0102')).toBeInTheDocument();
+      });
+
+      const cancelBtn = screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i });
+      expect(cancelBtn).toBeEnabled();
+    });
+
+    it('no muestra el botón de desistir en reservas ya canceladas', async () => {
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([sampleCancelledBooking]);
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0103')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByRole('button', { name: /Cancelar Reserva \/ Desistir/i })).not.toBeInTheDocument();
+      expect(screen.getByText('Reserva no activa')).toBeInTheDocument();
+    });
+
+    it('deshabilita la opción de desistir con aviso de plazo cerrado en el límite exacto de 24 horas', async () => {
+      const boundaryBooking: BookingDetailResponse = {
+        ...samplePendingBooking,
+        id_reserva: 201,
+        codigo_reserva: 'RES-BOUNDARY-24H',
+        fecha_inicio: sessionIn24h,
+      };
+
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([boundaryBooking]);
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-BOUNDARY-24H')).toBeInTheDocument();
+      });
+
+      const disabledCancelBtn = screen.getByRole('button', { name: /Desistimiento Cerrado \(T-24h\)/i });
+      expect(disabledCancelBtn).toBeDisabled();
+    });
+
+    it('deshabilita la opción de desistir cuando la antelación es menor a 24 horas (T=12h)', async () => {
+      const lateBooking: BookingDetailResponse = {
+        ...sampleConfirmedBooking,
+        id_reserva: 202,
+        codigo_reserva: 'RES-LATE-12H',
+        fecha_inicio: sessionIn12h,
+      };
+
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([lateBooking]);
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-LATE-12H')).toBeInTheDocument();
+      });
+
+      const disabledCancelBtn = screen.getByRole('button', { name: /Desistimiento Cerrado \(T-24h\)/i });
+      expect(disabledCancelBtn).toBeDisabled();
+    });
+
+    it('abre el diálogo accesible con detalles de la sesión y política RN-10 al presionar Desistir', async () => {
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([samplePendingBooking]);
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
+      });
+
+      const cancelBtn = screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i });
+      fireEvent.click(cancelBtn);
+
+      const dialog = screen.getByRole('dialog');
+      expect(dialog).toBeInTheDocument();
+      expect(dialog).toHaveAttribute('aria-modal', 'true');
+      expect(screen.getByText(/Desistimiento Voluntario de Cupo/i)).toBeInTheDocument();
+      expect(screen.getByText(/Política de Desistimiento y Liberación de Cupo/i)).toBeInTheDocument();
+      expect(screen.getByText(/Liberación efectiva del aforo/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Motivo de desistimiento \(opcional\):/i)).toBeInTheDocument();
+    });
+
+    it('permite ingresar el motivo de cancelación respetando el límite de caracteres', async () => {
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([samplePendingBooking]);
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i }));
+
+      const textarea = screen.getByLabelText(/Motivo de desistimiento \(opcional\):/i) as HTMLTextAreaElement;
+      fireEvent.change(textarea, { target: { value: 'Cruce horario con laboratorio de Redes' } });
+
+      expect(textarea.value).toBe('Cruce horario con laboratorio de Redes');
+      expect(screen.getByText(/38 \/ 300 caracteres/i)).toBeInTheDocument();
+    });
+
+    it('cierra el diálogo sin ejecutar cancelación al presionar el botón Volver', async () => {
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([samplePendingBooking]);
+      const spyCancel = vi.spyOn(bookingService, 'cancelReservation');
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i }));
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      const backBtn = screen.getByRole('button', { name: /^Volver$/i });
+      fireEvent.click(backBtn);
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(spyCancel).not.toHaveBeenCalled();
+    });
+
+    it('cierra el diálogo de desistimiento al presionar la tecla Escape', async () => {
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([samplePendingBooking]);
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i }));
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      act(() => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      });
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('cierra el diálogo al presionar el botón de cierre X de la cabecera', async () => {
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([samplePendingBooking]);
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i }));
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      const closeBtn = screen.getByRole('button', { name: /Cerrar diálogo de desistimiento/i });
+      fireEvent.click(closeBtn);
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('ejecuta cancelReservation con éxito, cierra el diálogo, notifica y refresca a CANCELADA_USUARIO', async () => {
+      bookingService.seedBooking(samplePendingBooking);
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
+      });
+
+      // Abrir diálogo de desistimiento
+      fireEvent.click(screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i }));
+
+      // Ingresar motivo
+      const textarea = screen.getByLabelText(/Motivo de desistimiento \(opcional\):/i);
+      fireEvent.change(textarea, { target: { value: 'Imprevisto de salud con certificado médico' } });
+
+      // Confirmar desistimiento
+      const confirmCancelBtn = screen.getByRole('button', { name: /Confirmar Desistimiento/i });
+      fireEvent.click(confirmCancelBtn);
+
+      await waitFor(() => {
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      });
+
+      // Notificación de éxito
+      expect(screen.getByRole('alert')).toHaveTextContent(/cancelada con éxito! La vacante ha sido liberada/i);
+      // Nueva insignia en la tarjeta
+      expect(screen.getByText('Desistimiento Voluntario')).toBeInTheDocument();
+      expect(screen.getByText(/Imprevisto de salud con certificado médico/i)).toBeInTheDocument();
+    });
+
+    it('muestra aviso pedagógico cuando el backend retorna ENDPOINT_NOT_IMPLEMENTED (T-28 en desarrollo)', async () => {
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([samplePendingBooking]);
+      vi.spyOn(bookingService, 'cancelReservation').mockRejectedValueOnce(
+        new BookingException(
+          'ENDPOINT_NOT_IMPLEMENTED',
+          'El endpoint POST /api/v1/bookings/{id_reserva}/cancel está en desarrollo por Renzo',
+          501
+        )
+      );
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Confirmar Desistimiento/i }));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Integración pendiente en backend \(T-28\)/i)
+        ).toBeInTheDocument();
+      });
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('maneja error WINDOW_CLOSED_T24H informando infracción de antelación para desistimiento', async () => {
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([samplePendingBooking]);
+      vi.spyOn(bookingService, 'cancelReservation').mockRejectedValueOnce(
+        new BookingException('WINDOW_CLOSED_T24H', 'Plazo cerrado', 400)
+      );
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Confirmar Desistimiento/i }));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Infracción de RN-10: El desistimiento voluntario solo está permitido/i)
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('maneja error ALREADY_CANCELLED en el diálogo de desistimiento', async () => {
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([samplePendingBooking]);
+      vi.spyOn(bookingService, 'cancelReservation').mockRejectedValueOnce(
+        new BookingException('ALREADY_CANCELLED', 'Ya cancelada', 400)
+      );
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Confirmar Desistimiento/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/Esta reserva ya fue cancelada con anterioridad/i)).toBeInTheDocument();
+      });
+    });
+
+    it('maneja error FORBIDDEN si se intenta desistir de una reserva ajena', async () => {
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([samplePendingBooking]);
+      vi.spyOn(bookingService, 'cancelReservation').mockRejectedValueOnce(
+        new BookingException('FORBIDDEN', 'No autorizado', 403)
+      );
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Confirmar Desistimiento/i }));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/No tienes autorización para cancelar una reserva de otro estudiante/i)
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('maneja error de red NETWORK_ERROR en desistimiento', async () => {
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([samplePendingBooking]);
+      vi.spyOn(bookingService, 'cancelReservation').mockRejectedValueOnce(
+        new BookingException('NETWORK_ERROR', 'Offline')
+      );
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Confirmar Desistimiento/i }));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/No fue posible contactar al servidor. Verifica tu conectividad/i)
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('previene envíos duplicados de desistimiento deshabilitando los botones mientras procesa', async () => {
+      let resolveCancel!: (value: BookingDetailResponse) => void;
+      const pendingPromise = new Promise<BookingDetailResponse>((resolve) => {
+        resolveCancel = resolve;
+      });
+
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([samplePendingBooking]);
+      vi.spyOn(bookingService, 'cancelReservation').mockReturnValue(pendingPromise);
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i }));
+      const submitBtn = screen.getByRole('button', { name: /Confirmar Desistimiento/i });
+      fireEvent.click(submitBtn);
+
+      expect(screen.getByRole('button', { name: /Procesando desistimiento.../i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /^Volver$/i })).toBeDisabled();
+
+      await act(async () => {
+        resolveCancel({
+          ...samplePendingBooking,
+          estado: 'CANCELADA_USUARIO',
+          motivo_cancelacion: 'Cancelación procesada',
+        });
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      });
+    });
+
+    it('recorta espacios en blanco en el motivo antes de despachar la petición', async () => {
+      const spyCancel = vi.spyOn(bookingService, 'cancelReservation').mockResolvedValue({
+        ...samplePendingBooking,
+        estado: 'CANCELADA_USUARIO',
+        motivo_cancelacion: 'Motivo limpio',
+      });
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([samplePendingBooking]);
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i }));
+
+      const textarea = screen.getByLabelText(/Motivo de desistimiento \(opcional\):/i);
+      fireEvent.change(textarea, { target: { value: '   Motivo con espacios alrededor   ' } });
+
+      fireEvent.click(screen.getByRole('button', { name: /Confirmar Desistimiento/i }));
+
+      await waitFor(() => {
+        expect(spyCancel).toHaveBeenCalledWith(
+          samplePendingBooking.id_reserva,
+          'Motivo con espacios alrededor',
+          studentEmail
+        );
+      });
+    });
+
+    it('permite desistir con 25 horas de anticipación (caso de borde positivo de RN-10)', async () => {
+      const sessionIn25h = new Date(fixedNow + 25 * 3600 * 1000).toISOString();
+      const nearBooking: BookingDetailResponse = {
+        ...samplePendingBooking,
+        id_reserva: 205,
+        codigo_reserva: 'RES-NEAR-25H',
+        fecha_inicio: sessionIn25h,
+      };
+
+      vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([nearBooking]);
+
+      render(<StudentBookingsView studentEmail={studentEmail} currentTime={fixedNow} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('RES-NEAR-25H')).toBeInTheDocument();
+      });
+
+      // Con 25 horas, el botón de desistimiento debe estar habilitado
+      const cancelBtn = screen.getByRole('button', { name: /Cancelar Reserva \/ Desistir/i });
+      expect(cancelBtn).toBeEnabled();
     });
   });
 });
