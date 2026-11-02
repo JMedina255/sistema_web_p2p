@@ -14,6 +14,9 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
     recommendationService.setMode('mock');
     bookingService.setMode('mock');
     bookingService.getMockAdapter().resetToDefaults();
+    // Autenticación institucional por defecto para pruebas de flujo
+    const testPayload = { sub: studentEmail, role: 'MENTOREADO' };
+    authService.saveToken(`h.${btoa(JSON.stringify(testPayload))}.s`);
   });
 
   afterEach(() => {
@@ -383,5 +386,25 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
 
     // bookingService NO debe haber sido invocado con un ID espurio o inventado
     expect(reserveSpy).not.toHaveBeenCalled();
+  });
+
+  it('11. Bloquea el flujo de reserva e induce autenticación si no existe sesión institucional activa (Auditoría B.2)', async () => {
+    authService.clearToken();
+    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: /Recomendaciones & Reservas/i }));
+
+    const reserveButtons = await screen.findAllByRole('button', { name: /Reservar Cupo/i });
+    fireEvent.click(reserveButtons[0]);
+
+    // Debe mostrar alerta institucional y no abrir el diálogo de reserva
+    expect(alertMock).toHaveBeenCalledWith(
+      expect.stringMatching(/Debes iniciar sesión con tu cuenta institucional @upt\.pe/i)
+    );
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    // Debe inducir la navegación hacia el login
+    expect(screen.getByRole('button', { name: /Acceso & OTP/i })).toBeInTheDocument();
   });
 });

@@ -411,5 +411,20 @@ describe('bookingService (T-23 / CUS04 / RF12 / RN-05 / RN-08 / RNF07)', () => {
       bookingService.setBaseUrl('http://servidor-upt:9000/');
       expect(bookingService.getBaseUrl()).toBe('http://servidor-upt:9000');
     });
+
+    it('impide activar modo mock en compilaciones de producción (Auditoría B.1)', () => {
+      vi.stubEnv('PROD', true);
+      try {
+        bookingService.setMode('api');
+        expect(bookingService.getMode()).toBe('api');
+
+        // Intento de conmutar a mock debe ser rechazado
+        bookingService.setMode('mock');
+        expect(bookingService.getMode()).toBe('api');
+      } finally {
+        vi.unstubAllEnvs();
+        bookingService.setMode('mock');
+      }
+    });
   });
 });

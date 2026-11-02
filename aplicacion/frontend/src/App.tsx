@@ -47,8 +47,9 @@ export const App: React.FC = () => {
   const [bookingSuccessData, setBookingSuccessData] = useState<BookingSuccessData | null>(null);
   const [feedRefreshKey, setFeedRefreshKey] = useState(0);
 
-  // Resolución de la identidad del estudiante desde token o fallback institucional UPT
-  const resolveStudentEmail = (): string => {
+  // Resolución estricta de la identidad del estudiante desde token JWT institucional (Auditoría B.2)
+  // No se permite fallback con identidades ficticias: la ausencia de token produce acceso restringido
+  const resolveStudentEmail = (): string | null => {
     const token = authService.getToken();
     if (token) {
       try {
@@ -64,16 +65,21 @@ export const App: React.FC = () => {
           }
         }
       } catch {
-        // Fallback si el token no es JWT estándar decodificable
+        // Fallback seguro si el token no es decodificable
       }
     }
-    return '2022074255@upt.pe';
+    return null;
   };
 
   const studentEmail = resolveStudentEmail();
 
   // Apertura del modal al seleccionar una oferta de la cartelera
   const handleSelectOffer = (offer: OfferRecommendationItem) => {
+    if (!studentEmail) {
+      alert('Debes iniciar sesión con tu cuenta institucional @upt.pe para reservar una mentoría.');
+      setActiveTab('auth');
+      return;
+    }
     setSelectedOffer(offer);
     setBookingError(null);
     setBookingSuccessData(null);
@@ -117,6 +123,11 @@ export const App: React.FC = () => {
         setBookingError(
           `Identificador de sesión inválido ("${offer.id_oferta}"). La oferta debe poseer un identificador numérico canónico estricto.`
         );
+        return;
+      }
+
+      if (!studentEmail) {
+        setBookingError('Se requiere una sesión institucional activa para formalizar reservas.');
         return;
       }
 
@@ -447,13 +458,13 @@ export const App: React.FC = () => {
           <>
             <RecommendationFeedView
               key={feedRefreshKey}
-              menteeEmail={studentEmail}
+              menteeEmail={studentEmail ?? undefined}
               onSelectOffer={handleSelectOffer}
             />
             <BookingModalView
               isOpen={isBookingModalOpen}
               offer={selectedOffer}
-              currentUserEmail={studentEmail}
+              currentUserEmail={studentEmail ?? ''}
               isSubmitting={isSubmittingBooking}
               error={bookingError}
               successData={bookingSuccessData}
