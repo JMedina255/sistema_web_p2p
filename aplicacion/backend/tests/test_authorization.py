@@ -202,3 +202,41 @@ def test_production_unauthenticated_request_rejected(monkeypatch):
     )
     assert res_promote.status_code == 401
     assert "Se requiere autenticación" in res_promote.json()["detail"]
+
+    # Intento de reservar en producción sin token
+    res_reserve = client.post(
+        "/api/v1/bookings/reserve",
+        json={"id_sesion": 1, "estudiante_email": "estudiante@upt.pe"},
+    )
+    assert res_reserve.status_code == 401
+    assert "entornos de producción se requiere cabecera Authorization" in res_reserve.json()["detail"]
+
+
+def test_reserve_booking_admin_substring_in_email_does_not_grant_admin_privileges():
+    """Valida que un correo que contenga la subcadena 'admin' no obtenga privilegios ilegítimos."""
+    fake_admin_email = "admin_student@upt.pe"
+    victim_email = "victima2026@upt.pe"
+    token = create_access_token({"sub": fake_admin_email, "roles": ["mentoreado"]})
+
+    res = client.post(
+        "/api/v1/bookings/reserve",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"id_sesion": 1, "estudiante_email": victim_email},
+    )
+    assert res.status_code == 403
+    assert "no tiene permisos" in res.json()["detail"] or "No tiene autorización" in res.json()["detail"]
+
+
+def test_reserve_booking_with_verified_admin_role_permits_override():
+    """Valida que un usuario con claim verificado 'administrador' pueda reservar para un estudiante."""
+    admin_email = "coordinador.epis@upt.pe"
+    target_student = "2023078888@upt.pe"
+    token_admin = create_access_token({"sub": admin_email, "roles": ["administrador"]})
+
+    res = client.post(
+        "/api/v1/bookings/reserve",
+        headers={"Authorization": f"Bearer {token_admin}"},
+        json={"id_sesion": 1, "estudiante_email": target_student},
+    )
+    assert res.status_code == 201
+    assert res.json()["estudiante_email"] == target_student

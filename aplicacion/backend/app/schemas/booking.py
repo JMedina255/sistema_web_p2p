@@ -20,6 +20,19 @@ class BookingCreatePayload(BaseModel):
         return clean
 
 
+class BookingCancelPayload(BaseModel):
+    """
+    Payload opcional para el desistimiento voluntario de reserva de cupo (RF14 / CUS17 / RN-10).
+    Permite registrar opcionalmente el motivo pedagógico o administrativo de la cancelación (máximo 300 caracteres).
+    """
+
+    motivo: str | None = Field(
+        None,
+        max_length=300,
+        description="Motivo voluntario del desistimiento (máximo 300 caracteres).",
+    )
+
+
 class BookingResponse(BaseModel):
     """
     Respuesta canónica de confirmación de reserva provisional (HTTP 201 Created).
