@@ -5,9 +5,22 @@ import { LoginOtpView } from './components/LoginOtpView';
 import { ConsentModalView } from './components/ConsentModalView';
 import { ProfileAvailabilityView } from './components/ProfileAvailabilityView';
 import { OfferPublishView } from './components/OfferPublishView';
+import { RecommendationFeedView } from './components/RecommendationFeedView';
+import { BookingModalView, type BookingSuccessData } from './components/BookingModalView';
+import { bookingService, BookingException } from './services/bookingService';
+import { authService } from './services/authService';
+import type { OfferRecommendationItem } from './services/recommendationService';
 
 export const App: React.FC = () => {
-  type NavTab = 'auth' | 'consent' | 'curriculum' | 'profile' | 'offers' | 'services';
+  type NavTab =
+    | 'auth'
+    | 'consent'
+    | 'curriculum'
+    | 'profile'
+    | 'offers'
+    | 'recommendations'
+    | 'services';
+
   const [activeTab, setActiveTab] = useState<NavTab>(() => {
     if (typeof window !== 'undefined' && window.location) {
       const p = new URLSearchParams(window.location.search).get('tab');
@@ -17,13 +30,120 @@ export const App: React.FC = () => {
         p === 'auth' ||
         p === 'consent' ||
         p === 'profile' ||
-        p === 'offers'
+        p === 'offers' ||
+        p === 'recommendations'
       ) {
         return p;
       }
     }
     return 'auth';
   });
+
+  // Estado del flujo integrado de reservas (T-20 -> T-21 -> T-23)
+  const [selectedOffer, setSelectedOffer] = useState<OfferRecommendationItem | null>(null);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [bookingSuccessData, setBookingSuccessData] = useState<BookingSuccessData | null>(null);
+  const [feedRefreshKey, setFeedRefreshKey] = useState(0);
+
+  // Resolución de la identidad del estudiante desde token o fallback institucional UPT
+  const resolveStudentEmail = (): string => {
+    const token = authService.getToken();
+    if (token) {
+      try {
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          const payloadJson = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+          const payload = JSON.parse(payloadJson);
+          if (payload.sub && typeof payload.sub === 'string' && payload.sub.includes('@')) {
+            return payload.sub.trim().toLowerCase();
+          }
+          if (payload.email && typeof payload.email === 'string') {
+            return payload.email.trim().toLowerCase();
+          }
+        }
+      } catch {
+        // Fallback si el token no es JWT estándar decodificable
+      }
+    }
+    return '2022074255@upt.pe';
+  };
+
+  const studentEmail = resolveStudentEmail();
+
+  // Apertura del modal al seleccionar una oferta de la cartelera
+  const handleSelectOffer = (offer: OfferRecommendationItem) => {
+    setSelectedOffer(offer);
+    setBookingError(null);
+    setBookingSuccessData(null);
+    setIsBookingModalOpen(true);
+  };
+
+  // Cierre del modal de reservas
+  const handleCloseBookingModal = () => {
+    setIsBookingModalOpen(false);
+    setSelectedOffer(null);
+    setBookingError(null);
+    setBookingSuccessData(null);
+  };
+
+  // Confirmación de reserva transaccional consumiendo bookingService
+  const handleConfirmReservation = async (offer: OfferRecommendationItem) => {
+    try {
+      setIsSubmittingBooking(true);
+      setBookingError(null);
+
+      // Validación estricta del identificador canónico de sesión (T-23 / Auditoría Fase B)
+      // Se rechazan cadenas no numéricas arbitrarias para impedir transformar accidentalmente una oferta en una sesión equivocada
+      const rawId = String(offer.id_oferta || '').trim();
+      let sesionId: number | null = null;
+
+      if (typeof offer.id_sesion === 'number') {
+        const directNum = offer.id_sesion;
+        if (Number.isInteger(directNum) && directNum > 0) {
+          sesionId = directNum;
+        }
+      }
+
+      if (sesionId === null && /^\d+$/.test(rawId)) {
+        const parsed = parseInt(rawId, 10);
+        if (Number.isInteger(parsed) && parsed > 0) {
+          sesionId = parsed;
+        }
+      }
+
+      if (sesionId === null) {
+        setBookingError(
+          `Identificador de sesión inválido ("${offer.id_oferta}"). La oferta debe poseer un identificador numérico canónico estricto.`
+        );
+        return;
+      }
+
+      const response = await bookingService.reserveSeat({
+        id_sesion: sesionId,
+        estudiante_email: studentEmail,
+      });
+
+      setBookingSuccessData(response);
+      // Sincronizar disponibilidad en la cartelera tras confirmación exitosa
+      setFeedRefreshKey((prev) => prev + 1);
+    } catch (err: unknown) {
+      if (err instanceof BookingException) {
+        setBookingError(err.message);
+        if (err.code === 'CAPACITY_EXCEEDED') {
+          // Si colisiona el aforo por concurrencia, refrescamos el feed para reflejar las vacantes agotadas
+          setFeedRefreshKey((prev) => prev + 1);
+        }
+      } else if (err instanceof Error) {
+        setBookingError(err.message);
+      } else {
+        setBookingError('Error inesperado al procesar la reserva provisional.');
+      }
+    } finally {
+      setIsSubmittingBooking(false);
+    }
+  };
 
   return (
     <div
@@ -90,7 +210,7 @@ export const App: React.FC = () => {
                 border: '1px solid rgba(255, 255, 255, 0.2)',
               }}
             >
-              Sprint 3 · Publicación de Ofertas (T-14)
+              Sprint 4 · Recomendaciones Top-k y Reservas Transaccionales (T-23)
             </span>
             <a
               href="http://localhost:8000/docs"
@@ -220,6 +340,24 @@ export const App: React.FC = () => {
 
           <button
             type="button"
+            onClick={() => setActiveTab('recommendations')}
+            style={{
+              background: activeTab === 'recommendations' ? '#1C2A59' : '#F1F5F9',
+              color: activeTab === 'recommendations' ? '#FFFFFF' : '#475569',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '0.5rem 1rem',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            🎯 Recomendaciones & Reservas (T-20 / T-21 / T-23)
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab('services')}
             style={{
               background: activeTab === 'services' ? '#1C2A59' : '#F1F5F9',
@@ -260,7 +398,7 @@ export const App: React.FC = () => {
               marginBottom: '0.5rem',
             }}
           >
-            Sprint 3 · Construcción de Software I (2026-II)
+            Sprint 4 · Construcción de Software I (2026-II)
           </span>
           <h2 style={{ fontSize: '1.75rem', color: '#1C2A59', margin: '0 0 0.5rem 0', fontWeight: 800 }}>
             {activeTab === 'auth'
@@ -273,6 +411,8 @@ export const App: React.FC = () => {
               ? 'Configuración de Perfil Formativo y Disponibilidad Horaria (T-11)'
               : activeTab === 'offers'
               ? 'Publicación y Parametrización de Ofertas de Mentoría (T-14)'
+              : activeTab === 'recommendations'
+              ? 'Cartelera Top-k Explicable y Reserva Transaccional (T-20 / T-21 / T-23)'
               : 'Infraestructura Base: React + FastAPI + Supabase'}
           </h2>
           <p style={{ margin: '0 auto', maxWidth: '680px', fontSize: '0.88rem', color: '#64748B', lineHeight: 1.6 }}>
@@ -286,8 +426,9 @@ export const App: React.FC = () => {
               ? 'Selección de intereses/fortalezas y agenda semanal en bloques de 1 hora con validación de mérito RN-03 (RF04 / CUS15).'
               : activeTab === 'offers'
               ? 'Programación de sesiones de mentoría con validación de antelación obligatoria RN-04 (>24h), aforos estándar inmutables RN-05 (10 presencial / 20 virtual) y asignación de infraestructura (RF08 / CUS06).'
-              : 'Monitoreo de comunicación asíncrona entre la SPA cliente (React 19 / TypeScript / Vite), FastAPI y Supabase.'
-            }
+              : activeTab === 'recommendations'
+              ? 'Inferencia adaptativa EdRecSys con explicabilidad transparente (XAI) y formalización atómica de reservas provisionales bajo control de aforo (RF06 / RF12 / CUS02 / CUS04 / RN-05 / RN-08).'
+              : 'Monitoreo de comunicación asíncrona entre la SPA cliente (React 19 / TypeScript / Vite), FastAPI y Supabase.'}
           </p>
         </div>
 
@@ -302,6 +443,24 @@ export const App: React.FC = () => {
           <ProfileAvailabilityView />
         ) : activeTab === 'offers' ? (
           <OfferPublishView />
+        ) : activeTab === 'recommendations' ? (
+          <>
+            <RecommendationFeedView
+              key={feedRefreshKey}
+              menteeEmail={studentEmail}
+              onSelectOffer={handleSelectOffer}
+            />
+            <BookingModalView
+              isOpen={isBookingModalOpen}
+              offer={selectedOffer}
+              currentUserEmail={studentEmail}
+              isSubmitting={isSubmittingBooking}
+              error={bookingError}
+              successData={bookingSuccessData}
+              onClose={handleCloseBookingModal}
+              onConfirmReservation={handleConfirmReservation}
+            />
+          </>
         ) : (
           <HealthStatus />
         )}
@@ -326,44 +485,44 @@ export const App: React.FC = () => {
             }}
           >
             <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
+              🎯 T-20: Recomendaciones Top-k (RF06 / CUS02 / RN-11)
+            </strong>
+            <span style={{ color: '#64748B' }}>
+              Motor híbrido con afinidad curricular, solapamiento Jaccard/Dice, disponibilidad horaria y multiplicador 1.3x para asignaturas críticas.
+            </span>
+          </div>
+
+          <div
+            style={{
+              background: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '8px',
+              padding: '1rem',
+              fontSize: '0.82rem',
+            }}
+          >
+            <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
+              🎟️ T-21 & T-23: Reserva Transaccional (RF12 / CUS04 / RN-05 / RN-08)
+            </strong>
+            <span style={{ color: '#64748B' }}>
+              Bloqueo pesimista concurrente en PostgreSQL, aforo estricto (10 presencial / 20 virtual) y ventana perentoria hasta T-24h para quórum.
+            </span>
+          </div>
+
+          <div
+            style={{
+              background: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '8px',
+              padding: '1rem',
+              fontSize: '0.82rem',
+            }}
+          >
+            <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
               ⚖️ T-04: Ley N° 29733 (RF02 / RN-02)
             </strong>
             <span style={{ color: '#64748B' }}>
               Consentimiento legal previo, libre e informado. El rechazo bloquea preventivamente el acceso a la plataforma.
-            </span>
-          </div>
-
-          <div
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid #E2E8F0',
-              borderRadius: '8px',
-              padding: '1rem',
-              fontSize: '0.82rem',
-            }}
-          >
-            <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              🔍 T-10: Catálogo Avanzado (RF05 / CUS21)
-            </strong>
-            <span style={{ color: '#64748B' }}>
-              Buscador en tiempo real con filtrado profundo por código, nombre y unidades temáticas silábicas oficiales.
-            </span>
-          </div>
-
-          <div
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid #E2E8F0',
-              borderRadius: '8px',
-              padding: '1rem',
-              fontSize: '0.82rem',
-            }}
-          >
-            <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              📅 T-11: Perfiles & Agenda (RF04 / CUS15)
-            </strong>
-            <span style={{ color: '#64748B' }}>
-              Matriz interactiva semanal (L-S) y validación de mérito RN-03 (mentores en ciclos VII a X).
             </span>
           </div>
 
