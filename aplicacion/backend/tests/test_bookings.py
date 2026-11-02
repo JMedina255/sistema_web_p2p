@@ -12,7 +12,11 @@ from app.main import app
 from app.models.booking import ReservaCupo
 from app.models.curriculum import Asignatura, TemaConceptual
 from app.models.offer import SesionMentoria
-from app.schemas.booking import BookingCreatePayload, MentoringDemandPayload
+from app.schemas.booking import (
+    BookingCancelPayload,
+    BookingCreatePayload,
+    MentoringDemandPayload,
+)
 from app.services.booking_service import (
     BookingService,
     _memory_bookings,
@@ -1379,4 +1383,444 @@ def test_confirm_attendance_success_in_real_db():
         assert persisted.fecha_ratificacion is not None
     finally:
         db.close()
+
+
+# ============================================================================
+# Pruebas T-28: Desistimiento Voluntario y Liberación Atómica de Cupos (RF14/CUS17/RN-10)
+# ============================================================================
+
+
+def test_cancel_reservation_success_in_memory_from_pending():
+    """Valida el desistimiento voluntario desde estado PENDIENTE_CONFIRMACION en memoria."""
+    now = datetime.now(UTC)
+    student = "2022074255@upt.pe"
+    token = create_access_token({"sub": student, "roles": ["mentoreado"]})
+
+    _memory_bookings.append(
+        {
+            "id_reserva": 801,
+            "codigo_reserva": "RES-MEM-801",
+            "id_sesion": 1,
+            "estudiante_email": student,
+            "estado": "PENDIENTE_CONFIRMACION",
+            "fecha_reserva": (now - timedelta(hours=2)).isoformat(),
+            "fecha_inicio": (now + timedelta(hours=48)).isoformat(),
+        }
+    )
+
+    res = client.post(
+        "/api/v1/bookings/801/cancel",
+        json={"motivo": "Cruce de horario con examen de laboratorio"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["id_reserva"] == 801
+    assert data["estado"] == "CANCELADA_USUARIO"
+    assert data["motivo_cancelacion"] == "Cruce de horario con examen de laboratorio"
+
+
+def test_cancel_reservation_success_in_memory_from_confirmed():
+    """Valida el desistimiento voluntario desde estado CONFIRMADA en memoria."""
+    now = datetime.now(UTC)
+    student = "2022074255@upt.pe"
+    token = create_access_token({"sub": student, "roles": ["mentoreado"]})
+
+    _memory_bookings.append(
+        {
+            "id_reserva": 802,
+            "codigo_reserva": "RES-MEM-802",
+            "id_sesion": 1,
+            "estudiante_email": student,
+            "estado": "CONFIRMADA",
+            "fecha_reserva": (now - timedelta(hours=10)).isoformat(),
+            "fecha_ratificacion": (now - timedelta(hours=5)).isoformat(),
+            "fecha_inicio": (now + timedelta(hours=36)).isoformat(),
+        }
+    )
+
+    res = client.post(
+        "/api/v1/bookings/802/cancel",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["id_reserva"] == 802
+    assert data["estado"] == "CANCELADA_USUARIO"
+    assert data["motivo_cancelacion"] == "Desistimiento voluntario del estudiante"
+
+
+def test_cancel_reservation_atomic_seat_liberation_and_rebooking():
+    """
+    Comprueba que el desistimiento libera atómicamente el cupo de la sesión:
+    1. Una sesión de aforo 1 alcanza su capacidad máxima.
+    2. Una nueva reserva falla con 409 CAPACITY_EXCEEDED.
+    3. El estudiante titular desiste voluntariamente (T-28).
+    4. Un segundo estudiante puede reservar inmediatamente el cupo liberado.
+    """
+    now = datetime.now(UTC)
+    sesion_id = 899
+    mentor = "mentor.cupo@upt.pe"
+    student_1 = "estudiante.uno@upt.pe"
+    student_2 = "estudiante.dos@upt.pe"
+
+    token_1 = create_access_token({"sub": student_1, "roles": ["mentoreado"]})
+    token_2 = create_access_token({"sub": student_2, "roles": ["mentoreado"]})
+
+    # Registrar oferta con aforo=1 en memoria
+    _memory_offers.append(
+        {
+            "id_sesion": sesion_id,
+            "codigo_sesion": "SES-CUPOS-899",
+            "mentor_email": mentor,
+            "id_asignatura": 1,
+            "id_tema": 1,
+            "fecha_inicio": (now + timedelta(hours=72)).isoformat(),
+            "duracion_minutos": 60,
+            "modalidad": "presencial",
+            "aforo_maximo": 1,
+            "espacio_asignado": "Laboratorio 3",
+            "estado": "PUBLICADA",
+        }
+    )
+
+    # Estudiante 1 reserva el único cupo disponible
+    res_b1 = client.post(
+        "/api/v1/bookings/reserve",
+        json={"id_sesion": sesion_id, "estudiante_email": student_1},
+        headers={"Authorization": f"Bearer {token_1}"},
+    )
+    assert res_b1.status_code == 201
+    id_reserva_1 = res_b1.json()["id_reserva"]
+
+    # Estudiante 2 intenta reservar -> Rechazado por aforo completo 409
+    res_b2_fail = client.post(
+        "/api/v1/bookings/reserve",
+        json={"id_sesion": sesion_id, "estudiante_email": student_2},
+        headers={"Authorization": f"Bearer {token_2}"},
+    )
+    assert res_b2_fail.status_code == 409
+    assert "CAPACITY_EXCEEDED" in res_b2_fail.json()["detail"]
+
+    # Estudiante 1 desiste voluntariamente de la reserva
+    res_cancel = client.post(
+        f"/api/v1/bookings/{id_reserva_1}/cancel",
+        json={"motivo": "Liberando cupo para compañero"},
+        headers={"Authorization": f"Bearer {token_1}"},
+    )
+    assert res_cancel.status_code == 200
+    assert res_cancel.json()["estado"] == "CANCELADA_USUARIO"
+
+    # Estudiante 2 reserva ahora el cupo liberado -> Debe ser exitoso (201)
+    res_b2_ok = client.post(
+        "/api/v1/bookings/reserve",
+        json={"id_sesion": sesion_id, "estudiante_email": student_2},
+        headers={"Authorization": f"Bearer {token_2}"},
+    )
+    assert res_b2_ok.status_code == 201
+    assert res_b2_ok.json()["estado"] == "PENDIENTE_CONFIRMACION"
+
+
+def test_cancel_reservation_rejects_already_cancelled_400():
+    """Rechaza con 400 ALREADY_CANCELLED el intento de volver a cancelar una reserva."""
+    now = datetime.now(UTC)
+    student = "2022074255@upt.pe"
+    token = create_access_token({"sub": student, "roles": ["mentoreado"]})
+
+    _memory_bookings.append(
+        {
+            "id_reserva": 803,
+            "codigo_reserva": "RES-MEM-803",
+            "id_sesion": 1,
+            "estudiante_email": student,
+            "estado": "CANCELADA_USUARIO",
+            "fecha_reserva": (now - timedelta(hours=10)).isoformat(),
+            "fecha_inicio": (now + timedelta(hours=48)).isoformat(),
+        }
+    )
+
+    res = client.post(
+        "/api/v1/bookings/803/cancel",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 400
+    assert "ALREADY_CANCELLED" in res.json()["detail"]
+
+
+def test_cancel_reservation_rejects_terminal_state_400():
+    """Rechaza el desistimiento sobre estados terminales no cancelables (e.g., ASISTIDA)."""
+    now = datetime.now(UTC)
+    student = "2022074255@upt.pe"
+    token = create_access_token({"sub": student, "roles": ["mentoreado"]})
+
+    _memory_bookings.append(
+        {
+            "id_reserva": 804,
+            "codigo_reserva": "RES-MEM-804",
+            "id_sesion": 1,
+            "estudiante_email": student,
+            "estado": "ASISTIDA",
+            "fecha_reserva": (now - timedelta(hours=72)).isoformat(),
+            "fecha_inicio": (now + timedelta(hours=48)).isoformat(),
+        }
+    )
+
+    res = client.post(
+        "/api/v1/bookings/804/cancel",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 400
+    assert "INVALID_STATUS_TRANSITION" in res.json()["detail"]
+
+
+def test_cancel_reservation_rejects_antelation_under_24_hours_rn10():
+    """Rechaza el desistimiento a menos de 24 horas del inicio de la sesión (RN-10)."""
+    now = datetime.now(UTC)
+    student = "2022074255@upt.pe"
+    token = create_access_token({"sub": student, "roles": ["mentoreado"]})
+
+    _memory_bookings.append(
+        {
+            "id_reserva": 805,
+            "codigo_reserva": "RES-MEM-805",
+            "id_sesion": 1,
+            "estudiante_email": student,
+            "estado": "CONFIRMADA",
+            "fecha_reserva": (now - timedelta(hours=5)).isoformat(),
+            "fecha_inicio": (now + timedelta(hours=12)).isoformat(),  # T-12h (cerrado)
+        }
+    )
+
+    res = client.post(
+        "/api/v1/bookings/805/cancel",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 400
+    assert "WINDOW_CLOSED_T24H" in res.json()["detail"]
+
+
+def test_cancel_reservation_rejects_nonexistent_404():
+    """Retorna 404 RESERVATION_NOT_FOUND ante un ID inexistente."""
+    student = "2022074255@upt.pe"
+    token = create_access_token({"sub": student, "roles": ["mentoreado"]})
+
+    res = client.post(
+        "/api/v1/bookings/999888/cancel",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 404
+    assert "RESERVATION_NOT_FOUND" in res.json()["detail"]
+
+
+def test_cancel_reservation_rejects_other_students_reservation_403():
+    """Rechaza con 403 FORBIDDEN si un estudiante intenta cancelar la reserva de otro usuario."""
+    now = datetime.now(UTC)
+    owner = "titular@upt.pe"
+    attacker = "usurpador@upt.pe"
+    token_attacker = create_access_token({"sub": attacker, "roles": ["mentoreado"]})
+
+    _memory_bookings.append(
+        {
+            "id_reserva": 806,
+            "codigo_reserva": "RES-MEM-806",
+            "id_sesion": 1,
+            "estudiante_email": owner,
+            "estado": "PENDIENTE_CONFIRMACION",
+            "fecha_reserva": (now - timedelta(hours=2)).isoformat(),
+            "fecha_inicio": (now + timedelta(hours=48)).isoformat(),
+        }
+    )
+
+    res = client.post(
+        "/api/v1/bookings/806/cancel",
+        headers={"Authorization": f"Bearer {token_attacker}"},
+    )
+    assert res.status_code == 403
+    assert "FORBIDDEN" in res.json()["detail"]
+
+
+def test_cancel_reservation_admin_override_permitted():
+    """Permite al administrador institucional cancelar una reserva de forma administrativa."""
+    now = datetime.now(UTC)
+    owner = "estudiante.gestion@upt.pe"
+    admin = "director.epis@upt.pe"
+    token_admin = create_access_token({"sub": admin, "roles": ["administrador"]})
+
+    _memory_bookings.append(
+        {
+            "id_reserva": 807,
+            "codigo_reserva": "RES-MEM-807",
+            "id_sesion": 1,
+            "estudiante_email": owner,
+            "estado": "PENDIENTE_CONFIRMACION",
+            "fecha_reserva": (now - timedelta(hours=2)).isoformat(),
+            "fecha_inicio": (now + timedelta(hours=48)).isoformat(),
+        }
+    )
+
+    res = client.post(
+        "/api/v1/bookings/807/cancel",
+        json={"motivo": "Cancelación administrativa por cierre extraordinario de campus"},
+        headers={"Authorization": f"Bearer {token_admin}"},
+    )
+    assert res.status_code == 200
+    assert res.json()["estado"] == "CANCELADA_USUARIO"
+
+
+def test_cancel_reservation_success_in_real_db():
+    """Valida el desistimiento con persistencia relacional en base de datos SQLite/PostgreSQL."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    TestingSession = sessionmaker(bind=engine)
+    db = TestingSession()
+
+    try:
+        now = datetime.now(UTC)
+        asig = Asignatura(codigo_curso="CC-401", nombre_curso="Bases de Datos II", ciclo_plan=4, creditos=4)
+        db.add(asig)
+        db.flush()
+
+        tema = TemaConceptual(id_asignatura=asig.id_asignatura, nombre_tema="Concurrencia ACID y Bloqueos", unidad_silabica=2)
+        db.add(tema)
+        db.flush()
+
+        ses = SesionMentoria(
+            codigo_sesion="SES-TEST-CANCEL-01",
+            mentor_email="mentor.cancel@upt.pe",
+            id_asignatura=asig.id_asignatura,
+            id_tema=tema.id_tema,
+            fecha_inicio=now + timedelta(hours=48),
+            duracion_minutos=60,
+            modalidad="presencial",
+            aforo_maximo=10,
+            espacio_asignado="Aula 202",
+            estado="PUBLICADA",
+        )
+        db.add(ses)
+        db.flush()
+
+        reserva = ReservaCupo(
+            codigo_reserva="RES-DB-CANCEL-77",
+            id_sesion=ses.id_sesion,
+            estudiante_email="estudiante.cancel@upt.pe",
+            estado="PENDIENTE_CONFIRMACION",
+            fecha_reserva=now,
+        )
+        db.add(reserva)
+        db.commit()
+
+        # Desistir de la reserva
+        result = BookingService.cancel_reservation(
+            db=db,
+            id_reserva=reserva.id_reserva,
+            payload=BookingCancelPayload(motivo="Reasignación de prácticas preprofesionales"),
+            caller_email="estudiante.cancel@upt.pe",
+        )
+
+        assert result.id_reserva == reserva.id_reserva
+        assert result.estado == "CANCELADA_USUARIO"
+        assert result.motivo_cancelacion == "Reasignación de prácticas preprofesionales"
+
+        # Verificar persistencia en base de datos
+        persisted = db.query(ReservaCupo).filter(ReservaCupo.id_reserva == reserva.id_reserva).first()
+        assert persisted is not None
+        assert persisted.estado == "CANCELADA_USUARIO"
+        assert persisted.motivo_cancelacion == "Reasignación de prácticas preprofesionales"
+    finally:
+        db.close()
+
+
+def test_concurrent_cancellation_and_rebooking_rnf07():
+    """
+    RNF07 / T-28: Prueba multihilo de cancelación concurrente con competencia por cupo liberado.
+    Garantiza que la liberación y readjudicación del cupo sean atómicas y nunca excedan el aforo.
+    """
+    now = datetime.now(UTC)
+    sesion_id = 950
+    aforo_max = 2
+
+    _memory_offers.append(
+        {
+            "id_sesion": sesion_id,
+            "codigo_sesion": "SES-CONC-CANCEL-950",
+            "mentor_email": "mentor.conc@upt.pe",
+            "id_asignatura": 1,
+            "id_tema": 1,
+            "fecha_inicio": (now + timedelta(hours=48)).isoformat(),
+            "duracion_minutos": 60,
+            "modalidad": "presencial",
+            "aforo_maximo": aforo_max,
+            "espacio_asignado": "Aula 301",
+            "estado": "PUBLICADA",
+        }
+    )
+
+    # Llenar el aforo con 2 estudiantes
+    r1 = {
+        "id_reserva": 951,
+        "codigo_reserva": "RES-951",
+        "id_sesion": sesion_id,
+        "estudiante_email": "titular1@upt.pe",
+        "estado": "CONFIRMADA",
+        "fecha_reserva": (now - timedelta(hours=5)).isoformat(),
+        "fecha_inicio": (now + timedelta(hours=48)).isoformat(),
+    }
+    r2 = {
+        "id_reserva": 952,
+        "codigo_reserva": "RES-952",
+        "id_sesion": sesion_id,
+        "estudiante_email": "titular2@upt.pe",
+        "estado": "CONFIRMADA",
+        "fecha_reserva": (now - timedelta(hours=5)).isoformat(),
+        "fecha_inicio": (now + timedelta(hours=48)).isoformat(),
+    }
+    _memory_bookings.extend([r1, r2])
+
+    token_titular1 = create_access_token({"sub": "titular1@upt.pe", "roles": ["mentoreado"]})
+
+    # Concurrencia: titular1 desiste mientras 10 nuevos aspirantes compiten por el cupo liberado
+    num_aspirantes = 10
+    results = {}
+
+    def do_cancel():
+        res = client.post(
+            "/api/v1/bookings/951/cancel",
+            headers={"Authorization": f"Bearer {token_titular1}"},
+        )
+        return ("cancel", res.status_code)
+
+    def do_reserve(idx: int):
+        email = f"aspirante_{idx}@upt.pe"
+        tkn = create_access_token({"sub": email, "roles": ["mentoreado"]})
+        res = client.post(
+            "/api/v1/bookings/reserve",
+            json={"id_sesion": sesion_id, "estudiante_email": email},
+            headers={"Authorization": f"Bearer {tkn}"},
+        )
+        return (f"reserve_{idx}", res.status_code)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=num_aspirantes + 1) as executor:
+        futures = [executor.submit(do_cancel)] + [
+            executor.submit(do_reserve, i) for i in range(num_aspirantes)
+        ]
+        for f in concurrent.futures.as_completed(futures):
+            op, code = f.result()
+            results[op] = code
+
+    # El desistimiento debe haber sido exitoso
+    assert results["cancel"] == 200
+
+    # Las reservas nuevas pueden tener como máximo 1 éxito (201)
+    reserve_successes = sum(1 for k, v in results.items() if k.startswith("reserve_") and v == 201)
+    assert reserve_successes <= 1
+
+    # Verificar que el aforo final ocupado no exceda jamás el aforo máximo de 2
+    final_active = sum(
+        1
+        for b in _memory_bookings
+        if b["id_sesion"] == sesion_id and b["estado"] in ["PENDIENTE_CONFIRMACION", "CONFIRMADA"]
+    )
+    assert final_active <= aforo_max
+
+
 
