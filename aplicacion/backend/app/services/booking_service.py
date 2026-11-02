@@ -61,6 +61,13 @@ def seed_default_bookings_in_memory() -> None:
                 "fecha_ratificacion": (now - timedelta(days=1)).isoformat(),
                 "motivo_cancelacion": None,
                 "ticket_hash": "a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0",
+                "fecha_inicio": (now + timedelta(days=2)).isoformat(),
+                "nombre_asignatura": "Cálculo I",
+                "nombre_tema": "Límites y Continuidad",
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "espacio_asignado": "Laboratorio de Cómputo 101 - Pabellón G (EPIS)",
+                "mentor_email": "2022073504@upt.pe",
                 "created_at": (now - timedelta(days=2)).isoformat(),
                 "updated_at": (now - timedelta(days=1)).isoformat(),
             }
@@ -159,6 +166,7 @@ class BookingService:
         db: Session | None,
         payload: BookingCreatePayload,
         caller_email: str | None = None,
+        is_admin: bool = False,
     ) -> BookingResponse:
         """
         Formalización atómica de una reserva provisional bajo control transaccional ACID.
@@ -169,7 +177,7 @@ class BookingService:
         # Validación estricta de propiedad de reserva: solo el estudiante o admin verificado
         if caller_email:
             caller_clean = caller_email.strip().lower()
-            if caller_clean != clean_email:
+            if not is_admin and caller_clean != clean_email:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="No tiene autorización para registrar reservas a nombre de otro estudiante.",
@@ -587,15 +595,17 @@ class BookingService:
                         )
 
                     clean_caller = (caller_email or "").strip().lower()
-                    if (
-                        not is_admin
-                        and clean_caller
-                        and clean_caller != reserva.estudiante_email.strip().lower()
-                    ):
-                        raise HTTPException(
-                            status_code=status.HTTP_403_FORBIDDEN,
-                            detail="FORBIDDEN: No tiene autorización para ratificar una reserva que no le pertenece.",
-                        )
+                    if not is_admin:
+                        if not clean_caller:
+                            raise HTTPException(
+                                status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="UNAUTHORIZED: Se requiere autenticación institucional válida para ratificar la asistencia.",
+                            )
+                        if clean_caller != reserva.estudiante_email.strip().lower():
+                            raise HTTPException(
+                                status_code=status.HTTP_403_FORBIDDEN,
+                                detail="FORBIDDEN: No tiene autorización para ratificar una reserva que no le pertenece.",
+                            )
 
                     if reserva.estado == "CONFIRMADA":
                         raise HTTPException(
@@ -622,15 +632,26 @@ class BookingService:
                         )
 
                     sesion = reserva.sesion
-                    if sesion:
-                        ses_start = sesion.fecha_inicio
-                        if ses_start.tzinfo is None:
-                            ses_start = ses_start.replace(tzinfo=UTC)
-                        if ses_start <= now_utc + timedelta(hours=24):
-                            raise HTTPException(
-                                status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="WINDOW_CLOSED_T24H: La ratificación de asistencia debe realizarse como mínimo 24 horas antes del inicio de la sesión (RN-08).",
-                            )
+                    if not sesion:
+                        sesion = (
+                            db.query(SesionMentoria)
+                            .filter(SesionMentoria.id_sesion == reserva.id_sesion)
+                            .first()
+                        )
+                    if not sesion:
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"SESSION_NOT_FOUND: No se encontró la sesión de mentoría vinculada a la reserva {id_reserva}.",
+                        )
+
+                    ses_start = sesion.fecha_inicio
+                    if ses_start.tzinfo is None:
+                        ses_start = ses_start.replace(tzinfo=UTC)
+                    if ses_start <= now_utc + timedelta(hours=24):
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="WINDOW_CLOSED_T24H: La ratificación de asistencia debe realizarse como mínimo 24 horas antes del inicio de la sesión (RN-08).",
+                        )
 
                     reserva.estado = "CONFIRMADA"
                     reserva.fecha_ratificacion = now_utc
@@ -698,15 +719,17 @@ class BookingService:
                 )
 
             clean_caller = (caller_email or "").strip().lower()
-            if (
-                not is_admin
-                and clean_caller
-                and clean_caller != target_booking["estudiante_email"].strip().lower()
-            ):
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="FORBIDDEN: No tiene autorización para ratificar una reserva que no le pertenece.",
-                )
+            if not is_admin:
+                if not clean_caller:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="UNAUTHORIZED: Se requiere autenticación institucional válida para ratificar la asistencia.",
+                    )
+                if clean_caller != target_booking["estudiante_email"].strip().lower():
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="FORBIDDEN: No tiene autorización para ratificar una reserva que no le pertenece.",
+                    )
 
             if target_booking["estado"] == "CONFIRMADA":
                 raise HTTPException(
@@ -812,15 +835,17 @@ class BookingService:
                         )
 
                     clean_caller = (caller_email or "").strip().lower()
-                    if (
-                        not is_admin
-                        and clean_caller
-                        and clean_caller != reserva.estudiante_email.strip().lower()
-                    ):
-                        raise HTTPException(
-                            status_code=status.HTTP_403_FORBIDDEN,
-                            detail="FORBIDDEN: No tiene autorización para cancelar una reserva que no le pertenece.",
-                        )
+                    if not is_admin:
+                        if not clean_caller:
+                            raise HTTPException(
+                                status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="UNAUTHORIZED: Se requiere autenticación institucional válida para desistir de la reserva.",
+                            )
+                        if clean_caller != reserva.estudiante_email.strip().lower():
+                            raise HTTPException(
+                                status_code=status.HTTP_403_FORBIDDEN,
+                                detail="FORBIDDEN: No tiene autorización para cancelar una reserva que no le pertenece.",
+                            )
 
                     if reserva.estado in ("CANCELADA_USUARIO", "CANCELADA_SISTEMA"):
                         raise HTTPException(
@@ -848,15 +873,20 @@ class BookingService:
                         .first()
                     )
 
-                    if sesion:
-                        ses_start = sesion.fecha_inicio
-                        if ses_start.tzinfo is None:
-                            ses_start = ses_start.replace(tzinfo=UTC)
-                        if ses_start <= now_utc + timedelta(hours=24):
-                            raise HTTPException(
-                                status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="WINDOW_CLOSED_T24H: El desistimiento voluntario debe efectuarse con más de 24 horas de antelación al inicio de la sesión (RN-10).",
-                            )
+                    if not sesion:
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"SESSION_NOT_FOUND: No se encontró la sesión de mentoría vinculada a la reserva {id_reserva}.",
+                        )
+
+                    ses_start = sesion.fecha_inicio
+                    if ses_start.tzinfo is None:
+                        ses_start = ses_start.replace(tzinfo=UTC)
+                    if ses_start <= now_utc + timedelta(hours=24):
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="WINDOW_CLOSED_T24H: El desistimiento voluntario debe efectuarse con más de 24 horas de antelación al inicio de la sesión (RN-10).",
+                        )
 
                     # Transición atómica de estado y registro de motivo
                     reserva.estado = "CANCELADA_USUARIO"
@@ -913,15 +943,17 @@ class BookingService:
                 )
 
             clean_caller = (caller_email or "").strip().lower()
-            if (
-                not is_admin
-                and clean_caller
-                and clean_caller != target_booking.get("estudiante_email", "").strip().lower()
-            ):
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="FORBIDDEN: No tiene autorización para cancelar una reserva que no le pertenece.",
-                )
+            if not is_admin:
+                if not clean_caller:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="UNAUTHORIZED: Se requiere autenticación institucional válida para desistir de la reserva.",
+                    )
+                if clean_caller != target_booking.get("estudiante_email", "").strip().lower():
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="FORBIDDEN: No tiene autorización para cancelar una reserva que no le pertenece.",
+                    )
 
             current_estado = target_booking.get("estado")
             if current_estado in ("CANCELADA_USUARIO", "CANCELADA_SISTEMA"):

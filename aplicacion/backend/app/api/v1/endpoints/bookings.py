@@ -17,6 +17,22 @@ from app.services.booking_service import BookingService
 router = APIRouter()
 
 
+def _extract_caller_and_admin_status(
+    authorization: str | None,
+    explicit_email: str | None = None,
+) -> tuple[str, bool]:
+    caller_email = _resolve_authenticated_email(
+        authorization, explicit_email=explicit_email, allow_admin_override=True
+    )
+    is_admin = False
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.split(" ", 1)[1].strip()
+        decoded = decode_access_token(token)
+        if decoded and "administrador" in decoded.get("roles", []):
+            is_admin = True
+    return caller_email, is_admin
+
+
 @router.post(
     "/reserve",
     response_model=BookingResponse,
@@ -36,14 +52,13 @@ def reserve_booking(
     SELECT ... FOR UPDATE en PostgreSQL, asegurando 0.0% de sobrecupo (RNF07).
     """
     effective_caller = student_email or payload.estudiante_email
-    caller_email = _resolve_authenticated_email(
-        authorization, explicit_email=effective_caller, allow_admin_override=True
-    )
+    caller_email, is_admin = _extract_caller_and_admin_status(authorization, explicit_email=effective_caller)
 
     return BookingService.reserve_seat(
         db=db,
         payload=payload,
         caller_email=caller_email,
+        is_admin=is_admin,
     )
 
 
@@ -62,31 +77,13 @@ def get_my_reservations(
     """
     Retorna la lista de reservas registradas para el estudiante mentoreado autenticado.
     """
-    effective_email = _resolve_authenticated_email(
-        authorization, explicit_email=student_email, allow_admin_override=True
-    )
+    effective_email, _ = _extract_caller_and_admin_status(authorization, explicit_email=student_email)
 
     return BookingService.get_student_reservations(
         db=db,
         student_email=effective_email,
         estado=estado,
     )
-
-
-def _extract_caller_and_admin_status(
-    authorization: str | None,
-    explicit_email: str | None = None,
-) -> tuple[str, bool]:
-    caller_email = _resolve_authenticated_email(
-        authorization, explicit_email=explicit_email, allow_admin_override=True
-    )
-    is_admin = False
-    if authorization and authorization.startswith("Bearer "):
-        token = authorization.split(" ", 1)[1].strip()
-        decoded = decode_access_token(token)
-        if decoded and "administrador" in decoded.get("roles", []):
-            is_admin = True
-    return caller_email, is_admin
 
 
 @router.post(

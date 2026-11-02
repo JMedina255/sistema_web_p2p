@@ -343,3 +343,83 @@ def test_confirm_attendance_admin_substring_rejected_403():
     )
     assert res.status_code == 403
     assert "FORBIDDEN" in res.json()["detail"]
+
+
+def test_confirm_attendance_unauthenticated_rejects_401():
+    """Valida que un llamado a confirmación sin token ni student_email sea rechazado con 401."""
+    res = client.post("/api/v1/bookings/1/confirm")
+    assert res.status_code == 401
+    assert "Se requiere autenticación" in res.json()["detail"]
+
+
+def test_cancel_reservation_unauthenticated_rejects_401():
+    """Valida que un llamado a desistimiento sin token ni student_email sea rechazado con 401."""
+    res = client.post("/api/v1/bookings/1/cancel")
+    assert res.status_code == 401
+    assert "Se requiere autenticación" in res.json()["detail"]
+
+
+def test_service_confirm_and_cancel_without_caller_email_rejects_401():
+    """Valida que invocar confirm_attendance o cancel_reservation en el servicio sin caller_email lance 401."""
+    from datetime import UTC, datetime, timedelta
+
+    import pytest
+    from fastapi import HTTPException
+
+    from app.services.booking_service import BookingService, _memory_bookings
+
+    now = datetime.now(UTC)
+    _memory_bookings.append(
+        {
+            "id_reserva": 799,
+            "codigo_reserva": "RES-MEM-799",
+            "id_sesion": 1,
+            "estudiante_email": "estudiante_799@upt.pe",
+            "estado": "PENDIENTE_CONFIRMACION",
+            "fecha_reserva": (now - timedelta(hours=2)).isoformat(),
+            "fecha_inicio": (now + timedelta(hours=48)).isoformat(),
+        }
+    )
+
+    with pytest.raises(HTTPException) as exc_confirm:
+        BookingService.confirm_attendance(db=None, id_reserva=799, caller_email=None, is_admin=False)
+    assert exc_confirm.value.status_code == 401
+    assert "UNAUTHORIZED" in exc_confirm.value.detail
+
+    with pytest.raises(HTTPException) as exc_cancel:
+        BookingService.cancel_reservation(db=None, id_reserva=799, caller_email=None, is_admin=False)
+    assert exc_cancel.value.status_code == 401
+    assert "UNAUTHORIZED" in exc_cancel.value.detail
+
+
+def test_service_reserve_seat_admin_override_and_ownership_guards():
+    """Valida la autorización a nivel de servicio para reserve_seat con admin override y rechazo 403."""
+    import pytest
+    from fastapi import HTTPException
+
+    from app.schemas.booking import BookingCreatePayload
+    from app.services.booking_service import BookingService
+
+    target_student = "estudiante_directo@upt.pe"
+    payload = BookingCreatePayload(id_sesion=1, estudiante_email=target_student)
+
+    # 1. Atacante sin rol admin intentando reservar para target_student
+    with pytest.raises(HTTPException) as exc_forbidden:
+        BookingService.reserve_seat(
+            db=None,
+            payload=payload,
+            caller_email="atacante@upt.pe",
+            is_admin=False,
+        )
+    assert exc_forbidden.value.status_code == 403
+    assert "No tiene autorización" in exc_forbidden.value.detail
+
+    # 2. Administrador verificado reservando directamente para target_student
+    res_admin = BookingService.reserve_seat(
+        db=None,
+        payload=payload,
+        caller_email="admin.directo@upt.pe",
+        is_admin=True,
+    )
+    assert res_admin.estudiante_email == target_student
+    assert res_admin.estado == "PENDIENTE_CONFIRMACION"
