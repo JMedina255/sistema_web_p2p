@@ -407,10 +407,12 @@ describe('BookingModalView Component (T-21 / CUS04 / RF12 / RN-05 / RN-08 / RNF0
     rerender(<BookingModalView {...defaultProps} currentUserEmail={undefined} />);
     expect(screen.getByText('token.user@upt.pe')).toBeInTheDocument();
 
-    // Caso 3: fallback por defecto
+    // Caso 3: sin token ni prop -> estado no autenticado con acceso restringido
     authService.clearToken();
     rerender(<BookingModalView {...defaultProps} currentUserEmail={undefined} />);
-    expect(screen.getByText('2022074255@upt.pe')).toBeInTheDocument();
+    expect(screen.getByText(/Sin sesión activa \(Acceso restringido\)/i)).toBeInTheDocument();
+    expect(screen.getByText('No Autenticado')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Confirmar Reserva de Cupo/i })).toBeDisabled();
   });
 
   // 20. Formateo de fechas

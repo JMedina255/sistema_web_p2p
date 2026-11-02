@@ -40,7 +40,14 @@ describe('App Component (Sprint Navigation)', () => {
       expect(screen.getByLabelText(/Asignatura formativa/i)).toBeInTheDocument();
     });
 
-    // 6. Cambiar a Monitor de Servicios (T-01)
+    // 6. Cambiar a Mis Reservas (T-25 / T-27)
+    const bookingsTab = screen.getByRole('button', { name: /Mis Reservas/i });
+    fireEvent.click(bookingsTab);
+    await waitFor(() => {
+      expect(screen.getByText(/Gestión de Reservas, Ratificación y Desistimiento/i)).toBeInTheDocument();
+    });
+
+    // 7. Cambiar a Monitor de Servicios (T-01)
     const monitorTab = screen.getByRole('button', { name: /Monitor de Servicios/i });
     fireEvent.click(monitorTab);
     await waitFor(() => {

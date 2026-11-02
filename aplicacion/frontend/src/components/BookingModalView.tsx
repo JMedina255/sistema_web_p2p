@@ -35,6 +35,8 @@ export interface BookingModalViewProps {
   onConfirmReservation: (offer: OfferRecommendationItem) => void | Promise<void>;
   /** Callback opcional para redirigir a solicitudes por demanda si no hay aforo */
   onDemandRedirect?: () => void;
+  /** Callback opcional para navegar hacia la vista de Mis Reservas tras formalizar una reserva */
+  onViewBookings?: () => void;
 }
 
 /**
@@ -63,7 +65,7 @@ function resolveCurrentUserEmail(explicitEmail?: string): string {
       // Ignorar fallos de decodificación de token
     }
   }
-  return '2022074255@upt.pe';
+  return '';
 }
 
 /**
@@ -104,6 +106,7 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
   onClose,
   onConfirmReservation,
   onDemandRedirect,
+  onViewBookings,
 }) => {
   const componentId = useId();
   const titleId = `booking-modal-title-${componentId}`;
@@ -250,6 +253,9 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
   const mentorEmailClean = (offer.mentor_email || '').trim().toLowerCase();
   const studentEmailClean = resolvedStudentEmail.trim().toLowerCase();
 
+  // 0. Validación de autenticación obligatoria (Auditoría B.2)
+  const isUnauthenticated = !studentEmailClean || !studentEmailClean.includes('@upt.pe');
+
   // 1. Prohibición de autoreserva (RN-03 / MENTOR_CANNOT_BOOK)
   const isSelfBooking = mentorEmailClean !== '' && mentorEmailClean === studentEmailClean;
 
@@ -269,6 +275,7 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
 
   // Capacidad de confirmación
   const canConfirm =
+    !isUnauthenticated &&
     !isSelfBooking &&
     !isCapacityExceeded &&
     !isExpired &&
@@ -418,21 +425,43 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
           >
             <div style={{ color: '#475569' }}>
               👤 <strong>Estudiante Solicitante:</strong>{' '}
-              <span style={{ color: '#1C2A59', fontWeight: 600 }}>{resolvedStudentEmail}</span>
+              {resolvedStudentEmail ? (
+                <span style={{ color: '#1C2A59', fontWeight: 600 }}>{resolvedStudentEmail}</span>
+              ) : (
+                <span style={{ color: '#DC2626', fontWeight: 600 }}>Sin sesión activa (Acceso restringido)</span>
+              )}
             </div>
             <span
               style={{
-                backgroundColor: '#DCFCE7',
-                color: '#166534',
+                backgroundColor: resolvedStudentEmail ? '#DCFCE7' : '#FEE2E2',
+                color: resolvedStudentEmail ? '#166534' : '#991B1B',
                 padding: '0.15rem 0.5rem',
                 borderRadius: '4px',
                 fontWeight: 600,
                 fontSize: '0.72rem',
               }}
             >
-              UPT Autenticado
+              {resolvedStudentEmail ? 'UPT Autenticado' : 'No Autenticado'}
             </span>
           </div>
+
+          {/* Advertencia de Usuario No Autenticado */}
+          {isUnauthenticated && (
+            <div
+              role="alert"
+              style={{
+                backgroundColor: '#FEF2F2',
+                borderLeft: '4px solid #DC2626',
+                padding: '0.75rem 1rem',
+                borderRadius: '6px',
+                fontSize: '0.85rem',
+                color: '#991B1B',
+                marginBottom: '1rem',
+              }}
+            >
+              <strong>Acceso restringido:</strong> Debe iniciar sesión con su correo institucional @upt.pe para formalizar una reserva de mentoría.
+            </div>
+          )}
 
           {/* Estado de Éxito: Comprobante Provisional */}
           {successData ? (
@@ -535,22 +564,49 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
                 )}
               </div>
 
-              <button
-                type="button"
-                onClick={onClose}
+              <div
                 style={{
-                  backgroundColor: '#1C2A59',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '0.65rem 1.5rem',
-                  fontSize: '0.88rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
+                  display: 'flex',
+                  gap: '0.75rem',
+                  justifyContent: 'center',
+                  flexWrap: 'wrap',
                 }}
               >
-                Entendido, Cerrar
-              </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  style={{
+                    backgroundColor: '#1C2A59',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '0.65rem 1.5rem',
+                    fontSize: '0.88rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Entendido, Cerrar
+                </button>
+                {onViewBookings && (
+                  <button
+                    type="button"
+                    onClick={onViewBookings}
+                    style={{
+                      backgroundColor: '#B99451',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '0.65rem 1.5rem',
+                      fontSize: '0.88rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Ver Mis Reservas 📅
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             <>

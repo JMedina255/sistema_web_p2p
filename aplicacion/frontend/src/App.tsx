@@ -7,6 +7,7 @@ import { ProfileAvailabilityView } from './components/ProfileAvailabilityView';
 import { OfferPublishView } from './components/OfferPublishView';
 import { RecommendationFeedView } from './components/RecommendationFeedView';
 import { BookingModalView, type BookingSuccessData } from './components/BookingModalView';
+import { StudentBookingsView } from './components/StudentBookingsView';
 import { bookingService, BookingException } from './services/bookingService';
 import { authService } from './services/authService';
 import type { OfferRecommendationItem } from './services/recommendationService';
@@ -19,6 +20,7 @@ export const App: React.FC = () => {
     | 'profile'
     | 'offers'
     | 'recommendations'
+    | 'bookings'
     | 'services';
 
   const [activeTab, setActiveTab] = useState<NavTab>(() => {
@@ -31,7 +33,8 @@ export const App: React.FC = () => {
         p === 'consent' ||
         p === 'profile' ||
         p === 'offers' ||
-        p === 'recommendations'
+        p === 'recommendations' ||
+        p === 'bookings'
       ) {
         return p;
       }
@@ -47,8 +50,9 @@ export const App: React.FC = () => {
   const [bookingSuccessData, setBookingSuccessData] = useState<BookingSuccessData | null>(null);
   const [feedRefreshKey, setFeedRefreshKey] = useState(0);
 
-  // Resolución de la identidad del estudiante desde token o fallback institucional UPT
-  const resolveStudentEmail = (): string => {
+  // Resolución estricta de la identidad del estudiante desde token JWT institucional (Auditoría B.2)
+  // No se permite fallback con identidades ficticias: la ausencia de token produce acceso restringido
+  const resolveStudentEmail = (): string | null => {
     const token = authService.getToken();
     if (token) {
       try {
@@ -64,16 +68,21 @@ export const App: React.FC = () => {
           }
         }
       } catch {
-        // Fallback si el token no es JWT estándar decodificable
+        // Fallback seguro si el token no es decodificable
       }
     }
-    return '2022074255@upt.pe';
+    return null;
   };
 
   const studentEmail = resolveStudentEmail();
 
   // Apertura del modal al seleccionar una oferta de la cartelera
   const handleSelectOffer = (offer: OfferRecommendationItem) => {
+    if (!studentEmail) {
+      alert('Debes iniciar sesión con tu cuenta institucional @upt.pe para reservar una mentoría.');
+      setActiveTab('auth');
+      return;
+    }
     setSelectedOffer(offer);
     setBookingError(null);
     setBookingSuccessData(null);
@@ -117,6 +126,11 @@ export const App: React.FC = () => {
         setBookingError(
           `Identificador de sesión inválido ("${offer.id_oferta}"). La oferta debe poseer un identificador numérico canónico estricto.`
         );
+        return;
+      }
+
+      if (!studentEmail) {
+        setBookingError('Se requiere una sesión institucional activa para formalizar reservas.');
         return;
       }
 
@@ -210,7 +224,7 @@ export const App: React.FC = () => {
                 border: '1px solid rgba(255, 255, 255, 0.2)',
               }}
             >
-              Sprint 4 · Recomendaciones Top-k y Reservas Transaccionales (T-23)
+              Sprint 5 · Ratificación, Desistimiento y Reservas (T-25 / T-27)
             </span>
             <a
               href="http://localhost:8000/docs"
@@ -358,6 +372,24 @@ export const App: React.FC = () => {
 
           <button
             type="button"
+            onClick={() => setActiveTab('bookings')}
+            style={{
+              background: activeTab === 'bookings' ? '#1C2A59' : '#F1F5F9',
+              color: activeTab === 'bookings' ? '#FFFFFF' : '#475569',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '0.5rem 1rem',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            📅 Mis Reservas (T-25 / T-27)
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab('services')}
             style={{
               background: activeTab === 'services' ? '#1C2A59' : '#F1F5F9',
@@ -398,7 +430,7 @@ export const App: React.FC = () => {
               marginBottom: '0.5rem',
             }}
           >
-            Sprint 4 · Construcción de Software I (2026-II)
+            Sprint 5 · Construcción de Software I (2026-II)
           </span>
           <h2 style={{ fontSize: '1.75rem', color: '#1C2A59', margin: '0 0 0.5rem 0', fontWeight: 800 }}>
             {activeTab === 'auth'
@@ -413,6 +445,8 @@ export const App: React.FC = () => {
               ? 'Publicación y Parametrización de Ofertas de Mentoría (T-14)'
               : activeTab === 'recommendations'
               ? 'Cartelera Top-k Explicable y Reserva Transaccional (T-20 / T-21 / T-23)'
+              : activeTab === 'bookings'
+              ? 'Gestión de Reservas, Ratificación y Desistimiento (T-25 / T-27)'
               : 'Infraestructura Base: React + FastAPI + Supabase'}
           </h2>
           <p style={{ margin: '0 auto', maxWidth: '680px', fontSize: '0.88rem', color: '#64748B', lineHeight: 1.6 }}>
@@ -428,6 +462,8 @@ export const App: React.FC = () => {
               ? 'Programación de sesiones de mentoría con validación de antelación obligatoria RN-04 (>24h), aforos estándar inmutables RN-05 (10 presencial / 20 virtual) y asignación de infraestructura (RF08 / CUS06).'
               : activeTab === 'recommendations'
               ? 'Inferencia adaptativa EdRecSys con explicabilidad transparente (XAI) y formalización atómica de reservas provisionales bajo control de aforo (RF06 / RF12 / CUS02 / CUS04 / RN-05 / RN-08).'
+              : activeTab === 'bookings'
+              ? 'Consulta de nómina de reservas personales, ratificación de asistencia para cómputo de quórum (RN-08 / RN-09 / PB-014) y desistimiento voluntario con restitución atómica de cupos antes de T-24h (RN-10 / PB-015).'
               : 'Monitoreo de comunicación asíncrona entre la SPA cliente (React 19 / TypeScript / Vite), FastAPI y Supabase.'}
           </p>
         </div>
@@ -447,20 +483,30 @@ export const App: React.FC = () => {
           <>
             <RecommendationFeedView
               key={feedRefreshKey}
-              menteeEmail={studentEmail}
+              menteeEmail={studentEmail ?? undefined}
               onSelectOffer={handleSelectOffer}
             />
             <BookingModalView
               isOpen={isBookingModalOpen}
               offer={selectedOffer}
-              currentUserEmail={studentEmail}
+              currentUserEmail={studentEmail ?? ''}
               isSubmitting={isSubmittingBooking}
               error={bookingError}
               successData={bookingSuccessData}
               onClose={handleCloseBookingModal}
               onConfirmReservation={handleConfirmReservation}
+              onViewBookings={() => {
+                handleCloseBookingModal();
+                setActiveTab('bookings');
+              }}
             />
           </>
+        ) : activeTab === 'bookings' ? (
+          <StudentBookingsView
+            studentEmail={studentEmail ?? undefined}
+            onExploreRecommendations={() => setActiveTab('recommendations')}
+            onLoginRedirect={() => setActiveTab('auth')}
+          />
         ) : (
           <HealthStatus />
         )}
@@ -475,6 +521,23 @@ export const App: React.FC = () => {
             gap: '1rem',
           }}
         >
+          <div
+            style={{
+              background: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '8px',
+              padding: '1rem',
+              fontSize: '0.82rem',
+            }}
+          >
+            <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
+              📅 T-25 & T-27: Mis Reservas (RF13 / RF14 / RN-08 / RN-10)
+            </strong>
+            <span style={{ color: '#64748B' }}>
+              Ratificación anticipada para quórum institucional (RN-08/RN-09), desistimiento voluntario sin penalidad antes de T-24h y restitución atómica de cupos (PB-014/PB-015).
+            </span>
+          </div>
+
           <div
             style={{
               background: '#FFFFFF',
