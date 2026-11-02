@@ -313,4 +313,75 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
       );
     });
   });
+
+  it('10. Rechaza de forma estricta identificadores de oferta alfanuméricos arbitrarios sin invocar a bookingService', async () => {
+    const reserveSpy = vi.spyOn(bookingService, 'reserveSeat');
+
+    // Forzar que el feed entregue una oferta con id_oferta no numérico (e.g. código de formato espurio)
+    vi.spyOn(recommendationService, 'getRecommendedOffers').mockResolvedValueOnce({
+      mentee_email: studentEmail,
+      total_candidates_evaluated: 1,
+      top_k: 5,
+      recommendations_count: 1,
+      algorithm: 'EdRecSys-v1.0-HybridMultifactorial',
+      items: [
+        {
+          id_oferta: 'OFR-INVALID-CODE-XYZ',
+          codigo_sesion: 'SES-999',
+          id_asignatura: 1,
+          codigo_asignatura: 'CALC-101',
+          nombre_asignatura: 'Cálculo I',
+          id_tema: 1,
+          nombre_tema: 'Límites',
+          fecha_inicio: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
+          duracion_minutos: 60,
+          modalidad: 'presencial',
+          aforo_maximo: 10,
+          aforo_disponible: 5,
+          espacio_asignado: 'Aula 101',
+          mentor_email: 'mentor@upt.pe',
+          mentor_nombre: 'Mentor Test',
+          mentor_ciclo: 8,
+          score_total: 0.9,
+          breakdown: {
+            curricular_affinity: 1.0,
+            course_weight_factor: 1.0,
+            critical_course_applied: null,
+            topic_overlap_jaccard: 0.8,
+            topic_overlap_dice: 0.88,
+            schedule_compatibility: 0.8,
+            schedule_matching_slots_count: 3,
+            matching_slots: ['Lun 10:00-11:00'],
+            modality_compatibility: 1.0,
+            institutional_merit_eligible: true,
+            explanation_text: 'Test',
+          },
+        },
+      ],
+    });
+
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: /Recomendaciones & Reservas/i }));
+
+    const reserveButtons = await screen.findAllByRole('button', { name: /Reservar Cupo/i });
+    fireEvent.click(reserveButtons[0]);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    const confirmButton = screen.getByRole('button', {
+      name: /Confirmar Reserva de Cupo/i,
+    });
+    fireEvent.click(confirmButton);
+
+    await waitFor(() => {
+      const errorAlert = screen.getByTestId('booking-error-alert');
+      expect(errorAlert).toBeInTheDocument();
+      expect(errorAlert).toHaveTextContent(/Identificador de sesión inválido/i);
+    });
+
+    // bookingService NO debe haber sido invocado con un ID espurio o inventado
+    expect(reserveSpy).not.toHaveBeenCalled();
+  });
 });

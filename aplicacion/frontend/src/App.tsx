@@ -94,8 +94,31 @@ export const App: React.FC = () => {
       setIsSubmittingBooking(true);
       setBookingError(null);
 
-      const parsedId = parseInt(offer.id_oferta.replace(/\D/g, ''), 10) || Number(offer.id_oferta);
-      const sesionId = isNaN(parsedId) || parsedId < 1 ? 1 : parsedId;
+      // Validación estricta del identificador canónico de sesión (T-23 / Auditoría Fase B)
+      // Se rechazan cadenas no numéricas arbitrarias para impedir transformar accidentalmente una oferta en una sesión equivocada
+      const rawId = String(offer.id_oferta || '').trim();
+      let sesionId: number | null = null;
+
+      if (typeof (offer as { id_sesion?: unknown }).id_sesion === 'number') {
+        const directNum = (offer as { id_sesion: number }).id_sesion;
+        if (Number.isInteger(directNum) && directNum > 0) {
+          sesionId = directNum;
+        }
+      }
+
+      if (sesionId === null && /^\d+$/.test(rawId)) {
+        const parsed = parseInt(rawId, 10);
+        if (Number.isInteger(parsed) && parsed > 0) {
+          sesionId = parsed;
+        }
+      }
+
+      if (sesionId === null) {
+        setBookingError(
+          `Identificador de sesión inválido ("${offer.id_oferta}"). La oferta debe poseer un identificador numérico canónico estricto.`
+        );
+        return;
+      }
 
       const response = await bookingService.reserveSeat({
         id_sesion: sesionId,
