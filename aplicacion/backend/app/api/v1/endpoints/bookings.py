@@ -67,6 +67,34 @@ def get_my_reservations(
     )
 
 
+@router.post(
+    "/{id_reserva}/confirm",
+    response_model=BookingDetailResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Ratificar formalmente asistencia a sesión de mentoría (T-26 / RF13 / CUS24 / RN-08)",
+)
+def confirm_booking_attendance(
+    id_reserva: int,
+    student_email: str | None = Query(None, description="Correo del estudiante en entorno de pruebas si no se envía Bearer JWT"),
+    authorization: str | None = Header(None),
+    db: Session | None = Depends(get_optional_session),
+) -> BookingDetailResponse:
+    """
+    Ratifica la intención de asistencia del estudiante a una reserva provisional
+    antes del corte perentorio de T-24h (RN-08), pasando el estado a CONFIRMADA
+    para el cómputo del quórum regulatorio institucional (RN-09).
+    """
+    caller_email = _resolve_authenticated_email(
+        authorization, explicit_email=student_email, allow_admin_override=True
+    )
+
+    return BookingService.confirm_attendance(
+        db=db,
+        id_reserva=id_reserva,
+        caller_email=caller_email,
+    )
+
+
 @router.get(
     "/session/{id_sesion}",
     response_model=list[BookingDetailResponse],

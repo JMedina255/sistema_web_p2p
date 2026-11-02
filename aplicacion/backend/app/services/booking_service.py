@@ -516,6 +516,215 @@ class BookingService:
             return sorted(results, key=lambda x: x.fecha_reserva, reverse=True)
 
     @classmethod
+    def confirm_attendance(
+        cls,
+        db: Session | None,
+        id_reserva: int,
+        caller_email: str | None = None,
+    ) -> BookingDetailResponse:
+        """
+        Ratifica formalmente la asistencia a una sesión de mentoría (T-26 / RF13 / CUS24 / RN-08).
+        Transiciona la reserva de PENDIENTE_CONFIRMACION a CONFIRMADA si se encuentra antes del
+        corte perentorio de T-24h y pertenece al estudiante autenticado.
+        """
+        if not id_reserva or id_reserva < 1:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="VALIDATION_ERROR: El identificador de reserva debe ser un número entero positivo.",
+            )
+
+        now_utc = datetime.now(UTC)
+        timeout_s = float(settings.BOOKING_TIMEOUT_SECONDS)
+        lock_acquired = _booking_lock.acquire(timeout=timeout_s)
+        if not lock_acquired:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="DATABASE_BUSY: El servicio de reservas se encuentra temporalmente sobrecargado. Por favor, reintente en unos momentos.",
+            )
+
+        try:
+            # ------------------------------------------------------------------
+            # Camino 1: Base de datos relacional con bloqueo pesimista
+            # ------------------------------------------------------------------
+            if db is not None:
+                try:
+                    if db.bind and db.bind.dialect.name == "postgresql":
+                        db.execute(text(f"SET LOCAL lock_timeout = '{settings.BOOKING_TIMEOUT_SECONDS}s';"))
+
+                    reserva = (
+                        db.query(ReservaCupo)
+                        .filter(ReservaCupo.id_reserva == id_reserva)
+                        .with_for_update()
+                        .first()
+                    )
+
+                    if not reserva:
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"RESERVATION_NOT_FOUND: No se encontró la reserva con ID {id_reserva}.",
+                        )
+
+                    clean_caller = (caller_email or "").strip().lower()
+                    if clean_caller and clean_caller != reserva.estudiante_email.strip().lower():
+                        raise HTTPException(
+                            status_code=status.HTTP_403_FORBIDDEN,
+                            detail="FORBIDDEN: No tiene autorización para ratificar una reserva que no le pertenece.",
+                        )
+
+                    if reserva.estado == "CONFIRMADA":
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="INVALID_STATUS_TRANSITION: La reserva ya se encuentra ratificada y confirmada.",
+                        )
+
+                    if reserva.estado in (
+                        "CANCELADA_USUARIO",
+                        "CANCELADA_SISTEMA",
+                        "NO_CONFIRMADA",
+                        "ASISTIDA",
+                        "INASISTENCIA",
+                    ):
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"INVALID_STATUS_TRANSITION: No se puede ratificar una reserva en estado {reserva.estado}.",
+                        )
+
+                    if reserva.estado != "PENDIENTE_CONFIRMACION":
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"INVALID_STATUS_TRANSITION: Transición no permitida desde el estado {reserva.estado}.",
+                        )
+
+                    sesion = reserva.sesion
+                    if sesion:
+                        ses_start = sesion.fecha_inicio
+                        if ses_start.tzinfo is None:
+                            ses_start = ses_start.replace(tzinfo=UTC)
+                        if ses_start <= now_utc + timedelta(hours=24):
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="WINDOW_CLOSED_T24H: La ratificación de asistencia debe realizarse como mínimo 24 horas antes del inicio de la sesión (RN-08).",
+                            )
+
+                    reserva.estado = "CONFIRMADA"
+                    reserva.fecha_ratificacion = now_utc
+                    reserva.updated_at = now_utc
+                    db.commit()
+                    db.refresh(reserva)
+
+                    ses = reserva.sesion
+                    return BookingDetailResponse(
+                        id_reserva=reserva.id_reserva,
+                        codigo_reserva=reserva.codigo_reserva,
+                        id_sesion=reserva.id_sesion,
+                        codigo_sesion=ses.codigo_sesion if ses else None,
+                        estudiante_email=reserva.estudiante_email,
+                        estado=reserva.estado,
+                        fecha_reserva=reserva.fecha_reserva.isoformat(),
+                        fecha_ratificacion=reserva.fecha_ratificacion.isoformat()
+                        if reserva.fecha_ratificacion
+                        else None,
+                        motivo_cancelacion=reserva.motivo_cancelacion,
+                        ticket_hash=reserva.ticket_hash,
+                        nombre_asignatura=ses.asignatura.nombre_curso if ses and ses.asignatura else None,
+                        nombre_tema=ses.tema.nombre_tema if ses and ses.tema else None,
+                        fecha_inicio=ses.fecha_inicio.isoformat() if ses else None,
+                        duracion_minutos=ses.duracion_minutos if ses else None,
+                        modalidad=ses.modalidad if ses else None,
+                        espacio_asignado=ses.espacio_asignado if ses else None,
+                        mentor_email=ses.mentor_email if ses else None,
+                    )
+                except HTTPException:
+                    db.rollback()
+                    raise
+                except Exception as exc:
+                    db.rollback()
+                    err_msg = str(exc).lower()
+                    if (
+                        "lock timeout" in err_msg
+                        or "canceling statement due to lock timeout" in err_msg
+                        or "could not obtain lock" in err_msg
+                        or "database_busy" in err_msg
+                    ):
+                        raise HTTPException(
+                            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail="DATABASE_BUSY: Tiempo de espera agotado al adquirir el bloqueo transaccional. Por favor, reintente en unos momentos.",
+                        ) from exc
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail=f"Error transaccional al ratificar la asistencia: {exc}",
+                    ) from exc
+
+            # ------------------------------------------------------------------
+            # Camino 2: Almacén en Memoria Aislada (Tests y Desarrollo Local)
+            # ------------------------------------------------------------------
+            seed_default_bookings_in_memory()
+            target_booking = None
+            for b in _memory_bookings:
+                if b["id_reserva"] == id_reserva or str(b["id_reserva"]) == str(id_reserva):
+                    target_booking = b
+                    break
+
+            if not target_booking:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"RESERVATION_NOT_FOUND: No se encontró la reserva con ID {id_reserva}.",
+                )
+
+            clean_caller = (caller_email or "").strip().lower()
+            if clean_caller and clean_caller != target_booking["estudiante_email"].strip().lower():
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="FORBIDDEN: No tiene autorización para ratificar una reserva que no le pertenece.",
+                )
+
+            if target_booking["estado"] == "CONFIRMADA":
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="INVALID_STATUS_TRANSITION: La reserva ya se encuentra ratificada y confirmada.",
+                )
+
+            if target_booking["estado"] in (
+                "CANCELADA_USUARIO",
+                "CANCELADA_SISTEMA",
+                "NO_CONFIRMADA",
+                "ASISTIDA",
+                "INASISTENCIA",
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"INVALID_STATUS_TRANSITION: No se puede ratificar una reserva en estado {target_booking['estado']}.",
+                )
+
+            if target_booking["estado"] != "PENDIENTE_CONFIRMACION":
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"INVALID_STATUS_TRANSITION: Transición no permitida desde el estado {target_booking['estado']}.",
+                )
+
+            f_inicio = target_booking.get("fecha_inicio")
+            if f_inicio:
+                try:
+                    f_dt = datetime.fromisoformat(f_inicio)
+                    if f_dt.tzinfo is None:
+                        f_dt = f_dt.replace(tzinfo=UTC)
+                    if f_dt <= now_utc + timedelta(hours=24):
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="WINDOW_CLOSED_T24H: La ratificación de asistencia debe realizarse como mínimo 24 horas antes del inicio de la sesión (RN-08).",
+                        )
+                except (ValueError, TypeError):
+                    pass
+
+            target_booking["estado"] = "CONFIRMADA"
+            target_booking["fecha_ratificacion"] = now_utc.isoformat()
+            target_booking["updated_at"] = now_utc.isoformat()
+
+            return BookingDetailResponse(**target_booking)
+        finally:
+            _booking_lock.release()
+
+    @classmethod
     def get_session_reservations(
         cls,
         db: Session | None,

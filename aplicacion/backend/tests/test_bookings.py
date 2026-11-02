@@ -1151,3 +1151,232 @@ def test_quorum_evaluation_in_memory_state_transitions():
     q_high = BookingService.evaluate_quorum(None, 300)
     assert q_high.cumple_quorum is True
     assert q_high.estado_sesion == "CONFIRMADA"
+
+
+# ==============================================================================
+# Batería T-26: Ratificación de Asistencia con Control Temporal (RF13 / CUS24 / RN-08)
+# ==============================================================================
+
+
+def test_confirm_attendance_success_in_memory():
+    """Valida la ratificación exitosa de asistencia en memoria antes de T-24h."""
+    now = datetime.now(UTC)
+    student = "2022074255@upt.pe"
+    token = create_access_token({"sub": student, "roles": ["mentoreado"]})
+
+    # Sembrar una reserva pendiente con 48h de antelación
+    _memory_bookings.append(
+        {
+            "id_reserva": 701,
+            "codigo_reserva": "RES-MEM-701",
+            "id_sesion": 1,
+            "codigo_sesion": "SES-1001",
+            "estudiante_email": student,
+            "estado": "PENDIENTE_CONFIRMACION",
+            "fecha_reserva": (now - timedelta(hours=2)).isoformat(),
+            "fecha_ratificacion": None,
+            "motivo_cancelacion": None,
+            "ticket_hash": "hash701",
+            "fecha_inicio": (now + timedelta(hours=48)).isoformat(),
+            "nombre_asignatura": "Algoritmos y Estructuras de Datos",
+            "nombre_tema": "Árboles AVL",
+            "duracion_minutos": 90,
+            "modalidad": "presencial",
+            "espacio_asignado": "Laboratorio 3",
+            "mentor_email": "mentor@upt.pe",
+        }
+    )
+
+    res = client.post(
+        "/api/v1/bookings/701/confirm",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["id_reserva"] == 701
+    assert data["estado"] == "CONFIRMADA"
+    assert data["fecha_ratificacion"] is not None
+    assert data["codigo_reserva"] == "RES-MEM-701"
+
+
+def test_confirm_attendance_rejects_already_confirmed_400():
+    """Rechaza la doble ratificación con INVALID_STATUS_TRANSITION."""
+    now = datetime.now(UTC)
+    student = "2022074255@upt.pe"
+    token = create_access_token({"sub": student, "roles": ["mentoreado"]})
+
+    _memory_bookings.append(
+        {
+            "id_reserva": 702,
+            "codigo_reserva": "RES-MEM-702",
+            "id_sesion": 1,
+            "estudiante_email": student,
+            "estado": "CONFIRMADA",
+            "fecha_reserva": (now - timedelta(days=1)).isoformat(),
+            "fecha_ratificacion": (now - timedelta(hours=12)).isoformat(),
+            "fecha_inicio": (now + timedelta(hours=36)).isoformat(),
+        }
+    )
+
+    res = client.post(
+        "/api/v1/bookings/702/confirm",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 400
+    assert "INVALID_STATUS_TRANSITION" in res.json()["detail"]
+
+
+def test_confirm_attendance_rejects_window_closed_t24h_400():
+    """Rechaza ratificación cuando restan <= 24h para el inicio (RN-08)."""
+    now = datetime.now(UTC)
+    student = "2022074255@upt.pe"
+    token = create_access_token({"sub": student, "roles": ["mentoreado"]})
+
+    _memory_bookings.append(
+        {
+            "id_reserva": 703,
+            "codigo_reserva": "RES-MEM-703",
+            "id_sesion": 1,
+            "estudiante_email": student,
+            "estado": "PENDIENTE_CONFIRMACION",
+            "fecha_reserva": (now - timedelta(hours=5)).isoformat(),
+            "fecha_inicio": (now + timedelta(hours=12)).isoformat(),  # T-12h (cerrado)
+        }
+    )
+
+    res = client.post(
+        "/api/v1/bookings/703/confirm",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 400
+    assert "WINDOW_CLOSED_T24H" in res.json()["detail"]
+
+
+def test_confirm_attendance_rejects_nonexistent_reservation_404():
+    """Retorna 404 estructurado ante un ID de reserva inexistente."""
+    student = "2022074255@upt.pe"
+    token = create_access_token({"sub": student, "roles": ["mentoreado"]})
+
+    res = client.post(
+        "/api/v1/bookings/999999/confirm",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 404
+    assert "RESERVATION_NOT_FOUND" in res.json()["detail"]
+
+
+def test_confirm_attendance_rejects_another_students_reservation_403():
+    """Rechaza el intento de ratificar la reserva de otro estudiante con 403 FORBIDDEN."""
+    now = datetime.now(UTC)
+    owner_student = "victima@upt.pe"
+    attacker_student = "atacante@upt.pe"
+    token_attacker = create_access_token({"sub": attacker_student, "roles": ["mentoreado"]})
+
+    _memory_bookings.append(
+        {
+            "id_reserva": 704,
+            "codigo_reserva": "RES-MEM-704",
+            "id_sesion": 1,
+            "estudiante_email": owner_student,
+            "estado": "PENDIENTE_CONFIRMACION",
+            "fecha_reserva": (now - timedelta(hours=3)).isoformat(),
+            "fecha_inicio": (now + timedelta(hours=48)).isoformat(),
+        }
+    )
+
+    res = client.post(
+        "/api/v1/bookings/704/confirm",
+        headers={"Authorization": f"Bearer {token_attacker}"},
+    )
+    assert res.status_code == 403
+    assert "FORBIDDEN" in res.json()["detail"]
+
+
+def test_confirm_attendance_rejects_cancelled_status_400():
+    """Rechaza la ratificación sobre una reserva cancelada voluntariamente."""
+    now = datetime.now(UTC)
+    student = "2022074255@upt.pe"
+    token = create_access_token({"sub": student, "roles": ["mentoreado"]})
+
+    _memory_bookings.append(
+        {
+            "id_reserva": 705,
+            "codigo_reserva": "RES-MEM-705",
+            "id_sesion": 1,
+            "estudiante_email": student,
+            "estado": "CANCELADA_USUARIO",
+            "fecha_reserva": (now - timedelta(hours=10)).isoformat(),
+            "fecha_inicio": (now + timedelta(hours=48)).isoformat(),
+        }
+    )
+
+    res = client.post(
+        "/api/v1/bookings/705/confirm",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 400
+    assert "INVALID_STATUS_TRANSITION" in res.json()["detail"]
+
+
+def test_confirm_attendance_success_in_real_db():
+    """Valida la ratificación con persistencia relacional en base de datos real o SQLite."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    TestingSession = sessionmaker(bind=engine)
+    db = TestingSession()
+
+    try:
+        now = datetime.now(UTC)
+        # Crear asignatura, tema y sesión
+        asig = Asignatura(codigo_curso="CC-301", nombre_curso="Estructuras de Datos", ciclo_plan=3, creditos=4)
+        db.add(asig)
+        db.flush()
+
+        tema = TemaConceptual(id_asignatura=asig.id_asignatura, nombre_tema="Grafos y Dijkstra", unidad_silabica=1)
+        db.add(tema)
+        db.flush()
+
+        ses = SesionMentoria(
+            codigo_sesion="SES-TEST-DB-01",
+            mentor_email="mentor.db@upt.pe",
+            id_asignatura=asig.id_asignatura,
+            id_tema=tema.id_tema,
+            fecha_inicio=now + timedelta(hours=48),
+            duracion_minutos=60,
+            modalidad="presencial",
+            aforo_maximo=10,
+            espacio_asignado="Aula 101",
+            estado="PUBLICADA",
+        )
+        db.add(ses)
+        db.flush()
+
+        reserva = ReservaCupo(
+            codigo_reserva="RES-DB-777",
+            id_sesion=ses.id_sesion,
+            estudiante_email="estudiante.db@upt.pe",
+            estado="PENDIENTE_CONFIRMACION",
+            fecha_reserva=now,
+        )
+        db.add(reserva)
+        db.commit()
+
+        # Invocar confirmación en base de datos
+        result = BookingService.confirm_attendance(
+            db=db,
+            id_reserva=reserva.id_reserva,
+            caller_email="estudiante.db@upt.pe",
+        )
+
+        assert result.id_reserva == reserva.id_reserva
+        assert result.estado == "CONFIRMADA"
+        assert result.fecha_ratificacion is not None
+
+        # Verificar persistencia en base de datos
+        persisted = db.query(ReservaCupo).filter(ReservaCupo.id_reserva == reserva.id_reserva).first()
+        assert persisted is not None
+        assert persisted.estado == "CONFIRMADA"
+        assert persisted.fecha_ratificacion is not None
+    finally:
+        db.close()
+
