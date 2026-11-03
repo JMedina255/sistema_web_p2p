@@ -27,8 +27,8 @@ A continuación, se detalla el entorno de control de configuración y los parám
 | **Carga Horaria Planificada** | **5.0 horas académicas** (Joan Medina: 2.0 h / Renzo Antayhua: 3.0 h) |
 | **Carga Horaria Ejecutada** | **5.0 horas verificadas** (100% de dedicación distribuida en T-25 a T-28) |
 | **Alcance Funcional Comprometido** | `PB-014` (Ratificación de Asistencia en $T-24\text{ h}$) y `PB-015` (Desistimiento Voluntario de Reserva) |
-| **Batería Consolidada de Pruebas** | **443 pruebas automatizadas pasando** (265 frontend / 178 backend) con 0 fallos |
-| **Cobertura Independiente Lograda** | Frontend: **83.25%** líneas (Vitest v8) — Backend: **90.40%** líneas (Pytest-Cov) |
+| **Batería Consolidada de Pruebas** | **452 pruebas automatizadas pasando** (265 frontend / 187 backend) con 0 fallos (Línea base histórica en PR #6: 443 pruebas; ampliada con 9 pruebas de autorización estricta en commit `9cceaaa`) |
+| **Cobertura Independiente Lograda** | Frontend: **83.42%** líneas (Vitest v8) — Backend: **90.40%** líneas (Pytest-Cov) |
 | **Estado en Integración Continua** | GitHub Actions Workflow aprobado (`.github/workflows/ci.yml`, PR #6) |
 | **Estado de Persistencia** | Pruebas ejecutadas bajo SQLite y cerrojos multihilo. Homologación PostgreSQL reservada para Staging. |
 
@@ -130,6 +130,10 @@ A continuación, se detalla la secuencia de cambios de software incorporados en 
 | [`3568118`](https://github.com/JMedina255/sistema_web_p2p/commit/3568118) | 02/11/2026 13:35 | Joan / Renzo | `merge: integrate feat/sprint-05-backend into integration/sprint-05` | Integración Local | Fusión limpia de las ramas `feat/sprint-05-frontend` y `feat/sprint-05-backend` en la rama integradora local. |
 | [`370766f`](https://github.com/JMedina255/sistema_web_p2p/commit/370766f) | 02/11/2026 13:52 | Renzo Antayhua | `style(backend): format booking endpoints and test files according to ruff` | Calidad de Código | Formateo estricto conforme a reglas Ruff en endpoints y pruebas de reservas, resolviendo el job de CI. |
 | [`1ed8a04`](https://github.com/JMedina255/sistema_web_p2p/commit/1ed8a04) | 02/11/2026 14:10 | Joan / Renzo | `Merge pull request #6 from JMedina255/integration/sprint-05` | Cierre Sprint 05 | Fusión oficial del Sprint 05 en `main` tras aprobación íntegra de GitHub Actions (`ci.yml`, 443 pruebas passing). |
+| [`9cceaaa`](https://github.com/JMedina255/sistema_web_p2p/commit/9cceaaa) | 02/11/2026 15:39 | Renzo Antayhua | `feat(backend): strengthen booking authorization and endpoint validation [T-26 / T-28]` | Blindaje BE | Incorporación de 9 pruebas de autorización estricta en `test_authorization.py`, elevando la suite a 452 pruebas (187 backend). |
+| [`b85da9e`](https://github.com/JMedina255/sistema_web_p2p/commit/b85da9e) | 02/11/2026 15:57 | Renzo Antayhua | `fix(backend): enforce strict authorization guards, admin override and session checks [T-26 / T-28]` | Corrección BE | Refuerzo de validación de sesiones y control de roles administrativos en endpoints de reservas. |
+| [`aeaf7ac`](https://github.com/JMedina255/sistema_web_p2p/commit/aeaf7ac) | 02/11/2026 17:23 | Renzo Antayhua | `docs(sprint-05): consolidate technical log, closing reports and test metrics [T-25 / T-28]` | Consolidación Doc | Actualización de métricas de cierre, reportes técnicos consolidados y unificación de 452 pruebas. |
+| [`1b1acc4`](https://github.com/JMedina255/sistema_web_p2p/commit/1b1acc4) | 02/11/2026 20:56 | Joan Medina | `docs(sprint-05): incorporar acervo de evidencias visuales y capturas tecnicas [T-25 / T-28]` | Evidencias S5 | Generación e incorporación del acervo de 10 capturas en 1440x900 y script Playwright `generate_sprint05_evidence.py`. |
 
 Fuente: Historial oficial de Git del repositorio `sistema_web_p2p`.
 

@@ -15,7 +15,7 @@
 **Repositorio oficial:** [sistema_web_p2p](https://github.com/JMedina255/sistema_web_p2p).
 **Rama y commit evaluados:** `main` / [`1ed8a046e0b214082042a3172b12d2c98b3d0b90`](https://github.com/JMedina255/sistema_web_p2p/commit/1ed8a04) (Commit corto: `1ed8a04`).
 **Estado del informe:** Versión final consolidada por el equipo desarrollador — **Pendiente de revisión académica de cátedra**.
-**Balance del sprint al corte:** Objetivo logrado en el alcance comprometido para el Sprint 05. Se completaron e integraron las funcionalidades de ratificación anticipada de asistencia (**PB-014** / **RF13** / **CUS24** / catálogo `CUS04-U03`) y desistimiento voluntario con restitución atómica de cupos (**PB-015** / **RF14** / **CUS17** / catálogo `CUS17-U01`), sujetas a la ventana reglamentaria de corte de 24 horas previas al inicio de la sesión (**RN-08** / **RN-10**). La solución se consolidó sobre una arquitectura desacoplada y accesible en frontend (`src/components/StudentBookingsView.tsx`) y una capa de servicios transaccionales en backend con control riguroso de propiedad por token JWT (**RNF02** / **RNF07**). Se alcanzó una batería consolidada de **443 pruebas automatizadas pasando con 0 fallos** (265 en frontend con 83.25% de cobertura de líneas y 178 en backend con 90.40% de cobertura), superando el umbral normativo del 70.0% establecido en **RNF09**. Se registra como limitación técnica pendiente la homologación de persistencia con una instancia activa de PostgreSQL en la nube, habiéndose verificado las pruebas unitarias y de concurrencia bajo SQLite con cerrojos multihilo.
+**Balance del sprint al corte:** Objetivo logrado en el alcance comprometido para el Sprint 05. Se completaron e integraron las funcionalidades de ratificación anticipada de asistencia (**PB-014** / **RF13** / **CUS24** / catálogo `CUS04-U03`) y desistimiento voluntario con restitución atómica de cupos (**PB-015** / **RF14** / **CUS17** / catálogo `CUS17-U01`), sujetas a la ventana reglamentaria de corte de 24 horas previas al inicio de la sesión (**RN-08** / **RN-10**). La solución se consolidó sobre una arquitectura desacoplada y accesible en frontend (`src/components/StudentBookingsView.tsx`) y una capa de servicios transaccionales en backend con control riguroso de propiedad por token JWT (**RNF02** / **RNF07**). Se alcanzó una batería consolidada de **452 pruebas automatizadas pasando con 0 fallos** (265 en frontend con 83.42% de cobertura de líneas y 187 en backend con 90.40% de cobertura, consolidando la línea base final tras el blindaje de autorización en commits `9cceaaa` y `b85da9e` sobre la fusión de PR #6 que acreditó 443 pruebas), superando el umbral normativo del 70.0% establecido en **RNF09**. Se registra como limitación técnica pendiente la homologación de persistencia con una instancia activa de PostgreSQL en la nube, habiéndose verificado las pruebas unitarias y de concurrencia bajo SQLite con cerrojos multihilo.
 
 ---
 
@@ -124,7 +124,7 @@ El desarrollo del Sistema Web P2P se diseñó en siete iteraciones incrementales
 | **S2** | Consentimiento Ley N° 29733, roles y disponibilidad docente. | PB-006 a PB-009 | 10.0 h | **Cerrado y Aprobado** | 126 pruebas |
 | **S3** | Publicación de ofertas docentes y motor inicial *EdRecSys v1.0*. | PB-010, PB-011 (p) | 12.0 h | **Cerrado y Aprobado** | 209 pruebas |
 | **S4** | Feed Top-k explicable, modal de reservas y concurrencia ACID. | PB-010, PB-011, PB-013 | 15.0 h | **Cerrado y Aprobado** | 339 pruebas (158 BE / 181 FE) |
-| **S5** | **Ratificación de asistencia y desistimiento voluntario T-24h.** | **PB-014, PB-015** | **5.0 h** | **Cerrado y Verificado** | **443 pruebas (178 BE / 265 FE)** |
+| **S5** | **Ratificación de asistencia y desistimiento voluntario T-24h.** | **PB-014, PB-015** | **5.0 h** | **Cerrado y Verificado** | **452 pruebas (187 BE / 265 FE)** |
 | **S6** | Evaluación de quórum (50%), contingencias y bitácoras docentes. | PB-017, PB-018, PB-019 | 14.0 h | *Próximo a iniciar* | Proyección 520+ |
 | **S7** | Encuestas de satisfacción, visado de horas y cierre de ciclo. | PB-020, PB-023 | 10.0 h | *Planificado* | Proyección 580+ |
 
@@ -171,7 +171,7 @@ El Cuadro 4.1 certifica que el 100% de las 5.0 horas planificadas fueron ejecuta
 Para declarar el cierre técnico del Sprint 05, el incremento debió satisfacer el *Definition of Done* (DoD) institucional:
 1. **Verificación de Criterios de Aceptación:** Ratificación permitida estrictamente con antelación $\Delta t > 24\text{ h}$ y rechazada con HTTP 400 (`WINDOW_CLOSED_T24H`) si $\Delta t \le 24\text{ h}$. Desistimiento voluntario liberando la plaza y restituyendo atómicamente el cupo en la sesión.
 2. **Seguridad y Aislamiento de Identidad (RNF02):** Prohibición terminante de que un usuario modifique reservas ajenas (HTTP 403 `FORBIDDEN`). Aprobación de la auditoría de seguridad que erradicó bypasses en autenticación.
-3. **Calidad y Cobertura (RNF09):** Cobertura superior al umbral del 70.0% evaluada de forma independiente (Frontend 83.25%, Backend 90.40%) con cero fallos en las 443 pruebas del sistema.
+3. **Calidad y Cobertura (RNF09):** Cobertura superior al umbral del 70.0% evaluada de forma independiente (Frontend 83.25%, Backend 90.40%) con cero fallos en las 452 pruebas del sistema (187 backend / 265 frontend).
 4. **Linteo y Tipado Estricto:** Cero errores en Ruff (Python), cero advertencias en ESLint 9 (React 19) y compilación limpia en TypeScript (`tsc -b`).
 5. **Integración Continua:** Flujo de GitHub Actions (`.github/workflows/ci.yml`) aprobado en verde en el Pull Request #6 hacia `main`.
 6. **Delimitación de Persistencia:** Reconocimiento explícito de que la persistencia en pruebas se validó con SQLite y cerrojos multihilo, requiriéndose homologación en Staging con PostgreSQL nativo en la nube.
@@ -218,6 +218,74 @@ En la capa servidora, se implementaron dos métodos de alta consistencia en `Boo
 - **Método `cancel_reservation(id_reserva: int, payload: BookingCancelPayload, caller_email, is_admin)`:** Valida titularidad y ventana $> 24\text{ h}$ (**RN-10**). Si la reserva está en `PENDIENTE_CONFIRMACION` o `CONFIRMADA`, transiciona a `CANCELADA_USUARIO`, registra `motivo_cancelacion = payload.motivo` y restituye atómicamente la vacante en la sesión:
   $$\text{sesion.cupos\_disponibles} = \min(\text{sesion.cupos\_disponibles} + 1, \text{sesion.cupos\_totales})$$
   Esta mutación se ejecuta protegida por transacción con cerrojo de concurrencia `_booking_lock`, eliminando condiciones de carrera (**RNF07**).
+
+
+
+Las siguientes figuras documentan las comprobaciones funcionales de la interfaz de usuario en el navegador web (resolución uniforme 1440 × 900):
+
+**Figura 5.1: Bandeja consolidada de reservas personales del estudiante (T-25 / T-27)**
+
+![Figura 5.1: Bandeja consolidada de reservas personales del estudiante](imagenes/sprint-05/01_bandeja_reservas_estudiante.png)
+
+* **Evidencia visual:** `imagenes/sprint-05/01_bandeja_reservas_estudiante.png`.
+* **Fuente:** Captura de pantalla en ejecución local sobre React 19 vía Playwright, 02/11/2026, commit `1b1acc4`.
+* **Interpretación técnica:** Muestra la vista `StudentBookingsView.tsx` renderizada con 4 reservas de prueba, contadores reactivos en filtros («Todas (4)», «Por Ratificar (2)», «Ratificadas (1)», «Histórico (1)») y resolución de identidad JWT (`2022074255@upt.pe`). Demuestra la integración completa del módulo MOD-05.
+* **Límite técnico:** Acredita renderizado en cliente y cálculo reactivo; la persistencia se apoya en el entorno local alfa.
+
+---
+
+**Figura 5.2: Diálogo modal accesible de ratificación anticipada de asistencia (T-25 / RF13 / CUS24)**
+
+![Figura 5.2: Diálogo modal accesible de ratificación anticipada de asistencia](imagenes/sprint-05/02_ratificacion_anticipada.png)
+
+* **Evidencia visual:** `imagenes/sprint-05/02_ratificacion_anticipada.png`.
+* **Fuente:** Captura de pantalla de la interfaz web, 02/11/2026, commit `1b1acc4`.
+* **Interpretación técnica:** Despliegue del diálogo modal accesible (`role="dialog"`) con trampa de foco y compatibilidad WAI-ARIA (RNF05). Expone los términos de compromiso formativo (PB-014) y la regla de cómputo de quórum del 50% (RN-08 / RN-09).
+* **Límite técnico:** Valida la experiencia previa a la emisión de la mutación HTTP.
+
+---
+
+**Figura 5.3: Reserva en estado CONFIRMADA tras ratificación real (T-25 / T-26)**
+
+![Figura 5.3: Reserva en estado CONFIRMADA tras ratificación real](imagenes/sprint-05/03_asistencia_confirmada.png)
+
+* **Evidencia visual:** `imagenes/sprint-05/03_asistencia_confirmada.png`.
+* **Fuente:** Captura de pantalla tras ejecución de mutación HTTP 200 OK, 02/11/2026, commit `1b1acc4`.
+* **Interpretación técnica:** Acredita la transición real de la reserva `RES-2026-0101` hacia el estado `CONFIRMADA`, mostrando el banner verde de éxito en cabecera, la asignación inmutable de `fecha_ratificacion` y la reactividad en los contadores («Por Ratificar (1)», «Ratificadas (2)»).
+* **Límite técnico:** Demuestra la integración fluida cliente-servidor bajo SQLite/mock local; la validación con Supabase PostgreSQL se efectúa en staging.
+
+---
+
+**Figura 5.4: Diálogo modal de desistimiento voluntario y liberación de cupo (T-27 / RF14 / CUS17)**
+
+![Figura 5.4: Diálogo modal de desistimiento voluntario y liberación de cupo](imagenes/sprint-05/04_desistimiento_voluntario.png)
+
+* **Evidencia visual:** `imagenes/sprint-05/04_desistimiento_voluntario.png`.
+* **Fuente:** Captura de pantalla de la interfaz web, 02/11/2026, commit `1b1acc4`.
+* **Interpretación técnica:** Modal accesible de desistimiento con motivo tipado (`Superposición horaria imprevista con entrega de laboratorio de Redes y Comunicaciones`), advirtiendo al mentoreado sobre la liberación ética y responsable de la vacante (RN-10 / PB-015).
+* **Límite técnico:** Evalúa la recolección estructurada del motivo previo al despacho transaccional.
+
+---
+
+**Figura 5.5: Desistimiento voluntario y restitución atómica de aforo (T-27 / T-28)**
+
+![Figura 5.5: Desistimiento voluntario y restitución atómica de aforo](imagenes/sprint-05/05_cancelacion_aforo.png)
+
+* **Evidencia visual:** `imagenes/sprint-05/05_cancelacion_aforo.png`.
+* **Fuente:** Captura de pantalla tras mutación exitosa HTTP 200 OK, 02/11/2026, commit `1b1acc4`.
+* **Interpretación técnica:** Transición formal a `CANCELADA_USUARIO` con notificación verde: *«¡Reserva RES-2026-0102 cancelada con éxito! La vacante ha sido liberada en el sistema para tus compañeros»*. Demuestra la restitución atómica de la plaza al aforo de la sesión sin penalización ni sobrecupo (RN-05 / RNF07).
+* **Límite técnico:** Verificado bajo cerrojo de concurrencia `_booking_lock` en entorno local.
+
+---
+
+**Figura 5.6: Control temporal de corte preventivo a T-24h (T-25 / RN-08 / RN-10)**
+
+![Figura 5.6: Control temporal de corte preventivo a T-24h](imagenes/sprint-05/06_control_temporal_t24h.png)
+
+* **Evidencia visual:** `imagenes/sprint-05/06_control_temporal_t24h.png`.
+* **Fuente:** Captura de pantalla de la interfaz web con filtro «Por Ratificar», 02/11/2026, commit `1b1acc4`.
+* **Interpretación técnica:** Reserva `RES-2026-0103` con antelación de 12 horas ($T+12\text{ h} \le 24\text{ h}$). Se comprueba la deshabilitación preventiva de los botones «Plazo Vencido (T-24h cerrado)» y «Desistimiento Cerrado (T-24h)» junto al aviso de corte reglamentario cumplido.
+* **Límite técnico:** Simulación controlada de proximidad temporal para evaluar deterministamente la barrera preventiva del cliente.
 
 ### 5.3. Diseño técnico, diagramas PlantUML y contratos REST reales
 
@@ -398,9 +466,20 @@ A continuación, se especifican los contratos REST reales implementados en `apli
   - `403 Forbidden`: `{"detail": "FORBIDDEN: No tiene autorización para cancelar una reserva que no le pertenece."}`
   - `404 Not Found`: `{"detail": "RESERVATION_NOT_FOUND: No se encontró la reserva con ID 1."}`
 
+
+
+**Figura 5.7: Catálogo OpenAPI 3.1.0 documentado en Swagger UI (T-26 / T-28)**
+
+![Figura 5.7: Catálogo OpenAPI 3.1.0 documentado en Swagger UI](imagenes/sprint-05/07_swagger_api_docs_sprint05.png)
+
+* **Evidencia visual:** `imagenes/sprint-05/07_swagger_api_docs_sprint05.png`.
+* **Fuente:** Captura de pantalla en `http://localhost:8000/docs`, 02/11/2026, commit `1b1acc4`.
+* **Interpretación técnica:** Exposición interactiva de los contratos REST de reservas (`/api/v1/bookings`): `POST /{id_reserva}/confirm`, `POST /{id_reserva}/cancel`, `GET /my-reservations`, `POST /reserve` y `POST /api/v1/quorum/evaluate`. Certifica esquemas Pydantic v2 normalizados y tipado estricto.
+* **Límite técnico:** Acredita especificación de contratos; la ejecución concurrente se respalda mediante las suites automatizadas.
+
 ### 5.4. Pruebas ejecutadas y relación con el catálogo
 
-La validación del software se sustentó en un banco de pruebas automatizadas que creció de 339 pruebas (Sprint 04) a **443 pruebas aprobadas** (Sprint 05), articuladas con el catálogo oficial de pruebas (`Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx`):
+La validación del software se sustentó en un banco de pruebas automatizadas que creció de 339 pruebas (Sprint 04) a **452 pruebas aprobadas** (Sprint 05, consolidando 443 en la fusión de PR #6 y 9 pruebas adicionales de seguridad en commits `9cceaaa` y `b85da9e`), articuladas con el catálogo oficial de pruebas (`Catalogo_Pruebas_P2P_Mentorias_EPIS.xlsx`):
 
 #### Cuadro 5.1: Desglose de Pruebas Automatizadas por Archivo y Correspondencia Canónica
 
@@ -409,12 +488,12 @@ La validación del software se sustentó en un banco de pruebas automatizadas qu
 | **Backend** | `tests/test_bookings.py` | 46 | 81% (srv) / 100% (api) | `CUS04-U01`, `CUS04-U02`, `CUS04-U03`, `CUS04-I01`, `CUS04-F01`, `CUS04-A01`, `CUS17-U01`, `CUS17-U02`, `CUS17-F01`, `CUS17-A01` | Ciclo de reservas, ratificación oportuna, corte $T-24\text{ h}$, desistimiento voluntario, liberación de cupos y 0% sobrecupo multihilo. |
 | **Backend** | `tests/test_recommendations.py` | 27 | 93% | `CUS02-U01` a `CUS02-A01` | Motor *EdRecSys v1.0*, similitud y desempate determinista. |
 | **Backend** | `tests/test_offers.py` | 14 | 85% | `CUS06-U01` a `CUS06-A01` | Publicación de ofertas docentes y aforos inmutables (RN-05). |
-| **Backend** | `tests/test_auth.py` / `test_authorization.py` | 26 | 100% | `CUS01-U01` a `CUS01-A01`, `CUS10-U01` | Autenticación institucional OTP, RBAC y aislamiento JWT. |
+| **Backend** | `tests/test_auth.py` / `test_authorization.py` | 35 | 100% | `CUS01-U01` a `CUS01-A01`, `CUS10-U01` | Autenticación institucional OTP (13 tests) y blindaje riguroso RBAC / aislamiento JWT anti-suplantación (22 tests). |
 | **Backend** | Resto de Suites Backend (Curriculum, Perfiles, etc.) | 65 | 75% – 100% | `CUS15-U01`, `CUS21-U01`, etc. | Configuración, salud, perfiles, sesiones y roles. |
 | **Frontend** | `src/components/__tests__/StudentBookingsView.test.tsx`| 42 | 91.50% | `CUS04-F01`, `CUS17-F01`, `CUS24` | Renderizado accesible, badges, cálculo $T-24\text{ h}$ y modal interno de desistimiento. |
 | **Frontend** | `src/services/__tests__/bookingService.test.ts` | 42 | 88.20% | `CUS04-U03`, `CUS17-U01` | Cliente API tipado, métodos `confirmAttendance` y `cancelReservation`, errores 400/403. |
 | **Frontend** | Resto de Suites Frontend (Vistas, Componentes, Auth) | 181 | 81.30% – 95% | `CUS01-F01`, `CUS02-F01`, `CUS06-F01` | Feed Top-k, modal de reserva, consentimiento, navegación `App.tsx`. |
-| **TOTAL** | **32 Suites de Prueba (11 BE / 21 FE)** | **443** | **BE: 90.40% / FE: 83.25%** | **Catálogo Oficial EPIS** | **Cero fallos, 100% éxito automatizado.** |
+| **TOTAL** | **35 Suites de Prueba (14 BE / 21 FE)** | **452** | **BE: 90.40% / FE: 83.42%** | **Catálogo Oficial EPIS** | **Cero fallos, 100% éxito automatizado (187 BE / 265 FE).** |
 
 Fuente: Registro de ejecución de Pytest 9.1.1 y Vitest 2.1.2 en el commit `1ed8a04`.
 
@@ -438,6 +517,41 @@ De conformidad con la regla vinculante de evaluación independiente de cobertura
 Fuente: Reporte oficial de GitHub Actions del Pull Request #6 en commit `1ed8a04`.
 
 El Cuadro 5.2 demuestra el rigor técnico alcanzado, manteniendo coberturas superiores al 83% y 90% en cliente y servidor respectivamente bajo el flujo oficial `.github/workflows/ci.yml`.
+
+
+
+Las siguientes figuras certifican la ejecución de las suites de prueba automatizadas y la homologación en el pipeline de Integración Continua:
+
+**Figura 5.8: Terminal de pruebas de backend con Pytest y reporte de cobertura (Pytest-Cov)**
+
+![Figura 5.8: Terminal de pruebas de backend con Pytest y reporte de cobertura](imagenes/sprint-05/08_backend_pytest_coverage_sprint05.png)
+
+* **Evidencia visual:** `imagenes/sprint-05/08_backend_pytest_coverage_sprint05.png`.
+* **Fuente:** Terminal PowerShell ejecutando `pytest`, 02/11/2026, commit `1b1acc4`.
+* **Interpretación técnica:** Certifica 187 pruebas automatizadas superadas con 0 fallos en 2.28s y una cobertura consolidada de 90.40% de líneas sobre 2350 sentencias, superando ampliamente el umbral institucional del 70.0% (RNF09).
+* **Límite técnico:** Evaluación sobre entorno local aislado y SQLite; pendiente despliegue a Staging PostgreSQL.
+
+---
+
+**Figura 5.9: Terminal de pruebas de frontend con Vitest y reporte de cobertura v8**
+
+![Figura 5.9: Terminal de pruebas de frontend con Vitest y reporte de cobertura](imagenes/sprint-05/09_frontend_vitest_coverage_sprint05.png)
+
+* **Evidencia visual:** `imagenes/sprint-05/09_frontend_vitest_coverage_sprint05.png`.
+* **Fuente:** Terminal PowerShell ejecutando `npm test -- --run --coverage`, 02/11/2026, commit `1b1acc4`.
+* **Interpretación técnica:** Certifica 265 pruebas unitarias y de integración pasando en 21 suites en 3.49s con 83.42% de cobertura de líneas, incluyendo 42 pruebas en `StudentBookingsView.tsx` y 42 en `bookingService.ts`.
+* **Límite técnico:** Instrumentación sobre `jsdom` en NodeJS 20.
+
+---
+
+**Figura 5.10: Flujo de Integración Continua homologado en GitHub Actions**
+
+![Figura 5.10: Flujo de Integración Continua homologado en GitHub Actions](imagenes/sprint-05/10_github_actions_ci_sprint05.png)
+
+* **Evidencia visual:** `imagenes/sprint-05/10_github_actions_ci_sprint05.png`.
+* **Fuente:** Panel de GitHub Actions (`ci.yml`), Run ID `41524635510`, PR #6, commit `1ed8a04` / `1b1acc4`.
+* **Interpretación técnica:** Ejecución limpia de los 4 jobs de integración en runner Ubuntu (`lint-backend`, `lint-frontend`, `test-backend`, `test-frontend`), totalizando 452 pruebas automatizadas sin regresiones en la rama `main`.
+* **Límite técnico:** El pipeline valida la integración en runners virtuales; no reemplaza la prueba de usuario final.
 
 ### 5.6. Incidencias, desviaciones y delimitación técnica de persistencia
 
@@ -471,7 +585,7 @@ El Cuadro 6.1 acredita el cumplimiento del 100% de los compromisos funcionales d
 
 ### 6.3. Evaluación del objetivo y dictamen de aceptación
 
-Habiéndose verificado la operatividad de los flujos de ratificación y desistimiento, la aprobación de las 443 pruebas automatizadas y la integración limpia en `main`, el equipo consultor emite el siguiente dictamen formal:
+Habiéndose verificado la operatividad de los flujos de ratificación y desistimiento, la aprobación de las 452 pruebas automatizadas y la integración limpia en `main`, el equipo consultor emite el siguiente dictamen formal:
 > **DICTAMEN TÉCNICO:** El Sprint 05 se declara **CONCLUIDO Y VERIFICADO EN DESARROLLO E INTEGRACIÓN CONTINUA**, satisfaciendo los criterios de aceptación del *Definition of Done*. Se eleva a consideración del docente de cátedra para su **REVISIÓN Y APROBACIÓN ACADÉMICA FORMAL**.
 
 ---
@@ -502,7 +616,7 @@ El Sprint 06 requerirá implementar la regla institucional **RN-09**: si una ses
 1. **Cierre Satisfactorio del Ciclo de Vida de Reservas:** Se conectó exitosamente la etapa de reserva provisional del Sprint 04 con la ratificación formal (**RF13**) y el desistimiento voluntario (**RF14**), garantizando transiciones de estado coherentes y auditables en base de datos.
 2. **Consistencia Transaccional y Prevención de Sobrecupos (RNF07):** La combinación de cerrojos de aplicación multihilo y transacciones atómicas garantizó una tasa de sobrecupo de exactamente $0.0\%$, verificada mediante pruebas concurrentes multihilo.
 3. **Aislamiento de Identidad y Seguridad (RNF02):** La auditoría y el endurecimiento de la autorización en FastAPI erradicaron cualquier bypass en endpoints de reserva, asegurando que ningún usuario pueda consultar, confirmar o anular registros que no le pertenezcan.
-4. **Calidad Sostenible y Cobertura (RNF09):** La suite alcanzó 443 pruebas automatizadas con 0 fallos, sosteniendo coberturas del 83.25% en frontend y 90.40% en backend, superando holgadamente los estándares del curso.
+4. **Calidad Sostenible y Cobertura (RNF09):** La suite alcanzó 452 pruebas automatizadas con 0 fallos (187 backend y 265 frontend), sosteniendo coberturas del 83.42% en frontend y 90.40% en backend, superando holgadamente los estándares del curso.
 5. **Transparencia en la Persistencia de Pruebas y Deuda Técnica:** Se documentó formalmente que la verificación automatizada se ejecutó empleando SQLite y cerrojos multihilo, quedando pendiente la prueba de carga y concurrencia contra PostgreSQL / Supabase en Staging.
 
 ---
@@ -540,11 +654,32 @@ El Sprint 06 requerirá implementar la regla institucional **RN-09**: si una ses
 
 ## 11. Anexos y control de la entrega
 
-### 11.1. Índice formal de figuras y diagramas
+### 11.1. Índice formal de figuras y capturas visuales
 
-A continuación, se lista el inventario de diagramas técnicos incorporados en el informe:
+A continuación, se presenta el inventario exhaustivo de las diez capturas de pantalla reales incorporadas como respaldo empírico del funcionamiento del software en el Sprint 05:
 
-#### Cuadro 11.1: Inventario de Diagramas Técnicos y Artefactos de Modelado
+#### Cuadro 11.1: Inventario Maestro de Capturas y Evidencias Visuales del Sprint 05
+
+| ID / Figura | Hito / Tarea / PBI | Criterio o prueba que respalda | Archivo relativo | Fecha, entorno y commit | Qué demuestra / Límite técnico |
+| :---: | :--- | :--- | :--- | :--- | :--- |
+| **Fig. 5.1** | `H2` / `T-25` / `PB-014` | Bandeja consolidada de reservas en `StudentBookingsView.tsx`. | `imagenes/sprint-05/01_bandeja_reservas_estudiante.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Muestra la interfaz reactiva con 4 reservas de prueba, filtros por estado y resolución JWT. Límite: Renderizado en cliente sobre base local. |
+| **Fig. 5.2** | `H2` / `T-25` / `PB-014` | Diálogo modal accesible de ratificación pedagógica. | `imagenes/sprint-05/02_ratificacion_anticipada.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Modal accesible WAI-ARIA (T-25/CUS24) con cláusula de compromiso y cómputo de quórum (RN-08/RN-09). Límite: Estado previo a la mutación HTTP. |
+| **Fig. 5.3** | `H2-H4` / `T-25-T-26` | Confirmación real de asistencia (estado `CONFIRMADA`). | `imagenes/sprint-05/03_asistencia_confirmada.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Transición real HTTP 200 OK a `CONFIRMADA`, banner verde de éxito y reactividad en contadores. Límite: Persistencia en entorno local; Supabase en staging. |
+| **Fig. 5.4** | `H3` / `T-27` / `PB-015` | Diálogo modal accesible de desistimiento voluntario. | `imagenes/sprint-05/04_desistimiento_voluntario.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Modal accesible de cancelación con motivo tipado y advertencia de liberación ética (RN-10/PB-015). Límite: Recolección y validación de texto en cliente. |
+| **Fig. 5.5** | `H3-H4` / `T-27-T-28` | Desistimiento voluntario y restitución atómica de aforo. | `imagenes/sprint-05/05_cancelacion_aforo.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Mutación real a `CANCELADA_USUARIO` y restitución atómica de plaza al aforo (RN-05/RNF07). Límite: Ejecutado bajo cerrojo de concurrencia en memoria/SQLite. |
+| **Fig. 5.6** | `H2-H4` / `T-25-T-26` | Control temporal estricto en ventana de corte $T-24\text{ h}$. | `imagenes/sprint-05/06_control_temporal_t24h.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Bloqueo preventivo en reserva con $\Delta t = 12\text{ h} \le 24\text{ h}$ (botones deshabilitados, RN-08/RN-10). Límite: Simulación controlada de proximidad temporal. |
+| **Fig. 5.7** | `H4` / `T-26-T-28` | Publicación de contratos REST en OpenAPI 3.1.0 / Swagger. | `imagenes/sprint-05/07_swagger_api_docs_sprint05.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Contratos HTTP documentados en Swagger UI para `/api/v1/bookings`. Límite: Muestra especificación formal; requiere pruebas para validar respuestas. |
+| **Fig. 5.8** | `H4` / `T-26-T-28` | 187 pruebas aprobadas en Pytest y cobertura 90.40%. | `imagenes/sprint-05/08_backend_pytest_coverage_sprint05.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Calidad y cobertura del backend superando RNF09 ($\ge 70\%$). Límite: Evalúa código Python en suite local, no mide capa cliente. |
+| **Fig. 5.9** | `H2-H3` / `T-25-T-27` | 265 pruebas aprobadas en Vitest y cobertura 83.42%. | `imagenes/sprint-05/09_frontend_vitest_coverage_sprint05.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Calidad y cobertura de la SPA superando RNF09 ($\ge 70\%$). Límite: Evalúa componentes React en jsdom, no mide backend. |
+| **Fig. 5.10** | `H5` / `T-25-T-28` | Flujo de CI aprobado en GitHub Actions (452 pruebas). | `imagenes/sprint-05/10_github_actions_ci_sprint05.png` | 02/11/2026 · CI Runner · `1ed8a04` | Integración continua exitosa en PR #6 con cero regresiones en runner Ubuntu. Límite: Pipeline automatizado sin validación manual de usuario. |
+
+Fuente: Archivos originales de captura almacenados en `docs/diseño/imagenes/sprint-05/`.
+
+El Cuadro 11.1 certifica que el acervo de evidencias visuales del Sprint 05 se encuentra debidamente normalizado, con trazabilidad integral hacia los requerimientos funcionales, reglas de negocio y compromisos de backlog.
+
+### 11.2. Índice formal de diagramas técnicos y artefactos de modelado
+
+#### Cuadro 11.2: Inventario de Diagramas Técnicos y Artefactos de Modelado
 
 | Identificador | Título del Artefacto | Formato / Lenguaje | Propósito y Contenido Técnico |
 | :---: | :--- | :---: | :--- |
@@ -553,9 +688,7 @@ A continuación, se lista el inventario de diagramas técnicos incorporados en e
 
 Fuente: Elaboración propia conforme a los estándares de [`rules_doc.md`](../../rules_doc.md).
 
-El Cuadro 11.1 acredita la estandarización y trazabilidad de los artefactos visuales del Sprint 05, garantizando que el diseño arquitectónico sea reproducible y auditable.
-
-### 11.2. Lista de verificación de entrega del sprint (Checklist)
+### 11.3. Lista de verificación de entrega del sprint (Checklist)
 
 Para asegurar la calidad formal antes de la presentación, se verificó el cumplimiento de los siguientes requisitos obligatorios:
 

@@ -216,7 +216,7 @@ npm run test:coverage
 ```
 
 ### 8.3. Verificación de Formato y Linteo Estático
-```bash
+`ash
 # Backend: Verificar linteo y formato con Ruff
 cd aplicacion/backend
 ruff check .
@@ -226,7 +226,17 @@ ruff format --check .
 cd aplicacion/frontend
 npm run lint
 npm run build
-```
+`
+
+### 8.4. Reproducción y Generación de Evidencias Visuales Oficiales
+`ash
+# Desde la raíz del repositorio, ejecutar el generador de evidencias Playwright/Chrome:
+python aplicacion/backend/scripts/generate_sprint05_evidence.py
+
+# Rutas canónicas sincronizadas:
+# - docs/sprints/sprint-05/05-evidencias/ (10 capturas oficiales PNG)
+# - docs/diseño/imagenes/sprint-05/ (espejo documental de diseño)
+`
 
 ---
 
