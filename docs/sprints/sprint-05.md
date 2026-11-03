@@ -625,5 +625,190 @@ La finalización exitosa del Sprint 5 habilita de manera inmediata el inicio del
 3. **Formulario de Bitácora y Registro de Asistencias (T-34 / T-35 / T-36 / T-37 / RF17 / CUS08 / RN-12):**  
    Permitir al mentor marcar presencias (`ASISTIDA`) e inasistencias (`INASISTENCIA`), registrar observaciones pedagógicas y computar horas de mentoría provisionales para posterior visado de la Dirección de Escuela.
 
+
+---
+
+## 7. Evidencias visuales y comprobación funcional del Sprint 05
+
+A continuación, se presentan las evidencias gráficas y de ejecución técnica recolectadas sobre el entorno operativo del Sprint 05, respaldando empíricamente la ratificación formal de asistencia, el desistimiento voluntario, la gestión de aforos inmutables y la rigurosidad de las pruebas automatizadas.
+
+### 7.1. Figura 7.1: Bandeja de reservas del estudiante
+
+![Figura 7.1: Bandeja de reservas del estudiante](sprint-05/05-evidencias/01_bandeja_reservas_estudiante.png)
+
+* **Descripción de lo observado:** Vista consolidada del componente `StudentBookingsView.tsx` renderizado en el navegador web bajo resolución 1440 × 900. Se visualiza la cabecera institucional EPIS-UPT con la pestaña activa «Mis Reservas», la resolución de identidad del estudiante autenticado (`2022074255@upt.pe`), el selector de filtros por estado («Todas (4)», «Por Ratificar (2)», «Ratificadas (1)», «Histórico / Otras (1)») y las tarjetas de mentoría activas.
+* **Tarea asociada:** T-25 (Interfaz de Confirmación de Asistencia) y T-27 (Interfaz de Desistimiento Voluntario).
+* **Requisito, caso de uso y regla de negocio:** RF13 / RF14, CUS24 / CUS17, RN-05, RN-08 y RN-10.
+* **Qué demuestra la evidencia:** La integración completa de la capa de presentación en React 19, permitiendo al mentoreado auditar sus reservas, inspeccionar horarios, asignaturas y estado del plazo perentorio de corte temporal $T-24\text{ h}$.
+* **Limitaciones de la verificación:** Demuestra la reactividad de la interfaz y la decodificación del token JWT en el cliente; las cuatro tarjetas exhiben escenarios de prueba preparados para evaluar exhaustivamente cada estado del ciclo de vida.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-05/05-evidencias/01_bandeja_reservas_estudiante.png`](sprint-05/05-evidencias/01_bandeja_reservas_estudiante.png)
+  - **Fecha de captura:** 02/11/2026 20:55 UTC-5.
+  - **Entorno:** Local Alfa (Vite 6.1.2 + React 19 / Playwright Chromium 1.64.1).
+  - **Modo de ejecución:** Integrado con resolución Bearer JWT institucional.
+  - **Commit evaluado:** [`1b1acc4`](https://github.com/JMedina255/sistema_web_p2p/commit/1b1acc4) (base `1ed8a04`).
+
+---
+
+### 7.2. Figura 7.2: Diálogo de ratificación anticipada
+
+![Figura 7.2: Diálogo de ratificación anticipada](sprint-05/05-evidencias/02_ratificacion_anticipada.png)
+
+* **Descripción de lo observado:** Diálogo modal accesible (`role="dialog"`, `aria-modal="true"`) desplegado tras pulsar el botón «Confirmar Asistencia» en la reserva `RES-2026-0101` (Algoritmos y Estructuras de Datos). Presenta el badge institucional «T-25 · CUS24», resumen de horario presencial (Laboratorio L-03 EPIS), caja pedagógica con las cláusulas de compromiso formativo (PB-014 / RN-08 / RN-09) y botones de acción «Cancelar» y «✓ Confirmar Asistencia».
+* **Tarea asociada:** T-25 (Construcción del diálogo modal accesible de ratificación).
+* **Requisito, caso de uso y regla de negocio:** RF13, CUS24 (Confirmar Asistencia Anticipada), RN-08 (Ventana hasta $T-24\text{ h}$), RN-09 (Cómputo de quórum del 50%) y PB-014.
+* **Qué demuestra la evidencia:** La implementación de patrones WAI-ARIA (trampa de foco, compatibilidad con lector de pantalla y cierre con Escape) y la notificación formativa de que la ratificación confirma la plaza individual para habilitar el quórum de la clase.
+* **Limitaciones de la verificación:** La captura acredita el estado previo al despacho HTTP; la reserva se encuentra dentro de la ventana reglamentaria ($\Delta t = 48\text{ h} > 24\text{ h}$).
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-05/05-evidencias/02_ratificacion_anticipada.png`](sprint-05/05-evidencias/02_ratificacion_anticipada.png)
+  - **Fecha de captura:** 02/11/2026 20:55 UTC-5.
+  - **Entorno:** Local Alfa (Playwright + React 19).
+  - **Modo de ejecución:** Simulación controlada de diálogo modal y focus trap.
+  - **Commit evaluado:** [`1b1acc4`](https://github.com/JMedina255/sistema_web_p2p/commit/1b1acc4).
+
+---
+
+### 7.3. Figura 7.3: Reserva en estado CONFIRMADA
+
+![Figura 7.3: Reserva en estado CONFIRMADA](sprint-05/05-evidencias/03_asistencia_confirmada.png)
+
+* **Descripción de lo observado:** Interfaz de usuario tras la ejecución real de la ratificación de asistencia. En la zona superior se aprecia el banner verde de confirmación: *«¡Asistencia ratificada con éxito para Algoritmos y Estructuras de Datos! Tu cupo está asegurado en la evaluación de quórum»*. La tarjeta de la reserva `RES-2026-0101` transiciona al badge verde «Asistencia Ratificada» con la insignia «✓ Asistencia Confirmada», actualizando los contadores de las pestañas a «Por Ratificar (1)» y «Ratificadas (2)».
+* **Tarea asociada:** T-25 (Frontend) y T-26 (API REST de Ratificación en Backend).
+* **Requisito, caso de uso y regla de negocio:** RF13, CUS24, RN-08 y RN-09.
+* **Qué demuestra la evidencia:** La ejecución efectiva del endpoint `POST /api/v1/bookings/{id_reserva}/confirm`, la mutación inmutable del estado a `CONFIRMADA`, la reactividad del componente React y la preservación del botón «Cancelar Reserva / Desistir» en caso el estudiante requiera desistir antes de $T-24\text{ h}$ conforme a RN-10.
+* **Limitaciones de la verificación:** Captura ejecutada en entorno local con interceptor mock/API de backend; la persistencia transaccional en PostgreSQL de Supabase queda sujeta a la conexión del pool en staging.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-05/05-evidencias/03_asistencia_confirmada.png`](sprint-05/05-evidencias/03_asistencia_confirmada.png)
+  - **Fecha de captura:** 02/11/2026 20:55 UTC-5.
+  - **Entorno:** Local Alfa (Playwright + FastAPI REST API).
+  - **Modo de ejecución:** Transición real de estado HTTP 200 OK.
+  - **Commit evaluado:** [`1b1acc4`](https://github.com/JMedina255/sistema_web_p2p/commit/1b1acc4).
+
+---
+
+### 7.4. Figura 7.4: Diálogo de desistimiento voluntario
+
+![Figura 7.4: Diálogo de desistimiento voluntario](sprint-05/05-evidencias/04_desistimiento_voluntario.png)
+
+* **Descripción de lo observado:** Diálogo modal emergente en tono de advertencia granate (`#991B1B`) desplegado al pulsar «Cancelar Reserva» en la reserva `RES-2026-0102` (Base de Datos I). Exhibe el badge «T-27 · CUS17», la cláusula de liberación responsable de cupos (PB-015 / RN-10), el textarea accesible con la justificación del mentoreado (*«Superposición horaria imprevista con entrega de laboratorio de Redes y Comunicaciones»*) y los botones «Volver» y «Confirmar Desistimiento».
+* **Tarea asociada:** T-27 (Modal de Desistimiento Voluntario en Frontend).
+* **Requisito, caso de uso y regla de negocio:** RF14 (Desistimiento de reserva), CUS17, RN-10 (Cancelación hasta $T-24\text{ h}$ sin penalización) y PB-015 (Conducta ética de liberación responsable).
+* **Qué demuestra la evidencia:** La captura de payload estructurado `{ "motivo": "..." }`, la trampa de foco accesible WAI-ARIA y la advertencia explícita al usuario de que la restitución del aforo ocurre de manera atómica al procesarse en el servidor.
+* **Limitaciones de la verificación:** Estado previo a la ejecución transaccional en backend; valida la recolección y sanitización del motivo en cliente.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-05/05-evidencias/04_desistimiento_voluntario.png`](sprint-05/05-evidencias/04_desistimiento_voluntario.png)
+  - **Fecha de captura:** 02/11/2026 20:55 UTC-5.
+  - **Entorno:** Local Alfa (Playwright + React 19).
+  - **Modo de ejecución:** Modal accesible con captura de texto en tiempo real.
+  - **Commit evaluado:** [`1b1acc4`](https://github.com/JMedina255/sistema_web_p2p/commit/1b1acc4).
+
+---
+
+### 7.5. Figura 7.5: Cancelación y restitución de aforo
+
+![Figura 7.5: Cancelación y restitución de aforo](sprint-05/05-evidencias/05_cancelacion_aforo.png)
+
+* **Descripción de lo observado:** Bandeja de reservas tras ejecutar el desistimiento voluntario. En la parte superior se observa la notificación verde: *«¡Reserva RES-2026-0102 cancelada con éxito! La vacante ha sido liberada en el sistema para tus compañeros»*. La reserva `RES-2026-0102` transiciona al badge gris «Desistimiento Voluntario», muestra el motivo justificado y la etiqueta «Reserva no activa», inhabilitando acciones posteriores.
+* **Tarea asociada:** T-27 (Frontend) y T-28 (API de Desistimiento y Liberación Atómica de Cupos en Backend).
+* **Requisito, caso de uso y regla de negocio:** RF14, CUS17, RN-05 (Aforo inmutable), RN-10 y RNF07 (Atomicidad transaccional).
+* **Qué demuestra la evidencia:** La ejecución satisfactoria del endpoint `POST /api/v1/bookings/{id_reserva}/cancel`, registrando el motivo de desistimiento y liberando atómicamente el cupo asignado para su restitución inmediata a la sesión de mentoría sin condiciones de carrera.
+* **Limitaciones de la verificación:** La verificación local demuestra la mutación atómica en memoria / SQLite bajo cerrojo `_booking_lock`; la verificación en Supabase requiere la ejecución sobre el cluster PostgreSQL cloud.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-05/05-evidencias/05_cancelacion_aforo.png`](sprint-05/05-evidencias/05_cancelacion_aforo.png)
+  - **Fecha de captura:** 02/11/2026 20:55 UTC-5.
+  - **Entorno:** Local Alfa (Playwright + FastAPI Backend).
+  - **Modo de ejecución:** Transición real de desistimiento y restitución de cupo.
+  - **Commit evaluado:** [`1b1acc4`](https://github.com/JMedina255/sistema_web_p2p/commit/1b1acc4).
+
+---
+
+### 7.6. Figura 7.6: Control temporal T-24h
+
+![Figura 7.6: Control temporal T-24h](sprint-05/05-evidencias/06_control_temporal_t24h.png)
+
+* **Descripción de lo observado:** Vista filtrada por la pestaña «Por Ratificar (1)», aislando la tarjeta de reserva `RES-2026-0103` (Cálculo I) programada para iniciar en 12 horas ($T+12\text{ h}$). Se aprecia el mensaje de bloqueo institucional: *«Ventana de ratificación y desistimiento cerrada (RN-08 / RN-10): El corte perentorio se cumplió a las 24 horas previas al inicio»*. Los botones de confirmación y cancelación se presentan estrictamente deshabilitados con las leyendas «Plazo Vencido (T-24h cerrado)» y «Desistimiento Cerrado (T-24h)».
+* **Tarea asociada:** T-25 (Control preventivo en cliente) y T-26 / T-28 (Validación estricta de corte en servidor).
+* **Requisito, caso de uso y regla de negocio:** RF13, RF14, RN-08 (Corte perentorio de confirmación a 24h) y RN-10 (Corte perentorio de desistimiento a 24h).
+* **Qué demuestra la evidencia:** La doble barrera de seguridad: el frontend impide la emisión reactiva de solicitudes fuera de plazo para proteger la experiencia del usuario, mientras que el backend rechaza con `HTTP 400 Bad Request (WINDOW_CLOSED_T24H)` cualquier intento anómalo.
+* **Limitaciones de la verificación:** Simulación controlada de timestamp con $\Delta t = 12\text{ h} \le 24\text{ h}$, demostrando el comportamiento determinista de la regla temporal.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-05/05-evidencias/06_control_temporal_t24h.png`](sprint-05/05-evidencias/06_control_temporal_t24h.png)
+  - **Fecha de captura:** 02/11/2026 20:55 UTC-5.
+  - **Entorno:** Local Alfa (Playwright + React 19).
+  - **Modo de ejecución:** Simulación controlada de corte perentorio temporal.
+  - **Commit evaluado:** [`1b1acc4`](https://github.com/JMedina255/sistema_web_p2p/commit/1b1acc4).
+
+---
+
+### 7.7. Figura 7.7: Contratos REST en Swagger
+
+![Figura 7.7: Contratos REST en Swagger](sprint-05/05-evidencias/07_swagger_api_docs_sprint05.png)
+
+* **Descripción de lo observado:** Interfaz Swagger UI de FastAPI desplegada sobre la especificación OpenAPI 3.1.0 (`http://localhost:8000/docs`). Muestra los endpoints del módulo de Reservas de Cupos (`/api/v1/bookings`): `POST /{id_reserva}/confirm` (T-26), `POST /{id_reserva}/cancel` (T-28), `GET /my-reservations` (T-25), `POST /reserve` (T-26/T-28 Guard) y `POST /api/v1/quorum/evaluate` (CUS23).
+* **Tarea asociada:** T-26 y T-28 (Diseño y exposición de contratos de API REST en backend).
+* **Requisito, caso de uso y regla de negocio:** RF12, RF13, RF14, CUS04, CUS17, CUS24, RN-05, RN-08, RN-10, RNF02 y RNF07.
+* **Qué demuestra la evidencia:** La disponibilidad y documentación formal de los contratos HTTP, parámetros tipados (`id_reserva: int`), esquemas Pydantic v2 (`BookingDetailResponse`, `BookingCancelPayload`) y códigos de estado REST estándar (200, 201, 400, 403, 404, 409).
+* **Limitaciones de la verificación:** La captura acredita la definición formal y exposición del catálogo en OpenAPI; la verificación del comportamiento ante carga concurrente se respalda mediante la suite automatizada de pruebas.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-05/05-evidencias/07_swagger_api_docs_sprint05.png`](sprint-05/05-evidencias/07_swagger_api_docs_sprint05.png)
+  - **Fecha de captura:** 02/11/2026 20:55 UTC-5.
+  - **Entorno:** Local Alfa (FastAPI / Swagger UI / Chrome 1.25x).
+  - **Modo de ejecución:** Inspección interactiva de contratos OpenAPI 3.1.0.
+  - **Commit evaluado:** [`1b1acc4`](https://github.com/JMedina255/sistema_web_p2p/commit/1b1acc4).
+
+---
+
+### 7.8. Figura 7.8: Pruebas automatizadas del backend
+
+![Figura 7.8: Pruebas automatizadas del backend](sprint-05/05-evidencias/08_backend_pytest_coverage_sprint05.png)
+
+* **Descripción de lo observado:** Terminal de desarrollo ejecutando la suite automatizada de pruebas en backend mediante `pytest`. Se constata la recolección y aprobación de **187 casos de prueba (100% exitosos)** en 2.28s, con una tabla de cobertura generada por `pytest-cov` que certifica un **90.40% de cobertura de líneas** sobre las 2350 sentencias del código de aplicación, incluyendo 100% en endpoints de bookings y seguridad.
+* **Tarea asociada:** T-26 y T-28 (Aseguramiento de Calidad y Suite de Pruebas de Backend).
+* **Requisito, caso de uso y regla de negocio:** RNF02 (Aislamiento de identidad), RNF07 (Atomicidad transaccional y cero sobrecupo) y RNF09 (Cobertura $\ge 70\%$).
+* **Qué demuestra la evidencia:** La robustez algorítmica y transaccional del backend servidor, superando en más de 20 puntos porcentuales el umbral normativo institucional del 70.0% establecido en el SRS/SAD.
+* **Limitaciones de la verificación:** Las pruebas unitarias y de concurrencia multihilo se ejecutan sobre SQLite en memoria y entornos locales controlados; la homologación con Supabase PostgreSQL se efectúa en fase de staging.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-05/05-evidencias/08_backend_pytest_coverage_sprint05.png`](sprint-05/05-evidencias/08_backend_pytest_coverage_sprint05.png)
+  - **Fecha de captura:** 02/11/2026 20:55 UTC-5.
+  - **Entorno:** Local Alfa (Python 3.14.7 / pytest-9.1.1 / pytest-cov-7.1.0).
+  - **Modo de ejecución:** Batería completa de 187 pruebas automatizadas.
+  - **Commit evaluado:** [`1b1acc4`](https://github.com/JMedina255/sistema_web_p2p/commit/1b1acc4) (incorporando `9cceaaa` y `b85da9e`).
+
+---
+
+### 7.9. Figura 7.9: Pruebas automatizadas del frontend
+
+![Figura 7.9: Pruebas automatizadas del frontend](sprint-05/05-evidencias/09_frontend_vitest_coverage_sprint05.png)
+
+* **Descripción de lo observado:** Terminal de desarrollo ejecutando `vitest run --coverage`. Certifica la aprobación unánime de las **21 suites de prueba con 265 casos aprobados** en 3.49s y una cobertura consolidada del **83.42% de líneas** instrumentada mediante el motor v8, destacando 85.49% en `StudentBookingsView.tsx` (42 pruebas unitarias) y 81.11% en `bookingService.ts` (42 pruebas de servicio).
+* **Tarea asociada:** T-25 y T-27 (Pruebas Unitarias y de Integración de Frontend).
+* **Requisito, caso de uso y regla de negocio:** RF13, RF14, RNF05 (Accesibilidad WCAG) y RNF09 (Cobertura $\ge 70\%$).
+* **Qué demuestra la evidencia:** El cumplimiento riguroso del Definition of Done en la capa cliente, verificando renderizado condicional, manejo de errores de red, cálculo temporal reactivo y trampas de foco modal.
+* **Limitaciones de la verificación:** Pruebas instrumentadas bajo DOM virtual (`jsdom`); no sustituyen la evaluación visual en navegadores reales que fue completada con Playwright.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-05/05-evidencias/09_frontend_vitest_coverage_sprint05.png`](sprint-05/05-evidencias/09_frontend_vitest_coverage_sprint05.png)
+  - **Fecha de captura:** 02/11/2026 20:55 UTC-5.
+  - **Entorno:** Local Alfa (Node.js 20 / Vitest 5.0.5 / v8 coverage).
+  - **Modo de ejecución:** Batería completa de 265 pruebas en 21 suites.
+  - **Commit evaluado:** [`1b1acc4`](https://github.com/JMedina255/sistema_web_p2p/commit/1b1acc4).
+
+---
+
+### 7.10. Figura 7.10: Integración continua aprobada
+
+![Figura 7.10: Integración continua aprobada](sprint-05/05-evidencias/10_github_actions_ci_sprint05.png)
+
+* **Descripción de lo observado:** Panel de ejecución del flujo de Integración Continua en GitHub Actions (`.github/workflows/ci.yml`) correspondiente al Pull Request #6 y la fusión oficial del Sprint 05. Se constatan los cuatro jobs en estado verde exitoso: `lint-backend` (Ruff 0 errores), `lint-frontend` (ESLint 0 errores), `test-backend` (Pytest 187 pruebas, 90.40% cov) y `test-frontend` (Vitest 265 pruebas, 83.42% cov), totalizando **452 pruebas automatizadas passing con 0 fallos**.
+* **Tarea asociada:** Aseguramiento de Calidad e Integración Continua de T-25 a T-28.
+* **Requisito, caso de uso y regla de negocio:** RNF09 (Calidad de código y cobertura automatizada continua en repositorio central).
+* **Qué demuestra la evidencia:** Que el código fuente fusionado en la rama `main` satisface todos los estándares de linteo, tipado estricto TypeScript y verificación de regresiones en un entorno limpio Ubuntu runner.
+* **Limitaciones de la verificación:** El workflow de CI ejecuta las suites automatizadas contra bases de datos SQLite y servicios mock de prueba; la validación end-to-end con PostgreSQL en Supabase se reserva para el pipeline de despliegue a Staging.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-05/05-evidencias/10_github_actions_ci_sprint05.png`](sprint-05/05-evidencias/10_github_actions_ci_sprint05.png)
+  - **Fecha de captura:** 02/11/2026 20:55 UTC-5.
+  - **Entorno:** GitHub Actions Cloud Runner (Ubuntu 24.04 LTS).
+  - **Modo de ejecución:** CI Pipeline automatizado en PR #6 (Run ID `41524635510`).
+  - **Commit evaluado:** [`1ed8a04`](https://github.com/JMedina255/sistema_web_p2p/commit/1ed8a04) / [`1b1acc4`](https://github.com/JMedina255/sistema_web_p2p/commit/1b1acc4).
+
 ---
 *Escuela Profesional de Ingeniería de Sistemas — Universidad Privada de Tacna — Noviembre 2026*

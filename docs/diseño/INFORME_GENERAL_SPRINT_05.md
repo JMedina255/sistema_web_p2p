@@ -56,7 +56,7 @@ A continuación, se presenta la ficha técnica de control de gestión del Sprint
 
 Fuente: Elaboración propia.
 
-Como certifica el Cuadro 1.1, el equipo concluyó con éxito los compromisos técnicos programados para el Sprint 05, alcanzando 443 pruebas automatizadas y sentando las bases operativas indispensables para la evaluación de quórum del Sprint 06.
+Como certifica el Cuadro 1.1, el equipo concluyó con éxito los compromisos técnicos programados para el Sprint 05, alcanzando 452 pruebas automatizadas (187 backend y 265 frontend, tras la consolidación de 443 pruebas en la fusión inicial de PR #6) y sentando las bases operativas indispensables para la evaluación de quórum del Sprint 06.
 
 ---
 
@@ -171,7 +171,7 @@ El Cuadro 5.1 acredita la resolución proactiva de riesgos de seguridad, garanti
 
 ## 6. Aseguramiento de Calidad y Catálogo de Pruebas Automatizadas
 
-A continuación, se desglosa el acervo consolidado de 443 pruebas automatizadas ejecutadas y aprobadas en el repositorio:
+A continuación, se desglosa el acervo consolidado de 452 pruebas automatizadas ejecutadas y aprobadas en el repositorio (187 backend / 265 frontend):
 
 ### Cuadro 6.1: Catálogo Consolidado de Suites de Pruebas (Sprint 05)
 
@@ -199,7 +199,7 @@ A continuación, se desglosa el acervo consolidado de 443 pruebas automatizadas 
 
 Fuente: Registro de ejecución de Pytest 9.1.1 y Vitest 2.1.2 en commit `1ed8a04`.
 
-El Cuadro 6.1 certifica la robustez de la base de código, acreditando que la suite de 443 pruebas cuenta con recuentos validados contra los archivos físicos del repositorio.
+El Cuadro 6.1 certifica la robustez de la base de código, acreditando que la suite de 452 pruebas cuenta con recuentos validados contra los archivos físicos del repositorio.
 
 ---
 

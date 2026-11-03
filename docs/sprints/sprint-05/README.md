@@ -8,7 +8,7 @@
 * Renzo Antonio Antayhua Mamani (Código: 2022073504)
 **Docente de Cátedra:** Dr. Ricardo Eduardo Valcárcel Alvarado
 **Commit Oficial de Cierre:** [`1ed8a046e0b214082042a3172b12d2c98b3d0b90`](https://github.com/JMedina255/sistema_web_p2p/commit/1ed8a04) (02/11/2026)
-**Estado:** **Sprint 05 — 100% Concluido y Homologado en CI (443 Pruebas Automatizadas) — Pendiente de Aprobación de Cátedra**
+**Estado:** **Sprint 05 — 100% Concluido y Homologado en CI (452 Pruebas Automatizadas: 187 Backend / 265 Frontend) — Pendiente de Aprobación de Cátedra**
 
 ---
 
@@ -22,7 +22,7 @@ A continuación, se detalla el índice formal de documentos, evidencias y especi
 | :--- | :--- | :--- |
 | **Informe Académico Canónico (G03)** | [`docs/diseño/G03_EPIS_Informe_Sprint_05.md`](../../diseño/G03_EPIS_Informe_Sprint_05.md) | Informe formal de 11 secciones normado por [`rules_doc.md`](../../../rules_doc.md) para la cátedra de Construcción de Software I. |
 | **Informe General Técnico de Cierre** | [`docs/diseño/INFORME_GENERAL_SPRINT_05.md`](../../diseño/INFORME_GENERAL_SPRINT_05.md) | Memoria técnica exhaustiva de arquitectura, contratos REST tipados, seguridad JWT y concurrencia transaccional. |
-| **Catálogo de Evidencia de Pruebas** | [`docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_05.md`](../../diseño/EVIDENCIA_PRUEBAS_SPRINT_05.md) | Reporte de 443 pruebas automatizadas (265 FE / 178 BE), métricas de cobertura independiente y comandos de reproducción. |
+| **Catálogo de Evidencia de Pruebas** | [`docs/diseño/EVIDENCIA_PRUEBAS_SPRINT_05.md`](../../diseño/EVIDENCIA_PRUEBAS_SPRINT_05.md) | Reporte de 452 pruebas automatizadas (265 FE / 187 BE), métricas de cobertura independiente y comandos de reproducción. |
 | **Mapa Maestro de Trazabilidad** | [`docs/sprints/sprint-05/02-trazabilidad/MAPA_FUENTES_SPRINT_05.md`](02-trazabilidad/MAPA_FUENTES_SPRINT_05.md) | Matriz biunívoca vertical: PBI $\leftrightarrow$ RF $\leftrightarrow$ CUS $\leftrightarrow$ RN $\leftrightarrow$ Tarea $\leftrightarrow$ Código $\leftrightarrow$ Pruebas $\leftrightarrow$ Commits. |
 | **Propuesta de Diapositivas Canva** | [`docs/sprints/sprint-05/04-presentacion/PROPUESTA_DIAPOSITIVAS_CANVA.md`](04-presentacion/PROPUESTA_DIAPOSITIVAS_CANVA.md) | Guion maestro pedagógico de 14 diapositivas para sustentación académica y posterior sincronización visual en Canva. |
 | **Bitácora de Planificación S05** | [`docs/sprints/sprint-05.md`](../sprint-05.md) | Bitácora técnica y registro de tareas ejecutadas del Sprint 05. |
@@ -40,6 +40,6 @@ El Cuadro 1.1 centraliza el acceso a los artefactos oficiales del Sprint 05, gar
 - **Reglas de Negocio Gobernadas:** Aforos inmutables (**RN-05**), corte a 24 horas previas (**RN-08** y **RN-10**) y preparación del quórum mínimo del 50% (**RN-09**).
 - **Seguridad Reforzada (RNF02):** Eliminación de bypass permisivo `"admin"` en commit `b9db285`, garantizando aislamiento de identidad por token JWT.
 - **Concurrencia ACID (RNF07):** Restitución atómica de cupos y 0.0% de sobrecupo verificados bajo contención multihilo de 20 peticiones concurrentes en `test_bookings.py`.
-- **Calidad y Cobertura (RNF09):** 443 pruebas automatizadas passing con 0 fallos (Frontend: 83.25%, Backend: 90.40%).
+- **Calidad y Cobertura (RNF09):** 452 pruebas automatizadas passing con 0 fallos (Frontend: 83.42%, Backend: 90.40%, consolidando la línea base tras blindaje en commits 9cceaaa y b85da9e; 443 pruebas en fusión inicial PR #6).
 - **Integración Continua:** Aprobado en GitHub Actions (`.github/workflows/ci.yml`) tras la corrección de linteo Ruff (`370766f`) en el PR #6.
 - **Limitación Técnica de Persistencia:** Verificación local ejecutada en SQLite con cerrojos multihilo. Homologación en PostgreSQL / Supabase pendiente para Staging.
