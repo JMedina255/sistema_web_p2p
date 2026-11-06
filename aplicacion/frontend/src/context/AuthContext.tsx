@@ -70,17 +70,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const email = (payload.sub || payload.email || '').trim().toLowerCase();
     if (!email || !email.includes('@')) return null;
 
-    let roles: UserRole[] = [];
-    if (Array.isArray(payload.roles) && payload.roles.length > 0) {
-      roles = payload.roles.map((r) => r.toLowerCase() as UserRole);
-    } else if (payload.role) {
-      roles = [payload.role.toLowerCase() as UserRole];
-    } else if (email.startsWith('admin')) {
-      roles = ['administrador', 'mentoreado'];
-    } else {
-      roles = ['mentoreado'];
-    }
+    const rawRoles: string[] =
+      Array.isArray(payload.roles) && payload.roles.length > 0
+        ? payload.roles
+        : payload.role
+        ? [payload.role]
+        : email.startsWith('admin')
+        ? ['administrador', 'mentoreado']
+        : ['mentoreado'];
 
+    const roles: UserRole[] = rawRoles.map((r) => r.toLowerCase() as UserRole);
     if (!roles.includes('mentoreado')) {
       roles.push('mentoreado');
     }
