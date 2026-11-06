@@ -23,7 +23,7 @@ export interface OfferPublishViewProps {
 const FALLBACK_COURSES: Course[] = [
   {
     id_asignatura: 1,
-    codigo_curso: 'CI-101',
+    codigo_curso: 'CALC-101',
     nombre_curso: 'Cálculo I',
     ciclo_plan: 1,
     creditos: 4,
@@ -33,7 +33,7 @@ const FALLBACK_COURSES: Course[] = [
   },
   {
     id_asignatura: 2,
-    codigo_curso: 'CI-201',
+    codigo_curso: 'CALC-201',
     nombre_curso: 'Cálculo II',
     ciclo_plan: 2,
     creditos: 4,
@@ -43,7 +43,7 @@ const FALLBACK_COURSES: Course[] = [
   },
   {
     id_asignatura: 3,
-    codigo_curso: 'SI-202',
+    codigo_curso: 'ALGO-202',
     nombre_curso: 'Algoritmos y Estructuras de Datos',
     ciclo_plan: 2,
     creditos: 4,
@@ -53,7 +53,7 @@ const FALLBACK_COURSES: Course[] = [
   },
   {
     id_asignatura: 4,
-    codigo_curso: 'SI-301',
+    codigo_curso: 'POO-301',
     nombre_curso: 'Programación Orientada a Objetos',
     ciclo_plan: 3,
     creditos: 4,
@@ -63,7 +63,7 @@ const FALLBACK_COURSES: Course[] = [
   },
   {
     id_asignatura: 5,
-    codigo_curso: 'SI-401',
+    codigo_curso: 'BDD-401',
     nombre_curso: 'Base de Datos',
     ciclo_plan: 4,
     creditos: 4,
@@ -75,27 +75,35 @@ const FALLBACK_COURSES: Course[] = [
 
 const FALLBACK_TOPICS: Record<number, Topic[]> = {
   1: [
-    { id_tema: 101, id_asignatura: 1, nombre_tema: 'Límites Indeterminados y Continuidad', unidad_silabica: 1, estado_activo: true },
-    { id_tema: 102, id_asignatura: 1, nombre_tema: 'Derivadas, Regla de la Cadena y Optimización', unidad_silabica: 2, estado_activo: true },
-    { id_tema: 103, id_asignatura: 1, nombre_tema: 'Trazado de Curvas y Teorema de Rolle', unidad_silabica: 3, estado_activo: true },
+    { id_tema: 1, id_asignatura: 1, nombre_tema: 'Límites y Continuidad', unidad_silabica: 1, estado_activo: true },
+    { id_tema: 2, id_asignatura: 1, nombre_tema: 'Derivadas y Regla de la Cadena', unidad_silabica: 2, estado_activo: true },
+    { id_tema: 3, id_asignatura: 1, nombre_tema: 'Aplicaciones de la Derivada (Optimización)', unidad_silabica: 3, estado_activo: true },
+    { id_tema: 4, id_asignatura: 1, nombre_tema: 'Integrales Indefinidas y Métodos de Integración', unidad_silabica: 4, estado_activo: true },
   ],
   2: [
-    { id_tema: 201, id_asignatura: 2, nombre_tema: 'Técnicas de Integración por Partes y Sustitución', unidad_silabica: 1, estado_activo: true },
-    { id_tema: 202, id_asignatura: 2, nombre_tema: 'Integrales Impropias y Aplicaciones de Volumen', unidad_silabica: 2, estado_activo: true },
-    { id_tema: 203, id_asignatura: 2, nombre_tema: 'Series Numéricas y Criterios de Convergencia', unidad_silabica: 3, estado_activo: true },
+    { id_tema: 5, id_asignatura: 2, nombre_tema: 'Integrales Definidas y Teorema Fundamental', unidad_silabica: 1, estado_activo: true },
+    { id_tema: 6, id_asignatura: 2, nombre_tema: 'Cálculo de Áreas y Volúmenes de Sólidos', unidad_silabica: 2, estado_activo: true },
+    { id_tema: 7, id_asignatura: 2, nombre_tema: 'Técnicas Avanzadas de Integración y Fracciones Parciales', unidad_silabica: 3, estado_activo: true },
+    { id_tema: 8, id_asignatura: 2, nombre_tema: 'Sucesiones y Series Numéricas', unidad_silabica: 4, estado_activo: true },
   ],
   3: [
-    { id_tema: 301, id_asignatura: 3, nombre_tema: 'Análisis Asintótico y Notación Big-O', unidad_silabica: 1, estado_activo: true },
-    { id_tema: 302, id_asignatura: 3, nombre_tema: 'Estructuras Dinámicas: Listas Enlazadas, Pilas y Colas', unidad_silabica: 2, estado_activo: true },
-    { id_tema: 303, id_asignatura: 3, nombre_tema: 'Árboles Binarios de Búsqueda y Grafos', unidad_silabica: 3, estado_activo: true },
+    { id_tema: 9, id_asignatura: 3, nombre_tema: 'Análisis Asintótico y Notación Big-O', unidad_silabica: 1, estado_activo: true },
+    { id_tema: 10, id_asignatura: 3, nombre_tema: 'Recursión y Técnicas Divide y Vencerás', unidad_silabica: 1, estado_activo: true },
+    { id_tema: 11, id_asignatura: 3, nombre_tema: 'Estructuras Lineales: Listas Enlazadas, Pilas y Colas', unidad_silabica: 2, estado_activo: true },
+    { id_tema: 12, id_asignatura: 3, nombre_tema: 'Árboles Binarios de Búsqueda y Recorridos', unidad_silabica: 3, estado_activo: true },
+    { id_tema: 13, id_asignatura: 3, nombre_tema: 'Grafos: Representaciones y Algoritmos BFS/DFS', unidad_silabica: 4, estado_activo: true },
   ],
   4: [
-    { id_tema: 401, id_asignatura: 4, nombre_tema: 'Encapsulamiento, Herencia y Polimorfismo', unidad_silabica: 1, estado_activo: true },
-    { id_tema: 402, id_asignatura: 4, nombre_tema: 'Principios SOLID y Patrones de Diseño', unidad_silabica: 2, estado_activo: true },
+    { id_tema: 14, id_asignatura: 4, nombre_tema: 'Principios SOLID y Encapsulamiento', unidad_silabica: 1, estado_activo: true },
+    { id_tema: 15, id_asignatura: 4, nombre_tema: 'Herencia, Polimorfismo e Interfaces', unidad_silabica: 2, estado_activo: true },
+    { id_tema: 16, id_asignatura: 4, nombre_tema: 'Patrones de Diseño Creacionales y Estructurales', unidad_silabica: 3, estado_activo: true },
+    { id_tema: 17, id_asignatura: 4, nombre_tema: 'Manejo Robusto de Excepciones y Colecciones Genéricas', unidad_silabica: 4, estado_activo: true },
   ],
   5: [
-    { id_tema: 501, id_asignatura: 5, nombre_tema: 'Modelo Entidad-Relación y Normalización (1FN-3FN)', unidad_silabica: 1, estado_activo: true },
-    { id_tema: 502, id_asignatura: 5, nombre_tema: 'Consultas SQL Complejas y Transacciones ACID', unidad_silabica: 2, estado_activo: true },
+    { id_tema: 18, id_asignatura: 5, nombre_tema: 'Modelo Entidad-Relación y Diagramas ER Extendido', unidad_silabica: 1, estado_activo: true },
+    { id_tema: 19, id_asignatura: 5, nombre_tema: 'Normalización Relacional (1FN, 2FN, 3FN, BCNF)', unidad_silabica: 2, estado_activo: true },
+    { id_tema: 20, id_asignatura: 5, nombre_tema: 'Lenguaje SQL DDL/DML, Consultas Complejas y Joins', unidad_silabica: 3, estado_activo: true },
+    { id_tema: 21, id_asignatura: 5, nombre_tema: 'Transacciones ACID, Control de Concurrencia e Índices', unidad_silabica: 4, estado_activo: true },
   ],
 };
 
@@ -128,7 +136,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
 
   // Campos del formulario
   const [selectedCourseId, setSelectedCourseId] = useState<number>(1);
-  const [selectedTopicId, setSelectedTopicId] = useState<number>(101);
+  const [selectedTopicId, setSelectedTopicId] = useState<number>(1);
   const [modality, setModality] = useState<SessionModality>('presencial');
   const [duration, setDuration] = useState<SessionDuration>(60);
   const [startDateTime, setStartDateTime] = useState<string>(getDefaultStartDateTime);

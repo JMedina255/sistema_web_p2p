@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { authService, AuthException } from '../services/authService';
 import type { RequestOtpResponse, VerifyOtpResponse } from '../services/authService';
 
-export const LoginOtpView: React.FC = () => {
+export interface LoginOtpViewProps {
+  onLoginSuccess?: (data: VerifyOtpResponse) => void;
+}
+
+export const LoginOtpView: React.FC<LoginOtpViewProps> = ({ onLoginSuccess }) => {
   // Estados del flujo
   const [step, setStep] = useState<'email' | 'otp' | 'success'>(() => { if (typeof window !== 'undefined' && window.location && new URLSearchParams(window.location.search).get('step') === 'otp') return 'otp'; return 'email'; });
   const [email, setEmail] = useState<string>('');
@@ -110,6 +114,9 @@ export const LoginOtpView: React.FC = () => {
       });
       setVerifyResult(resp);
       setStep('success');
+      if (onLoginSuccess) {
+        onLoginSuccess(resp);
+      }
     } catch (err: unknown) {
       if (err instanceof AuthException) {
         setErrorMessage(err.message);
@@ -625,6 +632,28 @@ export const LoginOtpView: React.FC = () => {
               </div>
             </div>
 
+            {onLoginSuccess && (
+              <button
+                type="button"
+                onClick={() => onLoginSuccess(verifyResult)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  backgroundColor: '#0F766E',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '0.88rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  marginBottom: '0.5rem',
+                  boxShadow: '0 2px 8px rgba(15, 118, 110, 0.25)',
+                }}
+              >
+                Ingresar al Sistema P2P EPIS →
+              </button>
+            )}
+
             <button
               type="button"
               onClick={handleReset}
@@ -687,6 +716,22 @@ export const LoginOtpView: React.FC = () => {
             }}
           >
             Renzo (2022073504@upt.pe)
+          </button>
+          <button
+            type="button"
+            onClick={() => handleLoadTestEmail('admin.epis@upt.pe')}
+            style={{
+              background: '#FFFFFF',
+              border: '1px solid #CBD5E1',
+              borderRadius: '4px',
+              padding: '0.2rem 0.5rem',
+              fontSize: '0.72rem',
+              cursor: 'pointer',
+              color: '#1C2A59',
+              fontWeight: 600,
+            }}
+          >
+            Admin (admin.epis@upt.pe)
           </button>
           <button
             type="button"

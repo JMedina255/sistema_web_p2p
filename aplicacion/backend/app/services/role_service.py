@@ -10,6 +10,10 @@ from app.schemas.roles import RoleOperationResponse
 _memory_user_roles: dict[str, set[str]] = {}
 
 
+def clear_user_roles_in_memory() -> None:
+    _memory_user_roles.clear()
+
+
 class RoleService:
     @staticmethod
     def get_user_roles(db: Session | None, email: str) -> list[str]:
@@ -36,8 +40,17 @@ class RoleService:
                 active_roles.insert(0, "mentoreado")
             return active_roles
 
-        # Rol institucional por defecto para todo estudiante
-        return ["mentoreado"]
+        # Roles por omisión para nuevos usuarios en memoria
+        initial_roles = ["mentoreado"]
+        if clean_email == "admin.epis@upt.pe" or clean_email.startswith("admin."):
+            initial_roles.append("administrador")
+        elif clean_email in ("mentor.avanzado@upt.pe", "2022073504@upt.pe") or clean_email.startswith(
+            "mentor."
+        ):
+            initial_roles.append("mentor")
+
+        _memory_user_roles[clean_email] = set(initial_roles)
+        return list(initial_roles)
 
     @staticmethod
     def promote_to_mentor(
@@ -101,7 +114,7 @@ class RoleService:
 
         # En memoria
         if clean_email not in _memory_user_roles:
-            _memory_user_roles[clean_email] = {"mentoreado"}
+            _memory_user_roles[clean_email] = set(RoleService.get_user_roles(None, clean_email))
         _memory_user_roles[clean_email].add("mentor")
 
         current_roles = RoleService.get_user_roles(db, clean_email)
@@ -136,8 +149,9 @@ class RoleService:
             except Exception:
                 db.rollback()
 
-        if clean_email in _memory_user_roles:
-            _memory_user_roles[clean_email].discard("mentor")
+        if clean_email not in _memory_user_roles:
+            _memory_user_roles[clean_email] = set(RoleService.get_user_roles(None, clean_email))
+        _memory_user_roles[clean_email].discard("mentor")
 
         current_roles = RoleService.get_user_roles(db, clean_email)
         return RoleOperationResponse(

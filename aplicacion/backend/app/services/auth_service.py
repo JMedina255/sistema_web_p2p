@@ -279,12 +279,29 @@ class AuthService:
             _memory_challenges[challenge_id]["consumed"] = True
 
         # Emisión de Token JWT de Sesión (T-03 / RNF01 / RNF02)
-        role = "administrador" if email.startswith("admin") else "estudiante"
+        from app.services.role_service import RoleService
+
+        user_roles = RoleService.get_user_roles(db, email)
+        if (email.startswith("admin") or email == "admin.epis@upt.pe") and "administrador" not in user_roles:
+            user_roles.append("administrador")
+        if "mentoreado" not in user_roles:
+            user_roles.insert(0, "mentoreado")
+
+        if "administrador" in user_roles:
+            primary_role = "administrador"
+        elif "mentor" in user_roles:
+            primary_role = "mentor"
+        elif "mentoreado" in user_roles:
+            primary_role = "mentoreado"
+        else:
+            primary_role = "estudiante"
+
         jwt_token = create_access_token(
             data={
                 "sub": email,
                 "email": email,
-                "role": role,
+                "roles": user_roles,
+                "role": primary_role,
             }
         )
 

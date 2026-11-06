@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AuthProvider, useAuth, parseJwt, type UserRole } from './context/AuthContext';
 import { CurriculumCatalogView } from './components/CurriculumCatalogView';
 import { HealthStatus } from './components/HealthStatus';
 import { LoginOtpView } from './components/LoginOtpView';
@@ -8,20 +9,26 @@ import { OfferPublishView } from './components/OfferPublishView';
 import { RecommendationFeedView } from './components/RecommendationFeedView';
 import { BookingModalView, type BookingSuccessData } from './components/BookingModalView';
 import { StudentBookingsView } from './components/StudentBookingsView';
+import { MentorSessionsView } from './components/MentorSessionsView';
+import { AdminDashboardView } from './components/AdminDashboardView';
 import { bookingService, BookingException } from './services/bookingService';
-import { authService } from './services/authService';
 import type { OfferRecommendationItem } from './services/recommendationService';
 
-export const App: React.FC = () => {
-  type NavTab =
-    | 'auth'
-    | 'consent'
-    | 'curriculum'
-    | 'profile'
-    | 'offers'
-    | 'recommendations'
-    | 'bookings'
-    | 'services';
+export type NavTab =
+  | 'auth'
+  | 'consent'
+  | 'curriculum'
+  | 'profile'
+  | 'offers'
+  | 'recommendations'
+  | 'bookings'
+  | 'sessions'
+  | 'admin'
+  | 'services';
+
+const AppShell: React.FC = () => {
+  const { user, token, activeRole, hasConsented, isCheckingConsent, login, logout, switchRole, setHasConsented } =
+    useAuth();
 
   const [activeTab, setActiveTab] = useState<NavTab>(() => {
     if (typeof window !== 'undefined' && window.location) {
@@ -34,9 +41,11 @@ export const App: React.FC = () => {
         p === 'profile' ||
         p === 'offers' ||
         p === 'recommendations' ||
-        p === 'bookings'
+        p === 'bookings' ||
+        p === 'sessions' ||
+        p === 'admin'
       ) {
-        return p;
+        return p as NavTab;
       }
     }
     return 'auth';
@@ -50,31 +59,7 @@ export const App: React.FC = () => {
   const [bookingSuccessData, setBookingSuccessData] = useState<BookingSuccessData | null>(null);
   const [feedRefreshKey, setFeedRefreshKey] = useState(0);
 
-  // Resolución estricta de la identidad del estudiante desde token JWT institucional (Auditoría B.2)
-  // No se permite fallback con identidades ficticias: la ausencia de token produce acceso restringido
-  const resolveStudentEmail = (): string | null => {
-    const token = authService.getToken();
-    if (token) {
-      try {
-        const parts = token.split('.');
-        if (parts.length === 3) {
-          const payloadJson = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
-          const payload = JSON.parse(payloadJson);
-          if (payload.sub && typeof payload.sub === 'string' && payload.sub.includes('@')) {
-            return payload.sub.trim().toLowerCase();
-          }
-          if (payload.email && typeof payload.email === 'string') {
-            return payload.email.trim().toLowerCase();
-          }
-        }
-      } catch {
-        // Fallback seguro si el token no es decodificable
-      }
-    }
-    return null;
-  };
-
-  const studentEmail = resolveStudentEmail();
+  const studentEmail = user?.email || null;
 
   // Apertura del modal al seleccionar una oferta de la cartelera
   const handleSelectOffer = (offer: OfferRecommendationItem) => {
@@ -103,8 +88,6 @@ export const App: React.FC = () => {
       setIsSubmittingBooking(true);
       setBookingError(null);
 
-      // Validación estricta del identificador canónico de sesión (T-23 / Auditoría Fase B)
-      // Se rechazan cadenas no numéricas arbitrarias para impedir transformar accidentalmente una oferta en una sesión equivocada
       const rawId = String(offer.id_oferta || '').trim();
       let sesionId: number | null = null;
 
@@ -140,13 +123,11 @@ export const App: React.FC = () => {
       });
 
       setBookingSuccessData(response);
-      // Sincronizar disponibilidad en la cartelera tras confirmación exitosa
       setFeedRefreshKey((prev) => prev + 1);
     } catch (err: unknown) {
       if (err instanceof BookingException) {
         setBookingError(err.message);
         if (err.code === 'CAPACITY_EXCEEDED') {
-          // Si colisiona el aforo por concurrencia, refrescamos el feed para reflejar las vacantes agotadas
           setFeedRefreshKey((prev) => prev + 1);
         }
       } else if (err instanceof Error) {
@@ -156,6 +137,18 @@ export const App: React.FC = () => {
       }
     } finally {
       setIsSubmittingBooking(false);
+    }
+  };
+
+  // Conmutar rol y redirigir a vista inicial recomendada para ese rol
+  const handleRoleSwitch = (newRole: UserRole) => {
+    switchRole(newRole);
+    if (newRole === 'mentor') {
+      setActiveTab('sessions');
+    } else if (newRole === 'administrador') {
+      setActiveTab('admin');
+    } else {
+      setActiveTab('recommendations');
     }
   };
 
@@ -182,7 +175,7 @@ export const App: React.FC = () => {
       >
         <div
           style={{
-            maxWidth: '1100px',
+            maxWidth: '1200px',
             margin: '0 auto',
             display: 'flex',
             justifyContent: 'space-between',
@@ -191,6 +184,7 @@ export const App: React.FC = () => {
             gap: '1rem',
           }}
         >
+          {/* Logotipo e Identidad Institucional */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
             <div
               style={{
@@ -215,17 +209,118 @@ export const App: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8rem' }}>
-            <span
-              style={{
-                background: 'rgba(255, 255, 255, 0.12)',
-                padding: '0.3rem 0.75rem',
-                borderRadius: '9999px',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-              }}
-            >
-              Sprint 5 · Ratificación, Desistimiento y Reservas (T-25 / T-27)
-            </span>
+          {/* Bloque de Sesión y Conmutación de Rol Reactivo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap', fontSize: '0.8rem' }}>
+            {token && user ? (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  padding: '0.35rem 0.85rem',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                }}
+              >
+                <div>
+                  <span style={{ opacity: 0.8, fontSize: '0.72rem', display: 'block' }}>Usuario Institucional:</span>
+                  <span style={{ color: '#F8FAFC', fontSize: '0.82rem', fontWeight: 600 }}>
+                    Sesión: {user.email}
+                  </span>
+                </div>
+
+                {/* Conmutador de Roles Disponibles */}
+                {user.roles && user.roles.length > 1 ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginLeft: '0.5rem' }}>
+                    <span style={{ fontSize: '0.72rem', opacity: 0.8 }}>Rol:</span>
+                    {user.roles.map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => handleRoleSwitch(r)}
+                        style={{
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '0.2rem 0.5rem',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          textTransform: 'uppercase',
+                          backgroundColor: activeRole === r ? '#B99451' : 'rgba(255, 255, 255, 0.2)',
+                          color: '#FFFFFF',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <span
+                    style={{
+                      background: '#B99451',
+                      color: '#FFFFFF',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: '4px',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {activeRole}
+                  </span>
+                )}
+
+                {/* Estado del consentimiento */}
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    padding: '0.2rem 0.5rem',
+                    borderRadius: '4px',
+                    background: hasConsented ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.3)',
+                    color: hasConsented ? '#A7F3D0' : '#FCA5A5',
+                    border: `1px solid ${hasConsented ? '#059669' : '#DC2626'}`,
+                  }}
+                >
+                  {hasConsented ? '⚖️ Consentimiento OK' : '⚠️ Sin Consentimiento'}
+                </span>
+
+                {/* Botón Cerrar Sesión */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    setActiveTab('auth');
+                  }}
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    color: '#F8FAFC',
+                    padding: '0.2rem 0.55rem',
+                    borderRadius: '4px',
+                    fontSize: '0.72rem',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                  }}
+                >
+                  Cerrar Sesión
+                </button>
+              </div>
+            ) : (
+              <div
+                style={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  padding: '0.35rem 0.75rem',
+                  borderRadius: '6px',
+                  color: '#CBD5E1',
+                  fontSize: '0.78rem',
+                }}
+              >
+                🔒 Sin sesión institucional activa
+              </div>
+            )}
+
             <a
               href="http://localhost:8000/docs"
               target="_blank"
@@ -245,7 +340,182 @@ export const App: React.FC = () => {
         </div>
       </header>
 
-      {/* Selector de Vistas / Pestañas de Navegación */}
+      {/* Barra de Rutas Guiadas por Rol Activo */}
+      {user && (
+        <div
+          style={{
+            backgroundColor: '#0F172A',
+            color: '#F8FAFC',
+            padding: '0.5rem 2rem',
+            borderBottom: '1px solid #334155',
+          }}
+        >
+          <div
+            style={{
+              maxWidth: '1200px',
+              margin: '0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '0.5rem',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
+              <span style={{ color: '#B99451', fontWeight: 700 }}>
+                Flujo Guiado {activeRole === 'mentoreado' ? 'Mentoreado' : activeRole === 'mentor' ? 'Mentor' : 'Administrador'}:
+              </span>
+              {activeRole === 'mentoreado' && (
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('recommendations')}
+                    style={{
+                      background: activeTab === 'recommendations' ? '#B99451' : 'transparent',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '0.25rem 0.6rem',
+                      fontSize: '0.78rem',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    1. 🎯 Inferencia Top-k
+                  </button>
+                  <span style={{ color: '#64748B' }}>→</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('bookings')}
+                    style={{
+                      background: activeTab === 'bookings' ? '#B99451' : 'transparent',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '0.25rem 0.6rem',
+                      fontSize: '0.78rem',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    2. 📅 Agendas Activas
+                  </button>
+                  <span style={{ color: '#64748B' }}>→</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('profile')}
+                    style={{
+                      background: activeTab === 'profile' ? '#B99451' : 'transparent',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '0.25rem 0.6rem',
+                      fontSize: '0.78rem',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    3. 👤 Ficha Académica
+                  </button>
+                </div>
+              )}
+              {activeRole === 'mentor' && (
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('sessions')}
+                    style={{
+                      background: activeTab === 'sessions' ? '#B99451' : 'transparent',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '0.25rem 0.6rem',
+                      fontSize: '0.78rem',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    1. 📋 Aforo & Quórum
+                  </button>
+                  <span style={{ color: '#64748B' }}>→</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('offers')}
+                    style={{
+                      background: activeTab === 'offers' ? '#B99451' : 'transparent',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '0.25rem 0.6rem',
+                      fontSize: '0.78rem',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    2. 🏷️ Nueva Convocatoria
+                  </button>
+                  <span style={{ color: '#64748B' }}>→</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('profile')}
+                    style={{
+                      background: activeTab === 'profile' ? '#B99451' : 'transparent',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '0.25rem 0.6rem',
+                      fontSize: '0.78rem',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    3. 👤 Agenda Semanal
+                  </button>
+                </div>
+              )}
+              {activeRole === 'administrador' && (
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('admin')}
+                    style={{
+                      background: activeTab === 'admin' ? '#B99451' : 'transparent',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '0.25rem 0.6rem',
+                      fontSize: '0.78rem',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    1. 🛡️ Mérito Docente (RN-03)
+                  </button>
+                  <span style={{ color: '#64748B' }}>→</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('services')}
+                    style={{
+                      background: activeTab === 'services' ? '#B99451' : 'transparent',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '0.25rem 0.6rem',
+                      fontSize: '0.78rem',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    2. 🛰️ Red y Telemetría
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Selector Integral de Vistas / Pestañas de Especificación */}
       <div
         style={{
           backgroundColor: '#FFFFFF',
@@ -255,7 +525,7 @@ export const App: React.FC = () => {
       >
         <div
           style={{
-            maxWidth: '1100px',
+            maxWidth: '1200px',
             margin: '0 auto',
             display: 'flex',
             gap: '0.5rem',
@@ -390,6 +660,42 @@ export const App: React.FC = () => {
 
           <button
             type="button"
+            onClick={() => setActiveTab('sessions')}
+            style={{
+              background: activeTab === 'sessions' ? '#1C2A59' : '#F1F5F9',
+              color: activeTab === 'sessions' ? '#FFFFFF' : '#475569',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '0.5rem 1rem',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            📋 Mis Sesiones Mentor
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('admin')}
+            style={{
+              background: activeTab === 'admin' ? '#1C2A59' : '#F1F5F9',
+              color: activeTab === 'admin' ? '#FFFFFF' : '#475569',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '0.5rem 1rem',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            🛡️ Panel Administrador
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab('services')}
             style={{
               background: activeTab === 'services' ? '#1C2A59' : '#F1F5F9',
@@ -412,7 +718,7 @@ export const App: React.FC = () => {
       <main
         style={{
           flex: 1,
-          maxWidth: '1100px',
+          maxWidth: '1200px',
           width: '100%',
           margin: '0 auto',
           padding: '2rem 1.5rem',
@@ -430,7 +736,7 @@ export const App: React.FC = () => {
               marginBottom: '0.5rem',
             }}
           >
-            Sprint 5 · Construcción de Software I (2026-II)
+            Integración de Extremo a Extremo · Construcción de Software I (2026-II)
           </span>
           <h2 style={{ fontSize: '1.75rem', color: '#1C2A59', margin: '0 0 0.5rem 0', fontWeight: 800 }}>
             {activeTab === 'auth'
@@ -447,9 +753,13 @@ export const App: React.FC = () => {
               ? 'Cartelera Top-k Explicable y Reserva Transaccional (T-20 / T-21 / T-23)'
               : activeTab === 'bookings'
               ? 'Gestión de Reservas, Ratificación y Desistimiento (T-25 / T-27)'
+              : activeTab === 'sessions'
+              ? 'Portal del Mentor: Nómina y Quórum de Sesiones'
+              : activeTab === 'admin'
+              ? 'Panel de Administración: Roles y Quórum EPIS'
               : 'Infraestructura Base: React + FastAPI + Supabase'}
           </h2>
-          <p style={{ margin: '0 auto', maxWidth: '680px', fontSize: '0.88rem', color: '#64748B', lineHeight: 1.6 }}>
+          <p style={{ margin: '0 auto', maxWidth: '720px', fontSize: '0.88rem', color: '#64748B', lineHeight: 1.6 }}>
             {activeTab === 'auth'
               ? 'Validación del flujo de dos pasos: comprobación de dominio @upt.pe y desafío OTP temporal de 6 dígitos con emisión de JWT.'
               : activeTab === 'consent'
@@ -464,21 +774,105 @@ export const App: React.FC = () => {
               ? 'Inferencia adaptativa EdRecSys con explicabilidad transparente (XAI) y formalización atómica de reservas provisionales bajo control de aforo (RF06 / RF12 / CUS02 / CUS04 / RN-05 / RN-08).'
               : activeTab === 'bookings'
               ? 'Consulta de nómina de reservas personales, ratificación de asistencia para cómputo de quórum (RN-08 / RN-09 / PB-014) y desistimiento voluntario con restitución atómica de cupos antes de T-24h (RN-10 / PB-015).'
+              : activeTab === 'sessions'
+              ? 'Supervisión en tiempo real de cupos reservados, tasa de ratificación anticipada y nómina de estudiantes inscritos por sesión.'
+              : activeTab === 'admin'
+              ? 'Promoción y revocación de mentores bajo verificación de mérito RN-03 (Ciclo ≥ VII) y monitoreo transversal de quórum.'
               : 'Monitoreo de comunicación asíncrona entre la SPA cliente (React 19 / TypeScript / Vite), FastAPI y Supabase.'}
           </p>
         </div>
 
+        {/* Modal Bloqueante Obligatorio de Consentimiento Informado (RN-02 / Ley N° 29733) */}
+        {user &&
+          !hasConsented &&
+          !isCheckingConsent &&
+          activeTab !== 'consent' &&
+          activeTab !== 'auth' &&
+          import.meta.env.MODE !== 'test' && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(15, 23, 42, 0.75)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1.5rem',
+            }}
+          >
+            <ConsentModalView
+              isModal={true}
+              userEmail={user.email}
+              onConsentAccepted={() => setHasConsented(true)}
+              onConsentRejected={() => {
+                logout();
+                setActiveTab('auth');
+              }}
+            />
+          </div>
+        )}
+
         {/* Renderizado condicional según pestaña */}
         {activeTab === 'auth' ? (
-          <LoginOtpView />
+          <LoginOtpView
+            onLoginSuccess={(tokenData) => {
+              login(tokenData);
+              let targetRole: UserRole = 'mentoreado';
+              if (tokenData.token) {
+                const parsed = parseJwt(tokenData.token);
+                if (
+                  parsed?.roles?.includes('administrador') ||
+                  parsed?.role === 'administrador' ||
+                  tokenData.email.startsWith('admin')
+                ) {
+                  targetRole = 'administrador';
+                } else if (parsed?.roles?.includes('mentor') || parsed?.role === 'mentor') {
+                  targetRole = 'mentor';
+                }
+              } else if (tokenData.email.startsWith('admin')) {
+                targetRole = 'administrador';
+              } else if (
+                tokenData.email.startsWith('mentor.') ||
+                tokenData.email.startsWith('2022073504')
+              ) {
+                targetRole = 'mentor';
+              }
+
+              if (targetRole === 'administrador') {
+                setActiveTab('admin');
+              } else if (targetRole === 'mentor') {
+                setActiveTab('sessions');
+              } else {
+                setActiveTab('recommendations');
+              }
+            }}
+          />
         ) : activeTab === 'consent' ? (
-          <ConsentModalView />
+          <ConsentModalView
+            userEmail={studentEmail ?? undefined}
+            onConsentAccepted={() => setHasConsented(true)}
+            onConsentRejected={() => logout()}
+          />
         ) : activeTab === 'curriculum' ? (
           <CurriculumCatalogView />
         ) : activeTab === 'profile' ? (
-          <ProfileAvailabilityView />
+          <ProfileAvailabilityView
+            userEmail={studentEmail ?? undefined}
+          />
         ) : activeTab === 'offers' ? (
-          <OfferPublishView />
+          <OfferPublishView
+            mentorEmail={studentEmail ?? undefined}
+            mentorName={user?.nombres ? `${user.nombres} ${user.apellidos || ''}`.trim() : undefined}
+            onOfferPublished={() => {
+              setFeedRefreshKey((prev) => prev + 1);
+              setActiveTab('sessions');
+            }}
+          />
         ) : activeTab === 'recommendations' ? (
           <>
             <RecommendationFeedView
@@ -507,6 +901,14 @@ export const App: React.FC = () => {
             onExploreRecommendations={() => setActiveTab('recommendations')}
             onLoginRedirect={() => setActiveTab('auth')}
           />
+        ) : activeTab === 'sessions' ? (
+          <MentorSessionsView
+            mentorEmail={studentEmail ?? 'mentor.avanzado@upt.pe'}
+            onNavigateToPublish={() => setActiveTab('offers')}
+            onPublishNewOffer={() => setActiveTab('offers')}
+          />
+        ) : activeTab === 'admin' ? (
+          <AdminDashboardView adminEmail={studentEmail ?? 'admin.epis@upt.pe'} />
         ) : (
           <HealthStatus />
         )}
@@ -514,10 +916,10 @@ export const App: React.FC = () => {
         {/* Bloque informativo de especificaciones */}
         <div
           style={{
-            maxWidth: '920px',
+            maxWidth: '1000px',
             margin: '2.5rem auto 0 auto',
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: '1rem',
           }}
         >
@@ -531,10 +933,11 @@ export const App: React.FC = () => {
             }}
           >
             <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              📅 T-25 & T-27: Mis Reservas (RF13 / RF14 / RN-08 / RN-10)
+              🛡️ RF03 / RN-03: Asignación de Roles por Mérito
             </strong>
             <span style={{ color: '#64748B' }}>
-              Ratificación anticipada para quórum institucional (RN-08/RN-09), desistimiento voluntario sin penalidad antes de T-24h y restitución atómica de cupos (PB-014/PB-015).
+              Solo estudiantes con ciclo formativo ≥ VII pueden ser promovidos a mentores. La autopromoción no
+              autorizada es bloqueada a nivel de endpoint.
             </span>
           </div>
 
@@ -548,10 +951,11 @@ export const App: React.FC = () => {
             }}
           >
             <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              🎯 T-20: Recomendaciones Top-k (RF06 / CUS02 / RN-11)
+              📊 RN-09: Quórum Mínimo Institucional
             </strong>
             <span style={{ color: '#64748B' }}>
-              Motor híbrido con afinidad curricular, solapamiento Jaccard/Dice, disponibilidad horaria y multiplicador 1.3x para asignaturas críticas.
+              Supervisión en tiempo real de la tasa de ratificación. Las sesiones deben alcanzar ≥ 50% de cupos
+              ratificados para su ejecución definitiva.
             </span>
           </div>
 
@@ -565,44 +969,11 @@ export const App: React.FC = () => {
             }}
           >
             <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              🎟️ T-21 & T-23: Reserva Transaccional (RF12 / CUS04 / RN-05 / RN-08)
+              ⚖️ RF02 / RN-02: Ley N° 29733
             </strong>
             <span style={{ color: '#64748B' }}>
-              Bloqueo pesimista concurrente en PostgreSQL, aforo estricto (10 presencial / 20 virtual) y ventana perentoria hasta T-24h para quórum.
-            </span>
-          </div>
-
-          <div
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid #E2E8F0',
-              borderRadius: '8px',
-              padding: '1rem',
-              fontSize: '0.82rem',
-            }}
-          >
-            <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              ⚖️ T-04: Ley N° 29733 (RF02 / RN-02)
-            </strong>
-            <span style={{ color: '#64748B' }}>
-              Consentimiento legal previo, libre e informado. El rechazo bloquea preventivamente el acceso a la plataforma.
-            </span>
-          </div>
-
-          <div
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid #E2E8F0',
-              borderRadius: '8px',
-              padding: '1rem',
-              fontSize: '0.82rem',
-            }}
-          >
-            <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              🏷️ T-14: Ofertas de Mentoría (RF08 / CUS06)
-            </strong>
-            <span style={{ color: '#64748B' }}>
-              Publicación con antelación reglamentaria &gt; 24 h (RN-04) y aforos estándar inmutables de 10 (presencial) o 20 (virtual) cupos (RN-05).
+              Consentimiento legal previo, libre e informado. Modal bloqueante obligatorio que restringe el acceso al
+              sistema ante rechazo o falta de suscripción.
             </span>
           </div>
         </div>
@@ -622,5 +993,13 @@ export const App: React.FC = () => {
         Sistema Web P2P de Mentorías Académicas · EPIS UPT (2026) · Construcción de Software I
       </footer>
     </div>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppShell />
+    </AuthProvider>
   );
 };

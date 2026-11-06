@@ -40,8 +40,7 @@ def get_recommended_mentors(
             authorization, explicit_email=mentee_email, allow_admin_override=True
         )
 
-    # Fallback si no se proveyó correo explícito ni token
-    target_email = effective_email or "2022074255@upt.pe"
+    target_email = (effective_email or "").strip()
 
     return RecommendationService.recommend_mentors(
         mentee_email=target_email,
@@ -73,7 +72,7 @@ def get_recommended_offers(
             authorization, explicit_email=mentee_email, allow_admin_override=True
         )
 
-    target_email = effective_email or "2022074255@upt.pe"
+    target_email = (effective_email or "").strip()
 
     return RecommendationService.recommend_offers(
         mentee_email=target_email,

@@ -30,12 +30,28 @@ export interface ConsentResponse {
 const STORAGE_KEY_PREFIX = 'p2p_consent_';
 const CURRENT_TERMS_VERSION = '2026-II-v1.0';
 
+function resolveInitialServiceMode(): 'mock' | 'api' {
+  if (import.meta.env.PROD) {
+    return 'api';
+  }
+  const envMode = import.meta.env.VITE_SERVICE_MODE;
+  if (envMode === 'mock') {
+    return 'mock';
+  }
+  if (envMode === 'api') {
+    return 'api';
+  }
+  if (import.meta.env.MODE === 'test') {
+    return 'mock';
+  }
+  return 'api';
+}
+
 class ConsentService {
-  private mode: 'mock' | 'api' = 'mock';
+  private mode: 'mock' | 'api' = resolveInitialServiceMode();
 
   constructor() {
-    // Si existe VITE_API_BASE_URL y no estamos en DEV forzado, podría usar api
-    this.mode = 'mock';
+    this.mode = resolveInitialServiceMode();
   }
 
   public getMode(): 'mock' | 'api' {

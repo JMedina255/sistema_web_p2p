@@ -11,7 +11,7 @@ import json
 import os
 import subprocess
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from playwright.sync_api import sync_playwright
 
@@ -22,7 +22,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(MIRROR_DIR, exist_ok=True)
 
 student_email = "2022074255@upt.pe"
-now = datetime.now(timezone.utc)
+now = datetime.now(UTC)
 
 # 4 Reservas canónicas para cubrir los 6 escenarios del Sprint 05
 booking1 = {
@@ -99,6 +99,7 @@ booking4 = {
     "ticket_hash": "d1a6e5f4a3b27180943526170894352617089435261708943526170894352617",
 }
 
+
 def save_both(page, filename, selector=None):
     path1 = os.path.join(OUTPUT_DIR, filename)
     path2 = os.path.join(MIRROR_DIR, filename)
@@ -111,7 +112,10 @@ def save_both(page, filename, selector=None):
         page.screenshot(path=path2)
     print(f"[OK] {filename} -> {os.path.getsize(path1):,} bytes")
 
-def render_html_to_both(html_content: str, filename: str, width: int = 1440, height: int = 900, delay_ms: int = 2000):
+
+def render_html_to_both(
+    html_content: str, filename: str, width: int = 1440, height: int = 900, delay_ms: int = 2000
+):
     path1 = os.path.join(OUTPUT_DIR, filename)
     path2 = os.path.join(MIRROR_DIR, filename)
     temp_html = os.path.abspath(f"temp_render_s05_{int(time.time() * 1000)}.html")
@@ -143,16 +147,14 @@ def render_html_to_both(html_content: str, filename: str, width: int = 1440, hei
     print(f"[OK] {filename} -> {size:,} bytes ({width}x{height})")
     return size
 
+
 def generate_ui_captures_01_to_06():
     print("=== Generando capturas dinámicas 01 a 06 con Playwright ===")
     current_bookings = [dict(booking1), dict(booking2), dict(booking3), dict(booking4)]
 
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=CHROME_PATH, headless=True)
-        context = browser.new_context(
-            viewport={"width": 1440, "height": 900},
-            device_scale_factor=1.25
-        )
+        context = browser.new_context(viewport={"width": 1440, "height": 900}, device_scale_factor=1.25)
         page = context.new_page()
 
         # Interceptor de peticiones API hacia el servidor local
@@ -161,42 +163,32 @@ def generate_ui_captures_01_to_06():
             method = route.request.method
 
             if "my-reservations" in url:
-                route.fulfill(
-                    status=200,
-                    content_type="application/json",
-                    body=json.dumps(current_bookings)
-                )
+                route.fulfill(status=200, content_type="application/json", body=json.dumps(current_bookings))
             elif "confirm" in url and method == "POST":
                 for b in current_bookings:
                     if b["id_reserva"] == 101:
                         b["estado"] = "CONFIRMADA"
-                        b["fecha_ratificacion"] = datetime.now(timezone.utc).isoformat()
-                        route.fulfill(
-                            status=200,
-                            content_type="application/json",
-                            body=json.dumps(b)
-                        )
+                        b["fecha_ratificacion"] = datetime.now(UTC).isoformat()
+                        route.fulfill(status=200, content_type="application/json", body=json.dumps(b))
                         return
                 route.fulfill(status=404, body=json.dumps({"detail": "Not found"}))
             elif "cancel" in url and method == "POST":
                 post_data = route.request.post_data
-                motivo = "Superposición horaria imprevista con entrega de laboratorio de Redes y Comunicaciones"
+                motivo = (
+                    "Superposición horaria imprevista con entrega de laboratorio de Redes y Comunicaciones"
+                )
                 if post_data:
                     try:
                         d = json.loads(post_data)
                         if d.get("motivo"):
                             motivo = d["motivo"]
-                    except:
+                    except Exception:
                         pass
                 for b in current_bookings:
                     if b["id_reserva"] == 102:
                         b["estado"] = "CANCELADA_USUARIO"
                         b["motivo_cancelacion"] = motivo
-                        route.fulfill(
-                            status=200,
-                            content_type="application/json",
-                            body=json.dumps(b)
-                        )
+                        route.fulfill(status=200, content_type="application/json", body=json.dumps(b))
                         return
                 route.fulfill(status=404, body=json.dumps({"detail": "Not found"}))
             else:
@@ -220,7 +212,9 @@ def generate_ui_captures_01_to_06():
         save_both(page, "01_bandeja_reservas_estudiante.png")
 
         # 02. Diálogo modal de ratificación anticipada
-        btn_confirm = page.locator("article:has-text('RES-2026-0101')").locator("button:has-text('Confirmar Asistencia')")
+        btn_confirm = page.locator("article:has-text('RES-2026-0101')").locator(
+            "button:has-text('Confirmar Asistencia')"
+        )
         btn_confirm.click()
         page.wait_for_selector("role=dialog")
         page.wait_for_selector("text=Ratificar Asistencia a Mentoría")
@@ -235,13 +229,17 @@ def generate_ui_captures_01_to_06():
         save_both(page, "03_asistencia_confirmada.png")
 
         # 04. Diálogo modal de desistimiento voluntario
-        btn_cancel = page.locator("article:has-text('RES-2026-0102')").locator("button:has-text('Cancelar Reserva')")
+        btn_cancel = page.locator("article:has-text('RES-2026-0102')").locator(
+            "button:has-text('Cancelar Reserva')"
+        )
         btn_cancel.click()
         page.wait_for_selector("role=dialog")
         page.wait_for_selector("text=Desistimiento Voluntario de Cupo")
         textarea = page.locator("role=dialog").locator("textarea")
         if textarea.count() > 0:
-            textarea.first.fill("Superposición horaria imprevista con entrega de laboratorio de Redes y Comunicaciones")
+            textarea.first.fill(
+                "Superposición horaria imprevista con entrega de laboratorio de Redes y Comunicaciones"
+            )
         time.sleep(0.5)
         save_both(page, "04_desistimiento_voluntario.png")
 
@@ -254,7 +252,9 @@ def generate_ui_captures_01_to_06():
 
         # 06. Control temporal T-24h (filtro Por Ratificar y tarjeta cerrada)
         # Seleccionar la pestaña de filtro Por Ratificar para aislar la reserva con ventana cerrada
-        tab_pendientes = page.locator("nav[aria-label='Filtro de reservas por estado']").locator("button:has-text('Por Ratificar')")
+        tab_pendientes = page.locator("nav[aria-label='Filtro de reservas por estado']").locator(
+            "button:has-text('Por Ratificar')"
+        )
         if tab_pendientes.count() > 0:
             tab_pendientes.click()
             time.sleep(0.5)
@@ -265,6 +265,7 @@ def generate_ui_captures_01_to_06():
         save_both(page, "06_control_temporal_t24h.png")
 
         browser.close()
+
 
 # ---------------------------------------------------------------------------
 # 07. Swagger OpenAPI 3.1.0 Specification — Sprint 05
@@ -471,6 +472,7 @@ def generate_07_swagger_api_docs():
 </html>"""
     return render_html_to_both(html, "07_swagger_api_docs_sprint05.png")
 
+
 # ---------------------------------------------------------------------------
 # 08. Pytest Backend Coverage — Sprint 05 (187 Tests / 90.40%)
 # ---------------------------------------------------------------------------
@@ -593,6 +595,7 @@ def generate_08_backend_pytest():
 </html>"""
     return render_html_to_both(html, "08_backend_pytest_coverage_sprint05.png")
 
+
 # ---------------------------------------------------------------------------
 # 09. Vitest Frontend Coverage — Sprint 05 (265 Tests / 83.42%)
 # ---------------------------------------------------------------------------
@@ -714,6 +717,7 @@ def generate_09_frontend_vitest():
 </body>
 </html>"""
     return render_html_to_both(html, "09_frontend_vitest_coverage_sprint05.png")
+
 
 # ---------------------------------------------------------------------------
 # 10. GitHub Actions CI Workflow Run — Sprint 05
@@ -868,6 +872,7 @@ def generate_10_github_actions_ci():
 </html>"""
     return render_html_to_both(html, "10_github_actions_ci_sprint05.png")
 
+
 def main():
     print("Iniciando generación de capturas oficiales para el Sprint 05...")
     generate_ui_captures_01_to_06()
@@ -880,6 +885,7 @@ def main():
     for f in files:
         p = os.path.join(OUTPUT_DIR, f)
         print(f" -> {f} ({os.path.getsize(p):,} bytes)")
+
 
 if __name__ == "__main__":
     main()

@@ -8,7 +8,6 @@ from app.models.offer import SesionMentoria
 from app.models.profile import PerfilAcademico
 from app.models.roles import Rol, UsuarioRol
 from app.schemas.offer import PublishOfferPayload, PublishOfferResponse
-from app.services.profile_service import get_profile_in_memory
 
 # Almacén en memoria de respaldo para ofertas
 _memory_offers: list[dict] = []
@@ -135,7 +134,7 @@ class OfferService:
         # 1. Verificación en base de datos si la sesión está activa
         if db is not None:
             try:
-                # Comprobar rol de mentor
+                # Comprobar rol de mentor o admin en usuario_roles
                 rol_mentor = (
                     db.query(UsuarioRol)
                     .join(Rol, UsuarioRol.id_rol == Rol.id_rol)
@@ -149,30 +148,30 @@ class OfferService:
                 perfil = db.query(PerfilAcademico).filter(PerfilAcademico.email == clean_email).first()
                 if rol_mentor or (perfil and perfil.ciclo_actual >= 7):
                     return
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Infracción de RN-03: Solo los estudiantes habilitados con rol de mentor (ciclo >= VII) pueden publicar ofertas de mentoría.",
-                )
+                # Si el usuario existe en BD pero no cumple mérito ni rol, rechazamos
+                if (
+                    perfil is not None
+                    or db.query(UsuarioRol).filter(UsuarioRol.email == clean_email).first() is not None
+                ):
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="Infracción de RN-03: Solo los estudiantes habilitados con rol de mentor (ciclo >= VII) pueden publicar ofertas de mentoría.",
+                    )
             except HTTPException:
                 raise
             except Exception:
-                pass  # Fallback a verificación en memoria
+                pass  # Fallback a verificación en servicios
 
-        # 2. Verificación en memoria
-        mem_profile = get_profile_in_memory(clean_email)
-        if mem_profile:
-            ciclo = mem_profile.get("ciclo_actual", 1)
-            rol = mem_profile.get("rol_postulacion", "mentoreado")
-            if ciclo >= 7 or rol in ["mentor", "administrador"]:
-                return
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Infracción de RN-03: Solo los estudiantes habilitados con rol de mentor (ciclo >= VII) pueden publicar ofertas de mentoría.",
-            )
+        # 2. Verificación mediante servicios de perfil y rol (memoria o catálogo institucional)
+        from app.services.profile_service import ProfileService
+        from app.services.role_service import RoleService
 
-        # Si el correo coincide con mentores conocidos (Renzo o mentor.avanzado)
-        codigo = clean_email.split("@")[0]
-        if codigo in ["2022073504", "mentor.avanzado", "admin.epis"]:
+        roles = RoleService.get_user_roles(db=None, email=clean_email)
+        if "mentor" in roles or "administrador" in roles:
+            return
+
+        prof = ProfileService.get_profile(db=None, email=clean_email)
+        if prof and prof.ciclo_actual >= 7:
             return
 
         raise HTTPException(

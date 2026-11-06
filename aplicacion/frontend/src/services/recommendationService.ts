@@ -507,10 +507,10 @@ export class MockRecommendationAdapter {
         id_oferta: '101',
         codigo_sesion: 'SES-0101',
         id_asignatura: 3,
-        codigo_asignatura: 'AED-201',
+        codigo_asignatura: 'ALGO-202',
         nombre_asignatura: 'Algoritmos y Estructuras de Datos',
-        id_tema: 301,
-        nombre_tema: 'Árboles Binarios de Búsqueda y AVL',
+        id_tema: 9,
+        nombre_tema: 'Análisis Asintótico y Notación Big-O',
         fecha_inicio: new Date(Date.now() + 72 * 3600 * 1000).toISOString(),
         duracion_minutos: 90,
         modalidad: 'presencial',
@@ -521,22 +521,25 @@ export class MockRecommendationAdapter {
         mentor_nombre: 'Renzo Antayhua',
         mentor_ciclo: 8,
         score_total: 0.942,
-        breakdown: defaultBreakdown,
+        breakdown: {
+          ...defaultBreakdown,
+          critical_course_applied: 'ALGO-202',
+        },
       },
       {
         id_oferta: '102',
         codigo_sesion: 'SES-0102',
         id_asignatura: 1,
-        codigo_asignatura: 'CI-101',
+        codigo_asignatura: 'CALC-101',
         nombre_asignatura: 'Cálculo I',
-        id_tema: 101,
-        nombre_tema: 'Límites Trigonométricos Notables',
+        id_tema: 1,
+        nombre_tema: 'Límites y Continuidad',
         fecha_inicio: new Date(Date.now() + 96 * 3600 * 1000).toISOString(),
         duracion_minutos: 60,
         modalidad: 'virtual',
         aforo_maximo: 20,
         aforo_disponible: 15,
-        espacio_asignado: 'https://meet.google.com/upt-ci-101-demo',
+        espacio_asignado: 'https://meet.google.com/upt-calc-101-demo',
         mentor_email: 'mentor.demo@upt.pe',
         mentor_nombre: 'Carlos Mentor Demo',
         mentor_ciclo: 9,
@@ -544,7 +547,7 @@ export class MockRecommendationAdapter {
         breakdown: {
           ...defaultBreakdown,
           course_weight_factor: 1.2,
-          critical_course_applied: 'CI-101',
+          critical_course_applied: 'CALC-101',
           score_total: 0.815,
         } as unknown as ScoreBreakdown,
       },
@@ -642,11 +645,28 @@ export class MockRecommendationAdapter {
 // Instancias y Fachada del Servicio (recommendationService)
 // ============================================================================
 
+function resolveInitialServiceMode(): 'mock' | 'api' {
+  if (import.meta.env.PROD) {
+    return 'api';
+  }
+  const envMode = import.meta.env.VITE_SERVICE_MODE;
+  if (envMode === 'mock') {
+    return 'mock';
+  }
+  if (envMode === 'api') {
+    return 'api';
+  }
+  if (import.meta.env.MODE === 'test') {
+    return 'mock';
+  }
+  return 'api';
+}
+
 const apiAdapterInstance = new ApiRecommendationAdapter();
 const mockAdapterInstance = new MockRecommendationAdapter();
 
-// Modo activo: 'api' por defecto dado que el backend de EdRecSys está 100% implementado
-let currentServiceMode: 'api' | 'mock' = 'api';
+// Modo activo: 'api' por defecto en producción/desarrollo, respetando variables de entorno
+let currentServiceMode: 'api' | 'mock' = resolveInitialServiceMode();
 
 export const recommendationService = {
   getMode(): 'api' | 'mock' {

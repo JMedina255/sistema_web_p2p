@@ -23,11 +23,42 @@ export interface AcademicProfile {
   updated_at?: string;
 }
 
+import { authService } from './authService';
+
 const STORAGE_PROFILE_KEY = 'p2p_profile_';
 const STORAGE_AVAILABILITY_KEY = 'p2p_availability_';
 
+function resolveInitialServiceMode(): 'mock' | 'api' {
+  if (import.meta.env.PROD) {
+    return 'api';
+  }
+  const envMode = import.meta.env.VITE_SERVICE_MODE;
+  if (envMode === 'mock') {
+    return 'mock';
+  }
+  if (envMode === 'api') {
+    return 'api';
+  }
+  if (import.meta.env.MODE === 'test') {
+    return 'mock';
+  }
+  return 'api';
+}
+
 class ProfileService {
-  private mode: 'mock' | 'api' = 'mock';
+  private mode: 'mock' | 'api' = resolveInitialServiceMode();
+
+  private getAuthHeaders(customHeaders: Record<string, string> = {}): Record<string, string> {
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+      ...customHeaders,
+    };
+    const token = authService.getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }
 
   public getMode(): 'mock' | 'api' {
     return this.mode;
@@ -90,7 +121,9 @@ class ProfileService {
     // Modo API (T-12 de Renzo)
     try {
       const baseUrl = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8000';
-      const res = await fetch(`${baseUrl}/api/v1/profiles/me?email=${encodeURIComponent(email)}`);
+      const res = await fetch(`${baseUrl}/api/v1/profiles/me?email=${encodeURIComponent(email)}`, {
+        headers: this.getAuthHeaders(),
+      });
       if (res.ok) {
         return (await res.json()) as AcademicProfile;
       }
@@ -144,10 +177,9 @@ class ProfileService {
     const baseUrl = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8000';
     const res = await fetch(`${baseUrl}/api/v1/profiles/me`, {
       method: 'PUT',
-      headers: {
+      headers: this.getAuthHeaders({
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      }),
       body: JSON.stringify(updatedProfile),
     });
 
@@ -191,7 +223,9 @@ class ProfileService {
     // Modo API real
     try {
       const baseUrl = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8000';
-      const res = await fetch(`${baseUrl}/api/v1/profiles/availability?email=${encodeURIComponent(email)}`);
+      const res = await fetch(`${baseUrl}/api/v1/profiles/availability?email=${encodeURIComponent(email)}`, {
+        headers: this.getAuthHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         return data.slots as AvailabilitySlot[];
@@ -234,7 +268,7 @@ class ProfileService {
     const baseUrl = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8000';
     const res = await fetch(`${baseUrl}/api/v1/profiles/availability`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: this.getAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ email, slots }),
     });
 

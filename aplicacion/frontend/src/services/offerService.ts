@@ -16,6 +16,8 @@
  * no se simule falsamente persistencia remota mientras la API no esté integrada.
  */
 
+import { authService } from './authService';
+
 export type SessionModality = 'presencial' | 'virtual';
 export type SessionDuration = 60 | 90;
 
@@ -277,15 +279,26 @@ class ApiOfferAdapter {
     return (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8000';
   }
 
+  private getAuthHeaders(customHeaders: Record<string, string> = {}): Record<string, string> {
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+      ...customHeaders,
+    };
+    const token = authService.getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }
+
   public async publishOffer(payload: PublishOfferPayload): Promise<PublishOfferResponse> {
     const url = `${this.getBaseUrl()}/api/v1/offers`;
     try {
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
+        headers: this.getAuthHeaders({
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        }),
         body: JSON.stringify(payload),
       });
 
@@ -314,7 +327,7 @@ class ApiOfferAdapter {
     const url = `${this.getBaseUrl()}/api/v1/offers${query}`;
     const response = await fetch(url, {
       method: 'GET',
-      headers: { 'Accept': 'application/json' },
+      headers: this.getAuthHeaders(),
     });
     if (!response.ok) {
       throw new OfferException('NETWORK_ERROR', `Error al consultar ofertas: ${response.statusText}`);
@@ -326,7 +339,24 @@ class ApiOfferAdapter {
 const mockAdapter = new MockOfferAdapter();
 const apiAdapter = new ApiOfferAdapter();
 
-let currentServiceMode: 'mock' | 'api' = 'mock';
+function resolveInitialServiceMode(): 'mock' | 'api' {
+  if (import.meta.env.PROD) {
+    return 'api';
+  }
+  const envMode = import.meta.env.VITE_SERVICE_MODE;
+  if (envMode === 'mock') {
+    return 'mock';
+  }
+  if (envMode === 'api') {
+    return 'api';
+  }
+  if (import.meta.env.MODE === 'test') {
+    return 'mock';
+  }
+  return 'api';
+}
+
+let currentServiceMode: 'mock' | 'api' = resolveInitialServiceMode();
 
 // ============================================================================
 // Fachada Principal del Servicio de Ofertas (offerService)

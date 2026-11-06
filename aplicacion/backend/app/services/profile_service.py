@@ -46,6 +46,16 @@ class ProfileService:
             apellidos = "Antayhua Mamani"
             ciclo = 7
             rol_pos = "mentor"
+        elif codigo == "mentor.avanzado" or clean_email.startswith("mentor."):
+            nombres = "Carlos Alberto"
+            apellidos = "Mendoza Dávila"
+            ciclo = 9
+            rol_pos = "mentor"
+        elif codigo == "admin.epis" or clean_email.startswith("admin."):
+            nombres = "Administrador"
+            apellidos = "EPIS-UPT"
+            ciclo = 10
+            rol_pos = "administrador"
 
         return AcademicProfileResponse(
             email=clean_email,

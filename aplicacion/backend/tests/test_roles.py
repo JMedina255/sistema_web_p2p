@@ -183,3 +183,24 @@ def test_promote_and_revoke_with_invalid_token_rejected():
         headers={"Authorization": f"Bearer {token_other}"},
     )
     assert res_cross_revoke.status_code == 403
+
+
+def test_revoke_default_mentor_in_memory_and_persists():
+    from app.services.role_service import clear_user_roles_in_memory
+
+    clear_user_roles_in_memory()
+
+    mentor_email = "2022073504@upt.pe"
+    # Inicialmente tiene rol de mentor
+    initial_roles = RoleService.get_user_roles(None, mentor_email)
+    assert "mentor" in initial_roles
+
+    # Revocar rol
+    revoke_res = RoleService.revoke_mentor(None, mentor_email, revoked_by="admin.epis@upt.pe")
+    assert revoke_res.success is True
+    assert "mentor" not in revoke_res.roles
+
+    # Consulta posterior debe confirmar que ya no tiene rol mentor
+    updated_roles = RoleService.get_user_roles(None, mentor_email)
+    assert "mentor" not in updated_roles
+    assert "mentoreado" in updated_roles
