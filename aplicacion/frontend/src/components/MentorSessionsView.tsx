@@ -42,6 +42,7 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
   const [rosters, setRosters] = useState<Record<string, EnrolledStudent[]>>({});
   const [loadingRosterId, setLoadingRosterId] = useState<string | null>(null);
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
+  const [now] = useState(() => Date.now());
 
   const fetchSessions = useCallback(async () => {
     setIsLoading(true);
@@ -98,7 +99,7 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
     const totalEnrolled = (enrolledList || []).filter((e) => e.estado !== 'CANCELADA_USUARIO' && e.estado !== 'CANCELADA_SISTEMA').length;
 
     const startDate = new Date(session.offer.fecha_inicio.replace('Z', '+00:00'));
-    const hoursRemaining = (startDate.getTime() - Date.now()) / (3600 * 1000);
+    const hoursRemaining = (startDate.getTime() - now) / (3600 * 1000);
 
     const isQuorumReached = confirmedCount >= quorumTarget;
     const isPastDeadline = hoursRemaining <= 24;

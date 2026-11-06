@@ -226,7 +226,7 @@ class BookingService:
                     sesion = (
                         db.query(SesionMentoria)
                         .filter(SesionMentoria.id_sesion == payload.id_sesion)
-                        .with_for_update()
+                        .with_for_update(of=SesionMentoria)
                         .first()
                     )
 
@@ -869,7 +869,7 @@ class BookingService:
                     sesion = (
                         db.query(SesionMentoria)
                         .filter(SesionMentoria.id_sesion == reserva.id_sesion)
-                        .with_for_update()
+                        .with_for_update(of=SesionMentoria)
                         .first()
                     )
 
