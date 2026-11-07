@@ -48,3 +48,13 @@ Fuente: Elaboración propia.
   - Coberturas de código: **87.42% Backend** y **83.25% Frontend**, superando con holgura el umbral del 70.0% requerido.
 - **Integración Continua (CI):**
   - Workflow de GitHub Actions (`ci.yml`) en estado verde exitoso.
+
+---
+
+## 3. Nota de Homologación Documental (Fase 05-B)
+
+Para asegurar la consistencia global con el informe SRS maestro (FD03), el SAD (FD04) y el Plan de Sprints:
+- **Equivalencia CUS08 vs CUS12/CUS13:** Se formaliza la compatibilidad canónica donde `CUS08` (SRS Maestro Cuadro 5.5) y el desglosado técnico `CUS12` (Asistencia TOTP) / `CUS13` (Bitácora) de este sprint representan el cumplimiento integral de **RF17**.
+- **Entorno Python 3.13.5:** Se ratifica la aprobación de la desviación técnica justificada registrada en el Sprint 01 respecto a la mención preliminar de Python 3.11 en el SAD §2.5.
+- **Trazabilidad Funcional:** Las tareas del Sprint 06 consolidan 37 PBIs completados acumulados que satisfacen las especificaciones de las HUs comprometidas hasta este hito.
+- Para mayor detalle, consultar [`docs/formalizacion/08_HOMOLOGACION_INCONSISTENCIAS.md`](../../formalizacion/08_HOMOLOGACION_INCONSISTENCIAS.md).
