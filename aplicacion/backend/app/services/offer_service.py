@@ -102,6 +102,83 @@ def seed_default_offers_in_memory() -> None:
                 "estado": "PUBLICADA",
                 "created_at": now.isoformat(),
             },
+            # Escenarios de Demostración Oficiales (DEMO-01 a DEMO-05)
+            {
+                "id_sesion": 101,
+                "codigo_sesion": "SES-DEMO-PUB01",
+                "mentor_email": "mentor.demo@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites Notables y Asíntotas",
+                "fecha_inicio": (now + timedelta(days=3)).isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Aula 201 - Pabellón EPIS",
+                "mentor_nombre": "Mentor Demostrativo Acreditado",
+                "notas_adicionales": "Sesión modelo de demostración institucional de límites de Cálculo I.",
+                "estado": "PUBLICADA",
+                "created_at": now.isoformat(),
+            },
+            {
+                "id_sesion": 102,
+                "codigo_sesion": "SES-DEMO-Q01",
+                "mentor_email": "mentor.demo@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites Notables y Asíntotas",
+                "fecha_inicio": (now + timedelta(hours=10)).isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Lab 101 - EPIS",
+                "mentor_nombre": "Mentor Demostrativo Acreditado",
+                "notas_adicionales": "Sesión modelo en contingencia por quórum insuficiente a T-24h.",
+                "estado": "QUORUM_INSUFICIENTE",
+                "created_at": now.isoformat(),
+            },
+            {
+                "id_sesion": 103,
+                "codigo_sesion": "SES-DEMO-ASIS01",
+                "mentor_email": "mentor.demo@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites Notables y Asíntotas",
+                "fecha_inicio": (now - timedelta(minutes=15)).isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Lab 102 - EPIS",
+                "mentor_nombre": "Mentor Demostrativo Acreditado",
+                "notas_adicionales": "Sesión modelo en curso lista para pase de lista con QR TOTP.",
+                "estado": "CONFIRMADA",
+                "created_at": now.isoformat(),
+            },
+            {
+                "id_sesion": 104,
+                "codigo_sesion": "SES-DEMO-BIT01",
+                "mentor_email": "mentor.demo@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites Notables y Asíntotas",
+                "fecha_inicio": (now - timedelta(hours=3)).isoformat(),
+                "duracion_minutos": 90,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Lab 103 - EPIS",
+                "mentor_nombre": "Mentor Demostrativo Acreditado",
+                "notas_adicionales": "Sesión modelo concluida (< 48h) lista para suscripción de bitácora pedagógica.",
+                "estado": "CONCLUIDA",
+                "created_at": now.isoformat(),
+            },
         ]
     )
 
@@ -326,7 +403,7 @@ class OfferService:
                     query = query.filter(SesionMentoria.modalidad == modalidad)
                 if estado:
                     query = query.filter(SesionMentoria.estado == estado)
-                else:
+                elif not mentor_email:
                     query = query.filter(SesionMentoria.estado == "PUBLICADA")
 
                 rows = query.order_by(SesionMentoria.fecha_inicio.asc()).all()
@@ -377,7 +454,7 @@ class OfferService:
             filtered = [o for o in filtered if o["modalidad"] == modalidad]
         if estado:
             filtered = [o for o in filtered if o["estado"] == estado]
-        else:
+        elif not mentor_email:
             filtered = [o for o in filtered if o["estado"] == "PUBLICADA"]
 
         for o in filtered:

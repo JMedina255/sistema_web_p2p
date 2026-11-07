@@ -72,6 +72,111 @@ def seed_default_bookings_in_memory() -> None:
                 "updated_at": (now - timedelta(days=1)).isoformat(),
             }
         )
+        # Reservas correspondientes a escenarios de demostración (DEMO-01 a DEMO-05)
+        _memory_bookings.extend(
+            [
+                {
+                    "id_reserva": 201,
+                    "codigo_reserva": "RES-DEMO-001",
+                    "id_sesion": 101,
+                    "codigo_sesion": "SES-DEMO-PUB01",
+                    "estudiante_email": "estudiante.demo@upt.pe",
+                    "estado": "PENDIENTE_CONFIRMACION",
+                    "fecha_reserva": (now - timedelta(hours=2)).isoformat(),
+                    "fecha_ratificacion": None,
+                    "motivo_cancelacion": None,
+                    "ticket_hash": None,
+                    "fecha_inicio": (now + timedelta(days=3)).isoformat(),
+                    "nombre_asignatura": "Cálculo I",
+                    "nombre_tema": "Límites Notables y Asíntotas",
+                    "duracion_minutos": 60,
+                    "modalidad": "presencial",
+                    "espacio_asignado": "Aula 201 - Pabellón EPIS",
+                    "mentor_email": "mentor.demo@upt.pe",
+                    "created_at": (now - timedelta(hours=2)).isoformat(),
+                },
+                {
+                    "id_reserva": 202,
+                    "codigo_reserva": "RES-DEMO-Q01",
+                    "id_sesion": 102,
+                    "codigo_sesion": "SES-DEMO-Q01",
+                    "estudiante_email": "estudiante.demo@upt.pe",
+                    "estado": "CONFIRMADA",
+                    "fecha_reserva": (now - timedelta(hours=30)).isoformat(),
+                    "fecha_ratificacion": (now - timedelta(hours=26)).isoformat(),
+                    "motivo_cancelacion": None,
+                    "ticket_hash": "b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef01",
+                    "fecha_inicio": (now + timedelta(hours=10)).isoformat(),
+                    "nombre_asignatura": "Cálculo I",
+                    "nombre_tema": "Límites Notables y Asíntotas",
+                    "duracion_minutos": 60,
+                    "modalidad": "presencial",
+                    "espacio_asignado": "Lab 101 - EPIS",
+                    "mentor_email": "mentor.demo@upt.pe",
+                    "created_at": (now - timedelta(hours=30)).isoformat(),
+                },
+                {
+                    "id_reserva": 203,
+                    "codigo_reserva": "RES-DEMO-Q02",
+                    "id_sesion": 102,
+                    "codigo_sesion": "SES-DEMO-Q01",
+                    "estudiante_email": "companero.demo@upt.pe",
+                    "estado": "CONFIRMADA",
+                    "fecha_reserva": (now - timedelta(hours=30)).isoformat(),
+                    "fecha_ratificacion": (now - timedelta(hours=25)).isoformat(),
+                    "motivo_cancelacion": None,
+                    "ticket_hash": "c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef012",
+                    "fecha_inicio": (now + timedelta(hours=10)).isoformat(),
+                    "nombre_asignatura": "Cálculo I",
+                    "nombre_tema": "Límites Notables y Asíntotas",
+                    "duracion_minutos": 60,
+                    "modalidad": "presencial",
+                    "espacio_asignado": "Lab 101 - EPIS",
+                    "mentor_email": "mentor.demo@upt.pe",
+                    "created_at": (now - timedelta(hours=30)).isoformat(),
+                },
+                {
+                    "id_reserva": 204,
+                    "codigo_reserva": "RES-DEMO-ASIS01",
+                    "id_sesion": 103,
+                    "codigo_sesion": "SES-DEMO-ASIS01",
+                    "estudiante_email": "estudiante.demo@upt.pe",
+                    "estado": "CONFIRMADA",
+                    "fecha_reserva": (now - timedelta(days=2)).isoformat(),
+                    "fecha_ratificacion": (now - timedelta(days=1)).isoformat(),
+                    "motivo_cancelacion": None,
+                    "ticket_hash": "d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0123",
+                    "fecha_inicio": (now - timedelta(minutes=15)).isoformat(),
+                    "nombre_asignatura": "Cálculo I",
+                    "nombre_tema": "Límites Notables y Asíntotas",
+                    "duracion_minutos": 60,
+                    "modalidad": "presencial",
+                    "espacio_asignado": "Lab 102 - EPIS",
+                    "mentor_email": "mentor.demo@upt.pe",
+                    "created_at": (now - timedelta(days=2)).isoformat(),
+                },
+                {
+                    "id_reserva": 205,
+                    "codigo_reserva": "RES-DEMO-BIT01",
+                    "id_sesion": 104,
+                    "codigo_sesion": "SES-DEMO-BIT01",
+                    "estudiante_email": "estudiante.demo@upt.pe",
+                    "estado": "CONFIRMADA",
+                    "fecha_reserva": (now - timedelta(days=3)).isoformat(),
+                    "fecha_ratificacion": (now - timedelta(days=2)).isoformat(),
+                    "motivo_cancelacion": None,
+                    "ticket_hash": "e5f67890123456789abcdef0123456789abcdef0123456789abcdef01234",
+                    "fecha_inicio": (now - timedelta(hours=3)).isoformat(),
+                    "nombre_asignatura": "Cálculo I",
+                    "nombre_tema": "Límites Notables y Asíntotas",
+                    "duracion_minutos": 90,
+                    "modalidad": "presencial",
+                    "espacio_asignado": "Lab 103 - EPIS",
+                    "mentor_email": "mentor.demo@upt.pe",
+                    "created_at": (now - timedelta(days=3)).isoformat(),
+                },
+            ]
+        )
 
 
 class BookingService:
@@ -536,6 +641,7 @@ class BookingService:
 
         # Fallback en memoria
         with _booking_lock:
+            seed_default_bookings_in_memory()
             results = []
             for b in _memory_bookings:
                 if b["estudiante_email"] == clean_email:

@@ -42,9 +42,9 @@ class RoleService:
 
         # Roles por omisión para nuevos usuarios en memoria (sin heurísticas de prefijo)
         initial_roles = ["mentoreado"]
-        if clean_email == "admin.epis@upt.pe":
+        if clean_email in ("admin.epis@upt.pe", "admin.demo@upt.pe"):
             initial_roles.append("administrador")
-        elif clean_email in ("mentor.avanzado@upt.pe", "2022073504@upt.pe"):
+        elif clean_email in ("mentor.avanzado@upt.pe", "2022073504@upt.pe", "mentor.demo@upt.pe"):
             initial_roles.append("mentor")
 
         _memory_user_roles[clean_email] = set(initial_roles)
