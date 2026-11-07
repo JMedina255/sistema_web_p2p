@@ -14,7 +14,7 @@ def get_mod05_seq():
 
 #### Diagrama 6.15.9: Diagrama de Secuencia - CUS-004: Reservar cupo de mentoría académica
 
-El diagrama de secuencia para `CUS-004` formaliza el ciclo transaccional de reserva de cupos con control de aforo y concurrencia crítica bajo PostgreSQL. Modela detalladamente las cuatro fases de interacción entre el Estudiante Mentoreado, la interfaz React (`BookingModalView.tsx`), el adaptador `bookingService.ts`, el endpoint `POST /api/v1/bookings/reserve`, el servicio `booking_service.py` y la base de datos relacional. Incluye la adquisición del cerrojo en memoria `_booking_lock`, el bloqueo pesimista de fila `SELECT ... FOR UPDATE OF sesiones_mentoria` con timeout de 5.0s, y los diez flujos de excepción (`E001` a `E010`).
+El diagrama de secuencia para `CUS-004` formaliza el ciclo transaccional de reserva de cupos con control de aforo y concurrencia crítica bajo PostgreSQL siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela detalladamente las cuatro fases de interacción entre el Estudiante Mentoreado, la interfaz React (`BookingModalView.tsx`), el adaptador `bookingService.ts`, el endpoint `POST /api/v1/bookings/reserve`, el servicio `booking_service.py` y la base de datos relacional. Incluye la adquisición del cerrojo en memoria `_booking_lock`, el bloqueo pesimista de fila `SELECT ... FOR UPDATE OF sesiones_mentoria` con timeout de 5.0s, y los diez flujos de excepción (`E001` a `E010`).
 
 ```plantuml
 @startuml
@@ -36,14 +36,14 @@ participant "Servicio Backend\\n(booking_service.py / consent_service.py)" as Se
 database "PostgreSQL DB\\n(SQLAlchemy / Supabase)" as DB
 
 == Fase 1: Exploración en Cartelera y Apertura del Diálogo Modal ==
-User -> UI: 1. Navega por cartelera y pulsa "Reservar Cupo" en sesión en estado PUBLICADA
+User -> UI: clickOfferCard ["Reservar Cupo"]
 activate UI
 UI -> UI: onSelectOffer: monta BookingModalView.tsx con offer, userEmail
 
 alt [E001] Oferta en cartelera sin vacantes disponibles (available_slots <= 0)
-    UI --> User: Inhabilita botón "Confirmar Reserva", aviso ámbar "Aforo completado" y botón [Volver a Cartelera]
-    User -> UI: Clic en [Volver a Cartelera]
-    UI --> User: Cierra modal y retorna al paso 1
+    UI -> UI: displayCapacityExhaustedWarning()
+    User -> UI: click ["Volver a Cartelera"]
+    UI -> UI: closeModal()
 else [E002] Reserva duplicada activa para el mismo estudiante
     UI -> Client: checkActiveBooking(offer.id, userEmail)
     activate Client
@@ -59,23 +59,23 @@ else [E002] Reserva duplicada activa para el mismo estudiante
     deactivate Service
     API --> Client: HTTP 400 Bad Request {"detail": "ALREADY_BOOKED"}
     deactivate API
-    Client --> UI: Captura ALREADY_BOOKED
+    Client -> UI: displayDuplicateBookingError(400, "ALREADY_BOOKED")
     deactivate Client
-    UI --> User: Notificación roja "Ya posees una reserva activa registrada" y botón [Aceptar]
-    User -> UI: Clic en [Aceptar]
-    UI --> User: Cierra modal y retorna al paso 1
+    User -> UI: click ["Aceptar"]
+    UI -> UI: closeModal()
 else Tarjeta con vacantes y sin duplicidad previa
     == Fase 2: Verificación de Precondiciones y Reglas de Negocio en Cliente ==
-    User -> UI: 3. Revisa tema, curso, horario, modalidad, cupos restantes y pulsa "Confirmar Reserva"
-    UI -> UI: Activa isSubmitting=true, deshabilita controles y muestra spinner azul institucional
+    User -> UI: click ["Confirmar Reserva"]
+    UI -> UI: setIsSubmitting(true)
     
     alt [E003] Sesión institucional no autenticada o token JWT expirado
-        UI -> UI: localStorage.getItem('auth_token') retorna null o expirado
-        UI --> User: Redirige a LoginOtpView.tsx con alerta roja "Sesión caducada por inactividad" (transfiere a CUS-001)
+        UI -> UI: displaySessionExpired()
+        User -> UI: click ["Iniciar Sesión"]
+        UI -> UI: redirectToLoginView()
     else [E004] Conflicto de rol de mentor (Autoreserva Prohibida: offer.mentor_email === userEmail)
-        UI --> User: Inhabilita acción, alerta roja "Un mentor no puede reservar cupos en su propia sesión" y botón [Cerrar]
-        User -> UI: Clic en [Cerrar]
-        UI --> User: Cierra modal y retorna al paso 1
+        UI -> UI: displaySelfBookingError()
+        User -> UI: click ["Cerrar"]
+        UI -> UI: closeModal()
     else [E005] Ausencia o revocación de consentimiento legal digital Ley N° 29733
         UI -> Client: getConsentStatus(userEmail)
         activate Client
@@ -83,14 +83,12 @@ else Tarjeta con vacantes y sin duplicidad previa
         activate API
         API --> Client: HTTP 403 Forbidden {"detail": "CONSENT_REQUIRED"}
         deactivate API
-        Client --> UI: Captura CONSENT_REQUIRED
+        Client -> UI: displayConsentRequiredModal()
         deactivate Client
-        UI --> User: Oculta modal de reserva y monta ConsentModalView.tsx en primer plano
-        User -> UI: Acepta términos Ley N° 29733 y pulsa "Aceptar y Continuar"
-        UI --> User: Persiste consentimiento y retorna al paso 3
+        User -> UI: click ["Aceptar y Continuar"]
+        UI -> UI: setConsentAccepted()
     else Precondiciones en cliente verificadas
         == Fase 3: Transacción Atómica con Bloqueo Pesimista en Base de Datos ==
-        User -> UI: 5. Observa progreso de procesamiento seguro en pantalla
         UI -> Client: reserveSeat(offer.id, userEmail)
         activate Client
         Client -> API: POST /api/v1/bookings/reserve {"id_sesion": id, "estudiante_email": email} [Bearer JWT]
@@ -103,10 +101,9 @@ else Tarjeta con vacantes y sin duplicidad previa
         alt [E009] Timeout de concurrencia en adquisición de cerrojo (_booking_lock timeout)
             Service --> API: Lanza HTTPException(503, "DATABASE_BUSY")
             API --> Client: HTTP 503 Service Unavailable {"detail": "DATABASE_BUSY: Servicio sobrecargado."}
-            Client --> UI: Captura DATABASE_BUSY
-            UI --> User: Aviso ámbar "Servicio con alta concurrencia temporal" y botón [Reintentar Reserva]
-            User -> UI: Clic en [Reintentar Reserva]
-            UI -> Client: reserveSeat(...) (retorna al paso 4)
+            Client -> UI: displayDatabaseBusyAlert(503)
+            User -> UI: click ["Reintentar Reserva"]
+            UI -> Client: reserveSeat(offer.id, userEmail)
         else Cerrojo en memoria adquirido
             Service -> DB: BEGIN TRANSACTION
             activate DB
@@ -118,26 +115,23 @@ else Tarjeta con vacantes y sin duplicidad previa
                 Service -> DB: ROLLBACK
                 Service --> API: Lanza HTTPException(404, "SESSION_NOT_FOUND")
                 API --> Client: HTTP 404 Not Found {"detail": "SESSION_NOT_FOUND"}
-                Client --> UI: Captura 404
-                UI --> User: Modal rojo "La sesión ya no está disponible" y botón [Volver a Cartelera]
-                User -> UI: Clic en [Volver a Cartelera]
-                UI --> User: Retorna al paso 1
+                Client -> UI: displaySessionNotFound(404)
+                User -> UI: click ["Volver a Cartelera"]
+                UI -> UI: closeModal()
             else [E007] Ventana de antelación menor a 24 horas (now_utc > fecha_inicio - 24h, RN-04)
                 Service -> DB: ROLLBACK
                 Service --> API: Lanza HTTPException(400, "RESERVATION_WINDOW_CLOSED")
                 API --> Client: HTTP 400 Bad Request {"detail": "RESERVATION_WINDOW_CLOSED"}
-                Client --> UI: Captura 400
-                UI --> User: Mensaje rojo "Plazo de reserva cerrado a T-24h" y botón [Entendido]
-                User -> UI: Clic en [Entendido]
-                UI --> User: Retorna al paso 1
+                Client -> UI: displayReservationWindowClosed(400)
+                User -> UI: click ["Entendido"]
+                UI -> UI: closeModal()
             else [E008] Aforo agotado en el instante del cerrojo (cupos_ocupados >= aforo_maximo, RN-05)
                 Service -> DB: ROLLBACK
                 Service --> API: Lanza HTTPException(409, "CAPACITY_EXCEEDED")
                 API --> Client: HTTP 409 Conflict {"detail": "CAPACITY_EXCEEDED: Último cupo reservado."}
-                Client --> UI: Captura 409
-                UI --> User: Alerta ámbar "El último cupo acaba de ser tomado" y botón [Ver Otras Sesiones]
-                User -> UI: Clic en [Ver Otras Sesiones]
-                UI --> User: Retorna al paso 1
+                Client -> UI: displayCapacityExceeded(409)
+                User -> UI: click ["Ver Otras Sesiones"]
+                UI -> UI: closeModal()
             else Condiciones de reserva válidas y aforo garantizado
                 Service -> Service: Genera ticket_hash = SHA256(uid + sid + timestamp)
                 Service -> DB: INSERT INTO reservas_cupo (id_usuario, id_sesion, estado='PENDIENTE_CONFIRMACION', ticket_hash)\\nVALUES (:uid, :sid, 'PENDIENTE_CONFIRMACION', :th) RETURNING id
@@ -148,10 +142,9 @@ else Tarjeta con vacantes y sin duplicidad previa
                     Service -> DB: ROLLBACK
                     Service --> API: Lanza HTTPException(500, "TRANSACTION_FAILED")
                     API --> Client: HTTP 500 Internal Server Error {"detail": "TRANSACTION_FAILED"}
-                    Client --> UI: Captura error 500
-                    UI --> User: Error rojo transaccional y botón [Reintentar]
-                    User -> UI: Clic en [Reintentar]
-                    UI --> User: Retorna al paso 4
+                    Client -> UI: displayTransactionFailed(500)
+                    User -> UI: click ["Reintentar"]
+                    UI -> Client: reserveSeat(offer.id, userEmail)
                 else Transacción confirmada exitosamente
                     Service -> DB: COMMIT
                     DB --> Service: Transacción ACID confirmada
@@ -160,13 +153,12 @@ else Tarjeta con vacantes y sin duplicidad previa
                     == Fase 4: Confirmación Provisional y Notificación de Plazo Límite ==
                     Service --> API: BookingCreateResponseDTO {"id": id_reserva, "estado": "PENDIENTE_CONFIRMACION", "deadline": t_minus_24h}
                     API --> Client: HTTP 201 Created BookingCreateResponseDTO
-                    Client --> UI: Reserva provisional confirmada
+                    Client -> UI: displayBookingSuccessModal(id_reserva, deadline)
                     
-                    UI -> UI: isSubmitting=false, conmuta modal a estado de éxito
-                    UI --> User: 6. Modal verde con número de comprobante, plazo hasta T-24h para ratificar asistencia (CUS-024) y botón [Ir a Mis Reservas]
-                    User -> UI: 7. Clic en [Ir a Mis Reservas]
-                    UI -> UI: Desmonta BookingModalView.tsx
-                    UI --> User: Redirige a StudentBookingsView.tsx con la tarjeta en estado "Pendiente de Confirmación"
+                    UI -> UI: setIsSubmitting(false)
+                    User -> UI: click ["Ir a Mis Reservas"]
+                    UI -> UI: unmountBookingModal()
+                    UI --> User: displayStudentBookingsDashboard
                 end
             end
             deactivate DB
@@ -186,7 +178,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 #### Diagrama 6.15.10: Diagrama de Secuencia - CUS-024: Ratificar asistencia a sesión de mentoría
 
-El diagrama de secuencia para `CUS-024` formaliza la confirmación obligatoria de asistencia por parte de los estudiantes con reserva en la ventana reglamentaria entre 48 y 24 horas antes del inicio de la sesión (`[T-48h, T-24h]`, `RN-08`). Modela la interacción entre el Estudiante Mentoreado, el panel `StudentBookingsView.tsx`, `bookingService.ts`, el endpoint `POST /api/v1/bookings/{id}/confirm`, el servicio `booking_service.py` y PostgreSQL. Modela la validación de ventana temporal, la conmutación de estado a `CONFIRMADA`, la emisión del pase digital de asistencia con código alfanumérico y los flujos de excepción por ratificación anticipada (`E001`) o extemporánea (`E002`).
+El diagrama de secuencia para `CUS-024` formaliza la confirmación obligatoria de asistencia por parte de los estudiantes con reserva en la ventana reglamentaria entre 48 y 24 horas antes del inicio de la sesión (`[T-48h, T-24h]`, `RN-08`) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el Estudiante Mentoreado, el panel `StudentBookingsView.tsx`, `bookingService.ts`, el endpoint `POST /api/v1/bookings/{id}/confirm`, el servicio `booking_service.py` y PostgreSQL. Modela la validación de ventana temporal, la conmutación de estado a `CONFIRMADA`, la emisión del pase digital de asistencia con código alfanumérico y los flujos de excepción por ratificación anticipada (`E001`) o extemporánea (`E002`).
 
 ```plantuml
 @startuml
@@ -208,7 +200,7 @@ participant "Servicio Backend\\n(booking_service.py)" as Service
 database "PostgreSQL DB\\n(SQLAlchemy / Supabase)" as DB
 
 == Fase 1: Identificación de reservas pendientes y verificación de ventana temporal ==
-User -> UI: 1. Accede a "Mis Reservas" en StudentBookingsView.tsx
+User -> UI: click ["Mis Reservas"]
 activate UI
 UI -> Client: getMyBookings() [Bearer JWT]
 activate Client
@@ -224,14 +216,13 @@ Service --> API: BookingListResponseDTO
 deactivate Service
 API --> Client: HTTP 200 OK BookingListResponseDTO
 deactivate API
-Client --> UI: Entrega reservas activas
+Client -> UI: displayBookingsList(bookings)
 deactivate Client
-UI --> User: 2. Renderiza tarjetas con cuenta regresiva. En reservas dentro de [T-48h, T-24h], despliega botón ámbar "Confirmar Asistencia"
 
 == Fase 2: Despacho de ratificación y validación de reglas de negocio ==
-User -> UI: 3. Clic en botón "Confirmar Asistencia" en la tarjeta
-UI --> User: 4. Abre modal de confirmación con texto: "¿Se compromete a asistir puntualmente a la sesión?"
-User -> UI: Pulsa "Sí, Confirmo mi Asistencia Definitiva"
+User -> UI: clickCardButton ["Confirmar Asistencia"]
+UI -> UI: openConfirmationModal()
+User -> UI: click ["Sí, Confirmo mi Asistencia Definitiva"]
 
 UI -> Client: confirmBooking(bookingId)
 activate Client
@@ -248,20 +239,17 @@ deactivate DB
 alt [E001] Intento de ratificación anticipada fuera de ventana (now_utc < fecha_inicio - 48h)
     Service --> API: Lanza HTTPException(400, "CONFIRMATION_NOT_OPEN")
     API --> Client: HTTP 400 Bad Request {"detail": "CONFIRMATION_NOT_OPEN: La ventana abre 48h antes del inicio."}
-    Client --> UI: Captura error 400
-    UI --> User: Mensaje azul "La ratificación se habilitará exactamente 48h antes de la sesión" y botón [Entendido]
-    User -> UI: Clic en [Entendido]
-    UI --> User: Cierra modal y retorna al paso 2
+    Client -> UI: displayConfirmationNotOpen(400)
+    User -> UI: click ["Entendido"]
+    UI -> UI: closeConfirmationModal()
 else [E002] Ventana de ratificación vencida a T-24h (now_utc > fecha_inicio - 24h)
     Service --> API: Lanza HTTPException(400, "CONFIRMATION_WINDOW_EXPIRED")
     API --> Client: HTTP 400 Bad Request {"detail": "CONFIRMATION_WINDOW_EXPIRED: Ventana cerró a T-24h."}
-    Client --> UI: Captura error 400
-    UI --> User: Tarjeta en gris indicando cupo dado de baja por falta de ratificación y botón [Aceptar]
-    User -> UI: Clic en [Aceptar]
-    UI --> User: Actualiza lista de reservas y retorna al paso 2
+    Client -> UI: displayConfirmationExpired(400)
+    User -> UI: click ["Aceptar"]
+    UI -> UI: refreshBookingsList()
 else Dentro de la ventana reglamentaria [T-48h, T-24h]
     == Fase 3: Transición atómica de estado y emisión de pase de asistencia ==
-    User -> UI: 5. Espera confirmación visual
     Service -> DB: BEGIN TRANSACTION
     activate DB
     Service -> DB: UPDATE reservas_cupo SET estado = 'CONFIRMADA', fecha_confirmacion = NOW() WHERE id = :bid
@@ -271,10 +259,10 @@ else Dentro de la ventana reglamentaria [T-48h, T-24h]
     
     Service --> API: BookingResponseDTO {"id": booking_id, "estado": "CONFIRMADA", "pass_code": "PASS-8472"}
     API --> Client: HTTP 200 OK BookingResponseDTO
-    Client --> UI: Asistencia confirmada
+    Client -> UI: displayPassCodeModal(booking_id, pass_code)
     
-    UI -> UI: Conmuta tarjeta a color verde con leyenda "Asistencia Ratificada"
-    UI --> User: 6. Despliega código alfanumérico para el pase de lista y emite notificación de éxito
+    UI -> UI: updateCardToConfirmed()
+    UI --> User: displayAttendanceConfirmedNotification
 end
 deactivate Service
 deactivate API
@@ -289,7 +277,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 #### Diagrama 6.15.11: Diagrama de Secuencia - CUS-017: Desistir voluntariamente de reserva
 
-El diagrama de secuencia para `CUS-017` modela la anulación voluntaria de una reserva de cupo sin penalización académica, condicionada a una antelación mayor a 24 horas (`fecha_inicio > now_utc + 24h`, `RN-04`). Modela las interacciones entre el Estudiante Mentoreado, `StudentBookingsView.tsx`, `bookingService.ts`, el endpoint `POST /api/v1/bookings/{id}/cancel`, `booking_service.py` y PostgreSQL. Modela la adquisición del cerrojo pesimista de fila, la conmutación a estado `CANCELADA_ESTUDIANTE`, la reducción atómica del contador de cupos ocupados y el rechazo de cancelaciones tardías (`E001`).
+El diagrama de secuencia para `CUS-017` modela la anulación voluntaria de una reserva de cupo sin penalización académica, condicionada a una antelación mayor a 24 horas (`fecha_inicio > now_utc + 24h`, `RN-04`) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las interacciones entre el Estudiante Mentoreado, `StudentBookingsView.tsx`, `bookingService.ts`, el endpoint `POST /api/v1/bookings/{id}/cancel`, `booking_service.py` y PostgreSQL. Modela la adquisición del cerrojo pesimista de fila, la conmutación a estado `CANCELADA_ESTUDIANTE`, la reducción atómica del contador de cupos ocupados y el rechazo de cancelaciones tardías (`E001`).
 
 ```plantuml
 @startuml
@@ -311,9 +299,9 @@ participant "Servicio Backend\\n(booking_service.py)" as Service
 database "PostgreSQL DB\\n(SQLAlchemy / Supabase)" as DB
 
 == Fase 1: Solicitud de desistimiento y verificación de plazos ==
-User -> UI: 1. Localiza reserva activa en "Mis Reservas" y pulsa "Cancelar Reserva"
+User -> UI: clickCardButton ["Cancelar Reserva"]
 activate UI
-UI --> User: 2. Abre modal de advertencia indicando que el desistimiento es irrevocable y solicita motivo opcional
+UI -> UI: openCancellationModal()
 
 alt [E001] Desistimiento tardío con menos de 24 horas de antelación (fecha_inicio <= now_utc + 24h)
     UI -> Client: checkCancellationDeadline(bookingId)
@@ -330,14 +318,14 @@ alt [E001] Desistimiento tardío con menos de 24 horas de antelación (fecha_ini
     deactivate Service
     API --> Client: HTTP 400 Bad Request {"detail": "LATE_CANCELLATION_PROHIBITED: Menos de 24h de antelación."}
     deactivate API
-    Client --> UI: Captura error 400
+    Client -> UI: displayLateCancellationProhibited(400)
     deactivate Client
-    UI --> User: Advertencia roja "No se permite cancelación voluntaria a menos de 24h para no desestabilizar quórum" y botón [Entendido]
-    User -> UI: Clic en [Entendido]
-    UI --> User: Cierra modal manteniendo la reserva activa y retorna al paso 1
+    User -> UI: click ["Entendido"]
+    UI -> UI: closeCancellationModal()
 else Antelación superior a 24 horas (cumple RN-04)
     == Fase 2: Confirmación y procesamiento atómico de liberación de cupo ==
-    User -> UI: 3. Selecciona motivo opcional y pulsa "Confirmar Cancelación"
+    User -> UI: enter (cancellationReason)
+    User -> UI: click ["Confirmar Cancelación"]
     UI -> Client: cancelBooking(bookingId, reason)
     activate Client
     Client -> API: POST /api/v1/bookings/{id}/cancel {"reason": reason} [Bearer JWT]
@@ -359,12 +347,12 @@ else Antelación superior a 24 horas (cumple RN-04)
     deactivate Service
     API --> Client: HTTP 200 OK BookingResponseDTO
     deactivate API
-    Client --> UI: Desistimiento confirmado
+    Client -> UI: displayCancellationSuccess()
     deactivate Client
     
-    UI --> User: 5. Modal de éxito indicando liberación correcta del cupo sin penalización
-    UI -> UI: Cierra modal, conmuta tarjeta a color gris con leyenda "Cancelada por el estudiante"
-    UI --> User: 6. Emite evento de actualización que incrementa las vacantes disponibles en la cartelera
+    UI -> UI: closeCancellationModal()
+    UI -> UI: updateCardToCancelled()
+    UI --> User: displayBookingCancelledConfirmation
 end
 deactivate UI
 @enduml
@@ -376,7 +364,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 #### Diagrama 6.15.12: Diagrama de Secuencia - CUS-023: Evaluar quórum automático a T-24h
 
-El diagrama de secuencia para `CUS-023` especifica el proceso automatizado y desatendido de evaluación de quórum reglamentario (mínimo 3 estudiantes con asistencia ratificada, `RN-05`) ejecutado exactamente 24 horas antes del inicio de cada sesión de mentoría. Modela la interacción entre el Proceso Demonio (`SchedulerWorker` / Celery / APScheduler), el controlador de quórum en `quorum.py`, `booking_service.py`, `simulation_service.py`, PostgreSQL y el servicio de correo SMTP. Incluye la promoción automática a `CONFIRMADA` si se cumple el quórum, y la transición a `QUORUM_INSUFICIENTE` con disparo de alertas urgentes (`A001`) si no se alcanza el umbral.
+El diagrama de secuencia para `CUS-023` especifica el proceso automatizado y desatendido de evaluación de quórum reglamentario (mínimo 3 estudiantes con asistencia ratificada, `RN-05`) ejecutado exactamente 24 horas antes del inicio de cada sesión de mentoría siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el Proceso Demonio (`SchedulerWorker` / Celery / APScheduler), el controlador de quórum en `quorum.py`, `booking_service.py`, `simulation_service.py`, PostgreSQL y el servicio de correo SMTP. Incluye la promoción automática a `CONFIRMADA` si se cumple el quórum, y la transición a `QUORUM_INSUFICIENTE` con disparo de alertas urgentes (`A001`) si no se alcanza el umbral.
 
 ```plantuml
 @startuml
@@ -403,9 +391,9 @@ actor "Estudiante Mentoreado" as Mentoreado
 
 == Fase 1: Disparo de la tarea programada y localización de sesiones a T-24h ==
 alt Disparo automatizado por demonio programado
-    Cron -> API: 1. Disparo automático de corte de quórum a T-24h
+    Cron -> API: Disparo automático de corte de quórum a T-24h
 else Disparo administrativo o simulado desde consola
-    Admin -> UI: 1. Accede a panel administrativo y pulsa "Evaluar Quórum Masivo"
+    Admin -> UI: click ["Evaluar Quórum Masivo"]
     activate UI
     UI -> Client: triggerQuorumEvaluation() [Bearer JWT]
     activate Client
@@ -440,12 +428,11 @@ loop Para cada sesión en ventana T-24h
         
         Service -> SMTP: send_urgent_quorum_alert(mentor_email, session_id, confirmed_count)
         activate SMTP
-        SMTP --> Mentor: A001-1.3 Alerta urgente al Mentor: "Tu sesión de mañana no alcanzó quórum de 3 alumnos. Ingrese para decidir."
+        SMTP --> Mentor: Alerta urgente: Sesión no alcanzó quórum de 3 alumnos
         deactivate SMTP
         
-        Service -> UI: Emite evento WebSocket / SSE hacia panel de control
-        UI --> Mentor: Notificación flotante de quórum insuficiente
-        Service --> API: A001-1.4 Sesión en QUORUM_INSUFICIENTE (transfiere a CUS-007)
+        Service -> UI: pushNotificationQuorumInsufficient(session_id)
+        Service --> API: A001-1.4 Sesión en QUORUM_INSUFICIENTE
     else Quórum reglamentario alcanzado (confirmed_count >= 3 estudiantes)
         == Fase 3: Confirmación oficial de sesión y notificación de viabilidad ==
         Service -> DB: BEGIN TRANSACTION
@@ -458,16 +445,15 @@ loop Para cada sesión en ventana T-24h
         
         Service -> SMTP: send_session_confirmed_email(mentor_email, session_data)
         activate SMTP
-        SMTP --> Mentor: Correo de confirmación oficial de dictado de sesión
+        SMTP --> Mentor: Correo oficial de dictado de sesión
         deactivate SMTP
         
         Service -> SMTP: send_confirmation_to_students(enrolled_emails, session_data)
         activate SMTP
-        SMTP --> Mentoreado: Correo oficial: "¡Sesión confirmada! Cuenta con quórum reglamentario."
+        SMTP --> Mentoreado: Correo oficial: Sesión confirmada con quórum reglamentario
         deactivate SMTP
         
-        Service -> UI: Emite evento de sesión confirmada para refrescar cartelera
-        UI --> Mentoreado: Actualiza estado a CONFIRMADA en interfaz
+        Service -> UI: pushNotificationQuorumConfirmed(session_id)
         Service --> API: SessionQuorumResultDTO {"session_id": sid, "status": "CONFIRMADA", "confirmed_students": confirmed_count}
     end
 end
@@ -485,7 +471,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 #### Diagrama 6.15.13: Diagrama de Secuencia - CUS-007: Decisión del mentor ante quórum insuficiente
 
-El diagrama de secuencia para `CUS-007` modela la gestión resolutiva que ejecuta el estudiante mentor cuando una sesión no alcanza el quórum a T-24h (estado `QUORUM_INSUFICIENTE`). Modela las interacciones entre el Mentor, `MentorSessionsView.tsx`, `offerService.ts`, el endpoint `POST /api/v1/offers/{offer_id}/quorum-decision`, `offer_service.py` y PostgreSQL. Abarca las tres alternativas de resolución: dictar de todas formas (`PROCEED`), reprogramar con antelación mayor a 24 horas (`RESCHEDULE`, con validación `E001`), o cancelar definitivamente con justificación obligatoria (`CANCEL`, con validación `E002`), actualizando los estados y notificando a los estudiantes inscritos.
+El diagrama de secuencia para `CUS-007` modela la gestión resolutiva que ejecuta el estudiante mentor cuando una sesión no alcanza el quórum a T-24h (estado `QUORUM_INSUFICIENTE`) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las interacciones entre el Mentor, `MentorSessionsView.tsx`, `offerService.ts`, el endpoint `POST /api/v1/offers/{offer_id}/quorum-decision`, `offer_service.py` y PostgreSQL. Abarca las tres alternativas de resolución: dictar de todas formas (`PROCEED`), reprogramar con antelación mayor a 24 horas (`RESCHEDULE`, con validación `E001`), o cancelar definitivamente con justificación obligatoria (`CANCEL`, con validación `E002`), actualizando los estados y notificando a los estudiantes inscritos.
 
 ```plantuml
 @startuml
@@ -509,34 +495,35 @@ participant "Servicio SMTP UPT\\n(EmailService)" as SMTP
 actor "Estudiantes Inscritos" as Students
 
 == Fase 1: Acceso a la sesión con quórum insuficiente y visualización de opciones ==
-Mentor -> UI: 1. Accede a "Mis Sesiones" y visualiza tarjeta resaltada en ámbar "Quórum Insuficiente"
+Mentor -> UI: click ["Mis Sesiones"]
 activate UI
-Mentor -> UI: 2. Clic en botón "Gestionar Sesión"
-UI --> Mentor: Abre modal con estudiantes ratificados y 3 opciones: [Dictar de Todas Formas], [Reprogramar Sesión], [Cancelar Sesión]
+Mentor -> UI: clickButton ["Gestionar Sesión"]
+UI -> UI: openQuorumDecisionModal()
 
 == Fase 2: Elección de la resolución y verificación de parámetros ==
 alt Decisión == 'RESCHEDULE' con nueva fecha ingresada
-    Mentor -> UI: 3. Selecciona "Reprogramar Sesión" e ingresa nueva fecha y hora
-    UI -> UI: Valida en cliente que nueva fecha > now_utc + 24h
+    Mentor -> UI: selectOption ["Reprogramar Sesión"]
+    Mentor -> UI: enter (newStartDateTime, newEndDateTime)
+    UI -> UI: validateAdvanceNotice(newStartDateTime)
     
     alt [E001] Fecha de reprogramación con menos de 24 horas de antelación
-        UI --> Mentor: Resalta selector de fecha en rojo, aviso: "La nueva fecha debe ser al menos 24h posterior al momento actual"
-        Mentor -> UI: Selecciona fecha y hora reglamentaria (> 24h)
-        UI --> Mentor: Rehabilita botón de confirmación y retorna al paso 3
+        UI -> UI: displayRescheduleDateError()
+        Mentor -> UI: enter (validStartDateTime > 24h)
+        UI -> UI: enableRescheduleConfirmButton()
     end
 else Decisión == 'CANCEL' con motivo de cancelación
-    Mentor -> UI: 3. Selecciona "Cancelar Sesión"
+    Mentor -> UI: selectOption ["Cancelar Sesión"]
     
     alt [E002] Justificación de cancelación definitiva vacía
-        UI --> Mentor: Resalta cuadro de texto obligatorio en rojo con mensaje de error
-        Mentor -> UI: Ingresa justificación válida de cancelación
-        UI --> Mentor: Rehabilita botón y retorna al paso 3
+        UI -> UI: displayEmptyReasonError()
+        Mentor -> UI: enter (validCancellationReason)
+        UI -> UI: enableCancelConfirmButton()
     end
 else Decisión == 'PROCEED' (Dictar de todas formas)
-    Mentor -> UI: 3. Selecciona opción "Dictar de Todas Formas"
+    Mentor -> UI: selectOption ["Dictar de Todas Formas"]
 end
 
-Mentor -> UI: 4. Presiona botón "Confirmar Decisión Resolutiva"
+Mentor -> UI: click ["Confirmar Decisión Resolutiva"]
 UI -> Client: submitQuorumDecision(offerId, decision, payload)
 activate Client
 Client -> API: POST /api/v1/offers/{offer_id}/quorum-decision {"decision": d, ...} [Bearer JWT]
@@ -553,7 +540,7 @@ alt Decisión == 'PROCEED' (Confirmar dictado a pesar del quórum bajo)
     Service -> DB: COMMIT
     Service -> SMTP: notify_students_session_confirmed(enrolled_emails)
     activate SMTP
-    SMTP --> Students: Notificación: "Tu sesión de mentoría se dictará según lo programado"
+    SMTP --> Students: Notificación: Tu sesión de mentoría se dictará según lo programado
     deactivate SMTP
 else Decisión == 'RESCHEDULE' (Reprogramar sesión)
     Service -> DB: UPDATE sesiones_mentoria SET estado = 'PUBLICADA', fecha_inicio = :new_start, fecha_fin = :new_end WHERE id = :oid
@@ -561,7 +548,7 @@ else Decisión == 'RESCHEDULE' (Reprogramar sesión)
     Service -> DB: COMMIT
     Service -> SMTP: notify_students_session_rescheduled(enrolled_emails, new_start)
     activate SMTP
-    SMTP --> Students: Notificación: "La sesión ha sido reprogramada. Por favor confirme su nueva fecha."
+    SMTP --> Students: Notificación: La sesión ha sido reprogramada
     deactivate SMTP
 else Decisión == 'CANCEL' (Cancelar definitivamente)
     Service -> DB: UPDATE sesiones_mentoria SET estado = 'CANCELADA_QUORUM', motivo_cancelacion = :reason WHERE id = :oid
@@ -569,7 +556,7 @@ else Decisión == 'CANCEL' (Cancelar definitivamente)
     Service -> DB: COMMIT
     Service -> SMTP: notify_students_session_cancelled(enrolled_emails, reason)
     activate SMTP
-    SMTP --> Students: Notificación: "Sesión cancelada por no alcanzar quórum reglamentario."
+    SMTP --> Students: Notificación: Sesión cancelada por no alcanzar quórum reglamentario
     deactivate SMTP
 end
 deactivate DB
@@ -578,11 +565,12 @@ Service --> API: QuorumResolutionResponseDTO {"success": true, "new_state": esta
 deactivate Service
 API --> Client: HTTP 200 OK QuorumResolutionResponseDTO
 deactivate API
-Client --> UI: Resolución confirmada
+Client -> UI: displayQuorumResolutionSuccess(new_state)
 deactivate Client
 
-UI -> UI: Cierra cuadro modal y actualiza estado de tarjeta
-UI --> Mentor: 6. Notificación flotante verde: "Decisión registrada exitosamente"
+UI -> UI: closeQuorumDecisionModal()
+UI -> UI: updateSessionCardState(new_state)
+UI --> Mentor: displayQuorumDecisionConfirmation
 deactivate UI
 @enduml
 ```

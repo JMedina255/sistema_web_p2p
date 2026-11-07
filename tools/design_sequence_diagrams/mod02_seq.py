@@ -15,7 +15,7 @@ El diagrama de secuencia para `CUS-006` formaliza la programación y publicació
 
 ```plantuml
 @startuml
-title Diagrama 6.15.3: Diagrama de Secuencia - CUS-006: Publicar oferta de mentoría académica\nSistema Web P2P - EPIS UPT
+title Diagrama 6.15.3: Diagrama de Secuencia - CUS-006: Publicar oferta de mentoría académica\\nSistema Web P2P - EPIS UPT
 
 autonumber
 skinparam shadowing false
@@ -25,12 +25,12 @@ skinparam fontSize 11
 skinparam sequenceBoxBorderColor #1E3A8A
 skinparam sequenceBoxBackgroundColor #F0F4F8
 
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-participant "interface : UI\n(OfferPublishView.tsx)" as UI
-participant "clientAdapter : Client\n(offerService.ts / apiClient.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/offers.py)" as API
-participant "Servicio Backend\n(offer_service.py / OfferService)" as Service
-database "postgresDB : Database\n(SQLAlchemy / Supabase)" as DB
+actor "Estudiante Mentor\\n(UserRole.mentor)" as Mentor
+participant "interface : UI\\n(OfferPublishView.tsx)" as UI
+participant "clientAdapter : Client\\n(offerService.ts / apiClient.ts)" as Client
+participant "Controlador FastAPI\\n(endpoints/offers.py)" as API
+participant "Servicio Backend\\n(offer_service.py / OfferService)" as Service
+database "postgresDB : Database\\n(SQLAlchemy / Supabase)" as DB
 
 == Fase 1: Configuración de la sesión y selección curricular ==
 Mentor -> UI: selectCourse(selectedCourseId)
@@ -41,7 +41,7 @@ Client -> API: GET /api/v1/curriculum/courses/{id}
 activate API
 API -> Service: get_course_by_id(id)
 activate Service
-Service -> DB: SELECT * FROM asignaturas WHERE id_asignatura = :id\nSELECT * FROM temas_curriculares WHERE id_asignatura = :id
+Service -> DB: SELECT * FROM asignaturas WHERE id_asignatura = :id\\nSELECT * FROM temas_curriculares WHERE id_asignatura = :id
 activate DB
 DB --> Service: Asignatura y lista de temas silábicos (Topic[])
 deactivate DB
@@ -78,7 +78,7 @@ else Formulario válido en cliente
         activate Service
 
         Service -> Service: validate_mentor_eligibility(db, effective_email)
-        Service -> DB: SELECT * FROM usuario_roles ur JOIN roles r ON ur.id_rol = r.id_rol\nWHERE ur.email = :email AND ur.activo = true AND r.nombre_rol IN ('mentor', 'administrador')
+        Service -> DB: SELECT * FROM usuario_roles ur JOIN roles r ON ur.id_rol = r.id_rol\\nWHERE ur.email = :email AND ur.activo = true AND r.nombre_rol IN ('mentor', 'administrador')
         activate DB
         DB --> Service: Roles del usuario y perfil académico (ciclo_actual)
         deactivate DB
@@ -101,7 +101,7 @@ else Formulario válido en cliente
             else Parámetros de mérito, aforo y antelación válidos
                 == Fase 3: Persistencia transaccional de la oferta y confirmación en cliente ==
                 Service -> DB: sesion_db = SesionMentoria(codigo_sesion=code, mentor_email=..., estado='PUBLICADA', ...)
-                Service -> DB: db.add(sesion_db)\ndb.commit()\ndb.refresh(sesion_db)
+                Service -> DB: db.add(sesion_db)\\ndb.commit()\\ndb.refresh(sesion_db)
                 activate DB
                 DB --> Service: Transacción confirmada (id_sesion, codigo_sesion='SES-XXXX')
                 deactivate DB
@@ -123,13 +123,15 @@ deactivate UI
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-006.
 
+---
+
 #### Diagrama 6.15.4: Diagrama de Secuencia - CUS-008: Consultar disponibilidad de espacios y recursos
 
-El diagrama de secuencia para `CUS-008` modela la consulta de disponibilidad de infraestructura física de la EPIS (aulas, laboratorios y salas de estudio) antes de programar sesiones presenciales. Detalla la interacción entre el Mentor, la interfaz de usuario, `offerService.ts`, el endpoint `GET /api/v1/offers/spaces/availability`, `offer_service.py` y las tablas `aulas` y `sesiones_mentoria`. Incorpora la restricción de horario universitario de 08:00 a 20:00 (`RN-07`, `E001`), la tolerancia a fallos de persistencia (`E002`) y la conmutación guiada hacia modalidad virtual (`A001`) ante saturación de espacios físicos.
+El diagrama de secuencia para `CUS-008` modela la consulta de disponibilidad de infraestructura física de la EPIS (aulas, laboratorios y salas de estudio) antes de programar sesiones presenciales siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Detalla la interacción entre el Mentor, la interfaz de usuario, `offerService.ts`, el endpoint `GET /api/v1/offers/spaces/availability`, `offer_service.py` y las tablas `aulas` y `sesiones_mentoria`. Incorpora la restricción de horario universitario de 08:00 a 20:00 (`RN-07`, `E001`), la tolerancia a fallos de persistencia (`E002`) y la conmutación guiada hacia modalidad virtual (`A001`) ante saturación de espacios físicos.
 
 ```plantuml
 @startuml
-title Diagrama 6.15.4: Diagrama de Secuencia - CUS-008: Consultar disponibilidad de espacios físicos y aulas de la EPIS\nSistema Web P2P - EPIS UPT
+title Diagrama 6.15.4: Diagrama de Secuencia - CUS-008: Consultar disponibilidad de espacios físicos y aulas de la EPIS\\nSistema Web P2P - EPIS UPT
 
 autonumber
 skinparam shadowing false
@@ -139,16 +141,17 @@ skinparam fontSize 11
 skinparam sequenceBoxBorderColor #1E3A8A
 skinparam sequenceBoxBackgroundColor #F0F4F8
 
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-participant "Vista React\n(OfferPublishView.tsx / SpacesModal)" as UI
-participant "Adaptador Cliente\n(offerService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/offers.py)" as API
-participant "Servicio Backend\n(offer_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+actor "Estudiante Mentor\\n(UserRole.mentor)" as Mentor
+participant "Vista React\\n(OfferPublishView.tsx / SpacesModal)" as UI
+participant "Adaptador Cliente\\n(offerService.ts)" as Client
+participant "Controlador FastAPI\\n(endpoints/offers.py)" as API
+participant "Servicio Backend\\n(offer_service.py)" as Service
+database "PostgreSQL DB\\n(SQLAlchemy / Supabase)" as DB
 
 == Fase 1: Definición de criterios temporales y despacho de consulta ==
-Mentor -> UI: 1. Selecciona fecha y franja horaria (inicio y fin) y pulsa "Consultar Aulas Disponibles"
+Mentor -> UI: enter (date, startTime, endTime)
 activate UI
+Mentor -> UI: click ["Consultar Aulas Disponibles"]
 UI -> Client: checkSpaceAvailability(date, startTime, endTime)
 activate Client
 
@@ -160,14 +163,11 @@ activate Service
 alt [E001] Horario fuera de la jornada institucional (fuera del intervalo 08:00 - 20:00, RN-07)
     Service --> API: Lanza HTTPException(400, "OPERATIONAL_HOURS_VIOLATION")
     API --> Client: HTTP 400 Bad Request {"detail": "OPERATIONAL_HOURS_VIOLATION: Operación sólo entre 08:00 y 20:00 horas."}
-    Client --> UI: Captura error 400
-    UI --> Mentor: Advertencia roja "Uso de aulas no autorizado fuera de la jornada reglamentaria"
-    Mentor -> UI: Modifica franja horaria seleccionando horario entre 08:00 y 20:00
-    UI --> Mentor: Actualiza selector y retorna al paso 1
+    Client -> UI: displayOperationalHoursError(400, "OPERATIONAL_HOURS_VIOLATION")
+    Mentor -> UI: enter (correctedStartTime, correctedEndTime)
+    Mentor -> UI: click ["Consultar Aulas Disponibles"]
 else Rango horario reglamentario válido
     == Fase 2: Verificación de ocupación en base de datos y renderización de resultados ==
-    Mentor -> UI: 3. Visualiza indicador circular de carga en color azul institucional
-    
     alt [E002] Falla de conexión o timeout con repositorio de infraestructura
         Service -> DB: Conexión y consulta de aulas (timeout)
         activate DB
@@ -175,29 +175,27 @@ else Rango horario reglamentario válido
         deactivate DB
         Service --> API: Lanza OperationalError
         API --> Client: HTTP 503 Service Unavailable {"detail": "INFRASTRUCTURE_UNAVAILABLE: No se pudo verificar disponibilidad."}
-        Client --> UI: Captura error 503
-        UI --> Mentor: Alerta roja "Indisponibilidad temporal del servicio" y botón [Reintentar Consulta]
-        Mentor -> UI: Clic en [Reintentar Consulta]
-        UI -> Client: checkSpaceAvailability(...) (retorna al paso 1)
+        Client -> UI: displayInfrastructureUnavailable(503)
+        Mentor -> UI: click ["Reintentar Consulta"]
+        UI -> Client: checkSpaceAvailability(date, startTime, endTime)
     else Conexión exitosa y consulta ejecutada
-        Service -> DB: SELECT a.id, a.codigo, a.capacidad, a.equipamiento FROM aulas a\nWHERE a.activa = true AND a.id NOT IN (\n  SELECT aula_id FROM sesiones_mentoria\n  WHERE fecha = :fecha AND NOT (hora_fin <= :start OR hora_inicio >= :end)\n  AND estado IN ('PUBLICADA', 'CONFIRMADA')\n)
+        Service -> DB: SELECT a.id, a.codigo, a.capacidad, a.equipamiento FROM aulas a\\nWHERE a.activa = true AND a.id NOT IN (\\n  SELECT aula_id FROM sesiones_mentoria\\n  WHERE fecha = :fecha AND NOT (hora_fin <= :start OR hora_inicio >= :end)\\n  AND estado IN ('PUBLICADA', 'CONFIRMADA')\\n)
         activate DB
         DB --> Service: Lista de aulas disponibles
         deactivate DB
         Service --> API: AvailableSpacesResponseDTO
         API --> Client: HTTP 200 OK AvailableSpacesResponseDTO
-        Client --> UI: Entrega catálogo de espacios libres
+        Client -> UI: displayAvailableSpaces(availableSpaces)
         
         alt [A001] Aulas físicas agotadas (cero registros libres)
-            UI --> Mentor: A001-1.2 Panel ámbar "Todas las aulas físicas ocupadas" y botones [Cambiar a Virtual] / [Modificar Horario]
-            Mentor -> UI: A001-1.3 Clic en [Cambiar a Modalidad Virtual]
-            UI -> UI: Conmuta modalidad a VIRTUAL, habilita Google Meet y ajusta aforo a 20 (RN-05)
-            UI --> Mentor: A001-1.4 Retorna al paso 1 del Flujo Normal
+            UI -> UI: displayNoSpacesAlert()
+            Mentor -> UI: click ["Cambiar a Modalidad Virtual"]
+            UI -> UI: setModalityVirtual(capacity=20, meet=true)
         else Aulas físicas disponibles
-            UI --> Mentor: 4. Renderiza cuadrícula interactiva de aulas libres con capacidad y equipamiento
-            Mentor -> UI: 5. Selecciona aula física deseada y pulsa "Asignar Aula a la Oferta"
-            UI -> UI: Asigna aula_id al formulario de publicación
-            UI --> Mentor: 6. Actualiza etiqueta verde con "Aula reservada provisionalmente" y habilita avance
+            Mentor -> UI: selectSpace (selectedSpaceId)
+            Mentor -> UI: click ["Asignar Aula a la Oferta"]
+            UI -> UI: assignSpaceToForm(selectedSpaceId)
+            UI --> Mentor: displaySpaceAssignedConfirmation
         end
     end
 end
