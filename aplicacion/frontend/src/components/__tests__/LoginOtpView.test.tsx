@@ -3,7 +3,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { LoginOtpView } from '../LoginOtpView';
 import { authService } from '../../services/authService';
 
-describe('LoginOtpView Component (T-02 / CUS01 / RF01 / RNF01)', () => {
+describe('LoginOtpView Component', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     authService.cancelChallenge();
@@ -14,10 +14,11 @@ describe('LoginOtpView Component (T-02 / CUS01 / RF01 / RNF01)', () => {
     authService.cancelChallenge();
   });
 
-  it('1. Renderiza el paso 1 con advertencia de modo simulación y campo de correo', () => {
+  it('1. Renderiza el paso 1 con formulario limpio sin controles dev en experiencia normal', () => {
     render(<LoginOtpView />);
 
-    expect(screen.getByText(/Acceso de prueba — Simulación/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Dev Mock/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Escenarios de Prueba/i)).not.toBeInTheDocument();
     expect(screen.getByLabelText(/Correo Electrónico Institucional/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Continuar con Código OTP/i })).toBeInTheDocument();
   });
@@ -34,11 +35,11 @@ describe('LoginOtpView Component (T-02 / CUS01 / RF01 / RNF01)', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(/Solo se permiten correos institucionales con dominio @upt\.pe/i);
   });
 
-  it('3. Los atajos de prueba rápida precargan los correos seleccionados', () => {
-    render(<LoginOtpView />);
+  it('3. Los atajos de prueba rápida precargan los correos seleccionados cuando los controles dev están activos', () => {
+    render(<LoginOtpView showDevControls={true} />);
 
-    const joanBtn = screen.getByRole('button', { name: /Joan \(2022074255@upt\.pe\)/i });
-    fireEvent.click(joanBtn);
+    const studentBtn = screen.getByRole('button', { name: /Estudiante \(2022074255@upt\.pe\)/i });
+    fireEvent.click(studentBtn);
 
     const emailInput = screen.getByLabelText(/Correo Electrónico Institucional/i) as HTMLInputElement;
     expect(emailInput.value).toBe('2022074255@upt.pe');
@@ -77,8 +78,8 @@ describe('LoginOtpView Component (T-02 / CUS01 / RF01 / RNF01)', () => {
 
     // Transiciona a pantalla de confirmación (Paso 3)
     expect(screen.getByText(/Código OTP Verificado con Éxito/i)).toBeInTheDocument();
-    expect(screen.getByText(/Acceso de prueba — Simulación \(T-02\)/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Probar Otro Acceso \/ Reiniciar/i })).toBeInTheDocument();
+    expect(screen.getByText(/Sesión institucional confirmada/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Cerrar y volver a iniciar/i })).toBeInTheDocument();
   });
 
   it('5. Muestra error con OTP incorrecto', async () => {
@@ -143,7 +144,7 @@ describe('LoginOtpView Component (T-02 / CUS01 / RF01 / RNF01)', () => {
     expect(otpInput.value).toBe('012345');
   });
 
-  it('8. Botón "Probar Otro Acceso / Reiniciar" restablece el estado para nuevas pruebas', async () => {
+  it('8. Botón "Cerrar y volver a iniciar" restablece el estado para nuevos inicios', async () => {
     render(<LoginOtpView />);
 
     // Completar flujo hasta el final
@@ -164,7 +165,7 @@ describe('LoginOtpView Component (T-02 / CUS01 / RF01 / RNF01)', () => {
       await vi.advanceTimersByTimeAsync(300);
     });
 
-    const restartBtn = screen.getByRole('button', { name: /Probar Otro Acceso \/ Reiniciar/i });
+    const restartBtn = screen.getByRole('button', { name: /Cerrar y volver a iniciar/i });
     fireEvent.click(restartBtn);
 
     // Debe estar en paso 1 nuevamente

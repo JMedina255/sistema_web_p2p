@@ -54,43 +54,59 @@ export function parseJwt(token: string): { sub?: string; email?: string; roles?:
   }
 }
 
+// Inicialización o reconstrucción del usuario a partir del token JWT
+// eslint-disable-next-line react-refresh/only-export-components
+export function initUserFromToken(jwtToken: string | null): AuthUser | null {
+  if (!jwtToken) return null;
+  const payload = parseJwt(jwtToken);
+  if (!payload) return null;
+
+  const email = (payload.sub || payload.email || '').trim().toLowerCase();
+  if (!email || !email.includes('@')) return null;
+
+  const rawRoles: string[] =
+    Array.isArray(payload.roles) && payload.roles.length > 0
+      ? payload.roles
+      : payload.role
+      ? [payload.role]
+      : ['mentoreado'];
+
+  const roles: UserRole[] = rawRoles.map((r) => r.toLowerCase() as UserRole);
+  if (!roles.includes('mentoreado')) {
+    roles.push('mentoreado');
+  }
+
+  const codigo = email.split('@')[0];
+  return {
+    email,
+    roles,
+    codigo,
+  };
+}
+
+function resolveInitialRole(user: AuthUser | null): UserRole {
+  if (!user) return 'mentoreado';
+  const savedRole = (typeof window !== 'undefined' ? sessionStorage.getItem(ACTIVE_ROLE_KEY) : null) as UserRole | null;
+  if (savedRole && user.roles.includes(savedRole)) {
+    return savedRole;
+  }
+  if (user.roles.includes('administrador')) {
+    return 'administrador';
+  }
+  if (user.roles.includes('mentor')) {
+    return 'mentor';
+  }
+  return 'mentoreado';
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(() => authService.getToken());
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [activeRole, setActiveRole] = useState<UserRole>('mentoreado');
+  const initialToken = authService.getToken();
+  const initialUser = initUserFromToken(initialToken);
+  const [token, setToken] = useState<string | null>(initialToken);
+  const [user, setUser] = useState<AuthUser | null>(initialUser);
+  const [activeRole, setActiveRole] = useState<UserRole>(() => resolveInitialRole(initialUser));
   const [hasConsented, setHasConsentedState] = useState<boolean>(true);
   const [isCheckingConsent, setIsCheckingConsent] = useState<boolean>(false);
-
-  // Inicialización o reconstrucción del usuario a partir del token JWT
-  const initUserFromToken = useCallback((jwtToken: string | null): AuthUser | null => {
-    if (!jwtToken) return null;
-    const payload = parseJwt(jwtToken);
-    if (!payload) return null;
-
-    const email = (payload.sub || payload.email || '').trim().toLowerCase();
-    if (!email || !email.includes('@')) return null;
-
-    const rawRoles: string[] =
-      Array.isArray(payload.roles) && payload.roles.length > 0
-        ? payload.roles
-        : payload.role
-        ? [payload.role]
-        : email.startsWith('admin')
-        ? ['administrador', 'mentoreado']
-        : ['mentoreado'];
-
-    const roles: UserRole[] = rawRoles.map((r) => r.toLowerCase() as UserRole);
-    if (!roles.includes('mentoreado')) {
-      roles.push('mentoreado');
-    }
-
-    const codigo = email.split('@')[0];
-    return {
-      email,
-      roles,
-      codigo,
-    };
-  }, []);
 
   // Verificar consentimiento digital en base de datos (RN-02 / Ley 29733)
   const verifyConsent = useCallback(async (email: string) => {
@@ -129,7 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setActiveRole('mentoreado');
       setHasConsentedState(true);
     }
-  }, [token, initUserFromToken, verifyConsent]);
+  }, [token, verifyConsent]);
 
   const login = useCallback(
     async (data: VerifyOtpResponse) => {
@@ -137,16 +153,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         authService.saveToken(data.token);
         setToken(data.token);
       } else {
-        // En modo mock sin token, emitir token simulado con claims estándar
+        // En modo mock sin token, emitir token simulado con claims estándar institucional
+        const cleanEmail = data.email.trim().toLowerCase();
+        const isOfficialAdmin = cleanEmail === 'admin.epis@upt.pe';
+        const isOfficialMentor = ['mentor.avanzado@upt.pe', '2022073504@upt.pe'].includes(cleanEmail);
+        const mockRoles = isOfficialAdmin
+          ? ['administrador', 'mentoreado']
+          : isOfficialMentor
+          ? ['mentor', 'mentoreado']
+          : ['mentoreado'];
+
         const mockPayload = {
-          sub: data.email,
-          email: data.email,
-          roles: data.email.startsWith('admin')
-            ? ['administrador', 'mentoreado']
-            : data.email.startsWith('2022073504') || data.email.startsWith('mentor.')
-            ? ['mentor', 'mentoreado']
-            : ['mentoreado'],
-          role: data.email.startsWith('admin') ? 'administrador' : 'estudiante',
+          sub: cleanEmail,
+          email: cleanEmail,
+          roles: mockRoles,
+          role: isOfficialAdmin ? 'administrador' : isOfficialMentor ? 'mentor' : 'estudiante',
         };
         const mockJwt = `mock.${btoa(JSON.stringify(mockPayload))}.sig`;
         authService.saveToken(mockJwt);

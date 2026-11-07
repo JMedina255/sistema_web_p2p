@@ -253,13 +253,17 @@ def test_reserve_booking_with_verified_admin_role_permits_override():
 
 
 def test_reserve_booking_unauthenticated_different_student_rejected_403():
-    """Valida que un solicitante sin token no pueda reservar a nombre de otro estudiante usando student_email."""
+    """Valida que un solicitante sin token no pueda reservar a nombre de otro estudiante usando student_email (SEC-13 / SEC-14)."""
     res = client.post(
         "/api/v1/bookings/reserve?student_email=atacante@upt.pe",
         json={"id_sesion": 1, "estudiante_email": "victima2026@upt.pe"},
     )
-    assert res.status_code == 403
-    assert "No tiene autorización" in res.json()["detail"] or "no tiene permisos" in res.json()["detail"]
+    assert res.status_code in (401, 403)
+    assert (
+        "autenticación" in res.json()["detail"].lower()
+        or "autorización" in res.json()["detail"].lower()
+        or "permisos" in res.json()["detail"].lower()
+    )
 
 
 def test_confirm_attendance_admin_override_permitted():

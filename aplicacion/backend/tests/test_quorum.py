@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.core.security import create_access_token
 from app.db.session import Base
 from app.main import app
 from app.models.booking import ReservaCupo
@@ -21,6 +22,8 @@ from app.services.offer_service import (
 )
 
 client = TestClient(app)
+ADMIN_TOKEN = create_access_token({"sub": "admin.epis@upt.pe", "roles": ["administrador"]})
+AUTH_HEADERS = {"Authorization": f"Bearer {ADMIN_TOKEN}"}
 
 
 @pytest.fixture(autouse=True)
@@ -53,11 +56,16 @@ def test_quorum_t29_presencial_below_3_mutates_to_insuficiente_in_memory():
         [
             {"id_reserva": 1, "id_sesion": 501, "estudiante_email": "est1@upt.pe", "estado": "CONFIRMADA"},
             {"id_reserva": 2, "id_sesion": 501, "estudiante_email": "est2@upt.pe", "estado": "CONFIRMADA"},
-            {"id_reserva": 3, "id_sesion": 501, "estudiante_email": "est3@upt.pe", "estado": "PENDIENTE_CONFIRMACION"},
+            {
+                "id_reserva": 3,
+                "id_sesion": 501,
+                "estudiante_email": "est3@upt.pe",
+                "estado": "PENDIENTE_CONFIRMACION",
+            },
         ]
     )
 
-    res = client.post("/api/v1/quorum/evaluate?mode=sprint6", json={"id_sesion": 501})
+    res = client.post("/api/v1/quorum/evaluate?mode=sprint6", json={"id_sesion": 501}, headers=AUTH_HEADERS)
     assert res.status_code == 200
     data = res.json()
     assert data["cumple_quorum"] is False
@@ -86,10 +94,15 @@ def test_quorum_t29_presencial_at_least_3_confirms_session_in_memory():
     )
     for i in range(3):
         _memory_bookings.append(
-            {"id_reserva": 10 + i, "id_sesion": 502, "estudiante_email": f"est{i}@upt.pe", "estado": "CONFIRMADA"}
+            {
+                "id_reserva": 10 + i,
+                "id_sesion": 502,
+                "estudiante_email": f"est{i}@upt.pe",
+                "estado": "CONFIRMADA",
+            }
         )
 
-    res = client.post("/api/v1/quorum/evaluate?mode=sprint6", json={"id_sesion": 502})
+    res = client.post("/api/v1/quorum/evaluate?mode=sprint6", json={"id_sesion": 502}, headers=AUTH_HEADERS)
     assert res.status_code == 200
     data = res.json()
     assert data["cumple_quorum"] is True
@@ -114,16 +127,21 @@ def test_quorum_t30_idempotency_prevents_duplicate_evaluation_in_memory():
     )
     for i in range(3):
         _memory_bookings.append(
-            {"id_reserva": 20 + i, "id_sesion": 503, "estudiante_email": f"est{i}@upt.pe", "estado": "CONFIRMADA"}
+            {
+                "id_reserva": 20 + i,
+                "id_sesion": 503,
+                "estudiante_email": f"est{i}@upt.pe",
+                "estado": "CONFIRMADA",
+            }
         )
 
     # Primera evaluación
-    res1 = client.post("/api/v1/quorum/evaluate?mode=sprint6", json={"id_sesion": 503})
+    res1 = client.post("/api/v1/quorum/evaluate?mode=sprint6", json={"id_sesion": 503}, headers=AUTH_HEADERS)
     assert res1.status_code == 200
     assert res1.json()["estado_sesion"] == "CONFIRMADA"
 
     # Segunda evaluación (idempotente)
-    res2 = client.post("/api/v1/quorum/evaluate?mode=sprint6", json={"id_sesion": 503})
+    res2 = client.post("/api/v1/quorum/evaluate?mode=sprint6", json={"id_sesion": 503}, headers=AUTH_HEADERS)
     assert res2.status_code == 200
     data2 = res2.json()
     assert data2["estado_sesion"] == "CONFIRMADA"
@@ -151,7 +169,12 @@ def test_quorum_t29_evaluate_all_active_quorums():
     )
     for i in range(4):
         _memory_bookings.append(
-            {"id_reserva": 30 + i, "id_sesion": 601, "estudiante_email": f"e{i}@upt.pe", "estado": "CONFIRMADA"}
+            {
+                "id_reserva": 30 + i,
+                "id_sesion": 601,
+                "estudiante_email": f"e{i}@upt.pe",
+                "estado": "CONFIRMADA",
+            }
         )
 
     # Sesión 2: fuera de ventana (T-36h), no debe evaluarse
@@ -168,7 +191,7 @@ def test_quorum_t29_evaluate_all_active_quorums():
         }
     )
 
-    res = client.post("/api/v1/quorum/evaluate-all")
+    res = client.post("/api/v1/quorum/evaluate-all", headers=AUTH_HEADERS)
     assert res.status_code == 200
     data = res.json()
     assert len(data) == 1
@@ -207,8 +230,19 @@ def test_quorum_t29_and_t30_in_real_db_with_row_locking():
         db.add(s)
 
         # 1 reserva confirmada y 1 pendiente (quórum insuficiente)
-        db.add(ReservaCupo(id_sesion=701, codigo_reserva="R-701-1", estudiante_email="e1@upt.pe", estado="CONFIRMADA"))
-        db.add(ReservaCupo(id_sesion=701, codigo_reserva="R-701-2", estudiante_email="e2@upt.pe", estado="PENDIENTE_CONFIRMACION"))
+        db.add(
+            ReservaCupo(
+                id_sesion=701, codigo_reserva="R-701-1", estudiante_email="e1@upt.pe", estado="CONFIRMADA"
+            )
+        )
+        db.add(
+            ReservaCupo(
+                id_sesion=701,
+                codigo_reserva="R-701-2",
+                estudiante_email="e2@upt.pe",
+                estado="PENDIENTE_CONFIRMACION",
+            )
+        )
         db.commit()
 
         # Evaluación 1: pasa a QUORUM_INSUFICIENTE y marca quorumevaluated_at

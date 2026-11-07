@@ -14,11 +14,14 @@ import { HealthStatus } from './HealthStatus';
 
 export interface AdminDashboardViewProps {
   adminEmail?: string;
+  showDevControls?: boolean;
 }
 
 export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
-  adminEmail = 'admin.epis@upt.pe',
+  adminEmail = '',
+  showDevControls = false,
 }) => {
+  const isDev = showDevControls && !import.meta.env.PROD;
   const [activeTab, setActiveTab] = useState<'roles' | 'quorum' | 'health'>('roles');
 
   // Estado para gestión de roles
@@ -217,7 +220,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
           <div>
             <div style={{ marginBottom: '1.5rem' }}>
               <h3 style={{ margin: '0 0 0.5rem', color: '#1C2A59', fontSize: '1.1rem' }}>
-                Asignación y Validación de Mérito de Mentores (RN-03 / RF03)
+                Asignación y Validación de Mérito de Mentores
               </h3>
               <p style={{ margin: 0, color: '#64748B', fontSize: '0.85rem', lineHeight: 1.5 }}>
                 Conforme al reglamento de mentorías EPIS-UPT, solo los estudiantes con ciclo académico mayor o igual a
@@ -272,60 +275,62 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
             </div>
 
             {/* Accesos rápidos de prueba */}
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-              <span style={{ fontSize: '0.75rem', color: '#64748B', alignSelf: 'center' }}>Cuentas de prueba:</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchEmail('2022074255@upt.pe');
-                  handleSearchRoles('2022074255@upt.pe');
-                }}
-                style={{
-                  fontSize: '0.75rem',
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '4px',
-                  border: '1px solid #CBD5E1',
-                  background: '#F8FAFC',
-                  cursor: 'pointer',
-                }}
-              >
-                2022074255 (Joan - Ciclo 7)
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchEmail('2022073504@upt.pe');
-                  handleSearchRoles('2022073504@upt.pe');
-                }}
-                style={{
-                  fontSize: '0.75rem',
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '4px',
-                  border: '1px solid #CBD5E1',
-                  background: '#F8FAFC',
-                  cursor: 'pointer',
-                }}
-              >
-                2022073504 (Renzo - Ciclo 8 / Mentor)
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchEmail('2023079999@upt.pe');
-                  handleSearchRoles('2023079999@upt.pe');
-                }}
-                style={{
-                  fontSize: '0.75rem',
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '4px',
-                  border: '1px solid #CBD5E1',
-                  background: '#F8FAFC',
-                  cursor: 'pointer',
-                }}
-              >
-                2023079999 (Novato - Ciclo 2)
-              </button>
-            </div>
+            {isDev && (
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+                <span style={{ fontSize: '0.75rem', color: '#64748B', alignSelf: 'center' }}>Cuentas de prueba:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchEmail('2022074255@upt.pe');
+                    handleSearchRoles('2022074255@upt.pe');
+                  }}
+                  style={{
+                    fontSize: '0.75rem',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '4px',
+                    border: '1px solid #CBD5E1',
+                    background: '#F8FAFC',
+                    cursor: 'pointer',
+                  }}
+                >
+                  2022074255 (Estudiante - Ciclo 7)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchEmail('2022073504@upt.pe');
+                    handleSearchRoles('2022073504@upt.pe');
+                  }}
+                  style={{
+                    fontSize: '0.75rem',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '4px',
+                    border: '1px solid #CBD5E1',
+                    background: '#F8FAFC',
+                    cursor: 'pointer',
+                  }}
+                >
+                  2022073504 (Mentor - Ciclo 8)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchEmail('2023079999@upt.pe');
+                    handleSearchRoles('2023079999@upt.pe');
+                  }}
+                  style={{
+                    fontSize: '0.75rem',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '4px',
+                    border: '1px solid #CBD5E1',
+                    background: '#F8FAFC',
+                    cursor: 'pointer',
+                  }}
+                >
+                  2023079999 (Estudiante - Ciclo 2)
+                </button>
+              </div>
+            )}
 
             {/* Mensajes de retroalimentación */}
             {roleMessage && (
@@ -419,7 +424,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                         cursor: roleLoading ? 'not-allowed' : 'pointer',
                       }}
                     >
-                      ⭐ Promover a Mentor (Verificar Mérito RN-03)
+                      ⭐ Promover a Mentor (Verificar Mérito Académico)
                     </button>
                   ) : (
                     <button
@@ -452,7 +457,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <div>
                 <h3 style={{ margin: 0, color: '#1C2A59', fontSize: '1.1rem' }}>
-                  Supervisión de Quórum y Sesiones EPIS (RN-09)
+                  Supervisión de Quórum y Sesiones EPIS
                 </h3>
                 <p style={{ margin: '0.25rem 0 0', color: '#64748B', fontSize: '0.82rem' }}>
                   Una sesión alcanza quórum viable cuando sus reservas ratificadas son iguales o mayores al 50% de la

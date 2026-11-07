@@ -216,7 +216,6 @@ def test_quorum_decision_rejects_fake_admin_email_substring_403():
     assert "FORBIDDEN" in res.json()["detail"]
 
 
-
 def test_quorum_decision_in_real_database():
     """T-33: Transacciones atómicas de contingencia en base de datos real con rollback/commit."""
     engine = create_engine("sqlite:///:memory:")

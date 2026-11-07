@@ -92,7 +92,7 @@ export const CurriculumCatalogView: React.FC = () => {
 
   return (
     <div style={{ width: '100%', maxWidth: '1000px', margin: '0 auto' }}>
-      {/* Controles de Búsqueda y Filtro Avanzado (T-10) */}
+      {/* Controles de Búsqueda y Filtro */}
       <div
         style={{
           backgroundColor: '#FFFFFF',
@@ -110,7 +110,7 @@ export const CurriculumCatalogView: React.FC = () => {
               htmlFor="curriculum-search"
               style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#1C2A59', marginBottom: '0.35rem' }}
             >
-              🔍 Buscar por curso, código o tema silábico (T-10 / RF05):
+              🔍 Buscar por curso, código o tema silábico:
             </label>
             <input
               id="curriculum-search"
@@ -306,7 +306,7 @@ export const CurriculumCatalogView: React.FC = () => {
 
                     <div style={{ fontSize: '0.76rem', color: '#64748B', display: 'flex', justifyContent: 'space-between', marginTop: '0.4rem' }}>
                       <span>Créditos: <strong>{course.creditos}</strong></span>
-                      <span>Factor Top-k: <strong>{course.factor_ponderacion}x</strong></span>
+                      <span>Prioridad: <strong>{course.es_prioritaria ? 'Alta' : 'Estándar'}</strong></span>
                       <span>Temas: <strong>{totalTemas > 0 ? totalTemas : '4'}</strong></span>
                     </div>
                   </div>
@@ -319,7 +319,7 @@ export const CurriculumCatalogView: React.FC = () => {
         {/* Detalle de Asignatura y Temas Silábicos */}
         <div>
           <h3 style={{ fontSize: '1rem', color: '#1C2A59', margin: '0 0 0.85rem 0', fontWeight: 700 }}>
-            📖 Temario Silábico Oficial (CUS21)
+            📖 Temario Silábico Oficial
           </h3>
           {selectedCourseDetail ? (
             <div
@@ -339,7 +339,7 @@ export const CurriculumCatalogView: React.FC = () => {
                   {selectedCourseDetail.nombre_curso}
                 </h4>
                 <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748B' }}>
-                  Plan de Estudios EPIS-UPT • Ciclo {selectedCourseDetail.ciclo_plan} • {selectedCourseDetail.creditos} Créditos • Ponderador Top-k {selectedCourseDetail.factor_ponderacion}x
+                  Plan de Estudios EPIS-UPT • Ciclo {selectedCourseDetail.ciclo_plan} • {selectedCourseDetail.creditos} Créditos
                 </p>
               </div>
 

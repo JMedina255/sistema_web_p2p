@@ -73,7 +73,10 @@ def test_bitacora_t35_success_within_48h_in_memory():
     assert target["estado"] == "BITACORA_REGISTRADA"
 
     # Consultar endpoint GET
-    res_get = client.get("/api/v1/sessions/951/bitacora")
+    res_get = client.get(
+        "/api/v1/sessions/951/bitacora",
+        headers={"Authorization": f"Bearer {token}"},
+    )
     assert res_get.status_code == 200
     assert res_get.json()["hash_firma"] == data["hash_firma"]
 
@@ -204,7 +207,6 @@ def test_bitacora_rejects_fake_admin_email_substring_403():
     )
     assert res.status_code == 403
     assert "FORBIDDEN" in res.json()["detail"]
-
 
 
 def test_bitacora_t35_persistence_in_real_database():

@@ -17,6 +17,7 @@ export interface OfferPublishViewProps {
   mentorEmail?: string;
   mentorName?: string;
   onOfferPublished?: (response: PublishOfferResponse) => void;
+  showDevControls?: boolean;
 }
 
 // Fallback de asignaturas críticas si el backend o la red aún no están disponibles
@@ -126,8 +127,9 @@ function getDefaultStartDateTime(): string {
 
 export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
   mentorEmail = '2022074255@upt.pe',
-  mentorName = 'Joan Cristian Medina Quispe',
+  mentorName = 'Mentor Académico',
   onOfferPublished,
+  showDevControls = false,
 }) => {
   // Datos del catálogo
   const [courses, setCourses] = useState<Course[]>(FALLBACK_COURSES);
@@ -317,49 +319,50 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
 
   return (
     <div style={{ width: '100%', maxWidth: '920px', margin: '0 auto' }}>
-      {/* Banner de Aviso de Modo Simulado / Backend Pendiente */}
-      <div
-        role="status"
-        aria-label="Aviso de Modo de Prueba"
-        style={{
-          backgroundColor: '#EFF6FF',
-          border: '1px solid #BFDBFE',
-          borderRadius: '10px',
-          padding: '0.85rem 1.25rem',
-          marginBottom: '1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '0.75rem',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          <span style={{ fontSize: '1.25rem' }}>ℹ️</span>
-          <div>
-            <strong style={{ color: '#1E40AF', fontSize: '0.85rem', display: 'block' }}>
-              Modo de prueba local — Backend pendiente
-            </strong>
-            <span style={{ color: '#3B82F6', fontSize: '0.78rem' }}>
-              La interfaz y las validaciones de negocio (RN-04 / RN-05) operan mediante adaptador local en espera de la
-              API de Renzo (T-15 / T-16).
-            </span>
-          </div>
-        </div>
-        <span
+      {/* Banner de Aviso de Modo Simulado (Solo en modo desarrollo explícito) */}
+      {showDevControls && !import.meta.env.PROD && (
+        <div
+          role="status"
+          aria-label="Aviso de Modo de Prueba"
           style={{
-            backgroundColor: '#DBEAFE',
-            color: '#1E40AF',
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            padding: '0.25rem 0.6rem',
-            borderRadius: '9999px',
-            border: '1px solid #93C5FD',
+            backgroundColor: '#EFF6FF',
+            border: '1px solid #BFDBFE',
+            borderRadius: '10px',
+            padding: '0.85rem 1.25rem',
+            marginBottom: '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
           }}
         >
-          T-14 · Joan (Frontend)
-        </span>
-      </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <span style={{ fontSize: '1.25rem' }}>ℹ️</span>
+            <div>
+              <strong style={{ color: '#1E40AF', fontSize: '0.85rem', display: 'block' }}>
+                Modo de prueba local
+              </strong>
+              <span style={{ color: '#3B82F6', fontSize: '0.78rem' }}>
+                La interfaz y las validaciones de publicación operan en entorno local de pruebas.
+              </span>
+            </div>
+          </div>
+          <span
+            style={{
+              backgroundColor: '#DBEAFE',
+              color: '#1E40AF',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '0.25rem 0.6rem',
+              borderRadius: '9999px',
+              border: '1px solid #93C5FD',
+            }}
+          >
+            Entorno de pruebas
+          </span>
+        </div>
+      )}
 
       {/* Tarjeta del Formulario Principal */}
       <div
@@ -400,18 +403,6 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
               >
                 🎓 Rol: Mentor Académico
               </span>
-              <span
-                style={{
-                  backgroundColor: '#E0E7FF',
-                  color: '#3730A3',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  padding: '0.2rem 0.55rem',
-                  borderRadius: '6px',
-                }}
-              >
-                CUS06 / RF08
-              </span>
             </div>
             <h3 style={{ margin: '0 0 0.25rem 0', color: '#1C2A59', fontSize: '1.35rem', fontWeight: 800 }}>
               Publicar Nueva Oferta de Mentoría
@@ -435,7 +426,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
           >
             <div>
               Antelación mín:{' '}
-              <strong style={{ color: '#1C2A59' }}>&gt; 24 h (RN-04)</strong>
+              <strong style={{ color: '#1C2A59' }}>&gt; 24 h</strong>
             </div>
             <div>
               Recomendada:{' '}
@@ -500,7 +491,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
                 <strong>{publishedSuccess.offer.nombre_asignatura}</strong>: {publishedSuccess.offer.nombre_tema}
               </div>
               <div>
-                <span style={{ color: '#6B7280', display: 'block', fontSize: '0.75rem' }}>Modalidad & Aforo (RN-05)</span>
+                <span style={{ color: '#6B7280', display: 'block', fontSize: '0.75rem' }}>Modalidad & Aforo</span>
                 <span style={{ textTransform: 'capitalize' }}>{publishedSuccess.offer.modalidad}</span> ·{' '}
                 <strong>{publishedSuccess.aforo} estudiantes</strong>
               </div>
@@ -601,7 +592,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
                 ))}
               </select>
               <span style={{ fontSize: '0.73rem', color: '#64748B', display: 'block', marginTop: '0.25rem' }}>
-                Cursos filtro prioritarios de I a IV ciclo (CUS21).
+                Cursos prioritarios de I a IV ciclo.
               </span>
             </div>
 
@@ -723,7 +714,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
                   htmlFor="input-capacity"
                   style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#1E293B', marginBottom: '0.45rem' }}
                 >
-                  4. Aforo Reglamentario Inmutable (RN-05) 🔒
+                  4. Aforo Reglamentario Inmutable 🔒
                 </label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <input
@@ -752,8 +743,8 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
                     }}
                   >
                     {modality === 'presencial'
-                      ? 'Límite fijo de 10 participantes para sesiones presenciales (RN-05).'
-                      : 'Límite fijo de 20 participantes para sesiones virtuales (RN-05).'}
+                      ? 'Límite institucional de 10 participantes para sesiones presenciales.'
+                      : 'Límite institucional de 20 participantes para sesiones virtuales.'}
                   </span>
                 </div>
               </div>
@@ -814,8 +805,8 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
                       lineHeight: 1.35,
                     }}
                   >
-                    <strong>⚠️ Infracción de RN-04:</strong> Antelación insuficiente ({hoursAdvance.toFixed(1)} h). Toda
-                    mentoría debe publicarse con más de 24 horas previas para garantizar el quórum.
+                    <strong>⚠️ Antelación insuficiente ({hoursAdvance.toFixed(1)} h):</strong> Toda
+                    mentoría debe publicarse con más de 24 horas de anticipación para garantizar la convocatoria.
                   </div>
                 ) : hoursAdvance < 48 ? (
                   <div
@@ -900,7 +891,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
                 htmlFor="input-space"
                 style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1E293B' }}
               >
-                7. Asignación de Infraestructura ({modality === 'presencial' ? 'Aula / Laboratorio RN-06' : 'Enlace Virtual RN-07'}) *
+                7. Asignación de Infraestructura ({modality === 'presencial' ? 'Aula / Laboratorio' : 'Enlace Virtual'}) *
               </label>
               <span
                 style={{
@@ -912,7 +903,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
                   borderRadius: '4px',
                 }}
               >
-                {modality === 'presencial' ? 'RN-06: Verificación de Aulas Libres' : 'RN-07: Aprovisionamiento Virtual'}
+                {modality === 'presencial' ? 'Aula / Laboratorio' : 'Aprovisionamiento Virtual'}
               </span>
             </div>
 
@@ -1078,7 +1069,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
               Mis Ofertas de Mentoría Publicadas
             </h4>
             <span style={{ fontSize: '0.78rem', color: '#64748B' }}>
-              Sesiones activas registradas por el mentor {mentorName} en este entorno de desarrollo.
+              Sesiones activas registradas por el mentor {mentorName}.
             </span>
           </div>
           <span
@@ -1107,7 +1098,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
               fontSize: '0.84rem',
             }}
           >
-            Aún no has publicado ofertas de mentoría en esta sesión de desarrollo. Completa el formulario superior para
+            Aún no has publicado ofertas de mentoría. Completa el formulario superior para
             publicar tu primera clase grupal.
           </div>
         ) : (
@@ -1155,7 +1146,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
                         textTransform: 'capitalize',
                       }}
                     >
-                      {item.offer.modalidad} · {item.aforo} cupos (RN-05)
+                      {item.offer.modalidad} · {item.aforo} cupos
                     </span>
                   </div>
                   <div style={{ color: '#475569', fontSize: '0.8rem' }}>

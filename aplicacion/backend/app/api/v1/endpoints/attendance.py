@@ -32,10 +32,7 @@ def get_attendance_token(
     Genera un token criptográfico dinámico rotatorio cada 30 segundos para la proyección del código QR
     y un código numérico de 6 dígitos por el mentor titular.
     """
-    caller_email = None
-    is_admin = False
-    if authorization:
-        caller_email, is_admin = _extract_caller_and_admin_status(authorization)
+    caller_email, is_admin = _extract_caller_and_admin_status(authorization)
 
     return AttendanceService.generate_token(
         db=db,
@@ -65,11 +62,9 @@ def record_attendance_checkin(
     - Valida token dinámico TOTP o código numérico.
     - Captura traza de auditoría con IP de origen.
     """
-    caller_email = None
-    if authorization:
-        caller_email = _resolve_authenticated_email(
-            authorization, explicit_email=None, allow_admin_override=True
-        )
+    caller_email = _resolve_authenticated_email(
+        authorization, explicit_email=payload.estudiante_email, allow_admin_override=True
+    )
 
     client_ip = request.client.host if request.client else "127.0.0.1"
 
@@ -90,11 +85,13 @@ def record_attendance_checkin(
 )
 def get_session_attendance(
     id_sesion: int,
+    authorization: str | None = Header(None),
     db: Session | None = Depends(get_optional_session),
 ) -> list[AttendanceItemResponse]:
     """
     Retorna la lista de asistencia de los estudiantes inscritos en la sesión de mentoría.
     """
+    _extract_caller_and_admin_status(authorization)
     return AttendanceService.get_roster(
         db=db,
         session_id=id_sesion,

@@ -109,7 +109,10 @@ def test_attendance_t36_checkin_success_with_confirmed_reservation():
     assert data["asistio"] is True
 
     # 3. Comprobar que en la nómina de asistencia figura presente
-    roster_res = client.get("/api/v1/sessions/1102/attendance")
+    roster_res = client.get(
+        "/api/v1/sessions/1102/attendance",
+        headers={"Authorization": f"Bearer {mentor_token}"},
+    )
     assert roster_res.status_code == 200
     roster = roster_res.json()
     assert len(roster) == 1
@@ -332,4 +335,3 @@ def test_attendance_t36_persistence_in_real_database():
     finally:
         db.close()
         engine.dispose()
-

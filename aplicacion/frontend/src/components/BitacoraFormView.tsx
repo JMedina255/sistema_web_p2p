@@ -166,14 +166,14 @@ export const BitacoraFormView: React.FC<BitacoraFormViewProps> = ({
             marginBottom: '0.5rem',
           }}
         >
-          Registro Pedagógico Oficial · RF17 / CUS13
+          Registro Pedagógico Oficial
         </span>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>
           📝 Bitácora Pedagógica de Mentoría
         </h2>
         <p style={{ margin: 0, fontSize: '0.88rem', opacity: 0.9 }}>
           Asignatura: <strong>{subjectName}</strong> — {sessionTitle}. Registro formal de tópicos explicados,
-          dificultades observadas y acreditación de horas académicas con firma digital SHA-256 (RN-12).
+          dificultades observadas y acreditación de horas académicas con firma digital SHA-256.
         </p>
       </div>
 
@@ -196,7 +196,7 @@ export const BitacoraFormView: React.FC<BitacoraFormViewProps> = ({
           <span style={{ fontSize: '2rem' }}>⛔</span>
           <div>
             <h3 style={{ margin: '0 0 0.35rem 0', fontSize: '1.1rem', fontWeight: 800 }}>
-              Formulario Bloqueado: Plazo Ordinario de 48 Horas Expirado (RN-12)
+              Formulario Bloqueado: Plazo Ordinario de 48 Horas Expirado
             </h3>
             <p style={{ margin: 0, fontSize: '0.85rem', lineHeight: 1.5 }}>
               Han transcurrido más de 48 horas desde la finalización de esta sesión. Conforme al reglamento de mentorías

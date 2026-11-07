@@ -282,8 +282,6 @@ class AuthService:
         from app.services.role_service import RoleService
 
         user_roles = RoleService.get_user_roles(db, email)
-        if (email.startswith("admin") or email == "admin.epis@upt.pe") and "administrador" not in user_roles:
-            user_roles.append("administrador")
         if "mentoreado" not in user_roles:
             user_roles.insert(0, "mentoreado")
 

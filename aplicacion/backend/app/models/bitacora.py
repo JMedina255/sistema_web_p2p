@@ -21,7 +21,11 @@ class BitacoraPedagogica(Base):
 
     id_bitacora: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_sesion: Mapped[int] = mapped_column(
-        Integer, ForeignKey("sesiones_mentoria.id_sesion", ondelete="CASCADE"), nullable=False, unique=True, index=True
+        Integer,
+        ForeignKey("sesiones_mentoria.id_sesion", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+        index=True,
     )
     id_mentor: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     temas_cubiertos: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)

@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, Header, status
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.v1.endpoints.profiles import _extract_caller_and_admin_status
+from app.core.dependencies import get_current_user
 from app.db.session import get_optional_session
 from app.schemas.bitacora import BitacoraCreatePayload, BitacoraResponse
 from app.services.bitacora_service import BitacoraService
@@ -28,17 +28,19 @@ def create_session_bitacora(
     - Observaciones pedagógicas sustantivas (>= 50 caracteres).
     - Cómputo de horas provisionales: duracion_minutos / 60.0.
     """
-    caller_email = None
-    is_admin = False
-    if authorization:
-        caller_email, is_admin = _extract_caller_and_admin_status(authorization)
+    user = get_current_user(authorization)
+    if not user.is_mentor and not user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="FORBIDDEN: Solo el mentor titular o un administrador pueden registrar la bitácora pedagógica.",
+        )
 
     return BitacoraService.create_bitacora(
         db=db,
         session_id=id_sesion,
         payload=payload,
-        caller_email=caller_email,
-        is_admin=is_admin,
+        caller_email=user.email,
+        is_admin=user.is_admin,
     )
 
 
@@ -50,11 +52,13 @@ def create_session_bitacora(
 )
 def get_session_bitacora(
     id_sesion: int,
+    authorization: str | None = Header(None),
     db: Session | None = Depends(get_optional_session),
 ) -> BitacoraResponse:
     """
     Retorna la bitácora pedagógica registrada y firmada digitalmente para una sesión de mentoría.
     """
+    get_current_user(authorization)
     return BitacoraService.get_bitacora(
         db=db,
         session_id=id_sesion,

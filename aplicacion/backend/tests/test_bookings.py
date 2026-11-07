@@ -30,6 +30,24 @@ from app.services.offer_service import (
 
 client = TestClient(app)
 
+_orig_post = client.post
+
+
+def auto_auth_post(url, *args, **kwargs):
+    headers = kwargs.get("headers")
+    if headers is None:
+        json_data = kwargs.get("json")
+        if isinstance(json_data, dict) and "estudiante_email" in json_data:
+            tok = create_access_token({"sub": json_data["estudiante_email"], "roles": ["mentoreado"]})
+            kwargs["headers"] = {"Authorization": f"Bearer {tok}"}
+        elif "/quorum/" in url:
+            tok = create_access_token({"sub": "admin.epis@upt.pe", "roles": ["administrador"]})
+            kwargs["headers"] = {"Authorization": f"Bearer {tok}"}
+    return _orig_post(url, *args, **kwargs)
+
+
+client.post = auto_auth_post
+
 
 @pytest.fixture(autouse=True)
 def setup_teardown_bookings():

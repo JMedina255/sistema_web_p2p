@@ -7,6 +7,7 @@ export interface ConsentModalViewProps {
   onConsentAccepted?: (consentedAt: string) => void;
   onConsentRejected?: () => void;
   isModal?: boolean;
+  showDevControls?: boolean;
 }
 
 export const ConsentModalView: React.FC<ConsentModalViewProps> = ({
@@ -14,6 +15,7 @@ export const ConsentModalView: React.FC<ConsentModalViewProps> = ({
   onConsentAccepted,
   onConsentRejected,
   isModal = false,
+  showDevControls = false,
 }) => {
   const [email, setEmail] = useState<string>(userEmail);
   const [status, setStatus] = useState<ConsentStatus | null>(null);
@@ -92,7 +94,7 @@ export const ConsentModalView: React.FC<ConsentModalViewProps> = ({
       setStatus(s);
       setIsChecked(false);
       setMessage({
-        text: 'Has rechazado el tratamiento de datos. El acceso a la plataforma ha sido bloqueado preventivamente (RN-02).',
+        text: 'Has rechazado el tratamiento de datos. El acceso a la plataforma ha sido suspendido preventivamente conforme a la política de privacidad.',
         type: 'info',
       });
       if (onConsentRejected) {
@@ -155,7 +157,7 @@ export const ConsentModalView: React.FC<ConsentModalViewProps> = ({
               Consentimiento Informado Digital
             </h2>
             <p style={{ margin: 0, fontSize: '0.75rem', color: '#CBD5E1' }}>
-              Protección de Datos Personales · Ley N° 29733 (RF02 / CUS01 / RN-02)
+              Protección de Datos Personales · Ley N° 29733
             </p>
           </div>
         </div>
@@ -175,7 +177,7 @@ export const ConsentModalView: React.FC<ConsentModalViewProps> = ({
       </div>
 
       <div style={{ padding: '1.75rem' }}>
-        {/* Selector de correo para simulación en dev */}
+        {/* Identificación de usuario institucional */}
         <div
           style={{
             display: 'flex',
@@ -190,41 +192,43 @@ export const ConsentModalView: React.FC<ConsentModalViewProps> = ({
           }}
         >
           <div>
-            <span style={{ color: '#64748B' }}>Usuario evaluado: </span>
+            <span style={{ color: '#64748B' }}>Usuario institucional: </span>
             <strong style={{ color: '#1C2A59' }}>{email}</strong>
           </div>
-          <div style={{ display: 'flex', gap: '0.35rem' }}>
-            <button
-              type="button"
-              onClick={() => setEmail('2022074255@upt.pe')}
-              style={{
-                fontSize: '0.7rem',
-                padding: '0.2rem 0.5rem',
-                borderRadius: '4px',
-                border: '1px solid #CBD5E1',
-                background: email === '2022074255@upt.pe' ? '#1C2A59' : '#FFFFFF',
-                color: email === '2022074255@upt.pe' ? '#FFFFFF' : '#334155',
-                cursor: 'pointer',
-              }}
-            >
-              Joan (2022074255)
-            </button>
-            <button
-              type="button"
-              onClick={() => setEmail('2022073504@upt.pe')}
-              style={{
-                fontSize: '0.7rem',
-                padding: '0.2rem 0.5rem',
-                borderRadius: '4px',
-                border: '1px solid #CBD5E1',
-                background: email === '2022073504@upt.pe' ? '#1C2A59' : '#FFFFFF',
-                color: email === '2022073504@upt.pe' ? '#FFFFFF' : '#334155',
-                cursor: 'pointer',
-              }}
-            >
-              Renzo (2022073504)
-            </button>
-          </div>
+          {showDevControls && !import.meta.env.PROD && (
+            <div style={{ display: 'flex', gap: '0.35rem' }}>
+              <button
+                type="button"
+                onClick={() => setEmail('2022074255@upt.pe')}
+                style={{
+                  fontSize: '0.7rem',
+                  padding: '0.2rem 0.5rem',
+                  borderRadius: '4px',
+                  border: '1px solid #CBD5E1',
+                  background: email === '2022074255@upt.pe' ? '#1C2A59' : '#FFFFFF',
+                  color: email === '2022074255@upt.pe' ? '#FFFFFF' : '#334155',
+                  cursor: 'pointer',
+                }}
+              >
+                Estudiante (2022074255)
+              </button>
+              <button
+                type="button"
+                onClick={() => setEmail('2022073504@upt.pe')}
+                style={{
+                  fontSize: '0.7rem',
+                  padding: '0.2rem 0.5rem',
+                  borderRadius: '4px',
+                  border: '1px solid #CBD5E1',
+                  background: email === '2022073504@upt.pe' ? '#1C2A59' : '#FFFFFF',
+                  color: email === '2022073504@upt.pe' ? '#FFFFFF' : '#334155',
+                  cursor: 'pointer',
+                }}
+              >
+                Mentor (2022073504)
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Texto normativo institucional de la Ley 29733 */}
@@ -367,7 +371,7 @@ export const ConsentModalView: React.FC<ConsentModalViewProps> = ({
               transition: 'background 0.2s',
             }}
           >
-            🚫 Rechazar y Salir (RN-02)
+            🚫 Rechazar y Salir
           </button>
 
           <button

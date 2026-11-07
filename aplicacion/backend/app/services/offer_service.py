@@ -102,6 +102,83 @@ def seed_default_offers_in_memory() -> None:
                 "estado": "PUBLICADA",
                 "created_at": now.isoformat(),
             },
+            # Escenarios de Demostración Oficiales (DEMO-01 a DEMO-05)
+            {
+                "id_sesion": 101,
+                "codigo_sesion": "SES-DEMO-PUB01",
+                "mentor_email": "mentor.demo@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites Notables y Asíntotas",
+                "fecha_inicio": (now + timedelta(days=3)).isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Aula 201 - Pabellón EPIS",
+                "mentor_nombre": "Mentor Demostrativo Acreditado",
+                "notas_adicionales": "Sesión modelo de demostración institucional de límites de Cálculo I.",
+                "estado": "PUBLICADA",
+                "created_at": now.isoformat(),
+            },
+            {
+                "id_sesion": 102,
+                "codigo_sesion": "SES-DEMO-Q01",
+                "mentor_email": "mentor.demo@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites Notables y Asíntotas",
+                "fecha_inicio": (now + timedelta(hours=10)).isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Lab 101 - EPIS",
+                "mentor_nombre": "Mentor Demostrativo Acreditado",
+                "notas_adicionales": "Sesión modelo en contingencia por quórum insuficiente a T-24h.",
+                "estado": "QUORUM_INSUFICIENTE",
+                "created_at": now.isoformat(),
+            },
+            {
+                "id_sesion": 103,
+                "codigo_sesion": "SES-DEMO-ASIS01",
+                "mentor_email": "mentor.demo@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites Notables y Asíntotas",
+                "fecha_inicio": (now - timedelta(minutes=15)).isoformat(),
+                "duracion_minutos": 60,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Lab 102 - EPIS",
+                "mentor_nombre": "Mentor Demostrativo Acreditado",
+                "notas_adicionales": "Sesión modelo en curso lista para pase de lista con QR TOTP.",
+                "estado": "CONFIRMADA",
+                "created_at": now.isoformat(),
+            },
+            {
+                "id_sesion": 104,
+                "codigo_sesion": "SES-DEMO-BIT01",
+                "mentor_email": "mentor.demo@upt.pe",
+                "id_asignatura": 1,
+                "codigo_asignatura": "CALC-101",
+                "nombre_asignatura": "Cálculo I",
+                "id_tema": 1,
+                "nombre_tema": "Límites Notables y Asíntotas",
+                "fecha_inicio": (now - timedelta(hours=3)).isoformat(),
+                "duracion_minutos": 90,
+                "modalidad": "presencial",
+                "aforo_maximo": 10,
+                "espacio_asignado": "Lab 103 - EPIS",
+                "mentor_nombre": "Mentor Demostrativo Acreditado",
+                "notas_adicionales": "Sesión modelo concluida (< 48h) lista para suscripción de bitácora pedagógica.",
+                "estado": "CONCLUIDA",
+                "created_at": now.isoformat(),
+            },
         ]
     )
 
@@ -190,6 +267,7 @@ class OfferService:
         db: Session | None,
         payload: PublishOfferPayload,
         caller_email: str | None = None,
+        is_admin: bool = False,
     ) -> PublishOfferResponse:
         """
         Publica una oferta de mentoría académica aplicando RN-03, RN-04 y RN-05.
@@ -197,13 +275,11 @@ class OfferService:
         global _session_counter
         # 1. Resolver y validar identidad
         effective_email = payload.mentor_email.strip().lower()
-        if caller_email and caller_email.strip().lower() != effective_email:
-            # Solo administradores pueden publicar a nombre de otro
-            if "admin" not in caller_email:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="No tiene autorización para publicar ofertas en nombre de otro usuario.",
-                )
+        if caller_email is not None and caller_email.strip().lower() != effective_email and not is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tiene autorización para publicar ofertas en nombre de otro usuario.",
+            )
 
         # 2. Validar mérito académico RN-03
         cls.validate_mentor_eligibility(db, effective_email)
@@ -327,7 +403,7 @@ class OfferService:
                     query = query.filter(SesionMentoria.modalidad == modalidad)
                 if estado:
                     query = query.filter(SesionMentoria.estado == estado)
-                else:
+                elif not mentor_email:
                     query = query.filter(SesionMentoria.estado == "PUBLICADA")
 
                 rows = query.order_by(SesionMentoria.fecha_inicio.asc()).all()
@@ -378,7 +454,7 @@ class OfferService:
             filtered = [o for o in filtered if o["modalidad"] == modalidad]
         if estado:
             filtered = [o for o in filtered if o["estado"] == estado]
-        else:
+        elif not mentor_email:
             filtered = [o for o in filtered if o["estado"] == "PUBLICADA"]
 
         for o in filtered:
@@ -440,33 +516,37 @@ class OfferService:
                 )
 
             # Control de titularidad y autorización (RNF02)
-            if caller_email:
-                clean_caller = caller_email.strip().lower()
-                clean_mentor = sesion.mentor_email.strip().lower()
-                if clean_caller != clean_mentor:
-                    has_admin_role = is_admin
-                    if not has_admin_role:
-                        try:
-                            admin_rol = db.query(Rol).filter(Rol.nombre_rol == "administrador").first()
-                            if admin_rol:
-                                has_admin = (
-                                    db.query(UsuarioRol)
-                                    .filter(
-                                        UsuarioRol.email == clean_caller,
-                                        UsuarioRol.id_rol == admin_rol.id_rol,
-                                        UsuarioRol.activo.is_(True),
-                                    )
-                                    .first()
+            if not caller_email:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Se requiere autenticación para resolver la contingencia de quórum.",
+                )
+            clean_caller = caller_email.strip().lower()
+            clean_mentor = sesion.mentor_email.strip().lower()
+            if clean_caller != clean_mentor:
+                has_admin_role = is_admin
+                if not has_admin_role:
+                    try:
+                        admin_rol = db.query(Rol).filter(Rol.nombre_rol == "administrador").first()
+                        if admin_rol:
+                            has_admin = (
+                                db.query(UsuarioRol)
+                                .filter(
+                                    UsuarioRol.email == clean_caller,
+                                    UsuarioRol.id_rol == admin_rol.id_rol,
+                                    UsuarioRol.activo.is_(True),
                                 )
-                                if has_admin:
-                                    has_admin_role = True
-                        except Exception:
-                            pass
-                    if not has_admin_role:
-                        raise HTTPException(
-                            status_code=status.HTTP_403_FORBIDDEN,
-                            detail="FORBIDDEN: Solo el mentor titular o un administrador pueden resolver la contingencia de quórum.",
-                        )
+                                .first()
+                            )
+                            if has_admin:
+                                has_admin_role = True
+                    except Exception:
+                        pass
+                if not has_admin_role:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="FORBIDDEN: Solo el mentor titular o un administrador pueden resolver la contingencia de quórum.",
+                    )
 
             if sesion.estado not in ("QUORUM_INSUFICIENTE", "PUBLICADA", "PENDIENTE_CONFIRMACION"):
                 raise HTTPException(
@@ -570,14 +650,19 @@ class OfferService:
                 detail="NOT_FOUND: La sesión de mentoría especificada no existe.",
             )
 
-        if caller_email:
-            clean_caller = caller_email.strip().lower()
-            clean_mentor = target["mentor_email"].strip().lower()
-            if not is_admin and clean_caller != clean_mentor:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="FORBIDDEN: Solo el mentor titular o un administrador pueden resolver la contingencia de quórum.",
-                )
+        if not caller_email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Se requiere autenticación para resolver la contingencia de quórum.",
+            )
+
+        clean_caller = caller_email.strip().lower()
+        clean_mentor = target["mentor_email"].strip().lower()
+        if not is_admin and clean_caller != clean_mentor:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="FORBIDDEN: Solo el mentor titular o un administrador pueden resolver la contingencia de quórum.",
+            )
 
         if payload.decision == "PROCEED":
             target["estado"] = "CONFIRMADA"
@@ -640,7 +725,9 @@ class OfferService:
                         "estado"
                     ] in ["PENDIENTE_CONFIRMACION", "CONFIRMADA"]:
                         b["estado"] = "CANCELADA_SISTEMA_QUORUM"
-                        b["motivo_cancelacion"] = f"Cancelación por quórum insuficiente: {payload.reason.strip()}"
+                        b["motivo_cancelacion"] = (
+                            f"Cancelación por quórum insuficiente: {payload.reason.strip()}"
+                        )
 
             return QuorumDecisionResponse(
                 id_sesion=id_sesion,
@@ -654,4 +741,3 @@ class OfferService:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="INVALID_DECISION: La decisión debe ser 'PROCEED', 'RESCHEDULE' o 'CANCEL'.",
         )
-

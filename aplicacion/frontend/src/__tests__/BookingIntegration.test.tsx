@@ -28,7 +28,7 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
     render(<App />);
 
     const recTab = screen.getByRole('button', {
-      name: /Recomendaciones & Reservas/i,
+      name: /^🎯 Explorar mentorías$/i,
     });
     expect(recTab).toBeInTheDocument();
 
@@ -37,11 +37,11 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
     await waitFor(() => {
       expect(
         screen.getByRole('heading', {
-          name: /Cartelera Top-k Explicable y Reserva Transaccional/i,
+          name: /Mentorías Recomendadas y Reserva de Sesiones/i,
         })
       ).toBeInTheDocument();
       expect(
-        screen.getByText(/Inferencia adaptativa EdRecSys con explicabilidad transparente/i)
+        screen.getByText(/Encuentra sesiones de mentoría afines a tus asignaturas y reserva tu vacante/i)
       ).toBeInTheDocument();
     });
 
@@ -55,7 +55,7 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
     render(<App />);
 
     // Navegar a recomendaciones
-    fireEvent.click(screen.getByRole('button', { name: /Recomendaciones & Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^🎯 Explorar mentorías$/i }));
 
     // Esperar a que aparezcan los botones de reservar
     const reserveButtons = await screen.findAllByRole('button', {
@@ -72,7 +72,7 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
       expect(
         screen.getByRole('heading', { name: /Confirmar Reserva de Cupo/i })
       ).toBeInTheDocument();
-      expect(screen.getByText(/Módulo MOD-05: Quórum y Reservas \(CUS04 \/ RF12\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/Reserva de Cupo de Mentoría/i)).toBeInTheDocument();
       expect(screen.getByText(studentEmail)).toBeInTheDocument();
     });
   });
@@ -81,7 +81,7 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
     const reserveSpy = vi.spyOn(bookingService, 'reserveSeat');
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Recomendaciones & Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^🎯 Explorar mentorías$/i }));
 
     const reserveButtons = await screen.findAllByRole('button', { name: /Reservar Cupo/i });
     fireEvent.click(reserveButtons[0]);
@@ -134,7 +134,7 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
     );
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Recomendaciones & Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^🎯 Explorar mentorías$/i }));
 
     const reserveButtons = await screen.findAllByRole('button', { name: /Reservar Cupo/i });
     fireEvent.click(reserveButtons[0]);
@@ -166,7 +166,7 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
     );
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Recomendaciones & Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^🎯 Explorar mentorías$/i }));
 
     const reserveButtons = await screen.findAllByRole('button', { name: /Reservar Cupo/i });
     fireEvent.click(reserveButtons[0]);
@@ -198,7 +198,7 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
     );
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Recomendaciones & Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^🎯 Explorar mentorías$/i }));
 
     const reserveButtons = await screen.findAllByRole('button', { name: /Reservar Cupo/i });
     fireEvent.click(reserveButtons[0]);
@@ -230,7 +230,7 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
     );
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Recomendaciones & Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^🎯 Explorar mentorías$/i }));
 
     const reserveButtons = await screen.findAllByRole('button', { name: /Reservar Cupo/i });
     fireEvent.click(reserveButtons[0]);
@@ -262,7 +262,7 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
     );
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Recomendaciones & Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^🎯 Explorar mentorías$/i }));
 
     const reserveButtons = await screen.findAllByRole('button', { name: /Reservar Cupo/i });
     fireEvent.click(reserveButtons[0]);
@@ -293,7 +293,7 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
     const reserveSpy = vi.spyOn(bookingService, 'reserveSeat');
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Recomendaciones & Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^🎯 Explorar mentorías$/i }));
 
     const reserveButtons = await screen.findAllByRole('button', { name: /Reservar Cupo/i });
     fireEvent.click(reserveButtons[0]);
@@ -364,7 +364,7 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
     });
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Recomendaciones & Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^🎯 Explorar mentorías$/i }));
 
     const reserveButtons = await screen.findAllByRole('button', { name: /Reservar Cupo/i });
     fireEvent.click(reserveButtons[0]);
@@ -390,21 +390,30 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
 
   it('11. Bloquea el flujo de reserva e induce autenticación si no existe sesión institucional activa (Auditoría B.2)', async () => {
     authService.clearToken();
-    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    window.history.pushState({}, '', '?tab=recommendations');
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Recomendaciones & Reservas/i }));
 
-    const reserveButtons = await screen.findAllByRole('button', { name: /Reservar Cupo/i });
-    fireEvent.click(reserveButtons[0]);
+    // Con guardas RBAC, el feed privado no se monta y se despliega acceso restringido
+    await waitFor(() => {
+      expect(screen.getByText(/Acceso Restringido a Explorar mentorías/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/debes iniciar sesión con tu cuenta institucional/i)
+      ).toBeInTheDocument();
+    });
 
-    // Debe mostrar alerta institucional y no abrir el diálogo de reserva
-    expect(alertMock).toHaveBeenCalledWith(
-      expect.stringMatching(/Debes iniciar sesión con tu cuenta institucional @upt\.pe/i)
-    );
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
     // Debe inducir la navegación hacia el login
-    expect(screen.getByRole('button', { name: /Acceso & OTP/i })).toBeInTheDocument();
+    const loginRedirectBtn = screen.getByRole('button', {
+      name: /Iniciar Sesión Institucional/i,
+    });
+    fireEvent.click(loginRedirectBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.getAllByRole('heading', { name: /Iniciar Sesión Institucional/i }).length
+      ).toBeGreaterThanOrEqual(1);
+    });
   });
 });

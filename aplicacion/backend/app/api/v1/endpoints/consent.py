@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, Query, Request, status
+from fastapi import APIRouter, Depends, Header, Query, Request, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import check_resource_ownership, get_optional_current_user
 from app.db.session import get_optional_session
 from app.schemas.consent import (
     ConsentAcceptRequest,
@@ -22,8 +23,12 @@ router = APIRouter()
 )
 def get_consent_status(
     email: str = Query(..., description="Correo institucional oficial @upt.pe"),
+    authorization: str | None = Header(None),
     db: Session | None = Depends(get_optional_session),
 ):
+    user = get_optional_current_user(authorization)
+    if user:
+        check_resource_ownership(user, email, allow_admin=True)
     return ConsentService.get_consent_status(db=db, email=email)
 
 
@@ -37,8 +42,12 @@ def get_consent_status(
 def accept_consent(
     payload: ConsentAcceptRequest,
     request: Request,
+    authorization: str | None = Header(None),
     db: Session | None = Depends(get_optional_session),
 ):
+    user = get_optional_current_user(authorization)
+    if user:
+        check_resource_ownership(user, payload.email, allow_admin=True)
     ip_addr = payload.ip_address or (request.client.host if request.client else None)
     ua = payload.user_agent or request.headers.get("user-agent")
     return ConsentService.accept_consent(
@@ -60,6 +69,10 @@ def accept_consent(
 )
 def revoke_consent(
     payload: ConsentRevokeRequest,
+    authorization: str | None = Header(None),
     db: Session | None = Depends(get_optional_session),
 ):
+    user = get_optional_current_user(authorization)
+    if user:
+        check_resource_ownership(user, payload.email, allow_admin=True)
     return ConsentService.revoke_consent(db=db, email=payload.email)
