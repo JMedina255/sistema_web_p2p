@@ -6397,7 +6397,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 #### Diagrama 6.15.3: Diagrama de Secuencia - CUS-006: Publicar oferta de mentoría académica
 
-El diagrama de secuencia para `CUS-006` formaliza la programación y publicación de sesiones de mentoría académica por parte de un mentor acreditado. Modela la interacción entre el Estudiante Mentor, la interfaz React (`OfferPublishView.tsx`), los clientes HTTP (`offerService.ts` / `apiClient.ts`), los endpoints FastAPI (`endpoints/curriculum.py` y `endpoints/offers.py`), los servicios de lógica de negocio (`CurriculumService` y `OfferService`) y PostgreSQL. Abarca la recuperación de temas curriculares silábicos, la verificación criptográfica del token JWT (`RN-01`, `E005`), la validación de mérito académico y rol habilitado (`RN-03`, `E004`), la comprobación de antelación mínima de 24 horas (`RN-04`, `E002`), el aforo reglamentario (exactamente 10 presencial o 20 virtual, `RN-05`, `E003`) y la creación transaccional atómica de la entidad `SesionMentoria` en estado `PUBLICADA`.
+El diagrama de secuencia para `CUS-006` formaliza la programación y publicación de sesiones de mentoría académica por parte de un mentor acreditado siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`interface : UI`), reflejando que la interfaz se actualiza y permanece a la espera de las acciones directas del estudiante mentor. Modela la interacción entre el Estudiante Mentor, la interfaz React (`OfferPublishView.tsx`), los clientes HTTP (`offerService.ts` / `apiClient.ts`), los endpoints FastAPI (`endpoints/curriculum.py` y `endpoints/offers.py`), los servicios de lógica de negocio (`CurriculumService` y `OfferService`) y PostgreSQL. Abarca la recuperación de temas curriculares silábicos, la verificación criptográfica del token JWT (`RN-01`, `E005`), la validación de mérito académico y rol habilitado (`RN-03`, `E004`), la comprobación de antelación mínima de 24 horas (`RN-04`, `E002`), el aforo reglamentario (exactamente 10 presencial o 20 virtual, `RN-05`, `E003`) y la creación transaccional atómica de la entidad `SesionMentoria` en estado `PUBLICADA`.
 
 ```plantuml
 @startuml
@@ -6414,19 +6414,19 @@ skinparam sequenceBoxBackgroundColor #F0F4F8
 
 actor "Estudiante Mentor
 (UserRole.mentor)" as Mentor
-participant "Vista React
+participant "interface : UI
 (OfferPublishView.tsx)" as UI
-participant "Adaptador Cliente
+participant "clientAdapter : Client
 (offerService.ts / apiClient.ts)" as Client
 participant "Controlador FastAPI
 (endpoints/offers.py)" as API
 participant "Servicio Backend
 (offer_service.py / OfferService)" as Service
-database "PostgreSQL DB
+database "postgresDB : Database
 (SQLAlchemy / Supabase)" as DB
 
 == Fase 1: Configuración de la sesión y selección curricular ==
-Mentor -> UI: 1. Accede a vista de publicación y selecciona asignatura curricular en "Curso"
+Mentor -> UI: selectCourse(selectedCourseId)
 activate UI
 UI -> Client: fetchCourseDetail(selectedCourseId)
 activate Client
@@ -6443,20 +6443,20 @@ Service --> API: CourseDetailResponse
 deactivate Service
 API --> Client: HTTP 200 OK CourseDetailResponse
 deactivate API
-Client --> UI: Entrega temas curriculares
+Client -> UI: displayTopicsAndForm(temas, defaultCapacity, suggestedSpace)
 deactivate Client
-UI --> Mentor: 2. Renderiza temas silábicos, campos de fecha, hora, duración (60|90 min), modalidad y cupos reglamentarios
 deactivate UI
 
 == Fase 2: Ingreso de parámetros, validación de reglas de aforo y antelación ==
-Mentor -> UI: 3. Selecciona tema, fecha/hora, modalidad, ingresa cupos y pulsa "Verificar y Publicar"
+Mentor -> UI: enter (topicId, startDateTime, duration, modality, assignedSpace)
 activate UI
-UI -> UI: validateOfferPayload(payload) en cliente
+Mentor -> UI: click ["Verificar y Publicar"]
+UI -> UI: validateOfferPayload(payload)
 
 alt [E001] Campos obligatorios incompletos o sintaxis inválida
-    UI --> Mentor: Resalta campos observados con borde rojo y texto explicativo
-    Mentor -> UI: Corrige campos completando los datos requeridos
-    UI --> Mentor: Rehabilita botón "Verificar y Publicar" y retorna al paso 3
+    UI -> UI: displayValidationErrors(fieldErrors)
+    Mentor -> UI: enterMissingFields(payload)
+    Mentor -> UI: click ["Verificar y Publicar"]
 else Formulario válido en cliente
     UI -> Client: publishOffer(payload: PublishOfferPayload)
     activate Client
@@ -6466,8 +6466,7 @@ else Formulario válido en cliente
 
     alt [E005] Discrepancia de identidad o suplantación de mentor
         API --> Client: HTTP 403 Forbidden {"detail": "No tiene autorización para publicar ofertas en nombre de otro usuario."}
-        Client --> UI: Captura error 403
-        UI --> Mentor: Alerta roja de seguridad institucional y retorna al paso 3
+        Client -> UI: displaySecurityError(403, "No tiene autorización para publicar ofertas en nombre de otro usuario.")
     else Identidad de mentor verificada
         API -> Service: publish_offer(db, payload, caller_email, is_admin)
         activate Service
@@ -6482,27 +6481,20 @@ WHERE ur.email = :email AND ur.activo = true AND r.nombre_rol IN ('mentor', 'adm
         alt [E004] Mentor no elegible por ciclo insuficiente o falta de rol (RN-03)
             Service --> API: Lanza HTTPException(403, "Infracción de RN-03: Solo los estudiantes habilitados con rol de mentor (ciclo >= VII)...")
             API --> Client: HTTP 403 Forbidden {"detail": "Infracción de RN-03: Solo los estudiantes habilitados..."}
-            Client --> UI: Captura error 403
-            UI --> Mentor: Banner rojo informando falta de acreditación académica y retorna al paso 3
+            Client -> UI: displayEligibilityError(403, "Infracción de RN-03: Solo los estudiantes habilitados con rol de mentor...")
         else Mentor acreditado (ciclo >= VII)
             Service -> Service: calculate_advance_hours(payload.fecha_inicio)
 
             alt [E002] Incumplimiento de antelación mínima de 24 horas (fecha_inicio <= now_utc + 24h)
                 Service --> API: Lanza HTTPException(400, "Infracción de RN-04: Toda mentoría debe publicarse con una antelación superior a 24 horas...")
                 API --> Client: HTTP 400 Bad Request {"detail": "Infracción de RN-04: Toda mentoría debe publicarse..."}
-                Client --> UI: Captura error 400
-                UI --> Mentor: Panel rojo "Antelación mínima requerida: 24 horas" y botón [Ajustar Fecha]
-                Mentor -> UI: Clic en [Ajustar Fecha], selecciona nueva fecha > 24h
-                UI --> Mentor: Retorna al paso 3
+                Client -> UI: displayAdvanceTimeError(400, "Infracción de RN-04: Toda mentoría debe publicarse con antelación > 24h")
             else [E003] Aforo no conforme con la modalidad (aforo != 10 presencial o != 20 virtual)
                 Service --> API: Lanza HTTPException(400, "Infracción de RN-05: El aforo reglamentario...")
                 API --> Client: HTTP 400 Bad Request {"detail": "Infracción de RN-05: El aforo reglamentario..."}
-                Client --> UI: Captura error 400
-                UI --> Mentor: Mensaje rojo "Aforo supera límite reglamentario", ajusta vacantes y retorna al paso 3
+                Client -> UI: displayCapacityError(400, "Infracción de RN-05: El aforo reglamentario...")
             else Parámetros de mérito, aforo y antelación válidos
                 == Fase 3: Persistencia transaccional de la oferta y confirmación en cliente ==
-                Mentor -> UI: 5. Visualiza indicador circular de procesamiento en botón
-                
                 Service -> DB: sesion_db = SesionMentoria(codigo_sesion=code, mentor_email=..., estado='PUBLICADA', ...)
                 Service -> DB: db.add(sesion_db)
 db.commit()
@@ -6513,10 +6505,8 @@ db.refresh(sesion_db)
                 
                 Service --> API: PublishOfferResponse (id_oferta=..., codigo_sesion='SES-XXXX', estado='PUBLICADA')
                 API --> Client: HTTP 201 Created PublishOfferResponse
-                Client --> UI: Entrega confirmación de publicación
-                
-                UI -> UI: setPublishedSuccess(response) y onOfferPublished(response)
-                UI --> Mentor: 6. Despliega tarjeta verde con código de sesión generado y botón "Ver en Mis Sesiones"
+                Client -> UI: showSuccessScreen(codigo_sesion='SES-XXXX', estado='PUBLICADA')
+                UI --> Mentor: displayPublishedConfirmation
             end
         end
         deactivate Service
