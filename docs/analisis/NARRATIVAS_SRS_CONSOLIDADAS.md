@@ -668,44 +668,43 @@ Toda la interacción con el usuario se documenta con exhaustivo nivel de detalle
 | **Id Caso de Uso** | CUS-023 |
 | **Nombre** | Evaluar quórum automático a T-24h |
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
-| **Requisito ID (RF)** | RF-015 (Monitoreo desatendido, alertas y quórum en T-24h); RN-08 (Cierre de ventana de confirmación), RN-09 (Corte desatendido y quórum mínimo del 50%) |
+| **Requisito ID (RF)** | RF-015 (Monitoreo desatendido, alertas y quórum en T-24h); RN-04 (Ventana de ratificación previa), RN-05 (Regla de quórum mínimo de 3 estudiantes en presencial o 5 en virtual / 50%), RN-10 (Automatización de eventos temporales a T-24h) |
 | **Versión** | 2.0 |
 | **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
-| **Actores** | **Primario:** Gestor de Tareas Desatendidas (*Servicio Cron / Backend*)<br>**Secundario:** Estudiante Mentor, Estudiantes Mentoreados con reserva |
-| **Interacción** | Fase de Construcción / Iteración Sprint 04 - Sprint 05 |
-| **Descripción** | Proceso desatendido y programado que se ejecuta automáticamente cuando el reloj del sistema marca con exactitud 24 horas antes del inicio de una sesión de mentoría en estado `PUBLICADA` ($T-24\text{ h}$), cerrando de forma perentoria la ventana de ratificación, cancelando por expiración las reservas provisionales no confirmadas para liberar el aforo, computando la cantidad de participantes en estado `CONFIRMADA` y evaluando si se alcanza el quórum mínimo reglamentario equivalente al 50% de la capacidad asignada (mínimo 5 confirmados en presencial o 10 en virtual según RN-09), transicionando la sesión a `CONFIRMADA` o `QUORUM_INSUFICIENTE`. |
-| **Referencias** | Guía SWEBOK v3.0, Estándar ISO/IEC/IEEE 29148:2018, Criterios de Acreditación ICACIT |
-| **Anexos** | Notificación Desatendida de Quórum Suficiente, Alerta al Mentor por Quórum Insuficiente con Enlace Resolutivo (`CUS-007`), Bitácora del Servicio Cron. |
-| **Precondiciones** | 1. La sesión de mentoría se encuentra en estado canónico `PUBLICADA`.<br>2. La diferencia entre la fecha y hora de inicio de la sesión y la hora del servidor es menor o igual a 24 horas ($T \le 24\text{ h}$). |
-| **PostCondiciones** | 1. Las reservas que continuaban en `PENDIENTE_CONFIRMACION` caducan y transicionan a `NO_CONFIRMADA`.<br>2. Si se alcanza o supera el 50% de quórum, la sesión transiciona a `CONFIRMADA` y se despachan las instrucciones de acceso final.<br>3. Si el quórum es inferior al 50%, la sesión transiciona a `QUORUM_INSUFICIENTE` y se dispara la alerta resolutiva al mentor (`CUS-007`). |
+| **Actores** | **Primario:** Gestor de Tareas Desatendidas (*Servicio Programado / Segundo Plano*)<br>**Secundario:** Estudiante Mentor, Estudiantes Mentoreados con reserva, Administrador Institucional |
+| **Interacción** | Fase de Construcción / Iteración Sprint 06 |
+| **Descripción** | Proceso automatizado y desatendido que se ejecuta exactamente 24 horas antes del inicio programado de una sesión de mentoría en estado `PUBLICADA` ($T-24\text{ h}$), garantizando idempotencia transaccional mediante marca temporal de evaluación para evitar ejecuciones repetidas y cerrojo de fila. El sistema cierra perentoriamente la ventana de confirmación, caduca las reservas provisionales no ratificadas pasando su estado a `CANCELADA_NO_CONFIRMADA` para liberar el aforo, cuantifica las reservas con asistencia ratificada en estado `CONFIRMADA` y evalúa el cumplimiento del quórum reglamentario (mínimo 3 estudiantes en modalidad presencial o 5 en virtual, o al menos el 50% de la capacidad). Si se alcanza el quórum, la sesión se promueve automáticamente a `CONFIRMADA`; de no alcanzarse, la sesión transiciona a `QUORUM_INSUFICIENTE` y se despachan notificaciones prioritarias al mentor para su decisión resolutiva (CUS-007). |
+| **Referencias** | Guía SWEBOK v3.0, Estándar ISO/IEC/IEEE 29148:2018, Criterios de Acreditación ICACIT, Reglamento Académico de Quórum EPIS-UPT |
+| **Anexos** | Notificación Desatendida de Quórum Reglamentario Suficiente, Alerta Prioritaria al Mentor por Quórum Insuficiente con Enlace Resolutivo (`CUS-007`), Registro de Auditoría de Tareas Programadas. |
+| **Precondiciones** | 1. La sesión de mentoría se encuentra en estado `PUBLICADA` y no registra marca temporal previa de evaluación de quórum.<br>2. La fecha y hora actual del servidor alcanza o supera la marca temporal de 24 horas previas al inicio de la sesión ($T \le 24\text{ h}$). |
+| **PostCondiciones** | 1. Las reservas asociadas en estado `PENDIENTE_CONFIRMACION` caducan y transicionan a `CANCELADA_NO_CONFIRMADA`.<br>2. La sesión registra su marca temporal de evaluación para garantizar estricta idempotencia.<br>3. Si se alcanza el quórum reglamentario, la sesión transiciona a `CONFIRMADA` y se despachan las instrucciones de acceso final.<br>4. Si no se alcanza el quórum reglamentario, la sesión transiciona a `QUORUM_INSUFICIENTE` y se activa el flujo de contingencia docente (`CUS-007`). |
 
 ##### Flujo Normal de Eventos
 
 | Usuario | Sistema |
 |---|---|
-| **Fase 1: Ejecución del cronómetro y corte de ventana (RN-08)** | |
-| **1.** El servicio desatendido (Cron daemon) inspecciona periódicamente la base de datos y detecta las sesiones de mentoría en estado `PUBLICADA` cuyo inicio dista 24 horas ($T \le 24\text{ h}$). | **2.** El sistema inicia una transacción atómica y cierra la ventana de ratificación para dicha sesión. Identifica todas las reservas asociadas que permanezcan en estado `PENDIENTE_CONFIRMACION`, actualiza su estado a `NO_CONFIRMADA` por expiración de plazo y notifica a los estudiantes omisos vía correo institucional. |
-| **Fase 2: Conteo de confirmados y evaluación matemática de quórum (RN-09)** | |
-| **3.** El sistema consulta el total de reservas en estado `CONFIRMADA` y calcula el ratio de ocupación respecto al aforo máximo establecido (10 en modalidad presencial, 20 en virtual). | **4.** El sistema evalúa si el número de confirmados es mayor o igual al umbral del 50% (al menos 5 alumnos en presencial o al menos 10 alumnos en virtual). (Si el quórum es igual o superior al 50%, salta a A001). (Si el quórum es estrictamente inferior al 50%, salta a E001). |
-| **Fase 3: Registro de la transición operativa de la sesión** | |
-| **5.** El sistema formaliza la nueva condición de la sesión de mentoría en la base de datos. | **6.** El sistema persiste el estado consolidado, genera las trazas en la bitácora del servidor y despacha los correos electrónicos correspondientes a todos los actores involucrados. |
+| **Fase 1: Detección programada y corte de ventana de ratificación** | |
+| **1.** El proceso de tareas desatendidas en segundo plano inspecciona periódicamente la base de datos y localiza las sesiones en estado `PUBLICADA` que distan 24 horas o menos de su inicio ($T \le 24\text{ h}$) y no han sido evaluadas previamente. | **2.** El sistema bloquea concurrentemente el registro de la sesión para evitar colisiones y cierra de forma definitiva la ventana de ratificación. Localiza las reservas que permanecen en estado `PENDIENTE_CONFIRMACION`, actualiza su estado a `CANCELADA_NO_CONFIRMADA` por expiración de plazo y notifica a los alumnos omisos. |
+| **Fase 2: Conteo de confirmados y evaluación del quórum reglamentario** | |
+| **3.** El sistema contabiliza las reservas que ostentan el estado `CONFIRMADA` y determina el umbral reglamentario aplicable según la modalidad de dictado (mínimo 3 estudiantes en presencial o 5 en virtual, o el 50% del aforo máximo). | **4.** El sistema evalúa si el recuento de confirmados satisface el quórum mínimo exigido. (Si el quórum reglamentario se cumple satisfactoriamente, salta a A001). (Si el quórum de confirmados es estrictamente inferior al umbral, salta a E001). |
+| **Fase 3: Formalización transaccional e idempotencia de evaluación** | |
+| **5.** El sistema estampa la marca temporal de evaluación de quórum en la sesión garantizando que no se reevalúe en ejecuciones posteriores. | **6.** El sistema consolida la transacción, registra la traza de auditoría y remite las comunicaciones institucionales correspondientes. |
 
 ##### Flujos Alternativos
 
-##### Flujo alternativo A001: Quórum reglamentario alcanzado (Mayor o igual al 50%)
+##### Flujo alternativo A001: Quórum reglamentario alcanzado (Sesión confirmada)
 | Usuario | Sistema |
 |---|---|
-| **A001-1.1** El servicio calcula que la sesión cuenta con 5 o más confirmados (presencial) o 10 o más confirmados (virtual). | **A001-1.2** El sistema transiciona el estado de la sesión a `CONFIRMADA`, bloquea de forma definitiva el aula física o el canal virtual y despacha un correo de confirmación de dictado al mentor y a los participantes con el mensaje: *"¡Quórum reglamentario alcanzado! Tu sesión de mentoría está confirmada para su ejecución"*. |
-| **A001-1.3** El mentor y los alumnos reciben la notificación. | **A001-1.4** El sistema consolida la agenda institucional y el sistema retorna al paso 6 del Flujo Normal de Eventos. |
+| **A001-1.1** El sistema verifica que la sesión cuenta con 3 o más confirmados en modalidad presencial (o 5 o más en virtual). | **A001-1.2** El sistema transiciona el estado de la sesión a `CONFIRMADA`, asegura de forma definitiva el aula física o el enlace virtual y despacha un correo de confirmación de dictado al mentor y a los participantes con el mensaje literal: *"¡Quórum reglamentario alcanzado! Tu sesión de mentoría está confirmada para su ejecución"*. |
+| **A001-1.3** El mentor y los estudiantes inscritos reciben la notificación institucional en sus paneles y bandejas de correo. | **A001-1.4** El sistema actualiza el calendario académico de mentorías y el sistema retorna al paso 5 del Flujo Normal de Eventos. |
 
 ##### Flujos de Excepción
 
-##### Flujo de excepción E001: Quórum insuficiente (Inferior al 50% reglamentario)
+##### Flujo de excepción E001: Quórum insuficiente al corte de 24 horas (Alerta al mentor)
 | Usuario | Sistema |
 |---|---|
-| **E001-1.1** El cómputo de reservas confirmadas no alcanza el umbral mínimo del 50% (menos de 5 alumnos en presencial o menos de 10 en virtual). | **E001-1.2** El sistema transiciona el estado de la sesión a `QUORUM_INSUFICIENTE`, genera una notificación de alta prioridad al Mentor con el mensaje literal: *"Atención: Tu sesión no alcanzó el quórum reglamentario del 50% al corte T-24h. Dispones de un enlace para decidir si dictas excepcionalmente o cancelas la sesión"* y detona la apertura del caso de uso resolutivo `CUS-007`. |
-| **E001-1.3** El mentor hace clic en la alerta recibida. | **E001-1.4** El sistema transfiere el control al caso de uso resolutivo `CUS-007` y finaliza el caso de uso sin generar registros de confirmación. |
-
+| **E001-1.1** El cómputo de reservas confirmadas no alcanza el umbral mínimo reglamentario (menos de 3 alumnos en presencial o menos de 5 en virtual). | **E001-1.2** El sistema transiciona el estado de la sesión a `QUORUM_INSUFICIENTE`, genera una notificación prioritaria al mentor con el mensaje literal: *"Atención: Tu sesión no alcanzó el quórum reglamentario al corte T-24h. Ingresa a la plataforma para decidir si dictas con aforo reducido, reprogramas o cancelas la sesión"* y habilita el acceso al caso de uso resolutivo `CUS-007`. |
+| **E001-1.3** El mentor recibe la notificación de contingencia en su panel de control y correo institucional. | **E001-1.4** El sistema concluye el caso de uso y transfiere el flujo a la toma de decisión del mentor (`CUS-007`). |
 ---
 
 #### CUS-007 - Decisión del mentor ante quórum insuficiente
@@ -715,44 +714,55 @@ Toda la interacción con el usuario se documenta con exhaustivo nivel de detalle
 | **Id Caso de Uso** | CUS-007 |
 | **Nombre** | Decisión del mentor ante quórum insuficiente |
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
-| **Requisito ID (RF)** | RF-016 (Gestión resolutiva ante quórum insuficiente); RN-09 (Corte desatendido y quórum mínimo), RN-10 (Cancelación oportuna y liberación inmediata de recursos) |
+| **Requisito ID (RF)** | RF-016 (Gestión resolutiva ante quórum insuficiente); RN-04 (Antelación mínima de 24 horas para reprogramaciones), RN-05 (Aforo y contingencia de quórum), RN-10 (Resolución oportuna de contingencia y motivos pedagógicos) |
 | **Versión** | 2.0 |
 | **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
-| **Actores** | **Primario:** Estudiante Mentor (*Responsable de la sesión*)<br>**Secundario:** Estudiantes Mentoreados con reserva confirmada |
-| **Interacción** | Fase de Construcción / Iteración Sprint 04 - Sprint 05 |
-| **Descripción** | Permite al Estudiante Mentor adoptar una resolución oportuna frente a una sesión que al corte de 24 horas previas ($T-24\text{ h}$) ha sido catalogada con `QUORUM_INSUFICIENTE` (RN-09). Conforme a la normativa institucional, el mentor posee la atribución potestativa de: (1) continuar con el dictado en forma excepcional para beneficiar a los alumnos confirmados sin penalización alguna, o (2) proceder a la cancelación formal de la sesión, liberando de inmediato el aula física o canal virtual y notificando a los estudiantes inscritos sin descuento de horas ni demérito en su reputación docente (RN-10). |
-| **Referencias** | Guía SWEBOK v3.0, Estándar ISO/IEC/IEEE 29148:2018, Criterios de Acreditación ICACIT |
-| **Anexos** | Pantalla de Decisión de Mentor ante Quórum Bajo, Cuadro de Diálogo de Confirmación de Dictado Excepcional, Modal de Cancelación sin Penalidad. |
-| **Precondiciones** | 1. La sesión de mentoría ha sido evaluada en el corte de 24 horas y ostenta el estado canónico `QUORUM_INSUFICIENTE` (`CUS-023`).<br>2. El mentor ha iniciado sesión institucional con su cuenta `@upt.pe` (`CUS-001`). |
-| **PostCondiciones** | 1. Si decide dictar, la sesión transiciona al estado canónico `CONFIRMADA` con marca de ejecución excepcional.<br>2. Si decide cancelar, la sesión transiciona a `CANCELADA`, liberando de inmediato el recinto físico o canal virtual y notificando a los alumnos inscritos (`RN-10`). |
+| **Actores** | **Primario:** Estudiante Mentor (*Responsable de la sesión*)<br>**Secundario:** Estudiantes Mentoreados con reserva confirmada, Administrador Institucional |
+| **Interacción** | Fase de Construcción / Iteración Sprint 06 |
+| **Descripción** | Permite al Estudiante Mentor adoptar una decisión resolutiva institucional oportuna frente a una sesión de mentoría que al corte perentorio de 24 horas previas ($T-24\text{ h}$) ha sido catalogada con `QUORUM_INSUFICIENTE` (CUS-023). El mentor accede al módulo de contingencias en su panel docente y dispone de tres alternativas reglamentarias: (1) Dictar la sesión con aforo reducido confirmando la ejecución para beneficiar a los estudiantes confirmados (`CONFIRMADA`), (2) Reprogramar la sesión para una nueva fecha y hora con antelación mínima mayor a 24 horas respecto al momento actual (RN-04) retornando a estado `PUBLICADA`, o (3) Cancelar definitivamente la sesión consignando una justificación pedagógica obligatoria (RN-10), lo que muta la sesión a `CANCELADA_QUORUM`, cancela en cascada las reservas a `CANCELADA_SISTEMA_QUORUM` y libera los recursos sin penalización académica. |
+| **Referencias** | Guía SWEBOK v3.0, Estándar ISO/IEC/IEEE 29148:2018, Criterios de Acreditación ICACIT, Reglamento Académico de Mentorías EPIS-UPT |
+| **Anexos** | Panel de Gestión de Contingencias de Quórum con Distintivo Ámbar, Cuadro Modal Accesible de Resolución con Tres Opciones, Formulario de Reprogramación Horaria, Formulario de Cancelación con Justificación Pedagógica. |
+| **Precondiciones** | 1. La sesión de mentoría ha sido evaluada a $T-24\text{ h}$ y se encuentra en estado `QUORUM_INSUFICIENTE` (`CUS-023`).<br>2. El mentor ha iniciado sesión institucional activa con su cuenta universitaria `@upt.pe` (`CUS-001`).<br>3. La resolución se despacha antes del horario de inicio programado de la sesión. |
+| **PostCondiciones** | 1. Si decide dictar, la sesión transiciona al estado `CONFIRMADA` con indicador de aforo reducido y se ratifica la agenda para los inscritos.<br>2. Si decide reprogramar, la sesión actualiza su horario con antelación mayor a 24 horas, restablece el estado a `PUBLICADA` y se notifica a los participantes.<br>3. Si decide cancelar, la sesión transiciona a `CANCELADA_QUORUM`, las reservas pasan a `CANCELADA_SISTEMA_QUORUM`, se liberan los recursos y se notifica con el motivo pedagógico. |
 
 ##### Flujo Normal de Eventos
 
 | Usuario | Sistema |
 |---|---|
-| **Fase 1: Acceso a la notificación resolutiva de la sesión** | |
-| **1.** El Mentor recibe la alerta institucional en su bandeja y hace clic en el enlace `"Gestionar Sesión con Quórum Insuficiente"` o ingresa a su panel docente. | **2.** El sistema presenta una pantalla de contingencia con el encabezado en color ámbar de advertencia, informando la asignatura, el tema silábico, el aforo total, el número real de alumnos confirmados (e.g. *"3 de 10 estudiantes confirmados"*), y dos botones de acción resolutiva: `"Dictar Sesión Excepcionalmente"` y `"Cancelar Sesión sin Penalidad"`. (Si el mentor no adopta ninguna resolución antes de cumplirse las 12 horas previas a la sesión, salta a E001). |
-| **Fase 2: Adopción de la resolución por el mentor (RN-09, RN-10)** | |
-| **3.** El Mentor opta por brindar la orientación a los estudiantes confirmados y presiona el botón `"Dictar Sesión Excepcionalmente"`. (Si el mentor decide cancelar la sesión por no alcanzar el quórum, salta a A001). | **4.** El sistema despliega un cuadro de diálogo modal informando que la decisión no acarreará ninguna penalidad en su reputación ni afectará el cómputo de sus horas y solicita confirmar la voluntad de dictado. |
-| **Fase 3: Formalización y actualización de cronogramas** | |
-| **5.** El Mentor presiona el botón `"Confirmar Dictado Excepcional"`. | **6.** El sistema transiciona la sesión al estado `CONFIRMADA` con indicador de modalidad excepcional, despacha un correo de confirmación definitiva a los estudiantes con su ticket de acceso y presenta un aviso en color verde con el texto literal: *"¡Sesión confirmada! Se ha notificado a los alumnos confirmados que la sesión se llevará a cabo según lo planificado"*. |
+| **Fase 1: Acceso a la gestión de contingencia y despliegue modal** | |
+| **1.** El Mentor recibe la alerta institucional o accede a la sección de sesiones en su panel docente, visualizando la tarjeta de la sesión destacada con un distintivo en color ámbar de advertencia con la etiqueta *"Quórum Insuficiente"* y presiona el botón `"Gestionar Contingencia"`. | **2.** El sistema despliega un cuadro de diálogo modal accesible que presenta la información de la sesión, la cantidad de alumnos confirmados frente al quórum esperado y las tres opciones resolutivas: `"Dictar con Aforo Reducido"`, `"Reprogramar Sesión"` y `"Cancelar Sesión Definitivamente"`. (Si el mentor opta por reprogramar la sesión para una nueva fecha, salta a A001). (Si el mentor opta por cancelar definitivamente la sesión, salta a A002). |
+| **Fase 2: Confirmación de dictado con aforo reducido** | |
+| **3.** El Mentor selecciona la opción `"Dictar con Aforo Reducido"` para brindar la mentoría a los alumnos confirmados y presiona el botón `"Confirmar Resolución"`. | **4.** El sistema solicita ratificar la decisión de impartir la clase, indicando que la realización con aforo reducido no genera descuento de horas docentes ni afecta su reputación académica. |
+| **Fase 3: Formalización transaccional y comunicación a los alumnos** | |
+| **5.** El Mentor presiona el botón `"Confirmar y Proceder con el Dictado"`. | **6.** El sistema transiciona la sesión al estado `CONFIRMADA`, bloquea de forma definitiva el espacio educativo, despacha un correo de ratificación a los estudiantes inscritos con sus instrucciones de acceso y despliega una notificación en color verde de éxito con el mensaje literal: *"¡Sesión confirmada! Se ha ratificado la realización de la sesión con los estudiantes inscritos"*. |
 
 ##### Flujos Alternativos
 
-##### Flujo alternativo A001: Decisión de cancelación formal de la sesión (RN-10)
+##### Flujo alternativo A001: Reprogramación de la sesión con nueva fecha y hora (RN-04)
 | Usuario | Sistema |
 |---|---|
-| **A001-1.1** El Mentor pulsa el botón `"Cancelar Sesión sin Penalidad"`. | **A001-1.2** El sistema despliega una ventana modal en color gris solicitando una breve fundamentación pedagógica y el botón `"Efectuar Cancelación"`. |
-| **A001-1.3** El Mentor ingresa una nota explicativa y pulsa `"Efectuar Cancelación"`. | **A001-1.4** El sistema transiciona la sesión al estado `CANCELADA`, libera inmediatamente el aula en el pabellón EPIS o destruye la sala virtual temporal (RN-10), notifica a los alumnos inscritos para que seleccionen otra sesión, y el sistema finaliza el caso de uso sin aplicar penalidades. |
+| **A001-1.1** En el paso 2 del Flujo Normal, el Mentor selecciona la opción `"Reprogramar Sesión"`. | **A001-1.2** El sistema despliega un selector de fecha y franja horaria junto con un aviso que recuerda la regla institucional RN-04: la nueva fecha debe fijarse con al menos 24 horas de antelación respecto a la hora actual. |
+| **A001-1.3** El Mentor selecciona la nueva fecha y hora y presiona el botón `"Confirmar Reprogramación"`. (Si la fecha seleccionada no cumple con la antelación mayor a 24 horas, salta a E001). | **A001-1.4** El sistema actualiza el cronograma de la sesión, restablece el estado a `PUBLICADA`, resetea la marca de evaluación de quórum, despacha una notificación por correo a los estudiantes inscritos invitándolos a ratificar su asistencia para el nuevo horario, muestra un aviso en color verde de éxito con el texto literal: *"Sesión reprogramada exitosamente. Se ha notificado a los alumnos sobre el nuevo horario"* y el sistema finaliza el caso de uso sin generar penalidades. |
+
+##### Flujo alternativo A002: Cancelación definitiva por quórum insuficiente con motivo justificado (RN-10)
+| Usuario | Sistema |
+|---|---|
+| **A002-1.1** En el paso 2 del Flujo Normal, el Mentor selecciona la opción `"Cancelar Sesión Definitivamente"`. | **A002-1.2** El sistema presenta un cuadro de texto multilínea solicitando ingresar obligatoriamente una justificación pedagógica clara para los estudiantes y la dirección académica conforme a RN-10, junto con el botón `"Confirmar Cancelación Definitiva"`. |
+| **A002-1.3** El Mentor redacta la justificación pedagógica y presiona el botón `"Confirmar Cancelación Definitiva"`. (Si el mentor intenta enviar la cancelación dejando el motivo en blanco, salta a E002). | **A002-1.4** El sistema transiciona la sesión al estado `CANCELADA_QUORUM`, cancela en cascada las reservas de los estudiantes marcándolas como `CANCELADA_SISTEMA_QUORUM`, libera el aula física o la sala virtual, notifica a los participantes afectados con el justificativo consignado, muestra un mensaje en color gris informativo con el texto literal: *"Sesión cancelada definitivamente por quórum insuficiente sin penalidad académica"* y el sistema finaliza el caso de uso sin aplicar deméritos al mentor. |
 
 ##### Flujos de Excepción
 
-##### Flujo de excepción E001: Ausencia de resolución del mentor antes de las 12 horas previas a la sesión
+##### Flujo de excepción E001: Reprogramación con antelación inferior a 24 horas (Infracción de RN-04)
 | Usuario | Sistema |
 |---|---|
-| **E001-1.1** El Mentor no interactúa con la plataforma ni adopta resolución alguna hasta que el tiempo restante llega al límite de 12 horas ($T-12\text{ h}$). | **E001-1.2** El sistema desatendido ejecuta la regla de salvaguarda de agenda estudiantil: cancela de oficio la sesión, transiciona a `CANCELADA_POR_INACTIVIDAD`, libera el aula asignada y despacha un correo a los inscritos indicando la baja del evento por falta de ratificación docente. |
-| **E001-1.3** El mentor accede con posterioridad a la plataforma. | **E001-1.4** El sistema muestra una alerta informativa en color rojo y el sistema finaliza el caso de uso sin posibilidad de dictado. |
+| **E001-1.1** En el paso A001-1.3, el Mentor ingresa una fecha u hora que dista menos de 24 horas respecto al tiempo actual del servidor. | **E001-1.2** El sistema bloquea el procesamiento, resalta el campo de fecha con un borde en color rojo de error y presenta una alerta con el mensaje literal: *"Fecha no permitida: Toda reprogramación debe realizarse con un mínimo de 24 horas de antelación para salvaguardar la disponibilidad estudiantil"*. |
+| **E001-1.3** El Mentor presiona el botón `"Modificar Fecha"` y ajusta el calendario a una fecha válida. | **E001-1.4** El sistema valida que el nuevo horario cumpla el margen de 24 horas y el sistema retorna al paso 3 del Flujo Normal de Eventos. |
 
+##### Flujo de excepción E002: Justificación pedagógica de cancelación omitida o en blanco (Infracción de RN-10)
+| Usuario | Sistema |
+|---|---|
+| **E002-1.1** En el paso A002-1.3, el Mentor presiona el botón de confirmación de cancelación dejando el cuadro de texto vacío o con espacios en blanco. | **E002-1.2** El sistema bloquea la transacción, resalta el área de texto con un borde en color rojo de error y despliega una advertencia con el mensaje literal: *"Motivo requerido: Debe ingresar obligatoriamente una justificación pedagógica para informar a los estudiantes la cancelación de la sesión"*. |
+| **E002-1.3** El Mentor redacta la justificación en el área de texto. | **E002-1.4** El sistema comprueba que el texto contenga información descriptiva y el sistema retorna al paso 3 del Flujo Normal de Eventos. |
 ---
 
 ### MOD-06: Trazabilidad, Bitácoras y Sesiones
@@ -764,50 +774,55 @@ Toda la interacción con el usuario se documenta con exhaustivo nivel de detalle
 | **Id Caso de Uso** | CUS-012 |
 | **Nombre** | Registrar asistencia a sesión de mentoría |
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
-| **Requisito ID (RF)** | RF-017 (Registro de bitácora y control de asistencia efectiva); RN-12 (Cierre formal de bitácora y control obligatorio de asistencia) |
+| **Requisito ID (RF)** | RF-017 (Registro de bitácora pedagógica y control de asistencia); RN-05 (Aforo y presencia efectiva), RN-12 (Trazabilidad de asistencia y ventana temporal de check-in) |
 | **Versión** | 2.0 |
 | **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
-| **Actores** | **Primario:** Estudiante Mentor (*Responsable de la sesión*)<br>**Secundario:** Estudiantes Asistentes |
-| **Interacción** | Fase de Construcción / Iteración Sprint 04 - Sprint 05 |
-| **Descripción** | Permite al Estudiante Mentor registrar de forma fehaciente la asistencia efectiva de los estudiantes que concurren a la sesión de mentoría programada, utilizando el generador dinámico de códigos QR en pantalla con tokens efímeros de refresco automático cada 60 segundos (para escaneo directo desde dispositivos móviles de los alumnos) o realizando el marcado nominal manual en el padrón digital de confirmados, siendo este control un prerrequisito obligatorio e indispensable para habilitar la encuesta post-mentoría y el cómputo de horas auditadas (RN-12). |
-| **Referencias** | Guía SWEBOK v3.0, Estándar ISO/IEC/IEEE 29148:2018, Criterios de Acreditación ICACIT |
-| **Anexos** | Pantalla de Control de Asistencia en Tiempo Real, Generador de Código QR Dinámico Efímero (Tokens 60s), Padrón Digital de Estudiantes Confirmados. |
-| **Precondiciones** | 1. La sesión de mentoría se encuentra en estado `CONFIRMADA` y en su franja horaria de ejecución o hasta 60 minutos posteriores a su finalización.<br>2. El mentor ha iniciado sesión institucional (`CUS-001`). |
-| **PostCondiciones** | 1. Las entidades `Asistencia` son registradas en la base de datos vinculando a cada mentoreado con el estado canónico `ASISTIO` o `FALTO`.<br>2. Los estudiantes marcados con `ASISTIO` quedan habilitados para diligenciar la encuesta de calidad post-mentoría (`RN-12`, `RN-13`). |
+| **Actores** | **Primario:** Estudiante Mentor (*Responsable del pase de lista*), Estudiante Mentoreado (*Asistente*)<br>**Secundario:** Administrador Institucional |
+| **Interacción** | Fase de Construcción / Iteración Sprint 06 |
+| **Descripción** | Permite registrar la presencia efectiva de los estudiantes durante la ejecución de una sesión de mentoría en estado `CONFIRMADA` o `EN_CURSO`. El mentor proyecta en pantalla un código QR dinámico criptográfico generado con algoritmo de contraseña de un solo uso por tiempo (TOTP) que se refresca automáticamente cada 30 segundos, acompañado de un código numérico de respaldo de 6 dígitos y un temporizador regresivo circular. El estudiante mentoreado escanea el código QR desde su dispositivo o ingresa el código numérico de 6 dígitos dentro del intervalo temporal reglamentario (desde 15 minutos antes del inicio programado hasta 30 minutos tras la finalización). El sistema verifica que el token esté vigente y que el alumno cuente con reserva confirmada en la sesión, persistiendo de forma fehaciente la asistencia y actualizando en tiempo real la nómina del mentor. |
+| **Referencias** | Guía SWEBOK v3.0, Estándar ISO/IEC/IEEE 29148:2018, Criterios de Acreditación ICACIT, Reglamento Académico de Asistencia EPIS-UPT |
+| **Anexos** | Pantalla de Control de Asistencia Digital con Proyector QR SVG en Alta Definición, Temporizador Regresivo Circular de 30 Segundos, Código Numérico de Respaldo de 6 Dígitos, Nómina Reactiva de Estudiantes en Tiempo Real. |
+| **Precondiciones** | 1. La sesión de mentoría se encuentra en estado `CONFIRMADA` o `EN_CURSO`.<br>2. El estudiante mentoreado cuenta con una reserva en estado `CONFIRMADA` para dicha sesión.<br>3. La solicitud se realiza dentro del intervalo temporal permitido (desde 15 minutos antes del inicio hasta 30 minutos después del fin). |
+| **PostCondiciones** | 1. Se registra la presencia del estudiante mentoreado en la bitácora de asistencias de la sesión.<br>2. La nómina interactiva en la pantalla del mentor actualiza reactivamente el estado del alumno a `"Presente"` con un distintivo en color verde.<br>3. El estudiante recibe un comprobante digital de asistencia en su dispositivo y queda habilitado para diligenciar la evaluación de calidad post-mentoría. |
 
 ##### Flujo Normal de Eventos
 
 | Usuario | Sistema |
 |---|---|
-| **Fase 1: Inicio de sesión y despliegue del generador QR** | |
-| **1.** El Mentor ingresa a la sesión de mentoría activa en su panel docente y presiona el botón `"Iniciar Registro de Asistencia"`. | **2.** El sistema presenta una pantalla de control con dos opciones: un visor en primer plano con el código QR dinámico de asistencia (que se regenera automáticamente cada 60 segundos mediante tokens criptográficos efímeros) y la tabla nominal con la lista de alumnos con reserva confirmada. |
-| **Fase 2: Escaneo dinámico por alumnos y marcado nominal** | |
-| **3.** Los estudiantes asistentes escanean con la cámara de sus teléfonos inteligentes el código QR proyectado en pantalla. (Si un alumno tiene fallas de cámara o batería, el mentor usa marcado manual, salta a A001). | **4.** El sistema valida el token efímero del QR, verifica que el alumno posea reserva en estado `CONFIRMADA` y actualiza la fila del alumno en la pantalla del mentor en tiempo real mostrando una insignia en color verde con el texto `"Presente"`. (Si el token del QR ha expirado al momento de escanear, salta a E001). (Si el alumno no cuenta con reserva previa en la sesión, salta a E002). |
-| **Fase 3: Cierre y consolidación del padrón de asistencia** | |
-| **5.** El Mentor revisa la nómina consolidada, constata los ausentes y presiona el botón `"Consolidar y Guardar Asistencia"`. | **6.** El sistema persiste de forma inmutable el padrón de asistencias en la base de datos, marca a los alumnos no registrados con el estado `FALTO`, inhabilita el generador de QR y despliega una notificación en color verde de éxito con el mensaje literal: *"¡Asistencia consolidada exitosamente! Se ha registrado la presencia de los participantes"*. |
+| **Fase 1: Apertura de asistencia y proyección del código QR dinámico** | |
+| **1.** El Mentor accede a su sesión en la plataforma y pulsa el botón `"Iniciar Pase de Asistencia Digital"`. | **2.** El sistema genera un token dinámico basado en tiempo con rotación estricta cada 30 segundos, despliega el código QR interactivo de alta definición junto a un código numérico de 6 dígitos y un temporizador circular, y presenta la lista nominal de los estudiantes confirmados en condición inicial de `"Ausente"`. |
+| **Fase 2: Escaneo del código o ingreso de clave numérica por el mentoreado** | |
+| **3.** El estudiante mentoreado presente en la sesión enfoca con la cámara de su dispositivo el código QR proyectado y pulsa el botón `"Registrar Mi Asistencia"`. (Si el estudiante no puede escanear la imagen por limitaciones de hardware, salta a A001). | **4.** El sistema valida que el token del código no haya expirado, que el estudiante posea una reserva confirmada en la sesión y que la petición ocurra dentro de la ventana de validez horaria (15 minutos antes del inicio hasta 30 minutos tras el fin). (Si el token de 30 segundos ha expirado, salta a E001). (Si el estudiante no posee reserva confirmada, salta a E002). (Si el intento se realiza fuera del intervalo de tolerancia horaria, salta a E003). |
+| **Fase 3: Persistencia de presencia y actualización reactiva de nómina** | |
+| **5.** El estudiante y el mentor observan la confirmación visual instantánea en sus pantallas. | **6.** El sistema registra la asistencia con la marca temporal exacta, actualiza de forma reactiva la fila del estudiante en el panel del mentor mostrándolo como `"Presente"` con distintivo en color verde, y despliega en el dispositivo del alumno un aviso en color verde con el texto literal: *"¡Asistencia registrada exitosamente! Gracias por tu puntualidad"*. |
 
 ##### Flujos Alternativos
 
-##### Flujo alternativo A001: Marcado nominal manual por el mentor ante incidencias de dispositivo
+##### Flujo alternativo A001: Registro de asistencia mediante código numérico de respaldo de 6 dígitos
 | Usuario | Sistema |
 |---|---|
-| **A001-1.1** Un alumno acreditado no puede escanear el QR por fallas técnicas en su dispositivo móvil. | **A001-1.2** El Mentor localiza el nombre del estudiante en la tabla nominal y pulsa sobre la casilla de verificación `"Marcar Presente Manual"`. |
-| **A001-1.3** El Mentor verifica la identidad física o visual del alumno. | **A001-1.4** El sistema actualiza el estado a `"Presente (Verificación Manual)"` y el sistema retorna al paso 5 del Flujo Normal de Eventos. |
+| **A001-1.1** El estudiante no puede enfocar el código QR por falta de cámara o poca iluminación; pulsa la opción `"Ingresar Código Numérico"`. | **A001-1.2** El sistema presenta un formulario con casillas para ingresar el código de 6 dígitos visible en la pantalla del mentor. |
+| **A001-1.3** El estudiante digita el código numérico de 6 dígitos y pulsa el botón `"Validar Código de Asistencia"`. | **A001-1.4** El sistema procesa la validación del código temporal y el sistema retorna al paso 4 del Flujo Normal de Eventos. |
 
 ##### Flujos de Excepción
 
-##### Flujo de excepción E001: Código QR dinámico expirado al instante del escaneo
+##### Flujo de excepción E001: Código QR o token dinámico expirado al momento de envío
 | Usuario | Sistema |
 |---|---|
-| **E001-1.1** El estudiante envía la solicitud de asistencia con un token QR que superó los 60 segundos de vigencia. | **E001-1.2** El sistema rechaza la marcación y despliega en el móvil del estudiante una notificación en color rojo de advertencia con el mensaje literal: *"Código QR expirado. Por favor, escanee nuevamente el código actualizado que se muestra en la pantalla del mentor"*. |
-| **E001-1.3** El estudiante reintenta el escaneo con el nuevo código QR visible. | **E001-1.4** El sistema procesa el nuevo token vigente y el sistema retorna al paso 4 del Flujo Normal de Eventos. |
+| **E001-1.1** El estudiante envía la solicitud cuando el ciclo de 30 segundos del token ya ha transcurrido. | **E001-1.2** El sistema rechaza la marcación y despliega en el móvil del estudiante una notificación en color ámbar de advertencia con el mensaje literal: *"Código de asistencia expirado. Por favor, escanee o digite el nuevo código proyectado por el mentor"*. |
+| **E001-1.3** El estudiante enfoca el nuevo código QR o ingresa la nueva clave numérica generada en pantalla. | **E001-1.4** El sistema captura el nuevo código emitido y el sistema retorna al paso 4 del Flujo Normal de Eventos. |
 
-##### Flujo de excepción E002: Estudiante sin reserva confirmada previa en la sesión
+##### Flujo de excepción E002: Estudiante sin reserva confirmada en la sesión de mentoría
 | Usuario | Sistema |
 |---|---|
-| **E002-1.1** Un estudiante que no realizó reserva previa o cuya reserva caducó intenta escanear el código QR en el aula. | **E002-1.2** El sistema detecta la ausencia de reserva confirmada en la base de datos, rechaza el registro y presenta una alerta con el mensaje literal: *"Acceso denegado: No cuenta con una reserva confirmada para esta sesión de mentoría"*. |
-| **E002-1.3** El estudiante pulsa `"Aceptar"`. | **E002-1.4** El sistema cancela la operación y finaliza el caso de uso sin registrar asistencia. |
+| **E002-1.1** Un alumno que no reservó cupo o cuya reserva no fue ratificada intenta escanear el código QR. | **E002-1.2** El sistema comprueba la ausencia de reserva confirmada en la base de datos, deniega el registro y presenta una alerta en color rojo de error con el mensaje literal: *"Acceso denegado: No registra una reserva confirmada para participar en esta sesión de mentoría"*. |
+| **E002-1.3** El estudiante presiona el botón `"Entendido"`. | **E002-1.4** El sistema cierra el diálogo y finaliza el caso de uso sin generar registros de asistencia. |
 
+##### Flujo de excepción E003: Check-in fuera de la ventana horaria permitida (Infracción de RN-12)
+| Usuario | Sistema |
+|---|---|
+| **E003-1.1** El estudiante intenta registrar asistencia más de 15 minutos antes del inicio de la sesión o más de 30 minutos después de culminada. | **E003-1.2** El sistema bloquea el registro por encontrarse fuera de la ventana horaria institucional y despliega una advertencia en color rojo con el mensaje literal: *"Registro cerrado: El pase de asistencia solo se encuentra habilitado durante la realización de la sesión"*. |
+| **E003-1.3** El estudiante pulsa el botón `"Aceptar"`. | **E003-1.4** El sistema devuelve la interfaz al panel principal y finaliza el caso de uso sin generar registros de asistencia. |
 ---
 
 #### CUS-013 - Registrar bitácora académica de sesión
@@ -817,50 +832,49 @@ Toda la interacción con el usuario se documenta con exhaustivo nivel de detalle
 | **Id Caso de Uso** | CUS-013 |
 | **Nombre** | Registrar bitácora académica de sesión |
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
-| **Requisito ID (RF)** | RF-017 (Registro de bitácora y control de asistencia), RF-020 (Gestión e intercambio de recursos académicos); RN-12 (Cierre formal de bitácora dentro de las 24h) |
+| **Requisito ID (RF)** | RF-017 (Registro de bitácora pedagógica y control de asistencia); RN-12 (Plazo perentorio de 48 horas post-sesión para registro de bitácora y observaciones mínimas de 50 caracteres) |
 | **Versión** | 2.0 |
 | **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
-| **Actores** | **Primario:** Estudiante Mentor (*Responsable de la sesión*)<br>**Secundario:** Administrador Institucional (*Comité de Tutoría*) |
-| **Interacción** | Fase de Construcción / Iteración Sprint 04 - Sprint 05 |
-| **Descripción** | Permite al Estudiante Mentor registrar de manera formal y documentada la bitácora pedagógica al término de la sesión de mentoría, detallando las competencias silábicas impartidas, el resumen de las dudas y ejercicios desarrollados, las observaciones cualitativas del grupo, adjuntando evidencias fotográficas o enlaces a materiales de clase compartidos, formalizando el cierre de la sesión dentro del plazo perentorio de 24 horas para habilitar el cómputo de horas de mentoría y abrir la ventana de evaluación de encuestas de calidad (RN-12, RN-13). |
-| **Referencias** | Guía SWEBOK v3.0, Estándar ISO/IEC/IEEE 29148:2018, Criterios de Acreditación ICACIT |
-| **Anexos** | Formulario Digital de Bitácora Pedagógica, Gestor de Carga de Archivos y Evidencias de Sesión, Resumen de Cierre de Sesión de Mentoría. |
-| **Precondiciones** | 1. La sesión de mentoría ha concluido su horario lectivo y se ha registrado el control de asistencia efectiva (`CUS-012`).<br>2. La sesión se encuentra dentro de la ventana de 24 horas posteriores a su culminación conforme a RN-12. |
-| **PostCondiciones** | 1. La entidad `BitacoraSesion` es persistida en la base de datos vinculada a la sesión y al mentor.<br>2. La sesión de mentoría transiciona al estado canónico `FINALIZADA`.<br>3. Se habilita la encuesta de satisfacción para los alumnos asistentes por 24 horas (`RN-13`) y las horas se registran como `PROVISIONALES` para futura auditoría y certificación (`CUS-018`). |
+| **Actores** | **Primario:** Estudiante Mentor (*Responsable del reporte formativo*)<br>**Secundario:** Administrador Institucional, Coordinador Académico |
+| **Interacción** | Fase de Construcción / Iteración Sprint 06 |
+| **Descripción** | Permite al Estudiante Mentor registrar de forma estructurada y fidedigna la bitácora pedagógica correspondiente a una sesión de mentoría concluida dentro del plazo perentorio de 48 horas posteriores a su culminación (RN-12). El mentor accede al formulario digital, selecciona los temas curriculares desarrollados mediante un checklist silábico, evalúa el nivel de asimilación conceptual y dificultad pedagógica (Bajo, Medio, Alto), redacta observaciones cualitativas sustantivas con una extensión no menor a 50 caracteres y suscribe la declaración jurada de veracidad académica. El sistema genera un sello digital criptográfico mediante hash SHA-256 sobre los contenidos consignados garantizando integridad e inalterabilidad, actualiza el estado de la sesión a `BITACORA_REGISTRADA` y acredita las horas pedagógicas provisionales del mentor (`duracion / 60.0`). |
+| **Referencias** | Guía SWEBOK v3.0, Estándar ISO/IEC/IEEE 29148:2018, Criterios de Acreditación ICACIT, Reglamento Académico de Mentorías y Certificación EPIS-UPT |
+| **Anexos** | Formulario de Bitácora Pedagógica con Checklist Silábico, Selector de Nivel de Dificultad, Cuadro de Observaciones con Contador de Caracteres, Declaración Jurada de Veracidad, Comprobante con Sello Digital Hash SHA-256. |
+| **Precondiciones** | 1. La sesión de mentoría ha concluido su ejecución horaria y se encuentra en estado `CONFIRMADA` o `CONCLUIDA`.<br>2. El mentor cuenta con sesión institucional activa `@upt.pe` (`CUS-001`).<br>3. El plazo transcurrido desde la culminación de la sesión es menor o igual a 48 horas conforme a RN-12. |
+| **PostCondiciones** | 1. Se inserta el registro formal de la bitácora pedagógica con sello digital hash SHA-256 inmutable.<br>2. El estado de la sesión transiciona a `BITACORA_REGISTRADA`.<br>3. Las horas de mentoría correspondientes a la duración de la sesión se computan como provisionales para posterior acreditación de créditos extracurriculares. |
 
 ##### Flujo Normal de Eventos
 
 | Usuario | Sistema |
 |---|---|
-| **Fase 1: Apertura del formulario de bitácora pedagógica** | |
-| **1.** El Mentor presiona el botón `"Diligenciar Bitácora Pedagógica"` en la ficha de la sesión concluida. | **2.** El sistema presenta el formulario oficial de bitácora con el encabezado en color azul institucional, precargando la asignatura, el tema silábico y el total de asistentes validados en el caso `CUS-012`. Dispone de cuadros de texto multilínea para `"Contenidos Desarrollados"`, `"Dificultades Detectadas"` y un componente de carga de evidencias fotográficas o documentos en formato PDF. |
-| **Fase 2: Registro de contenidos y carga de recursos y evidencias** | |
-| **3.** El Mentor redacta el resumen de los ejercicios abordados, especifica las observaciones pedagógicas y adjunta el archivo con la evidencia de la sesión. (Si el mentor desea adjuntar enlaces a diapositivas o grabaciones, salta a A001). | **4.** El sistema valida que los campos requeridos estén completos, que el texto contenga suficiente profundidad técnica (mínimo 30 caracteres) y que los archivos adjuntos no excedan los 10 MB. (Si la bitácora se presenta fuera de las 24 horas reglamentarias, salta a E001). (Si falta registrar la asistencia de los alumnos, salta a E002). |
-| **Fase 3: Cierre formal de la sesión y activación de encuestas** | |
-| **5.** El Mentor revisa el resumen consolidado y presiona el botón `"Finalizar Sesión y Registrar Bitácora"`. | **6.** El sistema persiste de forma atómica la bitácora, transiciona la sesión al estado `FINALIZADA`, computa provisionalmente las horas lectivas del mentor sujetas a posterior auditoría (`RN-14`), abre la ventana de encuestas de calidad para los asistentes activos durante las siguientes 24 horas (`RN-13`) y despliega un panel en color verde de éxito con el mensaje literal: *"¡Bitácora pedagógica registrada satisfactoriamente! La sesión ha sido finalizada y las encuestas han sido habilitadas"*. |
+| **Fase 1: Apertura de bitácora y verificación de plazo perentorio (RN-12)** | |
+| **1.** El Mentor ingresa a la sesión de mentoría concluida en su panel docente y presiona el botón `"Diligenciar Bitácora Pedagógica"`. | **2.** El sistema verifica que el tiempo transcurrido desde la hora de finalización de la sesión no exceda las 48 horas reglamentarias conforme a RN-12. Presenta el formulario oficial con el encabezado en color azul institucional, mostrando el checklist de temas curriculares de la asignatura, el selector de dificultad pedagógica (Bajo, Medio, Alto), el cuadro de observaciones y la casilla de declaración jurada. (Si han transcurrido más de 48 horas desde la finalización, salta a E001). |
+| **Fase 2: Consignación de temas silábicos, observaciones y firma** | |
+| **3.** El Mentor marca las casillas de los temas curriculares explicados, selecciona el nivel de asimilación conceptual del grupo, redacta las observaciones detalladas del desarrollo de la clase, marca la casilla de declaración jurada de veracidad y presiona el botón `"Firmar y Registrar Bitácora"`. | **4.** El sistema valida que se haya marcado al menos un tema curricular, que el texto de observaciones contenga al menos 50 caracteres descriptivos y que la declaración jurada esté aceptada. (Si el mentor desea adjuntar enlaces o recursos académicos adicionales, salta a A001). (Si las observaciones no alcanzan la longitud mínima de 50 caracteres, salta a E002). |
+| **Fase 3: Generación de sello criptográfico SHA-256 y acreditación provisional** | |
+| **5.** El Mentor observa el indicador circular de procesamiento seguro mientras el sistema formaliza el registro. | **6.** El sistema calcula el hash criptográfico SHA-256 sobre el contenido pedagógico para garantizar su inalterabilidad, persiste la bitácora, transiciona el estado de la sesión a `BITACORA_REGISTRADA`, registra las horas pedagógicas provisionales del mentor para su posterior certificación y despliega un panel en color verde de éxito con el código del sello digital y el texto literal: *"¡Bitácora pedagógica registrada y firmada exitosamente! Las horas han sido acreditadas provisionalmente para auditoría"*. |
 
 ##### Flujos Alternativos
 
-##### Flujo alternativo A001: Incorporación de enlaces y recursos de libre descarga para los alumnos
+##### Flujo alternativo A001: Incorporación de enlaces y recursos de libre descarga
 | Usuario | Sistema |
 |---|---|
-| **A001-1.1** El Mentor presiona el botón `"Añadir Recursos de Clase"` e introduce enlaces a repositorios de GitHub, diapositivas o grabaciones en Google Drive. | **A001-1.2** El sistema valida que los enlaces cuenten con protocolo HTTPS seguro. |
-| **A001-1.3** El Mentor confirma la incorporación de los enlaces. | **A001-1.4** El sistema almacena los recursos enlazándolos a la bitácora para consulta de los estudiantes inscritos y el sistema retorna al paso 4 del Flujo Normal de Eventos. |
+| **A001-1.1** En el paso 4 del Flujo Normal, el Mentor presiona el botón `"Añadir Recursos Didácticos"` e introduce enlaces a repositorios o diapositivas. | **A001-1.2** El sistema valida que los enlaces cuenten con protocolo HTTPS seguro. |
+| **A001-1.3** El Mentor confirma la incorporación de los enlaces al expediente de la sesión. | **A001-1.4** El sistema vincula los recursos a la bitácora para consulta de los estudiantes inscritos y el sistema retorna al paso 4 del Flujo Normal de Eventos. |
 
 ##### Flujos de Excepción
 
-##### Flujo de excepción E001: Registro de bitácora fuera del plazo de 24 horas (Infracción de RN-12)
+##### Flujo de excepción E001: Vencimiento del plazo perentorio de 48 horas (Infracción de RN-12)
 | Usuario | Sistema |
 |---|---|
-| **E001-1.1** El Mentor intenta diligenciar la bitácora habiendo transcurrido más de 24 horas desde la finalización de la sesión. | **E001-1.2** El sistema detecta el vencimiento del plazo (infracción de RN-12), bloquea la edición normal y despliega un cuadro de diálogo en color ámbar de advertencia con el mensaje literal: *"Plazo vencido: El registro de la bitácora ha excedido las 24 horas reglamentarias. La solicitud será enviada al Comité de Tutoría para su visado extraordinario"*. |
-| **E001-1.3** El Mentor presiona `"Enviar a Revisión Extraordinaria"`. | **E001-1.4** El sistema almacena la bitácora en estado `OBSERVADA_POR_PLAZO` y el sistema retorna al paso 6 del Flujo Normal de Eventos. |
+| **E001-1.1** El Mentor intenta diligenciar la bitácora habiendo transcurrido más de 48 horas desde la finalización programada de la sesión. | **E001-1.2** El sistema detecta el vencimiento del plazo estricto de 48 horas (infracción de RN-12), bloquea los campos de edición y despliega una advertencia en color ámbar con el mensaje literal: *"Plazo reglamentario vencido: El registro de la bitácora ha superado las 48 horas permitidas. La habilitación extraordinaria requiere autorización de la Coordinación Académica"*. |
+| **E001-1.3** El Mentor presiona el botón `"Solicitar Desbloqueo Extraordinario"`. | **E001-1.4** El sistema remite una solicitud a la dirección de escuela y el sistema finaliza el caso de uso sin generar registros ordinarios de bitácora. |
 
-##### Flujo de excepción E002: Intento de cierre sin control de asistencia registrado
+##### Flujo de excepción E002: Observaciones pedagógicas con longitud insuficiente (Menos de 50 caracteres)
 | Usuario | Sistema |
 |---|---|
-| **E002-1.1** El Mentor intenta guardar la bitácora sin haber consolidado previamente la lista de asistencias del caso `CUS-012`. | **E002-1.2** El sistema bloquea el botón de finalización y presenta un cuadro de alerta en color rojo con el mensaje literal: *"Control de asistencia incompleto: Debe consolidar obligatoriamente la asistencia de los estudiantes confirmados antes de proceder al cierre de la bitácora"*. |
-| **E002-1.3** El Mentor presiona el botón `"Ir a Control de Asistencia"`. | **E002-1.4** El sistema redirige al caso de uso `CUS-012` para completar el registro y finaliza el caso de uso sin generar registros de bitácora. |
-
+| **E002-1.1** En el paso 4 del Flujo Normal, el Mentor intenta registrar la bitácora con un texto de observaciones que no alcanza los 50 caracteres requeridos. | **E002-1.2** El sistema bloquea el envío, resalta el cuadro de texto con un borde en color rojo de error y muestra un contador interactivo junto con el mensaje literal: *"Descripción insuficiente: Las observaciones pedagógicas deben contener un detalle descriptivo de al menos 50 caracteres"*. |
+| **E002-1.3** El Mentor amplía la redacción incorporando el detalle del avance académico y las dificultades conceptuales observadas. | **E002-1.4** El sistema comprueba que el texto supere los 50 caracteres y el sistema retorna al paso 3 del Flujo Normal de Eventos. |
 ---
 
 #### CUS-014 - Visualizar historial y bitácoras académicas

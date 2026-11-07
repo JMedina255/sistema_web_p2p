@@ -37,10 +37,25 @@ export interface PublishOfferPayload {
   notas_adicionales?: string;
 }
 
+export interface QuorumDecisionPayload {
+  decision: 'PROCEED' | 'RESCHEDULE' | 'CANCEL';
+  new_start_time?: string;
+  reason?: string;
+}
+
+export interface QuorumDecisionResponse {
+  id_sesion: number;
+  codigo_sesion: string;
+  decision: string;
+  estado_nuevo: string;
+  mensaje: string;
+  nueva_fecha_inicio?: string | null;
+}
+
 export interface PublishOfferResponse {
   id_oferta: string;
   codigo_sesion: string;
-  estado: 'PUBLICADA';
+  estado: string;
   mensaje: string;
   fecha_publicacion: string;
   aforo: number;
@@ -268,6 +283,31 @@ class MockOfferAdapter {
       // Ignorar
     }
   }
+
+  public async resolveQuorum(offerId: string | number, payload: QuorumDecisionPayload): Promise<QuorumDecisionResponse> {
+    if (payload.decision === 'RESCHEDULE' && payload.new_start_time) {
+      const diff = (new Date(payload.new_start_time).getTime() - Date.now()) / (3600 * 1000);
+      if (diff <= 24) {
+        throw new Error('INSUFFICIENT_RESCHEDULE_ADVANCE: La nueva fecha debe superar 24h de antelación.');
+      }
+    }
+    if (payload.decision === 'CANCEL' && (!payload.reason || !payload.reason.trim())) {
+      throw new Error('REASON_REQUIRED: Debe ingresar un motivo justificado.');
+    }
+    const stateMap: Record<string, string> = {
+      PROCEED: 'CONFIRMADA',
+      RESCHEDULE: 'PUBLICADA',
+      CANCEL: 'CANCELADA_QUORUM',
+    };
+    return {
+      id_sesion: typeof offerId === 'number' ? offerId : parseInt(String(offerId), 10) || 101,
+      codigo_sesion: `SES-${offerId}`,
+      decision: payload.decision,
+      estado_nuevo: stateMap[payload.decision] || 'CONFIRMADA',
+      mensaje: 'Decisión de contingencia registrada exitosamente.',
+      nueva_fecha_inicio: payload.new_start_time,
+    };
+  }
 }
 
 // ============================================================================
@@ -334,6 +374,20 @@ class ApiOfferAdapter {
     }
     return response.json();
   }
+
+  public async resolveQuorum(offerId: string | number, payload: QuorumDecisionPayload): Promise<QuorumDecisionResponse> {
+    const url = `${this.getBaseUrl()}/api/v1/offers/${offerId}/quorum-decision`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => null);
+      throw new Error(err?.detail || `Error HTTP ${response.status}: ${response.statusText}`);
+    }
+    return response.json();
+  }
 }
 
 const mockAdapter = new MockOfferAdapter();
@@ -390,6 +444,16 @@ export const offerService = {
       return apiAdapter.getOffers(mentorEmail);
     }
     return mockAdapter.getOffers(mentorEmail);
+  },
+
+  /**
+   * Resuelve contingencia de quórum por el mentor (T-32 / T-33 / RF16 / CUS07).
+   */
+  async resolveQuorum(offerId: string | number, payload: QuorumDecisionPayload): Promise<QuorumDecisionResponse> {
+    if (currentServiceMode === 'api') {
+      return apiAdapter.resolveQuorum(offerId, payload);
+    }
+    return mockAdapter.resolveQuorum(offerId, payload);
   },
 
   /**

@@ -1,17 +1,24 @@
 /**
- * Vista: Mis Mentorías Publicadas y Supervisión de Quórum (Sprint 5 / Sprint 6 Pre-Requisito)
+ * Vista: Mis Mentorías Publicadas, Supervisión de Quórum y Resolución de Contingencias (T-32 / Sprint 6)
  *
  * Trazabilidad:
- * - Requerimiento Funcional: RF08 (Gestión y catálogo de ofertas de mentoría)
- * - Regla de Negocio RN-05: Aforo inmutable (10 presencial / 20 virtual)
- * - Regla de Negocio RN-08: Corte perentorio a T-24h para confirmaciones
- * - Regla de Negocio RN-09: Cómputo del quórum regulatorio del 50% (5 presencial / 10 virtual)
- * - Requerimiento No Funcional: RNF05 (Accesibilidad WAI-ARIA)
+ * - Requerimiento Funcional: RF08 (Gestión de ofertas), RF16 (Gestión resolutiva ante quórum insuficiente)
+ * - Casos de Uso: CUS06, CUS07, CUS23
+ * - Regla de Negocio RN-04: Antelación mínima de 24 horas para reprogramación
+ * - Regla de Negocio RN-05: Aforo inmutable (10 presencial / 20 virtual) y mínimo 3 confirmados
+ * - Regla de Negocio RN-10: Decisión resolutiva del mentor ante quórum insuficiente
+ * - Requerimiento No Funcional: RNF05 (Accesibilidad WCAG 2.1 AA / WAI-ARIA)
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { offerService, type PublishOfferResponse } from '../services/offerService';
+import {
+  offerService,
+  type PublishOfferResponse,
+  type QuorumDecisionPayload,
+} from '../services/offerService';
 import { authService } from '../services/authService';
+import { SessionAttendanceView } from './SessionAttendanceView';
+import { BitacoraFormView } from './BitacoraFormView';
 
 export interface MentorSessionsViewProps {
   mentorEmail: string;
@@ -38,11 +45,24 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Vistas activas de Asistencia y Bitácora
+  const [selectedAttendanceSession, setSelectedAttendanceSession] = useState<PublishOfferResponse | null>(null);
+  const [selectedBitacoraSession, setSelectedBitacoraSession] = useState<PublishOfferResponse | null>(null);
+
   // Mapa de nóminas de estudiantes por ID de sesión
   const [rosters, setRosters] = useState<Record<string, EnrolledStudent[]>>({});
   const [loadingRosterId, setLoadingRosterId] = useState<string | null>(null);
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
   const [now] = useState(() => Date.now());
+
+  // Estado del Diálogo Modal de Contingencia de Quórum (T-32 / WCAG 2.1 AA)
+  const [contingencySession, setContingencySession] = useState<PublishOfferResponse | null>(null);
+  const [contingencyDecision, setContingencyDecision] = useState<'PROCEED' | 'RESCHEDULE' | 'CANCEL'>('PROCEED');
+  const [rescheduleDate, setRescheduleDate] = useState<string>('');
+  const [cancelReason, setCancelReason] = useState<string>('');
+  const [isSubmittingContingency, setIsSubmittingContingency] = useState<boolean>(false);
+  const [contingencyError, setContingencyError] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const fetchSessions = useCallback(async () => {
     setIsLoading(true);
@@ -60,6 +80,17 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
   useEffect(() => {
     fetchSessions();
   }, [fetchSessions]);
+
+  // Manejo de tecla Escape para cerrar modal de accesibilidad
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && contingencySession) {
+        setContingencySession(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [contingencySession]);
 
   // Consultar nómina de inscritos de una sesión específica
   const loadRoster = async (sessionId: string) => {
@@ -96,13 +127,16 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
     const aforo = session.aforo || (session.offer.modalidad === 'presencial' ? 10 : 20);
     const quorumTarget = Math.ceil(aforo * 0.5); // RN-09: 50%
     const confirmedCount = (enrolledList || []).filter((e) => e.estado === 'CONFIRMADA').length;
-    const totalEnrolled = (enrolledList || []).filter((e) => e.estado !== 'CANCELADA_USUARIO' && e.estado !== 'CANCELADA_SISTEMA').length;
+    const totalEnrolled = (enrolledList || []).filter(
+      (e) => e.estado !== 'CANCELADA_USUARIO' && e.estado !== 'CANCELADA_SISTEMA'
+    ).length;
 
     const startDate = new Date(session.offer.fecha_inicio.replace('Z', '+00:00'));
     const hoursRemaining = (startDate.getTime() - now) / (3600 * 1000);
 
-    const isQuorumReached = confirmedCount >= quorumTarget;
+    const isQuorumReached = confirmedCount >= (session.offer.modalidad === 'presencial' ? 3 : 5) || confirmedCount >= quorumTarget;
     const isPastDeadline = hoursRemaining <= 24;
+    const isInsufficient = session.estado === 'QUORUM_INSUFICIENTE' || (isPastDeadline && !isQuorumReached);
 
     return {
       aforo,
@@ -112,11 +146,143 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
       hoursRemaining,
       isQuorumReached,
       isPastDeadline,
+      isInsufficient,
     };
   };
 
+  const openContingencyModal = (session: PublishOfferResponse) => {
+    setContingencySession(session);
+    setContingencyDecision('PROCEED');
+    setRescheduleDate('');
+    setCancelReason('');
+    setContingencyError(null);
+  };
+
+  const closeContingencyModal = () => {
+    setContingencySession(null);
+    setContingencyError(null);
+  };
+
+  const handleContingencySubmit = async () => {
+    if (!contingencySession) return;
+    setContingencyError(null);
+
+    // Validación en cliente para RESCHEDULE
+    if (contingencyDecision === 'RESCHEDULE') {
+      if (!rescheduleDate) {
+        setContingencyError('Debe ingresar una nueva fecha y hora para la mentoría.');
+        return;
+      }
+      const targetTime = new Date(rescheduleDate).getTime();
+      const diffHours = (targetTime - Date.now()) / (3600 * 1000);
+      if (diffHours <= 24) {
+        setContingencyError('Infracción de RN-04: La reprogramación exige una antelación mayor a 24 horas.');
+        return;
+      }
+    }
+
+    // Validación en cliente para CANCEL
+    if (contingencyDecision === 'CANCEL') {
+      if (!cancelReason.trim()) {
+        setContingencyError('Debe ingresar obligatoriamente una justificación académica de cancelación.');
+        return;
+      }
+    }
+
+    setIsSubmittingContingency(true);
+    try {
+      const sId = contingencySession.id_oferta || contingencySession.codigo_sesion;
+      const payload: QuorumDecisionPayload = {
+        decision: contingencyDecision,
+        new_start_time: contingencyDecision === 'RESCHEDULE' ? new Date(rescheduleDate).toISOString() : undefined,
+        reason: contingencyDecision === 'CANCEL' ? cancelReason.trim() : undefined,
+      };
+
+      const resp = await offerService.resolveQuorum(sId, payload);
+      setStatusMessage(`Decisión registrada exitosamente: ${resp.mensaje || 'Sesión actualizada'}`);
+
+      // Actualizar estado local de la sesión
+      setSessions((prev) =>
+        prev.map((s) => {
+          if ((s.id_oferta || s.codigo_sesion) === sId) {
+            return {
+              ...s,
+              estado: resp.estado_nuevo || (contingencyDecision === 'PROCEED' ? 'CONFIRMADA' : contingencyDecision === 'RESCHEDULE' ? 'PUBLICADA' : 'CANCELADA_QUORUM'),
+              offer: {
+                ...s.offer,
+                fecha_inicio: resp.nueva_fecha_inicio || s.offer.fecha_inicio,
+              },
+            };
+          }
+          return s;
+        })
+      );
+
+      closeContingencyModal();
+    } catch (err: unknown) {
+      setContingencyError(err instanceof Error ? err.message : 'Error al procesar la resolución de contingencia.');
+    } finally {
+      setIsSubmittingContingency(false);
+    }
+  };
+
+  if (selectedAttendanceSession) {
+    const sId = selectedAttendanceSession.id_oferta || selectedAttendanceSession.codigo_sesion;
+    return (
+      <SessionAttendanceView
+        sessionId={sId}
+        sessionTitle={`${selectedAttendanceSession.offer.nombre_asignatura} (${selectedAttendanceSession.codigo_sesion})`}
+        isMentor={true}
+        onBack={() => setSelectedAttendanceSession(null)}
+      />
+    );
+  }
+
+  if (selectedBitacoraSession) {
+    const sId = selectedBitacoraSession.id_oferta || selectedBitacoraSession.codigo_sesion;
+    const startMs = new Date(selectedBitacoraSession.offer.fecha_inicio).getTime();
+    const endMs = startMs + (selectedBitacoraSession.offer.duracion_minutos || 60) * 60 * 1000;
+    return (
+      <BitacoraFormView
+        sessionId={sId}
+        sessionTitle={`${selectedBitacoraSession.offer.nombre_asignatura} (${selectedBitacoraSession.codigo_sesion})`}
+        sessionEndDate={new Date(endMs)}
+        subjectName={selectedBitacoraSession.offer.nombre_asignatura}
+        onBack={() => setSelectedBitacoraSession(null)}
+      />
+    );
+  }
+
   return (
     <div style={{ width: '100%', maxWidth: '980px', margin: '0 auto' }}>
+      {/* Banner accesible de estado */}
+      <div aria-live="polite" style={{ position: 'relative' }}>
+        {statusMessage && (
+          <div
+            style={{
+              backgroundColor: '#DEF7EC',
+              border: '1px solid #31C48D',
+              borderRadius: '8px',
+              padding: '0.85rem 1.25rem',
+              color: '#03543F',
+              marginBottom: '1rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span>✅ {statusMessage}</span>
+            <button
+              type="button"
+              onClick={() => setStatusMessage(null)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: '#03543F' }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Cabecera del Portal de Mentor */}
       <div
         style={{
@@ -235,14 +401,23 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
               style={{
                 backgroundColor: '#FFFFFF',
                 borderRadius: '12px',
-                border: '1px solid #E2E8F0',
+                border: qInfo.isInsufficient ? '2px solid #F59E0B' : '1px solid #E2E8F0',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
                 overflow: 'hidden',
                 transition: 'border-color 0.2s',
               }}
             >
               <div style={{ padding: '1.25rem 1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    flexWrap: 'wrap',
+                    gap: '0.75rem',
+                    marginBottom: '0.75rem',
+                  }}
+                >
                   <div>
                     <span
                       style={{
@@ -270,7 +445,7 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
 
                   {/* Insignia de Quórum Reactivo */}
                   <div style={{ textAlign: 'right' }}>
-                    {qInfo.isQuorumReached ? (
+                    {session.estado === 'CONFIRMADA' || qInfo.isQuorumReached ? (
                       <span
                         style={{
                           backgroundColor: '#DEF7EC',
@@ -286,7 +461,7 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
                       >
                         ✅ Quórum Alcanzado (≥ 50%)
                       </span>
-                    ) : qInfo.isPastDeadline ? (
+                    ) : qInfo.isInsufficient ? (
                       <span
                         style={{
                           backgroundColor: '#FEF3C7',
@@ -300,7 +475,7 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
                           gap: '0.35rem',
                         }}
                       >
-                        ⚠️ Quórum Insuficiente (Corte T-24h)
+                        ⚠️ Quórum Insuficiente (&lt; 3 alumnos confirmados)
                       </span>
                     ) : (
                       <span
@@ -357,7 +532,14 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
 
                 {/* Barra de progreso de Aforo */}
                 <div style={{ marginBottom: '1rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '0.3rem' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      fontSize: '0.78rem',
+                      marginBottom: '0.3rem',
+                    }}
+                  >
                     <span style={{ color: '#475569', fontWeight: 600 }}>
                       Plazas ocupadas: {enrolled ? qInfo.totalEnrolled : '?'} / {qInfo.aforo} (Meta Quórum: {qInfo.quorumTarget})
                     </span>
@@ -378,7 +560,69 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
                 </div>
 
                 {/* Acciones */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  {qInfo.isInsufficient && (
+                    <button
+                      type="button"
+                      onClick={() => openContingencyModal(session)}
+                      style={{
+                        backgroundColor: '#F59E0B',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '0.45rem 1rem',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                      }}
+                    >
+                      ⚡ Resolver Contingencia
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedAttendanceSession(session)}
+                    style={{
+                      backgroundColor: '#1C2A59',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '6px',
+                      padding: '0.45rem 0.85rem',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                    }}
+                  >
+                    📱 Asistencia
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedBitacoraSession(session)}
+                    style={{
+                      backgroundColor: '#B99451',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '6px',
+                      padding: '0.45rem 0.85rem',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                    }}
+                  >
+                    📝 Bitácora
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => loadRoster(sId)}
@@ -470,6 +714,248 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
           );
         })}
       </div>
+
+      {/* Modal Accesible de Resolución de Contingencia (T-32 / WCAG 2.1 AA) */}
+      {contingencySession && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="contingency-modal-title"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              borderRadius: '16px',
+              maxWidth: '560px',
+              width: '100%',
+              padding: '1.75rem',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 id="contingency-modal-title" style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1C2A59', margin: 0 }}>
+                ⚡ Resolución de Quórum Insuficiente
+              </h3>
+              <button
+                type="button"
+                onClick={closeContingencyModal}
+                style={{ background: 'none', border: 'none', fontSize: '1.25rem', cursor: 'pointer', color: '#64748B' }}
+                aria-label="Cerrar modal"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p style={{ fontSize: '0.88rem', color: '#475569', marginBottom: '1.25rem' }}>
+              La sesión <strong>{contingencySession.codigo_sesion}</strong> ({contingencySession.offer.nombre_asignatura})
+              no alcanzó el quórum reglamentario en T-24h. Conforme a la regla <strong>RN-10</strong>, seleccione una acción resolutiva:
+            </p>
+
+            {contingencyError && (
+              <div
+                style={{
+                  backgroundColor: '#FEF2F2',
+                  border: '1px solid #F87171',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1rem',
+                  color: '#991B1B',
+                  fontSize: '0.82rem',
+                  marginBottom: '1rem',
+                }}
+              >
+                ⚠️ {contingencyError}
+              </div>
+            )}
+
+            {/* Opciones Resolutivas */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1.5rem' }}>
+              {/* Opción A: PROCEED */}
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.75rem',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '8px',
+                  border: contingencyDecision === 'PROCEED' ? '2px solid #1C2A59' : '1px solid #CBD5E1',
+                  backgroundColor: contingencyDecision === 'PROCEED' ? '#F8FAFC' : '#FFFFFF',
+                  cursor: 'pointer',
+                }}
+              >
+                <input
+                  type="radio"
+                  name="decision"
+                  value="PROCEED"
+                  checked={contingencyDecision === 'PROCEED'}
+                  onChange={() => setContingencyDecision('PROCEED')}
+                  style={{ marginTop: '0.2rem' }}
+                />
+                <div>
+                  <strong style={{ color: '#1C2A59', display: 'block', fontSize: '0.9rem' }}>
+                    Dictar de Todas Formas
+                  </strong>
+                  <span style={{ fontSize: '0.8rem', color: '#64748B' }}>
+                    Confirmar el dictado de la mentoría con el aforo reducido de estudiantes que ratificaron a tiempo.
+                  </span>
+                </div>
+              </label>
+
+              {/* Opción B: RESCHEDULE */}
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.75rem',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '8px',
+                  border: contingencyDecision === 'RESCHEDULE' ? '2px solid #1C2A59' : '1px solid #CBD5E1',
+                  backgroundColor: contingencyDecision === 'RESCHEDULE' ? '#F8FAFC' : '#FFFFFF',
+                  cursor: 'pointer',
+                }}
+              >
+                <input
+                  type="radio"
+                  name="decision"
+                  value="RESCHEDULE"
+                  checked={contingencyDecision === 'RESCHEDULE'}
+                  onChange={() => setContingencyDecision('RESCHEDULE')}
+                  style={{ marginTop: '0.2rem' }}
+                />
+                <div style={{ width: '100%' }}>
+                  <strong style={{ color: '#1C2A59', display: 'block', fontSize: '0.9rem' }}>
+                    Reprogramar Sesión
+                  </strong>
+                  <span style={{ fontSize: '0.8rem', color: '#64748B', display: 'block', marginBottom: '0.5rem' }}>
+                    Postergar la fecha y hora de la mentoría con al menos 24 horas de antelación (RN-04).
+                  </span>
+                  {contingencyDecision === 'RESCHEDULE' && (
+                    <div>
+                      <input
+                        type="datetime-local"
+                        aria-label="Nueva Fecha y Hora"
+                        value={rescheduleDate}
+                        onChange={(e) => setRescheduleDate(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem',
+                          borderRadius: '6px',
+                          border: '1px solid #94A3B8',
+                          fontSize: '0.85rem',
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </label>
+
+              {/* Opción C: CANCEL */}
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.75rem',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '8px',
+                  border: contingencyDecision === 'CANCEL' ? '2px solid #DC2626' : '1px solid #CBD5E1',
+                  backgroundColor: contingencyDecision === 'CANCEL' ? '#FEF2F2' : '#FFFFFF',
+                  cursor: 'pointer',
+                }}
+              >
+                <input
+                  type="radio"
+                  name="decision"
+                  value="CANCEL"
+                  checked={contingencyDecision === 'CANCEL'}
+                  onChange={() => setContingencyDecision('CANCEL')}
+                  style={{ marginTop: '0.2rem' }}
+                />
+                <div style={{ width: '100%' }}>
+                  <strong style={{ color: '#991B1B', display: 'block', fontSize: '0.9rem' }}>
+                    Cancelar Sesión Definitivamente
+                  </strong>
+                  <span style={{ fontSize: '0.8rem', color: '#64748B', display: 'block', marginBottom: '0.5rem' }}>
+                    Anular la sesión liberando a los estudiantes inscritos sin penalidad alguna (RN-10).
+                  </span>
+                  {contingencyDecision === 'CANCEL' && (
+                    <div>
+                      <textarea
+                        aria-label="Motivo de Cancelación"
+                        placeholder="Ingrese la justificación académica de cancelación obligatoria..."
+                        value={cancelReason}
+                        onChange={(e) => setCancelReason(e.target.value)}
+                        rows={3}
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem',
+                          borderRadius: '6px',
+                          border: '1px solid #94A3B8',
+                          fontSize: '0.85rem',
+                          resize: 'vertical',
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </label>
+            </div>
+
+            {/* Botones de acción */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              <button
+                type="button"
+                onClick={closeContingencyModal}
+                disabled={isSubmittingContingency}
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #CBD5E1',
+                  borderRadius: '8px',
+                  padding: '0.6rem 1.25rem',
+                  fontSize: '0.88rem',
+                  fontWeight: 600,
+                  color: '#475569',
+                  cursor: 'pointer',
+                }}
+              >
+                Cerrar
+              </button>
+              <button
+                type="button"
+                onClick={handleContingencySubmit}
+                disabled={isSubmittingContingency}
+                style={{
+                  backgroundColor: '#1C2A59',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '0.6rem 1.5rem',
+                  fontSize: '0.88rem',
+                  fontWeight: 700,
+                  cursor: isSubmittingContingency ? 'not-allowed' : 'pointer',
+                  opacity: isSubmittingContingency ? 0.7 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                }}
+              >
+                {isSubmittingContingency && <span>⏳</span>}
+                <span>Confirmar Decisión</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

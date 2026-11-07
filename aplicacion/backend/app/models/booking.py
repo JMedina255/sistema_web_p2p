@@ -32,7 +32,7 @@ class ReservaCupo(Base):
     estado: Mapped[str] = mapped_column(
         String(30),
         CheckConstraint(
-            "estado IN ('PENDIENTE_CONFIRMACION', 'CONFIRMADA', 'CANCELADA_USUARIO', 'NO_CONFIRMADA', 'CANCELADA_SISTEMA', 'ASISTIDA', 'INASISTENCIA')",
+            "estado IN ('PENDIENTE_CONFIRMACION', 'CONFIRMADA', 'CANCELADA_USUARIO', 'NO_CONFIRMADA', 'CANCELADA_NO_CONFIRMADA', 'CANCELADA_SISTEMA', 'CANCELADA_SISTEMA_QUORUM', 'ASISTIDA', 'INASISTENCIA')",
             name="chk_reserva_estado",
         ),
         default="PENDIENTE_CONFIRMACION",

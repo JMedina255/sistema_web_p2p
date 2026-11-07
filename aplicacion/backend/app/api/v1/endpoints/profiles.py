@@ -72,6 +72,23 @@ def _resolve_authenticated_email(
     )
 
 
+def _extract_caller_and_admin_status(
+    authorization: str | None,
+    explicit_email: str | None = None,
+) -> tuple[str, bool]:
+    caller_email = _resolve_authenticated_email(
+        authorization, explicit_email=explicit_email, allow_admin_override=True
+    )
+    is_admin = False
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.split(" ", 1)[1].strip()
+        decoded = decode_access_token(token)
+        if decoded and "administrador" in decoded.get("roles", []):
+            is_admin = True
+    return caller_email, is_admin
+
+
+
 @router.get(
     "/me",
     response_model=AcademicProfileResponse,

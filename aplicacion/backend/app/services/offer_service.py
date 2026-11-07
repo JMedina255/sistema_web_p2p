@@ -1,13 +1,19 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Literal
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.models.booking import ReservaCupo
 from app.models.offer import SesionMentoria
 from app.models.profile import PerfilAcademico
 from app.models.roles import Rol, UsuarioRol
-from app.schemas.offer import PublishOfferPayload, PublishOfferResponse
+from app.schemas.offer import (
+    PublishOfferPayload,
+    PublishOfferResponse,
+    QuorumDecisionPayload,
+    QuorumDecisionResponse,
+)
 
 # Almacén en memoria de respaldo para ofertas
 _memory_offers: list[dict] = []
@@ -32,7 +38,6 @@ def seed_default_offers_in_memory() -> None:
         return
     # Oferta 1: Cálculo I por Renzo (Ciclo VII) - Presencial
     now = datetime.now(UTC)
-    from datetime import timedelta
 
     f1 = (now + timedelta(days=3, hours=2)).replace(minute=0, second=0, microsecond=0)
     f2 = (now + timedelta(days=4, hours=4)).replace(minute=0, second=0, microsecond=0)
@@ -406,3 +411,247 @@ class OfferService:
             )
 
         return results
+
+    @classmethod
+    def resolve_quorum_decision(
+        cls,
+        db: Session | None,
+        id_sesion: int,
+        payload: QuorumDecisionPayload,
+        caller_email: str | None = None,
+        is_admin: bool = False,
+    ) -> QuorumDecisionResponse:
+        """
+        Gestiona la decisión resolutiva del mentor ante quórum insuficiente (T-33 / RF16 / CUS07 / RN-04 / RN-10).
+        Opciones:
+        - PROCEED: Confirma el dictado de la sesión con aforo reducido (estado -> CONFIRMADA).
+        - RESCHEDULE: Reprograma fecha/hora con antelación > 24h (estado -> PUBLICADA).
+        - CANCEL: Cancela definitivamente con justificativo obligatorio (estado -> CANCELADA_QUORUM) y libera reservas.
+        """
+        now_utc = datetime.now(UTC)
+
+        # 1. Base de datos relacional
+        if db is not None:
+            sesion = db.query(SesionMentoria).filter(SesionMentoria.id_sesion == id_sesion).first()
+            if not sesion:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="NOT_FOUND: La sesión de mentoría especificada no existe.",
+                )
+
+            # Control de titularidad y autorización (RNF02)
+            if caller_email:
+                clean_caller = caller_email.strip().lower()
+                clean_mentor = sesion.mentor_email.strip().lower()
+                if clean_caller != clean_mentor:
+                    has_admin_role = is_admin
+                    if not has_admin_role:
+                        try:
+                            admin_rol = db.query(Rol).filter(Rol.nombre_rol == "administrador").first()
+                            if admin_rol:
+                                has_admin = (
+                                    db.query(UsuarioRol)
+                                    .filter(
+                                        UsuarioRol.email == clean_caller,
+                                        UsuarioRol.id_rol == admin_rol.id_rol,
+                                        UsuarioRol.activo.is_(True),
+                                    )
+                                    .first()
+                                )
+                                if has_admin:
+                                    has_admin_role = True
+                        except Exception:
+                            pass
+                    if not has_admin_role:
+                        raise HTTPException(
+                            status_code=status.HTTP_403_FORBIDDEN,
+                            detail="FORBIDDEN: Solo el mentor titular o un administrador pueden resolver la contingencia de quórum.",
+                        )
+
+            if sesion.estado not in ("QUORUM_INSUFICIENTE", "PUBLICADA", "PENDIENTE_CONFIRMACION"):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"INVALID_SESSION_STATE: La sesión se encuentra en estado '{sesion.estado}' y no admite resolución de contingencia.",
+                )
+
+            if payload.decision == "PROCEED":
+                sesion.estado = "CONFIRMADA"
+                db.commit()
+                return QuorumDecisionResponse(
+                    id_sesion=sesion.id_sesion,
+                    codigo_sesion=sesion.codigo_sesion,
+                    decision="PROCEED",
+                    estado_nuevo="CONFIRMADA",
+                    mensaje="El mentor ha resuelto dictar la mentoría con aforo reducido. Sesión confirmada exitosamente.",
+                )
+
+            elif payload.decision == "RESCHEDULE":
+                if not payload.new_start_time:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="NEW_START_TIME_REQUIRED: Debe proporcionar la nueva fecha y hora para reprogramar la sesión.",
+                    )
+                try:
+                    raw_dt = datetime.fromisoformat(payload.new_start_time.replace("Z", "+00:00"))
+                    if raw_dt.tzinfo is None:
+                        raw_dt = raw_dt.replace(tzinfo=UTC)
+                except Exception:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="INVALID_DATETIME: Formato de nueva fecha y hora inválido (utilice ISO 8601).",
+                    ) from None
+
+                if (raw_dt - now_utc).total_seconds() / 3600.0 <= 24.0:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="INSUFFICIENT_RESCHEDULE_ADVANCE: La nueva fecha de la sesión debe programarse con al menos 24 horas de antelación respecto al momento actual (RN-04).",
+                    )
+
+                sesion.fecha_inicio = raw_dt
+                sesion.estado = "PUBLICADA"
+                sesion.quorumevaluated_at = None
+                db.commit()
+
+                return QuorumDecisionResponse(
+                    id_sesion=sesion.id_sesion,
+                    codigo_sesion=sesion.codigo_sesion,
+                    decision="RESCHEDULE",
+                    estado_nuevo="PUBLICADA",
+                    mensaje=f"Sesión reprogramada exitosamente para {raw_dt.isoformat()}. Se ha restablecido en cartelera pública.",
+                    nueva_fecha_inicio=raw_dt.isoformat(),
+                )
+
+            elif payload.decision == "CANCEL":
+                if not payload.reason or not payload.reason.strip():
+                    raise HTTPException(
+                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                        detail="REASON_REQUIRED: Debe ingresar obligatoriamente un motivo justificado para proceder con la cancelación definitiva.",
+                    )
+
+                sesion.estado = "CANCELADA_QUORUM"
+                # Cancelar reservas de estudiantes sin penalización
+                bookings = (
+                    db.query(ReservaCupo)
+                    .filter(
+                        ReservaCupo.id_sesion == id_sesion,
+                        ReservaCupo.estado.in_(["PENDIENTE_CONFIRMACION", "CONFIRMADA"]),
+                    )
+                    .all()
+                )
+                for b in bookings:
+                    b.estado = "CANCELADA_SISTEMA_QUORUM"
+                    b.motivo_cancelacion = f"Cancelación por quórum insuficiente: {payload.reason.strip()}"
+
+                db.commit()
+
+                return QuorumDecisionResponse(
+                    id_sesion=sesion.id_sesion,
+                    codigo_sesion=sesion.codigo_sesion,
+                    decision="CANCEL",
+                    estado_nuevo="CANCELADA_QUORUM",
+                    mensaje=f"Sesión cancelada definitivamente por el mentor. Motivo registrado: '{payload.reason.strip()}'.",
+                )
+
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="INVALID_DECISION: La decisión debe ser 'PROCEED', 'RESCHEDULE' o 'CANCEL'.",
+            )
+
+        # 2. Fallback en memoria
+        target = None
+        for off in _memory_offers:
+            if off.get("id_sesion") == id_sesion or str(off.get("id_sesion")) == str(id_sesion):
+                target = off
+                break
+
+        if not target:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="NOT_FOUND: La sesión de mentoría especificada no existe.",
+            )
+
+        if caller_email:
+            clean_caller = caller_email.strip().lower()
+            clean_mentor = target["mentor_email"].strip().lower()
+            if not is_admin and clean_caller != clean_mentor:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="FORBIDDEN: Solo el mentor titular o un administrador pueden resolver la contingencia de quórum.",
+                )
+
+        if payload.decision == "PROCEED":
+            target["estado"] = "CONFIRMADA"
+            return QuorumDecisionResponse(
+                id_sesion=id_sesion,
+                codigo_sesion=target.get("codigo_sesion", f"SES-{id_sesion}"),
+                decision="PROCEED",
+                estado_nuevo="CONFIRMADA",
+                mensaje="El mentor ha resuelto dictar la mentoría con aforo reducido. Sesión confirmada exitosamente.",
+            )
+
+        elif payload.decision == "RESCHEDULE":
+            if not payload.new_start_time:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="NEW_START_TIME_REQUIRED: Debe proporcionar la nueva fecha y hora para reprogramar la sesión.",
+                )
+            try:
+                raw_dt = datetime.fromisoformat(payload.new_start_time.replace("Z", "+00:00"))
+                if raw_dt.tzinfo is None:
+                    raw_dt = raw_dt.replace(tzinfo=UTC)
+            except Exception:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="INVALID_DATETIME: Formato de nueva fecha y hora inválido (utilice ISO 8601).",
+                ) from None
+
+            if (raw_dt - now_utc).total_seconds() / 3600.0 <= 24.0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="INSUFFICIENT_RESCHEDULE_ADVANCE: La nueva fecha de la sesión debe programarse con al menos 24 horas de antelación respecto al momento actual (RN-04).",
+                )
+
+            target["fecha_inicio"] = raw_dt.isoformat()
+            target["estado"] = "PUBLICADA"
+            target["quorumevaluated_at"] = None
+
+            return QuorumDecisionResponse(
+                id_sesion=id_sesion,
+                codigo_sesion=target.get("codigo_sesion", f"SES-{id_sesion}"),
+                decision="RESCHEDULE",
+                estado_nuevo="PUBLICADA",
+                mensaje=f"Sesión reprogramada exitosamente para {raw_dt.isoformat()}. Se ha restablecido en cartelera pública.",
+                nueva_fecha_inicio=raw_dt.isoformat(),
+            )
+
+        elif payload.decision == "CANCEL":
+            if not payload.reason or not payload.reason.strip():
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="REASON_REQUIRED: Debe ingresar obligatoriamente un motivo justificado para proceder con la cancelación definitiva.",
+                )
+
+            target["estado"] = "CANCELADA_QUORUM"
+            from app.services.booking_service import _booking_lock, _memory_bookings
+
+            with _booking_lock:
+                for b in _memory_bookings:
+                    if (b["id_sesion"] == id_sesion or str(b["id_sesion"]) == str(id_sesion)) and b[
+                        "estado"
+                    ] in ["PENDIENTE_CONFIRMACION", "CONFIRMADA"]:
+                        b["estado"] = "CANCELADA_SISTEMA_QUORUM"
+                        b["motivo_cancelacion"] = f"Cancelación por quórum insuficiente: {payload.reason.strip()}"
+
+            return QuorumDecisionResponse(
+                id_sesion=id_sesion,
+                codigo_sesion=target.get("codigo_sesion", f"SES-{id_sesion}"),
+                decision="CANCEL",
+                estado_nuevo="CANCELADA_QUORUM",
+                mensaje=f"Sesión cancelada definitivamente por el mentor. Motivo registrado: '{payload.reason.strip()}'.",
+            )
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="INVALID_DECISION: La decisión debe ser 'PROCEED', 'RESCHEDULE' o 'CANCEL'.",
+        )
+

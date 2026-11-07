@@ -56,14 +56,7 @@ class PublishOfferPayload(BaseModel):
 class PublishOfferResponse(BaseModel):
     id_oferta: str
     codigo_sesion: str
-    estado: Literal[
-        "PUBLICADA",
-        "PENDIENTE_CONFIRMACION",
-        "CONFIRMADA",
-        "CANCELADA_SISTEMA",
-        "CANCELADA_MENTOR",
-        "FINALIZADA",
-    ] = "PUBLICADA"
+    estado: str = "PUBLICADA"
     mensaje: str
     fecha_publicacion: str
     aforo: int
@@ -77,3 +70,33 @@ class OfferFilterParams(BaseModel):
     id_asignatura: int | None = None
     modalidad: Literal["presencial", "virtual"] | None = None
     estado: str | None = None
+
+
+class QuorumDecisionPayload(BaseModel):
+    """
+    Payload para resolución de contingencia de quórum por el mentor (T-33 / RF16 / CUS07 / RN-10).
+    """
+
+    decision: Literal["PROCEED", "RESCHEDULE", "CANCEL"] = Field(
+        ..., description="Decisión resolutiva reglamentaria del mentor."
+    )
+    new_start_time: str | None = Field(
+        None, description="Nueva fecha y hora en formato ISO 8601 (requerida para RESCHEDULE con > 24h)."
+    )
+    reason: str | None = Field(
+        None, description="Motivo académico justificado (requerido para CANCEL)."
+    )
+
+
+class QuorumDecisionResponse(BaseModel):
+    """
+    Respuesta de resolución de contingencia de quórum.
+    """
+
+    id_sesion: int
+    codigo_sesion: str
+    decision: str
+    estado_nuevo: str
+    mensaje: str
+    nueva_fecha_inicio: str | None = None
+

@@ -530,4 +530,19 @@ export const authService = {
   isAuthenticated(): boolean {
     return Boolean(this.getToken());
   },
+
+  getCurrentUser(): { email?: string } | null {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const parts = token.split('.');
+      if (parts.length >= 2) {
+        const payload = JSON.parse(atob(parts[1]));
+        return { email: payload.email || payload.sub };
+      }
+    } catch {
+      // Ignore parse failure
+    }
+    return null;
+  },
 };

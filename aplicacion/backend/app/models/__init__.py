@@ -1,4 +1,6 @@
+from app.models.attendance import AsistenciaSesion
 from app.models.auth import AuthChallenge
+from app.models.bitacora import BitacoraPedagogica
 from app.models.booking import ReservaCupo, SolicitudDemanda
 from app.models.consent import ConsentimientoLegal
 from app.models.curriculum import Asignatura, TemaConceptual
@@ -18,4 +20,6 @@ __all__ = [
     "SesionMentoria",
     "ReservaCupo",
     "SolicitudDemanda",
+    "BitacoraPedagogica",
+    "AsistenciaSesion",
 ]

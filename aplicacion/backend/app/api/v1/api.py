@@ -1,7 +1,9 @@
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
+    attendance,
     auth,
+    bitacora,
     bookings,
     consent,
     curriculum,
@@ -26,3 +28,5 @@ api_router.include_router(
 )
 api_router.include_router(bookings.router, prefix="/bookings", tags=["Reservas de Cupos"])
 api_router.include_router(quorum.router, prefix="/quorum", tags=["Evaluación de Quórum"])
+api_router.include_router(attendance.router, prefix="/sessions", tags=["Control de Asistencias & TOTP"])
+api_router.include_router(bitacora.router, prefix="/sessions", tags=["Bitácoras Pedagógicas"])
