@@ -120,10 +120,9 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
   // ==========================================================================
   it('2. Bloquea el acceso a Mis Reservas sin sesión activa y permite redirigir al login', async () => {
     authService.clearToken();
+    window.history.pushState({}, '', '?tab=bookings');
 
     render(<App />);
-    const bookingsTab = screen.getByRole('button', { name: /^📅 Mis Reservas$/i });
-    fireEvent.click(bookingsTab);
 
     await waitFor(() => {
       expect(screen.getByText(/Acceso Restringido a Mis Reservas/i)).toBeInTheDocument();

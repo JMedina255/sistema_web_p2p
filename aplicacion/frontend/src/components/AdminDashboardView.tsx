@@ -18,7 +18,7 @@ export interface AdminDashboardViewProps {
 }
 
 export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
-  adminEmail = 'admin.epis@upt.pe',
+  adminEmail = '',
   showDevControls = false,
 }) => {
   const isDev = showDevControls && !import.meta.env.PROD;

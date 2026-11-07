@@ -390,21 +390,30 @@ describe('BookingIntegration Flow (T-23 / RF06 / RF12 / CUS02 / CUS04)', () => {
 
   it('11. Bloquea el flujo de reserva e induce autenticación si no existe sesión institucional activa (Auditoría B.2)', async () => {
     authService.clearToken();
-    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    window.history.pushState({}, '', '?tab=recommendations');
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /^🎯 Explorar mentorías$/i }));
 
-    const reserveButtons = await screen.findAllByRole('button', { name: /Reservar Cupo/i });
-    fireEvent.click(reserveButtons[0]);
+    // Con guardas RBAC, el feed privado no se monta y se despliega acceso restringido
+    await waitFor(() => {
+      expect(screen.getByText(/Acceso Restringido a Explorar mentorías/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/debes iniciar sesión con tu cuenta institucional/i)
+      ).toBeInTheDocument();
+    });
 
-    // Debe mostrar alerta institucional y no abrir el diálogo de reserva
-    expect(alertMock).toHaveBeenCalledWith(
-      expect.stringMatching(/Debes iniciar sesión con tu cuenta institucional @upt\.pe/i)
-    );
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
     // Debe inducir la navegación hacia el login
-    expect(screen.getByRole('button', { name: /Iniciar sesión/i })).toBeInTheDocument();
+    const loginRedirectBtn = screen.getByRole('button', {
+      name: /Iniciar Sesión Institucional/i,
+    });
+    fireEvent.click(loginRedirectBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.getAllByRole('heading', { name: /Iniciar Sesión Institucional/i }).length
+      ).toBeGreaterThanOrEqual(1);
+    });
   });
 });
