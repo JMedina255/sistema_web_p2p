@@ -5,6 +5,7 @@ Sembrado de roles para usuarios institucionales (admin, mentores, estudiantes) y
 
 from datetime import UTC, datetime
 
+from app.core.config import settings
 from app.db.session import get_engine, get_session
 from app.models.consent import ConsentimientoLegal
 from app.models.profile import DisponibilidadHoraria, PerfilAcademico
@@ -12,6 +13,10 @@ from app.models.roles import Rol, UsuarioRol
 
 
 def seed_database():
+    if settings.APP_ENV == "production":
+        print("ADVERTENCIA: seed_database deshabilitado en entorno de producción por razones de seguridad.")
+        return
+
     engine = get_engine()
     if engine is None:
         print("DATABASE_URL no configurada. Saltando siembra.")
