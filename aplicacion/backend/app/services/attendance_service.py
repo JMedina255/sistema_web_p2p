@@ -55,6 +55,12 @@ class AttendanceService:
         if now_utc is None:
             now_utc = datetime.now(UTC)
 
+        if not caller_email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Se requiere autenticación para generar el token de asistencia.",
+            )
+
         # 1. Base de datos
         if db is not None:
             sesion = db.query(SesionMentoria).filter(SesionMentoria.id_sesion == session_id).first()
@@ -64,33 +70,32 @@ class AttendanceService:
                     detail="NOT_FOUND: La sesión de mentoría no existe.",
                 )
 
-            if caller_email:
-                clean_caller = caller_email.strip().lower()
-                clean_mentor = sesion.mentor_email.strip().lower()
-                if clean_caller != clean_mentor:
-                    has_admin_role = is_admin
-                    if not has_admin_role:
-                        try:
-                            admin_rol = db.query(Rol).filter(Rol.nombre_rol == "administrador").first()
-                            if admin_rol:
-                                has_admin = (
-                                    db.query(UsuarioRol)
-                                    .filter(
-                                        UsuarioRol.email == clean_caller,
-                                        UsuarioRol.id_rol == admin_rol.id_rol,
-                                        UsuarioRol.activo.is_(True),
-                                    )
-                                    .first()
+            clean_caller = caller_email.strip().lower()
+            clean_mentor = sesion.mentor_email.strip().lower()
+            if clean_caller != clean_mentor:
+                has_admin_role = is_admin
+                if not has_admin_role:
+                    try:
+                        admin_rol = db.query(Rol).filter(Rol.nombre_rol == "administrador").first()
+                        if admin_rol:
+                            has_admin = (
+                                db.query(UsuarioRol)
+                                .filter(
+                                    UsuarioRol.email == clean_caller,
+                                    UsuarioRol.id_rol == admin_rol.id_rol,
+                                    UsuarioRol.activo.is_(True),
                                 )
-                                if has_admin:
-                                    has_admin_role = True
-                        except Exception:
-                            pass
-                    if not has_admin_role:
-                        raise HTTPException(
-                            status_code=status.HTTP_403_FORBIDDEN,
-                            detail="FORBIDDEN: Solo el mentor titular o un administrador pueden generar el token de asistencia.",
-                        )
+                                .first()
+                            )
+                            if has_admin:
+                                has_admin_role = True
+                    except Exception:
+                        pass
+                if not has_admin_role:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="FORBIDDEN: Solo el mentor titular o un administrador pueden generar el token de asistencia.",
+                    )
         else:
             target = next(
                 (o for o in _memory_offers if o.get("id_sesion") == session_id or str(o.get("id_sesion")) == str(session_id)),
@@ -101,14 +106,13 @@ class AttendanceService:
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="NOT_FOUND: La sesión de mentoría no existe.",
                 )
-            if caller_email:
-                clean_caller = caller_email.strip().lower()
-                clean_mentor = target["mentor_email"].strip().lower()
-                if not is_admin and clean_caller != clean_mentor:
-                    raise HTTPException(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        detail="FORBIDDEN: Solo el mentor titular o un administrador pueden generar el token de asistencia.",
-                    )
+            clean_caller = caller_email.strip().lower()
+            clean_mentor = target["mentor_email"].strip().lower()
+            if not is_admin and clean_caller != clean_mentor:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="FORBIDDEN: Solo el mentor titular o un administrador pueden generar el token de asistencia.",
+                )
 
         # Generar token y código numérico TOTP de 6 dígitos
         raw_seed = f"{session_id}:{now_utc.timestamp()}:{secrets.token_hex(8)}"

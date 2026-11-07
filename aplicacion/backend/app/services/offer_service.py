@@ -190,6 +190,7 @@ class OfferService:
         db: Session | None,
         payload: PublishOfferPayload,
         caller_email: str | None = None,
+        is_admin: bool = False,
     ) -> PublishOfferResponse:
         """
         Publica una oferta de mentoría académica aplicando RN-03, RN-04 y RN-05.
@@ -197,13 +198,11 @@ class OfferService:
         global _session_counter
         # 1. Resolver y validar identidad
         effective_email = payload.mentor_email.strip().lower()
-        if caller_email and caller_email.strip().lower() != effective_email:
-            # Solo administradores pueden publicar a nombre de otro
-            if "admin" not in caller_email:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="No tiene autorización para publicar ofertas en nombre de otro usuario.",
-                )
+        if caller_email is not None and caller_email.strip().lower() != effective_email and not is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tiene autorización para publicar ofertas en nombre de otro usuario.",
+            )
 
         # 2. Validar mérito académico RN-03
         cls.validate_mentor_eligibility(db, effective_email)
@@ -440,33 +439,37 @@ class OfferService:
                 )
 
             # Control de titularidad y autorización (RNF02)
-            if caller_email:
-                clean_caller = caller_email.strip().lower()
-                clean_mentor = sesion.mentor_email.strip().lower()
-                if clean_caller != clean_mentor:
-                    has_admin_role = is_admin
-                    if not has_admin_role:
-                        try:
-                            admin_rol = db.query(Rol).filter(Rol.nombre_rol == "administrador").first()
-                            if admin_rol:
-                                has_admin = (
-                                    db.query(UsuarioRol)
-                                    .filter(
-                                        UsuarioRol.email == clean_caller,
-                                        UsuarioRol.id_rol == admin_rol.id_rol,
-                                        UsuarioRol.activo.is_(True),
-                                    )
-                                    .first()
+            if not caller_email:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Se requiere autenticación para resolver la contingencia de quórum.",
+                )
+            clean_caller = caller_email.strip().lower()
+            clean_mentor = sesion.mentor_email.strip().lower()
+            if clean_caller != clean_mentor:
+                has_admin_role = is_admin
+                if not has_admin_role:
+                    try:
+                        admin_rol = db.query(Rol).filter(Rol.nombre_rol == "administrador").first()
+                        if admin_rol:
+                            has_admin = (
+                                db.query(UsuarioRol)
+                                .filter(
+                                    UsuarioRol.email == clean_caller,
+                                    UsuarioRol.id_rol == admin_rol.id_rol,
+                                    UsuarioRol.activo.is_(True),
                                 )
-                                if has_admin:
-                                    has_admin_role = True
-                        except Exception:
-                            pass
-                    if not has_admin_role:
-                        raise HTTPException(
-                            status_code=status.HTTP_403_FORBIDDEN,
-                            detail="FORBIDDEN: Solo el mentor titular o un administrador pueden resolver la contingencia de quórum.",
-                        )
+                                .first()
+                            )
+                            if has_admin:
+                                has_admin_role = True
+                    except Exception:
+                        pass
+                if not has_admin_role:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="FORBIDDEN: Solo el mentor titular o un administrador pueden resolver la contingencia de quórum.",
+                    )
 
             if sesion.estado not in ("QUORUM_INSUFICIENTE", "PUBLICADA", "PENDIENTE_CONFIRMACION"):
                 raise HTTPException(
@@ -570,14 +573,19 @@ class OfferService:
                 detail="NOT_FOUND: La sesión de mentoría especificada no existe.",
             )
 
-        if caller_email:
-            clean_caller = caller_email.strip().lower()
-            clean_mentor = target["mentor_email"].strip().lower()
-            if not is_admin and clean_caller != clean_mentor:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="FORBIDDEN: Solo el mentor titular o un administrador pueden resolver la contingencia de quórum.",
-                )
+        if not caller_email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Se requiere autenticación para resolver la contingencia de quórum.",
+            )
+
+        clean_caller = caller_email.strip().lower()
+        clean_mentor = target["mentor_email"].strip().lower()
+        if not is_admin and clean_caller != clean_mentor:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="FORBIDDEN: Solo el mentor titular o un administrador pueden resolver la contingencia de quórum.",
+            )
 
         if payload.decision == "PROCEED":
             target["estado"] = "CONFIRMADA"

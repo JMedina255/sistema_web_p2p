@@ -1,8 +1,11 @@
-from fastapi import APIRouter, Depends, Header, HTTPException, Path, status
+from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
-from app.core.security import decode_access_token
+from app.core.dependencies import (
+    AuthenticatedUser,
+    check_resource_ownership,
+    get_current_user,
+)
 from app.db.session import get_optional_session
 from app.schemas.roles import (
     PromoteMentorRequest,
@@ -24,8 +27,15 @@ router = APIRouter()
 )
 def get_user_roles(
     email: str = Path(..., description="Correo electrónico institucional @upt.pe"),
+    current_user: AuthenticatedUser = Depends(get_current_user),
     db: Session | None = Depends(get_optional_session),
 ):
+    check_resource_ownership(
+        current_user=current_user,
+        owner_email=email,
+        allow_admin=True,
+        error_message="Violación de autorización: no tiene permisos para consultar roles de otro usuario.",
+    )
     roles = RoleService.get_user_roles(db=db, email=email)
     return UserRolesResponse(email=email, roles=roles, is_active=True)
 
@@ -39,50 +49,22 @@ def get_user_roles(
 )
 def promote_mentor(
     payload: PromoteMentorRequest,
-    authorization: str | None = Header(None, description="Token JWT de autorización"),
+    current_user: AuthenticatedUser = Depends(get_current_user),
     db: Session | None = Depends(get_optional_session),
 ):
-    assigned_by = payload.assigned_by
-
-    if authorization:
-        if not authorization.startswith("Bearer "):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Formato de cabecera Authorization inválido. Se espera Bearer <token>.",
-            )
-        token = authorization.split(" ", 1)[1].strip()
-        decoded = decode_access_token(token)
-        if not decoded:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token de autenticación expirado o inválido.",
-            )
-
-        caller_email = decoded.get("sub") or decoded.get("email")
-        if not caller_email:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="El token no contiene una identidad de usuario válida.",
-            )
-
-        caller_roles = decoded.get("roles", [])
-        # Denegación de autopromoción si el usuario intenta promoverse a sí mismo sin rol de administrador
-        if (
-            caller_email.strip().lower() == payload.email.strip().lower()
-            and "administrador" not in caller_roles
-        ):
+    # Control estricto de privilegios administrativos
+    if not current_user.is_admin:
+        if current_user.email == payload.email.strip().lower():
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="La autopromoción al rol de mentor no está permitida. Requiere autorización o asignación por la administración institucional.",
             )
-        if not assigned_by:
-            assigned_by = caller_email
-    elif settings.APP_ENV not in ("development", "test", "testing"):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Se requiere autenticación mediante cabecera Authorization: Bearer <token>.",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Violación de autorización: la promoción al rol de mentor requiere privilegios de administrador.",
         )
 
+    assigned_by = payload.assigned_by or current_user.email
     return RoleService.promote_to_mentor(
         db=db,
         email=payload.email,
@@ -99,48 +81,17 @@ def promote_mentor(
 )
 def revoke_mentor(
     payload: RevokeMentorRequest,
-    authorization: str | None = Header(None),
+    current_user: AuthenticatedUser = Depends(get_current_user),
     db: Session | None = Depends(get_optional_session),
 ):
-    revoked_by = payload.revoked_by
-    if authorization:
-        if not authorization.startswith("Bearer "):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Formato de cabecera Authorization inválido. Se espera Bearer <token>.",
-            )
-        token = authorization.split(" ", 1)[1].strip()
-        decoded = decode_access_token(token)
-        if not decoded:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token de autenticación expirado o inválido.",
-            )
-
-        caller_email = decoded.get("sub") or decoded.get("email")
-        if not caller_email:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="El token no contiene una identidad de usuario válida.",
-            )
-
-        caller_roles = decoded.get("roles", [])
-        if (
-            "administrador" not in caller_roles
-            and caller_email.strip().lower() != payload.email.strip().lower()
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Violación de autorización: no tiene permisos para revocar roles de otro usuario.",
-            )
-        if not revoked_by:
-            revoked_by = caller_email
-    elif settings.APP_ENV not in ("development", "test", "testing"):
+    # Control estricto de privilegios administrativos
+    if not current_user.is_admin:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Se requiere autenticación mediante cabecera Authorization: Bearer <token>.",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Violación de autorización: la revocación de roles institucionales requiere privilegios de administrador.",
         )
 
+    revoked_by = payload.revoked_by or current_user.email
     return RoleService.revoke_mentor(
         db=db,
         email=payload.email,

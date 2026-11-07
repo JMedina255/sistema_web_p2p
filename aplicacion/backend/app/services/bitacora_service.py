@@ -57,33 +57,37 @@ class BitacoraService:
                 )
 
             # Control de titularidad del mentor
-            if caller_email:
-                clean_caller = caller_email.strip().lower()
-                clean_mentor = sesion.mentor_email.strip().lower()
-                if clean_caller != clean_mentor:
-                    has_admin_role = is_admin
-                    if not has_admin_role:
-                        try:
-                            admin_rol = db.query(Rol).filter(Rol.nombre_rol == "administrador").first()
-                            if admin_rol:
-                                has_admin = (
-                                    db.query(UsuarioRol)
-                                    .filter(
-                                        UsuarioRol.email == clean_caller,
-                                        UsuarioRol.id_rol == admin_rol.id_rol,
-                                        UsuarioRol.activo.is_(True),
-                                    )
-                                    .first()
+            if not caller_email:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Se requiere autenticación para registrar la bitácora pedagógica.",
+                )
+            clean_caller = caller_email.strip().lower()
+            clean_mentor = sesion.mentor_email.strip().lower()
+            if clean_caller != clean_mentor:
+                has_admin_role = is_admin
+                if not has_admin_role:
+                    try:
+                        admin_rol = db.query(Rol).filter(Rol.nombre_rol == "administrador").first()
+                        if admin_rol:
+                            has_admin = (
+                                db.query(UsuarioRol)
+                                .filter(
+                                    UsuarioRol.email == clean_caller,
+                                    UsuarioRol.id_rol == admin_rol.id_rol,
+                                    UsuarioRol.activo.is_(True),
                                 )
-                                if has_admin:
-                                    has_admin_role = True
-                        except Exception:
-                            pass
-                    if not has_admin_role:
-                        raise HTTPException(
-                            status_code=status.HTTP_403_FORBIDDEN,
-                            detail="FORBIDDEN: Solo el mentor titular o un administrador pueden registrar la bitácora pedagógica.",
-                        )
+                                .first()
+                            )
+                            if has_admin:
+                                has_admin_role = True
+                    except Exception:
+                        pass
+                if not has_admin_role:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="FORBIDDEN: Solo el mentor titular o un administrador pueden registrar la bitácora pedagógica.",
+                    )
 
             # Validación de ventana temporal de 48 horas (RN-12)
             s_start = sesion.fecha_inicio
@@ -170,14 +174,19 @@ class BitacoraService:
                     detail="NOT_FOUND: La sesión de mentoría no existe.",
                 )
 
-            if caller_email:
-                clean_caller = caller_email.strip().lower()
-                clean_mentor = target["mentor_email"].strip().lower()
-                if not is_admin and clean_caller != clean_mentor:
-                    raise HTTPException(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        detail="FORBIDDEN: Solo el mentor titular o un administrador pueden registrar la bitácora pedagógica.",
-                    )
+            if not caller_email:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Se requiere autenticación para registrar la bitácora pedagógica.",
+                )
+
+            clean_caller = caller_email.strip().lower()
+            clean_mentor = target["mentor_email"].strip().lower()
+            if not is_admin and clean_caller != clean_mentor:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="FORBIDDEN: Solo el mentor titular o un administrador pueden registrar la bitácora pedagógica.",
+                )
 
             f_str = target.get("fecha_inicio", "")
             try:

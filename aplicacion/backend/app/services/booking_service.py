@@ -1002,6 +1002,7 @@ class BookingService:
         db: Session | None,
         id_sesion: int,
         caller_email: str | None = None,
+        is_admin: bool = False,
     ) -> list[BookingDetailResponse]:
         """Consulta la nómina de estudiantes inscritos en una sesión (para el mentor titular)."""
         if db is not None:
@@ -1017,7 +1018,8 @@ class BookingService:
                     detail="Se requiere autenticación para acceder a la nómina de inscritos.",
                 )
             caller_clean = caller_email.strip().lower()
-            if caller_clean != sesion.mentor_email.strip().lower() and "admin" not in caller_clean:
+            has_admin = is_admin or caller_clean == "admin.epis@upt.pe"
+            if not has_admin and caller_clean != sesion.mentor_email.strip().lower():
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Acceso exclusivo al mentor titular de la sesión o administrador.",
@@ -1073,7 +1075,8 @@ class BookingService:
                 )
 
             caller_clean = caller_email.strip().lower()
-            if caller_clean != target.get("mentor_email", "").strip().lower() and "admin" not in caller_clean:
+            has_admin = is_admin or caller_clean == "admin.epis@upt.pe"
+            if not has_admin and caller_clean != target.get("mentor_email", "").strip().lower():
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Acceso exclusivo al mentor titular de la sesión o administrador.",

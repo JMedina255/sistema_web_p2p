@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
-from app.core.security import decode_access_token
+from app.core.dependencies import (
+    get_current_user,
+)
 from app.db.session import get_optional_session
 from app.schemas.profile import (
     AcademicProfileResponse,
@@ -18,75 +19,39 @@ router = APIRouter()
 
 def _resolve_authenticated_email(
     authorization: str | None,
-    explicit_email: str | None,
+    explicit_email: str | None = None,
     allow_admin_override: bool = True,
 ) -> str:
     """
-    Resuelve y autoriza la identidad del estudiante a partir del token JWT Bearer,
-    con fallback al correo explícito en entorno de desarrollo o pruebas.
-    Garantiza el aislamiento de acceso entre usuarios (T-13 / RNF02).
+    Función de resolución y validación que delega a get_current_user y valida la titularidad del correo.
+    Garantiza que no exista bypass por entorno.
     """
-    if authorization:
-        if not authorization.startswith("Bearer "):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Formato de cabecera Authorization inválido. Se espera Bearer <token>.",
-            )
-        token = authorization.split(" ", 1)[1].strip()
-        decoded = decode_access_token(token)
-        if not decoded:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token de autenticación expirado o inválido.",
-            )
-
-        caller_email = decoded.get("sub") or decoded.get("email")
-        if not caller_email:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="El token no contiene una identidad de usuario válida.",
-            )
-
-        caller_roles = decoded.get("roles", [])
-        if explicit_email and explicit_email.strip().lower() != caller_email.strip().lower():
-            if allow_admin_override and "administrador" in caller_roles:
-                return explicit_email.strip().lower()
+    current_user = get_current_user(authorization)
+    if explicit_email and explicit_email.strip():
+        clean_target = explicit_email.strip().lower()
+        if clean_target != current_user.email:
+            if allow_admin_override and current_user.is_admin:
+                return clean_target
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Violación de autorización: no tiene permisos para acceder o modificar los datos de otro usuario.",
             )
-
-        return caller_email.strip().lower()
-
-    if explicit_email and explicit_email.strip():
-        if settings.APP_ENV in ("development", "test", "testing"):
-            return explicit_email.strip().lower()
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="En entornos de producción se requiere cabecera Authorization: Bearer <token>.",
-        )
-
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Se requiere autenticación mediante cabecera Authorization: Bearer <token> o parámetro email.",
-    )
+        return clean_target
+    return current_user.email
 
 
 def _extract_caller_and_admin_status(
     authorization: str | None,
     explicit_email: str | None = None,
 ) -> tuple[str, bool]:
+    """
+    Extrae el correo del llamante autenticado y su condición de administrador de forma centralizada.
+    """
+    current_user = get_current_user(authorization)
     caller_email = _resolve_authenticated_email(
         authorization, explicit_email=explicit_email, allow_admin_override=True
     )
-    is_admin = False
-    if authorization and authorization.startswith("Bearer "):
-        token = authorization.split(" ", 1)[1].strip()
-        decoded = decode_access_token(token)
-        if decoded and "administrador" in decoded.get("roles", []):
-            is_admin = True
-    return caller_email, is_admin
-
+    return caller_email, current_user.is_admin
 
 
 @router.get(

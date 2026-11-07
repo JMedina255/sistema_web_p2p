@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, Header, Query, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import get_current_user
 from app.db.session import get_optional_session
 from app.schemas.booking import (
     QuorumEvaluationPayload,
@@ -27,6 +28,7 @@ def evaluate_session_quorum(
     Evalúa la ratificación de vacantes de una sesión al cumplirse la ventana de corte T-24h.
     Caduca automáticamente las reservas no confirmadas y determina si la sesión alcanza el quórum reglamentario.
     """
+    get_current_user(authorization)
     if mode == "sprint6":
         return BookingService.evaluate_session_quorum(
             db=db,
@@ -53,4 +55,11 @@ def evaluate_all_active_quorums(
     Identifica sesiones en estado PUBLICADA en la ventana de corte, evalúa cumplimiento de quórum (3 presencial / 5 virtual),
     transiciona a CONFIRMADA o QUORUM_INSUFICIENTE e inhabilita reevaluaciones redundantes.
     """
+    user = get_current_user(authorization)
+    if not user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Violación de autorización: la evaluación masiva de quórum requiere privilegios de administrador.",
+        )
+
     return BookingService.evaluate_all_active_quorums(db=db)

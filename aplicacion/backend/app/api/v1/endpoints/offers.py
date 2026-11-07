@@ -3,10 +3,7 @@ from typing import Literal
 from fastapi import APIRouter, Depends, Header, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.v1.endpoints.profiles import (
-    _extract_caller_and_admin_status,
-    _resolve_authenticated_email,
-)
+from app.api.v1.endpoints.profiles import _extract_caller_and_admin_status
 from app.db.session import get_optional_session
 from app.schemas.offer import (
     PublishOfferPayload,
@@ -36,13 +33,16 @@ def publish_offer(
     - RN-04: Antelación obligatoria mayor a 24 horas respecto al inicio de la sesión.
     - RN-05: Aforo estándar estricto (10 presencial, 20 virtual).
     """
-    caller_email = None
-    if authorization:
-        caller_email = _resolve_authenticated_email(
-            authorization, explicit_email=payload.mentor_email, allow_admin_override=True
-        )
+    caller_email, is_admin = _extract_caller_and_admin_status(
+        authorization, explicit_email=payload.mentor_email
+    )
 
-    return OfferService.publish_offer(db=db, payload=payload, caller_email=caller_email)
+    return OfferService.publish_offer(
+        db=db,
+        payload=payload,
+        caller_email=caller_email,
+        is_admin=is_admin,
+    )
 
 
 @router.get(

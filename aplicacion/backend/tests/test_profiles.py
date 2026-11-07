@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.core.security import create_access_token
 from app.db.session import Base
 from app.main import app
 from app.models.profile import DisponibilidadHoraria, PerfilAcademico
@@ -11,9 +12,14 @@ from app.services.profile_service import ProfileService
 client = TestClient(app)
 
 
+def get_auth_headers(email: str, roles: list[str] | None = None) -> dict[str, str]:
+    token = create_access_token({"sub": email, "roles": roles or ["mentoreado"]})
+    return {"Authorization": f"Bearer {token}"}
+
+
 def test_get_profile_default():
     email = "2022074255@upt.pe"
-    response = client.get(f"/api/v1/profiles/me?email={email}")
+    response = client.get(f"/api/v1/profiles/me?email={email}", headers=get_auth_headers(email))
     assert response.status_code == 200
     data = response.json()
     assert data["email"] == email
@@ -36,7 +42,7 @@ def test_update_profile_success():
         "biografia": "Estudiante de 6to ciclo enfocado en Algoritmos y POO.",
         "modalidad_preferida": "virtual",
     }
-    response = client.put("/api/v1/profiles/me", json=payload)
+    response = client.put("/api/v1/profiles/me", json=payload, headers=get_auth_headers(email))
     assert response.status_code == 200
     data = response.json()
     assert data["email"] == email
@@ -54,7 +60,7 @@ def test_update_profile_rejects_mentor_when_cycle_below_7():
         "materias_interes": [1],
         "temas_seleccionados": [1],
     }
-    response = client.put("/api/v1/profiles/me", json=payload)
+    response = client.put("/api/v1/profiles/me", json=payload, headers=get_auth_headers(email))
     assert response.status_code == 400
     data = response.json()
     assert "MERIT_RULE_VIOLATION" in str(data)
@@ -73,7 +79,7 @@ def test_update_profile_allows_mentor_when_cycle_gte_7():
         "temas_seleccionados": [7, 8],
         "modalidad_preferida": "hibrida",
     }
-    response = client.put("/api/v1/profiles/me", json=payload)
+    response = client.put("/api/v1/profiles/me", json=payload, headers=get_auth_headers(email, ["mentor", "mentoreado"]))
     assert response.status_code == 200
     data = response.json()
     assert data["rol_postulacion"] == "mentor"
@@ -84,7 +90,7 @@ def test_get_and_update_availability():
     email = "2022074255@upt.pe"
 
     # 1. Consulta inicial
-    res_get = client.get(f"/api/v1/profiles/availability?email={email}")
+    res_get = client.get(f"/api/v1/profiles/availability?email={email}", headers=get_auth_headers(email))
     assert res_get.status_code == 200
     data_get = res_get.json()
     assert data_get["email"] == email
@@ -97,14 +103,14 @@ def test_get_and_update_availability():
         {"dia_semana": 5, "hora_inicio": "16:00", "hora_fin": "17:00"},
     ]
     payload = {"email": email, "slots": new_slots}
-    res_put = client.put("/api/v1/profiles/availability", json=payload)
+    res_put = client.put("/api/v1/profiles/availability", json=payload, headers=get_auth_headers(email))
     assert res_put.status_code == 200
     data_put = res_put.json()
     assert data_put["success"] is True
     assert data_put["totalSlots"] == 3
 
     # 3. Comprobar que los nuevos slots se leen correctamente
-    res_get_updated = client.get(f"/api/v1/profiles/availability?email={email}")
+    res_get_updated = client.get(f"/api/v1/profiles/availability?email={email}", headers=get_auth_headers(email))
     assert res_get_updated.status_code == 200
     assert len(res_get_updated.json()["slots"]) == 3
 
@@ -194,6 +200,7 @@ def test_profile_cycle_boundary_validations():
     res_one = client.put(
         "/api/v1/profiles/me",
         json={"email": email, "ciclo_actual": 1, "rol_postulacion": "mentoreado"},
+        headers=get_auth_headers(email),
     )
     assert res_one.status_code == 200
     assert res_one.json()["ciclo_actual"] == 1
@@ -201,6 +208,7 @@ def test_profile_cycle_boundary_validations():
     res_ten = client.put(
         "/api/v1/profiles/me",
         json={"email": email, "ciclo_actual": 10, "rol_postulacion": "mentor"},
+        headers=get_auth_headers(email, ["mentor", "mentoreado"]),
     )
     assert res_ten.status_code == 200
     assert res_ten.json()["ciclo_actual"] == 10
@@ -213,12 +221,14 @@ def test_availability_boundary_and_empty_slots():
     res_day0 = client.put(
         "/api/v1/profiles/availability",
         json={"email": email, "slots": [{"dia_semana": 0, "hora_inicio": "08:00", "hora_fin": "09:00"}]},
+        headers=get_auth_headers(email),
     )
     assert res_day0.status_code == 422
 
     res_day7 = client.put(
         "/api/v1/profiles/availability",
         json={"email": email, "slots": [{"dia_semana": 7, "hora_inicio": "08:00", "hora_fin": "09:00"}]},
+        headers=get_auth_headers(email),
     )
     assert res_day7.status_code == 422
 
@@ -226,6 +236,7 @@ def test_availability_boundary_and_empty_slots():
     res_bad_time = client.put(
         "/api/v1/profiles/availability",
         json={"email": email, "slots": [{"dia_semana": 1, "hora_inicio": "8:00", "hora_fin": "9:00"}]},
+        headers=get_auth_headers(email),
     )
     assert res_bad_time.status_code == 422
 
@@ -233,6 +244,7 @@ def test_availability_boundary_and_empty_slots():
     res_empty = client.put(
         "/api/v1/profiles/availability",
         json={"email": email, "slots": []},
+        headers=get_auth_headers(email),
     )
     assert res_empty.status_code == 200
     assert res_empty.json()["totalSlots"] == 0

@@ -40,13 +40,11 @@ class RoleService:
                 active_roles.insert(0, "mentoreado")
             return active_roles
 
-        # Roles por omisión para nuevos usuarios en memoria
+        # Roles por omisión para nuevos usuarios en memoria (sin heurísticas de prefijo)
         initial_roles = ["mentoreado"]
-        if clean_email == "admin.epis@upt.pe" or clean_email.startswith("admin."):
+        if clean_email == "admin.epis@upt.pe":
             initial_roles.append("administrador")
-        elif clean_email in ("mentor.avanzado@upt.pe", "2022073504@upt.pe") or clean_email.startswith(
-            "mentor."
-        ):
+        elif clean_email in ("mentor.avanzado@upt.pe", "2022073504@upt.pe"):
             initial_roles.append("mentor")
 
         _memory_user_roles[clean_email] = set(initial_roles)

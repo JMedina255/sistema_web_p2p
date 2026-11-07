@@ -69,8 +69,6 @@ export function initUserFromToken(jwtToken: string | null): AuthUser | null {
       ? payload.roles
       : payload.role
       ? [payload.role]
-      : email.startsWith('admin')
-      ? ['administrador', 'mentoreado']
       : ['mentoreado'];
 
   const roles: UserRole[] = rawRoles.map((r) => r.toLowerCase() as UserRole);
@@ -155,16 +153,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         authService.saveToken(data.token);
         setToken(data.token);
       } else {
-        // En modo mock sin token, emitir token simulado con claims estándar
+        // En modo mock sin token, emitir token simulado con claims estándar institucional
+        const cleanEmail = data.email.trim().toLowerCase();
+        const isOfficialAdmin = cleanEmail === 'admin.epis@upt.pe';
+        const isOfficialMentor = ['mentor.avanzado@upt.pe', '2022073504@upt.pe'].includes(cleanEmail);
+        const mockRoles = isOfficialAdmin
+          ? ['administrador', 'mentoreado']
+          : isOfficialMentor
+          ? ['mentor', 'mentoreado']
+          : ['mentoreado'];
+
         const mockPayload = {
-          sub: data.email,
-          email: data.email,
-          roles: data.email.startsWith('admin')
-            ? ['administrador', 'mentoreado']
-            : data.email.startsWith('2022073504') || data.email.startsWith('mentor.')
-            ? ['mentor', 'mentoreado']
-            : ['mentoreado'],
-          role: data.email.startsWith('admin') ? 'administrador' : 'estudiante',
+          sub: cleanEmail,
+          email: cleanEmail,
+          roles: mockRoles,
+          role: isOfficialAdmin ? 'administrador' : isOfficialMentor ? 'mentor' : 'estudiante',
         };
         const mockJwt = `mock.${btoa(JSON.stringify(mockPayload))}.sig`;
         authService.saveToken(mockJwt);

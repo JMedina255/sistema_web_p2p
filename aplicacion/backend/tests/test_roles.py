@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.core.security import create_access_token
 from app.db.session import Base
 from app.main import app
 from app.models.profile import PerfilAcademico
@@ -10,11 +11,14 @@ from app.services.profile_service import set_profile_in_memory
 from app.services.role_service import RoleService
 
 client = TestClient(app)
+ADMIN_TOKEN = create_access_token({"sub": "admin.epis@upt.pe", "roles": ["administrador"]})
+ADMIN_HEADERS = {"Authorization": f"Bearer {ADMIN_TOKEN}"}
 
 
 def test_get_user_roles_default_is_mentoreado():
     email = "2024011111@upt.pe"
-    response = client.get(f"/api/v1/roles/users/{email}")
+    token = create_access_token({"sub": email, "roles": ["mentoreado"]})
+    response = client.get(f"/api/v1/roles/users/{email}", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     data = response.json()
     assert data["email"] == email
@@ -29,6 +33,7 @@ def test_promote_mentor_rejects_when_cycle_below_7_rn03():
     response = client.post(
         "/api/v1/roles/promote-mentor",
         json={"email": email, "assigned_by": "sistema@upt.pe"},
+        headers=ADMIN_HEADERS,
     )
     assert response.status_code == 400
     data = response.json()
@@ -44,6 +49,7 @@ def test_promote_mentor_success_when_cycle_7_or_above():
     response = client.post(
         "/api/v1/roles/promote-mentor",
         json={"email": email, "assigned_by": "admin@upt.pe"},
+        headers=ADMIN_HEADERS,
     )
     assert response.status_code == 200
     data = response.json()
@@ -52,7 +58,7 @@ def test_promote_mentor_success_when_cycle_7_or_above():
     assert "mentor" in data["roles"]
 
     # Verificar consulta de roles
-    roles_res = client.get(f"/api/v1/roles/users/{email}")
+    roles_res = client.get(f"/api/v1/roles/users/{email}", headers=ADMIN_HEADERS)
     assert roles_res.status_code == 200
     assert "mentor" in roles_res.json()["roles"]
 
@@ -62,6 +68,7 @@ def test_revoke_mentor_success():
     response = client.post(
         "/api/v1/roles/revoke-mentor",
         json={"email": email, "revoked_by": "admin@upt.pe"},
+        headers=ADMIN_HEADERS,
     )
     assert response.status_code == 200
     data = response.json()
@@ -73,6 +80,7 @@ def test_promote_mentor_rejects_external_email():
     response = client.post(
         "/api/v1/roles/promote-mentor",
         json={"email": "externo@yahoo.com"},
+        headers=ADMIN_HEADERS,
     )
     assert response.status_code == 422
     assert "dominio institucional @upt.pe" in response.text
