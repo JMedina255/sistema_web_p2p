@@ -73,10 +73,10 @@ describe('MentorSessionsView Component (T-32 / RF16 / CUS07 / RN-04 / RN-10 / WC
     vi.spyOn(offerService, 'getOffers').mockResolvedValue([mockSessionInsufficient]);
     const resolveSpy = vi.spyOn(offerService, 'resolveQuorum').mockResolvedValue({
       id_sesion: 101,
+      codigo_sesion: 'SES-0101',
       decision: 'PROCEED',
       estado_nuevo: 'CONFIRMADA',
       nueva_fecha_inicio: null,
-      motivo_cancelacion: null,
       mensaje: 'Resolución registrada exitosamente. La sesión se dictará con aforo reducido.',
     });
 
@@ -137,10 +137,10 @@ describe('MentorSessionsView Component (T-32 / RF16 / CUS07 / RN-04 / RN-10 / WC
 
     resolveSpy.mockResolvedValue({
       id_sesion: 101,
+      codigo_sesion: 'SES-0101',
       decision: 'RESCHEDULE',
       estado_nuevo: 'PUBLICADA',
       nueva_fecha_inicio: new Date(validDate).toISOString(),
-      motivo_cancelacion: null,
       mensaje: 'Sesión reprogramada exitosamente.',
     });
 
@@ -180,10 +180,10 @@ describe('MentorSessionsView Component (T-32 / RF16 / CUS07 / RN-04 / RN-10 / WC
 
     resolveSpy.mockResolvedValue({
       id_sesion: 101,
+      codigo_sesion: 'SES-0101',
       decision: 'CANCEL',
       estado_nuevo: 'CANCELADA_QUORUM',
       nueva_fecha_inicio: null,
-      motivo_cancelacion: 'Inasistencia imprevista y cruce con evaluación de cátedra institucional.',
       mensaje: 'Sesión cancelada formalmente.',
     });
 
