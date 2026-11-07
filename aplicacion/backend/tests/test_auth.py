@@ -110,6 +110,43 @@ def test_verify_otp_incorrect_code():
     assert "OTP_INVALID" in response.text
 
 
+def test_verify_otp_incorrect_code_with_active_db_session(monkeypatch):
+    """
+    Verifica que al fallar la validación con una sesión activa de BD en get_optional_session,
+    la excepción HTTPException(400) se propague limpiamente como HTTP 400 y no como RuntimeError 500
+    (previniendo la regresión 'generator didn't stop after throw()').
+    """
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from sqlalchemy.pool import StaticPool
+
+    from app.db import session as db_session
+    from app.db.session import Base
+
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+
+    monkeypatch.setattr(db_session, "get_engine", lambda: engine)
+    monkeypatch.setattr(db_session, "_SessionLocal", testing_session)
+
+    res1 = client.post("/api/v1/auth/otp/request", json={"email": "wrong_db@upt.pe"})
+    assert res1.status_code == 200
+    challenge_id = res1.json()["challengeId"]
+
+    response = client.post(
+        "/api/v1/auth/otp/verify",
+        json={"challengeId": challenge_id, "otp": "999999"},
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"]["code"] == "OTP_INVALID"
+    engine.dispose()
+
+
 def test_verify_otp_success_and_jwt_token_issued():
     res1 = client.post("/api/v1/auth/otp/request", json={"email": "2022073504@upt.pe"})
     assert res1.status_code == 200

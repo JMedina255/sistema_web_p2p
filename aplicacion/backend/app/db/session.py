@@ -54,19 +54,22 @@ def get_optional_session():
     """
     Generador de sesión opcional que retorna None si la base de datos no está configurada.
     """
+    db = None
     try:
         engine = get_engine()
         if engine is not None and _SessionLocal is not None:
             db = _SessionLocal()
-            try:
-                yield db
-            finally:
-                db.close()
-            return
     except Exception:
-        pass
-    yield None
+        db = None
 
+    if db is None:
+        yield None
+        return
+
+    try:
+        yield db
+    finally:
+        db.close()
 
 def close_engine():
     """
