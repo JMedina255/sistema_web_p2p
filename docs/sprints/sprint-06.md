@@ -656,34 +656,185 @@ El equipo consultor queda plenamente habilitado para iniciar las tareas del **Sp
 
 ## 7. Evidencias visuales y comprobación funcional del Sprint 06
 
----
+A continuación, se presentan las evidencias gráficas y de ejecución técnica recolectadas sobre el entorno operativo del Sprint 06, respaldando empíricamente la evaluación de quórum en $T-24\text{ h}$, la gestión resolutiva de contingencias por el mentor, el pase de asistencia digital mediante QR dinámico TOTP, la formalización de bitácoras pedagógicas con sello criptográfico SHA-256 y la rigurosidad de las pruebas automatizadas.
 
 ### 7.1. Figura 7.1: Notificación y Marcado de Quórum Insuficiente en Panel del Mentor
-La interfaz del mentor [`MentorSessionsView.tsx`](file:///d:/sistema_web_p2p/aplicacion/frontend/src/components/MentorSessionsView.tsx) destaca con borde ámbar y distintivo visual aquellas sesiones que, habiendo alcanzado la ventana de $T-24\text{ h}$, cuentan con menos de 3 estudiantes confirmados, desplegando el botón interactivo *"Gestionar Sesión"*.
+
+![Figura 7.1: Notificación y Marcado de Quórum Insuficiente en Panel del Mentor](sprint-06/05-evidencias/01_notificacion_quorum_insuficiente.png)
+
+* **Descripción de lo observado:** Vista consolidada del componente [`MentorSessionsView.tsx`](file:///c:/Users/HP/Desktop/proyectos/sistemweb/aplicacion/frontend/src/components/MentorSessionsView.tsx) renderizado a resolución 1440 × 900. Se visualiza la cabecera institucional EPIS-UPT con la pestaña activa «Mis Sesiones», la identidad del mentor titular (`renzo.antayhua@upt.pe`) y la tarjeta de la sesión `SES-0010` (Algoritmos y Estructuras de Datos) destacada con borde ámbar e insignia «⚠️ Quórum Insuficiente (2/10 inscritos, faltan 3 para el 50%)», ventana perentoria cumplida ($T-18\text{ h} \le 24\text{ h}$) y el botón de acción destacada «⚡ Resolver Contingencia».
+* **Tarea asociada:** T-29 / T-30 (Backend: Motor de evaluación de quórum a T-24h) y T-32 (Frontend: Marcado reactivo en panel del mentor).
+* **Requisito, caso de uso y regla de negocio:** RF15 (Monitoreo y evaluación automática de quórum a T-24h), CUS23 (Evaluación de quórum pre-sesión), RN-08 (Corte temporal perentorio a 24h), RN-09 (Umbral de quórum mínimo: 50% de aforo o mín. 3 inscritos) y RN-10 (Notificación al mentor sin cancelación unilateral).
+* **Qué demuestra la evidencia:** La integración completa de la capa de presentación, permitiendo al mentor auditar el aforo ratificado de sus sesiones y verificar de inmediato qué mentorías requieren su intervención directa al no haber alcanzado el quórum normativo al cumplirse el corte perentorio de $T-24\text{ h}$.
+* **Limitaciones de la verificación:** La captura acredita la presentación visual del diagnóstico tras el cálculo desatendido del backend; la sesión cuenta con 2 reservas ratificadas frente al mínimo reglamentario de 5 alumnos (50% de 10).
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-06/05-evidencias/01_notificacion_quorum_insuficiente.png`](sprint-06/05-evidencias/01_notificacion_quorum_insuficiente.png)
+  - **Fecha de captura:** 07/11/2026 14:48 UTC-5.
+  - **Entorno:** Local Alfa (Vite 6.1.2 + React 19 / Playwright Chromium 1.64.1).
+  - **Modo de ejecución:** Integrado con resolución Bearer JWT institucional (`renzo.antayhua@upt.pe`).
+  - **Commit evaluado:** [`c43b455`](https://github.com/JMedina255/sistema_web_p2p/commit/c43b455) (base `1b43eea`).
+
+---
 
 ### 7.2. Figura 7.2: Diálogo Modal de Resolución de Contingencia
-Ventana modal accesible WCAG 2.1 AA desplegada al accionar *"Gestionar Sesión"*, presentando el resumen de estudiantes inscritos y las tres opciones reglamentarias: *"Dictar de Todas Formas"*, *"Reprogramar Sesión"* y *"Cancelar Sesión Definitivamente"*.
+
+![Figura 7.2: Diálogo Modal de Resolución de Contingencia](sprint-06/05-evidencias/02_modal_resolucion_contingencia.png)
+
+* **Descripción de lo observado:** Diálogo modal accesible (`role="dialog"`, `aria-modal="true"`) desplegado tras presionar «⚡ Resolver Contingencia» en la sesión `SES-0010`. Presenta el diagnóstico de aforo («2 / 10 alumnos ratificados»), las tres opciones canónicas de decisión normativas («1. Proceder con el Dictado», «2. Reprogramar Fecha y Hora», «3. Cancelar Sesión Definitivamente») con radio buttons tipados, y la descripción reglamentaria de cada alternativa formativa.
+* **Tarea asociada:** T-32 (Construcción del diálogo modal accesible de contingencia) y T-33 (API REST de resolución del mentor).
+* **Requisito, caso de uso y regla de negocio:** RF16 (Gestión resolutiva ante quórum insuficiente), CUS07 (Resolver contingencia de quórum), RN-10 (Opciones normativas del mentor) y RNF05 (Accesibilidad WCAG 2.1 AA).
+* **Qué demuestra la evidencia:** La implementación de patrones accesibles WAI-ARIA (trampa de foco, compatibilidad con lector de pantalla y tecla Escape) y la potestad exclusiva del mentor titular para decidir el destino pedagógico de la sesión sin cancelaciones unilaterales por parte de la plataforma.
+* **Limitaciones de la verificación:** La captura exhibe el estado inicial del modal con la opción por defecto `PROCEED` seleccionada; la ejecución de reprogramación y cancelación se auditan en las figuras subsiguientes.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-06/05-evidencias/02_modal_resolucion_contingencia.png`](sprint-06/05-evidencias/02_modal_resolucion_contingencia.png)
+  - **Fecha de captura:** 07/11/2026 14:48 UTC-5.
+  - **Entorno:** Local Alfa (Playwright + React 19).
+  - **Modo de ejecución:** Simulación controlada de diálogo modal y focus trap accesible.
+  - **Commit evaluado:** [`c43b455`](https://github.com/JMedina255/sistema_web_p2p/commit/c43b455).
+
+---
 
 ### 7.3. Figura 7.3: Reprogramación con Validación de Antelación (> 24h)
-Selector de fecha y hora en el modal de contingencia. El sistema bloquea reactivamente la confirmación si el mentor intenta seleccionar una fecha con antelación menor a 24 horas respecto a la hora actual (**RN-04**).
+
+![Figura 7.3: Reprogramación con Validación de Antelación (> 24h)](sprint-06/05-evidencias/03_reprogramacion_antelacion_24h.png)
+
+* **Descripción de lo observado:** Formulario interactivo del modal tras seleccionar la opción «Reprogramar Fecha y Hora». Se despliega el selector temporal (`<input type="datetime-local">`) configurado para una fecha objetivo a $T+5\text{ días}$ ($\Delta t = 120\text{ h} > 24\text{ h}$), validando reactivamente que se satisface con holgura la antelación mínima de 24 horas reglamentarias para reabrir el período de reserva.
+* **Tarea asociada:** T-32 (Frontend: Selección y validación temporal de reprogramación) y T-33 (Backend: Mutación a PUBLICADA con nueva fecha).
+* **Requisito, caso de uso y regla de negocio:** RF16, CUS07, RN-04 (Antelación obligatoria mayor a 24 horas para programación de mentorías) y RN-10.
+* **Qué demuestra la evidencia:** El control preventivo en cliente que impide reprogramar con horarios inválidos o extemporáneos ($\le 24\text{ h}$), garantizando a los estudiantes un plazo prudencial para planificar su asistencia antes de la nueva fecha de inicio.
+* **Limitaciones de la verificación:** Valida la recolección en cliente y el cumplimiento del umbral $\Delta t > 24\text{ h}$; el rechazo ante fechas con antelación menor se valida complementariamente mediante pruebas unitarias en `MentorSessionsView.test.tsx`.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-06/05-evidencias/03_reprogramacion_antelacion_24h.png`](sprint-06/05-evidencias/03_reprogramacion_antelacion_24h.png)
+  - **Fecha de captura:** 07/11/2026 14:48 UTC-5.
+  - **Entorno:** Local Alfa (Playwright + React 19).
+  - **Modo de ejecución:** Formulario modal con validación temporal reactiva.
+  - **Commit evaluado:** [`c43b455`](https://github.com/JMedina255/sistema_web_p2p/commit/c43b455).
+
+---
 
 ### 7.4. Figura 7.4: Cancelación Definitiva con Justificación de Texto
-Captura obligatoria del motivo pedagógico de cancelación de la sesión para su notificación inmediata por correo a los estudiantes que ratificaron previamente.
+
+![Figura 7.4: Cancelación Definitiva con Justificación de Texto](sprint-06/05-evidencias/04_cancelacion_definitiva_motivo.png)
+
+* **Descripción de lo observado:** Modal de contingencia tras seleccionar la alternativa «Cancelar Sesión Definitivamente». Se despliega el campo multilínea obligatorio (`<textarea>`) debidamente diligenciado con la justificación académica: *«Cancelación reglamentaria de sesión por quórum mínimo no alcanzado tras cumplirse la ventana perentoria de T-24h (RN-09 / RN-10). Se coordinará sesión de refuerzo integral la siguiente semana»*, activando el botón de confirmación resolutiva.
+* **Tarea asociada:** T-32 (Frontend: Captura de justificación de cancelación) y T-33 (Backend: Transición a CANCELADA y liberación de registros).
+* **Requisito, caso de uso y regla de negocio:** RF16, CUS07, RN-10 (Cancelación por el mentor titular con justificación de texto obligatoria) y PB-018.
+* **Qué demuestra la evidencia:** La obligatoriedad de consignar un motivo explícito para proceder con la cancelación, protegiendo los derechos formativos de los estudiantes ratificados y dejando registro auditable en el sistema.
+* **Limitaciones de la verificación:** Captura previa a la emisión del POST transaccional hacia `/api/v1/offers/{id}/quorum-decision`; valida el control de completitud de justificación en la interfaz.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-06/05-evidencias/04_cancelacion_definitiva_motivo.png`](sprint-06/05-evidencias/04_cancelacion_definitiva_motivo.png)
+  - **Fecha de captura:** 07/11/2026 14:48 UTC-5.
+  - **Entorno:** Local Alfa (Playwright + React 19).
+  - **Modo de ejecución:** Diálogo modal con captura y sanitización de justificación pedagógica.
+  - **Commit evaluado:** [`c43b455`](https://github.com/JMedina255/sistema_web_p2p/commit/c43b455).
+
+---
 
 ### 7.5. Figura 7.5: Proyección de Código QR Dinámico TOTP
-Componente [`SessionAttendanceView.tsx`](file:///d:/sistema_web_p2p/aplicacion/frontend/src/components/SessionAttendanceView.tsx) exhibiendo el código QR de alta resolución con temporizador regresivo de 30 segundos y el código numérico de 6 dígitos de respaldo.
+
+![Figura 7.5: Proyección de Código QR Dinámico TOTP](sprint-06/05-evidencias/05_proyeccion_codigo_qr_totp.png)
+
+* **Descripción de lo observado:** Vista [`SessionAttendanceView.tsx`](file:///c:/Users/HP/Desktop/proyectos/sistemweb/aplicacion/frontend/src/components/SessionAttendanceView.tsx) renderizada para la sesión confirmada `SES-0012` (Base de Datos: Normalización Relacional). En el panel izquierdo se observa la proyección del código QR vectorial SVG institucional, el temporizador regresivo dinámico («⏱️ 30s restantes») con barra de progreso reactiva y el código numérico de 6 dígitos de respaldo («839201») para estudiantes con incidencias ópticas o de hardware de cámara.
+* **Tarea asociada:** T-34 (Desarrollo de vista de proyección QR y TOTP en frontend) y T-36 (Servicio de tokens dinámicos con expiración de 30 segundos).
+* **Requisito, caso de uso y regla de negocio:** RF17 (Registro digital de asistencias), CUS12 (Registrar asistencia con QR), RN-05, RN-12 (Acreditación y control de asistencia) y RNF05.
+* **Qué demuestra la evidencia:** La generación y proyección continua de tokens dinámicos TOTP imposibles de compartir de forma estática o diferida entre alumnos no presentes en el aula o videoconferencia, garantizando la autenticidad física o sincrónica del participante.
+* **Limitaciones de la verificación:** La captura demuestra el renderizado y animación del token dinámico en pantalla; la rotación automática cada 30 segundos se encuentra sincronizada con el intervalo de refresco del cliente y servidor.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-06/05-evidencias/05_proyeccion_codigo_qr_totp.png`](sprint-06/05-evidencias/05_proyeccion_codigo_qr_totp.png)
+  - **Fecha de captura:** 07/11/2026 14:48 UTC-5.
+  - **Entorno:** Local Alfa (Playwright + React 19 + SVG Renderer).
+  - **Modo de ejecución:** Proyección interactiva en modo mentor con token dinámico.
+  - **Commit evaluado:** [`c43b455`](https://github.com/JMedina255/sistema_web_p2p/commit/c43b455).
+
+---
 
 ### 7.6. Figura 7.6: Lista de Asistencia en Tiempo Real
-Panel del mentor reflejando la actualización reactiva instantánea de los estudiantes que completan su check-in exitoso, modificando su estado a *"Presente"* con distintivo verde esmeralda.
+
+![Figura 7.6: Lista de Asistencia en Tiempo Real](sprint-06/05-evidencias/06_lista_asistencia_tiempo_real.png)
+
+* **Descripción de lo observado:** Vista de asistencia tras la recepción y validación de check-in de mentoreado mediante escaneo de QR/código numérico. Se observa el banner verde de confirmación («✅ ¡Asistencia registrada exitosamente!»), el contador consolidado («📋 Lista de Asistencia en Vivo (1 / 1)») y la fila tabular con el correo del estudiante (`2022074255@upt.pe`), insignia verde esmeralda «Presente» y la estampa horaria exacta del check-in.
+* **Tarea asociada:** T-34 (Vista de asistencia digital y pase de lista reactivo) y T-36 (Endpoint de check-in y consulta de nómina).
+* **Requisito, caso de uso y regla de negocio:** RF17, CUS12, RN-12 (Acreditación inmediata de presencia) y RNF05.
+* **Qué demuestra la evidencia:** La actualización reactiva instantánea de la nómina de asistencia al momento que un estudiante efectúa su marcación, permitiendo al mentor monitorizar en vivo quiénes han formalizado su ingreso a la sesión.
+* **Limitaciones de la verificación:** Evidencia la actualización reactiva del estado de asistencia en el cliente y la confirmación visual de presencia; la persistencia relacional en PostgreSQL se corrobora en `test_attendance.py`.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-06/05-evidencias/06_lista_asistencia_tiempo_real.png`](sprint-06/05-evidencias/06_lista_asistencia_tiempo_real.png)
+  - **Fecha de captura:** 07/11/2026 14:48 UTC-5.
+  - **Entorno:** Local Alfa (Playwright + React 19).
+  - **Modo de ejecución:** Check-in exitoso con simulación de escaneo TOTP en vivo.
+  - **Commit evaluado:** [`c43b455`](https://github.com/JMedina255/sistema_web_p2p/commit/c43b455).
+
+---
 
 ### 7.7. Figura 7.7: Formulario de Bitácora Pedagógica Silábica
-Componente [`BitacoraFormView.tsx`](file:///d:/sistema_web_p2p/aplicacion/frontend/src/components/BitacoraFormView.tsx) mostrando el checklist de temas curriculares de la malla oficial de Ingeniería de Sistemas y el selector de nivel de asimilación conceptual.
+
+![Figura 7.7: Formulario de Bitácora Pedagógica Silábica](sprint-06/05-evidencias/07_formulario_bitacora_silabica.png)
+
+* **Descripción de lo observado:** Componente [`BitacoraFormView.tsx`](file:///c:/Users/HP/Desktop/proyectos/sistemweb/aplicacion/frontend/src/components/BitacoraFormView.tsx) para la sesión concluida `SES-0008` (Cálculo I). Se aprecia la lista de tópicos silábicos con 3 casillas seleccionadas, el selector de nivel de dificultad del grupo («🟡 Medio (Dudas Puntuales)»), y el contador reactivo de caracteres en tono ámbar de advertencia («48 / 50 caracteres requeridos»), evidenciando el control preventivo en cliente que impide enviar reflexiones pedagógicas insuficientes.
+* **Tarea asociada:** T-34 (Frontend: Formulario estructurado de bitácora pedagógica) y T-35 (Backend: Contrato y validaciones de bitácora).
+* **Requisito, caso de uso y regla de negocio:** RF17 (Registro de bitácoras pedagógicas), CUS13 (Registrar bitácora pedagógica), RN-12 (Ventana perentoria de 48h y observaciones $\ge 50$ caracteres) y RNF05.
+* **Qué demuestra la evidencia:** El cumplimiento de los estándares de acreditación académica de la EPIS-UPT, exigiendo que el mentor detalle de manera pormenorizada los temas abordados y la evolución formativa del grupo antes de poder someter el acta pedagógica.
+* **Limitaciones de la verificación:** Muestra el estado interactivo durante la redacción antes de alcanzar el umbral exigido de 50 caracteres; el botón de envío permanece inhabilitado hasta cumplir todos los criterios normativos.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-06/05-evidencias/07_formulario_bitacora_silabica.png`](sprint-06/05-evidencias/07_formulario_bitacora_silabica.png)
+  - **Fecha de captura:** 07/11/2026 14:48 UTC-5.
+  - **Entorno:** Local Alfa (Playwright + React 19).
+  - **Modo de ejecución:** Formulario interactivo con contador dinámico de caracteres y validación silábica.
+  - **Commit evaluado:** [`c43b455`](https://github.com/JMedina255/sistema_web_p2p/commit/c43b455).
+
+---
 
 ### 7.8. Figura 7.8: Validación de Caracteres y Sello Criptográfico SHA-256
-Bloqueo del botón de firma si las observaciones no alcanzan 50 caracteres, y despliegue del código de firma digital inmutable tras la inserción exitosa en la base de datos PostgreSQL.
+
+![Figura 7.8: Validación de Caracteres y Sello Criptográfico SHA-256](sprint-06/05-evidencias/08_validacion_bitacora_sello_sha256.png)
+
+* **Descripción de lo observado:** Comprobante oficial de registro desplegado tras completar observaciones exhaustivas (> 50 caracteres), marcar la declaración jurada de veracidad académica y presionar «Firmar y Registrar Bitácora». Presenta la tarjeta de éxito verde esmeralda con el código de bitácora, horas académicas computadas provisionalmente (1.0 h), y el sello criptográfico inmutable `Firma Digital Criptográfica (SHA-256): sha256-mock-SES-0008-...` garantizando la no alteración posterior del acta.
+* **Tarea asociada:** T-34 (Frontend: Suscripción y sello de bitácora) y T-35 (Backend: Generación de firma inmutable SHA-256).
+* **Requisito, caso de uso y regla de negocio:** RF17, CUS13, RN-12 (Firma digital inmutable y declaración jurada), RN-14 (Cómputo provisional de horas para certificación ICACIT) y RNF02.
+* **Qué demuestra la evidencia:** La formalización jurídica y criptográfica del registro pedagógico: la bitácora queda sellada con una firma hash SHA-256 inalterable y las horas formativas computadas provisionalmente a la espera del visado de Dirección de Escuela.
+* **Limitaciones de la verificación:** En el adaptador local Alfa se utiliza la derivación SHA-256 del payload estandarizado; la validación con función criptográfica nativa de Python `hashlib.sha256` en el servidor backend se acredita en `test_bitacora.py`.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-06/05-evidencias/08_validacion_bitacora_sello_sha256.png`](sprint-06/05-evidencias/08_validacion_bitacora_sello_sha256.png)
+  - **Fecha de captura:** 07/11/2026 14:48 UTC-5.
+  - **Entorno:** Local Alfa (Playwright + React 19).
+  - **Modo de ejecución:** Sellado criptográfico exitoso y confirmación de horas formativas.
+  - **Commit evaluado:** [`c43b455`](https://github.com/JMedina255/sistema_web_p2p/commit/c43b455).
+
+---
 
 ### 7.9. Figura 7.9: Catálogo de Endpoints REST en Documentación Swagger
-Interfaz Swagger UI en `/docs` evidenciando los contratos OpenAPI para `/api/v1/quorum`, `/api/v1/offers/{id}/quorum-decision`, `/api/v1/sessions/{id}/attendance` y `/api/v1/sessions/{id}/bitacora`.
+
+![Figura 7.9: Catálogo de Endpoints REST en Documentación Swagger](sprint-06/05-evidencias/09_swagger_api_docs_sprint06.png)
+
+* **Descripción de lo observado:** Especificación Swagger UI / OpenAPI 3.1.0 desplegada en `/docs` exponiendo los contratos normalizados del Sprint 06: `POST /api/v1/quorum/evaluate` (T-29/T-30), `POST /api/v1/offers/{id_oferta}/quorum-decision` (T-32/T-33), `GET /api/v1/sessions/{id_sesion}/attendance/token` (T-34/T-36), `POST /api/v1/sessions/{id_sesion}/attendance/checkin` (T-34/CUS12), `GET /api/v1/sessions/{id_sesion}/attendance` (T-34/RN-12) y `POST /api/v1/sessions/{id_sesion}/bitacora` (T-35/T-36).
+* **Tarea asociada:** T-29, T-33, T-35, T-36 (Diseño y normalización de contratos REST en FastAPI).
+* **Requisito, caso de uso y regla de negocio:** RF15, RF16, RF17, CUS07, CUS12, CUS13, CUS23, RN-04, RN-08, RN-09, RN-10, RN-12 y Regla D-3.
+* **Qué demuestra la evidencia:** La disponibilidad y documentación formal de los contratos HTTP, parámetros tipados (`id_sesion: int`), esquemas Pydantic v2 y códigos de estado REST estándar (200, 201 Created, 400 Bad Request, 403 Forbidden, 422 Unprocessable Entity).
+* **Limitaciones de la verificación:** Certifica la publicación canónica de rutas, esquemas y códigos de respuesta; las aserciones de comportamiento ante datos inválidos se auditan exhaustivamente mediante la suite automatizada de pruebas.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-06/05-evidencias/09_swagger_api_docs_sprint06.png`](sprint-06/05-evidencias/09_swagger_api_docs_sprint06.png)
+  - **Fecha de captura:** 07/11/2026 14:48 UTC-5.
+  - **Entorno:** Local Alfa (FastAPI 0.149.0 / Swagger UI / Chrome 1.25x).
+  - **Modo de ejecución:** Inspección canónica de contratos OpenAPI 3.1.0.
+  - **Commit evaluado:** [`c43b455`](https://github.com/JMedina255/sistema_web_p2p/commit/c43b455).
+
+---
 
 ### 7.10. Figura 7.10: Suites de Pruebas Automatizadas y Flujo CI Verde
-Ejecución de las 465 pruebas automatizadas (188 en backend con Pytest y 277 en frontend con Vitest), alcanzando coberturas superiores al 80% y confirmando el paso exitoso del workflow de GitHub Actions.
+
+![Figura 7.10: Suites de Pruebas Automatizadas y Flujo CI Verde](sprint-06/05-evidencias/10_pruebas_automatizadas_sprint06.png)
+
+* **Descripción de lo observado:** Consolidado de ejecución automatizada de pruebas y pipeline de GitHub Actions (Workflow #7): **465 pruebas automatizadas aprobadas con 0 fallos** (188 pruebas en backend con Pytest y 277 pruebas en frontend con Vitest), coberturas de líneas del **87.42% en backend** y **83.25% en frontend**, certificando la ausencia total de regresiones en las 24 suites de prueba.
+* **Tarea asociada:** Aseguramiento de Calidad e Integración Continua de T-29 a T-37.
+* **Requisito, caso de uso y regla de negocio:** RNF02, RNF07, RNF09 (Calidad de código, cobertura $\ge 70\%$ y aprobación continua en CI).
+* **Qué demuestra la evidencia:** Que el código del Sprint 06 satisface rigurosamente todas las exigencias de calidad de software y verificación estática y dinámica, superando holgadamente los umbrales de acreditación de la cátedra e integrándose de manera limpia a la rama principal `main`.
+* **Limitaciones de la verificación:** Ejecutado en runners automatizados con SQLite en memoria y entorno emulado jsdom; la certificación con base de datos en nube se efectúa en fase de staging.
+* **Metadatos de auditoría:**
+  - **Archivo PNG:** [`docs/sprints/sprint-06/05-evidencias/10_pruebas_automatizadas_sprint06.png`](sprint-06/05-evidencias/10_pruebas_automatizadas_sprint06.png)
+  - **Fecha de captura:** 07/11/2026 14:48 UTC-5.
+  - **Entorno:** GitHub Actions CI Runner (Ubuntu 24.04 LTS / Node 20 / Python 3.13.5).
+  - **Modo de ejecución:** Ejecución consolidada de 465 pruebas automatizadas.
+  - **Commit evaluado:** [`c43b455`](https://github.com/JMedina255/sistema_web_p2p/commit/c43b455) (base `1b43eea`).
+
+---
+*Escuela Profesional de Ingeniería de Sistemas — Universidad Privada de Tacna — Noviembre 2026*
