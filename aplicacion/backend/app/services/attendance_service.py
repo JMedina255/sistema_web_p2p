@@ -98,7 +98,11 @@ class AttendanceService:
                     )
         else:
             target = next(
-                (o for o in _memory_offers if o.get("id_sesion") == session_id or str(o.get("id_sesion")) == str(session_id)),
+                (
+                    o
+                    for o in _memory_offers
+                    if o.get("id_sesion") == session_id or str(o.get("id_sesion")) == str(session_id)
+                ),
                 None,
             )
             if not target:
@@ -265,7 +269,11 @@ class AttendanceService:
         # 2. En memoria
         global _attendance_counter
         target = next(
-            (o for o in _memory_offers if o.get("id_sesion") == session_id or str(o.get("id_sesion")) == str(session_id)),
+            (
+                o
+                for o in _memory_offers
+                if o.get("id_sesion") == session_id or str(o.get("id_sesion")) == str(session_id)
+            ),
             None,
         )
         if not target:

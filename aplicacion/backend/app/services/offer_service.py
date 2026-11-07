@@ -648,7 +648,9 @@ class OfferService:
                         "estado"
                     ] in ["PENDIENTE_CONFIRMACION", "CONFIRMADA"]:
                         b["estado"] = "CANCELADA_SISTEMA_QUORUM"
-                        b["motivo_cancelacion"] = f"Cancelación por quórum insuficiente: {payload.reason.strip()}"
+                        b["motivo_cancelacion"] = (
+                            f"Cancelación por quórum insuficiente: {payload.reason.strip()}"
+                        )
 
             return QuorumDecisionResponse(
                 id_sesion=id_sesion,
@@ -662,4 +664,3 @@ class OfferService:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="INVALID_DECISION: La decisión debe ser 'PROCEED', 'RESCHEDULE' o 'CANCEL'.",
         )
-

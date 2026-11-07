@@ -335,4 +335,3 @@ def test_attendance_t36_persistence_in_real_database():
     finally:
         db.close()
         engine.dispose()
-

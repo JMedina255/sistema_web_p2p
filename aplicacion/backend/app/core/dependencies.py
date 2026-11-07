@@ -49,9 +49,7 @@ class AuthenticatedUser(BaseModel):
 def get_current_user(
     authorization: Annotated[
         str | None,
-        Header(
-            description="Cabecera HTTP de autorización con formato 'Bearer <token_jwt>'"
-        ),
+        Header(description="Cabecera HTTP de autorización con formato 'Bearer <token_jwt>'"),
     ] = None,
 ) -> AuthenticatedUser:
     """

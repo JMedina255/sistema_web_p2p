@@ -100,4 +100,3 @@ def resolve_quorum_contingency(
         caller_email=caller_email,
         is_admin=is_admin,
     )
-

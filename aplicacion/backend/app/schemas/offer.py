@@ -83,9 +83,7 @@ class QuorumDecisionPayload(BaseModel):
     new_start_time: str | None = Field(
         None, description="Nueva fecha y hora en formato ISO 8601 (requerida para RESCHEDULE con > 24h)."
     )
-    reason: str | None = Field(
-        None, description="Motivo académico justificado (requerido para CANCEL)."
-    )
+    reason: str | None = Field(None, description="Motivo académico justificado (requerido para CANCEL).")
 
 
 class QuorumDecisionResponse(BaseModel):
@@ -99,4 +97,3 @@ class QuorumDecisionResponse(BaseModel):
     estado_nuevo: str
     mensaje: str
     nueva_fecha_inicio: str | None = None
-

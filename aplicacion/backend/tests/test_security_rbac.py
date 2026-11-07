@@ -62,7 +62,9 @@ def test_sec_01_private_endpoints_without_authorization_header_rejected_401():
 # ==============================================================================
 def test_sec_02_malformed_or_tampered_jwt_signature_rejected_401():
     # Token con firma alterada
-    tampered_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbHVtbm9AdXB0LnBlIn0.firma_invalida_adulterada"
+    tampered_token = (
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbHVtbm9AdXB0LnBlIn0.firma_invalida_adulterada"
+    )
 
     res = client.get(
         "/api/v1/profiles/me",
@@ -93,9 +95,7 @@ def test_sec_03_expired_jwt_rejected_401():
 # SEC-04: Usuario Mentoreado intenta promover a otro a mentor -> 403 Forbidden
 # ==============================================================================
 def test_sec_04_mentee_attempts_to_promote_another_student_forbidden_403():
-    mentee_token = create_access_token(
-        data={"sub": "2024071111@upt.pe", "roles": ["mentoreado"]}
-    )
+    mentee_token = create_access_token(data={"sub": "2024071111@upt.pe", "roles": ["mentoreado"]})
 
     res = client.post(
         "/api/v1/roles/promote-mentor",
@@ -112,9 +112,7 @@ def test_sec_04_mentee_attempts_to_promote_another_student_forbidden_403():
 def test_sec_05_admin_substring_or_prefix_without_role_forbidden_403():
     # Correo engañoso con prefijo 'admin' pero sin rol administrador
     fake_admin_email = "admin.estudiante.falso@upt.pe"
-    fake_token = create_access_token(
-        data={"sub": fake_admin_email, "roles": ["mentoreado"]}
-    )
+    fake_token = create_access_token(data={"sub": fake_admin_email, "roles": ["mentoreado"]})
 
     res = client.post(
         "/api/v1/roles/promote-mentor",
@@ -129,9 +127,7 @@ def test_sec_05_admin_substring_or_prefix_without_role_forbidden_403():
 # SEC-06: Mentoreado intenta consultar reservas de otro estudiante -> 403 Forbidden
 # ==============================================================================
 def test_sec_06_mentee_attempts_to_read_another_student_reservations_forbidden_403():
-    student_a_token = create_access_token(
-        data={"sub": "alumno_a@upt.pe", "roles": ["mentoreado"]}
-    )
+    student_a_token = create_access_token(data={"sub": "alumno_a@upt.pe", "roles": ["mentoreado"]})
 
     res = client.get(
         "/api/v1/bookings/my-reservations?student_email=alumno_b@upt.pe",
@@ -145,9 +141,7 @@ def test_sec_06_mentee_attempts_to_read_another_student_reservations_forbidden_4
 # SEC-07: Mentoreado intenta modificar perfil de otro estudiante -> 403 Forbidden
 # ==============================================================================
 def test_sec_07_mentee_attempts_to_update_another_profile_forbidden_403():
-    student_a_token = create_access_token(
-        data={"sub": "alumno_a@upt.pe", "roles": ["mentoreado"]}
-    )
+    student_a_token = create_access_token(data={"sub": "alumno_a@upt.pe", "roles": ["mentoreado"]})
 
     payload = {
         "email": "alumno_b@upt.pe",
@@ -170,9 +164,7 @@ def test_sec_07_mentee_attempts_to_update_another_profile_forbidden_403():
 def test_sec_08_mentor_attempts_to_modify_another_mentor_session_forbidden_403():
     mentor_a = "mentor_a@upt.pe"
     mentor_b = "mentor_b@upt.pe"
-    token_mentor_a = create_access_token(
-        data={"sub": mentor_a, "roles": ["mentor", "mentoreado"]}
-    )
+    token_mentor_a = create_access_token(data={"sub": mentor_a, "roles": ["mentor", "mentoreado"]})
 
     # Sesión propiedad del mentor B
     _memory_offers.append(
@@ -203,9 +195,7 @@ def test_sec_08_mentor_attempts_to_modify_another_mentor_session_forbidden_403()
 # SEC-09: Usuario no mentor intenta generar QR/token de asistencia -> 403 Forbidden
 # ==============================================================================
 def test_sec_09_non_mentor_attempts_to_generate_attendance_token_forbidden_403():
-    student_token = create_access_token(
-        data={"sub": "alumno@upt.pe", "roles": ["mentoreado"]}
-    )
+    student_token = create_access_token(data={"sub": "alumno@upt.pe", "roles": ["mentoreado"]})
 
     _memory_offers.append(
         {
@@ -229,9 +219,7 @@ def test_sec_09_non_mentor_attempts_to_generate_attendance_token_forbidden_403()
 # SEC-10: Usuario no mentor intenta registrar o editar bitácora -> 403 Forbidden
 # ==============================================================================
 def test_sec_10_non_mentor_attempts_to_create_bitacora_forbidden_403():
-    student_token = create_access_token(
-        data={"sub": "alumno@upt.pe", "roles": ["mentoreado"]}
-    )
+    student_token = create_access_token(data={"sub": "alumno@upt.pe", "roles": ["mentoreado"]})
 
     _memory_offers.append(
         {
@@ -262,9 +250,7 @@ def test_sec_10_non_mentor_attempts_to_create_bitacora_forbidden_403():
 # SEC-11: Administrador con rol oficial realiza operación administrativa -> 200 OK
 # ==============================================================================
 def test_sec_11_official_verified_admin_executes_privileged_operations_200():
-    admin_token = create_access_token(
-        data={"sub": "admin.epis@upt.pe", "roles": ["administrador"]}
-    )
+    admin_token = create_access_token(data={"sub": "admin.epis@upt.pe", "roles": ["administrador"]})
 
     target_student = "2021071111@upt.pe"
     set_profile_in_memory(target_student, {"ciclo_actual": 8, "email": target_student})
@@ -292,9 +278,7 @@ def test_sec_11_official_verified_admin_executes_privileged_operations_200():
 # ==============================================================================
 def test_sec_12_multi_role_user_operates_within_authorized_claims_200():
     multi_user = "mentor.estudiante@upt.pe"
-    token = create_access_token(
-        data={"sub": multi_user, "roles": ["mentoreado", "mentor"]}
-    )
+    token = create_access_token(data={"sub": multi_user, "roles": ["mentoreado", "mentor"]})
 
     # Opera como mentoreado: consulta su propio perfil
     res_me = client.get(
@@ -345,9 +329,7 @@ def test_sec_14_privileged_operation_without_jwt_in_development_env_rejected_401
 # ==============================================================================
 def test_sec_15_revoked_role_user_denied_privileged_actions_403():
     student_email = "2021055555@upt.pe"
-    admin_token = create_access_token(
-        data={"sub": "admin.epis@upt.pe", "roles": ["administrador"]}
-    )
+    admin_token = create_access_token(data={"sub": "admin.epis@upt.pe", "roles": ["administrador"]})
 
     # 1. Asegurar rol inicial en RoleService
     set_profile_in_memory(student_email, {"ciclo_actual": 8, "email": student_email})
@@ -364,9 +346,7 @@ def test_sec_15_revoked_role_user_denied_privileged_actions_403():
     assert "mentor" not in res_revoke.json()["roles"]
 
     # 3. El usuario ahora solo emite token como mentoreado e intenta registrar bitácora
-    demoted_token = create_access_token(
-        data={"sub": student_email, "roles": ["mentoreado"]}
-    )
+    demoted_token = create_access_token(data={"sub": student_email, "roles": ["mentoreado"]})
     # En memoria, RoleService ya no tiene 'mentor'
     # Intentar publicar con token que carece del claim verificado de mentor
     _memory_offers.append(
@@ -423,9 +403,7 @@ def test_sec_17_db_failure_does_not_grant_privileged_roles():
 # ==============================================================================
 def test_sec_18_unconsented_user_blocked_from_reservations_rn02():
     unconsented_email = "sin_consentimiento@upt.pe"
-    token = create_access_token(
-        data={"sub": unconsented_email, "roles": ["mentoreado"]}
-    )
+    token = create_access_token(data={"sub": unconsented_email, "roles": ["mentoreado"]})
 
     payload = {
         "id_sesion": 1,
@@ -466,9 +444,7 @@ def test_legitimate_mentee_access_own_resources_200():
 
 def test_legitimate_mentor_access_own_session_200():
     mentor_email = "2022073504@upt.pe"
-    token = create_access_token(
-        data={"sub": mentor_email, "roles": ["mentor", "mentoreado"]}
-    )
+    token = create_access_token(data={"sub": mentor_email, "roles": ["mentor", "mentoreado"]})
 
     _memory_offers.append(
         {
@@ -492,9 +468,7 @@ def test_legitimate_mentor_access_own_session_200():
 
 
 def test_legitimate_admin_cross_profile_access_200():
-    admin_token = create_access_token(
-        data={"sub": "admin.epis@upt.pe", "roles": ["administrador"]}
-    )
+    admin_token = create_access_token(data={"sub": "admin.epis@upt.pe", "roles": ["administrador"]})
     target_student = "2022074255@upt.pe"
 
     # Administrador consulta perfil de cualquier estudiante

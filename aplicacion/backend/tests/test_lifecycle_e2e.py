@@ -81,7 +81,7 @@ def test_session_closure_end_to_end_lifecycle_t37():
         for i, email in enumerate([student_a, student_b, student_c]):
             b = ReservaCupo(
                 id_sesion=1401,
-                codigo_reserva=f"RES-E2E-{i+1}",
+                codigo_reserva=f"RES-E2E-{i + 1}",
                 estudiante_email=email,
                 estado="CONFIRMADA",  # Ratificada por los estudiantes
                 fecha_reserva=now - timedelta(hours=5),

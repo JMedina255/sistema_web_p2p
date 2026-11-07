@@ -79,7 +79,9 @@ def test_update_profile_allows_mentor_when_cycle_gte_7():
         "temas_seleccionados": [7, 8],
         "modalidad_preferida": "hibrida",
     }
-    response = client.put("/api/v1/profiles/me", json=payload, headers=get_auth_headers(email, ["mentor", "mentoreado"]))
+    response = client.put(
+        "/api/v1/profiles/me", json=payload, headers=get_auth_headers(email, ["mentor", "mentoreado"])
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["rol_postulacion"] == "mentor"
@@ -110,7 +112,9 @@ def test_get_and_update_availability():
     assert data_put["totalSlots"] == 3
 
     # 3. Comprobar que los nuevos slots se leen correctamente
-    res_get_updated = client.get(f"/api/v1/profiles/availability?email={email}", headers=get_auth_headers(email))
+    res_get_updated = client.get(
+        f"/api/v1/profiles/availability?email={email}", headers=get_auth_headers(email)
+    )
     assert res_get_updated.status_code == 200
     assert len(res_get_updated.json()["slots"]) == 3
 

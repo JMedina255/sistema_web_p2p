@@ -1473,9 +1473,7 @@ class BookingService:
                 )
                 for u in unconfirmed:
                     u.estado = "CANCELADA_NO_CONFIRMADA"
-                    u.motivo_cancelacion = (
-                        f"Expiración automática por falta de ratificación en T-{int(cutoff_hours)}h (RN-08/RN-09)."
-                    )
+                    u.motivo_cancelacion = f"Expiración automática por falta de ratificación en T-{int(cutoff_hours)}h (RN-08/RN-09)."
 
                 if cumple:
                     sesion.estado = "CONFIRMADA"
@@ -1665,4 +1663,3 @@ class BookingService:
                 continue
 
         return results
-

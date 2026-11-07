@@ -209,7 +209,6 @@ def test_bitacora_rejects_fake_admin_email_substring_403():
     assert "FORBIDDEN" in res.json()["detail"]
 
 
-
 def test_bitacora_t35_persistence_in_real_database():
     """T-35: Verificación en base de datos real con cálculo de horas proporcionales y firma SHA-256."""
     engine = create_engine("sqlite:///:memory:")
