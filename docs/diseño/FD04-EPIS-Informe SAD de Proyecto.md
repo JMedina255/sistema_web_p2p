@@ -73,6 +73,7 @@ Dr. RICARDO EDUARDO VALCARCEL ALVARADO
 7. [Vista de Procesos](#7-vista-de-procesos)
    7.1. [Diagrama de Proceso Actual](#71-diagrama-de-proceso-actual)
    7.2. [Diagrama de Proceso Propuesto](#72-diagrama-de-proceso-propuesto)
+   7.3. [Trazabilidad a Diagramas de Secuencia de Diseño](#73-trazabilidad-hacia-los-diagramas-de-secuencia-de-diseño-cus-001-al-cus-024)
 8. [Vista de Despliegue](#8-vista-de-despliegue)
    8.1. [Diagrama de Contenedor y Despliegue Físico](#81-diagrama-de-contenedor)
 9. [Vista de Implementación](#9-vista-de-implementación)
@@ -1099,6 +1100,43 @@ El análisis comparativo del flujo To-Be evidencia las siguientes transformacion
 1. **Gobernanza Automatizada de Recursos:** El corte en $T-24\text{ h}$ y el umbral de quórum del 50% (`RN-08`/`RN-09`) permiten evaluar la viabilidad y notificar al mentor. La liberación ocurre al cancelar según RN-10, no por el solo hecho de detectar quórum insuficiente.
 2. **Registro de asistencia:** CUS08 permite al mentor marcar la nómina o escanear tickets QR. El mecanismo técnico y sus controles contra reutilización se deben validar; no se atribuye a RNF04 una duración de 60 segundos.
 3. **Cierre del ciclo institucional:** La bitácora y la asistencia registradas en CUS08 producen horas provisionales. Solo el visado de CUS22 habilita su cómputo para CUS13 y CUS09, de acuerdo con RN-14.
+
+---
+
+### 7.3. Trazabilidad hacia los Diagramas de Secuencia de Diseño (CUS-001 al CUS-024)
+
+Para la especificación cronológica exhaustiva, el intercambio de mensajes sincrónicos/asíncronos y la gestión detallada de excepciones técnicas (`E001` a `E010`) y alternativas (`A001` a `A002`) de cada uno de los 24 casos de uso en las 7 capas de software (Actor, Vista React `.tsx`, Adaptador Cliente `.ts`, Controlador FastAPI `.py`, Servicio Backend `.py`, Persistencia PostgreSQL ORM/Cerrojos, y Servicios Externos SMTP), consúltese el documento canónico de diseño y la sección correspondiente del SRS:
+- **Documento Consolidado de Diagramas de Secuencia:** `docs/diseño/DIAGRAMAS_DE_SECUENCIA_CONSOLIDADOS.md`
+- **Sección 6.3.3 del SRS:** `docs/diseño/FD03-EPIS-Informe SRS de Proyecto.md` (Diagramas 6.15.1 al 6.15.24)
+
+#### Cuadro 7.3: Matriz de Trazabilidad Arquitectónica de Procesos a Diagramas de Secuencia (Fase de Diseño)
+
+| Módulo | Diagrama | Caso de Uso | Vista React (.tsx) | Controlador FastAPI (.py) | Servicio Backend (.py) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **MOD-01** | Diagrama 6.15.1 | `CUS-001` - Iniciar sesión 2FA | `LoginOtpView.tsx` | `endpoints/auth.py` | `auth_service.py` |
+| **MOD-01** | Diagrama 6.15.2 | `CUS-010` - Gestionar roles | `AdminDashboardView.tsx` | `endpoints/roles.py` | `role_service.py` |
+| **MOD-02** | Diagrama 6.15.3 | `CUS-006` - Publicar oferta | `OfferPublishView.tsx` | `endpoints/offers.py` | `offer_service.py` |
+| **MOD-02** | Diagrama 6.15.4 | `CUS-008` - Disponibilidad aulas | `OfferPublishView.tsx` | `endpoints/offers.py` | `offer_service.py` |
+| **MOD-03** | Diagrama 6.15.5 | `CUS-005` - Perfil y matriz horaria | `ProfileAvailabilityView.tsx` | `endpoints/profiles.py` | `profile_service.py` |
+| **MOD-03** | Diagrama 6.15.6 | `CUS-021` - Catálogo curricular | `CurriculumCatalogView.tsx` | `endpoints/curriculum.py` | `curriculum_service.py` |
+| **MOD-04** | Diagrama 6.15.7 | `CUS-002` - Recomendaciones Top-k | `RecommendationFeedView.tsx` | `endpoints/recommendations.py` | `recommendation_service.py` |
+| **MOD-04** | Diagrama 6.15.8 | `CUS-003` - Registrar demanda | `DemandModalView.tsx` | `endpoints/recommendations.py` | `recommendation_service.py` |
+| **MOD-05** | Diagrama 6.15.9 | `CUS-004` - Reservar cupo | `BookingModalView.tsx` | `endpoints/bookings.py` | `booking_service.py` |
+| **MOD-05** | Diagrama 6.15.10 | `CUS-024` - Ratificar asistencia | `StudentBookingsView.tsx` | `endpoints/bookings.py` | `booking_service.py` |
+| **MOD-05** | Diagrama 6.15.11 | `CUS-017` - Desistir reserva | `StudentBookingsView.tsx` | `endpoints/bookings.py` | `booking_service.py` |
+| **MOD-05** | Diagrama 6.15.12 | `CUS-023` - Evaluar quórum T-24h | `AdminDashboardView.tsx` | `endpoints/quorum.py` | `booking_service.py` |
+| **MOD-05** | Diagrama 6.15.13 | `CUS-007` - Decisión de quórum | `MentorSessionsView.tsx` | `endpoints/offers.py` | `offer_service.py` |
+| **MOD-06** | Diagrama 6.15.14 | `CUS-012` - Asistencia QR | `SessionAttendanceView.tsx` | `endpoints/attendance.py` | `attendance_service.py` |
+| **MOD-06** | Diagrama 6.15.15 | `CUS-013` - Bitácora pedagógica | `BitacoraFormView.tsx` | `endpoints/bitacora.py` | `bitacora_service.py` |
+| **MOD-06** | Diagrama 6.15.16 | `CUS-014` - Historial y bitácoras | `HistorySessionsView.tsx` | `endpoints/history.py` | `history_service.py` |
+| **MOD-07** | Diagrama 6.15.17 | `CUS-018` - Constancia de horas | `CertificateView.tsx` | `endpoints/certificates.py` | `certificate_service.py` |
+| **MOD-07** | Diagrama 6.15.18 | `CUS-019` - Insignias y reputación | `GamificationView.tsx` | `endpoints/gamification.py` | `reputation_service.py` |
+| **MOD-08** | Diagrama 6.15.19 | `CUS-009` - Notificar eventos | `NotificationBell.tsx` | `endpoints/notifications.py` | `notification_service.py` |
+| **MOD-08** | Diagrama 6.15.20 | `CUS-011` - Reportes analíticos | `AnalyticsDashboardView.tsx` | `endpoints/analytics.py` | `analytics_service.py` |
+| **MOD-08** | Diagrama 6.15.21 | `CUS-015` - Métricas retención | `RetentionDashboardView.tsx` | `endpoints/analytics.py` | `analytics_service.py` |
+| **MOD-08** | Diagrama 6.15.22 | `CUS-016` - Auditar trazas | `AuditLogView.tsx` | `endpoints/audit.py` | `audit_service.py` |
+| **MOD-08** | Diagrama 6.15.23 | `CUS-020` - Configurar parámetros | `SystemSettingsView.tsx` | `endpoints/config.py` | `config_service.py` |
+| **MOD-08** | Diagrama 6.15.24 | `CUS-022` - Catálogo temario | `AdminCurriculumView.tsx` | `endpoints/curriculum.py` | `curriculum_service.py` |
 
 ---
 
