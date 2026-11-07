@@ -212,4 +212,5 @@ if __name__ == "__main__":
     errs1 = audit_file("docs/analisis/FD03-EPIS-Informe SRS de Proyecto.md")
     errs2 = audit_file("docs/diseño/FD03-EPIS-Informe SRS de Proyecto.md")
     errs3 = audit_file("docs/analisis/NARRATIVAS_SRS_CONSOLIDADAS.md")
-    sys.exit(errs1 + errs2 + errs3)
+    errs4 = audit_file("docs/diseño/NARRATIVAS_FASE_DISEÑO_CONSOLIDADAS.md")
+    sys.exit(errs1 + errs2 + errs3 + errs4)
