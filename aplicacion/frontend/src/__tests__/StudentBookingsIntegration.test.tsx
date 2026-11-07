@@ -98,19 +98,20 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
   it('1. Permite navegar hacia Mis Reservas desde el selector principal de pestañas', async () => {
     render(<App />);
 
-    const bookingsTab = screen.getByRole('button', { name: /Mis Reservas/i });
+    const bookingsTab = screen.getByRole('button', { name: /^📅 Mis Reservas$/i });
     expect(bookingsTab).toBeInTheDocument();
 
     fireEvent.click(bookingsTab);
 
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', {
-          name: /Gestión de Reservas, Ratificación y Desistimiento/i,
-        })
+        screen.getAllByRole('heading', {
+          name: /Mis Reservas de Mentoría/i,
+        }).length
+      ).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getByText(/Revisa tus sesiones reservadas, confirma tu asistencia/i)
       ).toBeInTheDocument();
-      expect(screen.getByText(/Consulta de nómina de reservas personales/i)).toBeInTheDocument();
-      expect(screen.getByText(/Mis Reservas de Mentoría/i)).toBeInTheDocument();
     });
   });
 
@@ -121,7 +122,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     authService.clearToken();
 
     render(<App />);
-    const bookingsTab = screen.getByRole('button', { name: /Mis Reservas/i });
+    const bookingsTab = screen.getByRole('button', { name: /^📅 Mis Reservas$/i });
     fireEvent.click(bookingsTab);
 
     await waitFor(() => {
@@ -137,7 +138,9 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     fireEvent.click(loginRedirectBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/Acceso & OTP/i)).toBeInTheDocument();
+      expect(
+        screen.getAllByRole('heading', { name: /Iniciar Sesión Institucional/i }).length
+      ).toBeGreaterThanOrEqual(1);
       expect(screen.getByLabelText(/Correo Electrónico Institucional/i)).toBeInTheDocument();
     });
   });
@@ -149,7 +152,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([]);
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Mis Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^📅 Mis Reservas$/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/No se encontraron reservas/i)).toBeInTheDocument();
@@ -166,7 +169,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     await waitFor(() => {
       expect(
         screen.getByRole('heading', {
-          name: /Cartelera Top-k Explicable y Reserva Transaccional/i,
+          name: /Mentorías Recomendadas y Reserva de Sesiones/i,
         })
       ).toBeInTheDocument();
     });
@@ -179,7 +182,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     render(<App />);
 
     // Navegar a recomendaciones
-    fireEvent.click(screen.getByRole('button', { name: /Recomendaciones & Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^🎯 Explorar mentorías$/i }));
 
     const reserveButtons = await screen.findAllByRole('button', { name: /Reservar Cupo/i });
     expect(reserveButtons.length).toBeGreaterThan(0);
@@ -207,10 +210,10 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
       expect(
-        screen.getByRole('heading', {
-          name: /Gestión de Reservas, Ratificación y Desistimiento/i,
-        })
-      ).toBeInTheDocument();
+        screen.getAllByRole('heading', {
+          name: /Mis Reservas de Mentoría/i,
+        }).length
+      ).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -221,7 +224,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([pendingBooking48h]);
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Mis Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^📅 Mis Reservas$/i }));
 
     await waitFor(() => {
       expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
@@ -239,7 +242,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
         screen.getByRole('heading', { name: /Ratificar Asistencia a Mentoría/i })
       ).toBeInTheDocument();
       expect(screen.getByText(/quórum mínimo del 50%/i)).toBeInTheDocument();
-      expect(screen.getByText(/Compromiso.*PB-014/i)).toBeInTheDocument();
+      expect(screen.getByText(/Compromiso de Asistencia y Quórum/i)).toBeInTheDocument();
     });
   });
 
@@ -255,7 +258,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     });
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Mis Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^📅 Mis Reservas$/i }));
 
     await waitFor(() => {
       expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
@@ -285,13 +288,13 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([closedBooking12h]);
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Mis Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^📅 Mis Reservas$/i }));
 
     await waitFor(() => {
       expect(screen.getByText('RES-2026-0103')).toBeInTheDocument();
     });
 
-    const disabledBtn = screen.getByRole('button', { name: /Plazo Vencido \(T-24h cerrado\)/i });
+    const disabledBtn = screen.getByRole('button', { name: /Plazo Vencido/i });
     expect(disabledBtn).toBeDisabled();
     expect(screen.getByText(/Ventana.*cerrada/i)).toBeInTheDocument();
   });
@@ -303,7 +306,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([confirmedBooking36h]);
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Mis Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^📅 Mis Reservas$/i }));
 
     await waitFor(() => {
       expect(screen.getByText('RES-2026-0102')).toBeInTheDocument();
@@ -321,7 +324,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
       expect(
         screen.getByRole('heading', { name: /Desistimiento Voluntario de Cupo/i })
       ).toBeInTheDocument();
-      expect(screen.getByText(/Política de Desistimiento.*RN-10/i)).toBeInTheDocument();
+      expect(screen.getByText(/Política de Desistimiento y Liberación de Cupo/i)).toBeInTheDocument();
       expect(screen.getByPlaceholderText(/Describe brevemente el motivo/i)).toBeInTheDocument();
     });
   });
@@ -338,7 +341,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     });
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Mis Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^📅 Mis Reservas$/i }));
 
     await waitFor(() => {
       expect(screen.getByText('RES-2026-0102')).toBeInTheDocument();
@@ -384,7 +387,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([cancelledBooking]);
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Mis Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^📅 Mis Reservas$/i }));
 
     await waitFor(() => {
       expect(screen.getByText('RES-2026-0104')).toBeInTheDocument();
@@ -407,7 +410,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     );
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Mis Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^📅 Mis Reservas$/i }));
 
     await waitFor(() => {
       expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
@@ -433,7 +436,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     );
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Mis Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^📅 Mis Reservas$/i }));
 
     await waitFor(() => {
       expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
@@ -444,7 +447,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
 
     await waitFor(() => {
       expect(
-        screen.getByText(/Integración pendiente en backend \(T-26\)/i)
+        screen.getByText(/Servicio en integración/i)
       ).toBeInTheDocument();
     });
   });
@@ -462,7 +465,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     vi.spyOn(bookingService, 'confirmAttendance').mockReturnValue(pendingPromise);
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Mis Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^📅 Mis Reservas$/i }));
 
     await waitFor(() => {
       expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
@@ -496,7 +499,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     const listSpy = vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([pendingBooking48h]);
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Mis Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^📅 Mis Reservas$/i }));
 
     await waitFor(() => {
       expect(listSpy).toHaveBeenCalledTimes(1);
@@ -522,7 +525,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     ]);
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Mis Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^📅 Mis Reservas$/i }));
 
     await waitFor(() => {
       expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();
@@ -551,7 +554,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
     vi.spyOn(bookingService, 'getMyReservations').mockResolvedValue([pendingBooking48h]);
 
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /Mis Reservas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^📅 Mis Reservas$/i }));
 
     await waitFor(() => {
       expect(screen.getByText('RES-2026-0101')).toBeInTheDocument();

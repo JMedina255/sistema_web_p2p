@@ -320,22 +320,6 @@ const AppShell: React.FC = () => {
                 🔒 Sin sesión institucional activa
               </div>
             )}
-
-            <a
-              href="http://localhost:8000/docs"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                color: '#F8FAFC',
-                textDecoration: 'none',
-                background: '#B99451',
-                padding: '0.3rem 0.75rem',
-                borderRadius: '9999px',
-                fontWeight: 600,
-              }}
-            >
-              Swagger /docs ↗
-            </a>
           </div>
         </div>
       </header>
@@ -381,7 +365,7 @@ const AppShell: React.FC = () => {
                       fontWeight: 600,
                     }}
                   >
-                    1. 🎯 Inferencia Top-k
+                    1. 🎯 Explorar mentorías
                   </button>
                   <span style={{ color: '#64748B' }}>→</span>
                   <button
@@ -398,7 +382,7 @@ const AppShell: React.FC = () => {
                       fontWeight: 600,
                     }}
                   >
-                    2. 📅 Agendas Activas
+                    2. 📅 Mis reservas
                   </button>
                   <span style={{ color: '#64748B' }}>→</span>
                   <button
@@ -415,7 +399,7 @@ const AppShell: React.FC = () => {
                       fontWeight: 600,
                     }}
                   >
-                    3. 👤 Ficha Académica
+                    3. 👤 Mi perfil
                   </button>
                 </div>
               )}
@@ -435,7 +419,7 @@ const AppShell: React.FC = () => {
                       fontWeight: 600,
                     }}
                   >
-                    1. 📋 Aforo & Quórum
+                    1. 📋 Mis sesiones
                   </button>
                   <span style={{ color: '#64748B' }}>→</span>
                   <button
@@ -452,7 +436,7 @@ const AppShell: React.FC = () => {
                       fontWeight: 600,
                     }}
                   >
-                    2. 🏷️ Nueva Convocatoria
+                    2. 🏷️ Publicar mentoría
                   </button>
                   <span style={{ color: '#64748B' }}>→</span>
                   <button
@@ -469,7 +453,7 @@ const AppShell: React.FC = () => {
                       fontWeight: 600,
                     }}
                   >
-                    3. 👤 Agenda Semanal
+                    3. 👤 Mi disponibilidad
                   </button>
                 </div>
               )}
@@ -489,7 +473,7 @@ const AppShell: React.FC = () => {
                       fontWeight: 600,
                     }}
                   >
-                    1. 🛡️ Mérito Docente (RN-03)
+                    1. 🛡️ Gestión de mentores
                   </button>
                   <span style={{ color: '#64748B' }}>→</span>
                   <button
@@ -506,7 +490,7 @@ const AppShell: React.FC = () => {
                       fontWeight: 600,
                     }}
                   >
-                    2. 🛰️ Red y Telemetría
+                    2. 🛰️ Estado del sistema
                   </button>
                 </div>
               )}
@@ -547,7 +531,7 @@ const AppShell: React.FC = () => {
               transition: 'all 0.2s',
             }}
           >
-            🔐 Acceso & OTP (T-02)
+            🔐 Iniciar sesión
           </button>
 
           <button
@@ -565,7 +549,7 @@ const AppShell: React.FC = () => {
               transition: 'all 0.2s',
             }}
           >
-            ⚖️ Consentimiento Ley 29733 (T-04)
+            ⚖️ Consentimiento
           </button>
 
           <button
@@ -583,7 +567,7 @@ const AppShell: React.FC = () => {
               transition: 'all 0.2s',
             }}
           >
-            📚 Catálogo Curricular (T-10)
+            📚 Cursos
           </button>
 
           <button
@@ -601,7 +585,7 @@ const AppShell: React.FC = () => {
               transition: 'all 0.2s',
             }}
           >
-            👤 Perfil & Disponibilidad (T-11)
+            👤 Mi perfil
           </button>
 
           <button
@@ -619,7 +603,7 @@ const AppShell: React.FC = () => {
               transition: 'all 0.2s',
             }}
           >
-            🏷️ Publicar Ofertas (T-14)
+            🏷️ Publicar mentoría
           </button>
 
           <button
@@ -637,7 +621,7 @@ const AppShell: React.FC = () => {
               transition: 'all 0.2s',
             }}
           >
-            🎯 Recomendaciones & Reservas (T-20 / T-21 / T-23)
+            🎯 Explorar mentorías
           </button>
 
           <button
@@ -655,7 +639,7 @@ const AppShell: React.FC = () => {
               transition: 'all 0.2s',
             }}
           >
-            📅 Mis Reservas (T-25 / T-27)
+            📅 Mis reservas
           </button>
 
           <button
@@ -673,7 +657,7 @@ const AppShell: React.FC = () => {
               transition: 'all 0.2s',
             }}
           >
-            📋 Mis Sesiones Mentor
+            📋 Mis sesiones
           </button>
 
           <button
@@ -691,7 +675,7 @@ const AppShell: React.FC = () => {
               transition: 'all 0.2s',
             }}
           >
-            🛡️ Panel Administrador
+            🛡️ Administración
           </button>
 
           <button
@@ -709,7 +693,7 @@ const AppShell: React.FC = () => {
               transition: 'all 0.2s',
             }}
           >
-            🛰️ Monitor de Servicios (T-01)
+            🛰️ Estado del sistema
           </button>
         </div>
       </div>
@@ -725,60 +709,47 @@ const AppShell: React.FC = () => {
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <span
-            style={{
-              textTransform: 'uppercase',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              letterSpacing: '0.1em',
-              color: '#B99451',
-              display: 'block',
-              marginBottom: '0.5rem',
-            }}
-          >
-            Integración de Extremo a Extremo · Construcción de Software I (2026-II)
-          </span>
           <h2 style={{ fontSize: '1.75rem', color: '#1C2A59', margin: '0 0 0.5rem 0', fontWeight: 800 }}>
             {activeTab === 'auth'
-              ? 'Interfaz de Acceso Institucional y Desafío OTP'
+              ? 'Iniciar Sesión Institucional'
               : activeTab === 'consent'
-              ? 'Consentimiento Informado Digital — Ley N° 29733 (T-04)'
+              ? 'Consentimiento Informado de Privacidad'
               : activeTab === 'curriculum'
-              ? 'Consulta Avanzada del Catálogo Curricular EPIS-UPT (T-10)'
+              ? 'Catálogo Curricular'
               : activeTab === 'profile'
-              ? 'Configuración de Perfil Formativo y Disponibilidad Horaria (T-11)'
+              ? 'Perfil del Estudiante y Disponibilidad Horaria'
               : activeTab === 'offers'
-              ? 'Publicación y Parametrización de Ofertas de Mentoría (T-14)'
+              ? 'Publicación de Ofertas de Mentoría'
               : activeTab === 'recommendations'
-              ? 'Cartelera Top-k Explicable y Reserva Transaccional (T-20 / T-21 / T-23)'
+              ? 'Mentorías Recomendadas y Reserva de Sesiones'
               : activeTab === 'bookings'
-              ? 'Gestión de Reservas, Ratificación y Desistimiento (T-25 / T-27)'
+              ? 'Mis Reservas de Mentoría'
               : activeTab === 'sessions'
-              ? 'Portal del Mentor: Nómina y Quórum de Sesiones'
+              ? 'Panel del Mentor: Sesiones y Asistencia'
               : activeTab === 'admin'
-              ? 'Panel de Administración: Roles y Quórum EPIS'
-              : 'Infraestructura Base: React + FastAPI + Supabase'}
+              ? 'Panel de Administración Institucional'
+              : 'Estado de los Servicios del Sistema'}
           </h2>
           <p style={{ margin: '0 auto', maxWidth: '720px', fontSize: '0.88rem', color: '#64748B', lineHeight: 1.6 }}>
             {activeTab === 'auth'
-              ? 'Validación del flujo de dos pasos: comprobación de dominio @upt.pe y desafío OTP temporal de 6 dígitos con emisión de JWT.'
+              ? 'Ingresa con tu correo institucional @upt.pe mediante código de verificación temporal.'
               : activeTab === 'consent'
-              ? 'Formalización obligatoria de la política institucional de privacidad y tratamiento de datos personales conforme a la Ley N° 29733 (RF02 / CUS01 / RN-02).'
+              ? 'Tratamiento seguro de datos personales y política de privacidad de la plataforma de mentorías académicas.'
               : activeTab === 'curriculum'
-              ? 'Búsqueda en tiempo real por materias filtro, código y temas silábicos para el motor de recomendación Top-k (RF05 / CUS21).'
+              ? 'Consulta asignaturas de la carrera, códigos curriculares y contenidos temáticos.'
               : activeTab === 'profile'
-              ? 'Selección de intereses/fortalezas y agenda semanal en bloques de 1 hora con validación de mérito RN-03 (RF04 / CUS15).'
+              ? 'Gestiona tus intereses temáticos, fortalezas formativas y disponibilidad de horarios semanales.'
               : activeTab === 'offers'
-              ? 'Programación de sesiones de mentoría con validación de antelación obligatoria RN-04 (>24h), aforos estándar inmutables RN-05 (10 presencial / 20 virtual) y asignación de infraestructura (RF08 / CUS06).'
+              ? 'Programa nuevas sesiones de mentoría indicando asignatura, modalidad, horario y ubicación.'
               : activeTab === 'recommendations'
-              ? 'Inferencia adaptativa EdRecSys con explicabilidad transparente (XAI) y formalización atómica de reservas provisionales bajo control de aforo (RF06 / RF12 / CUS02 / CUS04 / RN-05 / RN-08).'
+              ? 'Encuentra sesiones de mentoría afines a tus asignaturas y reserva tu vacante.'
               : activeTab === 'bookings'
-              ? 'Consulta de nómina de reservas personales, ratificación de asistencia para cómputo de quórum (RN-08 / RN-09 / PB-014) y desistimiento voluntario con restitución atómica de cupos antes de T-24h (RN-10 / PB-015).'
+              ? 'Revisa tus sesiones reservadas, confirma tu asistencia con anticipación o libera tu vacante si no puedes asistir.'
               : activeTab === 'sessions'
-              ? 'Supervisión en tiempo real de cupos reservados, tasa de ratificación anticipada y nómina de estudiantes inscritos por sesión.'
+              ? 'Supervisa tus sesiones de mentoría programadas, estudiantes inscritos y estado del quórum.'
               : activeTab === 'admin'
-              ? 'Promoción y revocación de mentores bajo verificación de mérito RN-03 (Ciclo ≥ VII) y monitoreo transversal de quórum.'
-              : 'Monitoreo de comunicación asíncrona entre la SPA cliente (React 19 / TypeScript / Vite), FastAPI y Supabase.'}
+              ? 'Supervisión de usuarios, acreditación de mentores y seguimiento de sesiones académicas.'
+              : 'Monitoreo de conectividad y estado operativo de la plataforma.'}
           </p>
         </div>
 
@@ -913,70 +884,6 @@ const AppShell: React.FC = () => {
           <HealthStatus />
         )}
 
-        {/* Bloque informativo de especificaciones */}
-        <div
-          style={{
-            maxWidth: '1000px',
-            margin: '2.5rem auto 0 auto',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '1rem',
-          }}
-        >
-          <div
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid #E2E8F0',
-              borderRadius: '8px',
-              padding: '1rem',
-              fontSize: '0.82rem',
-            }}
-          >
-            <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              🛡️ RF03 / RN-03: Asignación de Roles por Mérito
-            </strong>
-            <span style={{ color: '#64748B' }}>
-              Solo estudiantes con ciclo formativo ≥ VII pueden ser promovidos a mentores. La autopromoción no
-              autorizada es bloqueada a nivel de endpoint.
-            </span>
-          </div>
-
-          <div
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid #E2E8F0',
-              borderRadius: '8px',
-              padding: '1rem',
-              fontSize: '0.82rem',
-            }}
-          >
-            <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              📊 RN-09: Quórum Mínimo Institucional
-            </strong>
-            <span style={{ color: '#64748B' }}>
-              Supervisión en tiempo real de la tasa de ratificación. Las sesiones deben alcanzar ≥ 50% de cupos
-              ratificados para su ejecución definitiva.
-            </span>
-          </div>
-
-          <div
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid #E2E8F0',
-              borderRadius: '8px',
-              padding: '1rem',
-              fontSize: '0.82rem',
-            }}
-          >
-            <strong style={{ color: '#1C2A59', display: 'block', marginBottom: '0.25rem' }}>
-              ⚖️ RF02 / RN-02: Ley N° 29733
-            </strong>
-            <span style={{ color: '#64748B' }}>
-              Consentimiento legal previo, libre e informado. Modal bloqueante obligatorio que restringe el acceso al
-              sistema ante rechazo o falta de suscripción.
-            </span>
-          </div>
-        </div>
       </main>
 
       {/* Pie de página institucional */}
@@ -990,7 +897,7 @@ const AppShell: React.FC = () => {
           color: '#64748B',
         }}
       >
-        Sistema Web P2P de Mentorías Académicas · EPIS UPT (2026) · Construcción de Software I
+        Sistema Web P2P de Mentorías Académicas · Escuela Profesional de Ingeniería de Sistemas — Universidad Privada de Tacna (2026)
       </footer>
     </div>
   );

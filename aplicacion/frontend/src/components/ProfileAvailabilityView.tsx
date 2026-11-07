@@ -7,6 +7,7 @@ import type { Course } from '../services/apiClient';
 export interface ProfileAvailabilityViewProps {
   userEmail?: string;
   onSaved?: () => void;
+  showDevControls?: boolean;
 }
 
 const DAYS_OF_WEEK = [
@@ -35,6 +36,7 @@ const TIME_SLOTS = [
 export const ProfileAvailabilityView: React.FC<ProfileAvailabilityViewProps> = ({
   userEmail = '2022074255@upt.pe',
   onSaved,
+  showDevControls = false,
 }) => {
   const [email, setEmail] = useState<string>(userEmail);
   const [profile, setProfile] = useState<AcademicProfile | null>(null);
@@ -183,7 +185,7 @@ export const ProfileAvailabilityView: React.FC<ProfileAvailabilityViewProps> = (
       ]);
 
       setNotification({
-        text: `Perfil formativo y agenda semanal (${slots.length} horas) guardados exitosamente conforme a RF04 / CUS15.`,
+        text: `Perfil formativo y agenda semanal (${slots.length} horas) guardados exitosamente.`,
         type: 'success',
       });
 
@@ -233,38 +235,40 @@ export const ProfileAvailabilityView: React.FC<ProfileAvailabilityViewProps> = (
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.4rem' }}>
-          <button
-            type="button"
-            onClick={() => setEmail('2022074255@upt.pe')}
-            style={{
-              fontSize: '0.72rem',
-              padding: '0.25rem 0.6rem',
-              borderRadius: '6px',
-              border: '1px solid #CBD5E1',
-              background: email.includes('2022074255') ? '#1C2A59' : '#FFFFFF',
-              color: email.includes('2022074255') ? '#FFFFFF' : '#334155',
-              cursor: 'pointer',
-            }}
-          >
-            Joan (VI Ciclo)
-          </button>
-          <button
-            type="button"
-            onClick={() => setEmail('2022073504@upt.pe')}
-            style={{
-              fontSize: '0.72rem',
-              padding: '0.25rem 0.6rem',
-              borderRadius: '6px',
-              border: '1px solid #CBD5E1',
-              background: email.includes('2022073504') ? '#1C2A59' : '#FFFFFF',
-              color: email.includes('2022073504') ? '#FFFFFF' : '#334155',
-              cursor: 'pointer',
-            }}
-          >
-            Renzo (VII Ciclo Mentor)
-          </button>
-        </div>
+        {showDevControls && !import.meta.env.PROD && (
+          <div style={{ display: 'flex', gap: '0.4rem' }}>
+            <button
+              type="button"
+              onClick={() => setEmail('2022074255@upt.pe')}
+              style={{
+                fontSize: '0.72rem',
+                padding: '0.25rem 0.6rem',
+                borderRadius: '6px',
+                border: '1px solid #CBD5E1',
+                background: email.includes('2022074255') ? '#1C2A59' : '#FFFFFF',
+                color: email.includes('2022074255') ? '#FFFFFF' : '#334155',
+                cursor: 'pointer',
+              }}
+            >
+              Estudiante (VI Ciclo)
+            </button>
+            <button
+              type="button"
+              onClick={() => setEmail('2022073504@upt.pe')}
+              style={{
+                fontSize: '0.72rem',
+                padding: '0.25rem 0.6rem',
+                borderRadius: '6px',
+                border: '1px solid #CBD5E1',
+                background: email.includes('2022073504') ? '#1C2A59' : '#FFFFFF',
+                color: email.includes('2022073504') ? '#FFFFFF' : '#334155',
+                cursor: 'pointer',
+              }}
+            >
+              Mentor (VII Ciclo)
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Pestañas de Navegación Interna */}
@@ -354,7 +358,7 @@ export const ProfileAvailabilityView: React.FC<ProfileAvailabilityViewProps> = (
         >
           <div style={{ borderBottom: '1px solid #E2E8F0', paddingBottom: '0.75rem', marginBottom: '1.25rem' }}>
             <h3 style={{ margin: '0 0 0.25rem 0', color: '#1C2A59', fontSize: '1.15rem', fontWeight: 800 }}>
-              Configuración del Perfil Académico (CUS15 / RF04)
+              Configuración del Perfil Académico
             </h3>
             <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748B' }}>
               Define tu avance curricular, materias filtro prioritarias y modalidad de aprendizaje preferida.
@@ -445,7 +449,7 @@ export const ProfileAvailabilityView: React.FC<ProfileAvailabilityViewProps> = (
                 color: '#991B1B',
               }}
             >
-              ⚠️ <strong>Regla de Mérito RN-03:</strong> Tu ciclo actual ({profile.ciclo_actual}) es menor al VII ciclo. La acreditación oficial como Mentor requiere estar cursando del VII al X ciclo y haber aprobado las asignaturas críticas.
+              ⚠️ <strong>Requisito de Mérito:</strong> Tu ciclo actual ({profile.ciclo_actual}) es menor al VII ciclo. La postulación como Mentor requiere estar cursando del VII al X ciclo y haber aprobado las asignaturas formativas correspondientes.
             </div>
           )}
 
@@ -573,7 +577,7 @@ export const ProfileAvailabilityView: React.FC<ProfileAvailabilityViewProps> = (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid #E2E8F0', paddingBottom: '0.75rem', marginBottom: '1.25rem' }}>
             <div>
               <h3 style={{ margin: '0 0 0.25rem 0', color: '#1C2A59', fontSize: '1.15rem', fontWeight: 800 }}>
-                Agenda Semanal de Disponibilidad (RF04 / CUS15)
+                Agenda Semanal de Disponibilidad
               </h3>
               <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748B' }}>
                 Haz clic sobre las franjas horarias en las que tienes disponibilidad para recibir o brindar mentorías.

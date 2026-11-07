@@ -4,9 +4,11 @@ import type { RequestOtpResponse, VerifyOtpResponse } from '../services/authServ
 
 export interface LoginOtpViewProps {
   onLoginSuccess?: (data: VerifyOtpResponse) => void;
+  showDevControls?: boolean;
 }
 
-export const LoginOtpView: React.FC<LoginOtpViewProps> = ({ onLoginSuccess }) => {
+export const LoginOtpView: React.FC<LoginOtpViewProps> = ({ onLoginSuccess, showDevControls = false }) => {
+  const isDevVisible = showDevControls && !import.meta.env.PROD;
   // Estados del flujo
   const [step, setStep] = useState<'email' | 'otp' | 'success'>(() => { if (typeof window !== 'undefined' && window.location && new URLSearchParams(window.location.search).get('step') === 'otp') return 'otp'; return 'email'; });
   const [email, setEmail] = useState<string>('');
@@ -70,7 +72,7 @@ export const LoginOtpView: React.FC<LoginOtpViewProps> = ({ onLoginSuccess }) =>
     }
 
     if (!cleanEmail.toLowerCase().endsWith('@upt.pe')) {
-      setErrorMessage('Acceso restringido: Solo se permiten correos institucionales con dominio @upt.pe (CUS01 / RF01).');
+      setErrorMessage('Acceso restringido: Solo se permiten correos institucionales con dominio @upt.pe.');
       return;
     }
 
@@ -189,62 +191,64 @@ export const LoginOtpView: React.FC<LoginOtpViewProps> = ({ onLoginSuccess }) =>
         overflow: 'hidden',
       }}
     >
-      {/* Banner de Modo de Acceso en Desarrollo */}
-      <div
-        style={{
-          backgroundColor: authMode === 'api' ? '#F0FDF4' : '#FFFBEB',
-          borderBottom: authMode === 'api' ? '1px solid #BBF7D0' : '1px solid #FDE68A',
-          padding: '0.6rem 1.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '0.5rem',
-          fontSize: '0.78rem',
-          color: authMode === 'api' ? '#15803D' : '#B45309',
-          fontWeight: 600,
-        }}
-      >
-        <span>
-          {authMode === 'api'
-            ? '⚡ API Real de Autenticación & OTP (T-03 · FastAPI + Supabase)'
-            : '🧪 Acceso de prueba — Simulación (Hito 3 · T-02)'}
-        </span>
-        <div style={{ display: 'flex', gap: '0.35rem' }}>
-          <button
-            type="button"
-            onClick={() => handleToggleMode('mock')}
-            style={{
-              background: authMode === 'mock' ? '#FDE68A' : '#FFFFFF',
-              border: '1px solid #FCD34D',
-              borderRadius: '4px',
-              padding: '0.15rem 0.45rem',
-              fontSize: '0.7rem',
-              fontWeight: authMode === 'mock' ? 700 : 500,
-              cursor: 'pointer',
-              color: '#92400E',
-            }}
-          >
-            Dev Mock
-          </button>
-          <button
-            type="button"
-            onClick={() => handleToggleMode('api')}
-            style={{
-              background: authMode === 'api' ? '#BBF7D0' : '#FFFFFF',
-              border: '1px solid #86EFAC',
-              borderRadius: '4px',
-              padding: '0.15rem 0.45rem',
-              fontSize: '0.7rem',
-              fontWeight: authMode === 'api' ? 700 : 500,
-              cursor: 'pointer',
-              color: '#166534',
-            }}
-          >
-            API Real (T-03)
-          </button>
+      {/* Banner de Modo de Acceso en Desarrollo (Oculto en experiencia normal) */}
+      {isDevVisible && (
+        <div
+          style={{
+            backgroundColor: authMode === 'api' ? '#F0FDF4' : '#FFFBEB',
+            borderBottom: authMode === 'api' ? '1px solid #BBF7D0' : '1px solid #FDE68A',
+            padding: '0.6rem 1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '0.5rem',
+            fontSize: '0.78rem',
+            color: authMode === 'api' ? '#15803D' : '#B45309',
+            fontWeight: 600,
+          }}
+        >
+          <span>
+            {authMode === 'api'
+              ? '⚡ Servidor Institucional API Real'
+              : '🧪 Acceso de prueba — Simulación'}
+          </span>
+          <div style={{ display: 'flex', gap: '0.35rem' }}>
+            <button
+              type="button"
+              onClick={() => handleToggleMode('mock')}
+              style={{
+                background: authMode === 'mock' ? '#FDE68A' : '#FFFFFF',
+                border: '1px solid #FCD34D',
+                borderRadius: '4px',
+                padding: '0.15rem 0.45rem',
+                fontSize: '0.7rem',
+                fontWeight: authMode === 'mock' ? 700 : 500,
+                cursor: 'pointer',
+                color: '#92400E',
+              }}
+            >
+              Dev Mock
+            </button>
+            <button
+              type="button"
+              onClick={() => handleToggleMode('api')}
+              style={{
+                background: authMode === 'api' ? '#BBF7D0' : '#FFFFFF',
+                border: '1px solid #86EFAC',
+                borderRadius: '4px',
+                padding: '0.15rem 0.45rem',
+                fontSize: '0.7rem',
+                fontWeight: authMode === 'api' ? 700 : 500,
+                cursor: 'pointer',
+                color: '#166534',
+              }}
+            >
+              API Real
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div style={{ padding: '2rem' }}>
         {/* Encabezado del Formulario */}
@@ -270,7 +274,7 @@ export const LoginOtpView: React.FC<LoginOtpViewProps> = ({ onLoginSuccess }) =>
             Iniciar Sesión Institucional
           </h2>
           <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748B' }}>
-            Acceso seguro con 2FA mediante código OTP temporal (CUS01 / RNF01)
+            Ingresa tu correo institucional @upt.pe para recibir un código de verificación temporal.
           </p>
         </div>
 
@@ -419,7 +423,7 @@ export const LoginOtpView: React.FC<LoginOtpViewProps> = ({ onLoginSuccess }) =>
                   Cambiar correo
                 </button>
               </div>
-              {challenge.mockCodeHint && (
+              {isDevVisible && challenge.mockCodeHint && (
                 <div
                   style={{
                     marginTop: '0.6rem',
@@ -608,27 +612,12 @@ export const LoginOtpView: React.FC<LoginOtpViewProps> = ({ onLoginSuccess }) =>
               }}
             >
               <div style={{ marginBottom: '0.35rem' }}>
-                <span style={{ color: '#64748B' }}>Modo de verificación:</span>{' '}
-                <strong style={{ color: '#B99451' }}>
-                  {verifyResult.mode === 'mock' ? 'Acceso de prueba — Simulación (T-02)' : 'API Backend Real'}
-                </strong>
+                <span style={{ color: '#64748B' }}>Estado:</span>{' '}
+                <strong style={{ color: '#16A34A' }}>Sesión institucional confirmada</strong>
               </div>
               <div style={{ marginBottom: '0.35rem' }}>
-                <span style={{ color: '#64748B' }}>Marca de tiempo:</span>{' '}
+                <span style={{ color: '#64748B' }}>Hora de verificación:</span>{' '}
                 <span>{new Date(verifyResult.verifiedAt).toLocaleTimeString()}</span>
-              </div>
-              {verifyResult.token && (
-                <div style={{ marginTop: '0.6rem', padding: '0.6rem', background: '#F1F5F9', borderRadius: '6px', fontSize: '0.74rem' }}>
-                  <span style={{ fontWeight: 700, color: '#1C2A59', display: 'block', marginBottom: '0.2rem' }}>
-                    🔑 Token JWT de Sesión Emitido (T-03 / HS256):
-                  </span>
-                  <code style={{ color: '#0F766E', wordBreak: 'break-all', display: 'block' }}>
-                    {verifyResult.token}
-                  </code>
-                </div>
-              )}
-              <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '0.5rem', borderTop: '1px solid #E2E8F0', paddingTop: '0.4rem' }}>
-                📌 <em>Alcance delimitado:</em> El consentimiento legal informado (Ley 29733, T-04/T-05) y la matriz de perfiles se integran formalmente en el Sprint 2.
               </div>
             </div>
 
@@ -650,7 +639,7 @@ export const LoginOtpView: React.FC<LoginOtpViewProps> = ({ onLoginSuccess }) =>
                   boxShadow: '0 2px 8px rgba(15, 118, 110, 0.25)',
                 }}
               >
-                Ingresar al Sistema P2P EPIS →
+                Ingresar al Sistema →
               </button>
             )}
 
@@ -669,91 +658,93 @@ export const LoginOtpView: React.FC<LoginOtpViewProps> = ({ onLoginSuccess }) =>
                 cursor: 'pointer',
               }}
             >
-              Probar Otro Acceso / Reiniciar
+              Cerrar y volver a iniciar
             </button>
           </div>
         )}
       </div>
 
-      {/* Panel Auxiliar de Escenarios de Prueba (Solo visible en Modo Mock / Dev) */}
-      <div
-        style={{
-          backgroundColor: '#F8FAFC',
-          borderTop: '1px solid #E2E8F0',
-          padding: '1rem 1.5rem',
-          fontSize: '0.76rem',
-          color: '#475569',
-        }}
-      >
-        <span style={{ fontWeight: 700, color: '#1C2A59', display: 'block', marginBottom: '0.4rem' }}>
-          🛠️ Escenarios de Prueba Reproducibles (Joan - T-02):
-        </span>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.6rem' }}>
-          <button
-            type="button"
-            onClick={() => handleLoadTestEmail('2022074255@upt.pe')}
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid #CBD5E1',
-              borderRadius: '4px',
-              padding: '0.2rem 0.5rem',
-              fontSize: '0.72rem',
-              cursor: 'pointer',
-            }}
-          >
-            Joan (2022074255@upt.pe)
-          </button>
-          <button
-            type="button"
-            onClick={() => handleLoadTestEmail('2022073504@upt.pe')}
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid #CBD5E1',
-              borderRadius: '4px',
-              padding: '0.2rem 0.5rem',
-              fontSize: '0.72rem',
-              cursor: 'pointer',
-            }}
-          >
-            Renzo (2022073504@upt.pe)
-          </button>
-          <button
-            type="button"
-            onClick={() => handleLoadTestEmail('admin.epis@upt.pe')}
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid #CBD5E1',
-              borderRadius: '4px',
-              padding: '0.2rem 0.5rem',
-              fontSize: '0.72rem',
-              cursor: 'pointer',
-              color: '#1C2A59',
-              fontWeight: 600,
-            }}
-          >
-            Admin (admin.epis@upt.pe)
-          </button>
-          <button
-            type="button"
-            onClick={() => handleLoadTestEmail('estudiante@gmail.com')}
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid #CBD5E1',
-              borderRadius: '4px',
-              padding: '0.2rem 0.5rem',
-              fontSize: '0.72rem',
-              cursor: 'pointer',
-              color: '#DC2626',
-            }}
-          >
-            Inválido (@gmail.com)
-          </button>
+      {/* Panel Auxiliar de Escenarios de Prueba (Solo visible en configuración explícita de desarrollo) */}
+      {isDevVisible && (
+        <div
+          style={{
+            backgroundColor: '#F8FAFC',
+            borderTop: '1px solid #E2E8F0',
+            padding: '1rem 1.5rem',
+            fontSize: '0.76rem',
+            color: '#475569',
+          }}
+        >
+          <span style={{ fontWeight: 700, color: '#1C2A59', display: 'block', marginBottom: '0.4rem' }}>
+            🛠️ Cuentas de prueba preconfiguradas:
+          </span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.6rem' }}>
+            <button
+              type="button"
+              onClick={() => handleLoadTestEmail('2022074255@upt.pe')}
+              style={{
+                background: '#FFFFFF',
+                border: '1px solid #CBD5E1',
+                borderRadius: '4px',
+                padding: '0.2rem 0.5rem',
+                fontSize: '0.72rem',
+                cursor: 'pointer',
+              }}
+            >
+              Estudiante (2022074255@upt.pe)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleLoadTestEmail('2022073504@upt.pe')}
+              style={{
+                background: '#FFFFFF',
+                border: '1px solid #CBD5E1',
+                borderRadius: '4px',
+                padding: '0.2rem 0.5rem',
+                fontSize: '0.72rem',
+                cursor: 'pointer',
+              }}
+            >
+              Mentor (2022073504@upt.pe)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleLoadTestEmail('admin.epis@upt.pe')}
+              style={{
+                background: '#FFFFFF',
+                border: '1px solid #CBD5E1',
+                borderRadius: '4px',
+                padding: '0.2rem 0.5rem',
+                fontSize: '0.72rem',
+                cursor: 'pointer',
+                color: '#1C2A59',
+                fontWeight: 600,
+              }}
+            >
+              Admin (admin.epis@upt.pe)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleLoadTestEmail('estudiante@gmail.com')}
+              style={{
+                background: '#FFFFFF',
+                border: '1px solid #CBD5E1',
+                borderRadius: '4px',
+                padding: '0.2rem 0.5rem',
+                fontSize: '0.72rem',
+                cursor: 'pointer',
+                color: '#DC2626',
+              }}
+            >
+              Inválido (@gmail.com)
+            </button>
+          </div>
+          <div style={{ lineHeight: 1.4, color: '#64748B' }}>
+            • Código válido: <code>123456</code> (tras reenvío: <code>654321</code>).<br />
+            • Simular vencimiento inmediato: código <code>000000</code>.
+          </div>
         </div>
-        <div style={{ lineHeight: 1.4, color: '#64748B' }}>
-          • Código válido: <code>123456</code> (tras reenvío: <code>654321</code>).<br />
-          • Simular vencimiento inmediato: código <code>000000</code>.
-        </div>
-      </div>
+      )}
     </div>
   );
 };

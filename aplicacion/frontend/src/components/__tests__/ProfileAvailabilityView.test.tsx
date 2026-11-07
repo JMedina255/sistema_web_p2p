@@ -58,8 +58,8 @@ describe('ProfileAvailabilityView Component (T-11 / RF04 / CUS15)', () => {
     const mentorButton = screen.getByRole('button', { name: /Postulante a Mentor/i });
     fireEvent.click(mentorButton);
 
-    // Como Joan por defecto tiene ciclo 6 (< 7), debe saltar la advertencia RN-03
-    expect(screen.getByText(/Regla de Mérito RN-03/i)).toBeInTheDocument();
+    // Como el estudiante por defecto tiene ciclo 6 (< 7), debe saltar la advertencia de mérito
+    expect(screen.getByText(/Requisito de Mérito/i)).toBeInTheDocument();
   });
 
   it('3. Permite alternar a la pestaña de disponibilidad y muestra la grilla semanal', async () => {

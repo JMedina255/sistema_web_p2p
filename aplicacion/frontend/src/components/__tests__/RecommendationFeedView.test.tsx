@@ -155,8 +155,8 @@ describe('RecommendationFeedView Component (T-20 / RF06 / CUS02 / RN-11)', () =>
       render(<RecommendationFeedView />);
 
       expect(screen.getByRole('status')).toBeInTheDocument();
-      expect(screen.getByText(/Calculando afinidad multifactorial con EdRecSys/i)).toBeInTheDocument();
-      expect(screen.getByText(/Cartelera Inteligente de Mentorías/i)).toBeInTheDocument();
+      expect(screen.getByText(/Calculando afinidad con sesiones disponibles/i)).toBeInTheDocument();
+      expect(screen.getByText(/Cartelera de Mentorías Recomendadas/i)).toBeInTheDocument();
     });
 
     it('renderiza el encabezado institucional y las pestañas principales', async () => {
@@ -165,7 +165,7 @@ describe('RecommendationFeedView Component (T-20 / RF06 / CUS02 / RN-11)', () =>
       render(<RecommendationFeedView />);
 
       await waitFor(() => {
-        expect(screen.getByText(/Cartelera Inteligente de Mentorías \(EdRecSys v1.0\)/i)).toBeInTheDocument();
+        expect(screen.getByText(/Cartelera de Mentorías Recomendadas/i)).toBeInTheDocument();
       });
 
       expect(screen.getByRole('tab', { name: /Sesiones Recomendadas/i })).toBeInTheDocument();
@@ -266,7 +266,7 @@ describe('RecommendationFeedView Component (T-20 / RF06 / CUS02 / RN-11)', () =>
       expect(screen.getByText(/Índice de Dice:/i)).toBeInTheDocument();
       expect(screen.getByText(/91\.9%/i)).toBeInTheDocument();
       expect(screen.getByText(/Multiplicador Prioritario: 1.3x \(AED-201\)/i)).toBeInTheDocument();
-      expect(screen.getByText(/Mérito Docente Acreditado \(RN-03: Ciclo VII-X\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/Mérito Académico Acreditado \(Ciclo VII-X\)/i)).toBeInTheDocument();
 
       // Franjas horarias
       expect(screen.getByText('Lun 10:00-11:00')).toBeInTheDocument();
@@ -304,7 +304,7 @@ describe('RecommendationFeedView Component (T-20 / RF06 / CUS02 / RN-11)', () =>
       });
 
       expect(screen.getByText('Renzo Antonio Antayhua Mamani')).toBeInTheDocument();
-      expect(screen.getByText(/Ciclo 8 \(RN-03\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/Ciclo 8/i)).toBeInTheDocument();
       expect(screen.getByText(/Asignaturas de asesoría académica:/i)).toBeInTheDocument();
       expect(screen.getByText('Algoritmos y Estructuras de Datos')).toBeInTheDocument();
     });
@@ -334,7 +334,7 @@ describe('RecommendationFeedView Component (T-20 / RF06 / CUS02 / RN-11)', () =>
 
       expect(screen.getByText(/No se encontraron recomendaciones en este momento/i)).toBeInTheDocument();
       expect(screen.getByText(/Banco de Solicitudes por Demanda/i)).toBeInTheDocument();
-      expect(screen.getByText(/¿Necesitas asesoría en un tema específico\? \(RF07 \/ CUS03\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/¿Necesitas asesoría en un tema específico\?/i)).toBeInTheDocument();
     });
 
     it('ejecuta el callback onRequestDemand al presionar el botón de solicitud por demanda', async () => {
@@ -353,10 +353,10 @@ describe('RecommendationFeedView Component (T-20 / RF06 / CUS02 / RN-11)', () =>
       render(<RecommendationFeedView onRequestDemand={onDemandSpy} />);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /Registrar Solicitud por Demanda \(CUS03\)/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Registrar Solicitud por Demanda/i })).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByRole('button', { name: /Registrar Solicitud por Demanda \(CUS03\)/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Registrar Solicitud por Demanda/i }));
       expect(onDemandSpy).toHaveBeenCalledTimes(1);
     });
   });

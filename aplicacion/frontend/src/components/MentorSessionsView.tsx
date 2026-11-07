@@ -176,7 +176,7 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
       const targetTime = new Date(rescheduleDate).getTime();
       const diffHours = (targetTime - Date.now()) / (3600 * 1000);
       if (diffHours <= 24) {
-        setContingencyError('Infracción de RN-04: La reprogramación exige una antelación mayor a 24 horas.');
+        setContingencyError('La reprogramación exige una antelación mayor a 24 horas.');
         return;
       }
     }
@@ -299,7 +299,7 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
             📋 Mis Mentorías Académicas Programadas
           </h2>
           <p style={{ margin: 0, fontSize: '0.88rem', color: '#64748B' }}>
-            Supervisión pedagógica de aforo, ratificación de estudiantes y quórum institucional (RN-05 / RN-08 / RN-09).
+            Supervisión de aforo, ratificación de estudiantes y quórum institucional.
           </p>
         </div>
         {handlePublish && (
@@ -760,7 +760,7 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
 
             <p style={{ fontSize: '0.88rem', color: '#475569', marginBottom: '1.25rem' }}>
               La sesión <strong>{contingencySession.codigo_sesion}</strong> ({contingencySession.offer.nombre_asignatura})
-              no alcanzó el quórum reglamentario en T-24h. Conforme a la regla <strong>RN-10</strong>, seleccione una acción resolutiva:
+              no alcanzó el quórum mínimo requerido a 24 horas del inicio. Seleccione una acción resolutiva:
             </p>
 
             {contingencyError && (
@@ -838,7 +838,7 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
                     Reprogramar Sesión
                   </strong>
                   <span style={{ fontSize: '0.8rem', color: '#64748B', display: 'block', marginBottom: '0.5rem' }}>
-                    Postergar la fecha y hora de la mentoría con al menos 24 horas de antelación (RN-04).
+                    Postergar la fecha y hora de la mentoría con al menos 24 horas de antelación.
                   </span>
                   {contingencyDecision === 'RESCHEDULE' && (
                     <div>
@@ -886,7 +886,7 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
                     Cancelar Sesión Definitivamente
                   </strong>
                   <span style={{ fontSize: '0.8rem', color: '#64748B', display: 'block', marginBottom: '0.5rem' }}>
-                    Anular la sesión liberando a los estudiantes inscritos sin penalidad alguna (RN-10).
+                    Anular la sesión liberando a los estudiantes inscritos sin penalidad alguna.
                   </span>
                   {contingencyDecision === 'CANCEL' && (
                     <div>

@@ -80,11 +80,11 @@ describe('OfferPublishView Component (T-14 / RF08 / CUS06)', () => {
   });
 
   it('1. Renderiza el formulario con banner de modo de prueba local y datos del mentor', async () => {
-    render(<OfferPublishView mentorEmail={mentorEmail} mentorName={mentorName} />);
+    render(<OfferPublishView mentorEmail={mentorEmail} mentorName={mentorName} showDevControls={true} />);
 
-    // Verifica banner de modo prueba local (Backend pendiente)
-    expect(screen.getByText(/Modo de prueba local — Backend pendiente/i)).toBeInTheDocument();
-    expect(screen.getByText(/T-14 · Joan \(Frontend\)/i)).toBeInTheDocument();
+    // Verifica banner de modo prueba local
+    expect(screen.getByText(/Modo de prueba local/i)).toBeInTheDocument();
+    expect(screen.getByText(/Entorno de pruebas/i)).toBeInTheDocument();
 
     // Verifica título e identidad del mentor
     expect(screen.getByText(/Publicar Nueva Oferta de Mentoría/i)).toBeInTheDocument();
@@ -102,7 +102,7 @@ describe('OfferPublishView Component (T-14 / RF08 / CUS06)', () => {
 
       await waitFor(() => {
         expect(screen.getByLabelText(/Aforo reglamentario/i)).toHaveValue('10 Estudiantes');
-        expect(screen.getByText(/Límite fijo de 10 participantes para sesiones presenciales \(RN-05\)/i)).toBeInTheDocument();
+        expect(screen.getByText(/Límite institucional de 10 participantes para sesiones presenciales/i)).toBeInTheDocument();
       });
     });
 
@@ -118,9 +118,9 @@ describe('OfferPublishView Component (T-14 / RF08 / CUS06)', () => {
 
       await waitFor(() => {
         expect(screen.getByLabelText(/Aforo reglamentario/i)).toHaveValue('20 Estudiantes');
-        expect(screen.getByText(/Límite fijo de 20 participantes para sesiones virtuales \(RN-05\)/i)).toBeInTheDocument();
-        // Verifica que también cambió la infraestructura a enlace virtual con RN-07
-        expect(screen.getByText(/RN-07: Aprovisionamiento Virtual/i)).toBeInTheDocument();
+        expect(screen.getByText(/Límite institucional de 20 participantes para sesiones virtuales/i)).toBeInTheDocument();
+        // Verifica que también cambió la infraestructura a enlace virtual
+        expect(screen.getByText(/Aprovisionamiento Virtual/i)).toBeInTheDocument();
       });
     });
   });
@@ -146,7 +146,7 @@ describe('OfferPublishView Component (T-14 / RF08 / CUS06)', () => {
       fireEvent.change(dateInput, { target: { value: dateString } });
 
       await waitFor(() => {
-        expect(screen.getByText(/Infracción de RN-04/i)).toBeInTheDocument();
+        expect(screen.getByText(/Antelación insuficiente/i)).toBeInTheDocument();
       });
 
       const submitBtn = screen.getByRole('button', { name: /Publicar Oferta de Mentoría/i });

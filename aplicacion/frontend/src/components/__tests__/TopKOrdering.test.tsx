@@ -682,7 +682,7 @@ describe('Batería T-19: Ordenamiento Determinista y Empates Top-k (ORD-01 a ORD
 
       // Abrir panel XAI para verificar desglose explicable en la oferta #1 (Algoritmos)
       const xaiButtons = screen.getAllByRole('button', {
-        name: /Ver desglose de compatibilidad \(XAI\)/i,
+        name: /Ver desglose de compatibilidad/i,
       });
       fireEvent.click(xaiButtons[0]);
 

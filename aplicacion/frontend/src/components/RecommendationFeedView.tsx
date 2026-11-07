@@ -183,7 +183,7 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
             padding: '0.2rem 0',
           }}
         >
-          <span>{isExpanded ? '▼ Ocultar desglose de compatibilidad' : '▶ Ver desglose de compatibilidad (XAI)'}</span>
+          <span>{isExpanded ? '▼ Ocultar desglose de compatibilidad' : '▶ Ver desglose de compatibilidad'}</span>
         </button>
 
         {isExpanded && (
@@ -291,7 +291,7 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
                     fontWeight: 600,
                   }}
                 >
-                  ✓ Mérito Docente Acreditado (RN-03: Ciclo VII-X)
+                  ✓ Mérito Académico Acreditado (Ciclo VII-X)
                 </span>
               )}
 
@@ -435,7 +435,7 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
                 </div>
 
                 <div>
-                  <div style={{ color: '#64748B', fontSize: '0.75rem' }}>Disponibilidad (RN-05)</div>
+                  <div style={{ color: '#64748B', fontSize: '0.75rem' }}>Cupos disponibles</div>
                   <div style={{ marginTop: '0.1rem' }}>
                     {isFull ? (
                       <span
@@ -459,7 +459,7 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
                 </div>
 
                 <div>
-                  <div style={{ color: '#64748B', fontSize: '0.75rem' }}>Estudiante Mentor (RN-03)</div>
+                  <div style={{ color: '#64748B', fontSize: '0.75rem' }}>Estudiante Mentor</div>
                   <div style={{ fontWeight: 600, color: '#1E293B', marginTop: '0.1rem' }}>
                     {offer.mentor_nombre || offer.mentor_email} (Ciclo {offer.mentor_ciclo})
                   </div>
@@ -546,7 +546,7 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
                     borderRadius: '9999px',
                   }}
                 >
-                  Ciclo {mentor.mentor_ciclo} (RN-03)
+                  Ciclo {mentor.mentor_ciclo}
                 </span>
                 <h3 style={{ margin: '0.5rem 0 0.2rem 0', fontSize: '1.15rem', color: '#0F172A' }}>
                   {mentor.mentor_nombres} {mentor.mentor_apellidos}
@@ -668,7 +668,7 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
 
         <p style={{ margin: '0 0 1.25rem 0', color: '#64748B', fontSize: '0.92rem', lineHeight: '1.5' }}>
           No existen ofertas activas ni mentores disponibles que coincidan con la asignatura o franjas horarias
-          de tu agenda semanal. Recuerda que las sesiones requieren antelación mayor a 24 horas (RN-04) y cupo libre (RN-05).
+          de tu agenda semanal. Recuerda que las sesiones requieren antelación mayor a 24 horas y cupos disponibles.
         </p>
 
         {/* Orientación Pedagógica conforme a CUS03 / RF07 */}
@@ -685,7 +685,7 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
           }}
         >
           <div style={{ fontWeight: 700, color: '#1C2A59', marginBottom: '0.3rem' }}>
-            💡 ¿Necesitas asesoría en un tema específico? (RF07 / CUS03)
+            💡 ¿Necesitas asesoría en un tema específico?
           </div>
           <div>
             Puedes registrar tu necesidad temática en el <strong>Banco de Solicitudes por Demanda</strong> para que un
@@ -709,7 +709,7 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
               boxShadow: '0 2px 4px rgba(185, 148, 81, 0.25)',
             }}
           >
-            Registrar Solicitud por Demanda (CUS03)
+            Registrar Solicitud por Demanda
           </button>
         )}
       </div>
@@ -732,7 +732,7 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <h2 style={{ margin: 0, color: '#1C2A59', fontSize: '1.45rem', fontWeight: 800 }}>
-              Cartelera Inteligente de Mentorías (EdRecSys v1.0)
+              Cartelera de Mentorías Recomendadas
             </h2>
             <p style={{ margin: '0.35rem 0 0 0', color: '#64748B', fontSize: '0.9rem' }}>
               Recomendaciones personalizadas por afinidad curricular, coincidencia horaria semanal y materias prioritarias EPIS.
@@ -984,10 +984,10 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
             }}
           />
           <div style={{ color: '#1C2A59', fontWeight: 600, fontSize: '0.95rem' }}>
-            Calculando afinidad multifactorial con EdRecSys...
+            Calculando afinidad con sesiones disponibles...
           </div>
           <div style={{ color: '#64748B', fontSize: '0.82rem', marginTop: '0.25rem' }}>
-            Evaluando coincidencia curricular, temática silábica y agenda 6×11
+            Evaluando coincidencia curricular, temática silábica y agenda semanal
           </div>
         </div>
       ) : (

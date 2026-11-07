@@ -433,7 +433,7 @@ describe('StudentBookingsView Component (T-25 / RF13 / CUS24 / RN-08 / RN-09 / R
 
       await waitFor(() => {
         expect(
-          screen.getByText(/Integración pendiente en backend \(T-26\)/i)
+          screen.getByText(/Servicio en integración/i)
         ).toBeInTheDocument();
       });
       // El diálogo permanece abierto para no perder contexto
@@ -461,7 +461,7 @@ describe('StudentBookingsView Component (T-25 / RF13 / CUS24 / RN-08 / RN-09 / R
 
       await waitFor(() => {
         expect(
-          screen.getByText(/Infracción de RN-08: El plazo perentorio de ratificación cerró/i)
+          screen.getByText(/El plazo para ratificar tu asistencia cerró/i)
         ).toBeInTheDocument();
       });
     });
@@ -665,7 +665,7 @@ describe('StudentBookingsView Component (T-25 / RF13 / CUS24 / RN-08 / RN-09 / R
         expect(screen.getByText('RES-BOUNDARY-24H')).toBeInTheDocument();
       });
 
-      const disabledCancelBtn = screen.getByRole('button', { name: /Desistimiento Cerrado \(T-24h\)/i });
+      const disabledCancelBtn = screen.getByRole('button', { name: /Desistimiento Cerrado \(Cierre 24h\)/i });
       expect(disabledCancelBtn).toBeDisabled();
     });
 
@@ -685,7 +685,7 @@ describe('StudentBookingsView Component (T-25 / RF13 / CUS24 / RN-08 / RN-09 / R
         expect(screen.getByText('RES-LATE-12H')).toBeInTheDocument();
       });
 
-      const disabledCancelBtn = screen.getByRole('button', { name: /Desistimiento Cerrado \(T-24h\)/i });
+      const disabledCancelBtn = screen.getByRole('button', { name: /Desistimiento Cerrado \(Cierre 24h\)/i });
       expect(disabledCancelBtn).toBeDisabled();
     });
 
@@ -837,7 +837,7 @@ describe('StudentBookingsView Component (T-25 / RF13 / CUS24 / RN-08 / RN-09 / R
 
       await waitFor(() => {
         expect(
-          screen.getByText(/Integración pendiente en backend \(T-28\)/i)
+          screen.getByText(/Servicio en integración/i)
         ).toBeInTheDocument();
       });
       expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -860,7 +860,7 @@ describe('StudentBookingsView Component (T-25 / RF13 / CUS24 / RN-08 / RN-09 / R
 
       await waitFor(() => {
         expect(
-          screen.getByText(/Infracción de RN-10: El desistimiento voluntario solo está permitido/i)
+          screen.getByText(/El desistimiento voluntario solo está permitido/i)
         ).toBeInTheDocument();
       });
     });

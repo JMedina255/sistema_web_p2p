@@ -43,7 +43,7 @@ export const HealthStatus: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
         <div>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1C2A59', margin: 0 }}>
-            🛰️ Monitor de Servicios (Hito 2 · T-01)
+            🛰️ Monitor de Servicios del Sistema
           </h2>
           <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: '#64748B' }}>
             Base URL: <code style={{ background: '#F1F5F9', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{apiBaseUrl}</code>

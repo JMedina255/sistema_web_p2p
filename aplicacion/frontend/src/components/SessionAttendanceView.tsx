@@ -192,14 +192,14 @@ export const SessionAttendanceView: React.FC<SessionAttendanceViewProps> = ({
             marginBottom: '0.5rem',
           }}
         >
-          Control de Asistencia Digital · RF17 / CUS12{isMentor ? ' (Modo Mentor)' : ' (Modo Estudiante)'}
+          Control de Asistencia Digital{isMentor ? ' · Modo Mentor' : ' · Modo Estudiante'}
         </span>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>
           📱 {sessionTitle}
         </h2>
         <p style={{ margin: 0, fontSize: '0.88rem', opacity: 0.9 }}>
-          Pase de lista biométrico/digital mediante código QR dinámico cifrado basado en TOTP.
-          El código rota automáticamente cada 30 segundos para prevenir suplantaciones (RN-12).
+          Registro de asistencia mediante código QR dinámico basado en TOTP.
+          El código se actualiza periódicamente para garantizar la validez del registro.
         </p>
       </div>
 

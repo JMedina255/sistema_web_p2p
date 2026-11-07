@@ -364,7 +364,7 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
                 marginBottom: '0.25rem',
               }}
             >
-              Módulo MOD-05: Quórum y Reservas (CUS04 / RF12)
+              Reserva de Cupo de Mentoría
             </div>
             <h2
               id={titleId}
@@ -551,7 +551,7 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
                 </div>
                 {successData.fecha_limite_confirmacion && (
                   <div>
-                    <strong>Fecha Límite para Ratificar (RN-08):</strong>{' '}
+                    <strong>Fecha Límite para Ratificar:</strong>{' '}
                     <span style={{ color: '#DC2626', fontWeight: 600 }}>
                       {formatSessionDateTime(successData.fecha_limite_confirmacion)}
                     </span>
@@ -704,7 +704,7 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
                     </div>
                     <div style={{ color: '#64748B', fontSize: '0.78rem' }}>
                       {offer.mentor_ciclo
-                        ? `Ciclo ${offer.mentor_ciclo} • Mérito RN-03`
+                        ? `Ciclo ${offer.mentor_ciclo} • Mentor Acreditado`
                         : offer.mentor_email}
                     </div>
                   </div>
@@ -767,10 +767,10 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Aforo y Vacantes (RN-05) */}
+                  {/* Aforo y Vacantes */}
                   <div>
                     <div style={{ color: '#64748B', fontSize: '0.75rem', fontWeight: 600 }}>
-                      DISPONIBILIDAD DE AFORO (RN-05)
+                      DISPONIBILIDAD DE VACANTES
                     </div>
                     <div
                       style={{
@@ -826,7 +826,7 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
                     lineHeight: 1.4,
                   }}
                 >
-                  <strong>🚫 Restricción de Autoreserva (RN-03):</strong> Como mentor titular de esta
+                  <strong>🚫 Restricción de Autoreserva:</strong> Como mentor titular de esta
                   sesión formativa, no puedes postularte ni reservar una vacante como estudiante mentoreado.
                 </div>
               )}
@@ -845,7 +845,7 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
                     lineHeight: 1.4,
                   }}
                 >
-                  <strong>⚠️ Aforo Agotado (RN-05):</strong> No quedan vacantes disponibles en esta
+                  <strong>⚠️ Aforo Agotado:</strong> No quedan vacantes disponibles en esta
                   sesión. Puedes registrar una solicitud de mentoría por demanda para coordinar una
                   nueva fecha con un mentor.
                   {onDemandRedirect && (
@@ -864,7 +864,7 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
                           cursor: 'pointer',
                         }}
                       >
-                        Registrar Solicitud por Demanda (CUS03)
+                        Registrar Solicitud por Demanda
                       </button>
                     </div>
                   )}
@@ -904,13 +904,13 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
                     lineHeight: 1.4,
                   }}
                 >
-                  <strong>🔒 Ventana de Reserva Cerrada (T-24h / RN-08):</strong> Las reservas cierran
+                  <strong>🔒 Ventana de Reserva Cerrada (T-24h):</strong> Las reservas cierran
                   estrictamente 24 horas antes del inicio de la sesión para proceder a la evaluación de
-                  quórum institucional (RN-09).
+                  quórum institucional.
                 </div>
               )}
 
-              {/* Aviso Normativo sobre Reserva Provisional (RN-08 / RNF07) */}
+              {/* Aviso Normativo sobre Reserva Provisional */}
               <div
                 id={descId}
                 style={{
@@ -932,11 +932,10 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
                   </li>
                   <li>
                     Deberás ratificar tu asistencia obligatoriamente antes de las <strong>24 horas previas</strong>{' '}
-                    al inicio de la sesión (RN-08) para confirmar tu plaza y cómputo de quórum.
+                    al inicio de la sesión para asegurar tu plaza definitiva.
                   </li>
                   <li>
-                    <strong>Concurrencia ACID (RNF07):</strong> Las vacantes mostradas son referenciales
-                    hasta que el servidor confirme la transacción bajo bloqueo pesimista.
+                    <strong>Confirmación en línea:</strong> Tu vacante se asegura de manera inmediata al procesar y confirmar la transacción.
                   </li>
                 </ul>
               </div>

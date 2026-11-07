@@ -128,7 +128,7 @@ describe('MentorSessionsView Component (T-32 / RF16 / CUS07 / RN-04 / RN-10 / WC
     const dateInput = screen.getByLabelText(/Nueva Fecha y Hora/i);
     fireEvent.change(dateInput, { target: { value: invalidDate } });
     fireEvent.click(confirmBtn);
-    expect(screen.getByText(/Infracción de RN-04: La reprogramación exige una antelación mayor a 24 horas/i)).toBeInTheDocument();
+    expect(screen.getByText(/La reprogramación exige una antelación mayor a 24 horas/i)).toBeInTheDocument();
     expect(resolveSpy).not.toHaveBeenCalled();
 
     // Caso C: Ingresar fecha válida (> 24h)

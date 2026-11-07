@@ -85,7 +85,7 @@ describe('BookingModalView Component (T-21 / CUS04 / RF12 / RN-05 / RN-08 / RNF0
     expect(screen.getByText(/Algoritmos y Estructuras de Datos/i)).toBeInTheDocument();
     expect(screen.getByText(/Tema: Grafos y Algoritmo de Dijkstra/i)).toBeInTheDocument();
     expect(screen.getByText(/Renzo Antayhua Mamani/i)).toBeInTheDocument();
-    expect(screen.getByText(/Ciclo 8 • Mérito RN-03/i)).toBeInTheDocument();
+    expect(screen.getByText(/Ciclo 8 • Mentor Acreditado/i)).toBeInTheDocument();
     expect(screen.getByText(/90 minutos/i)).toBeInTheDocument();
     expect(screen.getByText(/PRESENCIAL/i)).toBeInTheDocument();
     expect(screen.getByText(/Laboratorio L-02 - Pabellón G/i)).toBeInTheDocument();
@@ -157,7 +157,7 @@ describe('BookingModalView Component (T-21 / CUS04 / RF12 / RN-05 / RN-08 / RNF0
 
     const warning = screen.getByTestId('warning-self-booking');
     expect(warning).toBeInTheDocument();
-    expect(warning).toHaveTextContent(/Restricción de Autoreserva \(RN-03\)/i);
+    expect(warning).toHaveTextContent(/Restricción de Autoreserva/i);
 
     const confirmButton = screen.getByRole('button', { name: /Confirmar Reserva de Cupo/i });
     expect(confirmButton).toBeDisabled();
@@ -181,7 +181,7 @@ describe('BookingModalView Component (T-21 / CUS04 / RF12 / RN-05 / RN-08 / RNF0
 
     const warning = screen.getByTestId('warning-capacity-exceeded');
     expect(warning).toBeInTheDocument();
-    expect(warning).toHaveTextContent(/Aforo Agotado \(RN-05\)/i);
+    expect(warning).toHaveTextContent(/Aforo Agotado/i);
 
     const confirmButton = screen.getByRole('button', { name: /Confirmar Reserva de Cupo/i });
     expect(confirmButton).toBeDisabled();
@@ -220,7 +220,7 @@ describe('BookingModalView Component (T-21 / CUS04 / RF12 / RN-05 / RN-08 / RNF0
 
     const warning = screen.getByTestId('warning-window-closed');
     expect(warning).toBeInTheDocument();
-    expect(warning).toHaveTextContent(/Ventana de Reserva Cerrada \(T-24h \/ RN-08\)/i);
+    expect(warning).toHaveTextContent(/Ventana de Reserva Cerrada/i);
 
     const confirmButton = screen.getByRole('button', { name: /Confirmar Reserva de Cupo/i });
     expect(confirmButton).toBeDisabled();

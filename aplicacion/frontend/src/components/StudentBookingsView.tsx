@@ -147,7 +147,7 @@ function evaluateT24Window(
       hoursRemaining,
       cutoffIso,
       message:
-        'Ventana de ratificación y desistimiento cerrada (RN-08 / RN-10): El corte perentorio se cumplió a las 24 horas previas al inicio.',
+        'Ventana de ratificación y desistimiento cerrada: El corte perentorio se cumplió a las 24 horas previas al inicio.',
     };
   }
 
@@ -156,7 +156,7 @@ function evaluateT24Window(
     isPast: false,
     hoursRemaining,
     cutoffIso,
-    message: `Ventana abierta (RN-08 / RN-10): Restan aproximadamente ${hoursRemaining} horas para el inicio de la clase.`,
+    message: `Ventana abierta: Restan aproximadamente ${hoursRemaining} horas para el inicio de la clase.`,
   };
 }
 
@@ -180,7 +180,7 @@ function getStatusConfig(status: BookingStatus | string): StatusConfig {
         badgeText: '#92400E',
         badgeBorder: '#F59E0B',
         description:
-          'Cupo provisional. Debes ratificar tu asistencia antes de T-24h para ser contabilizado en el quórum (RN-08).',
+          'Cupo provisional. Debes ratificar tu asistencia antes de 24 horas para ser contabilizado en el quórum.',
       };
     case 'CONFIRMADA':
       return {
@@ -189,7 +189,7 @@ function getStatusConfig(status: BookingStatus | string): StatusConfig {
         badgeText: '#065F46',
         badgeBorder: '#10B981',
         description:
-          'Has ratificado tu asistencia. Tu cupo está asegurado en la evaluación del quórum regulatorio (RN-09).',
+          'Has ratificado tu asistencia. Tu cupo está asegurado en la evaluación del quórum institucional.',
       };
     case 'NO_CONFIRMADA':
       return {
@@ -206,7 +206,7 @@ function getStatusConfig(status: BookingStatus | string): StatusConfig {
         badgeBg: '#F3F4F6',
         badgeText: '#374151',
         badgeBorder: '#9CA3AF',
-        description: 'Cancelada voluntariamente por el estudiante conforme a la política RN-10.',
+        description: 'Cancelada voluntariamente por el estudiante conforme a la política de desistimiento.',
       };
     case 'CANCELADA_SISTEMA':
       return {
@@ -215,7 +215,7 @@ function getStatusConfig(status: BookingStatus | string): StatusConfig {
         badgeText: '#7F1D1D',
         badgeBorder: '#DC2626',
         description:
-          'Sesión suspendida por el sistema al no alcanzar el quórum del 50% reglamentario (RN-09).',
+          'Sesión suspendida por el sistema al no alcanzar el quórum del 50% reglamentario.',
       };
     case 'ASISTIDA':
       return {
@@ -359,11 +359,11 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
       if (err instanceof BookingException) {
         if (err.code === 'ENDPOINT_NOT_IMPLEMENTED') {
           setConfirmError(
-            'ℹ️ Integración pendiente en backend (T-26): El servicio de ratificación en el servidor FastAPI está en desarrollo por Renzo. La interfaz está lista y conectada contractualmente.'
+            'ℹ️ Servicio en integración: El servicio de ratificación en el servidor está en proceso de integración. La solicitud ha sido registrada localmente.'
           );
         } else if (err.code === 'WINDOW_CLOSED_T24H') {
           setConfirmError(
-            'Infracción de RN-08: El plazo perentorio de ratificación cerró a las 24 horas previas al inicio de la sesión.'
+            'El plazo para ratificar tu asistencia cerró a las 24 horas previas al inicio de la sesión.'
           );
         } else if (err.code === 'INVALID_STATUS_TRANSITION') {
           setConfirmError('Esta reserva ya fue confirmada o se encuentra en un estado incompatible.');
@@ -424,11 +424,11 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
       if (err instanceof BookingException) {
         if (err.code === 'ENDPOINT_NOT_IMPLEMENTED') {
           setCancelError(
-            'ℹ️ Integración pendiente en backend (T-28): El servicio de desistimiento y restitución atómica de cupo en el servidor FastAPI está en desarrollo por Renzo. La interfaz está conectada contractualmente.'
+            'ℹ️ Servicio en integración: El servicio de desistimiento en el servidor está en proceso de integración. La solicitud ha sido registrada localmente.'
           );
         } else if (err.code === 'WINDOW_CLOSED_T24H') {
           setCancelError(
-            'Infracción de RN-10: El desistimiento voluntario solo está permitido con más de 24 horas de anticipación al inicio de la sesión.'
+            'El desistimiento voluntario solo está permitido con más de 24 horas de anticipación al inicio de la sesión.'
           );
         } else if (err.code === 'ALREADY_CANCELLED') {
           setCancelError('Esta reserva ya fue cancelada con anterioridad.');
@@ -534,7 +534,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
             id={`${componentId}-unauth-title`}
             style={{ color: '#002147', fontSize: '20px', fontWeight: 700, margin: '0 0 8px 0' }}
           >
-            Acceso Restringido a Mis Reservas (RN-01)
+            Acceso Restringido a Mis Reservas
           </h2>
           <p style={{ color: '#4B5563', fontSize: '14px', maxWidth: '520px', margin: '0 auto 20px auto' }}>
             Para consultar tus cupos inscritos, ratificar asistencia o desistir de una reserva, debes iniciar sesión
@@ -1006,7 +1006,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                       }}
                     >
                       <span aria-hidden="true">{timeCheck.isOpen ? '⏳ ' : '⛔ '}</span>
-                      <strong>Plazo RN-08 / RN-10:</strong> {timeCheck.message}
+                      <strong>Plazo de confirmación:</strong> {timeCheck.message}
                       {timeCheck.cutoffIso && (
                         <div style={{ marginTop: '2px', fontSize: '11px' }}>
                           Corte definitivo: <strong>{formatDateTime(timeCheck.cutoffIso)}</strong>
@@ -1044,7 +1044,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                   )}
                 </div>
 
-                {/* Barra de Acciones de la Tarjeta (T-25 Ratificación / T-27 Desistimiento) */}
+                {/* Barra de Acciones de la Tarjeta */}
                 <div
                   style={{
                     display: 'flex',
@@ -1094,7 +1094,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                           cursor: 'not-allowed',
                         }}
                       >
-                        Plazo Vencido (T-24h cerrado)
+                        Plazo Vencido (Cierre 24h)
                       </button>
                     )
                   )}
@@ -1115,7 +1115,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                     </span>
                   )}
 
-                  {/* Botón de Desistimiento Voluntario (T-27 / RF14 / CUS17 / RN-10) */}
+                  {/* Botón de Desistimiento Voluntario */}
                   {isCancelEligible && (
                     canCancel ? (
                       <button
@@ -1142,7 +1142,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                       <button
                         disabled
                         aria-disabled="true"
-                        title="El desistimiento voluntario no está permitido a menos de 24 horas del inicio (RN-10)."
+                        title="El desistimiento voluntario no está permitido a menos de 24 horas del inicio."
                         style={{
                           backgroundColor: '#F1F5F9',
                           color: '#94A3B8',
@@ -1154,7 +1154,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                           cursor: 'not-allowed',
                         }}
                       >
-                        Desistimiento Cerrado (T-24h)
+                        Desistimiento Cerrado (Cierre 24h)
                       </button>
                     )
                   )}
@@ -1241,7 +1241,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                     marginRight: '8px',
                   }}
                 >
-                  T-25 · CUS24
+                  Confirmación
                 </span>
                 <span style={{ fontSize: '13px', color: '#CBD5E1' }}>
                   {confirmingBooking.codigo_reserva}
@@ -1303,7 +1303,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                 </div>
               </div>
 
-              {/* Mensajes de Compromiso Formativo (PB-014 / RN-08 / RN-09) */}
+              {/* Mensajes de Compromiso Formativo */}
               <div
                 style={{
                   backgroundColor: '#FFFBEB',
@@ -1316,18 +1316,18 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                 }}
               >
                 <p style={{ margin: '0 0 6px 0', fontWeight: 700 }}>
-                  📜 Compromiso de Asistencia y Quórum (RN-08 / RN-09 / PB-014):
+                  📜 Compromiso de Asistencia y Quórum:
                 </p>
                 <ul style={{ margin: 0, paddingLeft: '18px', lineHeight: 1.4 }}>
                   <li>
                     Al ratificar, tu cupo pasa a estado <strong>CONFIRMADA</strong> y se contabiliza en el quórum
-                    mínimo del 50% requerido (5 estudiantes en presencial / 10 en virtual) para habilitar el dictado de la clase.
+                    mínimo del 50% requerido para habilitar el dictado de la clase.
                   </li>
                   <li>
-                    Si surge algún imprevisto, puedes desistir voluntariamente hasta 24 horas antes del inicio sin penalización académica (RN-10).
+                    Si surge algún imprevisto, puedes desistir voluntariamente hasta 24 horas antes del inicio sin penalización académica.
                   </li>
                   <li>
-                    <em>Aviso institucional:</em> La ratificación individual no asegura el dictado definitivo si la sesión general no alcanza el quórum del 50% al corte de T-24h (RN-09).
+                    <em>Aviso institucional:</em> La ratificación individual asegura tu plaza; la realización de la sesión depende de alcanzar el quórum mínimo al cierre de las 24 horas.
                   </li>
                 </ul>
               </div>
@@ -1466,7 +1466,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                     marginRight: '8px',
                   }}
                 >
-                  T-27 · CUS17
+                  Desistimiento
                 </span>
                 <span style={{ fontSize: '13px', color: '#FCA5A5' }}>
                   {cancellingBooking.codigo_reserva}
@@ -1544,14 +1544,14 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                 }}
               >
                 <p style={{ margin: '0 0 6px 0', fontWeight: 700 }}>
-                  ⚠️ Política de Desistimiento y Liberación de Cupo (RN-10 / PB-015):
+                  ⚠️ Política de Desistimiento y Liberación de Cupo:
                 </p>
                 <ul style={{ margin: 0, paddingLeft: '18px', lineHeight: 1.4 }}>
                   <li>
                     Al desistir voluntariamente con más de 24 horas de antelación, tu vacante será cancelada sin penalización en tu historial formativo institucional.
                   </li>
                   <li>
-                    <em>Liberación efectiva del aforo:</em> La vacante se restituye al catálogo de mentorías únicamente cuando el servidor procesa y confirma la transacción de manera atómica (RN-05 / RNF07).
+                    <em>Liberación efectiva del aforo:</em> La vacante se restituye al catálogo de mentorías para que otro estudiante pueda aprovecharla.
                   </li>
                   <li>
                     Esta acción es irreversible. Para volver a inscribirte deberás reservar nuevamente desde la cartelera si aún quedan vacantes disponibles.
