@@ -1588,59 +1588,59 @@ A continuación, se presentan los 24 casos de uso canónicos estructurados en lo
 | **Id Caso de Uso** | **UC-006** (CUS-006) |
 | **Nombre** | Publicar oferta de mentoría académica con validación de antelación y aforo |
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
-| **Requisito ID (RF)** | RF-008 (Publicación y parametrización de ofertas de mentoría), RF-009 (Aprovisionamiento automatizado de infraestructura); RN-04 (Ventana de antelación mínima de 24 horas a T-24h), RN-05 (Aforo máximo de 10 presencial y 20 virtual), RN-06 (Prevención de colisión horaria de espacios) |
+| **Requisito ID (RF)** | RF-008 (Publicación y parametrización de ofertas de mentoría), RF-009 (Aprovisionamiento automatizado de infraestructura); RN-01 (Autenticación y pertenencia de cuenta institucional), RN-03 (Mérito académico y habilitación de mentor ciclo >= VII), RN-04 (Ventana de antelación mínima de 24 horas a T-24h), RN-05 (Aforo máximo estricto de 10 presencial y 20 virtual) |
 | **Versión** | 2.0 |
 | **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
 | **Actores** | Estudiante Mentor (`UserRole.mentor`), Administrador Institucional |
 | **Interacción** | Fase de Construcción / Iteración Sprint 02 - Sprint 03 |
-| **Descripción** | Permite a los estudiantes mentores formalizar la apertura de una sesión de mentoría a través del componente cliente `OfferPublishView.tsx` y el servicio `offerService.ts`, despachando una petición `POST /api/v1/offers/publish` hacia el controlador `aplicacion/backend/app/api/v1/endpoints/offers.py`. El backend valida el token JWT institucional extrayendo el claim del mentor, y ejecuta en `app/services/offer_service.py` (`OfferService.publish_offer`) las validaciones de negocio institucionales: antelación mínima de 24 horas respecto a la fecha y hora actual en UTC (`fecha_inicio > now_utc + 24h`, RN-04), límites de capacidad según modalidad (máximo 10 cupos en presencial y 20 en virtual, RN-05), verificación de ausencia de traslape con otras sesiones activas del mentor, y validación del aula física o enlace institucional de videoconferencia. Persiste la entidad ORM `SesionMentoria` (`app/models/offer.py`) en estado `PUBLICADA`, emite una confirmación con HTTP 201 Created y sincroniza la cartelera institucional. |
+| **Descripción** | Permite a los estudiantes mentores formalizar la apertura de una sesión de mentoría a través del componente cliente `OfferPublishView.tsx` y el servicio `offerService.ts`, despachando una petición `POST /api/v1/offers` hacia el controlador `aplicacion/backend/app/api/v1/endpoints/offers.py`. El backend valida el token JWT institucional extrayendo criptográficamente el claim del llamante mediante `_extract_caller_and_admin_status`, verificando que coincida con el correo del mentor o cuente con rol de administrador (RN-01). En `app/services/offer_service.py` (`OfferService.publish_offer`), se ejecutan las validaciones de negocio institucionales: comprobación de mérito académico y habilitación de mentor en ciclo >= VII (`validate_mentor_eligibility`, RN-03), cálculo estricto de antelación superior a 24 horas respecto a la fecha y hora actual en UTC (`calculate_advance_hours > 24h`, RN-04), y conformidad de capacidad según la modalidad (exactamente 10 cupos en presencial y 20 en virtual, RN-05). Se instancia y persiste la entidad ORM `SesionMentoria` (`app/models/offer.py`) en estado `PUBLICADA`, se confirma la transacción en PostgreSQL, se emite una respuesta HTTP 201 Created con el esquema `PublishOfferResponse` y se sincroniza la cartelera institucional en cliente. |
 | **Referencias** | Guía SWEBOK v3.0 (Capítulo 1: Requisitos de Software y Capítulo 2: Diseño de Software)<br>Estándar ISO/IEC/IEEE 29148:2018 y Criterios ICACIT 2026<br>Documento de Arquitectura de Software (SAD v2.0 - MOD-04: Planificación, Espacios y Agendamiento)<br>Reglamento Académico de Mentorías EPIS-UPT |
-| **Anexos** | `aplicacion/frontend/src/components/OfferPublishView.tsx`<br>`aplicacion/frontend/src/services/offerService.ts` (`OfferService`, `ApiOfferAdapter`)<br>`aplicacion/backend/app/api/v1/endpoints/offers.py` (`POST /api/v1/offers/publish`)<br>`aplicacion/backend/app/services/offer_service.py` (`OfferService.publish_offer`)<br>`aplicacion/backend/app/models/offer.py` (`SesionMentoria`, `EstadoSesion`, `ModalidadSesion`), `app/models/curriculum.py` (`TemaCurricular`) |
-| **Precondiciones** | 1. Usuario autenticado con token JWT institucional activo conteniendo el rol `UserRole.mentor`.<br>2. Perfil de mentor registrado en `perfiles_academicos` con materias y temas habilitados.<br>3. Fecha y hora de inicio fijadas con al menos 24 horas de antelación respecto a la hora UTC actual. |
-| **PostCondiciones** | 1. Registro insertado en la tabla `sesiones_mentoria` con `estado = 'PUBLICADA'` y aforo parametrizado.<br>2. Transacción confirmada en PostgreSQL y emisión de evento de invalidación de caché para el motor de recomendación.<br>3. Despliegue de comprobante de publicación en cliente con código identificador de sesión. |
+| **Anexos** | `aplicacion/frontend/src/components/OfferPublishView.tsx`<br>`aplicacion/frontend/src/services/offerService.ts` (`OfferService`, `ApiOfferAdapter`)<br>`aplicacion/backend/app/api/v1/endpoints/offers.py` (`POST /api/v1/offers`)<br>`aplicacion/backend/app/services/offer_service.py` (`OfferService.publish_offer`, `OfferService.validate_mentor_eligibility`, `OfferService.calculate_advance_hours`)<br>`aplicacion/backend/app/models/offer.py` (`SesionMentoria`), `app/models/roles.py` (`UsuarioRol`, `Rol`), `app/models/profile.py` (`PerfilAcademico`), `app/schemas/offer.py` (`PublishOfferPayload`, `PublishOfferResponse`) |
+| **Precondiciones** | 1. Usuario autenticado con token JWT institucional activo conteniendo el rol `UserRole.mentor`.<br>2. Perfil de mentor registrado en `perfiles_academicos` con ciclo académico actual >= VII (RN-03).<br>3. Fecha y hora de inicio fijadas con más de 24 horas de antelación respecto a la hora UTC actual del servidor (RN-04). |
+| **PostCondiciones** | 1. Registro insertado en la tabla `sesiones_mentoria` con `estado = 'PUBLICADA'`, código de sesión generado `SES-XXXX` y aforo parametrizado.<br>2. Transacción confirmada en PostgreSQL (`db.commit()`) y refresco de entidad (`db.refresh()`).<br>3. Despliegue de comprobante de publicación en cliente con código identificador de sesión y botón para navegar a la cartelera o mis sesiones. |
 
 ##### Flujo Normal de Eventos
 
 | Usuario | Sistema |
 |---|---|
 | **Fase 1: Configuración de la sesión y selección curricular** | |
-| **1.** El estudiante mentor accede a la vista de publicación en `OfferPublishView.tsx` y selecciona la asignatura curricular en la lista desplegable `"Curso"`. | **2.** En `offerService.ts`, se invoca la carga de temas disponibles. `OfferPublishView.tsx` renderiza los temas silábicos correspondientes, los campos de fecha de inicio, hora de inicio, duración en minutos (60 a 120), modalidad (`Presencial` o `Virtual`), aula asignada o enlace de videoconferencia (`meet.google.com`), y número de cupos máximos. |
+| **1.** El estudiante mentor accede a la vista de publicación en `OfferPublishView.tsx` y selecciona la asignatura curricular en la lista desplegable `"Curso"`. | **2.** En `OfferPublishView.tsx`, se invoca `fetchCourseDetail(selectedCourseId)` despachando `GET /api/v1/curriculum/courses/{id}` hacia `endpoints/curriculum.py`. El backend ejecuta `CurriculumService.get_course_by_id(db, course_id)` consultando `temas_curriculares` en PostgreSQL y retorna HTTP 200 OK con `CourseDetailResponse`. `OfferPublishView.tsx` renderiza la lista de temas silábicos, los selectores de fecha y hora de inicio, duración (60 o 90 minutos), modalidad (`presencial` o `virtual`), aula física sugerida o enlace Google Meet (`https://meet.google.com/upt-epis-...`), y asigna el aforo reglamentario inmutable según RN-05 (10 para presencial, 20 para virtual). |
 | **Fase 2: Ingreso de parámetros, validación de reglas de aforo y antelación** | |
-| **3.** El mentor completa la selección de tema, especifica la fecha y hora programada, selecciona la modalidad, ingresa el número de vacantes deseadas y hace clic en el botón `"Verificar y Publicar"`. | **4.** En `OfferPublishView.tsx`, se ejecutan validaciones previas de formulario. En `offerService.ts`, se despacha `POST /api/v1/offers/publish` con el payload `OfferCreateRequest`. En `offers.py`, el controlador recibe la petición y delega a `offer_service.py`. El servicio valida: 1) que todos los campos requeridos estén completos, 2) que `fecha_inicio >= now_utc + timedelta(hours=24)` (RN-04), 3) que `aforo_maximo <= 10` si la modalidad es `PRESENCIAL` o `aforo_maximo <= 20` si es `VIRTUAL` (RN-05). (Si faltan campos obligatorios o la sintaxis es inválida, salta a E001). (Si la fecha es inferior a 24 horas de antelación, salta a E002). (Si el aforo sobrepasa los límites institucionales de 10 o 20 cupos, salta a E003). |
-| **Fase 3: Verificación de concurrencia de horarios y persistencia transaccional** | |
-| **5.** El mentor espera la confirmación visual en el botón que presenta un indicador circular de procesamiento. | **6.** En `offer_service.py`, se ejecuta una consulta transaccional `SELECT count(*) FROM sesiones_mentoria WHERE id_mentor = :mid AND estado IN ('PUBLICADA', 'CONFIRMADA') AND NOT (fecha_fin <= :inicio OR fecha_inicio >= :fin)`. Si se seleccionó aula presencial, se verifica que no esté ocupada por otra sesión en ese intervalo. Si es virtual, se valida que el enlace pertenezca al dominio universitario. El backend ejecuta `INSERT INTO sesiones_mentoria (...) VALUES (...)`, confirma la transacción con `db.commit()` y retorna HTTP 201 Created con el payload `OfferResponse`. En `OfferPublishView.tsx`, se limpia el formulario, se despliega una tarjeta de confirmación en color verde con el código generado de sesión y el botón `"Ver en Cartelera"`. (Si existe traslape de horario para el mentor o en el aula solicitada, salta a E004). (Si el enlace de videoconferencia es inválido, salta a E005). |
+| **3.** El mentor selecciona el tema silábico, especifica la fecha y hora programada, confirma la modalidad, verifica los cupos reglamentarios y hace clic en el botón `"Verificar y Publicar"`. | **4.** En `OfferPublishView.tsx`, se invoca `validateOfferPayload(payload)`. Si la sintaxis es válida, en `offerService.ts` (`ApiOfferAdapter.publishOffer`) se despacha `POST /api/v1/offers` con el payload `PublishOfferPayload` adjuntando el encabezado `Authorization: Bearer <jwt_token>`. En `endpoints/offers.py`, el controlador extrae la identidad del llamante mediante `_extract_caller_and_admin_status(authorization, payload.mentor_email)`. El controlador delega a `offer_service.OfferService.publish_offer(db, payload, caller_email, is_admin)`. El servicio valida: 1) que `caller_email == payload.mentor_email` o `is_admin == True` (RN-01), 2) que el mentor cumpla mérito académico en `usuario_roles` y `perfiles_academicos` con `ciclo_actual >= 7` mediante `validate_mentor_eligibility(db, email)` (RN-03), 3) que `fecha_inicio > now_utc + timedelta(hours=24)` mediante `calculate_advance_hours(payload.fecha_inicio)` (RN-04), y 4) que `aforo_maximo == 10` para presencial o `== 20` para virtual (RN-05). (Si faltan campos obligatorios o la sintaxis es inválida en cliente o Pydantic, salta a E001). (Si la fecha de inicio es menor o igual a 24 horas de antelación respecto a UTC now, salta a E002). (Si el aforo no corresponde estrictamente al estándar institucional de 10 o 20 cupos, salta a E003). (Si el usuario no cuenta con acreditación de mentor o su ciclo es menor a VII, salta a E004). (Si existe discrepancia entre la identidad del token y el correo del mentor, salta a E005). |
+| **Fase 3: Persistencia transaccional de la oferta y confirmación en cliente** | |
+| **5.** El mentor espera la confirmación visual en el botón que presenta un indicador circular de procesamiento y el estado `isSubmitting = true`. | **6.** En `offer_service.py`, al validar todos los criterios normativos, se genera el identificador unívoco de sesión `code = f"SES-{_session_counter}"`, se instancia la entidad ORM `sesion_db = SesionMentoria(codigo_sesion=code, mentor_email=effective_email, id_asignatura=payload.id_asignatura, id_tema=payload.id_tema, fecha_inicio=start_dt, duracion_minutos=payload.duracion_minutos, modalidad=payload.modalidad, aforo_maximo=expected_capacity, espacio_asignado=payload.espacio_asignado, notas_adicionales=payload.notas_adicionales, estado="PUBLICADA")`, se ejecuta `db.add(sesion_db)`, se confirma la transacción mediante `db.commit()` y se refresca la entidad con `db.refresh(sesion_db)`. El backend retorna HTTP 201 Created serializando `PublishOfferResponse`. En `OfferPublishView.tsx`, se limpia el formulario, se invoca el callback `onOfferPublished(response)` para sincronizar la cartelera, y se despliega una tarjeta de confirmación en color verde con el código generado de sesión (e.g. `SES-1004`), el espacio asignado y el botón `"Ver en Mis Sesiones"`. |
 
 ##### Flujos de Excepción
 
-##### Flujo de excepción E001: Campos obligatorios incompletos o inválidos
+##### Flujo de excepción E001: Campos obligatorios incompletos o sintaxis inválida
 | Usuario | Sistema |
 |---|---|
-| | **E001-1.1** En el paso 4 del Flujo Normal, el validador Pydantic `OfferCreateRequest` en `offers.py` detecta omisión de campos requeridos (e.g. tema curricular o modalidad ausente). Lanza `HTTPException(status_code=422, detail="VALIDATION_ERROR: Todos los campos de la sesión son obligatorios.")`.<br><br>En `OfferPublishView.tsx`, se capturan los errores de validación y se resaltan los campos observados con un borde en color rojo y texto explicativo. |
+| | **E001-1.1** En el paso 4 del Flujo Normal, `validateOfferPayload` en cliente o el validador Pydantic `PublishOfferPayload` en `endpoints/offers.py` detecta omisión de campos requeridos (e.g. tema curricular o fecha ausente). Lanza `HTTPException(status_code=422, detail="VALIDATION_ERROR: Todos los campos de la sesión son obligatorios.")`.<br><br>En `OfferPublishView.tsx`, se capturan los errores y se resaltan los campos observados con borde en color rojo y texto explicativo. |
 | **E001-1.2** Corrige los campos observados completando los datos requeridos. | **E001-1.3** Rehabilita el botón `"Verificar y Publicar"` y retorna al paso 3 del Flujo Normal de Eventos. |
 
-##### Flujo de excepción E002: Incumplimiento de antelación mínima de 24 horas
+##### Flujo de excepción E002: Incumplimiento de antelación mínima de 24 horas a T-24h
 | Usuario | Sistema |
 |---|---|
-| | **E002-1.1** En el paso 4 del Flujo Normal, `offer_service.py` evalúa `fecha_inicio < now_utc + timedelta(hours=24)` (violación de RN-04). Lanza `HTTPException(status_code=400, detail="INSUFFICIENT_ADVANCE_TIME: Las ofertas de mentoría deben programarse con un mínimo de 24 horas de antelación.")`.<br><br>En `OfferPublishView.tsx`, se despliega un panel de advertencia en color rojo destacando que no se permite publicar sesiones con menos de 24 horas de margen para garantizar la convocatoria de estudiantes. Presenta el botón `<button onClick={handleAdjustDate}>Ajustar Fecha</button>`. |
+| | **E002-1.1** En el paso 4 del Flujo Normal, `offer_service.py` calcula `advance_hours = calculate_advance_hours(payload.fecha_inicio)`. Al constatar que `advance_hours <= 24.0`, lanza `HTTPException(status_code=400, detail="Infracción de RN-04: Toda mentoría debe publicarse con una antelación superior a 24 horas respecto al inicio de la sesión para garantizar la confirmación de quórum.")`.<br><br>En `OfferPublishView.tsx`, se despliega un panel de advertencia en color rojo destacando que no se permite publicar sesiones con menos de 24 horas de margen para garantizar la convocatoria de estudiantes. Presenta el botón `<button onClick={handleAdjustDate}>Ajustar Fecha</button>`. |
 | **E002-1.2** Hace clic en el botón "Ajustar Fecha". | **E002-1.3** Asigna el foco al selector de fecha y hora, sugiriendo una fecha válida posterior a 24 horas, y retorna al paso 3 del Flujo Normal de Eventos. |
 
-##### Flujo de excepción E003: Aforo sobrepasa los límites institucionales
+##### Flujo de excepción E003: Aforo reglamentario no conforme según modalidad
 | Usuario | Sistema |
 |---|---|
-| | **E003-1.1** En el paso 4 del Flujo Normal, `offer_service.py` detecta que el valor de aforo ingresado excede el límite máximo institucional establecido en RN-05 (aforo > 10 para modalidad presencial o aforo > 20 para virtual). Lanza `HTTPException(status_code=400, detail="CAPACITY_EXCEEDED: El aforo máximo permitido es de 10 estudiantes en modalidad presencial y 20 en modalidad virtual.")`.<br><br>En `OfferPublishView.tsx`, se despliega un mensaje de error en color rojo junto al campo de vacantes indicando el límite reglamentario. |
-| **E003-1.2** Ajusta el número de vacantes al rango permitido (1 a 10 en presencial o 1 a 20 en virtual). | **E003-1.3** Actualiza el valor en el estado del componente y retorna al paso 3 del Flujo Normal de Eventos. |
+| | **E003-1.1** En el paso 4 del Flujo Normal, `offer_service.py` detecta que `payload.aforo_maximo` no coincide con el estándar inmutable de RN-05 (`10` cupos para presencial o `20` para virtual). Lanza `HTTPException(status_code=400, detail="Infracción de RN-05: El aforo reglamentario para la modalidad presencial debe ser exactamente 10 estudiantes.")`.<br><br>En `OfferPublishView.tsx`, se despliega un mensaje de error en color rojo junto al campo de vacantes indicando el límite reglamentario. |
+| **E003-1.2** Ajusta el número de vacantes al valor reglamentario exacto (10 en presencial o 20 en virtual). | **E003-1.3** Actualiza el valor en el estado del componente y retorna al paso 3 del Flujo Normal de Eventos. |
 
-##### Flujo de excepción E004: Conflicto de horario o traslape de espacio físico
+##### Flujo de excepción E004: Mentor no elegible por ciclo insuficiente o falta de rol acreditado
 | Usuario | Sistema |
 |---|---|
-| | **E004-1.1** En el paso 6 del Flujo Normal, la consulta de solapamiento en `offer_service.py` detecta que el mentor ya tiene una sesión programada en ese bloque horario, o que el aula física seleccionada se encuentra reservada. Lanza `HTTPException(status_code=409, detail="SCHEDULE_CONFLICT: Existe un traslape de horario con otra sesión programada del mentor o el aula física ya se encuentra ocupada.")`.<br><br>En `OfferPublishView.tsx`, se captura el error 409 y se despliega una alerta en color ámbar explicando el conflicto de horario. Presenta el botón `<button onClick={handleReschedule}>Cambiar Horario o Aula</button>`. |
-| **E004-1.2** Hace clic en el botón "Cambiar Horario o Aula". | **E004-1.3** Habilita nuevamente los selectores de franja horaria y aula, y retorna al paso 3 del Flujo Normal de Eventos. |
+| | **E004-1.1** En el paso 4 del Flujo Normal, `validate_mentor_eligibility(db, effective_email)` en `offer_service.py` consulta las tablas `usuario_roles` y `perfiles_academicos`. Si el usuario no tiene rol `mentor` activo o su ciclo es menor a VII (infracción de RN-03), lanza `HTTPException(status_code=403, detail="Infracción de RN-03: Solo los estudiantes habilitados con rol de mentor (ciclo >= VII) pueden publicar ofertas de mentoría.")`.<br><br>En `OfferPublishView.tsx`, se despliega una alerta roja indicando que su perfil no cumple los requisitos académicos de mentoría. |
+| **E004-1.2** Hace clic en el botón "Revisar Perfil". | **E004-1.3** Redirige al usuario hacia el módulo de perfil académico (`CUS-005`) y finaliza el caso de uso. |
 
-##### Flujo de excepción E005: Enlace de videoconferencia virtual inválido
+##### Flujo de excepción E005: Suplantación de identidad o discrepancia de credenciales del mentor
 | Usuario | Sistema |
 |---|---|
-| | **E005-1.1** En el paso 6 del Flujo Normal, para modalidad virtual, `offer_service.py` valida la URL de reunión contra patrones autorizados institucionales (e.g. `meet.google.com`). Si la URL no coincide con el dominio institucional autorizado, lanza `HTTPException(status_code=400, detail="INVALID_MEETING_URL: El enlace de videoconferencia debe pertenecer a la plataforma institucional Google Meet.")`.<br><br>En `OfferPublishView.tsx`, se resalta el cuadro de texto del enlace en color rojo con el mensaje de dominio no autorizado. |
-| **E005-1.2** Ingresa un enlace válido de videoconferencia universitaria. | **E005-1.3** Valida la estructura del enlace en cliente y retorna al paso 3 del Flujo Normal de Eventos. |
+| | **E005-1.1** En el paso 4 del Flujo Normal, en `endpoints/offers.py` y `offer_service.py` se compara `caller_email` extraído criptográficamente del token JWT contra `payload.mentor_email`. Si no coinciden y el llamante no es administrador (infracción de RN-01), lanza `HTTPException(status_code=403, detail="No tiene autorización para publicar ofertas en nombre de otro usuario.")`.<br><br>En `OfferPublishView.tsx`, se captura el error 403 y se muestra una alerta roja de seguridad institucional. |
+| **E005-1.2** Hace clic en el botón "Sincronizar Credenciales". | **E005-1.3** Recarga la identidad de la sesión activa en el formulario y retorna al paso 3 del Flujo Normal de Eventos. |
 
 #### CUS-008 - Consultar disponibilidad de espacios y recursos
 
@@ -6397,7 +6397,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 #### Diagrama 6.15.3: Diagrama de Secuencia - CUS-006: Publicar oferta de mentoría académica
 
-El diagrama de secuencia para `CUS-006` formaliza la programación y publicación de sesiones de mentoría académica por parte de un mentor acreditado. Modela la interacción entre el Estudiante Mentor, la interfaz React, el cliente HTTP `offerService.ts`, el endpoint en `offers.py`, el servicio de lógica de negocio `offer_service.py` y PostgreSQL. Abarca la recuperación de temas curriculares, la validación estricta de antelación mínima de 24 horas (`RN-04`, `E002`), el aforo reglamentario (máximo 10 presencial, 20 virtual, `RN-05`, `E003`), la detección de conflictos de horario (`E004`), la verificación de enlaces Google Meet (`E005`) y la creación transaccional atómica en estado `PUBLICADA`.
+El diagrama de secuencia para `CUS-006` formaliza la programación y publicación de sesiones de mentoría académica por parte de un mentor acreditado. Modela la interacción entre el Estudiante Mentor, la interfaz React (`OfferPublishView.tsx`), los clientes HTTP (`offerService.ts` / `apiClient.ts`), los endpoints FastAPI (`endpoints/curriculum.py` y `endpoints/offers.py`), los servicios de lógica de negocio (`CurriculumService` y `OfferService`) y PostgreSQL. Abarca la recuperación de temas curriculares silábicos, la verificación criptográfica del token JWT (`RN-01`, `E005`), la validación de mérito académico y rol habilitado (`RN-03`, `E004`), la comprobación de antelación mínima de 24 horas (`RN-04`, `E002`), el aforo reglamentario (exactamente 10 presencial o 20 virtual, `RN-05`, `E003`) y la creación transaccional atómica de la entidad `SesionMentoria` en estado `PUBLICADA`.
 
 ```plantuml
 @startuml
@@ -6417,7 +6417,7 @@ actor "Estudiante Mentor
 participant "Vista React
 (OfferPublishView.tsx)" as UI
 participant "Adaptador Cliente
-(offerService.ts / ApiOfferAdapter)" as Client
+(offerService.ts / apiClient.ts)" as Client
 participant "Controlador FastAPI
 (endpoints/offers.py)" as API
 participant "Servicio Backend
@@ -6428,95 +6428,99 @@ database "PostgreSQL DB
 == Fase 1: Configuración de la sesión y selección curricular ==
 Mentor -> UI: 1. Accede a vista de publicación y selecciona asignatura curricular en "Curso"
 activate UI
-UI -> Client: loadCourseTopics(courseId)
+UI -> Client: fetchCourseDetail(selectedCourseId)
 activate Client
-Client -> API: GET /api/v1/curriculum/courses/{course_id}/topics
+Client -> API: GET /api/v1/curriculum/courses/{id}
 activate API
-API -> Service: get_course_topics(course_id)
+API -> Service: get_course_by_id(id)
 activate Service
-Service -> DB: SELECT * FROM temas_curriculares WHERE curso_id = :cid
+Service -> DB: SELECT * FROM asignaturas WHERE id_asignatura = :id
+SELECT * FROM temas_curriculares WHERE id_asignatura = :id
 activate DB
-DB --> Service: Lista de temas silábicos
+DB --> Service: Asignatura y lista de temas silábicos (Topic[])
 deactivate DB
-Service --> API: TopicListDTO
+Service --> API: CourseDetailResponse
 deactivate Service
-API --> Client: HTTP 200 OK TopicListDTO
+API --> Client: HTTP 200 OK CourseDetailResponse
 deactivate API
 Client --> UI: Entrega temas curriculares
 deactivate Client
-UI --> Mentor: 2. Renderiza temas silábicos, campos de fecha, hora, duración (60-120 min), modalidad y cupos
+UI --> Mentor: 2. Renderiza temas silábicos, campos de fecha, hora, duración (60|90 min), modalidad y cupos reglamentarios
 deactivate UI
 
 == Fase 2: Ingreso de parámetros, validación de reglas de aforo y antelación ==
 Mentor -> UI: 3. Selecciona tema, fecha/hora, modalidad, ingresa cupos y pulsa "Verificar y Publicar"
 activate UI
-UI -> UI: Valida sintaxis de campos en formulario cliente
+UI -> UI: validateOfferPayload(payload) en cliente
 
-alt [E001] Campos obligatorios incompletos o inválidos
+alt [E001] Campos obligatorios incompletos o sintaxis inválida
     UI --> Mentor: Resalta campos observados con borde rojo y texto explicativo
     Mentor -> UI: Corrige campos completando los datos requeridos
     UI --> Mentor: Rehabilita botón "Verificar y Publicar" y retorna al paso 3
 else Formulario válido en cliente
-    UI -> Client: publishOffer(payload)
+    UI -> Client: publishOffer(payload: PublishOfferPayload)
     activate Client
-    Client -> API: POST /api/v1/offers/publish OfferCreateRequest [Bearer JWT]
+    Client -> API: POST /api/v1/offers PublishOfferPayload [Bearer JWT]
     activate API
-    API -> Service: publish_offer(mentor_id, payload)
-    activate Service
-    
-    alt [E002] Incumplimiento de antelación mínima de 24 horas (fecha_inicio < now_utc + 24h)
-        Service --> API: Lanza HTTPException(400, "INSUFFICIENT_ADVANCE_TIME")
-        API --> Client: HTTP 400 Bad Request {"detail": "INSUFFICIENT_ADVANCE_TIME: Mínimo 24 horas de antelación."}
-        Client --> UI: Captura error 400
-        UI --> Mentor: Panel rojo "Antelación mínima requerida: 24 horas" y botón [Ajustar Fecha]
-        Mentor -> UI: Clic en [Ajustar Fecha], selecciona nueva fecha > 24h
-        UI --> Mentor: Retorna al paso 3
-    else [E003] Aforo sobrepasa límites institucionales (presencial > 10 o virtual > 20)
-        Service --> API: Lanza HTTPException(400, "CAPACITY_EXCEEDED")
-        API --> Client: HTTP 400 Bad Request {"detail": "CAPACITY_EXCEEDED: Máximo 10 presencial y 20 virtual."}
-        Client --> UI: Captura error 400
-        UI --> Mentor: Mensaje rojo "Aforo supera límite reglamentario", ajusta vacantes y retorna al paso 3
-    else Parámetros de aforo y antelación válidos
-        == Fase 3: Verificación de concurrencia de horarios y persistencia transaccional ==
-        Mentor -> UI: 5. Visualiza indicador circular de procesamiento en botón
-        
-        Service -> DB: SELECT count(*) FROM sesiones_mentoria
-WHERE id_mentor = :mid AND estado IN ('PUBLICADA', 'CONFIRMADA')
-AND NOT (fecha_fin <= :inicio OR fecha_inicio >= :fin)
+    API -> API: _extract_caller_and_admin_status(authorization, payload.mentor_email)
+
+    alt [E005] Discrepancia de identidad o suplantación de mentor
+        API --> Client: HTTP 403 Forbidden {"detail": "No tiene autorización para publicar ofertas en nombre de otro usuario."}
+        Client --> UI: Captura error 403
+        UI --> Mentor: Alerta roja de seguridad institucional y retorna al paso 3
+    else Identidad de mentor verificada
+        API -> Service: publish_offer(db, payload, caller_email, is_admin)
+        activate Service
+
+        Service -> Service: validate_mentor_eligibility(db, effective_email)
+        Service -> DB: SELECT * FROM usuario_roles ur JOIN roles r ON ur.id_rol = r.id_rol
+WHERE ur.email = :email AND ur.activo = true AND r.nombre_rol IN ('mentor', 'administrador')
         activate DB
-        DB --> Service: Resultado de solapamiento de horarios
+        DB --> Service: Roles del usuario y perfil académico (ciclo_actual)
         deactivate DB
-        
-        alt [E004] Conflicto de horario del mentor o traslape en aula física
-            Service --> API: Lanza HTTPException(409, "SCHEDULE_CONFLICT")
-            API --> Client: HTTP 409 Conflict {"detail": "SCHEDULE_CONFLICT: Traslape con otra sesión o aula ocupada."}
-            Client --> UI: Captura error 409
-            UI --> Mentor: Alerta ámbar "Existe conflicto de horario o aula ocupada" y botón [Cambiar Horario o Aula]
-            Mentor -> UI: Clic en [Cambiar Horario o Aula]
-            UI --> Mentor: Habilita selectores y retorna al paso 3
-        else [E005] Enlace de videoconferencia virtual no pertenece a Google Meet institucional
-            Service --> API: Lanza HTTPException(400, "INVALID_MEETING_URL")
-            API --> Client: HTTP 400 Bad Request {"detail": "INVALID_MEETING_URL: Debe pertenecer a meet.google.com."}
-            Client --> UI: Captura error 400
-            UI --> Mentor: Resalta enlace en rojo solicitando URL de meet.google.com válida y retorna al paso 3
-        else Ausencia de traslapes y enlace validado
-            Service -> DB: BEGIN TRANSACTION
-            activate DB
-            Service -> DB: INSERT INTO sesiones_mentoria (id_mentor, id_tema, modalidad, aforo_maximo, fecha_inicio, fecha_fin, estado='PUBLICADA')
-VALUES (...) RETURNING id
-            Service -> DB: COMMIT
-            DB --> Service: Transacción confirmada (id_sesion)
-            deactivate DB
-            
-            Service --> API: OfferResponseDTO {"id": id_sesion, "estado": "PUBLICADA"}
-            API --> Client: HTTP 201 Created OfferResponseDTO
-            Client --> UI: Oferta creada exitosamente
-            
-            UI -> UI: Limpia formulario y actualiza caché
-            UI --> Mentor: 6. Despliega tarjeta verde con código de sesión generado y botón "Ver en Cartelera"
+
+        alt [E004] Mentor no elegible por ciclo insuficiente o falta de rol (RN-03)
+            Service --> API: Lanza HTTPException(403, "Infracción de RN-03: Solo los estudiantes habilitados con rol de mentor (ciclo >= VII)...")
+            API --> Client: HTTP 403 Forbidden {"detail": "Infracción de RN-03: Solo los estudiantes habilitados..."}
+            Client --> UI: Captura error 403
+            UI --> Mentor: Banner rojo informando falta de acreditación académica y retorna al paso 3
+        else Mentor acreditado (ciclo >= VII)
+            Service -> Service: calculate_advance_hours(payload.fecha_inicio)
+
+            alt [E002] Incumplimiento de antelación mínima de 24 horas (fecha_inicio <= now_utc + 24h)
+                Service --> API: Lanza HTTPException(400, "Infracción de RN-04: Toda mentoría debe publicarse con una antelación superior a 24 horas...")
+                API --> Client: HTTP 400 Bad Request {"detail": "Infracción de RN-04: Toda mentoría debe publicarse..."}
+                Client --> UI: Captura error 400
+                UI --> Mentor: Panel rojo "Antelación mínima requerida: 24 horas" y botón [Ajustar Fecha]
+                Mentor -> UI: Clic en [Ajustar Fecha], selecciona nueva fecha > 24h
+                UI --> Mentor: Retorna al paso 3
+            else [E003] Aforo no conforme con la modalidad (aforo != 10 presencial o != 20 virtual)
+                Service --> API: Lanza HTTPException(400, "Infracción de RN-05: El aforo reglamentario...")
+                API --> Client: HTTP 400 Bad Request {"detail": "Infracción de RN-05: El aforo reglamentario..."}
+                Client --> UI: Captura error 400
+                UI --> Mentor: Mensaje rojo "Aforo supera límite reglamentario", ajusta vacantes y retorna al paso 3
+            else Parámetros de mérito, aforo y antelación válidos
+                == Fase 3: Persistencia transaccional de la oferta y confirmación en cliente ==
+                Mentor -> UI: 5. Visualiza indicador circular de procesamiento en botón
+                
+                Service -> DB: sesion_db = SesionMentoria(codigo_sesion=code, mentor_email=..., estado='PUBLICADA', ...)
+                Service -> DB: db.add(sesion_db)
+db.commit()
+db.refresh(sesion_db)
+                activate DB
+                DB --> Service: Transacción confirmada (id_sesion, codigo_sesion='SES-XXXX')
+                deactivate DB
+                
+                Service --> API: PublishOfferResponse (id_oferta=..., codigo_sesion='SES-XXXX', estado='PUBLICADA')
+                API --> Client: HTTP 201 Created PublishOfferResponse
+                Client --> UI: Entrega confirmación de publicación
+                
+                UI -> UI: setPublishedSuccess(response) y onOfferPublished(response)
+                UI --> Mentor: 6. Despliega tarjeta verde con código de sesión generado y botón "Ver en Mis Sesiones"
+            end
         end
+        deactivate Service
     end
-    deactivate Service
     deactivate API
     deactivate Client
 end
@@ -6525,8 +6529,6 @@ deactivate UI
 ```
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-006.
-
----
 
 #### Diagrama 6.15.4: Diagrama de Secuencia - CUS-008: Consultar disponibilidad de espacios y recursos
 
