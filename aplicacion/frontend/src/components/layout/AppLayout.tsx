@@ -183,6 +183,23 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                   <span style={{ color: '#64748B' }}>→</span>
                   <button
                     type="button"
+                    onClick={() => onSelectTab('certificates')}
+                    style={{
+                      background: activeTab === 'certificates' ? '#B99451' : 'transparent',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '0.25rem 0.6rem',
+                      fontSize: '0.78rem',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    3. 📜 Mis constancias
+                  </button>
+                  <span style={{ color: '#64748B' }}>→</span>
+                  <button
+                    type="button"
                     onClick={() => onSelectTab('profile')}
                     style={{
                       background: activeTab === 'profile' ? '#B99451' : 'transparent',
@@ -195,7 +212,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                       fontWeight: 600,
                     }}
                   >
-                    3. 👤 Mi disponibilidad
+                    4. 👤 Mi disponibilidad
                   </button>
                 </div>
               )}

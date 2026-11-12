@@ -72,6 +72,7 @@ export function isValidTab(tab: unknown): tab is NavTab {
     'recommendations',
     'bookings',
     'sessions',
+    'certificates',
     'admin',
     'services',
   ];

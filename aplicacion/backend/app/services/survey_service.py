@@ -129,9 +129,7 @@ class SurveyService:
                     detail="SURVEY_WINDOW_EXPIRED: La ventana perentoria de 24 horas para remitir la evaluación de calidad ha expirado",
                 )
 
-            sanitized_com = (
-                html.escape(payload.comentarios.strip()) if payload.comentarios else None
-            )
+            sanitized_com = html.escape(payload.comentarios.strip()) if payload.comentarios else None
 
             encuesta = EncuestaCalidad(
                 id_sesion=session_id,
@@ -197,7 +195,11 @@ class SurveyService:
             has_booking_attended = any(
                 b.get("id_sesion") == session_id
                 and b.get("estudiante_email", "").strip().lower() == clean_caller
-                and (b.get("asistio") is True or b.get("estado") == "ASISTIDA" or b.get("asistencia_confirmada") is True)
+                and (
+                    b.get("asistio") is True
+                    or b.get("estado") == "ASISTIDA"
+                    or b.get("asistencia_confirmada") is True
+                )
                 for b in _memory_bookings
             )
 
@@ -243,9 +245,7 @@ class SurveyService:
                     detail="SURVEY_WINDOW_EXPIRED: La ventana perentoria de 24 horas para remitir la evaluación de calidad ha expirado",
                 )
 
-            sanitized_com = (
-                html.escape(payload.comentarios.strip()) if payload.comentarios else None
-            )
+            sanitized_com = html.escape(payload.comentarios.strip()) if payload.comentarios else None
 
             s_id = _survey_counter
             _survey_counter += 1
@@ -384,7 +384,11 @@ class SurveyService:
             has_booking_attended = any(
                 b.get("id_sesion") == session_id
                 and b.get("estudiante_email", "").strip().lower() == clean_caller
-                and (b.get("asistio") is True or b.get("estado") == "ASISTIDA" or b.get("asistencia_confirmada") is True)
+                and (
+                    b.get("asistio") is True
+                    or b.get("estado") == "ASISTIDA"
+                    or b.get("asistencia_confirmada") is True
+                )
                 for b in _memory_bookings
             )
             eligible = (not is_cancelled) and (not is_absent) and (has_attendance or has_booking_attended)

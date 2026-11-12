@@ -5,6 +5,7 @@ from app.api.v1.endpoints import (
     auth,
     bitacora,
     bookings,
+    certificates,
     consent,
     curriculum,
     health,
@@ -13,6 +14,7 @@ from app.api.v1.endpoints import (
     quorum,
     recommendations,
     roles,
+    simulation,
     survey,
 )
 
@@ -33,3 +35,7 @@ api_router.include_router(attendance.router, prefix="/sessions", tags=["Control 
 api_router.include_router(bitacora.router, prefix="/sessions", tags=["Bitácoras Pedagógicas"])
 api_router.include_router(bitacora.admin_router, prefix="/bitacoras", tags=["Auditoría de Bitácoras"])
 api_router.include_router(survey.router, prefix="/sessions", tags=["Encuestas de Calidad"])
+api_router.include_router(
+    certificates.router, prefix="/certificates", tags=["Acreditación & Constancias Oficiales"]
+)
+api_router.include_router(simulation.router, prefix="/simulation", tags=["Testbench & Auditoría Algorítmica"])

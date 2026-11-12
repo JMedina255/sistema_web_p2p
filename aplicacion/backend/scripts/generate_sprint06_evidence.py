@@ -220,14 +220,16 @@ def generate_ui_captures_01_to_08():
                 route.fulfill(
                     status=200,
                     content_type="application/json",
-                    body=json.dumps({
-                        "has_consented": True,
-                        "consented_at": "2026-11-01T10:00:00Z",
-                        "terms_version": "2026-II-v1.0",
-                        "version": "1.0",
-                        "email": mentor_email,
-                        "mode": "api",
-                    }),
+                    body=json.dumps(
+                        {
+                            "has_consented": True,
+                            "consented_at": "2026-11-01T10:00:00Z",
+                            "terms_version": "2026-II-v1.0",
+                            "version": "1.0",
+                            "email": mentor_email,
+                            "mode": "api",
+                        }
+                    ),
                 )
             elif "api/v1/offers" in url and "quorum-decision" not in url:
                 route.fulfill(status=200, content_type="application/json", body=json.dumps(sessions_list))
@@ -237,26 +239,30 @@ def generate_ui_captures_01_to_08():
                 route.fulfill(
                     status=200,
                     content_type="application/json",
-                    body=json.dumps({
-                        "id_sesion": 10,
-                        "codigo_sesion": "SES-0010",
-                        "decision": "RESCHEDULE",
-                        "estado_nuevo": "PUBLICADA",
-                        "mensaje": "Sesión reprogramada exitosamente conforme a RN-04.",
-                        "nueva_fecha_inicio": (now + timedelta(days=5)).isoformat(),
-                    }),
+                    body=json.dumps(
+                        {
+                            "id_sesion": 10,
+                            "codigo_sesion": "SES-0010",
+                            "decision": "RESCHEDULE",
+                            "estado_nuevo": "PUBLICADA",
+                            "mensaje": "Sesión reprogramada exitosamente conforme a RN-04.",
+                            "nueva_fecha_inicio": (now + timedelta(days=5)).isoformat(),
+                        }
+                    ),
                 )
             elif "attendance/token" in url:
                 route.fulfill(
                     status=200,
                     content_type="application/json",
-                    body=json.dumps({
-                        "session_id": 12,
-                        "token": "P2P-TOTP-7b91d2c4e5a8",
-                        "totp_code": "839201",
-                        "expires_in": 28,
-                        "expires_at": (now + timedelta(seconds=28)).isoformat(),
-                    }),
+                    body=json.dumps(
+                        {
+                            "session_id": 12,
+                            "token": "P2P-TOTP-7b91d2c4e5a8",
+                            "totp_code": "839201",
+                            "expires_in": 28,
+                            "expires_at": (now + timedelta(seconds=28)).isoformat(),
+                        }
+                    ),
                 )
             elif "attendance" in url and method == "GET":
                 route.fulfill(status=200, content_type="application/json", body=json.dumps(roster_attendance))
@@ -264,26 +270,28 @@ def generate_ui_captures_01_to_08():
                 route.fulfill(
                     status=200,
                     content_type="application/json",
-                    body=json.dumps({
-                        "id_bitacora": 101,
-                        "id_sesion": 8,
-                        "id_mentor": mentor_email,
-                        "temas_cubiertos": [
-                            "Límites algebraicos e indeterminaciones",
-                            "Continuidad puntual y en intervalos",
-                            "Derivadas y reglas de derivación",
-                        ],
-                        "observaciones": (
-                            "Se cubrieron satisfactoriamente los conceptos de límites notables y continuidad en funciones racionales. "
-                            "Los estudiantes demostraron comprensión en la resolución de problemas prácticos y asimilaron la regla de L'Hôpital."
-                        ),
-                        "nivel_dificultad": "Medio",
-                        "hash_firma": "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
-                        "horas_declaradas": 2.0,
-                        "visado_administrador": False,
-                        "created_at": now.isoformat(),
-                        "mensaje": "Bitácora pedagógica registrada y sellada exitosamente con firma SHA-256.",
-                    }),
+                    body=json.dumps(
+                        {
+                            "id_bitacora": 101,
+                            "id_sesion": 8,
+                            "id_mentor": mentor_email,
+                            "temas_cubiertos": [
+                                "Límites algebraicos e indeterminaciones",
+                                "Continuidad puntual y en intervalos",
+                                "Derivadas y reglas de derivación",
+                            ],
+                            "observaciones": (
+                                "Se cubrieron satisfactoriamente los conceptos de límites notables y continuidad en funciones racionales. "
+                                "Los estudiantes demostraron comprensión en la resolución de problemas prácticos y asimilaron la regla de L'Hôpital."
+                            ),
+                            "nivel_dificultad": "Medio",
+                            "hash_firma": "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
+                            "horas_declaradas": 2.0,
+                            "visado_administrador": False,
+                            "created_at": now.isoformat(),
+                            "mensaje": "Bitácora pedagógica registrada y sellada exitosamente con firma SHA-256.",
+                        }
+                    ),
                 )
             else:
                 route.continue_()
@@ -344,7 +352,9 @@ def generate_ui_captures_01_to_08():
         time.sleep(0.5)
 
         # 05. Proyección de Código QR Dinámico TOTP
-        btn_attendance = page.locator("div").filter(has_text="SES-0012").locator("button", has_text="Asistencia").first
+        btn_attendance = (
+            page.locator("div").filter(has_text="SES-0012").locator("button", has_text="Asistencia").first
+        )
         btn_attendance.click(force=True)
         page.wait_for_selector("text=Proyección de Código QR Dinámico")
         page.wait_for_selector("text=Código numérico de respaldo")
@@ -366,7 +376,9 @@ def generate_ui_captures_01_to_08():
         time.sleep(0.5)
 
         # 07. Formulario de Bitácora Pedagógica Silábica
-        btn_bitacora = page.locator("div").filter(has_text="SES-0008").locator("button", has_text="Bitácora").first
+        btn_bitacora = (
+            page.locator("div").filter(has_text="SES-0008").locator("button", has_text="Bitácora").first
+        )
         btn_bitacora.click(force=True)
         page.wait_for_selector("text=Bitácora Pedagógica de Mentoría")
 

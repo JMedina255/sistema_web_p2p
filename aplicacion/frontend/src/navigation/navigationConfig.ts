@@ -14,6 +14,7 @@ export type NavTab =
   | 'recommendations'
   | 'bookings'
   | 'sessions'
+  | 'certificates'
   | 'admin'
   | 'services';
 
@@ -95,6 +96,14 @@ export const NAVIGATION_ITEMS: Record<NavTab, NavigationItem> = {
     requiresAuth: true,
     description: 'Convocatoria y programación de nuevas sesiones de mentoría académica.',
   },
+  certificates: {
+    tab: 'certificates',
+    label: 'Mis constancias',
+    icon: '📜',
+    allowedRoles: ['mentor'],
+    requiresAuth: true,
+    description: 'Acreditación de horas de mentoría y descarga de constancias oficiales DEMO.',
+  },
   admin: {
     tab: 'admin',
     label: 'Administración',
@@ -145,6 +154,7 @@ export function getNavigationItemsForRole(role: UserRole | null): NavigationItem
       return [
         NAVIGATION_ITEMS.sessions,
         NAVIGATION_ITEMS.offers,
+        NAVIGATION_ITEMS.certificates,
         NAVIGATION_ITEMS.curriculum,
         NAVIGATION_ITEMS.profile,
       ];

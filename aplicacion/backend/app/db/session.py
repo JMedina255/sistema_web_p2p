@@ -71,6 +71,7 @@ def get_optional_session():
     finally:
         db.close()
 
+
 def close_engine():
     """
     Libera los recursos del pool de conexiones al apagar el servicio.

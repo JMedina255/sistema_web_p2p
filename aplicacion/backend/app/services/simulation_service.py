@@ -1,3 +1,4 @@
+import random
 import time
 from typing import Any
 
@@ -8,21 +9,52 @@ from app.services.recommendation_service import (
 
 class SimulationService:
     """
-    Servicio de Simulación y Testbench de Evaluación Algorítmica (T-18 / RF06 / RNF03).
+    Servicio de Simulación y Testbench de Evaluación Algorítmica (T-18 / T-45 / RF06 / RNF03).
     Genera cohortes sintéticas de estudiantes EPIS-UPT y evalúa exhaustivamente:
+    - Precisión cuantitativa del ranking: Precision@3 (>= 0.80) y Precision@5 (>= 0.75) con juicios ground-truth.
     - Ordenamiento determinista (invarianza ante permutación de entrada).
     - Casos frontera:
         1. Sin solapamiento horario (0 franjas de coincidencia).
         2. Temas conceptuales silábicos disjuntos (Jaccard = 0.0).
         3. Asignaturas formativas sin ofertas activas.
         4. Mentores no elegibles por ciclo < VII (regla de mérito RN-03).
-    - Métricas de latencia de cómputo y filtrado estricto.
+    - Métricas de latencia de cómputo y filtrado estricto (RNF03 < 50ms).
     """
+
+    # Juicios de relevancia curricular Ground-Truth institucional (EPIS-UPT)
+    GROUND_TRUTH_RELEVANCE: dict[str, set[str]] = {
+        "mentoreado.ciclo1@upt.pe": {
+            "mentor.alfa.c7@upt.pe",
+            "mentor.epsilon.c8@upt.pe",
+            "mentora.gamma.c8@upt.pe",
+            "mentor.zeta.c9@upt.pe",
+        },
+        "mentoreado.ciclo2@upt.pe": {
+            "mentor.beta.c9@upt.pe",
+            "mentor.zeta.c9@upt.pe",
+            "mentor.eta.c7@upt.pe",
+            "mentor.alfa.c7@upt.pe",
+        },
+        "mentoreado.ciclo3@upt.pe": {
+            "mentora.gamma.c8@upt.pe",
+            "mentor.delta.c10@upt.pe",
+            "mentor.zeta.c9@upt.pe",
+            "mentor.eta.c7@upt.pe",
+        },
+        "mentoreado.ciclo4@upt.pe": {
+            "mentor.delta.c10@upt.pe",
+            "mentor.beta.c9@upt.pe",
+            "mentor.epsilon.c8@upt.pe",
+            "mentor.alfa.c7@upt.pe",
+        },
+    }
 
     @staticmethod
     def generate_synthetic_cohorts() -> tuple[list[dict], list[dict]]:
         """
-        Genera perfiles sintéticos representativos de la EPIS-UPT para mentoreados y mentores.
+        Genera perfiles sintéticos representativos de la EPIS-UPT:
+        - 4 estudiantes mentoreados (Ciclos I a IV).
+        - 10 candidatos a mentor: 7 elegibles (Ciclos VII a X) y 3 no elegibles (Ciclos < VII).
         """
         mentees = [
             {
@@ -79,7 +111,7 @@ class SimulationService:
         ]
 
         mentors = [
-            # Mentor A: Alta compatibilidad con mentoreado 1 (Cálculo I)
+            # 1. Mentor Alfa (Cálculo I + Algoritmos, Ciclo 7)
             {
                 "email": "mentor.alfa.c7@upt.pe",
                 "nombres": "Renzo",
@@ -93,7 +125,7 @@ class SimulationService:
                     {"dia_semana": 3, "hora_inicio": "14:00", "hora_fin": "15:00"},
                 ],
             },
-            # Mentor B: Alta compatibilidad con mentoreado 2 (Algoritmos)
+            # 2. Mentor Beta (Algoritmos + BDD, Ciclo 9)
             {
                 "email": "mentor.beta.c9@upt.pe",
                 "nombres": "Carlos",
@@ -107,7 +139,7 @@ class SimulationService:
                     {"dia_semana": 4, "hora_inicio": "15:00", "hora_fin": "16:00"},
                 ],
             },
-            # Mentor C: Mentor ciclo 8 con modalidad híbrida
+            # 3. Mentora Gamma (Cálculo I + POO, Ciclo 8)
             {
                 "email": "mentora.gamma.c8@upt.pe",
                 "nombres": "Elena",
@@ -118,22 +150,64 @@ class SimulationService:
                 "modalidad_preferida": "hibrida",
                 "disponibilidad": [
                     {"dia_semana": 5, "hora_inicio": "10:00", "hora_fin": "11:00"},
+                    {"dia_semana": 1, "hora_inicio": "09:00", "hora_fin": "10:00"},
                 ],
             },
-            # Mentor D: Mentor ciclo 10 senior en BDD
+            # 4. Mentor Delta (BDD + POO, Ciclo 10)
             {
                 "email": "mentor.delta.c10@upt.pe",
                 "nombres": "Fernando",
                 "apellidos": "Rojas",
                 "ciclo_actual": 10,
-                "materias_interes": [5],
-                "temas_seleccionados": [18, 19, 20, 21],
+                "materias_interes": [4, 5],
+                "temas_seleccionados": [14, 18, 19, 20],
                 "modalidad_preferida": "presencial",
                 "disponibilidad": [
                     {"dia_semana": 6, "hora_inicio": "09:00", "hora_fin": "10:00"},
+                    {"dia_semana": 5, "hora_inicio": "10:00", "hora_fin": "11:00"},
                 ],
             },
-            # Mentor Inelegible Caso Frontera (Ciclo VI < VII -> RN-03)
+            # 5. Mentora Epsilon (Cálculo I + POO, Ciclo 8)
+            {
+                "email": "mentor.epsilon.c8@upt.pe",
+                "nombres": "Valeria",
+                "apellidos": "Gómez",
+                "ciclo_actual": 8,
+                "materias_interes": [1, 4],
+                "temas_seleccionados": [2, 14],
+                "modalidad_preferida": "presencial",
+                "disponibilidad": [
+                    {"dia_semana": 1, "hora_inicio": "09:00", "hora_fin": "10:00"},
+                ],
+            },
+            # 6. Mentor Zeta (Algoritmos + Cálculo I, Ciclo 9)
+            {
+                "email": "mentor.zeta.c9@upt.pe",
+                "nombres": "Diego",
+                "apellidos": "Castro",
+                "ciclo_actual": 9,
+                "materias_interes": [1, 3],
+                "temas_seleccionados": [1, 10],
+                "modalidad_preferida": "virtual",
+                "disponibilidad": [
+                    {"dia_semana": 2, "hora_inicio": "10:00", "hora_fin": "11:00"},
+                ],
+            },
+            # 7. Mentora Eta (BDD + Algoritmos, Ciclo 7)
+            {
+                "email": "mentor.eta.c7@upt.pe",
+                "nombres": "Lucía",
+                "apellidos": "Paredes",
+                "ciclo_actual": 7,
+                "materias_interes": [3, 5],
+                "temas_seleccionados": [11, 19],
+                "modalidad_preferida": "presencial",
+                "disponibilidad": [
+                    {"dia_semana": 6, "hora_inicio": "09:00", "hora_fin": "10:00"},
+                    {"dia_semana": 4, "hora_inicio": "15:00", "hora_fin": "16:00"},
+                ],
+            },
+            # 8. Mentor Inelegible Caso Frontera (Ciclo VI < VII -> RN-03)
             {
                 "email": "ineligible.ciclo6@upt.pe",
                 "nombres": "Estudiante",
@@ -146,7 +220,20 @@ class SimulationService:
                     {"dia_semana": 1, "hora_inicio": "08:00", "hora_fin": "09:00"},
                 ],
             },
-            # Mentor Inelegible Caso Frontera (Ciclo III < VII -> RN-03)
+            # 9. Mentor Inelegible Caso Frontera (Ciclo IV < VII -> RN-03)
+            {
+                "email": "ineligible.ciclo4@upt.pe",
+                "nombres": "Estudiante",
+                "apellidos": "Ciclo Cuatro",
+                "ciclo_actual": 4,
+                "materias_interes": [4, 5],
+                "temas_seleccionados": [14, 18],
+                "modalidad_preferida": "virtual",
+                "disponibilidad": [
+                    {"dia_semana": 5, "hora_inicio": "10:00", "hora_fin": "11:00"},
+                ],
+            },
+            # 10. Mentor Inelegible Caso Frontera (Ciclo III < VII -> RN-03)
             {
                 "email": "ineligible.ciclo3@upt.pe",
                 "nombres": "Estudiante",
@@ -160,6 +247,86 @@ class SimulationService:
         ]
 
         return mentees, mentors
+
+    @classmethod
+    def evaluate_precision_at_k(cls, top_k_list: tuple[int, ...] = (3, 5)) -> dict[str, Any]:
+        """
+        Evalúa cuantitativamente Precision@3 y Precision@5 del recomendador híbrido EdRecSys
+        utilizando la cohorte sintética con juicios de relevancia ground-truth (T-45 / RF06).
+        """
+        mentees, mentors = cls.generate_synthetic_cohorts()
+        p3_list: list[float] = []
+        p5_list: list[float] = []
+        detailed_evaluations: list[dict[str, Any]] = []
+
+        for m in mentees:
+            m_courses = set(m["materias_interes"])
+            m_topics = set(m["temas_seleccionados"])
+            m_slots = {(s["dia_semana"], s["hora_inicio"], s["hora_fin"]) for s in m["disponibilidad"]}
+            m_modality = m["modalidad_preferida"]
+
+            scored = []
+            for c in mentors:
+                if c["ciclo_actual"] < 7:
+                    continue
+                score, bd = RecommendationService.compute_candidate_score(
+                    mentee_courses=m_courses,
+                    mentee_topics=m_topics,
+                    mentee_slots=m_slots,
+                    mentee_modality=m_modality,
+                    candidate_courses=set(c["materias_interes"]),
+                    candidate_topics=set(c["temas_seleccionados"]),
+                    candidate_slots={
+                        (s["dia_semana"], s["hora_inicio"], s["hora_fin"]) for s in c["disponibilidad"]
+                    },
+                    candidate_modality=c["modalidad_preferida"],
+                    candidate_cycle=c["ciclo_actual"],
+                )
+                scored.append(
+                    (
+                        -round(score, 4),
+                        -round(bd.course_weight_factor, 2),
+                        -c["ciclo_actual"],
+                        -bd.schedule_matching_slots_count,
+                        c["email"],
+                    )
+                )
+
+            scored.sort()
+            ranked_mentors = [item[4] for item in scored]
+            relevant_set = cls.GROUND_TRUTH_RELEVANCE.get(m["email"], set())
+
+            top_3 = ranked_mentors[:3]
+            top_5 = ranked_mentors[:5]
+
+            p_at_3 = len(set(top_3) & relevant_set) / 3.0
+            p_at_5 = len(set(top_5) & relevant_set) / 5.0
+
+            p3_list.append(p_at_3)
+            p5_list.append(p_at_5)
+
+            detailed_evaluations.append(
+                {
+                    "mentee_email": m["email"],
+                    "top_3_recommended": top_3,
+                    "top_5_recommended": top_5,
+                    "precision_at_3": round(p_at_3, 4),
+                    "precision_at_5": round(p_at_5, 4),
+                }
+            )
+
+        mean_p3 = round(sum(p3_list) / len(p3_list), 4)
+        mean_p5 = round(sum(p5_list) / len(p5_list), 4)
+
+        return {
+            "precision_at_3": round(mean_p3, 3),
+            "precision_at_5": round(mean_p5, 3),
+            "target_precision_at_3": 0.80,
+            "target_precision_at_5": 0.75,
+            "meets_p3_target": mean_p3 >= 0.80,
+            "meets_p5_target": mean_p5 >= 0.75,
+            "evaluations": detailed_evaluations,
+        }
 
     @classmethod
     def evaluate_edge_cases(cls) -> dict[str, Any]:
@@ -235,7 +402,6 @@ class SimulationService:
         }
 
         # Caso Frontera 3: Asignatura sin oferta disponible
-        # Evalúa que consultar recomendaciones para un curso sin ofertas retorne lista vacía sin error HTTP 500
         empty_rec = RecommendationService.recommend_offers(
             mentee_email="mentoreado.ciclo1@upt.pe",
             top_k=5,
@@ -249,7 +415,6 @@ class SimulationService:
         }
 
         # Caso Frontera 4: Mentores no elegibles por ciclo < VII (RN-03)
-        # Evalúa mentores con ciclos 1 a 6: deben recibir score 0.0 y elegibilidad False
         ineligible_filtered_count = 0
         for cycle in range(1, 7):
             score_ineligible, bd_ineligible = RecommendationService.compute_candidate_score(
@@ -266,7 +431,7 @@ class SimulationService:
             if score_ineligible == 0.0 and not bd_ineligible.institutional_merit_eligible:
                 ineligible_filtered_count += 1
 
-        # Subcaso 4b: Mentor con campos nulos en BD (materias_interes=None, modalidad=None)
+        # Subcaso 4b: Mentor con campos nulos en BD
         score_nulls, bd_nulls = RecommendationService.compute_candidate_score(
             mentee_courses=m_courses,
             mentee_topics=m_topics,
@@ -304,10 +469,7 @@ class SimulationService:
 
         baseline_ranking: list[str] = []
 
-        import random
-
         for i in range(runs):
-            # Clonar y permutar aleatoriamente el orden de candidatos
             shuffled_candidates = list(mentors)
             random.seed(42 + i)
             random.shuffle(shuffled_candidates)
@@ -362,12 +524,13 @@ class SimulationService:
     @classmethod
     def run_benchmark(cls) -> dict[str, Any]:
         """
-        Ejecuta el banco de pruebas completo (Testbench) y reporta latencias y conformidades.
+        Ejecuta el banco de pruebas completo (Testbench) y reporta Precision@k, latencias y conformidades.
         """
         start_time = time.perf_counter()
 
         edge_cases = cls.evaluate_edge_cases()
         determinism = cls.evaluate_deterministic_ordering(runs=5)
+        precision_metrics = cls.evaluate_precision_at_k()
 
         mentees, mentors = cls.generate_synthetic_cohorts()
         evaluations_count = 0
@@ -393,19 +556,28 @@ class SimulationService:
                 evaluations_count += 1
 
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0
-        avg_latency_us = (elapsed_ms / max(1, evaluations_count)) * 1000.0
+        avg_latency_ms = round(elapsed_ms / max(1, evaluations_count), 2)
+        avg_latency_us = round((elapsed_ms / max(1, evaluations_count)) * 1000.0, 2)
 
         all_edges_passed = all(v.get("handled_gracefully", False) for v in edge_cases.values())
+        success = (
+            all_edges_passed
+            and determinism["is_deterministic"]
+            and precision_metrics["meets_p3_target"]
+            and precision_metrics["meets_p5_target"]
+        )
 
         return {
-            "testbench_status": "SUCCESS"
-            if (all_edges_passed and determinism["is_deterministic"])
-            else "FAILED",
+            "testbench_status": "SUCCESS" if success else "FAILED",
+            "precision_at_3": precision_metrics["precision_at_3"],
+            "precision_at_5": precision_metrics["precision_at_5"],
             "evaluations_count": evaluations_count,
             "total_elapsed_ms": round(elapsed_ms, 3),
-            "avg_latency_per_candidate_us": round(avg_latency_us, 2),
+            "avg_latency_ms": avg_latency_ms,
+            "avg_latency_per_candidate_us": avg_latency_us,
             "determinism_verified": determinism["is_deterministic"],
             "stable_top_3": determinism.get("stable_top_k"),
             "edge_cases": edge_cases,
             "rn03_filter_leak_rate": 0.0,
+            "precision_details": precision_metrics["evaluations"],
         }

@@ -8,20 +8,20 @@ client = TestClient(app)
 
 def test_generate_synthetic_cohorts_validity():
     mentees, mentors = SimulationService.generate_synthetic_cohorts()
-    assert len(mentees) >= 4
-    assert len(mentors) >= 5
+    assert len(mentees) == 4
+    assert len(mentors) == 10
 
-    # Validar que los mentoreados sean de ciclos tempranos (I a IV)
+    # Validar que los mentoreados sean de ciclos formativos I a IV
     for m in mentees:
         assert 1 <= m["ciclo_actual"] <= 4
         assert len(m["materias_interes"]) > 0
         assert len(m["temas_seleccionados"]) > 0
 
-    # Validar que la cohorte de mentores incluya casos elegibles e inelegibles
+    # Validar 7 mentores elegibles (ciclo >= 7) y 3 inelegibles (ciclo < 7) según RN-03
     eligible_count = sum(1 for m in mentors if m["ciclo_actual"] >= 7)
     ineligible_count = sum(1 for m in mentors if m["ciclo_actual"] < 7)
-    assert eligible_count >= 3
-    assert ineligible_count >= 2
+    assert eligible_count == 7
+    assert ineligible_count == 3
 
 
 def test_evaluate_edge_cases_all_pass():
@@ -64,11 +64,24 @@ def test_evaluate_deterministic_ordering():
     assert len(det_result["stable_top_k"]) > 0
 
 
+def test_precision_at_k_metrics_t45():
+    """Valida métricas Precision@3 (>= 0.80) y Precision@5 (>= 0.75) según T-45 / RF06."""
+    p_metrics = SimulationService.evaluate_precision_at_k()
+    assert p_metrics["meets_p3_target"] is True
+    assert p_metrics["meets_p5_target"] is True
+    assert p_metrics["precision_at_3"] >= 0.80
+    assert p_metrics["precision_at_5"] >= 0.75
+    assert len(p_metrics["evaluations"]) == 4
+
+
 def test_run_benchmark_metrics():
     bench = SimulationService.run_benchmark()
     assert bench["testbench_status"] == "SUCCESS"
     assert bench["evaluations_count"] > 0
     assert bench["total_elapsed_ms"] >= 0
+    assert bench["avg_latency_ms"] < 50.0  # RNF03 sub-50ms
+    assert bench["precision_at_3"] >= 0.80
+    assert bench["precision_at_5"] >= 0.75
     assert bench["determinism_verified"] is True
     assert bench["rn03_filter_leak_rate"] == 0.0
 
@@ -78,5 +91,17 @@ def test_simulation_testbench_endpoint():
     assert response.status_code == 200
     data = response.json()
     assert data["testbench_status"] == "SUCCESS"
+    assert data["determinism_verified"] is True
+    assert "edge_cases" in data
+
+
+def test_simulation_benchmark_endpoint_t45():
+    """Valida el endpoint REST oficial GET /api/v1/simulation/benchmark (T-45 / RF06)."""
+    response = client.get("/api/v1/simulation/benchmark")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["testbench_status"] == "SUCCESS"
+    assert data["precision_at_3"] >= 0.80
+    assert data["precision_at_5"] >= 0.75
     assert data["determinism_verified"] is True
     assert "edge_cases" in data

@@ -28,6 +28,7 @@ import { RecommendationFeedView } from './components/RecommendationFeedView';
 import { BookingModalView, type BookingSuccessData } from './components/BookingModalView';
 import { StudentBookingsView } from './components/StudentBookingsView';
 import { MentorSessionsView } from './components/MentorSessionsView';
+import { CertificateDownloadView } from './components/CertificateDownloadView';
 import { AdminDashboardView } from './components/AdminDashboardView';
 import { bookingService, BookingException } from './services/bookingService';
 import type { OfferRecommendationItem } from './services/recommendationService';
@@ -66,6 +67,10 @@ const TAB_HEADERS: Record<NavTab, { title: string; subtitle: string }> = {
   sessions: {
     title: 'Panel del Mentor: Sesiones y Asistencia',
     subtitle: 'Supervisa tus sesiones de mentoría programadas, estudiantes inscritos y estado del quórum.',
+  },
+  certificates: {
+    title: 'Acreditación y Constancias de Mentoría',
+    subtitle: 'Consulta tu progreso hacia el umbral de 20 horas visadas y descarga tu constancia oficial DEMO.',
   },
   admin: {
     title: 'Panel de Administración Institucional',
@@ -408,6 +413,13 @@ const AppShell: React.FC = () => {
             mentorEmail={studentEmail ?? ''}
             onNavigateToPublish={() => handleSelectTab('offers')}
             onPublishNewOffer={() => handleSelectTab('offers')}
+          />
+        )}
+
+        {activeTab === 'certificates' && (
+          <CertificateDownloadView
+            mentorEmail={studentEmail ?? undefined}
+            onNavigateToSessions={() => handleSelectTab('sessions')}
           />
         )}
 

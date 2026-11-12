@@ -42,19 +42,28 @@ describe('App Component (Navegación Institucional por Rol)', () => {
 
     render(<App />);
 
-    // El mentor ve Mis sesiones, Publicar mentoría, Cursos y Mi perfil
+    // El mentor ve Mis sesiones, Publicar mentoría, Mis constancias, Cursos y Mi perfil
     const sessionsTab = screen.getByRole('button', { name: /^📋 Mis sesiones$/i });
     const offersTab = screen.getByRole('button', { name: /^🏷️ Publicar mentoría$/i });
+    const certsTab = screen.getByRole('button', { name: /^📜 Mis constancias$/i });
     const curriculumTab = screen.getByRole('button', { name: /^📚 Cursos$/i });
     const profileTab = screen.getByRole('button', { name: /^👤 Mi perfil$/i });
 
     expect(sessionsTab).toBeInTheDocument();
     expect(offersTab).toBeInTheDocument();
+    expect(certsTab).toBeInTheDocument();
     expect(curriculumTab).toBeInTheDocument();
     expect(profileTab).toBeInTheDocument();
 
     // No debe ver administración
     expect(screen.queryByRole('button', { name: /^🛡️ Administración$/i })).not.toBeInTheDocument();
+
+    // Alternar a Mis constancias (T-43 / T-47)
+    fireEvent.click(certsTab);
+    await waitFor(() => {
+      expect(screen.getByText(/Avance hacia el Umbral de Acreditación/i)).toBeInTheDocument();
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
 
     // Alternar a Publicar mentoría
     fireEvent.click(offersTab);
