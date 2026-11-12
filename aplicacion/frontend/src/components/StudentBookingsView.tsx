@@ -24,6 +24,7 @@ import {
   BookingException,
 } from '../services/bookingService';
 import { authService } from '../services/authService';
+import { PostSessionSurveyModal } from './PostSessionSurveyModal';
 
 /**
  * Propiedades del componente StudentBookingsView (T-25 / T-27 / RF13 / RF14).
@@ -277,6 +278,11 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
     type: 'success' | 'info' | 'error';
     text: string;
   } | null>(null);
+
+  // Estado para modal de encuesta de calidad post-mentoría (T-38 / RF18 / RN-12 / RN-13)
+  const [activeSurveyBooking, setActiveSurveyBooking] = useState<BookingDetailResponse | null>(null);
+  const [evaluatedBookings, setEvaluatedBookings] = useState<Set<number>>(new Set());
+  const [componentMountTime] = useState<number>(() => currentTime ?? Date.now());
 
   // Referencias para accesibilidad y focus trap en diálogos
   const confirmCancelBtnRef = useRef<HTMLButtonElement>(null);
@@ -1115,6 +1121,88 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                     </span>
                   )}
 
+                  {/* Evaluación de Calidad y Satisfacción Post-Mentoría (T-38 / RF18 / RN-12 / RN-13) */}
+                  {(() => {
+                    const startMs = booking.fecha_inicio ? new Date(booking.fecha_inicio).getTime() : 0;
+                    const durMin = booking.duracion_minutos || 60;
+                    const endMs = startMs > 0 ? startMs + durMin * 60 * 1000 : 0;
+                    const nowMs = currentTime !== undefined ? currentTime : componentMountTime;
+                    const isSessionConcluded = endMs > 0 && nowMs >= endMs;
+                    const elapsedHours = endMs > 0 ? (nowMs - endMs) / (1000 * 60 * 60) : 0;
+                    const isSurveyWindowExpired = elapsedHours > 24;
+
+                    const hasEffectiveAttendance =
+                      booking.asistio === true ||
+                      booking.asistencia_confirmada === true ||
+                      booking.estado === 'ASISTIDA';
+                    const isMarkedAbsent =
+                      booking.asistio === false || booking.estado === 'INASISTENCIA';
+                    const isEvaluated = evaluatedBookings.has(booking.id_reserva);
+
+                    if (isEvaluated) {
+                      return (
+                        <span
+                          style={{
+                            fontSize: '12px',
+                            color: '#4F46E5',
+                            fontWeight: 700,
+                            padding: '8px 12px',
+                            backgroundColor: '#EEF2FF',
+                            borderRadius: '6px',
+                          }}
+                        >
+                          ✓ Evaluada
+                        </span>
+                      );
+                    }
+
+                    if (isSessionConcluded && !isMarkedAbsent && hasEffectiveAttendance) {
+                      if (isSurveyWindowExpired) {
+                        return (
+                          <button
+                            disabled
+                            aria-disabled="true"
+                            title="El plazo reglamentario de 24 horas para remitir tu evaluación ha expirado (RN-13)."
+                            style={{
+                              backgroundColor: '#E2E8F0',
+                              color: '#94A3B8',
+                              border: 'none',
+                              borderRadius: '6px',
+                              padding: '9px 18px',
+                              fontSize: '13px',
+                              fontWeight: 600,
+                              cursor: 'not-allowed',
+                            }}
+                          >
+                            Encuesta Cerrada (Plazo de 24h Vencido)
+                          </button>
+                        );
+                      }
+                      return (
+                        <button
+                          onClick={() => setActiveSurveyBooking(booking)}
+                          style={{
+                            backgroundColor: '#4338CA',
+                            color: '#FFFFFF',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '9px 18px',
+                            fontSize: '13px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                          }}
+                        >
+                          ⭐ Evaluar Mentoría
+                        </button>
+                      );
+                    }
+                    return null;
+                  })()}
+
                   {/* Botón de Desistimiento Voluntario */}
                   {isCancelEligible && (
                     canCancel ? (
@@ -1666,6 +1754,35 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal Accesible de Encuesta Post-Mentoría (T-38 / RF18 / RN-12 / RN-13) */}
+      {activeSurveyBooking && (
+        <PostSessionSurveyModal
+          isOpen={Boolean(activeSurveyBooking)}
+          onClose={() => setActiveSurveyBooking(null)}
+          sessionId={activeSurveyBooking.id_sesion}
+          sessionTitle={activeSurveyBooking.nombre_asignatura || activeSurveyBooking.nombre_tema || 'Sesión de Mentoría'}
+          mentorName={activeSurveyBooking.mentor_email || 'Mentor Titular'}
+          sessionEndDate={
+            activeSurveyBooking.fecha_inicio
+              ? new Date(new Date(activeSurveyBooking.fecha_inicio).getTime() + (activeSurveyBooking.duracion_minutos || 60) * 60000)
+              : undefined
+          }
+          asistenciaConfirmada={
+            activeSurveyBooking.asistio !== false &&
+            activeSurveyBooking.estado !== 'INASISTENCIA' &&
+            (activeSurveyBooking.asistio === true ||
+              activeSurveyBooking.asistencia_confirmada === true ||
+              activeSurveyBooking.estado === 'ASISTIDA')
+          }
+          currentTime={currentTime}
+          onSurveySubmitted={() => {
+            if (activeSurveyBooking) {
+              setEvaluatedBookings((prev) => new Set(prev).add(activeSurveyBooking.id_reserva));
+            }
+          }}
+        />
       )}
     </section>
   );

@@ -73,6 +73,8 @@ export interface BookingDetailResponse {
   modalidad?: string | null;
   espacio_asignado?: string | null;
   mentor_email?: string | null;
+  asistio?: boolean | null;
+  asistencia_confirmada?: boolean | null;
 }
 
 /**

@@ -1,4 +1,6 @@
+from app.services.attendance_service import AttendanceService
 from app.services.auth_service import AuthService
+from app.services.bitacora_service import BitacoraService
 from app.services.booking_service import BookingService
 from app.services.consent_service import ConsentService
 from app.services.curriculum_service import CurriculumService
@@ -7,6 +9,7 @@ from app.services.profile_service import ProfileService
 from app.services.recommendation_service import RecommendationService
 from app.services.role_service import RoleService
 from app.services.simulation_service import SimulationService
+from app.services.survey_service import SurveyService
 
 __all__ = [
     "CurriculumService",
@@ -18,4 +21,7 @@ __all__ = [
     "RecommendationService",
     "SimulationService",
     "BookingService",
+    "AttendanceService",
+    "BitacoraService",
+    "SurveyService",
 ]

@@ -10,6 +10,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { roleService } from '../services/roleService';
 import { offerService, type PublishOfferResponse } from '../services/offerService';
+import { bitacoraService, type BitacoraItem } from '../services/bitacoraService';
 import { HealthStatus } from './HealthStatus';
 
 export interface AdminDashboardViewProps {
@@ -22,7 +23,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
   showDevControls = false,
 }) => {
   const isDev = showDevControls && !import.meta.env.PROD;
-  const [activeTab, setActiveTab] = useState<'roles' | 'quorum' | 'health'>('roles');
+  const [activeTab, setActiveTab] = useState<'roles' | 'quorum' | 'health' | 'bitacoras'>('roles');
 
   // Estado para gestión de roles
   const [searchEmail, setSearchEmail] = useState('');
@@ -35,6 +36,17 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
   const [offers, setOffers] = useState<PublishOfferResponse[]>([]);
   const [offersLoading, setOffersLoading] = useState(false);
   const [offersError, setOffersError] = useState<string | null>(null);
+
+  // Estado para auditoría y fiscalización de bitácoras (T-40 / T-41 / RF26 / RN-14)
+  const [bitacoras, setBitacoras] = useState<BitacoraItem[]>([]);
+  const [bitacorasLoading, setBitacorasLoading] = useState(false);
+  const [bitacorasError, setBitacorasError] = useState<string | null>(null);
+  const [bitacoraFiltro, setBitacoraFiltro] = useState<'TODAS' | 'PENDIENTES' | 'VISADAS' | 'OBSERVADA'>('TODAS');
+  const [selectedBitacoraDetail, setSelectedBitacoraDetail] = useState<BitacoraItem | null>(null);
+  const [observingBitacora, setObservingBitacora] = useState<BitacoraItem | null>(null);
+  const [motivoObservacion, setMotivoObservacion] = useState('');
+  const [bitacoraActionLoading, setBitacoraActionLoading] = useState(false);
+  const [bitacoraFeedback, setBitacoraFeedback] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   // Carga inicial de ofertas para supervisión de quórum
   const loadOffers = useCallback(async () => {
@@ -50,11 +62,107 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
     }
   }, []);
 
+  // Carga de bitácoras para fiscalización administrativa
+  const loadBitacoras = useCallback(async (filtro?: string) => {
+    setBitacorasLoading(true);
+    setBitacorasError(null);
+    try {
+      const data = await bitacoraService.getBitacoras(filtro);
+      setBitacoras(data);
+    } catch (err) {
+      setBitacorasError(err instanceof Error ? err.message : 'Error al cargar bitácoras');
+    } finally {
+      setBitacorasLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (activeTab === 'quorum') {
       loadOffers();
+    } else if (activeTab === 'bitacoras') {
+      loadBitacoras(bitacoraFiltro);
     }
-  }, [activeTab, loadOffers]);
+  }, [activeTab, bitacoraFiltro, loadOffers, loadBitacoras]);
+
+  const handleVisarBitacora = async (b: BitacoraItem) => {
+    setBitacoraActionLoading(true);
+    setBitacoraFeedback(null);
+    try {
+      const res = await bitacoraService.visar(b.id_bitacora);
+      setBitacoras((prev) =>
+        prev.map((item) =>
+          item.id_bitacora === b.id_bitacora
+            ? { ...item, visado_administrador: true, estado_sesion: 'HORAS_VISADAS' }
+            : item
+        )
+      );
+      setBitacoraFeedback({
+        text: res.mensaje || 'Horas acreditadas y visadas institucionalmente con éxito.',
+        type: 'success',
+      });
+    } catch (err) {
+      setBitacoraFeedback({
+        text: err instanceof Error ? err.message : 'Error al visar bitácora.',
+        type: 'error',
+      });
+    } finally {
+      setBitacoraActionLoading(false);
+    }
+  };
+
+  // Cierre accesible de modales con tecla Escape (WCAG 2.1 AA / RNF05)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (observingBitacora && !bitacoraActionLoading) {
+          setObservingBitacora(null);
+          setMotivoObservacion('');
+        } else if (selectedBitacoraDetail) {
+          setSelectedBitacoraDetail(null);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [observingBitacora, bitacoraActionLoading, selectedBitacoraDetail]);
+
+  const handleObservarSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!observingBitacora) return;
+    const clean = motivoObservacion.trim();
+    if (clean.length < 15) {
+      setBitacoraFeedback({
+        text: 'La justificación técnica de la observación debe contener al menos 15 caracteres.',
+        type: 'error',
+      });
+      return;
+    }
+    setBitacoraActionLoading(true);
+    setBitacoraFeedback(null);
+    try {
+      const res = await bitacoraService.observar(observingBitacora.id_bitacora, clean);
+      setBitacoras((prev) =>
+        prev.map((item) =>
+          item.id_bitacora === observingBitacora.id_bitacora
+            ? { ...item, visado_administrador: false, estado_sesion: 'OBSERVADA' }
+            : item
+        )
+      );
+      setObservingBitacora(null);
+      setMotivoObservacion('');
+      setBitacoraFeedback({
+        text: res.mensaje || 'Bitácora observada para corrección.',
+        type: 'success',
+      });
+    } catch (err) {
+      setBitacoraFeedback({
+        text: err instanceof Error ? err.message : 'Error al observar bitácora.',
+        type: 'error',
+      });
+    } finally {
+      setBitacoraActionLoading(false);
+    }
+  };
 
   // Manejadores de Gestión de Roles
   const handleSearchRoles = async (targetEmail: string) => {
@@ -194,6 +302,22 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
             }}
           >
             📊 Monitoreo de Quórum
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('bitacoras')}
+            style={{
+              padding: '0.45rem 0.9rem',
+              borderRadius: '6px',
+              border: 'none',
+              background: activeTab === 'bitacoras' ? '#B99451' : 'rgba(255, 255, 255, 0.15)',
+              color: '#FFFFFF',
+              fontWeight: 600,
+              fontSize: '0.82rem',
+              cursor: 'pointer',
+            }}
+          >
+            📋 Auditoría de Bitácoras
           </button>
           <button
             type="button"
@@ -587,7 +711,461 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
           </div>
         )}
 
-        {/* SECCIÓN 3: SALUD DEL SISTEMA */}
+        {/* SECCIÓN 3: AUDITORÍA DE BITÁCORAS (T-40 / T-41 / RF26 / RN-14) */}
+        {activeTab === 'bitacoras' && (
+          <div>
+            <div style={{ marginBottom: '1.25rem' }}>
+              <h3 style={{ margin: '0 0 0.5rem', color: '#1C2A59', fontSize: '1.1rem' }}>
+                Bandeja de Auditoría de Bitácoras y Visado Institucional de Horas
+              </h3>
+              <p style={{ margin: 0, color: '#64748B', fontSize: '0.85rem', lineHeight: 1.5 }}>
+                Fiscalización académica y refrendo oficial de horas de acompañamiento pedagógico (<strong>RF26 / RN-14</strong>).
+                Solo las bitácoras con visado administrativo conmutan sus horas a formalmente acreditadas para certificación.
+              </p>
+            </div>
+
+            {/* Filtros de la bandeja */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+              {(
+                [
+                  { key: 'TODAS', label: 'Todas las Bitácoras' },
+                  { key: 'PENDIENTES', label: 'Pendientes de Visado' },
+                  { key: 'VISADAS', label: 'Horas Visadas y Acreditadas' },
+                  { key: 'OBSERVADA', label: 'Observadas para Corrección' },
+                ] as const
+              ).map((f) => (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => setBitacoraFiltro(f.key)}
+                  style={{
+                    padding: '0.45rem 0.85rem',
+                    borderRadius: '6px',
+                    border: '1px solid #CBD5E1',
+                    background: bitacoraFiltro === f.key ? '#1C2A59' : '#FFFFFF',
+                    color: bitacoraFiltro === f.key ? '#FFFFFF' : '#334155',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Mensajes de feedback */}
+            {bitacoraFeedback && (
+              <div
+                style={{
+                  padding: '0.75rem 1rem',
+                  borderRadius: '6px',
+                  marginBottom: '1rem',
+                  fontSize: '0.85rem',
+                  background: bitacoraFeedback.type === 'success' ? '#DEF7EC' : '#FDE8E8',
+                  color: bitacoraFeedback.type === 'success' ? '#03543F' : '#9B1C1C',
+                  border: `1px solid ${bitacoraFeedback.type === 'success' ? '#84E1BC' : '#F8B4B4'}`,
+                }}
+              >
+                {bitacoraFeedback.text}
+              </div>
+            )}
+
+            {bitacorasError && (
+              <div
+                style={{
+                  padding: '0.75rem 1rem',
+                  borderRadius: '6px',
+                  marginBottom: '1rem',
+                  fontSize: '0.85rem',
+                  background: '#FDE8E8',
+                  color: '#9B1C1C',
+                  border: '1px solid #F8B4B4',
+                }}
+              >
+                {bitacorasError}
+              </div>
+            )}
+
+            {/* Tabla de bitácoras */}
+            {bitacorasLoading ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: '#64748B' }}>
+                Cargando bitácoras pedagógicas...
+              </div>
+            ) : bitacoras.length === 0 ? (
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '2.5rem',
+                  background: '#F8FAFC',
+                  borderRadius: '8px',
+                  border: '1px dashed #CBD5E1',
+                  color: '#64748B',
+                }}
+              >
+                No se registraron bitácoras bajo el filtro seleccionado.
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table
+                  style={{
+                    width: '100%',
+                    borderCollapse: 'collapse',
+                    textAlign: 'left',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  <thead>
+                    <tr style={{ background: '#F1F5F9', borderBottom: '2px solid #E2E8F0' }}>
+                      <th style={{ padding: '0.75rem 1rem', color: '#1C2A59', fontWeight: 700 }}>
+                        Código / Sesión
+                      </th>
+                      <th style={{ padding: '0.75rem 1rem', color: '#1C2A59', fontWeight: 700 }}>
+                        Mentor Titular
+                      </th>
+                      <th style={{ padding: '0.75rem 1rem', color: '#1C2A59', fontWeight: 700 }}>
+                        Horas
+                      </th>
+                      <th style={{ padding: '0.75rem 1rem', color: '#1C2A59', fontWeight: 700 }}>
+                        Estado
+                      </th>
+                      <th style={{ padding: '0.75rem 1rem', color: '#1C2A59', fontWeight: 700 }}>
+                        Acciones
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bitacoras.map((b) => {
+                      const isVisada = b.visado_administrador || b.estado_sesion === 'HORAS_VISADAS';
+                      const isObservada = b.estado_sesion === 'OBSERVADA';
+
+                      return (
+                        <tr
+                          key={b.id_bitacora}
+                          style={{
+                            borderBottom: '1px solid #E2E8F0',
+                            transition: 'background-color 0.15s ease',
+                          }}
+                        >
+                          <td style={{ padding: '0.85rem 1rem', fontWeight: 600, color: '#1E293B' }}>
+                            {b.codigo_sesion || `SES-${b.id_sesion}`}
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem', color: '#475569' }}>
+                            {b.id_mentor}
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem', color: '#334155', fontWeight: 600 }}>
+                            {b.horas_declaradas.toFixed(1)} h
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem' }}>
+                            {isVisada ? (
+                              <span
+                                style={{
+                                  display: 'inline-block',
+                                  padding: '0.25rem 0.6rem',
+                                  borderRadius: '9999px',
+                                  background: '#DEF7EC',
+                                  color: '#03543F',
+                                  fontWeight: 700,
+                                  fontSize: '0.75rem',
+                                }}
+                              >
+                                Horas Acreditadas
+                              </span>
+                            ) : isObservada ? (
+                              <span
+                                style={{
+                                  display: 'inline-block',
+                                  padding: '0.25rem 0.6rem',
+                                  borderRadius: '9999px',
+                                  background: '#FDE8E8',
+                                  color: '#9B1C1C',
+                                  fontWeight: 700,
+                                  fontSize: '0.75rem',
+                                }}
+                              >
+                                Observada
+                              </span>
+                            ) : (
+                              <span
+                                style={{
+                                  display: 'inline-block',
+                                  padding: '0.25rem 0.6rem',
+                                  borderRadius: '9999px',
+                                  background: '#FEF3C7',
+                                  color: '#92400E',
+                                  fontWeight: 700,
+                                  fontSize: '0.75rem',
+                                }}
+                              >
+                                Pendiente de Visado
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem' }}>
+                            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedBitacoraDetail(b)}
+                                style={{
+                                  padding: '0.35rem 0.65rem',
+                                  borderRadius: '5px',
+                                  border: '1px solid #CBD5E1',
+                                  background: '#FFFFFF',
+                                  color: '#334155',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Ver Detalle Pedagógico
+                              </button>
+                              {!isVisada && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleVisarBitacora(b)}
+                                  disabled={bitacoraActionLoading}
+                                  style={{
+                                    padding: '0.35rem 0.65rem',
+                                    borderRadius: '5px',
+                                    border: 'none',
+                                    background: '#059669',
+                                    color: '#FFFFFF',
+                                    fontSize: '0.78rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                  }}
+                                >
+                                  Aprobar y Visar Horas
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setObservingBitacora(b);
+                                  setMotivoObservacion('');
+                                }}
+                                disabled={bitacoraActionLoading}
+                                style={{
+                                  padding: '0.35rem 0.65rem',
+                                  borderRadius: '5px',
+                                  border: 'none',
+                                  background: '#DC2626',
+                                  color: '#FFFFFF',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Observar Bitácora
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Modal de Detalle Pedagógico e Inspección SHA-256 */}
+            {selectedBitacoraDetail && (
+              <div
+                style={{
+                  position: 'fixed',
+                  inset: 0,
+                  backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '1rem',
+                  zIndex: 50,
+                }}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Detalle Pedagógico de Bitácora"
+              >
+                <div
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '12px',
+                    maxWidth: '600px',
+                    width: '100%',
+                    padding: '1.5rem',
+                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <h4 style={{ margin: 0, color: '#1C2A59', fontSize: '1.1rem', fontWeight: 700 }}>
+                      Detalle de Bitácora Pedagógica
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBitacoraDetail(null)}
+                      style={{ border: 'none', background: 'transparent', fontSize: '1.2rem', cursor: 'pointer' }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div>
+                      <strong>Mentor:</strong> {selectedBitacoraDetail.id_mentor}
+                    </div>
+                    <div>
+                      <strong>Temas Cubiertos:</strong>
+                      <ul style={{ margin: '0.25rem 0 0', paddingLeft: '1.25rem' }}>
+                        {selectedBitacoraDetail.temas_cubiertos.map((t, idx) => (
+                          <li key={idx}>{t}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <strong>Nivel de Dificultad Percibido:</strong> {selectedBitacoraDetail.nivel_dificultad}
+                    </div>
+                    <div>
+                      <strong>Observaciones Docentes:</strong>
+                      <p style={{ margin: '0.25rem 0 0', background: '#F8FAFC', padding: '0.6rem', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+                        {selectedBitacoraDetail.observaciones}
+                      </p>
+                    </div>
+                    <div>
+                      <strong>Firma Criptográfica SHA-256:</strong>
+                      <code
+                        style={{
+                          display: 'block',
+                          margin: '0.25rem 0 0',
+                          padding: '0.5rem',
+                          background: '#0F172A',
+                          color: '#38BDF8',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
+                          wordBreak: 'break-all',
+                        }}
+                      >
+                        {selectedBitacoraDetail.hash_firma}
+                      </code>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: '1.25rem', textAlign: 'right' }}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBitacoraDetail(null)}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: '#1C2A59',
+                        color: '#FFFFFF',
+                        fontWeight: 600,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cerrar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Diálogo Modal Accesible de Observación Técnica */}
+            {observingBitacora && (
+              <div
+                style={{
+                  position: 'fixed',
+                  inset: 0,
+                  backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '1rem',
+                  zIndex: 50,
+                }}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Observar Bitácora Pedagógica"
+              >
+                <div
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '12px',
+                    maxWidth: '520px',
+                    width: '100%',
+                    padding: '1.5rem',
+                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  <h4 style={{ margin: '0 0 0.5rem', color: '#B91C1C', fontSize: '1.1rem', fontWeight: 700 }}>
+                    Formular Observación Técnica
+                  </h4>
+                  <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: '#64748B' }}>
+                    Detalla el motivo técnico o discrepancia detectada para que el mentor titular proceda con su subsanación.
+                    (Justificación obligatoria de al menos 15 caracteres).
+                  </p>
+                  <form onSubmit={handleObservarSubmit}>
+                    <textarea
+                      role="textbox"
+                      required
+                      rows={4}
+                      value={motivoObservacion}
+                      onChange={(e) => setMotivoObservacion(e.target.value)}
+                      placeholder="Ingrese los motivos fundamentados de la observación técnica..."
+                      style={{
+                        width: '100%',
+                        padding: '0.65rem 0.85rem',
+                        border: '1px solid #CBD5E1',
+                        borderRadius: '6px',
+                        fontSize: '0.85rem',
+                        boxSizing: 'border-box',
+                        marginBottom: '0.5rem',
+                      }}
+                    />
+                    <div style={{ fontSize: '0.75rem', color: motivoObservacion.trim().length >= 15 ? '#059669' : '#DC2626', marginBottom: '1rem' }}>
+                      {motivoObservacion.trim().length}/15 caracteres mínimos
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => setObservingBitacora(null)}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          borderRadius: '6px',
+                          border: '1px solid #CBD5E1',
+                          background: '#FFFFFF',
+                          color: '#475569',
+                          fontWeight: 600,
+                          fontSize: '0.82rem',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={bitacoraActionLoading || motivoObservacion.trim().length < 15}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          borderRadius: '6px',
+                          border: 'none',
+                          background: '#DC2626',
+                          color: '#FFFFFF',
+                          fontWeight: 600,
+                          fontSize: '0.82rem',
+                          cursor: 'pointer',
+                          opacity: motivoObservacion.trim().length < 15 ? 0.6 : 1,
+                        }}
+                      >
+                        Confirmar Observación
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* SECCIÓN 4: SALUD DEL SISTEMA */}
         {activeTab === 'health' && (
           <div>
             <HealthStatus />

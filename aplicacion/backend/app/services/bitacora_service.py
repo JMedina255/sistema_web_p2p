@@ -8,7 +8,13 @@ from sqlalchemy.orm import Session
 from app.models.bitacora import BitacoraPedagogica
 from app.models.offer import SesionMentoria
 from app.models.roles import Rol, UsuarioRol
-from app.schemas.bitacora import BitacoraCreatePayload, BitacoraResponse
+from app.schemas.bitacora import (
+    BitacoraCreatePayload,
+    BitacoraItemResponse,
+    BitacoraObservacionResponse,
+    BitacoraResponse,
+    BitacoraVisadoResponse,
+)
 from app.services.offer_service import _memory_offers
 
 _bitacora_lock = threading.RLock()
@@ -62,6 +68,12 @@ class BitacoraService:
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Se requiere autenticación para registrar la bitácora pedagógica.",
                 )
+            if sesion.estado.startswith("CANCELADA"):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"INVALID_SESSION_STATE: No se puede registrar la bitácora de una sesión cancelada ({sesion.estado}).",
+                )
+
             clean_caller = caller_email.strip().lower()
             clean_mentor = sesion.mentor_email.strip().lower()
             if clean_caller != clean_mentor:
@@ -180,6 +192,12 @@ class BitacoraService:
                     detail="Se requiere autenticación para registrar la bitácora pedagógica.",
                 )
 
+            if str(target.get("estado", "")).startswith("CANCELADA"):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"INVALID_SESSION_STATE: No se puede registrar la bitácora de una sesión cancelada ({target.get('estado')}).",
+                )
+
             clean_caller = caller_email.strip().lower()
             clean_mentor = target["mentor_email"].strip().lower()
             if not is_admin and clean_caller != clean_mentor:
@@ -289,3 +307,433 @@ class BitacoraService:
                     detail="NOT_FOUND: No existe bitácora registrada para esta sesión.",
                 )
             return BitacoraResponse(**existing)
+
+    @classmethod
+    def visar_bitacora(
+        cls,
+        db: Session | None,
+        bitacora_id: int,
+        caller_email: str | None = None,
+        is_admin: bool = False,
+        now_utc: datetime | None = None,
+    ) -> BitacoraVisadoResponse:
+        """
+        Visa y aprueba administrativamente una bitácora pedagógica (T-41 / RF26 / CUS22 / RN-14).
+        - Exclusivo para rol administrador (RNF02).
+        - Conmuta visado_administrador = True y sesion.estado = 'HORAS_VISADAS'.
+        - Convalida horas declaradas como acreditadas.
+        """
+        if now_utc is None:
+            now_utc = datetime.now(UTC)
+
+        clean_caller = (caller_email or "").strip().lower()
+        has_admin = is_admin
+
+        if not has_admin and db is not None and clean_caller:
+            try:
+                admin_rol = db.query(Rol).filter(Rol.nombre_rol == "administrador").first()
+                if admin_rol:
+                    has_admin = (
+                        db.query(UsuarioRol)
+                        .filter(
+                            UsuarioRol.email == clean_caller,
+                            UsuarioRol.id_rol == admin_rol.id_rol,
+                            UsuarioRol.activo.is_(True),
+                        )
+                        .first()
+                        is not None
+                    )
+            except Exception:
+                pass
+
+        if not has_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="ADMIN_ROLE_REQUIRED: Se requieren privilegios de Administrador de Escuela para auditar bitácoras.",
+            )
+
+        # 1. Base de datos
+        if db is not None:
+            b = (
+                db.query(BitacoraPedagogica)
+                .filter(
+                    (BitacoraPedagogica.id_bitacora == bitacora_id)
+                    | (BitacoraPedagogica.id_sesion == bitacora_id)
+                )
+                .first()
+            )
+            if not b:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="NOT_FOUND: La bitácora pedagógica no existe.",
+                )
+
+            sesion = db.query(SesionMentoria).filter(SesionMentoria.id_sesion == b.id_sesion).first()
+            if sesion:
+                if sesion.estado.startswith("CANCELADA"):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"INVALID_SESSION_STATE: No se puede visar una bitácora de una sesión cancelada ({sesion.estado}).",
+                    )
+                if sesion.estado not in ("BITACORA_REGISTRADA", "HORAS_VISADAS", "OBSERVADA", "CONCLUIDA"):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"INVALID_SESSION_STATE: Solo se pueden visar bitácoras de sesiones concluidas con bitácora registrada (estado actual: {sesion.estado}).",
+                    )
+                sesion.estado = "HORAS_VISADAS"
+            b.visado_administrador = True
+
+            db.commit()
+            db.refresh(b)
+
+            return BitacoraVisadoResponse(
+                id_bitacora=b.id_bitacora,
+                id_sesion=b.id_sesion,
+                id_mentor=b.id_mentor,
+                horas_declaradas=b.horas_declaradas,
+                visado_administrador=True,
+                estado_sesion=sesion.estado if sesion else "HORAS_VISADAS",
+                auditor_email=clean_caller or "admin.epis@upt.pe",
+                visado_at=now_utc.isoformat(),
+                mensaje=f"Bitácora pedagógica visada institucionalmente con éxito. {b.horas_declaradas} horas formativas acreditadas para certificación.",
+            )
+
+        # 2. En memoria
+        with _bitacora_lock:
+            target_b = next(
+                (
+                    b
+                    for b in _memory_bitacoras
+                    if b["id_bitacora"] == bitacora_id
+                    or str(b["id_bitacora"]) == str(bitacora_id)
+                    or b["id_sesion"] == bitacora_id
+                    or str(b["id_sesion"]) == str(bitacora_id)
+                ),
+                None,
+            )
+            if not target_b:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="NOT_FOUND: La bitácora pedagógica no existe.",
+                )
+
+            s_id = target_b["id_sesion"]
+            target_sesion = next(
+                (
+                    off
+                    for off in _memory_offers
+                    if off.get("id_sesion") == s_id or str(off.get("id_sesion")) == str(s_id)
+                ),
+                None,
+            )
+            if target_sesion:
+                curr_estado = target_sesion.get("estado", "")
+                if curr_estado.startswith("CANCELADA"):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"INVALID_SESSION_STATE: No se puede visar una bitácora de una sesión cancelada ({curr_estado}).",
+                    )
+                if curr_estado not in ("BITACORA_REGISTRADA", "HORAS_VISADAS", "OBSERVADA", "CONCLUIDA"):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"INVALID_SESSION_STATE: Solo se pueden visar bitácoras de sesiones concluidas con bitácora registrada (estado actual: {curr_estado}).",
+                    )
+                target_sesion["estado"] = "HORAS_VISADAS"
+            target_b["visado_administrador"] = True
+
+            return BitacoraVisadoResponse(
+                id_bitacora=target_b["id_bitacora"],
+                id_sesion=target_b["id_sesion"],
+                id_mentor=target_b["id_mentor"],
+                horas_declaradas=target_b["horas_declaradas"],
+                visado_administrador=True,
+                estado_sesion="HORAS_VISADAS",
+                auditor_email=clean_caller or "admin.epis@upt.pe",
+                visado_at=now_utc.isoformat(),
+                mensaje=f"Bitácora pedagógica visada institucionalmente con éxito. {target_b['horas_declaradas']} horas formativas acreditadas para certificación.",
+            )
+
+    @classmethod
+    def observar_bitacora(
+        cls,
+        db: Session | None,
+        bitacora_id: int,
+        motivo: str,
+        caller_email: str | None = None,
+        is_admin: bool = False,
+        now_utc: datetime | None = None,
+    ) -> BitacoraObservacionResponse:
+        """
+        Formula una observación de auditoría sobre la bitácora pedagógica (T-41 / RF26 / CUS22 / CUS25).
+        - Exclusivo para rol administrador.
+        - Requiere motivo sustantivo (>= 15 caracteres).
+        - Transiciona el estado a 'OBSERVADA' y visado_administrador = False.
+        """
+        if now_utc is None:
+            now_utc = datetime.now(UTC)
+
+        clean_caller = (caller_email or "").strip().lower()
+        has_admin = is_admin
+
+        if not has_admin and db is not None and clean_caller:
+            try:
+                admin_rol = db.query(Rol).filter(Rol.nombre_rol == "administrador").first()
+                if admin_rol:
+                    has_admin = (
+                        db.query(UsuarioRol)
+                        .filter(
+                            UsuarioRol.email == clean_caller,
+                            UsuarioRol.id_rol == admin_rol.id_rol,
+                            UsuarioRol.activo.is_(True),
+                        )
+                        .first()
+                        is not None
+                    )
+            except Exception:
+                pass
+
+        if not has_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="ADMIN_ROLE_REQUIRED: Se requieren privilegios de Administrador de Escuela para auditar bitácoras.",
+            )
+
+        clean_motivo = (motivo or "").strip()
+        if len(clean_motivo) < 15:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="OBSERVATION_REASON_REQUIRED: Debe ingresar obligatoriamente una justificación para la observación técnica.",
+            )
+
+        # 1. Base de datos
+        if db is not None:
+            b = (
+                db.query(BitacoraPedagogica)
+                .filter(
+                    (BitacoraPedagogica.id_bitacora == bitacora_id)
+                    | (BitacoraPedagogica.id_sesion == bitacora_id)
+                )
+                .first()
+            )
+            if not b:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="NOT_FOUND: La bitácora pedagógica no existe.",
+                )
+
+            sesion = db.query(SesionMentoria).filter(SesionMentoria.id_sesion == b.id_sesion).first()
+            if sesion:
+                if sesion.estado.startswith("CANCELADA"):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"INVALID_SESSION_STATE: No se puede observar una bitácora de una sesión cancelada ({sesion.estado}).",
+                    )
+                if sesion.estado not in ("BITACORA_REGISTRADA", "HORAS_VISADAS", "OBSERVADA", "CONCLUIDA"):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"INVALID_SESSION_STATE: No se puede observar una bitácora de una sesión en estado {sesion.estado}.",
+                    )
+                sesion.estado = "OBSERVADA"
+            b.visado_administrador = False
+
+            db.commit()
+            db.refresh(b)
+
+            return BitacoraObservacionResponse(
+                id_bitacora=b.id_bitacora,
+                id_sesion=b.id_sesion,
+                id_mentor=b.id_mentor,
+                estado_sesion=sesion.estado if sesion else "OBSERVADA",
+                motivo_observacion=clean_motivo,
+                auditor_email=clean_caller or "admin.epis@upt.pe",
+                observado_at=now_utc.isoformat(),
+                mensaje="Bitácora observada para corrección técnica por el Administrador.",
+            )
+
+        # 2. En memoria
+        with _bitacora_lock:
+            target_b = next(
+                (
+                    b
+                    for b in _memory_bitacoras
+                    if b["id_bitacora"] == bitacora_id
+                    or str(b["id_bitacora"]) == str(bitacora_id)
+                    or b["id_sesion"] == bitacora_id
+                    or str(b["id_sesion"]) == str(bitacora_id)
+                ),
+                None,
+            )
+            if not target_b:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="NOT_FOUND: La bitácora pedagógica no existe.",
+                )
+
+            s_id = target_b["id_sesion"]
+            target_sesion = next(
+                (
+                    off
+                    for off in _memory_offers
+                    if off.get("id_sesion") == s_id or str(off.get("id_sesion")) == str(s_id)
+                ),
+                None,
+            )
+            if target_sesion:
+                curr_estado = target_sesion.get("estado", "")
+                if curr_estado.startswith("CANCELADA"):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"INVALID_SESSION_STATE: No se puede observar una bitácora de una sesión cancelada ({curr_estado}).",
+                    )
+                if curr_estado not in ("BITACORA_REGISTRADA", "HORAS_VISADAS", "OBSERVADA", "CONCLUIDA"):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"INVALID_SESSION_STATE: No se puede observar una bitácora de una sesión en estado {curr_estado}.",
+                    )
+                target_sesion["estado"] = "OBSERVADA"
+            target_b["visado_administrador"] = False
+
+            return BitacoraObservacionResponse(
+                id_bitacora=target_b["id_bitacora"],
+                id_sesion=target_b["id_sesion"],
+                id_mentor=target_b["id_mentor"],
+                estado_sesion="OBSERVADA",
+                motivo_observacion=clean_motivo,
+                auditor_email=clean_caller or "admin.epis@upt.pe",
+                observado_at=now_utc.isoformat(),
+                mensaje="Bitácora observada para corrección técnica por el Administrador.",
+            )
+
+    @classmethod
+    def list_bitacoras(
+        cls,
+        db: Session | None,
+        estado_filtro: str | None = None,
+        caller_email: str | None = None,
+        is_admin: bool = False,
+    ) -> list[BitacoraItemResponse]:
+        """
+        Retorna la lista de bitácoras registradas para la bandeja de auditoría administrativa (T-40).
+        """
+        clean_caller = (caller_email or "").strip().lower()
+        has_admin = is_admin
+
+        if not has_admin and db is not None and clean_caller:
+            try:
+                admin_rol = db.query(Rol).filter(Rol.nombre_rol == "administrador").first()
+                if admin_rol:
+                    has_admin = (
+                        db.query(UsuarioRol)
+                        .filter(
+                            UsuarioRol.email == clean_caller,
+                            UsuarioRol.id_rol == admin_rol.id_rol,
+                            UsuarioRol.activo.is_(True),
+                        )
+                        .first()
+                        is not None
+                    )
+            except Exception:
+                pass
+
+        if not has_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="ADMIN_ROLE_REQUIRED: Se requieren privilegios de Administrador de Escuela para auditar bitácoras.",
+            )
+
+        clean_filtro = estado_filtro.strip().upper() if estado_filtro else None
+
+        if db is not None:
+            bitacoras = db.query(BitacoraPedagogica).all()
+            results: list[BitacoraItemResponse] = []
+            for b in bitacoras:
+                sesion = db.query(SesionMentoria).filter(SesionMentoria.id_sesion == b.id_sesion).first()
+                estado = (
+                    sesion.estado
+                    if sesion
+                    else ("HORAS_VISADAS" if b.visado_administrador else "BITACORA_REGISTRADA")
+                )
+
+                if clean_filtro and clean_filtro != "TODAS":
+                    if clean_filtro == "PENDIENTES" and (
+                        b.visado_administrador or estado != "BITACORA_REGISTRADA"
+                    ):
+                        continue
+                    elif clean_filtro == "VISADAS" and (
+                        not b.visado_administrador and estado != "HORAS_VISADAS"
+                    ):
+                        continue
+                    elif clean_filtro not in ("PENDIENTES", "VISADAS") and estado != clean_filtro:
+                        continue
+
+                results.append(
+                    BitacoraItemResponse(
+                        id_bitacora=b.id_bitacora,
+                        id_sesion=b.id_sesion,
+                        codigo_sesion=sesion.codigo_sesion if sesion else f"SES-{b.id_sesion}",
+                        id_mentor=b.id_mentor,
+                        temas_cubiertos=b.temas_cubiertos,
+                        observaciones=b.observaciones,
+                        nivel_dificultad=b.nivel_dificultad,
+                        hash_firma=b.hash_firma,
+                        horas_declaradas=b.horas_declaradas,
+                        visado_administrador=b.visado_administrador,
+                        estado_sesion=estado,
+                        fecha_inicio=sesion.fecha_inicio.isoformat()
+                        if sesion and sesion.fecha_inicio
+                        else None,
+                        created_at=b.created_at.isoformat(),
+                    )
+                )
+            return results
+
+        with _bitacora_lock:
+            results = []
+            for b in _memory_bitacoras:
+                s_id = b["id_sesion"]
+                target_sesion = next(
+                    (
+                        off
+                        for off in _memory_offers
+                        if off.get("id_sesion") == s_id or str(off.get("id_sesion")) == str(s_id)
+                    ),
+                    None,
+                )
+                estado = (
+                    target_sesion.get("estado", "BITACORA_REGISTRADA")
+                    if target_sesion
+                    else ("HORAS_VISADAS" if b.get("visado_administrador") else "BITACORA_REGISTRADA")
+                )
+
+                if clean_filtro and clean_filtro != "TODAS":
+                    if clean_filtro == "PENDIENTES" and (
+                        b.get("visado_administrador") or estado != "BITACORA_REGISTRADA"
+                    ):
+                        continue
+                    elif clean_filtro == "VISADAS" and (
+                        not b.get("visado_administrador") and estado != "HORAS_VISADAS"
+                    ):
+                        continue
+                    elif clean_filtro not in ("PENDIENTES", "VISADAS") and estado != clean_filtro:
+                        continue
+
+                results.append(
+                    BitacoraItemResponse(
+                        id_bitacora=b["id_bitacora"],
+                        id_sesion=b["id_sesion"],
+                        codigo_sesion=target_sesion.get("codigo_sesion", f"SES-{b['id_sesion']}")
+                        if target_sesion
+                        else f"SES-{b['id_sesion']}",
+                        id_mentor=b["id_mentor"],
+                        temas_cubiertos=b["temas_cubiertos"],
+                        observaciones=b["observaciones"],
+                        nivel_dificultad=b["nivel_dificultad"],
+                        hash_firma=b["hash_firma"],
+                        horas_declaradas=b["horas_declaradas"],
+                        visado_administrador=b.get("visado_administrador", False),
+                        estado_sesion=estado,
+                        fecha_inicio=target_sesion.get("fecha_inicio") if target_sesion else None,
+                        created_at=b.get("created_at", datetime.now(UTC).isoformat()),
+                    )
+                )
+            return results
