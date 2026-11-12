@@ -76,13 +76,11 @@ alt Cupos disponibles > 0 y Elegibilidad Validada
     Service --> API: BookingResponseDTO {idReserva, estado: 'PENDIENTE_CONFIRMACION'}
     API --> Client: HTTP 201 Created {idReserva, estado: 'PENDIENTE_CONFIRMACION'}
     Client --> UI: Comprobante provisional
-    UI --> User: Muestra confirmación y plazo hasta T-24h
 else Conflicto de aforo o estudiante no elegible
     Service -> DB: ROLLBACK
     Service --> API: Lanza HTTPException(409, "Aforo agotado o colisión concurrente")
     API --> Client: HTTP 409 Conflict {"detail": "Aforo agotado"}
     Client --> UI: Captura error 409
-    UI --> User: Alerta de denegación de reserva
 end
 deactivate DB
 deactivate Service
@@ -116,12 +114,10 @@ alt Tiempo restante >= 24 horas (now_utc <= s.fecha_inicio - 24h)
     Service --> API: BookingConfirmDTO {estado: 'CONFIRMADA', pase_asistencia: 'PASS-8472'}
     API --> Client: HTTP 200 OK {estado: 'CONFIRMADA', pase_asistencia: 'PASS-8472'}
     Client --> UI: Pase digital confirmado
-    UI --> User: Despliega ticket digital y acceso formal
 else Plazo cerrado (now_utc > s.fecha_inicio - 24h)
     Service --> API: Lanza HTTPException(400, "Ventana de ratificación vencida")
     API --> Client: HTTP 400 Bad Request {"detail": "Ventana de ratificación vencida"}
     Client --> UI: Captura error 400
-    UI --> User: Informa revocación reglamentaria
 end
 deactivate Service
 deactivate API
@@ -185,7 +181,6 @@ else confirmed_count < 3 (Quórum Insuficiente)
         Service --> API: QuorumDecisionResponseDTO
         API --> Client: HTTP 200 OK
         Client --> UI: Dictado confirmado
-        UI --> Mentor: Notificación de éxito
     else Mentor selecciona "Reprogramar Sesión"
         Mentor -> UI: Clic "Reprogramar Sesión" con nueva fecha (> 24h)
         UI -> Client: submitQuorumDecision(idSesion, 'RESCHEDULE', new_start)
@@ -203,7 +198,6 @@ else confirmed_count < 3 (Quórum Insuficiente)
         Service --> API: QuorumDecisionResponseDTO
         API --> Client: HTTP 200 OK
         Client --> UI: Reprogramación confirmada
-        UI --> Mentor: Sesión reprogramada
     else Mentor selecciona "Cancelar Sesión"
         Mentor -> UI: Clic "Cancelar sin Penalización" con justificativo
         UI -> Client: submitQuorumDecision(idSesion, 'CANCEL', reason)
@@ -222,7 +216,6 @@ else confirmed_count < 3 (Quórum Insuficiente)
         Service --> API: QuorumDecisionResponseDTO
         API --> Client: HTTP 200 OK
         Client --> UI: Cancelación confirmada
-        UI --> Mentor: Cancelación registrada
     end
     deactivate Client
     deactivate UI
@@ -435,7 +428,6 @@ alt [A001] Acceso recurrente con consentimiento formalizado previo (has_consente
     API --> Client: HTTP 200 OK {"access_token": token, "token_type": "Bearer", "user": user}
     Client -> UI: displaySessionDashboard(token, user)
     UI -> UI: localStorage.setItem('auth_token', token)
-    UI --> User: displaySuccessSessionNotification
 else Primer acceso sin consentimiento legal formalizado
     Service --> API: Requiere consentimiento {"requires_consent": true, "temp_token": temp_token}
     API --> Client: HTTP 200 OK {"requires_consent": true}
@@ -470,7 +462,6 @@ else Primer acceso sin consentimiento legal formalizado
         
         UI -> UI: localStorage.setItem('auth_token', token)
         UI -> UI: Actualiza estado global de autenticación en App.tsx
-        UI --> User: displaySuccessSessionNotification
     end
 end
 deactivate Service
@@ -623,7 +614,6 @@ else Asignación válida y conforme a RBAC
     
     UI -> UI: updateTableInMemory()
     UI -> UI: closeAssignmentModal()
-    UI --> Admin: displaySuccessNotification
 end
 deactivate Service
 deactivate API
@@ -739,7 +729,6 @@ else Formulario válido en cliente
                 Service --> API: PublishOfferResponse (id_oferta=..., codigo_sesion='SES-XXXX', estado='PUBLICADA')
                 API --> Client: HTTP 201 Created PublishOfferResponse
                 Client -> UI: showSuccessScreen(codigo_sesion='SES-XXXX', estado='PUBLICADA')
-                UI --> Mentor: displayPublishedConfirmation
             end
         end
         deactivate Service
@@ -825,7 +814,6 @@ else Rango horario reglamentario válido
             Mentor -> UI: selectSpace (selectedSpaceId)
             Mentor -> UI: click ["Asignar Aula a la Oferta"]
             UI -> UI: assignSpaceToForm(selectedSpaceId)
-            UI --> Mentor: displaySpaceAssignedConfirmation
         end
     end
 end
@@ -937,7 +925,6 @@ else Datos válidos en cliente
         Client -> UI: displayProfileUpdatedSuccess(profile)
         
         UI -> UI: updateLocalCache(profile)
-        UI --> Mentor: displayProfileUpdatedConfirmation
     end
     deactivate Service
     deactivate API
@@ -1043,7 +1030,6 @@ Client -> UI: displayTopicAccordion(topics)
 deactivate Client
 
 UI -> UI: expandTopicAccordion()
-UI --> User: displayTopicListAccordion
 deactivate UI
 @enduml
 ```
@@ -1136,7 +1122,6 @@ else Motor operativo
             activate BookingModal
             BookingModal -> UI: renderBookingModal(offer_id, user_id)
             deactivate BookingModal
-            UI --> User: displayBookingModalTransfer
         end
     end
 end
@@ -1239,7 +1224,6 @@ else Formulario válido en cliente
         Client -> UI: displayDemandCreatedSuccess(id_demanda)
         
         UI -> UI: closeModal()
-        UI --> User: displayDemandRegisteredConfirmation
     end
     deactivate Service
     deactivate API
@@ -1402,7 +1386,6 @@ else Tarjeta con vacantes y sin duplicidad previa
                     UI -> UI: setIsSubmitting(false)
                     User -> UI: click ["Ir a Mis Reservas"]
                     UI -> UI: unmountBookingModal()
-                    UI --> User: displayStudentBookingsDashboard
                 end
             end
             deactivate DB
@@ -1506,7 +1489,6 @@ else Dentro de la ventana reglamentaria [T-48h, T-24h]
     Client -> UI: displayPassCodeModal(booking_id, pass_code)
     
     UI -> UI: updateCardToConfirmed()
-    UI --> User: displayAttendanceConfirmedNotification
 end
 deactivate Service
 deactivate API
@@ -1596,7 +1578,6 @@ else Antelación superior a 24 horas (cumple RN-04)
     
     UI -> UI: closeCancellationModal()
     UI -> UI: updateCardToCancelled()
-    UI --> User: displayBookingCancelledConfirmation
 end
 deactivate UI
 @enduml
@@ -1814,7 +1795,6 @@ deactivate Client
 
 UI -> UI: closeQuorumDecisionModal()
 UI -> UI: updateSessionCardState(new_state)
-UI --> Mentor: displayQuorumDecisionConfirmation
 deactivate UI
 @enduml
 ```
@@ -1923,7 +1903,6 @@ else Token TOTP vigente
             Service --> API: AttendanceResponseDTO {"success": true, "asistio": true}
             API --> Client: HTTP 200 OK AttendanceResponseDTO
             Client -> UI: displayCheckinSuccessNotification()
-            UI --> Mentoreado: displayCheckinConfirmation
         end
     end
 end
@@ -2029,7 +2008,6 @@ else Contenido sustantivo válido
     deactivate Client
     
     UI -> UI: redirectToSessionHistory()
-    UI --> Mentor: displayBitacoraCreatedConfirmation
 end
 deactivate UI
 @enduml
@@ -2117,8 +2095,6 @@ API --> Client: HTTP 200 OK BitacoraDetailDTO
 deactivate API
 Client -> UI: displayBitacoraDetailModal(bitacoraDetail)
 deactivate Client
-
-UI --> User: displayBitacoraDetailModal
 deactivate UI
 @enduml
 ```
@@ -2236,7 +2212,6 @@ API --> Client: HTTP 200 OK (Stream PDF)
 deactivate API
 Client -> UI: triggerBrowserDownload(stream)
 deactivate Client
-UI --> Mentor: displayDownloadPdfCompleted
 deactivate UI
 @enduml
 ```
@@ -2322,8 +2297,6 @@ end
 deactivate Service
 deactivate API
 deactivate Client
-
-UI --> User: displayLeaderboardView
 deactivate UI
 @enduml
 ```
@@ -2424,7 +2397,6 @@ deactivate Service
 API --> Client: HTTP 200 OK
 Client -> UI: decreaseUnreadCounter()
 UI -> UI: decrementNotificationCounter()
-UI --> User: displayReferencedSessionView
 deactivate Client
 deactivate API
 deactivate UI
@@ -2515,8 +2487,6 @@ else Rango temporal válido
     deactivate API
     Client -> UI: triggerExcelDownload()
     deactivate Client
-    
-    UI --> Admin: displayExcelDownloadedConfirmation
 end
 deactivate UI
 @enduml
@@ -2617,7 +2587,6 @@ API --> Client: HTTP 200 OK (Stream Binario PDF)
 deactivate API
 Client -> UI: triggerPdfDownload()
 deactivate Client
-UI --> Evaluador: displayIcacitDossierDownloadedConfirmation
 deactivate UI
 @enduml
 ```
@@ -2725,7 +2694,6 @@ else Cadena 100% íntegra (0 discrepancias)
     Service --> API: VerifyChainResponseDTO {"status": "VALID", "records_verified": count, "tampering_detected": false}
     API --> Client: HTTP 200 OK VerifyChainResponseDTO
     Client -> UI: displayIntegrityVerifiedBadge()
-    UI --> SecOfficer: displayChainIntegrityConfirmation
 end
 deactivate Service
 deactivate API
@@ -2828,7 +2796,6 @@ else Valores en rangos admisibles
         deactivate Service
         API --> Client: HTTP 200 OK ParameterUpdateResponseDTO
         Client -> UI: displayParametersUpdatedSuccess(updated_keys)
-        UI --> Admin: displayParametersUpdatedConfirmation
     end
     deactivate API
     deactivate Client
@@ -2930,7 +2897,6 @@ else Semana lectiva válida
         
         UI -> UI: closeNewTopicModal()
         UI -> UI: appendTopicToTree(id_tema)
-        UI --> Admin: displayTopicRegisteredConfirmation
     end
     deactivate Service
     deactivate API
