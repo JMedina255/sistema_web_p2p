@@ -12,6 +12,7 @@ import { roleService } from '../services/roleService';
 import { offerService, type PublishOfferResponse } from '../services/offerService';
 import { bitacoraService, type BitacoraItem } from '../services/bitacoraService';
 import { HealthStatus } from './HealthStatus';
+import { CurriculumCatalogView } from './CurriculumCatalogView';
 
 export interface AdminDashboardViewProps {
   adminEmail?: string;
@@ -23,7 +24,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
   showDevControls = false,
 }) => {
   const isDev = showDevControls && !import.meta.env.PROD;
-  const [activeTab, setActiveTab] = useState<'roles' | 'quorum' | 'health' | 'bitacoras'>('roles');
+  const [activeTab, setActiveTab] = useState<'roles' | 'quorum' | 'health' | 'bitacoras' | 'curriculum'>('roles');
 
   // Estado para gestión de roles
   const [searchEmail, setSearchEmail] = useState('');
@@ -318,6 +319,22 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
             }}
           >
             📋 Auditoría de Bitácoras
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('curriculum')}
+            style={{
+              padding: '0.45rem 0.9rem',
+              borderRadius: '6px',
+              border: 'none',
+              background: activeTab === 'curriculum' ? '#B99451' : 'rgba(255, 255, 255, 0.15)',
+              color: '#FFFFFF',
+              fontWeight: 600,
+              fontSize: '0.82rem',
+              cursor: 'pointer',
+            }}
+          >
+            📚 Catálogo Curricular (RF05)
           </button>
           <button
             type="button"
@@ -1165,7 +1182,23 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
           </div>
         )}
 
-        {/* SECCIÓN 4: SALUD DEL SISTEMA */}
+        {/* SECCIÓN 4: GESTIÓN CURRICULAR (RF05 / CUS21) */}
+        {activeTab === 'curriculum' && (
+          <div>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3 style={{ margin: '0 0 0.5rem', color: '#1C2A59', fontSize: '1.1rem' }}>
+                Gestión y Mantenimiento del Catálogo Curricular Oficial (RF05 / CUS21)
+              </h3>
+              <p style={{ margin: 0, color: '#64748B', fontSize: '0.85rem', lineHeight: 1.5 }}>
+                Como Administrador institucional de la EPIS-UPT, puedes registrar nuevas materias críticas de I a IV ciclo,
+                actualizar créditos y factores de mérito algorítmico, y mantener la taxonomía jerárquica de temas silábicos oficiales.
+              </p>
+            </div>
+            <CurriculumCatalogView isAdmin={true} />
+          </div>
+        )}
+
+        {/* SECCIÓN 5: SALUD DEL SISTEMA */}
         {activeTab === 'health' && (
           <div>
             <HealthStatus />

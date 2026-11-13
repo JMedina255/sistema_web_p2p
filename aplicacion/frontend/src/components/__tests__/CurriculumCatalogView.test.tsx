@@ -122,4 +122,56 @@ describe('CurriculumCatalogView Component (T-09 / T-10 / CUS21 / RF05)', () => {
       expect(screen.getByRole('alert')).toHaveTextContent(/Fallo de conexión/i);
     });
   });
+
+  it('5. Modo Administrador: Despliega controles de creación y edición (RF05 / CUS21)', async () => {
+    vi.spyOn(apiClient, 'fetchCourses').mockResolvedValue(mockCourses);
+    vi.spyOn(apiClient, 'fetchCourseDetail').mockResolvedValue(mockDetail);
+
+    render(<CurriculumCatalogView isAdmin={true} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('admin-add-course-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('admin-add-topic-btn')).toBeInTheDocument();
+    });
+  });
+
+  it('6. Modo Administrador: Abre modal y permite registrar una nueva asignatura (RF05 / CUS21)', async () => {
+    vi.spyOn(apiClient, 'fetchCourses').mockResolvedValue(mockCourses);
+    vi.spyOn(apiClient, 'fetchCourseDetail').mockResolvedValue(mockDetail);
+    const createSpy = vi.spyOn(apiClient, 'createCourse').mockResolvedValue({
+      id_asignatura: 99,
+      codigo_curso: 'BD-301',
+      nombre_curso: 'Bases de Datos I',
+      ciclo_plan: 3,
+      creditos: 4,
+      es_prioritaria: true,
+      factor_ponderacion: 1.2,
+      estado_activo: true,
+    });
+
+    render(<CurriculumCatalogView isAdmin={true} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('admin-add-course-btn')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('admin-add-course-btn'));
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/ej\. CI-101/i)).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText(/ej\. CI-101/i), { target: { value: 'BD-301' } });
+    fireEvent.change(screen.getByPlaceholderText(/ej\. Cálculo I/i), { target: { value: 'Bases de Datos I' } });
+
+    fireEvent.click(screen.getByRole('button', { name: /Registrar Asignatura/i }));
+
+    await waitFor(() => {
+      expect(createSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          codigo_curso: 'BD-301',
+          nombre_curso: 'Bases de Datos I',
+        })
+      );
+    });
+  });
 });
