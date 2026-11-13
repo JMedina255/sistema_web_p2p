@@ -1,11 +1,13 @@
 import hashlib
 import threading
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.bitacora import BitacoraPedagogica
+from app.models.curriculum import TemaConceptual
 from app.models.offer import SesionMentoria
 from app.models.roles import Rol, UsuarioRol
 from app.schemas.bitacora import (
@@ -20,6 +22,30 @@ from app.services.offer_service import _memory_offers
 _bitacora_lock = threading.RLock()
 _memory_bitacoras: list[dict] = []
 _bitacora_counter = 1
+
+
+def _format_temas_cubiertos(
+    raw_temas: list[Any] | None, topic_map: dict[int, str] | None = None
+) -> list[str]:
+    """
+    Normaliza y formatea la lista de temas cubiertos.
+    Si se suministraron IDs numéricos de temas silábicos, los resuelve a sus títulos descriptivos.
+    """
+    if not raw_temas:
+        return []
+    resolved: list[str] = []
+    for item in raw_temas:
+        if item is None:
+            continue
+        if topic_map:
+            if isinstance(item, int) and item in topic_map:
+                resolved.append(topic_map[item])
+                continue
+            if isinstance(item, str) and item.isdigit() and int(item) in topic_map:
+                resolved.append(topic_map[int(item)])
+                continue
+        resolved.append(str(item))
+    return resolved
 
 
 def clear_bitacoras_in_memory() -> None:
@@ -286,11 +312,18 @@ class BitacoraService:
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="NOT_FOUND: No existe bitácora registrada para esta sesión.",
                 )
+            topic_map: dict[int, str] = {}
+            try:
+                topics = db.query(TemaConceptual).all()
+                topic_map = {t.id_tema: t.nombre_tema for t in topics}
+            except Exception:
+                pass
+
             return BitacoraResponse(
                 id_bitacora=b.id_bitacora,
                 id_sesion=b.id_sesion,
                 id_mentor=b.id_mentor,
-                temas_cubiertos=b.temas_cubiertos,
+                temas_cubiertos=_format_temas_cubiertos(b.temas_cubiertos, topic_map),
                 observaciones=b.observaciones,
                 nivel_dificultad=b.nivel_dificultad,
                 hash_firma=b.hash_firma,
@@ -306,7 +339,9 @@ class BitacoraService:
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="NOT_FOUND: No existe bitácora registrada para esta sesión.",
                 )
-            return BitacoraResponse(**existing)
+            item_data = dict(existing)
+            item_data["temas_cubiertos"] = _format_temas_cubiertos(item_data.get("temas_cubiertos"))
+            return BitacoraResponse(**item_data)
 
     @classmethod
     def visar_bitacora(
@@ -645,6 +680,13 @@ class BitacoraService:
 
         if db is not None:
             bitacoras = db.query(BitacoraPedagogica).all()
+            topic_map: dict[int, str] = {}
+            try:
+                topics = db.query(TemaConceptual).all()
+                topic_map = {t.id_tema: t.nombre_tema for t in topics}
+            except Exception:
+                pass
+
             results: list[BitacoraItemResponse] = []
             for b in bitacoras:
                 sesion = db.query(SesionMentoria).filter(SesionMentoria.id_sesion == b.id_sesion).first()
@@ -672,7 +714,7 @@ class BitacoraService:
                         id_sesion=b.id_sesion,
                         codigo_sesion=sesion.codigo_sesion if sesion else f"SES-{b.id_sesion}",
                         id_mentor=b.id_mentor,
-                        temas_cubiertos=b.temas_cubiertos,
+                        temas_cubiertos=_format_temas_cubiertos(b.temas_cubiertos, topic_map),
                         observaciones=b.observaciones,
                         nivel_dificultad=b.nivel_dificultad,
                         hash_firma=b.hash_firma,
@@ -725,7 +767,7 @@ class BitacoraService:
                         if target_sesion
                         else f"SES-{b['id_sesion']}",
                         id_mentor=b["id_mentor"],
-                        temas_cubiertos=b["temas_cubiertos"],
+                        temas_cubiertos=_format_temas_cubiertos(b.get("temas_cubiertos")),
                         observaciones=b["observaciones"],
                         nivel_dificultad=b["nivel_dificultad"],
                         hash_firma=b["hash_firma"],

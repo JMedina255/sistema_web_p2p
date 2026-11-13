@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -19,6 +19,15 @@ class BitacoraCreatePayload(BaseModel):
     nivel_dificultad: Literal["Bajo", "Medio", "Alto"] = Field(
         "Medio", description="Nivel de dificultad percibido en el aprendizaje del grupo."
     )
+
+    @field_validator("temas_cubiertos", mode="before")
+    @classmethod
+    def coerce_temas_cubiertos(cls, v: Any) -> list[str]:
+        if isinstance(v, list):
+            return [str(item) for item in v if item is not None]
+        if v is None:
+            return []
+        return [str(v)]
 
     @field_validator("observaciones")
     @classmethod
@@ -47,6 +56,15 @@ class BitacoraResponse(BaseModel):
     visado_administrador: bool
     created_at: str
     mensaje: str = "Bitácora pedagógica registrada y sellada criptográficamente con éxito."
+
+    @field_validator("temas_cubiertos", mode="before")
+    @classmethod
+    def coerce_temas_cubiertos(cls, v: Any) -> list[str]:
+        if isinstance(v, list):
+            return [str(item) for item in v if item is not None]
+        if v is None:
+            return []
+        return [str(v)]
 
 
 class BitacoraObservarPayload(BaseModel):
@@ -119,3 +137,12 @@ class BitacoraItemResponse(BaseModel):
     estado_sesion: str
     fecha_inicio: str | None = None
     created_at: str
+
+    @field_validator("temas_cubiertos", mode="before")
+    @classmethod
+    def coerce_temas_cubiertos(cls, v: Any) -> list[str]:
+        if isinstance(v, list):
+            return [str(item) for item in v if item is not None]
+        if v is None:
+            return []
+        return [str(v)]
