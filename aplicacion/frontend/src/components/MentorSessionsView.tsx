@@ -10,13 +10,14 @@
  * - Requerimiento No Funcional: RNF05 (Accesibilidad WCAG 2.1 AA / WAI-ARIA)
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   offerService,
   type PublishOfferResponse,
   type QuorumDecisionPayload,
 } from '../services/offerService';
 import { authService } from '../services/authService';
+import { bookingService, type DemandRequestResponse } from '../services/bookingService';
 import { SessionAttendanceView } from './SessionAttendanceView';
 import { BitacoraFormView } from './BitacoraFormView';
 
@@ -24,6 +25,7 @@ export interface MentorSessionsViewProps {
   mentorEmail: string;
   onNavigateToPublish?: () => void;
   onPublishNewOffer?: () => void;
+  onProposeDirectedOffer?: (demand: DemandRequestResponse) => void;
 }
 
 interface EnrolledStudent {
@@ -39,11 +41,19 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
   mentorEmail,
   onNavigateToPublish,
   onPublishNewOffer,
+  onProposeDirectedOffer,
 }) => {
   const handlePublish = onNavigateToPublish || onPublishNewOffer;
   const [sessions, setSessions] = useState<PublishOfferResponse[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Subpestañas: Mis Sesiones vs Banco de Solicitudes por Demanda (RF07)
+  const [activeMentorTab, setActiveMentorTab] = useState<'sessions' | 'demands'>('sessions');
+  const [demands, setDemands] = useState<DemandRequestResponse[]>([]);
+  const [isLoadingDemands, setIsLoadingDemands] = useState<boolean>(false);
+  const [demandsError, setDemandsError] = useState<string | null>(null);
+  const [demandCourseFilter, setDemandCourseFilter] = useState<string>('ALL');
 
   // Vistas activas de Asistencia y Bitácora
   const [selectedAttendanceSession, setSelectedAttendanceSession] = useState<PublishOfferResponse | null>(null);
@@ -77,9 +87,41 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
     }
   }, [mentorEmail]);
 
+  const fetchDemands = useCallback(async () => {
+    setIsLoadingDemands(true);
+    setDemandsError(null);
+    try {
+      const data = await bookingService.getDemandRequests();
+      setDemands(data || []);
+    } catch {
+      setDemandsError('No fue posible cargar las solicitudes de asesoría por demanda.');
+    } finally {
+      setIsLoadingDemands(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchSessions();
   }, [fetchSessions]);
+
+  useEffect(() => {
+    fetchDemands();
+  }, [fetchDemands]);
+
+  const demandCourses = useMemo(() => {
+    const map = new Map<number, string>();
+    demands.forEach((d) => {
+      const name = d.nombre_asignatura || `Asignatura #${d.id_asignatura}`;
+      map.set(d.id_asignatura, name);
+    });
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }, [demands]);
+
+  const filteredDemands = useMemo(() => {
+    if (demandCourseFilter === 'ALL') return demands;
+    const cid = Number(demandCourseFilter);
+    return demands.filter((d) => d.id_asignatura === cid);
+  }, [demands, demandCourseFilter]);
 
   // Manejo de tecla Escape para cerrar modal de accesibilidad
   useEffect(() => {
@@ -299,7 +341,7 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
             📋 Mis Mentorías Académicas Programadas
           </h2>
           <p style={{ margin: 0, fontSize: '0.88rem', color: '#64748B' }}>
-            Supervisión de aforo, ratificación de estudiantes y quórum institucional.
+            Supervisión de aforo, ratificación de estudiantes, quórum institucional y banco de demanda.
           </p>
         </div>
         {handlePublish && (
@@ -325,6 +367,86 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
           </button>
         )}
       </div>
+
+      {/* Subpestañas Interactivas: Mis Sesiones vs Banco de Solicitudes RF07 */}
+      <div
+        role="tablist"
+        aria-label="Pestañas de Gestión del Mentor"
+        style={{
+          display: 'flex',
+          gap: '0.75rem',
+          borderBottom: '2px solid #E2E8F0',
+          marginBottom: '1.5rem',
+        }}
+      >
+        <button
+          type="button"
+          role="tab"
+          id="mentor-tab-sessions"
+          aria-selected={activeMentorTab === 'sessions'}
+          aria-controls="mentor-panel-sessions"
+          onClick={() => setActiveMentorTab('sessions')}
+          style={{
+            padding: '0.65rem 1.25rem',
+            fontSize: '0.92rem',
+            fontWeight: 700,
+            border: 'none',
+            borderBottom: activeMentorTab === 'sessions' ? '3px solid #1C2A59' : '3px solid transparent',
+            background: 'none',
+            color: activeMentorTab === 'sessions' ? '#1C2A59' : '#64748B',
+            cursor: 'pointer',
+            marginBottom: '-2px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}
+        >
+          <span>📋</span> Mis Sesiones ({sessions.length})
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          id="mentor-tab-demands"
+          aria-selected={activeMentorTab === 'demands'}
+          aria-controls="mentor-panel-demands"
+          onClick={() => {
+            setActiveMentorTab('demands');
+            fetchDemands();
+          }}
+          style={{
+            padding: '0.65rem 1.25rem',
+            fontSize: '0.92rem',
+            fontWeight: 700,
+            border: 'none',
+            borderBottom: activeMentorTab === 'demands' ? '3px solid #B99451' : '3px solid transparent',
+            background: 'none',
+            color: activeMentorTab === 'demands' ? '#B99451' : '#64748B',
+            cursor: 'pointer',
+            marginBottom: '-2px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}
+        >
+          <span>📥</span> Banco de Solicitudes por Demanda (RF07)
+          <span
+            style={{
+              backgroundColor: activeMentorTab === 'demands' ? '#FEF3C7' : '#F1F5F9',
+              color: activeMentorTab === 'demands' ? '#92400E' : '#64748B',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              padding: '0.15rem 0.5rem',
+              borderRadius: '999px',
+            }}
+          >
+            {demands.length}
+          </span>
+        </button>
+      </div>
+
+      {activeMentorTab === 'sessions' && (
+        <div id="mentor-panel-sessions" role="tabpanel" aria-labelledby="mentor-tab-sessions">
 
       {/* Estados de carga y error */}
       {isLoading && (
@@ -714,6 +836,241 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
           );
         })}
       </div>
+      </div>
+      )}
+
+      {/* Panel 2: Banco de Solicitudes por Demanda (RF07) */}
+      {activeMentorTab === 'demands' && (
+        <div id="mentor-panel-demands" role="tabpanel" aria-labelledby="mentor-tab-demands" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {/* Banner explicativo y controles */}
+          <div
+            style={{
+              backgroundColor: '#F8FAFC',
+              border: '1px solid #CBD5E1',
+              borderRadius: '10px',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '1rem',
+            }}
+          >
+            <div>
+              <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1rem', fontWeight: 700, color: '#1C2A59' }}>
+                📥 Banco de Solicitudes Temáticas por Demanda (RF07)
+              </h3>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748B', maxWidth: '680px' }}>
+                Solicitudes registradas por estudiantes cuando no hallaron ofertas afines en el catálogo activo.
+                Como mentor calificado, puedes proponer una <strong>mentoría dirigida</strong> con pre-llenado de temas para atender sus dudas de forma expedita.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              {demandCourses.length > 0 && (
+                <select
+                  value={demandCourseFilter}
+                  onChange={(e) => setDemandCourseFilter(e.target.value)}
+                  aria-label="Filtrar solicitudes por asignatura"
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '6px',
+                    border: '1px solid #CBD5E1',
+                    fontSize: '0.84rem',
+                    backgroundColor: '#FFFFFF',
+                    color: '#1E293B',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <option value="ALL">Todas las Asignaturas ({demands.length})</option>
+                  {demandCourses.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              <button
+                type="button"
+                onClick={fetchDemands}
+                disabled={isLoadingDemands}
+                style={{
+                  padding: '0.5rem 0.85rem',
+                  borderRadius: '6px',
+                  border: '1px solid #CBD5E1',
+                  backgroundColor: '#FFFFFF',
+                  fontSize: '0.84rem',
+                  fontWeight: 600,
+                  color: '#1C2A59',
+                  cursor: isLoadingDemands ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                }}
+              >
+                <span>🔄</span> {isLoadingDemands ? 'Cargando...' : 'Actualizar'}
+              </button>
+            </div>
+          </div>
+
+          {/* Estados de carga y error del banco de demanda */}
+          {isLoadingDemands && (
+            <div style={{ textAlign: 'center', padding: '3rem', color: '#64748B' }}>
+              <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
+              <p>Consultando banco de solicitudes por demanda en base de datos...</p>
+            </div>
+          )}
+
+          {demandsError && (
+            <div
+              role="alert"
+              style={{
+                backgroundColor: '#FEF2F2',
+                border: '1px solid #F87171',
+                borderRadius: '8px',
+                padding: '1rem',
+                color: '#991B1B',
+              }}
+            >
+              {demandsError}
+            </div>
+          )}
+
+          {/* Estado vacío de solicitudes */}
+          {!isLoadingDemands && !demandsError && filteredDemands.length === 0 && (
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px dashed #CBD5E1',
+                borderRadius: '12px',
+                padding: '3rem 2rem',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>✨</div>
+              <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', fontWeight: 700, color: '#1E293B' }}>
+                No hay solicitudes pendientes en el banco de demanda
+              </h4>
+              <p style={{ margin: 0, fontSize: '0.88rem', color: '#64748B', maxWidth: '480px', marginInline: 'auto' }}>
+                Actualmente las ofertas del catálogo cubren la demanda académica de los estudiantes o no hay solicitudes registradas bajo este filtro.
+              </p>
+            </div>
+          )}
+
+          {/* Listado de tarjetas de solicitudes */}
+          {!isLoadingDemands && !demandsError && filteredDemands.length > 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
+              {filteredDemands.map((demand) => (
+                <div
+                  key={demand.id_demanda}
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: '10px',
+                    padding: '1.25rem',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <span
+                        style={{
+                          backgroundColor: '#EFF6FF',
+                          color: '#1D4ED8',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          padding: '0.2rem 0.6rem',
+                          borderRadius: '4px',
+                        }}
+                      >
+                        {demand.nombre_asignatura || `Asignatura #${demand.id_asignatura}`}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
+                        {new Date(demand.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.05rem', fontWeight: 700, color: '#1E293B' }}>
+                      {demand.nombre_tema || `Tema silábico #${demand.id_tema}`}
+                    </h4>
+
+                    <div style={{ fontSize: '0.8rem', color: '#64748B', marginBottom: '0.75rem' }}>
+                      <span>Solicitado por: </span>
+                      <code style={{ fontSize: '0.78rem', backgroundColor: '#F1F5F9', padding: '0.1rem 0.35rem', borderRadius: '3px' }}>
+                        {demand.estudiante_email}
+                      </code>
+                    </div>
+
+                    {demand.observaciones && (
+                      <div
+                        style={{
+                          backgroundColor: '#F8FAFC',
+                          borderLeft: '3px solid #B99451',
+                          padding: '0.5rem 0.75rem',
+                          fontSize: '0.83rem',
+                          color: '#475569',
+                          borderRadius: '0 4px 4px 0',
+                          fontStyle: 'italic',
+                        }}
+                      >
+                        "{demand.observaciones}"
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ paddingTop: '0.5rem', borderTop: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span
+                      style={{
+                        backgroundColor: '#FEF3C7',
+                        color: '#92400E',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        padding: '0.2rem 0.5rem',
+                        borderRadius: '999px',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {demand.estado}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (onProposeDirectedOffer) {
+                          onProposeDirectedOffer(demand);
+                        } else if (handlePublish) {
+                          handlePublish();
+                        }
+                      }}
+                      style={{
+                        backgroundColor: '#B99451',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '0.5rem 0.9rem',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        boxShadow: '0 2px 4px rgba(185, 148, 81, 0.25)',
+                      }}
+                    >
+                      <span>🎯</span> Proponer Mentoría Dirigida
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Modal Accesible de Resolución de Contingencia (T-32 / WCAG 2.1 AA) */}
       {contingencySession && (

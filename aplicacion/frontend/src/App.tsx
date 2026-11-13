@@ -31,7 +31,7 @@ import { MentorSessionsView } from './components/MentorSessionsView';
 import { CertificateDownloadView } from './components/CertificateDownloadView';
 import { AdminDashboardView } from './components/AdminDashboardView';
 import { MentoringDemandModalView } from './components/MentoringDemandModalView';
-import { bookingService, BookingException } from './services/bookingService';
+import { bookingService, BookingException, type DemandRequestResponse } from './services/bookingService';
 import type { OfferRecommendationItem } from './services/recommendationService';
 
 export type { NavTab } from './navigation/navigationConfig';
@@ -156,6 +156,9 @@ const AppShell: React.FC = () => {
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [bookingSuccessData, setBookingSuccessData] = useState<BookingSuccessData | null>(null);
   const [feedRefreshKey, setFeedRefreshKey] = useState(0);
+
+  // Solicitud por demanda seleccionada para mentoría dirigida (RF07)
+  const [directedDemand, setDirectedDemand] = useState<DemandRequestResponse | null>(null);
 
   const studentEmail = user?.email || null;
 
@@ -371,7 +374,19 @@ const AppShell: React.FC = () => {
             mentorName={
               user?.nombres ? `${user.nombres} ${user.apellidos || ''}`.trim() : undefined
             }
+            directedDemand={directedDemand}
+            initialCourseId={directedDemand?.id_asignatura}
+            initialTopicId={directedDemand?.id_tema}
+            initialNotes={
+              directedDemand
+                ? `[Mentoría Dirigida RF07] Sesión formulada para atender la solicitud del estudiante ${
+                    directedDemand.estudiante_email
+                  }${directedDemand.observaciones ? `: "${directedDemand.observaciones}"` : '.'}`
+                : undefined
+            }
+            onClearDirectedDemand={() => setDirectedDemand(null)}
             onOfferPublished={() => {
+              setDirectedDemand(null);
               setFeedRefreshKey((prev) => prev + 1);
               handleSelectTab('sessions');
             }}
@@ -424,8 +439,18 @@ const AppShell: React.FC = () => {
         {activeTab === 'sessions' && (
           <MentorSessionsView
             mentorEmail={studentEmail ?? ''}
-            onNavigateToPublish={() => handleSelectTab('offers')}
-            onPublishNewOffer={() => handleSelectTab('offers')}
+            onNavigateToPublish={() => {
+              setDirectedDemand(null);
+              handleSelectTab('offers');
+            }}
+            onPublishNewOffer={() => {
+              setDirectedDemand(null);
+              handleSelectTab('offers');
+            }}
+            onProposeDirectedOffer={(demand) => {
+              setDirectedDemand(demand);
+              handleSelectTab('offers');
+            }}
           />
         )}
 

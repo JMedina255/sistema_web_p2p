@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { fetchCourses, fetchCourseDetail } from '../services/apiClient';
 import type { Course, Topic } from '../services/apiClient';
+import type { DemandRequestResponse } from '../services/bookingService';
 import {
   offerService,
   validateOfferPayload,
@@ -18,6 +19,11 @@ export interface OfferPublishViewProps {
   mentorName?: string;
   onOfferPublished?: (response: PublishOfferResponse) => void;
   showDevControls?: boolean;
+  initialCourseId?: number;
+  initialTopicId?: number;
+  initialNotes?: string;
+  directedDemand?: DemandRequestResponse | null;
+  onClearDirectedDemand?: () => void;
 }
 
 /**
@@ -42,6 +48,11 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
   mentorName = 'Mentor Académico',
   onOfferPublished,
   showDevControls = false,
+  initialCourseId,
+  initialTopicId,
+  initialNotes,
+  directedDemand,
+  onClearDirectedDemand,
 }) => {
   // Datos del catálogo
   const [courses, setCourses] = useState<Course[]>([]);
@@ -72,13 +83,16 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
       const fetched = await fetchCourses(true);
       if (fetched.length > 0) {
         setCourses(fetched);
-        const firstCourseId = fetched[0].id_asignatura;
-        setSelectedCourseId(firstCourseId);
+        const targetCourseId = initialCourseId && fetched.some((c) => c.id_asignatura === initialCourseId)
+          ? initialCourseId
+          : fetched[0].id_asignatura;
+        setSelectedCourseId(targetCourseId);
         try {
-          const detail = await fetchCourseDetail(firstCourseId);
+          const detail = await fetchCourseDetail(targetCourseId);
           if (detail.temas && detail.temas.length > 0) {
             setTopics(detail.temas);
-            setSelectedTopicId(detail.temas[0].id_tema);
+            const foundInitial = initialTopicId && detail.temas.some((t) => t.id_tema === initialTopicId);
+            setSelectedTopicId(foundInitial ? (initialTopicId as number) : detail.temas[0].id_tema);
           }
         } catch {
           // Ignorar fallo secundario de detalle
@@ -95,11 +109,21 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
     } finally {
       setIsLoadingCourses(false);
     }
-  }, []);
+  }, [initialCourseId, initialTopicId]);
 
   useEffect(() => {
     loadCatalog();
   }, [loadCatalog]);
+
+  // Actualizar estados reactivos si cambian las props iniciales
+  useEffect(() => {
+    if (initialCourseId) {
+      setSelectedCourseId(initialCourseId);
+    }
+    if (initialNotes !== undefined) {
+      setAdditionalNotes(initialNotes);
+    }
+  }, [initialCourseId, initialNotes]);
 
   // Cargar temas cuando cambie la asignatura seleccionada
   useEffect(() => {
@@ -114,7 +138,8 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
         const detail = await fetchCourseDetail(selectedCourseId);
         if (isMounted && detail.temas && detail.temas.length > 0) {
           setTopics(detail.temas);
-          setSelectedTopicId(detail.temas[0].id_tema);
+          const foundInitial = initialTopicId && detail.temas.some((t) => t.id_tema === initialTopicId);
+          setSelectedTopicId(foundInitial ? (initialTopicId as number) : detail.temas[0].id_tema);
           return;
         } else if (isMounted) {
           setTopics([]);
@@ -131,7 +156,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [selectedCourseId]);
+  }, [selectedCourseId, initialTopicId]);
 
   // Cargar ofertas publicadas del mentor en este entorno de prueba
   const refreshRecentOffers = useCallback(async () => {
@@ -517,6 +542,75 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
             }}
           >
             <strong>Error al publicar:</strong> {submissionError}
+          </div>
+        )}
+
+        {/* Banner de Mentoría Dirigida por Demanda (RF07) */}
+        {directedDemand && (
+          <div
+            role="region"
+            aria-label="Información de Mentoría Dirigida"
+            style={{
+              backgroundColor: '#FEF3C7',
+              border: '2px solid #F59E0B',
+              borderRadius: '10px',
+              padding: '1rem 1.25rem',
+              marginBottom: '1.5rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              gap: '1rem',
+              boxShadow: '0 2px 6px rgba(245, 158, 11, 0.15)',
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                <span style={{ fontSize: '1.25rem' }}>🎯</span>
+                <strong style={{ color: '#92400E', fontSize: '0.98rem' }}>
+                  Formulación de Mentoría Dirigida por Demanda (RF07)
+                </strong>
+              </div>
+              <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.88rem', color: '#78350F' }}>
+                Estás formulando una sesión orientada a responder la solicitud del estudiante{' '}
+                <strong>{directedDemand.estudiante_email}</strong> para el tema{' '}
+                <strong>{directedDemand.nombre_tema || `Tema #${directedDemand.id_tema}`}</strong> en{' '}
+                <strong>{directedDemand.nombre_asignatura || `Asignatura #${directedDemand.id_asignatura}`}</strong>.
+              </p>
+              {directedDemand.observaciones && (
+                <div
+                  style={{
+                    fontSize: '0.84rem',
+                    fontStyle: 'italic',
+                    color: '#B45309',
+                    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                    padding: '0.45rem 0.75rem',
+                    borderRadius: '6px',
+                    borderLeft: '3px solid #D97706',
+                  }}
+                >
+                  "{directedDemand.observaciones}"
+                </div>
+              )}
+            </div>
+            {onClearDirectedDemand && (
+              <button
+                type="button"
+                onClick={onClearDirectedDemand}
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #D97706',
+                  borderRadius: '6px',
+                  color: '#92400E',
+                  padding: '0.35rem 0.75rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                ✕ Desvincular Solicitud
+              </button>
+            )}
           </div>
         )}
 

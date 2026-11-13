@@ -46,6 +46,8 @@ export interface DemandRequestResponse {
   id_demanda: number;
   id_asignatura: number;
   id_tema: number;
+  nombre_asignatura?: string | null;
+  nombre_tema?: string | null;
   estudiante_email: string;
   observaciones: string | null;
   estado: string;
@@ -639,8 +641,31 @@ export class MockBookingAdapter {
   public resetToDefaults(): void {
     this.bookings = [];
     this.nextBookingId = 501;
-    this.demandRequests = [];
-    this.nextDemandId = 101;
+    this.demandRequests = [
+      {
+        id_demanda: 101,
+        id_asignatura: 1,
+        id_tema: 2,
+        nombre_asignatura: 'Cálculo I',
+        nombre_tema: 'Derivadas y Reglas de Derivación',
+        estudiante_email: 'estudiante.demo@upt.pe',
+        observaciones: 'Necesito refuerzo para la práctica calificada de regla de la cadena y derivación implícita.',
+        estado: 'PENDIENTE',
+        created_at: new Date(Date.now() - 3600 * 1000 * 5).toISOString(),
+      },
+      {
+        id_demanda: 102,
+        id_asignatura: 3,
+        id_tema: 11,
+        nombre_asignatura: 'Algoritmos y Estructuras de Datos',
+        nombre_tema: 'Punteros y Gestión Dinámica de Memoria en C++',
+        estudiante_email: '2023074122@upt.pe',
+        observaciones: 'Dudas con asignación dinámica new/delete y punteros dobles.',
+        estado: 'PENDIENTE',
+        created_at: new Date(Date.now() - 3600 * 1000 * 12).toISOString(),
+      },
+    ];
+    this.nextDemandId = 103;
     this.simulatedTime = null;
   }
 

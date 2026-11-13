@@ -136,7 +136,7 @@ describe('MentoringDemandModalView Component (CUS03 / RF07)', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/¡Solicitud Registrada con Éxito!/i)).toBeInTheDocument();
-      expect(screen.getByText(/#DEM-101/i)).toBeInTheDocument();
+      expect(screen.getByText(/#DEM-\d+/i)).toBeInTheDocument();
       expect(screen.getByText(/PENDIENTE/i)).toBeInTheDocument();
     });
 

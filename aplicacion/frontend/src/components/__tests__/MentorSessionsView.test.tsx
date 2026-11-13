@@ -196,4 +196,47 @@ describe('MentorSessionsView Component (T-32 / RF16 / CUS07 / RN-04 / RN-10 / WC
       });
     });
   });
+
+  // 8. Permite alternar a la pestaña del Banco de Solicitudes por Demanda (RF07)
+  it('8. Permite conmutar a la subpestaña del Banco de Solicitudes por Demanda (RF07) y visualizar solicitudes', async () => {
+    vi.spyOn(offerService, 'getOffers').mockResolvedValue([]);
+
+    render(<MentorSessionsView mentorEmail={mentorEmail} />);
+
+    // Buscar botón de la pestaña de demanda
+    const demandTabBtn = await screen.findByRole('tab', { name: /Banco de Solicitudes por Demanda/i });
+    expect(demandTabBtn).toBeInTheDocument();
+
+    fireEvent.click(demandTabBtn);
+
+    // Debe mostrar la cabecera explicativa del banco de demanda
+    await waitFor(() => {
+      expect(screen.getByText(/Banco de Solicitudes Temáticas por Demanda/i)).toBeInTheDocument();
+    });
+  });
+
+  // 9. Invoca el callback de propuesta de mentoría dirigida al hacer clic en el botón de acción
+  it('9. Invoca onProposeDirectedOffer al pulsar "Proponer Mentoría Dirigida" en una solicitud de demanda', async () => {
+    vi.spyOn(offerService, 'getOffers').mockResolvedValue([]);
+    const onPropose = vi.fn();
+
+    render(
+      <MentorSessionsView
+        mentorEmail={mentorEmail}
+        onProposeDirectedOffer={onPropose}
+      />
+    );
+
+    const demandTabBtn = await screen.findByRole('tab', { name: /Banco de Solicitudes por Demanda/i });
+    fireEvent.click(demandTabBtn);
+
+    // Esperar a que aparezcan las tarjetas de solicitudes (cargadas del MockAdapter por defecto)
+    const proposeBtns = await screen.findAllByRole('button', { name: /Proponer Mentoría Dirigida/i });
+    expect(proposeBtns.length).toBeGreaterThan(0);
+
+    fireEvent.click(proposeBtns[0]);
+    expect(onPropose).toHaveBeenCalledTimes(1);
+    expect(onPropose.mock.calls[0][0]).toHaveProperty('id_demanda');
+    expect(onPropose.mock.calls[0][0]).toHaveProperty('nombre_asignatura');
+  });
 });
