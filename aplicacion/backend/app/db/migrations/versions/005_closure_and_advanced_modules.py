@@ -136,6 +136,33 @@ def upgrade() -> None:
         if "quorumevaluated_at" not in sesiones_cols:
             op.add_column("sesiones_mentoria", sa.Column("quorumevaluated_at", sa.DateTime(timezone=True), nullable=True))
 
+    # 7. Actualización de constraints de estado para quórum y ciclo de vida de sesiones y reservas
+    if "sesiones_mentoria" in existing_tables:
+        op.execute("""
+            ALTER TABLE sesiones_mentoria DROP CONSTRAINT IF EXISTS chk_sesion_estado;
+            ALTER TABLE sesiones_mentoria ADD CONSTRAINT chk_sesion_estado CHECK (
+                estado IN (
+                    'BORRADOR', 'PUBLICADA', 'PENDIENTE_CONFIRMACION', 'QUORUM_INSUFICIENTE',
+                    'CONFIRMADA', 'EN_CURSO', 'CONCLUIDA', 'COMPLETADA', 'BITACORA_REGISTRADA',
+                    'HORAS_VISADAS', 'OBSERVADA', 'CANCELADA_SISTEMA', 'CANCELADA_MENTOR',
+                    'CANCELADA_ADMIN', 'CANCELADA_QUORUM', 'RECHAZADA', 'EXPIRADA',
+                    'EN_EVALUACION', 'AUDITADA', 'FINALIZADA'
+                )
+            );
+        """)
+
+    if "reservas_cupo" in existing_tables:
+        op.execute("""
+            ALTER TABLE reservas_cupo DROP CONSTRAINT IF EXISTS chk_reserva_estado;
+            ALTER TABLE reservas_cupo ADD CONSTRAINT chk_reserva_estado CHECK (
+                estado IN (
+                    'PENDIENTE_CONFIRMACION', 'CONFIRMADA', 'CANCELADA_USUARIO',
+                    'NO_CONFIRMADA', 'CANCELADA_NO_CONFIRMADA', 'CANCELADA_SISTEMA',
+                    'CANCELADA_SISTEMA_QUORUM', 'ASISTIDA', 'INASISTENCIA'
+                )
+            );
+        """)
+
 
 def downgrade() -> None:
     bind = op.get_bind()

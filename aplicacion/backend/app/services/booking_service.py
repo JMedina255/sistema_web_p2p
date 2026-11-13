@@ -694,7 +694,7 @@ class BookingService:
                     reserva = (
                         db.query(ReservaCupo)
                         .filter(ReservaCupo.id_reserva == id_reserva)
-                        .with_for_update()
+                        .with_for_update(of=ReservaCupo)
                         .first()
                     )
 
@@ -963,7 +963,7 @@ class BookingService:
                     reserva = (
                         db.query(ReservaCupo)
                         .filter(ReservaCupo.id_reserva == id_reserva)
-                        .with_for_update()
+                        .with_for_update(of=ReservaCupo)
                         .first()
                     )
 
@@ -1537,10 +1537,11 @@ class BookingService:
                 sesion = (
                     db.query(SesionMentoria)
                     .filter(SesionMentoria.id_sesion == id_sesion)
-                    .with_for_update()
+                    .with_for_update(of=SesionMentoria)
                     .first()
                 )
             except Exception:
+                db.rollback()
                 sesion = db.query(SesionMentoria).filter(SesionMentoria.id_sesion == id_sesion).first()
 
             if not sesion:
