@@ -177,24 +177,24 @@ El archivo [aplicacion/backend/requirements.txt](file:///d:/sistema_web_p2p/apli
 
 ---
 
-## 6. Matriz Priorizada de Hallazgos por Severidad
+## 6. Matriz Priorizada de Hallazgos por Severidad y Estado de Cierre
 
-| Severidad | Código | Componente / Archivo | Deficiencia / Modo Demo | Ubicación Exacta |
-| :---: | :---: | :--- | :--- | :--- |
-| 🔴 **CRÍTICA** | **DEP-01** | Backend: `requirements.txt` | Faltan 4 dependencias obligatorias (`openpyxl`, `reportlab`, `qrcode`, `PyPDF2`). Impide arrancar en entornos limpios. | [requirements.txt#L1-L12](file:///d:/sistema_web_p2p/aplicacion/backend/requirements.txt#L1-L12) |
-| 🔴 **CRÍTICA** | **SEC-01** | Backend: `auth_service.py` | Servidor SMTP inexistente. Códigos OTP impresos en consola y bypass con `"000000"`. Nadie recibe correos en producción. | [auth_service.py#L140-L153](file:///d:/sistema_web_p2p/aplicacion/backend/app/services/auth_service.py#L140-L153) |
-| 🔴 **CRÍTICA** | **DB-01** | Backend: Migraciones Alembic | Migraciones detenidas en la versión 004. Tablas de asistencia, bitácoras, encuestas y certificados no están en Alembic. | [versions/004...](file:///d:/sistema_web_p2p/aplicacion/backend/app/db/migrations/versions/) |
-| 🔴 **CRÍTICA** | **STATE-01** | Backend: `attendance_service.py` | Tokens TOTP residen en RAM del proceso Python. Falla en balanceo de carga o con múltiples workers de Uvicorn. | [attendance_service.py#L24](file:///d:/sistema_web_p2p/aplicacion/backend/app/services/attendance_service.py#L24) |
-| 🟠 **ALTA** | **UI-LOCK** | Frontend: Servicios de Asistencia, Bitácora y Encuesta | Forzados permanentemente a modo `'mock'` en desarrollo sin función `setMode()` ni toggles en la UI. | [attendanceService.ts#L164](file:///d:/sistema_web_p2p/aplicacion/frontend/src/services/attendanceService.ts#L164) |
-| 🟠 **ALTA** | **ARCH-01** | Backend: `db/session.py` | `get_optional_session` oculta caídas de base de datos y conmuta silenciosamente a variables en memoria RAM. | [session.py#L53-L73](file:///d:/sistema_web_p2p/aplicacion/backend/app/db/session.py#L53-L73) |
-| 🟡 **MEDIA** | **EXT-01** | Full-Stack: Google Meet y Discord | Enlaces virtuales generados mediante `Math.random()` en cliente y hashes MD5 en backend; sin integración con APIs reales. | [offerService.ts#L469](file:///d:/sistema_web_p2p/aplicacion/frontend/src/services/offerService.ts#L469) |
-| 🟡 **MEDIA** | **STO-01** | Backend: Constancias y Recursos | Sin almacenamiento en Supabase Storage ni AWS S3. Constancias en RAM y recursos docentes en listas de memoria. | [resource_service.py#L98](file:///d:/sistema_web_p2p/aplicacion/backend/app/services/resource_service.py#L98) |
-| 🟡 **MEDIA** | **PDF-01** | Backend: `certificate_service.py` | Marca de agua diagonal forzada `"DEMO - FINES ACADÉMICOS"` y estado `"EMITIDO_DEMO"` en base de datos. | [certificate_service.py#L180](file:///d:/sistema_web_p2p/aplicacion/backend/app/services/certificate_service.py#L180) |
-| 🟡 **MEDIA** | **API-01** | Frontend: Solicitudes por Demanda | Endpoints de demanda académica existen en backend pero el frontend no tiene los métodos ni la vista modal conectada. | [RecommendationFeedView.tsx#L696](file:///d:/sistema_web_p2p/aplicacion/frontend/src/components/RecommendationFeedView.tsx#L696) |
-| 🟡 **MEDIA** | **CRON-01** | Backend: Scheduler de Quórum | No hay motor Celery/APScheduler en segundo plano. Requiere trigger manual por HTTP. | [catalog_support_service.py#L675](file:///d:/sistema_web_p2p/aplicacion/backend/app/services/catalog_support_service.py#L675) |
-| 🟢 **MENOR** | **UI-01** | Frontend: `LoginOtpView.tsx` | Backdoor por parámetro de URL (`?step=otp`) que pre-inicializa un desafío mock con código visible `'849201'`. | [LoginOtpView.tsx#L13-L16](file:///d:/sistema_web_p2p/aplicacion/frontend/src/components/LoginOtpView.tsx#L13-L16) |
-| 🟢 **MENOR** | **UI-02** | Frontend: `OfferPublishView.tsx` | Constantes `FALLBACK_COURSES` y `FALLBACK_TOPICS` hardcodeadas que ocultan fallos de red en la carga curricular. | [OfferPublishView.tsx#L24-L105](file:///d:/sistema_web_p2p/aplicacion/frontend/src/components/OfferPublishView.tsx#L24-L105) |
-| 🟢 **MENOR** | **DATA-01** | Backend: Datos Hardcodeados | Nombres de estudiantes ("Joan Medina", "Renzo Antayhua") y asignación de roles cableados en código de servicios. | [profile_service.py#L40-L59](file:///d:/sistema_web_p2p/aplicacion/backend/app/services/profile_service.py#L40-L59) |
+| Severidad | Código | Componente / Archivo | Deficiencia / Modo Demo Original | Estado Actual | Ubicación / Implementación |
+| :---: | :---: | :--- | :--- | :---: | :--- |
+| 🔴 **CRÍTICA** | **DEP-01** | Backend: `requirements.txt` | Faltaban dependencias obligatorias (`openpyxl`, `reportlab`, `qrcode`, `PyPDF2`, `PyMuPDF`). | ✅ **CERRADO** | Actualizado `requirements.txt` y `pyproject.toml` con versiones explícitas. |
+| 🔴 **CRÍTICA** | **SEC-01** | Backend: `auth_service.py` | Servidor SMTP inexistente. Códigos OTP en consola y bypass con `"000000"`. | ✅ **CERRADO** | Integrado `EmailService` con Gmail SMTP TLS/SSL real y validación estricta. |
+| 🔴 **CRÍTICA** | **DB-01** | Backend: Migraciones Alembic | Migraciones detenidas en versión 004. Tablas nucleares no versionadas en Alembic. | ✅ **CERRADO** | Creada migración `005_closure_and_advanced_modules.py` y aplicada a Supabase (Head). |
+| 🔴 **CRÍTICA** | **STATE-01** | Backend: `attendance_service.py` | Tokens TOTP residían en RAM volátil del proceso. Fallo con balanceo de carga. | ✅ **CERRADO** | Persistidos en tabla `tokens_asistencia_activos` en PostgreSQL con TTL y multi-worker. |
+| 🟠 **ALTA** | **UI-LOCK** | Frontend: Asistencia, Bitácora y Encuesta | Forzados rígidamente a modo `'mock'` en desarrollo sin `setMode()`. | ✅ **CERRADO** | Implementado `setMode()` y modo `'api'` activo por defecto en desarrollo y producción. |
+| 🟠 **ALTA** | **ARCH-01** | Backend: `db/session.py` | Caídas de BD ocultas por conmutación silenciosa a memoria RAM. | ✅ **CERRADO** | Implementado `get_required_session()` con rechazo estricto `HTTP 503` (Modo Estricto). |
+| 🟡 **MEDIA** | **EXT-01** | Full-Stack: Google Meet y Discord | Enlaces virtuales generados por `Math.random()` y hashes MD5. | ✅ **CERRADO** | Implementado `VirtualRoomService` con normalización institucional de Meet (@upt.pe). |
+| 🟡 **MEDIA** | **STO-01** | Backend: Constancias y Recursos | Sin almacenamiento en la nube; archivos en RAM y carpetas locales. | ✅ **CERRADO** | Implementado `StorageService` integrado con la API REST de Supabase Storage. |
+| 🟡 **MEDIA** | **PDF-01** | Backend: `certificate_service.py` | Marca de agua diagonal forzada `"DEMO"` y estado `"EMITIDO_DEMO"`. | ✅ **CERRADO** | Configurada bandera `ENABLE_DEMO_WATERMARK=false` y emisión oficial `"EMITIDO"`. |
+| 🟡 **MEDIA** | **API-01** | Frontend: Solicitudes por Demanda | Endpoints en backend pero frontend sin métodos ni modal conectado. | ✅ **CERRADO** | Implementado `createDemandRequest` y modal `MentoringDemandModalView.tsx` (CUS03). |
+| 🟡 **MEDIA** | **CRON-01** | Backend: Scheduler de Quórum | Sin scheduler en background; dependía de disparos manuales HTTP. | ✅ **CERRADO** | Implementado `QuorumScheduler` en background task con evaluación a T-24h. |
+| 🟢 **MENOR** | **UI-01** | Frontend: `LoginOtpView.tsx` | Backdoor por parámetro `?step=otp` con código mock visible `'849201'`. | ✅ **CERRADO** | Eliminado parámetro espía y desafío inyectado; flujo limpio desde paso 1. |
+| 🟢 **MENOR** | **UI-02** | Frontend: `OfferPublishView.tsx` | Constantes `FALLBACK_COURSES` y `FALLBACK_TOPICS` hardcodeadas. | ✅ **CERRADO** | Eliminados fallbacks; carga dinámica desde API con alerta de reintento. |
+| 🟢 **MENOR** | **DATA-01** | Backend: Datos Hardcodeados | Nombres de alumnos cableados en código de servicios. | ✅ **CERRADO** | Extracción OIDC/JWT y aprovisionamiento determinista por `parse_student_email`. |
 
 ---
 
