@@ -13,6 +13,7 @@ from reportlab.pdfgen import canvas
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.models.bitacora import BitacoraPedagogica
 from app.models.certificate import CertificadoHoras
 from app.models.profile import PerfilAcademico
@@ -22,6 +23,7 @@ from app.schemas.certificate import (
     HoursSummaryResponse,
 )
 from app.services.bitacora_service import _bitacora_lock, _memory_bitacoras
+from app.services.storage_service import StorageService
 
 _certificate_lock = threading.RLock()
 _memory_certificates: list[dict[str, Any]] = []
@@ -171,15 +173,17 @@ class CertificateService:
 
         # ---------------------------------------------------------------------
         # 1. Marca de agua diagonal "DEMO - FINES ACADÉMICOS" (Capa de fondo)
+        # Evaluada reactivamente mediante settings.ENABLE_DEMO_WATERMARK
         # ---------------------------------------------------------------------
-        c.saveState()
-        c.setFont("Helvetica-Bold", 42)
-        c.setFillColor(colors.Color(0.82, 0.82, 0.82, alpha=0.35))
-        c.translate(page_width / 2.0, page_height / 2.0)
-        c.rotate(45)
-        c.drawCentredString(0, 0, "DEMO - FINES ACADÉMICOS")
-        c.drawCentredString(0, -70, "USO EXCLUSIVO CÁTEDRA CS-I")
-        c.restoreState()
+        if settings.ENABLE_DEMO_WATERMARK:
+            c.saveState()
+            c.setFont("Helvetica-Bold", 42)
+            c.setFillColor(colors.Color(0.82, 0.82, 0.82, alpha=0.35))
+            c.translate(page_width / 2.0, page_height / 2.0)
+            c.rotate(45)
+            c.drawCentredString(0, 0, "DEMO - FINES ACADÉMICOS")
+            c.drawCentredString(0, -70, "USO EXCLUSIVO CÁTEDRA CS-I")
+            c.restoreState()
 
         # ---------------------------------------------------------------------
         # 2. Marco perimetral institucional y orla decorativa
@@ -301,7 +305,8 @@ class CertificateService:
         c.drawString(330, y_spec, "Estado Oficial:")
         c.setFont("Helvetica-Bold", 9)
         c.setFillColor(colors.HexColor("#0284C7"))
-        c.drawString(420, y_spec, "EMITIDO_DEMO (Acreditado)")
+        display_pdf_estado = "EMITIDO_DEMO (Acreditado)" if settings.ENABLE_DEMO_WATERMARK else "EMITIDO (Acreditado Oficial)"
+        c.drawString(420, y_spec, display_pdf_estado)
 
         y_spec -= 18
         c.setFont("Helvetica-Bold", 9)
@@ -371,6 +376,11 @@ class CertificateService:
         c.save()
         buf.seek(0)
         return buf.getvalue()
+
+    @classmethod
+    def issue_certificate(cls, *args, **kwargs):
+        """Alias para generate_certificate."""
+        return cls.generate_certificate(*args, **kwargs)
 
     @classmethod
     def generate_certificate(
@@ -508,7 +518,15 @@ class CertificateService:
                 fecha_emision=now_utc,
             )
 
-            # 8. Persistencia relacional en base de datos con manejo atómico de IntegrityError
+            # 8. Persistencia relacional en base de datos y almacenamiento físico
+            final_estado = "EMITIDO_DEMO" if settings.ENABLE_DEMO_WATERMARK else "EMITIDO"
+            storage_path = StorageService.save_file(
+                bucket=settings.SUPABASE_BUCKET_CERTIFICATES,
+                filename=f"{codigo_folio}.pdf",
+                content=pdf_bytes,
+                content_type="application/pdf",
+            )
+
             global _certificate_counter
             cert_id = _certificate_counter
             _certificate_counter += 1
@@ -521,7 +539,7 @@ class CertificateService:
                         periodo_academico=periodo_academico,
                         horas_acreditadas=summary.horas_visadas,
                         hash_firma=hash_firma,
-                        estado="EMITIDO_DEMO",
+                        estado=final_estado,
                         created_at=now_utc,
                     )
                     db.add(cert_orm)
@@ -543,11 +561,12 @@ class CertificateService:
                 "periodo_academico": periodo_academico,
                 "horas_acreditadas": summary.horas_visadas,
                 "hash_firma": hash_firma,
-                "estado": "EMITIDO_DEMO",
+                "estado": final_estado,
                 "created_at": now_utc.isoformat(),
                 "verification_url": cls._build_verification_url(codigo_folio),
                 "pdf_bytes": pdf_bytes,
                 "mentor_name": mentor_display_name,
+                "storage_path": storage_path,
             }
             _memory_certificates.append(cert_dict)
 
@@ -596,18 +615,26 @@ class CertificateService:
         """
         Recupera o recompila el binario PDF de la constancia garantizando coincidencia estricta de hash.
         """
-        # 1. Buscar en memoria primero (si ya está compilado el binario)
+        # 1. Buscar en memoria o StorageService primero
         with _certificate_lock:
             for mc in _memory_certificates:
-                if mc.get("id_certificado") == certificate_id and "pdf_bytes" in mc:
+                if mc.get("id_certificado") == certificate_id:
                     folio = mc["codigo_folio"]
                     filename = f"Constancia_Mentoria_EPIS_2026_II_{folio}.pdf"
-                    return mc["pdf_bytes"], filename
+                    stored_bytes = StorageService.get_file(settings.SUPABASE_BUCKET_CERTIFICATES, f"{folio}.pdf")
+                    if stored_bytes:
+                        return stored_bytes, filename
+                    if "pdf_bytes" in mc:
+                        return mc["pdf_bytes"], filename
 
-        # 2. Si solo está en base de datos, recompilarlo con datos idénticos
+        # 2. Si está en base de datos, recuperar desde StorageService o recompilarlo con datos idénticos
         if db is not None:
             c = db.query(CertificadoHoras).filter(CertificadoHoras.id_certificado == certificate_id).first()
             if c:
+                filename = f"Constancia_Mentoria_EPIS_2026_II_{c.codigo_folio}.pdf"
+                stored_bytes = StorageService.get_file(settings.SUPABASE_BUCKET_CERTIFICATES, f"{c.codigo_folio}.pdf")
+                if stored_bytes:
+                    return stored_bytes, filename
                 mentor_name = c.id_mentor
                 try:
                     p = db.query(PerfilAcademico).filter(PerfilAcademico.email.ilike(c.id_mentor)).first()

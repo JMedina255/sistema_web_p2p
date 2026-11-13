@@ -1,4 +1,5 @@
 import time
+from contextlib import contextmanager
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
@@ -48,6 +49,30 @@ def get_session():
         yield db
     finally:
         db.close()
+
+
+@contextmanager
+def get_session_context():
+    """
+    Context manager síncrono para scripts, tareas en segundo plano y schedulers.
+    Garantiza el cierre seguro de la sesión de base de datos al finalizar el bloque.
+    """
+    db = None
+    try:
+        engine = get_engine()
+        if engine is not None and _SessionLocal is not None:
+            db = _SessionLocal()
+    except Exception:
+        db = None
+
+    try:
+        yield db
+    finally:
+        if db is not None:
+            try:
+                db.close()
+            except Exception:
+                pass
 
 
 def get_optional_session():

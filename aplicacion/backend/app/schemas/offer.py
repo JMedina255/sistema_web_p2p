@@ -20,7 +20,7 @@ class PublishOfferPayload(BaseModel):
     modalidad: Literal["presencial", "virtual"] = Field(..., description="Modalidad formativa.")
     aforo_maximo: int = Field(..., description="Aforo estándar (10 presencial, 20 virtual según RN-05).")
     espacio_asignado: str = Field(
-        ..., min_length=3, max_length=255, description="Aula física o enlace virtual."
+        default="", max_length=255, description="Aula física o enlace virtual (o vacío/auto para generación automática)."
     )
     mentor_email: str = Field(
         ..., min_length=5, max_length=255, description="Correo institucional del mentor."

@@ -1,3 +1,5 @@
+import asyncio
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -5,13 +7,54 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.api import api_router
 from app.core.config import settings
-from app.db.session import close_engine
+from app.db.session import close_engine, get_session_context
+from app.services.booking_service import BookingService
+
+logger = logging.getLogger("app.main")
+
+
+async def _quorum_scheduler_loop():
+    """
+    Tarea en segundo plano para evaluación periódica y desatendida del quórum a T-24h (RN-08 / RN-09 / RN-10).
+    Se ejecuta de forma autónoma cada SCHEDULER_INTERVAL_MINUTES.
+    """
+    logger.info(
+        "Planificador desatendido de quórum iniciado (intervalo: %s min).",
+        settings.SCHEDULER_INTERVAL_MINUTES,
+    )
+    interval_seconds = max(0.001, float(settings.SCHEDULER_INTERVAL_MINUTES) * 60)
+    while True:
+        try:
+            await asyncio.sleep(interval_seconds)
+            logger.info("Ejecutando evaluación automática periódica de quórum (T-24h)...")
+            with get_session_context() as db:
+                evaluated = BookingService.evaluate_quorum_for_all_active_sessions(db)
+                if evaluated:
+                    logger.info("Evaluación de quórum procesó %d sesiones activas.", len(evaluated))
+        except asyncio.CancelledError:
+            logger.info("Planificador desatendido de quórum cancelado limpiamente.")
+            break
+        except Exception as exc:
+            logger.error("Error en ciclo del planificador de quórum: %s", exc)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Inicio diferido (lazy): FastAPI arranca sin bloquearse si DATABASE_URL no está disponible
+    scheduler_task = None
+    if settings.ENABLE_BACKGROUND_SCHEDULER:
+        scheduler_task = asyncio.create_task(_quorum_scheduler_loop())
+
     yield
+
+    # Cancelación limpia de la tarea en segundo plano al apagar el servicio
+    if scheduler_task is not None:
+        scheduler_task.cancel()
+        try:
+            await scheduler_task
+        except asyncio.CancelledError:
+            pass
+
     # Cierre de recursos del pool de conexiones al apagar el servicio
     close_engine()
 

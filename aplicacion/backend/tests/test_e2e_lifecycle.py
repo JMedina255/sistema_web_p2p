@@ -5,6 +5,7 @@ import PyPDF2
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.core.config import settings
 from app.db.session import Base
 from app.models.bitacora import BitacoraPedagogica
 from app.models.booking import ReservaCupo
@@ -210,7 +211,8 @@ def test_full_mentoring_cycle_and_certificate_issuance_t48():
         assert cert_data["id_certificado"] > 0
         assert cert_data["codigo_folio"].startswith("CERT-2026-II-")
         assert cert_data["horas_acreditadas"] == 20.0
-        assert cert_data["estado"] == "EMITIDO_DEMO"
+        expected_estado = "EMITIDO_DEMO" if settings.ENABLE_DEMO_WATERMARK else "EMITIDO"
+        assert cert_data["estado"] == expected_estado
         assert len(cert_data["hash_firma"]) == 64
 
         # ---------------------------------------------------------------------
@@ -225,7 +227,10 @@ def test_full_mentoring_cycle_and_certificate_issuance_t48():
 
         reader = PyPDF2.PdfReader(io.BytesIO(pdf_out))
         extracted_text = reader.pages[0].extract_text()
-        assert "DEMO - FINES ACADÉMICOS" in extracted_text
+        if settings.ENABLE_DEMO_WATERMARK:
+            assert "DEMO - FINES ACADÉMICOS" in extracted_text
+        else:
+            assert "DEMO - FINES ACADÉMICOS" not in extracted_text
         assert cert_data["codigo_folio"] in extracted_text
         assert "20.0 HORAS FORMATIVAS" in extracted_text
         assert "FIRMA CRIPTOGRÁFICA SHA-256:" in extracted_text

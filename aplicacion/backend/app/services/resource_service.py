@@ -7,10 +7,14 @@ y descarga compartida de recursos académicos asociados a sesiones de mentoría.
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
 from fastapi import HTTPException, status
+
+from app.core.config import settings
+from app.services.storage_service import StorageService
 
 
 class ValidadorCargaRecurso:
@@ -124,6 +128,16 @@ class ResourceService:
         rec_id = cls._counter
         cls._counter += 1
 
+        # Persistencia física mediante StorageService si se adjuntan bytes
+        storage_path = None
+        if content is not None:
+            safe_filename = f"sesion_{id_sesion}_{Path(nombre_recurso).name}"
+            storage_path = StorageService.save_file(
+                bucket=settings.SUPABASE_BUCKET_RESOURCES,
+                filename=safe_filename,
+                content=content,
+            )
+
         rec = {
             "id_recurso": rec_id,
             "id_sesion": id_sesion,
@@ -132,7 +146,7 @@ class ResourceService:
             "tipo": validation["tipo"],
             "tamano_bytes": validation.get("tamano_bytes", 0),
             "descripcion": descripcion or "",
-            "content": content,
+            "storage_path": storage_path,
         }
         cls._memory_resources.append(rec)
         return {

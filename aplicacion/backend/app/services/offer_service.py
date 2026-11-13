@@ -310,6 +310,14 @@ class OfferService:
         code = f"SES-{_session_counter}"
         _session_counter += 1
 
+        # Resolución y aprovisionamiento de espacio físico o aula virtual (VirtualRoomService)
+        if payload.modalidad == "virtual":
+            from app.services.virtual_room_service import VirtualRoomService
+            assigned_space = VirtualRoomService.resolve_virtual_room(payload.espacio_asignado, code)
+        else:
+            assigned_space = payload.espacio_asignado.strip() if payload.espacio_asignado else "Aula EPIS"
+        payload.espacio_asignado = assigned_space
+
         iso_str = payload.fecha_inicio.replace("Z", "+00:00")
         start_dt = datetime.fromisoformat(iso_str)
         if start_dt.tzinfo is None:
@@ -328,7 +336,7 @@ class OfferService:
                     duracion_minutos=payload.duracion_minutos,
                     modalidad=payload.modalidad,
                     aforo_maximo=expected_capacity,
-                    espacio_asignado=payload.espacio_asignado,
+                    espacio_asignado=assigned_space,
                     notas_adicionales=payload.notas_adicionales,
                     estado="PUBLICADA",
                 )
@@ -356,7 +364,7 @@ class OfferService:
             "duracion_minutos": payload.duracion_minutos,
             "modalidad": payload.modalidad,
             "aforo_maximo": expected_capacity,
-            "espacio_asignado": payload.espacio_asignado,
+            "espacio_asignado": assigned_space,
             "mentor_nombre": payload.mentor_nombre,
             "notas_adicionales": payload.notas_adicionales,
             "estado": "PUBLICADA",
@@ -371,7 +379,7 @@ class OfferService:
             mensaje=f"¡Oferta de mentoría publicada con éxito en el catálogo EPIS! Código de sesión: {code}",
             fecha_publicacion=now.isoformat(),
             aforo=expected_capacity,
-            espacio_asignado=payload.espacio_asignado,
+            espacio_asignado=assigned_space,
             modo="api",
             offer=payload,
         )

@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.core.security import create_access_token, generate_otp_code, hash_otp_code, verify_otp_hash
 from app.models.auth import AuthChallenge
 from app.schemas.auth import RequestOtpResponse, VerifyOtpResponse
+from app.services.email_service import EmailService
 
 # Almacén en memoria de respaldo para desafíos cuando no hay BD configurada o en pruebas unitarias
 _memory_challenges: dict[str, dict] = {}
@@ -137,10 +138,14 @@ class AuthService:
         }
 
         # Proveemos hint de código en desarrollo para facilitar pruebas reproducibles
-        is_dev = settings.APP_ENV == "development"
+        # En producción (APP_ENV == "production"), mockCodeHint es estrictamente None
+        is_dev = settings.APP_ENV != "production"
         mock_hint = code if is_dev else None
         if is_dev:
             print(f"[AUTH DEV] >>> CÓDIGO OTP EMITIDO PARA {clean_email}: {code} <<<")
+
+        # Despacho de notificación de correo institucional vía EmailService
+        EmailService.send_otp_email(clean_email, code, settings.OTP_EXPIRE_MINUTES)
 
         return RequestOtpResponse(
             challengeId=challenge_id,
@@ -222,8 +227,9 @@ class AuthService:
         code_salt = challenge.code_salt if is_obj else challenge["code_salt"]
         email = challenge.email if is_obj else challenge["email"]
 
-        # Código de prueba rápida de expiración inmediata "000000" o plazo vencido (5 minutos RNF01)
-        if clean_otp == "000000" or now > expires_at:
+        # Código de prueba rápida de expiración inmediata "000000" (restringido a dev/test, nunca en prod) o plazo vencido (5 minutos RNF01)
+        is_dev = settings.APP_ENV != "production"
+        if (clean_otp == "000000" and is_dev) or now > expires_at:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={

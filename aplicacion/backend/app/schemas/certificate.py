@@ -12,7 +12,7 @@ class CertificateMetaResponse(BaseModel):
         ..., ge=20.0, description="Total de horas visadas acumuladas (mínimo 20h)"
     )
     hash_firma: str = Field(..., description="Huella criptográfica SHA-256 de autenticidad")
-    estado: str = Field(default="EMITIDO_DEMO", description="Estado institucional del documento emitido")
+    estado: str = Field(default="EMITIDO", description="Estado institucional del documento emitido (EMITIDO o EMITIDO_DEMO)")
     created_at: str = Field(..., description="Fecha y hora de expedición en formato ISO 8601")
     verification_url: str = Field(..., description="URL institucional pública para validación por código QR")
 
@@ -48,7 +48,7 @@ class CertificateVerifyResponse(BaseModel):
     periodo_academico: str = Field(..., description="Periodo académico acreditado")
     horas_acreditadas: float = Field(..., description="Total de horas formativas acreditadas")
     hash_firma: str = Field(..., description="Huella SHA-256 de integridad institucional")
-    estado: str = Field(..., description="Estado de la constancia (EMITIDO_DEMO)")
+    estado: str = Field(..., description="Estado de la constancia (EMITIDO o EMITIDO_DEMO)")
     fecha_emision: str = Field(..., description="Fecha de expedición registrada")
     institucion: str = Field(
         default="Universidad Privada de Tacna - Escuela Profesional de Ingeniería de Sistemas",

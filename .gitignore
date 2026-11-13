@@ -52,3 +52,8 @@ aplicacion/frontend/.env
 .DS_Store
 Thumbs.db
 
+# Uploads directory
+uploads/
+aplicacion/backend/uploads/
+
+

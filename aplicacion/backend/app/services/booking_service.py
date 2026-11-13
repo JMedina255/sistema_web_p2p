@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import secrets
 import threading
 from datetime import UTC, datetime, timedelta
@@ -21,7 +22,10 @@ from app.schemas.booking import (
     QuorumEvaluationResponse,
 )
 from app.services.consent_service import ConsentService
+from app.services.email_service import EmailService
 from app.services.offer_service import _memory_offers, seed_default_offers_in_memory
+
+logger = logging.getLogger("app.booking")
 
 # Candado de concurrencia para operaciones en memoria y entornos compartidos
 _booking_lock = threading.RLock()
@@ -766,6 +770,24 @@ class BookingService:
                     db.refresh(reserva)
 
                     ses = reserva.sesion
+                    try:
+                        t_title = (
+                            ses.tema.nombre_tema
+                            if ses and ses.tema
+                            else (ses.asignatura.nombre_curso if ses and ses.asignatura else "Mentoría Académica")
+                        )
+                        r_link = ses.espacio_asignado if ses and ses.espacio_asignado else "Por definir"
+                        s_date = ses.fecha_inicio.isoformat() if ses and ses.fecha_inicio else None
+                        EmailService.send_session_confirmation_email(
+                            to_email=reserva.estudiante_email,
+                            session_code=ses.codigo_sesion if ses else f"SES-{reserva.id_sesion}",
+                            topic_title=t_title,
+                            room_or_link=r_link,
+                            session_date=s_date,
+                        )
+                    except Exception as email_err:
+                        logger.warning("Fallo al enviar correo de confirmación de asistencia: %s", email_err)
+
                     return BookingDetailResponse(
                         id_reserva=reserva.id_reserva,
                         codigo_reserva=reserva.codigo_reserva,
@@ -878,6 +900,17 @@ class BookingService:
             target_booking["estado"] = "CONFIRMADA"
             target_booking["fecha_ratificacion"] = now_utc.isoformat()
             target_booking["updated_at"] = now_utc.isoformat()
+
+            try:
+                EmailService.send_session_confirmation_email(
+                    to_email=target_booking["estudiante_email"],
+                    session_code=target_booking.get("codigo_sesion", f"SES-{target_booking['id_sesion']}"),
+                    topic_title=target_booking.get("nombre_tema") or target_booking.get("nombre_asignatura") or "Mentoría Académica",
+                    room_or_link=target_booking.get("espacio_asignado", "Por definir"),
+                    session_date=str(target_booking.get("fecha_inicio", "")),
+                )
+            except Exception as email_err:
+                logger.warning("Fallo al enviar correo de confirmación de asistencia en memoria: %s", email_err)
 
             return BookingDetailResponse(**target_booking)
         finally:
@@ -1589,6 +1622,24 @@ class BookingService:
                 sesion.quorumevaluated_at = now_utc
                 db.commit()
 
+                if not cumple:
+                    try:
+                        topic_name = (
+                            sesion.tema.nombre_tema
+                            if sesion.tema
+                            else (sesion.asignatura.nombre_curso if sesion.asignatura else None)
+                        )
+                        EmailService.send_quorum_alert_email(
+                            to_email=sesion.mentor_email,
+                            session_code=sesion.codigo_sesion,
+                            confirmed_students=confirmed_count,
+                            required_students=min_students,
+                            session_date=sesion.fecha_inicio.isoformat() if sesion.fecha_inicio else "",
+                            topic_title=topic_name,
+                        )
+                    except Exception as email_err:
+                        logger.warning("Fallo al enviar alerta de quórum por correo: %s", email_err)
+
             msg = (
                 f"Quórum alcanzado: {pct}% ({confirmed_count}/{aforo} confirmados). Sesión confirmada reglamentariamente."
                 if cumple
@@ -1693,6 +1744,19 @@ class BookingService:
                     target["estado"] = "QUORUM_INSUFICIENTE"
                 target["quorumevaluated_at"] = now_utc.isoformat()
 
+                if not cumple:
+                    try:
+                        EmailService.send_quorum_alert_email(
+                            to_email=target.get("mentor_email", ""),
+                            session_code=target.get("codigo_sesion", f"SES-{id_sesion}"),
+                            confirmed_students=confirmed,
+                            required_students=min_students,
+                            session_date=str(target.get("fecha_inicio", "")),
+                            topic_title=target.get("nombre_tema") or target.get("nombre_asignatura"),
+                        )
+                    except Exception as email_err:
+                        logger.warning("Fallo al enviar alerta de quórum por correo en memoria: %s", email_err)
+
             msg = (
                 f"Quórum alcanzado: {pct}% ({confirmed}/{aforo} confirmados). Sesión confirmada."
                 if cumple
@@ -1769,3 +1833,14 @@ class BookingService:
                 continue
 
         return results
+
+    @classmethod
+    def evaluate_quorum_for_all_active_sessions(
+        cls,
+        db: Session | None,
+        now_utc: datetime | None = None,
+    ) -> list[QuorumEvaluationResponse]:
+        """
+        Alias unificado para evaluate_all_active_quorums para invocación desatendida desde schedulers.
+        """
+        return cls.evaluate_all_active_quorums(db=db, now_utc=now_utc)

@@ -186,11 +186,10 @@ export function validateOfferPayload(
   }
 
   // Validación de infraestructura
-  if (!payload.espacio_asignado || !payload.espacio_asignado.trim()) {
-    errors.espacio_asignado =
-      payload.modalidad === 'presencial'
-        ? 'Debe asignar o confirmar un ambiente físico validado (RN-06).'
-        : 'Debe generar o especificar el enlace institucional de teleconferencia (RN-07).';
+  if (!payload.modalidad || payload.modalidad === 'presencial') {
+    if (!payload.espacio_asignado || !payload.espacio_asignado.trim()) {
+      errors.espacio_asignado = 'Debe asignar o confirmar un ambiente físico validado (RN-06).';
+    }
   }
 
   return {
@@ -220,9 +219,15 @@ class MockOfferAdapter {
 
     // Forzar aforo reglamentario RN-05
     const forcedCapacity = STANDARD_CAPACITY[payload.modalidad];
+    let resolvedSpace = payload.espacio_asignado;
+    if (payload.modalidad === 'virtual' && (!resolvedSpace || !resolvedSpace.trim() || resolvedSpace.toLowerCase() === 'auto')) {
+      resolvedSpace = offerService.generateVirtualLink(payload.codigo_asignatura || 'epis');
+    }
+
     const sanitizedPayload: PublishOfferPayload = {
       ...payload,
       aforo_maximo: forcedCapacity,
+      espacio_asignado: resolvedSpace,
     };
 
     const code = `SES-${this.sessionCounter++}`;
@@ -464,12 +469,15 @@ export const offerService = {
   },
 
   /**
-   * Helper para generar enlace de reunión virtual reproducible.
+   * Helper para generar enlace de reunión virtual estándar institucional sin Math.random().
    */
   generateVirtualLink(subjectCode: string): string {
-    const randomHex = Math.random().toString(36).substring(2, 7);
-    const codePrefix = subjectCode.toLowerCase().replace(/[^a-z0-9]/g, '');
-    return `https://meet.google.com/upt-${codePrefix}-${randomHex}`;
+    const codePrefix = subjectCode.toLowerCase().replace(/[^a-z0-9]/g, '') || 'epis';
+    // Generación determinista / estándar de sala virtual sin recurrir a Math.random()
+    const suffix = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID().replace(/-/g, '').slice(0, 4)
+      : Date.now().toString(36).slice(-4);
+    return `https://meet.google.com/upt-${codePrefix}-${suffix}`;
   },
 
   /**

@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
@@ -58,6 +58,89 @@ class Settings(BaseSettings):
         default=False,
         description="Habilita endpoints de prueba de simulación multihilo para auditoría de concurrencia y validación de RNF07.",
     )
+
+    # Configuración de Correo Electrónico (SMTP orientada por defecto a Gmail / Google)
+    SMTP_ENABLED: bool = Field(
+        default=False,
+        description="Activa el envío real de correos mediante servidor SMTP",
+    )
+    SMTP_HOST: str = Field(
+        default="smtp.gmail.com",
+        description="Servidor SMTP (por defecto smtp.gmail.com para cuentas de Google)",
+    )
+    SMTP_PORT: int = Field(
+        default=587,
+        description="Puerto SMTP (587 para STARTTLS, 465 para SSL)",
+    )
+    SMTP_USE_TLS: bool = Field(
+        default=True,
+        description="Usar cifrado STARTTLS",
+    )
+    SMTP_USER: str | None = Field(
+        default=None,
+        description="Usuario o correo de la cuenta de Google (ej. mentorias.upt@gmail.com)",
+    )
+    SMTP_PASSWORD: str | None = Field(
+        default=None,
+        repr=False,
+        description="Contraseña de aplicación (Google App Password de 16 caracteres)",
+    )
+    SMTP_FROM_EMAIL: str = Field(
+        default="noreply.mentoria.upt@gmail.com",
+        description="Dirección remitente visible",
+    )
+    SMTP_FROM_NAME: str = Field(
+        default="Sistema de Mentorías EPIS-UPT",
+        description="Nombre del remitente",
+    )
+
+    # Configuración de Almacenamiento Híbrido (Storage)
+    STORAGE_BACKEND: str = Field(
+        default="local",
+        description="Proveedor de almacenamiento: 'local' o 'supabase'",
+    )
+    STORAGE_LOCAL_DIR: str = Field(
+        default="uploads",
+        description="Directorio local para almacenamiento de archivos",
+    )
+    SUPABASE_URL: str | None = Field(
+        default=None,
+        description="URL base del proyecto de Supabase (ej. https://xyz.supabase.co)",
+    )
+    SUPABASE_SERVICE_ROLE_KEY: str | None = Field(
+        default=None,
+        repr=False,
+        description="Clave de servicio de Supabase con permisos para Storage",
+    )
+    SUPABASE_BUCKET_CERTIFICATES: str = Field(
+        default="certificados",
+        description="Bucket para constancias PDF",
+    )
+    SUPABASE_BUCKET_RESOURCES: str = Field(
+        default="recursos",
+        description="Bucket o carpeta para recursos académicos adjuntos",
+    )
+    ENABLE_DEMO_WATERMARK: bool = Field(
+        default=False,
+        description="Estampar marca de agua 'DEMO' en PDFs generados. Por defecto False (emisión oficial limpia sin marcas de agua).",
+    )
+
+    # Planificador Desatendido en Segundo Plano (Scheduler)
+    ENABLE_BACKGROUND_SCHEDULER: bool = Field(
+        default=True,
+        description="Activa el evaluador automático de quórum en segundo plano",
+    )
+    SCHEDULER_INTERVAL_MINUTES: int = Field(
+        default=15,
+        description="Intervalo en minutos para revisión periódica de quórum a T-24h",
+    )
+
+    @model_validator(mode="after")
+    def adjust_production_defaults(self):
+        # En producción, si no se configuró explícitamente la marca de agua, emitir constancias limpias oficiales
+        if self.APP_ENV == "production" and "ENABLE_DEMO_WATERMARK" not in self.model_fields_set:
+            self.ENABLE_DEMO_WATERMARK = False
+        return self
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod

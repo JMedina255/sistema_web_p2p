@@ -202,6 +202,24 @@ describe('offerService (T-14 / RF08 / CUS06 / RN-04 / RN-05)', () => {
       expect(validation.isValid).toBe(false);
       expect(validation.errors.aforo_maximo).toMatch(/Infracción de RN-05.*20 estudiantes/i);
     });
+
+    it('10. Permite espacio_asignado vacío o ausente en modalidad virtual para auto-aprovisionamiento', () => {
+      const in50Hours = new Date(baseNow.getTime() + 50 * 3600 * 1000).toISOString();
+      const virtualPayloadWithEmptySpace: Partial<PublishOfferPayload> = {
+        id_asignatura: 1,
+        id_tema: 101,
+        modalidad: 'virtual',
+        duracion_minutos: 60,
+        aforo_maximo: 20,
+        fecha_inicio: in50Hours,
+        espacio_asignado: '',
+        mentor_email: '2022074255@upt.pe',
+      };
+
+      const validation = validateOfferPayload(virtualPayloadWithEmptySpace, baseNow);
+      expect(validation.isValid).toBe(true);
+      expect(validation.errors.espacio_asignado).toBeUndefined();
+    });
   });
 
   describe('Adaptador Mock y Publicación (T-14)', () => {
@@ -245,6 +263,28 @@ describe('offerService (T-14 / RF08 / CUS06 / RN-04 / RN-05)', () => {
 
       const room = offerService.suggestClassroom();
       expect(room).toContain('EPIS');
+    });
+
+    it('4. Auto-genera enlace Google Meet cuando se publica una oferta virtual con espacio vacío', async () => {
+      const in72Hours = new Date(Date.now() + 72 * 3600 * 1000).toISOString();
+      const virtualPayload: PublishOfferPayload = {
+        id_asignatura: 1,
+        codigo_asignatura: 'CI-101',
+        nombre_asignatura: 'Cálculo I',
+        id_tema: 101,
+        nombre_tema: 'Derivadas',
+        modalidad: 'virtual',
+        duracion_minutos: 60,
+        aforo_maximo: 20,
+        fecha_inicio: in72Hours,
+        espacio_asignado: '',
+        mentor_email: '2022074255@upt.pe',
+        mentor_nombre: 'Joan Medina Quispe',
+      };
+
+      const res = await offerService.publishOffer(virtualPayload);
+      expect(res.estado).toBe('PUBLICADA');
+      expect(res.espacio_asignado).toMatch(/^https:\/\/meet\.google\.com\/upt-ci101-[a-z0-9]+/);
     });
   });
 

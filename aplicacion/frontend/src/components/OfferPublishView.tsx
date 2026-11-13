@@ -941,6 +941,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
                   <input
                     id="input-space"
                     aria-label="Enlace de teleconferencia virtual"
+                    placeholder="https://meet.google.com/xxx-yyyy-zzz o Teams/Zoom"
                     type="text"
                     value={assignedSpace}
                     onChange={(e) => setAssignedSpace(e.target.value)}
@@ -958,9 +959,10 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
                   <button
                     type="button"
                     onClick={() =>
-                      setAssignedSpace(offerService.generateVirtualLink(currentCourse.codigo_curso))
+                      setAssignedSpace(offerService.generateVirtualLink(currentCourse ? currentCourse.codigo_curso : 'epis'))
                     }
                     disabled={isSubmitting}
+                    title="Generar automáticamente por el sistema"
                     style={{
                       backgroundColor: '#EEF2FF',
                       color: '#4338CA',
@@ -973,11 +975,11 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    🔄 Regenerar Enlace
+                    🔄 Generar automáticamente por el sistema
                   </button>
                 </div>
                 <span style={{ fontSize: '0.73rem', color: '#64748B', display: 'block', marginTop: '0.35rem' }}>
-                  Enlace seguro institucional de Google Meet (@upt.pe) generado automáticamente.
+                  Ingresa tu propio enlace de Google Meet, Zoom o Teams, o pulsa "Generar automáticamente por el sistema".
                 </span>
               </div>
             )}

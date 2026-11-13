@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.core.config import settings
 from app.core.security import create_access_token
 from app.db.session import Base
 from app.main import app
@@ -127,7 +128,8 @@ def test_generate_certificate_success_with_twenty_or_more_hours_201():
     assert cert["id_mentor"] == mentor_email
     assert cert["periodo_academico"] == "2026-II"
     assert cert["horas_acreditadas"] == 22.0
-    assert cert["estado"] == "EMITIDO_DEMO"
+    expected_estado = "EMITIDO_DEMO" if settings.ENABLE_DEMO_WATERMARK else "EMITIDO"
+    assert cert["estado"] == expected_estado
     assert cert["codigo_folio"].startswith("CERT-2026-II-")
     assert len(cert["hash_firma"]) == 64
     assert f"folio={cert['codigo_folio']}" in cert["verification_url"]
@@ -177,7 +179,8 @@ def test_generate_certificate_duplicate_rejected_409():
     assert "DUPLICATE_CERTIFICATE_ISSUANCE" in r2.json()["detail"]
 
 
-def test_download_certificate_pdf_binary_and_watermark_200():
+def test_download_certificate_pdf_binary_and_watermark_200(monkeypatch):
+    monkeypatch.setattr(settings, "ENABLE_DEMO_WATERMARK", True)
     mentor_email = "mentor.pdf@upt.pe"
     headers = get_auth_header(mentor_email, ["mentor"])
 
@@ -250,7 +253,8 @@ def test_verify_certificate_endpoint_public_200_and_404():
     assert v_data["codigo_folio"] == folio
     assert v_data["id_mentor"] == mentor_email
     assert v_data["horas_acreditadas"] == 21.0
-    assert v_data["estado"] == "EMITIDO_DEMO"
+    expected_estado = "EMITIDO_DEMO" if settings.ENABLE_DEMO_WATERMARK else "EMITIDO"
+    assert v_data["estado"] == expected_estado
 
     # 2. Folio inexistente -> 404
     bad_resp = client.get("/api/v1/certificates/verificar?folio=CERT-2026-II-9999")
