@@ -25,8 +25,31 @@ export type BookingStatus =
 export interface BookingCreatePayload {
   /** Identificador unívoco entero de la sesión de mentoría (id_sesion >= 1) */
   id_sesion: number;
-  /** Correo institucional @upt.pe del estudiante mentoreado */
+  /** Correo institucional (@virtual.upt.pe o @upt.pe) del estudiante mentoreado */
   estudiante_email: string;
+}
+
+/**
+ * Payload para registrar una solicitud de mentoría por demanda temática (CUS03 / RF07).
+ */
+export interface DemandRequestPayload {
+  id_asignatura: number;
+  id_tema: number;
+  observaciones?: string;
+  estudiante_email?: string;
+}
+
+/**
+ * Respuesta del registro y consulta del banco de solicitudes por demanda (CUS03 / RF07).
+ */
+export interface DemandRequestResponse {
+  id_demanda: number;
+  id_asignatura: number;
+  id_tema: number;
+  estudiante_email: string;
+  observaciones: string | null;
+  estado: string;
+  created_at: string;
 }
 
 /**
@@ -175,10 +198,10 @@ export class ApiBookingAdapter {
     }
 
     const cleanEmail = (payload.estudiante_email || '').trim().toLowerCase();
-    if (!cleanEmail.endsWith('@upt.pe')) {
+    if (!cleanEmail.endsWith('@virtual.upt.pe') && !cleanEmail.endsWith('@upt.pe')) {
       throw new BookingException(
         'VALIDATION_ERROR',
-        'El correo del estudiante debe pertenecer obligatoriamente al dominio institucional @upt.pe.',
+        'El correo del estudiante debe pertenecer obligatoriamente al dominio institucional @virtual.upt.pe o @upt.pe.',
         400
       );
     }
@@ -411,6 +434,111 @@ export class ApiBookingAdapter {
   }
 
   /**
+   * Registra una necesidad temática de mentoría por demanda (POST /api/v1/bookings/requests).
+   */
+  public async createDemandRequest(
+    payload: DemandRequestPayload
+  ): Promise<DemandRequestResponse> {
+    if (!payload.id_asignatura || !Number.isInteger(payload.id_asignatura) || payload.id_asignatura < 1) {
+      throw new BookingException(
+        'VALIDATION_ERROR',
+        'El identificador de asignatura debe ser un número entero positivo.',
+        400
+      );
+    }
+    if (!payload.id_tema || !Number.isInteger(payload.id_tema) || payload.id_tema < 1) {
+      throw new BookingException(
+        'VALIDATION_ERROR',
+        'El identificador de tema debe ser un número entero positivo.',
+        400
+      );
+    }
+
+    const url = `${this.baseUrl}/api/v1/bookings/requests`;
+    const token = authService.getToken();
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          id_asignatura: payload.id_asignatura,
+          id_tema: payload.id_tema,
+          observaciones: payload.observaciones || null,
+        }),
+      });
+    } catch (err: unknown) {
+      throw new BookingException(
+        'NETWORK_ERROR',
+        'No fue posible registrar la solicitud por demanda. Verifique su conexión al servidor.',
+        undefined,
+        err
+      );
+    }
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      this.handleHttpError(response.status, data);
+    }
+
+    return data as DemandRequestResponse;
+  }
+
+  /**
+   * Consulta el banco de solicitudes de mentoría por demanda activas (GET /api/v1/bookings/requests).
+   */
+  public async getDemandRequests(
+    filters?: { id_asignatura?: number; ciclo?: number }
+  ): Promise<DemandRequestResponse[]> {
+    const params = new URLSearchParams();
+    if (filters?.id_asignatura) params.append('id_asignatura', String(filters.id_asignatura));
+    if (filters?.ciclo) params.append('ciclo', String(filters.ciclo));
+
+    const qs = params.toString();
+    const url = `${this.baseUrl}/api/v1/bookings/requests${qs ? `?${qs}` : ''}`;
+    const token = authService.getToken();
+
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(url, { method: 'GET', headers });
+    } catch (err: unknown) {
+      throw new BookingException(
+        'NETWORK_ERROR',
+        'No fue posible consultar las solicitudes por demanda.',
+        undefined,
+        err
+      );
+    }
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      this.handleHttpError(response.status, data);
+    }
+
+    return (data || []) as DemandRequestResponse[];
+  }
+
+  /**
    * Interpreta las respuestas de error estructuradas de FastAPI y eleva BookingException.
    */
   private handleHttpError(status: number, data: unknown): never {
@@ -500,6 +628,8 @@ export class ApiBookingAdapter {
 export class MockBookingAdapter {
   private bookings: BookingDetailResponse[] = [];
   private nextBookingId = 501;
+  private demandRequests: DemandRequestResponse[] = [];
+  private nextDemandId = 101;
   private simulatedTime: number | null = null;
 
   constructor() {
@@ -509,6 +639,8 @@ export class MockBookingAdapter {
   public resetToDefaults(): void {
     this.bookings = [];
     this.nextBookingId = 501;
+    this.demandRequests = [];
+    this.nextDemandId = 101;
     this.simulatedTime = null;
   }
 
@@ -552,10 +684,10 @@ export class MockBookingAdapter {
     }
 
     const cleanEmail = (payload.estudiante_email || '').trim().toLowerCase();
-    if (!cleanEmail.endsWith('@upt.pe')) {
+    if (!cleanEmail.endsWith('@virtual.upt.pe') && !cleanEmail.endsWith('@upt.pe')) {
       throw new BookingException(
         'VALIDATION_ERROR',
-        'El correo del estudiante debe pertenecer al dominio institucional @upt.pe.',
+        'El correo del estudiante debe pertenecer al dominio institucional @virtual.upt.pe o @upt.pe.',
         400
       );
     }
@@ -836,6 +968,40 @@ export class MockBookingAdapter {
 
     return { ...booking };
   }
+
+  /**
+   * Registra una necesidad formativa de mentoría por demanda (Mock).
+   */
+  public async createDemandRequest(payload: DemandRequestPayload): Promise<DemandRequestResponse> {
+    const newDemand: DemandRequestResponse = {
+      id_demanda: this.nextDemandId++,
+      id_asignatura: payload.id_asignatura,
+      id_tema: payload.id_tema,
+      estudiante_email:
+        payload.estudiante_email ||
+        authService.getCurrentUser()?.email ||
+        'ra2022073504@virtual.upt.pe',
+      observaciones: payload.observaciones || null,
+      estado: 'PENDIENTE',
+      created_at: new Date().toISOString(),
+    };
+    this.demandRequests.push(newDemand);
+    return newDemand;
+  }
+
+  /**
+   * Consulta el banco de solicitudes por demanda (Mock).
+   */
+  public async getDemandRequests(filters?: {
+    id_asignatura?: number;
+    ciclo?: number;
+  }): Promise<DemandRequestResponse[]> {
+    let result = [...this.demandRequests];
+    if (filters?.id_asignatura) {
+      result = result.filter((r) => r.id_asignatura === filters.id_asignatura);
+    }
+    return result;
+  }
 }
 
 // ============================================================================
@@ -968,5 +1134,28 @@ export const bookingService = {
       return mockAdapterInstance.cancelReservation(id_reserva, motivo, studentEmail);
     }
     return apiAdapterInstance.cancelReservation(id_reserva, motivo);
+  },
+
+  /**
+   * Registra una necesidad formativa de mentoría por demanda (CUS03 / RF07).
+   */
+  async createDemandRequest(payload: DemandRequestPayload): Promise<DemandRequestResponse> {
+    if (currentServiceMode === 'mock') {
+      return mockAdapterInstance.createDemandRequest(payload);
+    }
+    return apiAdapterInstance.createDemandRequest(payload);
+  },
+
+  /**
+   * Consulta el banco institucional de solicitudes de mentoría por demanda (CUS03 / RF07).
+   */
+  async getDemandRequests(filters?: {
+    id_asignatura?: number;
+    ciclo?: number;
+  }): Promise<DemandRequestResponse[]> {
+    if (currentServiceMode === 'mock') {
+      return mockAdapterInstance.getDemandRequests(filters);
+    }
+    return apiAdapterInstance.getDemandRequests(filters);
   },
 };

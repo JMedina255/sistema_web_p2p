@@ -20,94 +20,6 @@ export interface OfferPublishViewProps {
   showDevControls?: boolean;
 }
 
-// Fallback de asignaturas críticas si el backend o la red aún no están disponibles
-const FALLBACK_COURSES: Course[] = [
-  {
-    id_asignatura: 1,
-    codigo_curso: 'CALC-101',
-    nombre_curso: 'Cálculo I',
-    ciclo_plan: 1,
-    creditos: 4,
-    es_prioritaria: true,
-    factor_ponderacion: 1.5,
-    estado_activo: true,
-  },
-  {
-    id_asignatura: 2,
-    codigo_curso: 'CALC-201',
-    nombre_curso: 'Cálculo II',
-    ciclo_plan: 2,
-    creditos: 4,
-    es_prioritaria: true,
-    factor_ponderacion: 1.5,
-    estado_activo: true,
-  },
-  {
-    id_asignatura: 3,
-    codigo_curso: 'ALGO-202',
-    nombre_curso: 'Algoritmos y Estructuras de Datos',
-    ciclo_plan: 2,
-    creditos: 4,
-    es_prioritaria: true,
-    factor_ponderacion: 1.4,
-    estado_activo: true,
-  },
-  {
-    id_asignatura: 4,
-    codigo_curso: 'POO-301',
-    nombre_curso: 'Programación Orientada a Objetos',
-    ciclo_plan: 3,
-    creditos: 4,
-    es_prioritaria: true,
-    factor_ponderacion: 1.3,
-    estado_activo: true,
-  },
-  {
-    id_asignatura: 5,
-    codigo_curso: 'BDD-401',
-    nombre_curso: 'Base de Datos',
-    ciclo_plan: 4,
-    creditos: 4,
-    es_prioritaria: true,
-    factor_ponderacion: 1.2,
-    estado_activo: true,
-  },
-];
-
-const FALLBACK_TOPICS: Record<number, Topic[]> = {
-  1: [
-    { id_tema: 1, id_asignatura: 1, nombre_tema: 'Límites y Continuidad', unidad_silabica: 1, estado_activo: true },
-    { id_tema: 2, id_asignatura: 1, nombre_tema: 'Derivadas y Regla de la Cadena', unidad_silabica: 2, estado_activo: true },
-    { id_tema: 3, id_asignatura: 1, nombre_tema: 'Aplicaciones de la Derivada (Optimización)', unidad_silabica: 3, estado_activo: true },
-    { id_tema: 4, id_asignatura: 1, nombre_tema: 'Integrales Indefinidas y Métodos de Integración', unidad_silabica: 4, estado_activo: true },
-  ],
-  2: [
-    { id_tema: 5, id_asignatura: 2, nombre_tema: 'Integrales Definidas y Teorema Fundamental', unidad_silabica: 1, estado_activo: true },
-    { id_tema: 6, id_asignatura: 2, nombre_tema: 'Cálculo de Áreas y Volúmenes de Sólidos', unidad_silabica: 2, estado_activo: true },
-    { id_tema: 7, id_asignatura: 2, nombre_tema: 'Técnicas Avanzadas de Integración y Fracciones Parciales', unidad_silabica: 3, estado_activo: true },
-    { id_tema: 8, id_asignatura: 2, nombre_tema: 'Sucesiones y Series Numéricas', unidad_silabica: 4, estado_activo: true },
-  ],
-  3: [
-    { id_tema: 9, id_asignatura: 3, nombre_tema: 'Análisis Asintótico y Notación Big-O', unidad_silabica: 1, estado_activo: true },
-    { id_tema: 10, id_asignatura: 3, nombre_tema: 'Recursión y Técnicas Divide y Vencerás', unidad_silabica: 1, estado_activo: true },
-    { id_tema: 11, id_asignatura: 3, nombre_tema: 'Estructuras Lineales: Listas Enlazadas, Pilas y Colas', unidad_silabica: 2, estado_activo: true },
-    { id_tema: 12, id_asignatura: 3, nombre_tema: 'Árboles Binarios de Búsqueda y Recorridos', unidad_silabica: 3, estado_activo: true },
-    { id_tema: 13, id_asignatura: 3, nombre_tema: 'Grafos: Representaciones y Algoritmos BFS/DFS', unidad_silabica: 4, estado_activo: true },
-  ],
-  4: [
-    { id_tema: 14, id_asignatura: 4, nombre_tema: 'Principios SOLID y Encapsulamiento', unidad_silabica: 1, estado_activo: true },
-    { id_tema: 15, id_asignatura: 4, nombre_tema: 'Herencia, Polimorfismo e Interfaces', unidad_silabica: 2, estado_activo: true },
-    { id_tema: 16, id_asignatura: 4, nombre_tema: 'Patrones de Diseño Creacionales y Estructurales', unidad_silabica: 3, estado_activo: true },
-    { id_tema: 17, id_asignatura: 4, nombre_tema: 'Manejo Robusto de Excepciones y Colecciones Genéricas', unidad_silabica: 4, estado_activo: true },
-  ],
-  5: [
-    { id_tema: 18, id_asignatura: 5, nombre_tema: 'Modelo Entidad-Relación y Diagramas ER Extendido', unidad_silabica: 1, estado_activo: true },
-    { id_tema: 19, id_asignatura: 5, nombre_tema: 'Normalización Relacional (1FN, 2FN, 3FN, BCNF)', unidad_silabica: 2, estado_activo: true },
-    { id_tema: 20, id_asignatura: 5, nombre_tema: 'Lenguaje SQL DDL/DML, Consultas Complejas y Joins', unidad_silabica: 3, estado_activo: true },
-    { id_tema: 21, id_asignatura: 5, nombre_tema: 'Transacciones ACID, Control de Concurrencia e Índices', unidad_silabica: 4, estado_activo: true },
-  ],
-};
-
 /**
  * Genera una fecha por defecto en formato local YYYY-MM-DDTHH:mm con antelación >= 48 h recomendada
  */
@@ -132,13 +44,14 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
   showDevControls = false,
 }) => {
   // Datos del catálogo
-  const [courses, setCourses] = useState<Course[]>(FALLBACK_COURSES);
-  const [topics, setTopics] = useState<Topic[]>(FALLBACK_TOPICS[1] || []);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [topics, setTopics] = useState<Topic[]>([]);
   const [isLoadingCourses, setIsLoadingCourses] = useState<boolean>(true);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
 
   // Campos del formulario
-  const [selectedCourseId, setSelectedCourseId] = useState<number>(1);
-  const [selectedTopicId, setSelectedTopicId] = useState<number>(1);
+  const [selectedCourseId, setSelectedCourseId] = useState<number>(0);
+  const [selectedTopicId, setSelectedTopicId] = useState<number>(0);
   const [modality, setModality] = useState<SessionModality>('presencial');
   const [duration, setDuration] = useState<SessionDuration>(60);
   const [startDateTime, setStartDateTime] = useState<string>(getDefaultStartDateTime);
@@ -151,32 +64,51 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [recentOffers, setRecentOffers] = useState<PublishOfferResponse[]>([]);
 
-  // Cargar catálogo de cursos
-  useEffect(() => {
-    let isMounted = true;
-    const loadCatalog = async () => {
-      setIsLoadingCourses(true);
-      try {
-        const fetched = await fetchCourses(true);
-        if (isMounted && fetched.length > 0) {
-          setCourses(fetched);
-          setSelectedCourseId(fetched[0].id_asignatura);
+  // Cargar catálogo de cursos y temas iniciales
+  const loadCatalog = useCallback(async () => {
+    setIsLoadingCourses(true);
+    setCatalogError(null);
+    try {
+      const fetched = await fetchCourses(true);
+      if (fetched.length > 0) {
+        setCourses(fetched);
+        const firstCourseId = fetched[0].id_asignatura;
+        setSelectedCourseId(firstCourseId);
+        try {
+          const detail = await fetchCourseDetail(firstCourseId);
+          if (detail.temas && detail.temas.length > 0) {
+            setTopics(detail.temas);
+            setSelectedTopicId(detail.temas[0].id_tema);
+          }
+        } catch {
+          // Ignorar fallo secundario de detalle
         }
-      } catch {
-        // Usa FALLBACK_COURSES
-      } finally {
-        if (isMounted) setIsLoadingCourses(false);
+      } else {
+        setCatalogError('No se encontraron asignaturas activas registradas en el catálogo curricular.');
       }
-    };
-    loadCatalog();
-    return () => {
-      isMounted = false;
-    };
+    } catch (err: unknown) {
+      setCatalogError(
+        err instanceof Error
+          ? `No se pudo conectar con el catálogo curricular del servidor: ${err.message}`
+          : 'Error al conectar con el servidor institucional para cargar el catálogo.'
+      );
+    } finally {
+      setIsLoadingCourses(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadCatalog();
+  }, [loadCatalog]);
 
   // Cargar temas cuando cambie la asignatura seleccionada
   useEffect(() => {
     let isMounted = true;
+    if (!selectedCourseId) {
+      setTopics([]);
+      setSelectedTopicId(0);
+      return;
+    }
     const loadTopics = async () => {
       try {
         const detail = await fetchCourseDetail(selectedCourseId);
@@ -184,23 +116,18 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
           setTopics(detail.temas);
           setSelectedTopicId(detail.temas[0].id_tema);
           return;
+        } else if (isMounted) {
+          setTopics([]);
+          setSelectedTopicId(0);
         }
       } catch {
-        // Fallback a temas locales conocidos
-      }
-      if (isMounted) {
-        const fb = FALLBACK_TOPICS[selectedCourseId] || [];
-        setTopics(fb);
-        if (fb.length > 0) {
-          setSelectedTopicId(fb[0].id_tema);
-        } else {
+        if (isMounted) {
+          setTopics([]);
           setSelectedTopicId(0);
         }
       }
     };
-    if (selectedCourseId) {
-      loadTopics();
-    }
+    loadTopics();
     return () => {
       isMounted = false;
     };
@@ -361,6 +288,49 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
           >
             Entorno de pruebas
           </span>
+        </div>
+      )}
+
+      {/* Alerta de Error en Carga de Catálogo Curricular Institucional */}
+      {catalogError && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          style={{
+            backgroundColor: '#FEF2F2',
+            border: '1px solid #FCA5A5',
+            borderRadius: '10px',
+            padding: '1rem 1.25rem',
+            marginBottom: '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <span style={{ fontSize: '1.25rem' }}>⚠️</span>
+            <span style={{ color: '#991B1B', fontSize: '0.88rem', fontWeight: 600 }}>
+              {catalogError}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={loadCatalog}
+            style={{
+              backgroundColor: '#DC2626',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '0.45rem 0.9rem',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            🔄 Reintentar
+          </button>
         </div>
       )}
 

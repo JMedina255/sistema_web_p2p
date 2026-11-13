@@ -9,11 +9,11 @@ export interface LoginOtpViewProps {
 
 export const LoginOtpView: React.FC<LoginOtpViewProps> = ({ onLoginSuccess, showDevControls = false }) => {
   const isDevVisible = showDevControls && !import.meta.env.PROD;
-  // Estados del flujo
-  const [step, setStep] = useState<'email' | 'otp' | 'success'>(() => { if (typeof window !== 'undefined' && window.location && new URLSearchParams(window.location.search).get('step') === 'otp') return 'otp'; return 'email'; });
+  // Estados del flujo (Inicia limpiamente en el paso 1 sin trampas de URL ni estados inyectados)
+  const [step, setStep] = useState<'email' | 'otp' | 'success'>('email');
   const [email, setEmail] = useState<string>('');
   const [otp, setOtp] = useState<string>('');
-  const [challenge, setChallenge] = useState<RequestOtpResponse | null>(() => { if (typeof window !== 'undefined' && window.location && new URLSearchParams(window.location.search).get('step') === 'otp') { return { challengeId: 'c7b5a198-4d32-42fe-b58e-d927d612e4b0', expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(), cooldownSeconds: 60, mockCodeHint: '849201', email: 'estudiante@upt.pe', message: 'Código generado', isMock: true }; } return null; });
+  const [challenge, setChallenge] = useState<RequestOtpResponse | null>(null);
   const [verifyResult, setVerifyResult] = useState<VerifyOtpResponse | null>(null);
 
   // Estados de control y feedback

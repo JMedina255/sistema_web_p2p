@@ -30,6 +30,7 @@ import { StudentBookingsView } from './components/StudentBookingsView';
 import { MentorSessionsView } from './components/MentorSessionsView';
 import { CertificateDownloadView } from './components/CertificateDownloadView';
 import { AdminDashboardView } from './components/AdminDashboardView';
+import { MentoringDemandModalView } from './components/MentoringDemandModalView';
 import { bookingService, BookingException } from './services/bookingService';
 import type { OfferRecommendationItem } from './services/recommendationService';
 
@@ -150,6 +151,7 @@ const AppShell: React.FC = () => {
   // Estado del flujo integrado de reservas (T-20 -> T-21 -> T-23)
   const [selectedOffer, setSelectedOffer] = useState<OfferRecommendationItem | null>(null);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isDemandModalOpen, setIsDemandModalOpen] = useState(false);
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [bookingSuccessData, setBookingSuccessData] = useState<BookingSuccessData | null>(null);
@@ -160,7 +162,7 @@ const AppShell: React.FC = () => {
   // Apertura del modal al seleccionar una oferta de la cartelera
   const handleSelectOffer = (offer: OfferRecommendationItem) => {
     if (!studentEmail) {
-      alert('Debes iniciar sesión con tu cuenta institucional @upt.pe para reservar una mentoría.');
+      alert('Debes iniciar sesión con tu cuenta institucional @virtual.upt.pe o @upt.pe para reservar una mentoría.');
       handleSelectTab('auth');
       return;
     }
@@ -382,6 +384,7 @@ const AppShell: React.FC = () => {
               key={feedRefreshKey}
               menteeEmail={studentEmail ?? undefined}
               onSelectOffer={handleSelectOffer}
+              onRequestDemand={() => setIsDemandModalOpen(true)}
             />
             <BookingModalView
               isOpen={isBookingModalOpen}
@@ -396,6 +399,16 @@ const AppShell: React.FC = () => {
                 handleCloseBookingModal();
                 handleSelectTab('bookings');
               }}
+              onDemandRedirect={() => {
+                handleCloseBookingModal();
+                setIsDemandModalOpen(true);
+              }}
+            />
+            <MentoringDemandModalView
+              isOpen={isDemandModalOpen}
+              onClose={() => setIsDemandModalOpen(false)}
+              preselectedCourseId={selectedOffer?.id_asignatura}
+              preselectedTopicId={selectedOffer?.id_tema}
             />
           </>
         )}

@@ -43,6 +43,13 @@ export const SessionAttendanceView: React.FC<SessionAttendanceViewProps> = ({
   const [checkinMessage, setCheckinMessage] = useState<string | null>(null);
   const [checkinError, setCheckinError] = useState<string | null>(null);
 
+  // Escáner de Cámara Real (HTML5 MediaDevices / BarcodeDetector)
+  const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const scanIntervalRef = useRef<number | null>(null);
+
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Carga del token dinámico TOTP (rota cada 30 segundos)
@@ -122,24 +129,119 @@ export const SessionAttendanceView: React.FC<SessionAttendanceViewProps> = ({
     }
   };
 
-  // Simular escaneo de QR (útil para pruebas y cámaras web integradas)
-  const handleSimulateQrScan = async () => {
-    if (!tokenData?.token) return;
+  // Detención segura de los tracks de cámara y temporizadores de escaneo
+  const stopCamera = useCallback(() => {
+    if (scanIntervalRef.current) {
+      clearInterval(scanIntervalRef.current);
+      scanIntervalRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setIsCameraActive(false);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, [stopCamera]);
+
+  // Procesamiento de token escaneado por cámara real
+  const handleProcessQrCheckin = async (qrToken: string) => {
     setIsSubmittingCheckin(true);
     setCheckinError(null);
     setCheckinMessage(null);
     try {
-      const userEmail = studentEmail || (typeof authService.getCurrentUser === 'function' ? authService.getCurrentUser()?.email : undefined);
+      const userEmail =
+        studentEmail ||
+        (typeof authService.getCurrentUser === 'function' ? authService.getCurrentUser()?.email : undefined);
       const resp = await attendanceService.checkIn(sessionId, {
-        qr_token: tokenData.token,
+        qr_token: qrToken,
         estudiante_email: userEmail,
       });
-      setCheckinMessage(resp.mensaje || '¡Asistencia registrada exitosamente!');
+      setCheckinMessage(resp.mensaje || '¡Asistencia registrada exitosamente mediante código QR!');
       await fetchRoster();
     } catch (err: unknown) {
-      setCheckinError(err instanceof Error ? err.message : 'Error en lectura de código QR.');
+      setCheckinError(err instanceof Error ? err.message : 'Error en la validación del código QR escaneado.');
     } finally {
       setIsSubmittingCheckin(false);
+    }
+  };
+
+  // Apertura e inicialización de cámara física web/móvil
+  const handleToggleCamera = async () => {
+    if (isCameraActive) {
+      stopCamera();
+      return;
+    }
+
+    setCameraError(null);
+    setCheckinError(null);
+    setCheckinMessage(null);
+
+    if (
+      typeof navigator === 'undefined' ||
+      !navigator.mediaDevices ||
+      typeof navigator.mediaDevices.getUserMedia !== 'function'
+    ) {
+      setCameraError(
+        'Tu dispositivo o navegador no admite acceso a cámara web. Por favor ingresa el código numérico de 6 dígitos proyectado.'
+      );
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } },
+      });
+      streamRef.current = stream;
+      setIsCameraActive(true);
+
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(() => {});
+        }
+      }, 100);
+
+      // Si el navegador soporta BarcodeDetector nativo (Chromium / Edge / Chrome)
+      if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
+        try {
+          const detector = new (window as any).BarcodeDetector({ formats: ['qr_code'] });
+          scanIntervalRef.current = window.setInterval(async () => {
+            if (videoRef.current && videoRef.current.readyState >= 2) {
+              try {
+                const barcodes = await detector.detect(videoRef.current);
+                if (barcodes.length > 0 && barcodes[0].rawValue) {
+                  const detectedToken = barcodes[0].rawValue;
+                  stopCamera();
+                  await handleProcessQrCheckin(detectedToken);
+                }
+              } catch {
+                // Siguiente frame
+              }
+            }
+          }, 350);
+        } catch {
+          // Fallback silencioso
+        }
+      } else {
+        setCameraError(
+          'Escaneo automático no disponible en este navegador. Por favor ingresa el código de 6 dígitos que figura bajo el QR.'
+        );
+      }
+    } catch (err: unknown) {
+      stopCamera();
+      const isDenied =
+        err instanceof Error &&
+        (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError');
+      setCameraError(
+        isDenied
+          ? 'Permiso de cámara denegado. Ingresa manualmente el código TOTP de 6 dígitos que figura en pantalla.'
+          : 'No se pudo inicializar la cámara. Puedes ingresar el código numérico alternativamente.'
+      );
     }
   };
 
@@ -439,6 +541,70 @@ export const SessionAttendanceView: React.FC<SessionAttendanceViewProps> = ({
                   />
                 </div>
 
+                {/* Visor de Cámara Real para Escaneo de Código QR */}
+                {isCameraActive && (
+                  <div
+                    style={{
+                      marginBottom: '1rem',
+                      position: 'relative',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      backgroundColor: '#000000',
+                      textAlign: 'center',
+                    }}
+                  >
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      style={{ width: '100%', maxHeight: '240px', objectFit: 'cover' }}
+                    />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        border: '2px dashed #22C55E',
+                        borderRadius: '8px',
+                        pointerEvents: 'none',
+                        margin: '1.25rem',
+                      }}
+                    />
+                    <div
+                      style={{
+                        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                        color: '#FFFFFF',
+                        fontSize: '0.75rem',
+                        padding: '0.35rem',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Enfoca el código QR proyectado en la pantalla
+                    </div>
+                  </div>
+                )}
+
+                {cameraError && (
+                  <div
+                    role="alert"
+                    style={{
+                      marginBottom: '1rem',
+                      padding: '0.65rem 0.85rem',
+                      backgroundColor: '#FEF3C7',
+                      border: '1px solid #FCD34D',
+                      borderRadius: '6px',
+                      color: '#92400E',
+                      fontSize: '0.8rem',
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    ℹ️ {cameraError}
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                   <button
                     type="submit"
@@ -460,12 +626,12 @@ export const SessionAttendanceView: React.FC<SessionAttendanceViewProps> = ({
 
                   <button
                     type="button"
-                    onClick={handleSimulateQrScan}
-                    disabled={isSubmittingCheckin || !tokenData?.token}
+                    onClick={handleToggleCamera}
+                    disabled={isSubmittingCheckin}
                     style={{
-                      backgroundColor: '#FFFFFF',
-                      border: '1px solid #CBD5E1',
-                      color: '#1C2A59',
+                      backgroundColor: isCameraActive ? '#FEE2E2' : '#FFFFFF',
+                      border: isCameraActive ? '1px solid #FCA5A5' : '1px solid #CBD5E1',
+                      color: isCameraActive ? '#991B1B' : '#1C2A59',
                       borderRadius: '8px',
                       padding: '0.65rem 1rem',
                       fontWeight: 600,
@@ -473,7 +639,7 @@ export const SessionAttendanceView: React.FC<SessionAttendanceViewProps> = ({
                       fontSize: '0.82rem',
                     }}
                   >
-                    📷 Escaneo de Cámara
+                    {isCameraActive ? '❌ Cerrar Cámara' : '📷 Escaneo de Cámara'}
                   </button>
                 </div>
               </form>

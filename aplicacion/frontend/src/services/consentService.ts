@@ -143,8 +143,8 @@ class ConsentService {
    * Registra la aceptación expresa del consentimiento informado digital.
    */
   public async acceptConsent(email: string, termsVersion: string = CURRENT_TERMS_VERSION): Promise<ConsentResponse> {
-    if (!email || !email.endsWith('@upt.pe')) {
-      throw new Error('Se requiere un correo institucional válido con dominio @upt.pe');
+    if (!email || (!email.endsWith('@virtual.upt.pe') && !email.endsWith('@upt.pe'))) {
+      throw new Error('Se requiere un correo institucional válido con dominio @virtual.upt.pe o @upt.pe');
     }
 
     const consentedAt = new Date().toISOString();

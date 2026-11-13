@@ -54,10 +54,10 @@ describe('bookingService (T-23 / Sprint 05 Fase 1 - RF12 / RF13 / RF14 / RN-08 /
       };
 
       await expect(apiAdapter.reserveSeat(payload)).rejects.toThrow(
-        /dominio institucional @upt.pe/i
+        /dominio institucional.*@upt\.pe/i
       );
       await expect(mockAdapter.reserveSeat(payload)).rejects.toThrow(
-        /dominio institucional @upt.pe/i
+        /dominio institucional.*@upt\.pe/i
       );
     });
 

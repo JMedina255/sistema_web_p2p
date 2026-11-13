@@ -156,13 +156,28 @@ const mockAdapter = new MockSurveyAdapter();
 
 function resolveServiceMode(): 'mock' | 'api' {
   if (import.meta.env.PROD) return 'api';
-  if (import.meta.env.VITE_SERVICE_MODE === 'api') return 'api';
-  return 'mock';
+  if (import.meta.env.VITE_SERVICE_MODE === 'mock' || import.meta.env.MODE === 'test') {
+    return 'mock';
+  }
+  return 'api';
 }
 
-const currentMode = resolveServiceMode();
+let currentMode: 'mock' | 'api' = resolveServiceMode();
 
 export const surveyService = {
+  getMode(): 'mock' | 'api' {
+    return currentMode;
+  },
+
+  setMode(mode: 'mock' | 'api'): void {
+    if (import.meta.env.PROD && mode === 'mock') {
+      console.warn('Violación de seguridad: El modo mock está desactivado en producción.');
+      currentMode = 'api';
+      return;
+    }
+    currentMode = mode;
+  },
+
   async submitSurvey(
     sessionId: string | number,
     payload: SurveyPayload

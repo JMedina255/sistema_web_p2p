@@ -29,7 +29,7 @@ describe('consentService (T-04 / RF02 / RN-02)', () => {
 
   it('3. Rechaza el registro con correos que no pertenecen al dominio @upt.pe', async () => {
     await expect(consentService.acceptConsent('usuario@gmail.com')).rejects.toThrow(
-      'Se requiere un correo institucional válido con dominio @upt.pe'
+      'Se requiere un correo institucional válido con dominio @virtual.upt.pe o @upt.pe'
     );
   });
 
