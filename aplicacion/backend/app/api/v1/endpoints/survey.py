@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Header, status
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user
-from app.db.session import get_optional_session
+from app.db.session import get_optional_session, get_required_session
 from app.schemas.survey import SurveyCreatePayload, SurveyResponse, SurveyStatusResponse
 from app.services.survey_service import SurveyService
 
@@ -19,7 +19,7 @@ def submit_session_survey(
     id: int,
     payload: SurveyCreatePayload,
     authorization: str | None = Header(None),
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> SurveyResponse:
     """
     Registra la evaluación de calidad de la sesión de mentoría remitida por un estudiante con asistencia confirmada.

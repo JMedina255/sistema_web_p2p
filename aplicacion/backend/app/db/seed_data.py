@@ -43,6 +43,8 @@ def seed_database():
         # 2. Asignar roles a usuarios de prueba
         user_roles_to_seed = [
             ("admin.epis@upt.pe", ["administrador", "mentoreado"]),
+            ("ra2022073504@virtual.upt.pe", ["mentoreado"]),
+            ("jm2022074255@virtual.upt.pe", ["mentor", "mentoreado"]),
             ("2022073504@upt.pe", ["mentor", "mentoreado"]),
             ("2022074255@upt.pe", ["mentoreado"]),
             ("mentor.avanzado@upt.pe", ["mentor", "mentoreado"]),
@@ -75,6 +77,30 @@ def seed_database():
 
         # 3. Sembrar perfiles académicos de prueba si no existen
         profiles_to_seed = [
+            {
+                "email": "ra2022073504@virtual.upt.pe",
+                "codigo_estudiante": "2022073504",
+                "nombres": "Renzo Antonio",
+                "apellidos": "Antayhua Mamani",
+                "ciclo_actual": 3,
+                "rol_postulacion": "mentoreado",
+                "materias_interes": [1, 3],
+                "temas_seleccionados": [1, 2, 9],
+                "biografia": "Estudiante de la EPIS-UPT buscando asesoría académica en materias filtro.",
+                "modalidad_preferida": "presencial",
+            },
+            {
+                "email": "jm2022074255@virtual.upt.pe",
+                "codigo_estudiante": "2022074255",
+                "nombres": "Joan Cristian",
+                "apellidos": "Medina Quispe",
+                "ciclo_actual": 8,
+                "rol_postulacion": "mentor",
+                "materias_interes": [1, 3],
+                "temas_seleccionados": [1, 2, 9, 10],
+                "biografia": "Mentor acreditado de VIII ciclo. Especialidad en Estructuras de Datos y Algoritmos.",
+                "modalidad_preferida": "presencial",
+            },
             {
                 "email": "admin.epis@upt.pe",
                 "codigo_estudiante": "admin.epis",
@@ -166,7 +192,13 @@ def seed_database():
                 )
 
         # 5. Sembrar consentimiento legal aceptado para usuarios de prueba
-        for email in ["admin.epis@upt.pe", "2022073504@upt.pe", "mentor.avanzado@upt.pe"]:
+        for email in [
+            "admin.epis@upt.pe",
+            "ra2022073504@virtual.upt.pe",
+            "jm2022074255@virtual.upt.pe",
+            "2022073504@upt.pe",
+            "mentor.avanzado@upt.pe",
+        ]:
             existing_c = db.query(ConsentimientoLegal).filter(ConsentimientoLegal.email == email).first()
             if not existing_c:
                 c = ConsentimientoLegal(

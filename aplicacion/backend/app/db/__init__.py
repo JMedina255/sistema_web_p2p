@@ -3,6 +3,7 @@ from app.db.session import (
     close_engine,
     get_engine,
     get_optional_session,
+    get_required_session,
     get_session,
     test_db_connection,
 )
@@ -12,6 +13,7 @@ __all__ = [
     "get_engine",
     "get_session",
     "get_optional_session",
+    "get_required_session",
     "close_engine",
     "test_db_connection",
 ]

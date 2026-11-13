@@ -52,7 +52,7 @@ def test_accept_consent_rejects_external_email():
     }
     response = client.post("/api/v1/consent/accept", json=payload)
     assert response.status_code == 422
-    assert "dominio institucional @upt.pe" in response.text
+    assert "dominio institucional" in response.text and "@upt.pe" in response.text
 
 
 def test_revoke_consent_blocks_access():

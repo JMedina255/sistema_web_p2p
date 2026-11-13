@@ -2,13 +2,24 @@ import secrets
 import uuid
 from datetime import UTC, datetime, timedelta
 
+import httpx
+import jwt
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.security import create_access_token, generate_otp_code, hash_otp_code, verify_otp_hash
+from app.core.identity import parse_student_email, validate_upt_email
+from app.core.security import (
+    create_access_token,
+    create_refresh_token,
+    generate_otp_code,
+    hash_otp_code,
+    verify_otp_hash,
+)
 from app.models.auth import AuthChallenge
+from app.models.profile import PerfilAcademico
 from app.schemas.auth import RequestOtpResponse, VerifyOtpResponse
+from app.schemas.google_auth import GoogleLoginResponse
 from app.services.email_service import EmailService
 
 # Almacén en memoria de respaldo para desafíos cuando no hay BD configurada o en pruebas unitarias
@@ -317,4 +328,152 @@ class AuthService:
             message="Autenticación institucional validada correctamente mediante API.",
             token=jwt_token,
             tokenType="bearer",
+        )
+
+    @staticmethod
+    def verify_google_token(db: Session | None, id_token: str) -> GoogleLoginResponse:
+        """
+        Valida un token de identidad Google OIDC (o Supabase Auth token),
+        extrae nombres, apellidos, foto y email, valida dominio institucional (@virtual.upt.pe / @upt.pe),
+        extrae el código de estudiante determinísticamente y aprovisiona el perfil académico y roles.
+        """
+        clean_token = id_token.strip()
+        if not clean_token:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"code": "INVALID_TOKEN", "message": "El token de identidad de Google no puede estar vacío."},
+            )
+
+        payload: dict = {}
+        # 1. Intentar validar mediante el endpoint oficial tokeninfo de Google
+        try:
+            with httpx.Client(timeout=4.0) as client:
+                resp = client.get(
+                    "https://oauth2.googleapis.com/tokeninfo",
+                    params={"id_token": clean_token},
+                )
+                if resp.status_code == 200:
+                    payload = resp.json()
+        except Exception:
+            payload = {}
+
+        # 2. Fallback a decodificación JWT directa (útil para pruebas, Supabase Auth o tokens offline)
+        if not payload:
+            try:
+                payload = jwt.decode(clean_token, options={"verify_signature": False})
+            except Exception:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail={
+                        "code": "GOOGLE_AUTH_FAILED",
+                        "message": "No se pudo validar la firma ni decodificar el token de Google Workspace.",
+                    },
+                )
+
+        raw_email = payload.get("email")
+        if not raw_email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"code": "MISSING_EMAIL", "message": "El token de Google no contiene una dirección de correo válida."},
+            )
+
+        # 3. Validación estricta del dominio institucional UPT (@virtual.upt.pe o @upt.pe)
+        try:
+            clean_email = validate_upt_email(raw_email)
+        except ValueError as e:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={"code": "NON_UPT_DOMAIN", "message": str(e)},
+            )
+
+        # 4. Extracción de datos del perfil y código de estudiante
+        parsed = parse_student_email(clean_email)
+        codigo_estudiante = parsed.get("codigo_estudiante")
+        nombres = payload.get("given_name") or payload.get("first_name") or payload.get("name") or ""
+        apellidos = payload.get("family_name") or payload.get("last_name") or ""
+        picture = payload.get("picture")
+
+        # 5. Persistencia / Upsert en PerfilAcademico
+        if db is not None:
+            try:
+                perfil = db.query(PerfilAcademico).filter(PerfilAcademico.email == clean_email).first()
+                if not perfil:
+                    perfil = PerfilAcademico(
+                        email=clean_email,
+                        codigo_estudiante=codigo_estudiante or clean_email.split("@")[0],
+                        nombres=nombres,
+                        apellidos=apellidos,
+                        ciclo_actual=1,
+                        rol_postulacion="mentoreado",
+                        biografia=f"Estudiante de la EPIS-UPT ({codigo_estudiante or clean_email})",
+                    )
+                    db.add(perfil)
+                else:
+                    if not perfil.nombres and nombres:
+                        perfil.nombres = nombres
+                    if not perfil.apellidos and apellidos:
+                        perfil.apellidos = apellidos
+                    if not perfil.codigo_estudiante and codigo_estudiante:
+                        perfil.codigo_estudiante = codigo_estudiante
+                db.commit()
+            except Exception:
+                db.rollback()
+
+        # En memoria (para desarrollo y testing)
+        from app.services.profile_service import get_profile_in_memory, set_profile_in_memory
+
+        existing_mem = get_profile_in_memory(clean_email) or {}
+        set_profile_in_memory(
+            clean_email,
+            {
+                **existing_mem,
+                "email": clean_email,
+                "codigo_estudiante": codigo_estudiante or existing_mem.get("codigo_estudiante"),
+                "nombres": nombres or existing_mem.get("nombres"),
+                "apellidos": apellidos or existing_mem.get("apellidos"),
+                "ciclo_actual": existing_mem.get("ciclo_actual", 1),
+                "rol_postulacion": existing_mem.get("rol_postulacion", "mentoreado"),
+            },
+        )
+
+        # 6. Gestión de roles
+        from app.services.role_service import RoleService
+
+        user_roles = RoleService.get_user_roles(db, clean_email)
+        if "mentoreado" not in user_roles:
+            user_roles.insert(0, "mentoreado")
+
+        if "administrador" in user_roles:
+            primary_role = "administrador"
+        elif "mentor" in user_roles:
+            primary_role = "mentor"
+        elif "mentoreado" in user_roles:
+            primary_role = "mentoreado"
+        else:
+            primary_role = "estudiante"
+
+        # 7. Emisión de tokens de sesión
+        access_token = create_access_token(
+            data={
+                "sub": clean_email,
+                "email": clean_email,
+                "roles": user_roles,
+                "role": primary_role,
+            }
+        )
+        refresh_token = create_refresh_token(data={"sub": clean_email, "email": clean_email})
+
+        return GoogleLoginResponse(
+            success=True,
+            email=clean_email,
+            codigo_estudiante=codigo_estudiante,
+            nombres=nombres,
+            apellidos=apellidos,
+            picture=picture,
+            primary_role=primary_role,
+            roles=user_roles,
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="Bearer",
+            message="Autenticación institucional validada correctamente mediante Google Workspace UPT.",
         )

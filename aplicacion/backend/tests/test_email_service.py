@@ -27,7 +27,7 @@ def test_email_service_mime_message_construction():
         text_body="Hola Alumno",
     )
     assert msg["To"] == "test.student@upt.pe"
-    assert "noreply.mentoria.upt@gmail.com" in msg["From"]
+    assert (settings.SMTP_USER or "noreply.mentoria.upt@gmail.com") in msg["From"]
     assert msg["Subject"] == "Asunto de Prueba Institucional"
     assert msg.is_multipart()
     parts = msg.get_payload()

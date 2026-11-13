@@ -9,6 +9,7 @@ from app.schemas.auth import (
     VerifyOtpPayload,
     VerifyOtpResponse,
 )
+from app.schemas.google_auth import GoogleLoginPayload, GoogleLoginResponse
 from app.services.auth_service import AuthService
 
 router = APIRouter()
@@ -54,3 +55,17 @@ def verify_otp(
     db: Session | None = Depends(get_optional_session),
 ):
     return AuthService.verify_otp(db=db, challenge_id=payload.challengeId, otp=payload.otp)
+
+
+@router.post(
+    "/google",
+    response_model=GoogleLoginResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Autenticación federada con Google Workspace institucional",
+    description="Valida el token Google OIDC (@virtual.upt.pe / @upt.pe), extrae código de estudiante, nombres y emite JWT de sesión.",
+)
+def login_with_google(
+    payload: GoogleLoginPayload,
+    db: Session | None = Depends(get_optional_session),
+):
+    return AuthService.verify_google_token(db=db, id_token=payload.id_token)

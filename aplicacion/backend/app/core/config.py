@@ -135,11 +135,26 @@ class Settings(BaseSettings):
         description="Intervalo en minutos para revisión periódica de quórum a T-24h",
     )
 
+    # Autenticación Federada Google Identity
+    GOOGLE_CLIENT_ID: str | None = Field(
+        default=None,
+        description="Google OAuth Client ID para autenticación institucional con @virtual.upt.pe",
+    )
+
+    # Modo de Persistencia Estricto (Prevención de degradación silenciosa a RAM)
+    STRICT_DATABASE_MODE: bool = Field(
+        default=False,
+        description="En modo estricto, rechaza transacciones con HTTP 503 si PostgreSQL no está disponible",
+    )
+
     @model_validator(mode="after")
     def adjust_production_defaults(self):
-        # En producción, si no se configuró explícitamente la marca de agua, emitir constancias limpias oficiales
-        if self.APP_ENV == "production" and "ENABLE_DEMO_WATERMARK" not in self.model_fields_set:
-            self.ENABLE_DEMO_WATERMARK = False
+        # En producción, forzar persistencia estricta para erradicar degradación a RAM
+        if self.APP_ENV == "production":
+            if "STRICT_DATABASE_MODE" not in self.model_fields_set:
+                self.STRICT_DATABASE_MODE = True
+            if "ENABLE_DEMO_WATERMARK" not in self.model_fields_set:
+                self.ENABLE_DEMO_WATERMARK = False
         return self
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")

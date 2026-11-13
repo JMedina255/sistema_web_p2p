@@ -1,4 +1,4 @@
-from app.models.attendance import AsistenciaSesion
+from app.models.attendance import AsistenciaSesion, TokenAsistenciaActivo
 from app.models.auth import AuthChallenge
 from app.models.bitacora import BitacoraPedagogica
 from app.models.booking import ReservaCupo, SolicitudDemanda
@@ -24,6 +24,7 @@ __all__ = [
     "SolicitudDemanda",
     "BitacoraPedagogica",
     "AsistenciaSesion",
+    "TokenAsistenciaActivo",
     "EncuestaCalidad",
     "CertificadoHoras",
 ]

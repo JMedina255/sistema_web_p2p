@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, 
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user
-from app.db.session import get_optional_session
+from app.db.session import get_optional_session, get_required_session
 from app.schemas.certificate import (
     CertificateGenerateRequest,
     CertificateMetaResponse,
@@ -70,7 +70,7 @@ def get_certificate_hours_summary(
 def generate_mentor_certificate(
     payload: CertificateGenerateRequest | None = None,
     authorization: Annotated[str | None, Header()] = None,
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> CertificateMetaResponse:
     """
     Compila y emite la constancia oficial de mentoría académica en formato PDF:

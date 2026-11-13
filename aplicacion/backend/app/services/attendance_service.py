@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timedelta
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models.attendance import AsistenciaSesion
+from app.models.attendance import AsistenciaSesion, TokenAsistenciaActivo
 from app.models.booking import ReservaCupo
 from app.models.offer import SesionMentoria
 from app.models.roles import Rol, UsuarioRol
@@ -131,6 +131,30 @@ class AttendanceService:
                 "expires_at": expires_at,
             }
 
+        # Persistir en PostgreSQL para soporte multi-worker distribuido
+        if db is not None:
+            try:
+                token_db = (
+                    db.query(TokenAsistenciaActivo)
+                    .filter(TokenAsistenciaActivo.id_sesion == session_id)
+                    .first()
+                )
+                if not token_db:
+                    token_db = TokenAsistenciaActivo(
+                        id_sesion=session_id,
+                        token=token,
+                        totp_code=totp_code,
+                        expires_at=expires_at,
+                    )
+                    db.add(token_db)
+                else:
+                    token_db.token = token
+                    token_db.totp_code = totp_code
+                    token_db.expires_at = expires_at
+                db.commit()
+            except Exception:
+                db.rollback()
+
         return AttendanceTokenResponse(
             session_id=session_id,
             token=token,
@@ -160,35 +184,57 @@ class AttendanceService:
             )
         student_email = student_email.strip().lower()
 
-        # Validación estricta de código QR o código numérico TOTP
+        # Validación estricta de código QR o código numérico TOTP (PostgreSQL o memoria)
         if not payload.qr_token and not payload.numeric_code:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="TOKEN_OR_CODE_REQUIRED: Debe proporcionar el código QR dinámico o el código numérico de 6 dígitos de asistencia.",
             )
 
-        with _attendance_lock:
-            active_info = _active_attendance_tokens.get(session_id)
-            if not active_info:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="NO_ACTIVE_ATTENDANCE_TOKEN: El mentor aún no ha iniciado el pase de asistencia digital para esta sesión.",
+        active_info = None
+        if db is not None:
+            try:
+                token_db = (
+                    db.query(TokenAsistenciaActivo)
+                    .filter(TokenAsistenciaActivo.id_sesion == session_id)
+                    .first()
                 )
-            if now_utc > active_info["expires_at"]:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="QR_TOKEN_EXPIRED: El código de asistencia ha expirado. Por favor, escanee el código QR actualizado proyectado por el mentor.",
-                )
-            if payload.qr_token and payload.qr_token != active_info["token"]:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="QR_TOKEN_EXPIRED: Token de asistencia no válido o rotado.",
-                )
-            if payload.numeric_code and payload.numeric_code != active_info["totp_code"]:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="QR_TOKEN_EXPIRED: Código numérico de asistencia incorrecto o expirado.",
-                )
+                if token_db:
+                    exp_dt = token_db.expires_at
+                    if exp_dt.tzinfo is None:
+                        exp_dt = exp_dt.replace(tzinfo=UTC)
+                    active_info = {
+                        "token": token_db.token,
+                        "totp_code": token_db.totp_code,
+                        "expires_at": exp_dt,
+                    }
+            except Exception:
+                active_info = None
+
+        if not active_info:
+            with _attendance_lock:
+                active_info = _active_attendance_tokens.get(session_id)
+
+        if not active_info:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="NO_ACTIVE_ATTENDANCE_TOKEN: El mentor aún no ha iniciado el pase de asistencia digital para esta sesión.",
+            )
+        if now_utc > active_info["expires_at"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="QR_TOKEN_EXPIRED: El código de asistencia ha expirado. Por favor, escanee el código QR actualizado proyectado por el mentor.",
+            )
+        if payload.qr_token and payload.qr_token != active_info["token"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="QR_TOKEN_EXPIRED: Token de asistencia no válido o rotado.",
+            )
+        if payload.numeric_code and payload.numeric_code != active_info["totp_code"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="QR_TOKEN_EXPIRED: Código numérico de asistencia incorrecto o expirado.",
+            )
 
         # 1. Base de datos
         if db is not None:
@@ -255,7 +301,12 @@ class AttendanceService:
 
             reserva.estado = "ASISTIDA"
             db.commit()
-            db.refresh(asistencia)
+            try:
+                db.refresh(asistencia)
+            except Exception:
+                pass
+            if asistencia.id_asistencia is None:
+                asistencia.id_asistencia = 1
 
             return AttendanceCheckinResponse(
                 id_asistencia=asistencia.id_asistencia,

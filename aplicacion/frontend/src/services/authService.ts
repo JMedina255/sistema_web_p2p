@@ -101,15 +101,15 @@ class MockAuthAdapter {
 
     const trimmedEmail = email.trim().toLowerCase();
 
-    // Validación de dominio institucional exacto @upt.pe (CUS01 / RN-01)
-    if (!trimmedEmail.endsWith('@upt.pe')) {
+    // Validación de dominio institucional (@virtual.upt.pe para alumnos o @upt.pe directivo) (CUS01 / RN-01)
+    if (!trimmedEmail.endsWith('@virtual.upt.pe') && !trimmedEmail.endsWith('@upt.pe')) {
       throw new AuthException(
         'NON_UPT_DOMAIN',
-        'El correo debe pertenecer estrictamente al dominio institucional oficial @upt.pe.'
+        'El correo debe pertenecer al dominio institucional oficial @virtual.upt.pe o @upt.pe.'
       );
     }
 
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@upt\.pe$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@(virtual\.upt\.pe|upt\.pe)$/;
     if (!emailRegex.test(trimmedEmail)) {
       throw new AuthException(
         'INVALID_EMAIL',
@@ -288,14 +288,18 @@ export class ApiAuthAdapter {
     this.apiBaseUrl = apiBaseUrl || envUrl || 'http://localhost:8000';
   }
 
+  public getApiBaseUrl(): string {
+    return this.apiBaseUrl;
+  }
+
   public async requestOtp(email: string): Promise<RequestOtpResponse> {
     const trimmedEmail = email.trim().toLowerCase();
 
-    // Validación previa de dominio institucional exacto @upt.pe
-    if (!trimmedEmail.endsWith('@upt.pe')) {
+    // Validación previa de dominio institucional oficial (@virtual.upt.pe o @upt.pe)
+    if (!trimmedEmail.endsWith('@virtual.upt.pe') && !trimmedEmail.endsWith('@upt.pe')) {
       throw new AuthException(
         'NON_UPT_DOMAIN',
-        'El correo debe pertenecer estrictamente al dominio institucional oficial @upt.pe.'
+        'El correo debe pertenecer al dominio institucional oficial @virtual.upt.pe o @upt.pe.'
       );
     }
 
@@ -497,6 +501,71 @@ export const authService = {
     }
 
     return result;
+  },
+
+  async loginWithGoogle(idToken: string): Promise<VerifyOtpResponse> {
+    if (currentMode === 'mock') {
+      const parts = idToken.split('.');
+      let email = 'ra2022073504@virtual.upt.pe';
+      if (parts.length >= 2) {
+        try {
+          const payload = JSON.parse(atob(parts[1]));
+          email = payload.email || email;
+        } catch {
+          // ignore
+        }
+      }
+      const mockResult: VerifyOtpResponse = {
+        success: true,
+        email,
+        verifiedAt: new Date().toISOString(),
+        mode: 'mock',
+        message: 'Sesión iniciada con Google Workspace UPT (Modo Mock).',
+        token: `mock_jwt_google_${Date.now()}`,
+        tokenType: 'bearer',
+      };
+      this.saveToken(mockResult.token!);
+      return mockResult;
+    }
+
+    const response = await fetch(`${apiAdapter.getApiBaseUrl()}/api/v1/auth/google`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ id_token: idToken }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new AuthException(
+        errorData.detail?.code || 'AUTH_ERROR',
+        errorData.detail?.message || 'Error durante la autenticación con Google Workspace.'
+      );
+    }
+
+    const data = await response.json();
+    if (data.access_token) {
+      this.saveToken(data.access_token);
+      try {
+        localStorage.setItem('auth_token', data.access_token);
+        localStorage.setItem('user_email', data.email);
+        localStorage.setItem('user_role', data.primary_role);
+      } catch {
+        // ignore
+      }
+    }
+
+    return {
+      success: true,
+      email: data.email,
+      verifiedAt: new Date().toISOString(),
+      mode: 'api',
+      message: data.message,
+      token: data.access_token,
+      tokenType: data.token_type,
+    };
   },
 
   cancelChallenge(): void {

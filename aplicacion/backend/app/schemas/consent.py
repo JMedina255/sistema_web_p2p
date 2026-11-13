@@ -2,17 +2,11 @@ import re
 
 from pydantic import BaseModel, Field, field_validator
 
+from app.core.identity import validate_upt_email
+
 
 def _validate_upt_email(v: str) -> str:
-    clean_email = v.strip().lower()
-    if not clean_email.endswith("@upt.pe"):
-        raise ValueError(
-            "El correo electrónico debe pertenecer al dominio institucional @upt.pe (CUS01 / RN-01)"
-        )
-    email_regex = r"^[a-zA-Z0-9._%+-]+@upt\.pe$"
-    if not re.match(email_regex, clean_email):
-        raise ValueError("El formato del correo institucional es inválido")
-    return clean_email
+    return validate_upt_email(v)
 
 
 class ConsentStatusResponse(BaseModel):

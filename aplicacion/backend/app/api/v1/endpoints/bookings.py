@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.endpoints.profiles import _resolve_authenticated_email
 from app.core.security import decode_access_token
-from app.db.session import get_optional_session
+from app.db.session import get_optional_session, get_required_session
 from app.schemas.booking import (
     BookingCancelPayload,
     BookingCreatePayload,
@@ -45,7 +45,7 @@ def reserve_booking(
         None, description="Correo del estudiante en entorno de pruebas si no se envía Bearer JWT"
     ),
     authorization: str | None = Header(None),
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> BookingResponse:
     """
     Formaliza de manera atómica una reserva provisional bajo bloqueo pesimista
@@ -98,7 +98,7 @@ def confirm_booking_attendance(
         None, description="Correo del estudiante en entorno de pruebas si no se envía Bearer JWT"
     ),
     authorization: str | None = Header(None),
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> BookingDetailResponse:
     """
     Ratifica la intención de asistencia del estudiante a una reserva provisional
@@ -128,7 +128,7 @@ def cancel_booking_reservation(
         None, description="Correo del estudiante en entorno de pruebas si no se envía Bearer JWT"
     ),
     authorization: str | None = Header(None),
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> BookingDetailResponse:
     """
     Desiste voluntariamente de una reserva activa de mentoría (PENDIENTE_CONFIRMACION o CONFIRMADA)
@@ -180,7 +180,7 @@ def create_demand_request(
     payload: MentoringDemandPayload,
     student_email: str | None = Query(None, description="Correo del solicitante"),
     authorization: str | None = Header(None),
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> MentoringDemandResponse:
     """
     Permite al estudiante mentoreado registrar una necesidad formativa específica

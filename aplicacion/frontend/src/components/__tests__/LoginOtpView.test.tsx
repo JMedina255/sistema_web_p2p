@@ -32,7 +32,7 @@ describe('LoginOtpView Component', () => {
     const submitBtn = screen.getByRole('button', { name: /Continuar con Código OTP/i });
     fireEvent.click(submitBtn);
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/Solo se permiten correos institucionales con dominio @upt\.pe/i);
+    expect(screen.getByRole('alert')).toHaveTextContent(/Solo se permiten correos institucionales con dominio/i);
   });
 
   it('3. Los atajos de prueba rápida precargan los correos seleccionados cuando los controles dev están activos', () => {

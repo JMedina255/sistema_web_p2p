@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.identity import parse_student_email
 from app.models.profile import DisponibilidadHoraria, PerfilAcademico
 from app.schemas.profile import (
     AcademicProfileResponse,
@@ -31,17 +32,18 @@ class ProfileService:
     @staticmethod
     def _default_profile(email: str) -> AcademicProfileResponse:
         clean_email = email.strip().lower()
-        codigo = clean_email.split("@")[0] if "@" in clean_email else clean_email
+        parsed = parse_student_email(clean_email)
+        codigo = parsed.get("codigo_estudiante") or (clean_email.split("@")[0] if "@" in clean_email else clean_email)
         nombres = ""
         apellidos = ""
         ciclo = 3
         rol_pos = "mentoreado"
 
-        if codigo == "2022074255":
+        if codigo == "2022074255" or clean_email.startswith("jm2022074255"):
             nombres = "Joan Cristian"
             apellidos = "Medina Quispe"
             ciclo = 6
-        elif codigo == "2022073504":
+        elif codigo == "2022073504" or clean_email.startswith("ra2022073504"):
             nombres = "Renzo Antonio"
             apellidos = "Antayhua Mamani"
             ciclo = 7
@@ -139,9 +141,11 @@ class ProfileService:
             try:
                 perfil = db.query(PerfilAcademico).filter(PerfilAcademico.email == clean_email).first()
                 if not perfil:
+                    parsed_info = parse_student_email(clean_email)
+                    resolved_codigo = payload.codigo_estudiante or parsed_info.get("codigo_estudiante") or clean_email.split("@")[0]
                     perfil = PerfilAcademico(
                         email=clean_email,
-                        codigo_estudiante=payload.codigo_estudiante or clean_email.split("@")[0],
+                        codigo_estudiante=resolved_codigo,
                         nombres=payload.nombres,
                         apellidos=payload.apellidos,
                         ciclo_actual=payload.ciclo_actual,

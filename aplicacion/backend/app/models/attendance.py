@@ -33,3 +33,24 @@ class AsistenciaSesion(Base):
     )
 
     sesion = relationship("SesionMentoria", backref="asistencias", lazy="joined")
+
+
+class TokenAsistenciaActivo(Base):
+    """
+    Entidad tokens_asistencia_activos.
+    Persiste los códigos dinámicos TOTP (30s) en PostgreSQL para permitir
+    balanceo de carga multi-worker sin desincronización de memoria.
+    """
+
+    __tablename__ = "tokens_asistencia_activos"
+
+    id_token: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id_sesion: Mapped[int] = mapped_column(
+        Integer, ForeignKey("sesiones_mentoria.id_sesion", ondelete="CASCADE"), unique=True, nullable=False, index=True
+    )
+    token: Mapped[str] = mapped_column(String(64), nullable=False)
+    totp_code: Mapped[str] = mapped_column(String(6), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )

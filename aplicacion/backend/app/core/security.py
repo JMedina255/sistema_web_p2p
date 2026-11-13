@@ -56,6 +56,24 @@ def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = 
     return encoded_jwt
 
 
+def create_refresh_token(data: dict[str, Any]) -> str:
+    """
+    Crea un token JWT de refresco de sesión con expiración extendida (7 días).
+    """
+    to_encode = data.copy()
+    now = datetime.now(UTC)
+    expire = now + timedelta(days=7)
+    to_encode.update(
+        {
+            "iat": int(now.timestamp()),
+            "exp": int(expire.timestamp()),
+            "iss": "sistema-p2p-epis-upt",
+            "type": "refresh",
+        }
+    )
+    return jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+
+
 def decode_access_token(token: str) -> dict[str, Any] | None:
     """
     Decodifica y valida un token JWT de sesión. Retorna el payload si es válido o None si expiró/es inválido.

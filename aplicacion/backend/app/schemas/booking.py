@@ -2,6 +2,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
+from app.core.identity import validate_upt_email
+
 
 class BookingCreatePayload(BaseModel):
     """
@@ -9,15 +11,12 @@ class BookingCreatePayload(BaseModel):
     """
 
     id_sesion: int = Field(..., ge=1, description="Identificador unívoco de la sesión de mentoría.")
-    estudiante_email: str = Field(..., description="Correo institucional @upt.pe del estudiante mentoreado.")
+    estudiante_email: str = Field(..., description="Correo institucional (@virtual.upt.pe o @upt.pe) del estudiante mentoreado.")
 
     @field_validator("estudiante_email")
     @classmethod
     def validate_upt_email(cls, v: str) -> str:
-        clean = v.strip().lower()
-        if not clean.endswith("@upt.pe"):
-            raise ValueError("El correo del estudiante debe pertenecer al dominio institucional @upt.pe.")
-        return clean
+        return validate_upt_email(v)
 
 
 class BookingCancelPayload(BaseModel):

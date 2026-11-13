@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user
-from app.db.session import get_optional_session
+from app.db.session import get_optional_session, get_required_session
 from app.schemas.bitacora import (
     BitacoraCreatePayload,
     BitacoraItemResponse,
@@ -27,7 +27,7 @@ def create_session_bitacora(
     id_sesion: int,
     payload: BitacoraCreatePayload,
     authorization: str | None = Header(None),
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> BitacoraResponse:
     """
     Registra el reporte pedagógico de la sesión de mentoría con firma criptográfica SHA-256.
@@ -61,7 +61,7 @@ def create_session_bitacora(
 def get_session_bitacora(
     id_sesion: int,
     authorization: str | None = Header(None),
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> BitacoraResponse:
     """
     Retorna la bitácora pedagógica registrada y firmada digitalmente para una sesión de mentoría.

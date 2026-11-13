@@ -97,6 +97,40 @@ def get_optional_session():
         db.close()
 
 
+def get_required_session():
+    """
+    Generador de sesión estricto que arroja HTTP 503 si la base de datos está caída o inaccesible
+    cuando STRICT_DATABASE_MODE=True o en producción (APP_ENV=production),
+    previniendo la degradación silenciosa a memoria RAM volátil.
+    """
+    db = None
+    try:
+        engine = get_engine()
+        if engine is not None and _SessionLocal is not None:
+            db = _SessionLocal()
+    except Exception:
+        db = None
+
+    if db is None:
+        if settings.STRICT_DATABASE_MODE:
+            from fastapi import HTTPException, status
+
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "code": "DATABASE_UNAVAILABLE",
+                    "message": "DATABASE_UNAVAILABLE: El servicio de base de datos PostgreSQL/Supabase no está disponible. Operación abortada para prevenir inconsistencias de persistencia.",
+                },
+            )
+        yield None
+        return
+
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 def close_engine():
     """
     Libera los recursos del pool de conexiones al apagar el servicio.

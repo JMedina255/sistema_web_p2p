@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Header, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.v1.endpoints.profiles import _extract_caller_and_admin_status
-from app.db.session import get_optional_session
+from app.db.session import get_optional_session, get_required_session
 from app.schemas.offer import (
     PublishOfferPayload,
     PublishOfferResponse,
@@ -25,7 +25,7 @@ router = APIRouter()
 def publish_offer(
     payload: PublishOfferPayload,
     authorization: str | None = Header(None),
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> PublishOfferResponse:
     """
     Publica una oferta de mentoría académica conforme a las reglas del sistema:

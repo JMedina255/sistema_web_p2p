@@ -5,7 +5,7 @@ from app.api.v1.endpoints.profiles import (
     _extract_caller_and_admin_status,
     _resolve_authenticated_email,
 )
-from app.db.session import get_optional_session
+from app.db.session import get_optional_session, get_required_session
 from app.schemas.attendance import (
     AttendanceCheckinPayload,
     AttendanceCheckinResponse,
@@ -26,7 +26,7 @@ router = APIRouter()
 def get_attendance_token(
     id_sesion: int,
     authorization: str | None = Header(None),
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> AttendanceTokenResponse:
     """
     Genera un token criptográfico dinámico rotatorio cada 30 segundos para la proyección del código QR
@@ -53,7 +53,7 @@ def record_attendance_checkin(
     payload: AttendanceCheckinPayload,
     request: Request,
     authorization: str | None = Header(None),
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> AttendanceCheckinResponse:
     """
     Registra la presencia efectiva del estudiante mentoreado:

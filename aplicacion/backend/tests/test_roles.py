@@ -83,7 +83,7 @@ def test_promote_mentor_rejects_external_email():
         headers=ADMIN_HEADERS,
     )
     assert response.status_code == 422
-    assert "dominio institucional @upt.pe" in response.text
+    assert "dominio institucional" in response.text and "@upt.pe" in response.text
 
 
 def test_role_service_with_real_db_session():
