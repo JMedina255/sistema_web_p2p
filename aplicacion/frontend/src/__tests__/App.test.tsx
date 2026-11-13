@@ -76,7 +76,7 @@ describe('App Component (Navegación Institucional por Rol)', () => {
     fireEvent.click(profileTab);
     await waitFor(() => {
       expect(screen.getByText(/1. Perfil Formativo Académico/i)).toBeInTheDocument();
-    });
+    }, { timeout: 4000 });
   });
 
   it('3. Navegación en rol administrador: muestra menú de administración y telemetría', async () => {

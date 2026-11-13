@@ -13,6 +13,7 @@ import { offerService, type PublishOfferResponse } from '../services/offerServic
 import { bitacoraService, type BitacoraItem } from '../services/bitacoraService';
 import { HealthStatus } from './HealthStatus';
 import { CurriculumCatalogView } from './CurriculumCatalogView';
+import { AdminScheduleUploadView } from './AdminScheduleUploadView';
 
 export interface AdminDashboardViewProps {
   adminEmail?: string;
@@ -24,7 +25,9 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
   showDevControls = false,
 }) => {
   const isDev = showDevControls && !import.meta.env.PROD;
-  const [activeTab, setActiveTab] = useState<'roles' | 'quorum' | 'health' | 'bitacoras' | 'curriculum'>('roles');
+  const [activeTab, setActiveTab] = useState<
+    'roles' | 'quorum' | 'health' | 'bitacoras' | 'curriculum' | 'schedule'
+  >('roles');
 
   // Estado para gestión de roles
   const [searchEmail, setSearchEmail] = useState('');
@@ -335,6 +338,22 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
             }}
           >
             📚 Catálogo Curricular (RF05)
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('schedule')}
+            style={{
+              padding: '0.45rem 0.9rem',
+              borderRadius: '6px',
+              border: 'none',
+              background: activeTab === 'schedule' ? '#B99451' : 'rgba(255, 255, 255, 0.15)',
+              color: '#FFFFFF',
+              fontWeight: 600,
+              fontSize: '0.82rem',
+              cursor: 'pointer',
+            }}
+          >
+            📅 Cronograma de Aulas (RF10)
           </button>
           <button
             type="button"
@@ -1198,7 +1217,12 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
           </div>
         )}
 
-        {/* SECCIÓN 5: SALUD DEL SISTEMA */}
+        {/* SECCIÓN 5: CRONOGRAMAS Y PARSER DE HORARIOS (RF10 / CUS11 / RN-06) */}
+        {activeTab === 'schedule' && (
+          <AdminScheduleUploadView />
+        )}
+
+        {/* SECCIÓN 6: SALUD DEL SISTEMA */}
         {activeTab === 'health' && (
           <div>
             <HealthStatus />

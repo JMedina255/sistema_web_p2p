@@ -36,6 +36,38 @@ class ScheduleParserService:
     ALLOWED_EXTENSIONS = {".xlsx", ".xls", ".pdf"}
     MAX_FILE_SIZE = 15 * 1024 * 1024  # 15 MB
 
+    _active_free_slots: list[dict[str, Any]] = [
+        {"aula": "Lab 01", "dia": "Lunes", "hora_inicio": "08:00", "hora_fin": "10:00", "estado": "LIBRE"},
+        {"aula": "Lab 01", "dia": "Miércoles", "hora_inicio": "14:00", "hora_fin": "16:00", "estado": "LIBRE"},
+        {"aula": "Lab 02", "dia": "Martes", "hora_inicio": "10:00", "hora_fin": "12:00", "estado": "LIBRE"},
+        {"aula": "Lab 02", "dia": "Jueves", "hora_inicio": "16:00", "hora_fin": "18:00", "estado": "LIBRE"},
+        {"aula": "Aula 101", "dia": "Lunes", "hora_inicio": "10:00", "hora_fin": "12:00", "estado": "LIBRE"},
+        {"aula": "Aula 202", "dia": "Miércoles", "hora_inicio": "08:00", "hora_fin": "10:00", "estado": "LIBRE"},
+        {"aula": "Aula 302", "dia": "Viernes", "hora_inicio": "14:00", "hora_fin": "16:00", "estado": "LIBRE"},
+    ]
+    _last_imported_filename: str | None = "cronograma_oficial_base_2026.xlsx"
+
+    @classmethod
+    def get_active_slots(cls, dia: str | None = None, aula: str | None = None) -> list[dict[str, Any]]:
+        slots = list(cls._active_free_slots)
+        if dia:
+            dia_clean = dia.strip().lower()
+            slots = [s for s in slots if s.get("dia", "").lower() == dia_clean]
+        if aula:
+            aula_clean = aula.strip().lower()
+            slots = [s for s in slots if aula_clean in s.get("aula", "").lower()]
+        return slots
+
+    @classmethod
+    def get_classrooms(cls) -> list[str]:
+        aulas = sorted({s["aula"] for s in cls._active_free_slots if s.get("aula")})
+        return aulas
+
+    @classmethod
+    def update_active_slots(cls, slots: list[dict[str, Any]], filename: str) -> None:
+        cls._active_free_slots = slots
+        cls._last_imported_filename = filename
+
     @classmethod
     def validar_archivo(cls, filename: str, content: bytes) -> str:
         """
@@ -208,6 +240,9 @@ class ScheduleParserService:
 
         # Verificación cruzada: las reservas activas previas no se anulan ni pierden
         active_count = len(reservas_activas) if reservas_activas else 0
+
+        # Actualiza las aulas y franjas libres en el repositorio activo del sistema
+        cls.update_active_slots(slots, filename)
 
         return {
             "status": "PROCESADO_EXITOSAMENTE",
