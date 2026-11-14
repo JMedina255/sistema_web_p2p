@@ -210,6 +210,24 @@ def seed_database():
                 )
                 db.add(c)
 
+        # Sincronización automática de secuencias para prevenir UniqueViolation en claves primarias
+        find_seqs_sql = """
+        SELECT 
+            c.table_name,
+            c.column_name,
+            pg_get_serial_sequence(c.table_name, c.column_name) AS seq_name
+        FROM information_schema.tables t
+        JOIN information_schema.columns c 
+            ON t.table_name = c.table_name AND t.table_schema = c.table_schema
+        WHERE t.table_schema = 'public'
+          AND t.table_type = 'BASE TABLE'
+          AND pg_get_serial_sequence(c.table_name, c.column_name) IS NOT NULL;
+        """
+        for table_name, col_name, seq_name in db.execute(text(find_seqs_sql)).fetchall():
+            max_val = db.execute(text(f"SELECT COALESCE(MAX({col_name}), 0) FROM {table_name}")).scalar()
+            if max_val > 0:
+                db.execute(text(f"SELECT setval('{seq_name}', {max_val}, true)"))
+
         db.commit()
         print("Siembra completada exitosamente en PostgreSQL.")
     except Exception as e:
