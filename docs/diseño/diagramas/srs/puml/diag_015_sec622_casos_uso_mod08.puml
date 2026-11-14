@@ -1,0 +1,34 @@
+/'
+  Diagrama: Diagrama 6.12: Diagrama de Casos de Uso - MOD-08: Analítica, Notificaciones y Configuración
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.12: Diagrama de Casos de Uso - MOD-08: Analítica, Notificaciones y Configuración
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+actor "Administrador (EPIS)" as Admin #FEF9C3
+actor "Servicio Cron Backend" as Cron #FFF1F2
+
+rectangle "MOD-08: Analítica, Notificaciones y Configuración" {
+  usecase "CUS-009: Notificar eventos\ncríticos y alertas temporales" as CUS09
+  usecase "CUS-011: Generar reportes e\nindicadores de analítica" as CUS11
+  usecase "CUS-015: Consultar métricas\nde retención y desempeño" as CUS15
+  usecase "CUS-016: Auditar trazas de\nseguridad y consentimiento" as CUS16
+  usecase "CUS-020: Configurar parámetros\ninstitucionales y umbrales" as CUS20
+  usecase "CUS-022: Gestionar catálogo\nde temas y materias críticas" as CUS22
+}
+
+Cron --> CUS09
+Admin --> CUS11
+Admin --> CUS15
+Admin --> CUS16
+Admin --> CUS20
+Admin --> CUS22
+@enduml

@@ -1,0 +1,95 @@
+/'
+  Diagrama: Diagrama 6.15.21: Diagrama de Secuencia - CUS-015: Consultar métricas de retención y desempeño
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.21: Diagrama de Secuencia - CUS-015: Consultar métricas de correlación de retención estudiantil y desempeño\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Comisión de Calidad ICACIT / Admin" as Evaluador
+participant "Vista React\n(RetentionDashboardView.tsx)" as UI
+participant "Adaptador Cliente\n(analyticsService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/analytics.py)" as API
+participant "Servicio Backend\n(analytics_service.py)" as Service
+participant "Compilador PDF ICACIT\n(ReportEngine)" as PDF
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Acceso al módulo de impacto y selección de cohorte ==
+Evaluador -> UI: click ["Impacto y Retención Académica"]
+activate UI
+UI -> Client: getRetentionMetrics() [Bearer JWT]
+activate Client
+Client -> API: GET /api/v1/analytics/retention/impact
+activate API
+API -> Service: analyze_retention_correlation()
+activate Service
+Service -> DB: SELECT count(DISTINCT estudiante_id) as total_alumnos,\n       avg(CASE WHEN asistencia_count >= 3 THEN tasa_aprobacion ELSE NULL END) as aprobacion_mentoreados,\n       avg(CASE WHEN asistencia_count = 0 THEN tasa_aprobacion ELSE NULL END) as aprobacion_control\nFROM cohortes_academicas
+activate DB
+DB --> Service: Comparativa estadística de cohortes
+deactivate DB
+Service --> API: RetentionImpactDTO
+deactivate Service
+API --> Client: HTTP 200 OK RetentionImpactDTO
+deactivate API
+Client -> UI: displayRetentionChart(metrics)
+deactivate Client
+
+== Fase 2: Segmentación por asignatura filtro y período lectivo ==
+Evaluador -> UI: selectCourseFilter (courseId="algoritmos-epis")
+Evaluador -> UI: click ["Calcular Índice de Impacto"]
+UI -> Client: getCourseRetentionImpact(courseId)
+activate Client
+Client -> API: GET /api/v1/analytics/retention/cohorts?course_id={course_id}
+activate API
+API -> Service: get_course_cohort_stats(course_id)
+activate Service
+Service -> DB: SELECT count(*) as n_muestra, corr(asistencias, nota_final) as r_pearson\nFROM actas_semestrales a JOIN asistencias_sesion s ON a.estudiante_id = s.estudiante_id\nWHERE a.curso_id = :cid
+activate DB
+DB --> Service: Muestra y correlación calculada
+deactivate DB
+
+alt [A001] Muestra insuficiente para inferencia estadística (< 10 registros)
+    Service --> API: RetentionCohortDTO {"n_muestra": n, "significancia": false, "solo_descriptivo": true}
+    API --> Client: HTTP 200 OK
+    Client -> UI: displayInsufficientSampleAlert()
+    Evaluador -> UI: click ["Ampliar Rango a Semestres Anteriores"]
+    UI -> UI: offerExpandedRange()
+else Tamaño muestral suficiente (>= 10 registros)
+    Service --> API: RetentionCohortDTO {"n_muestra": n, "significancia": true, "r_pearson": r}
+    API --> Client: HTTP 200 OK RetentionCohortDTO
+    Client -> UI: displayCorrelationResults(stats)
+end
+deactivate Service
+deactivate API
+deactivate Client
+
+== Fase 3: Visualización de indicadores ICACIT y exportación ==
+Evaluador -> UI: click ["Exportar Evidencia ICACIT"]
+UI -> Client: exportIcacitEvidence(courseId)
+activate Client
+Client -> API: POST /api/v1/analytics/retention/export-evidence {"course_id": cid} [Bearer JWT]
+activate API
+API -> Service: generate_icacit_report(course_id)
+activate Service
+Service -> PDF: compile_icacit_dossier(datos_retencion, tablas_frecuencia, firmas_integridad)
+activate PDF
+PDF --> Service: Documento PDF formal de acreditación
+deactivate PDF
+Service --> API: StreamingResponse(content=pdf_stream, media_type="application/pdf")
+deactivate Service
+API --> Client: HTTP 200 OK (Stream Binario PDF)
+deactivate API
+Client -> UI: triggerPdfDownload()
+deactivate Client
+UI --> Evaluador: displayIcacitDossierDownloadedConfirmation
+deactivate UI
+@enduml

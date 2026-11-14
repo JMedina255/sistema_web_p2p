@@ -1,0 +1,189 @@
+/'
+  Diagrama: Diagrama 6.20: Diagrama Entidad-Relación Físico (15 Tablas Relacionales) - PostgreSQL
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.20: Diagrama Entidad-Relación Físico (15 Tablas Relacionales)\nSistema Web P2P - PostgreSQL / Supabase
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam entity {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+    ArrowColor #2B3A42
+}
+
+entity "usuarios" as tbl_usuarios {
+  *id : uuid <<PK>>
+  --
+  *codigo_estudiante : varchar(20) <<UQ>>
+  *email : varchar(100) <<UQ>>
+  *nombres : varchar(100)
+  *apellidos : varchar(100)
+  *activo : boolean
+  *created_at : timestamptz
+}
+
+entity "roles" as tbl_roles {
+  *id : integer <<PK>>
+  --
+  *codigo : varchar(30) <<UQ>>
+  *nombre : varchar(50)
+}
+
+entity "usuario_roles" as tbl_usuario_roles {
+  *usuario_id : uuid <<PK, FK>>
+  *rol_id : integer <<PK, FK>>
+  --
+  *asignado_en : timestamptz
+}
+
+entity "consentimientos_legales" as tbl_consentimientos {
+  *id : uuid <<PK>>
+  --
+  *usuario_id : uuid <<FK, UQ>>
+  *ip_address : varchar(45)
+  *user_agent : text
+  *version_politica : varchar(20)
+  *aceptado_en : timestamptz
+}
+
+entity "codigos_otp" as tbl_otp {
+  *id : uuid <<PK>>
+  --
+  *email : varchar(100)
+  *codigo_hash : varchar(64)
+  *intentos : integer
+  *expira_en : timestamptz
+  *consumido : boolean
+}
+
+entity "perfiles_formativos" as tbl_perfiles {
+  *id : uuid <<PK>>
+  --
+  *usuario_id : uuid <<FK, UQ>>
+  *biografia : text
+  *ciclo_actual : integer
+  *reputacion : numeric(3,2)
+  *horas_acumuladas : numeric(5,2)
+}
+
+entity "disponibilidades_horarias" as tbl_disponibilidad {
+  *id : uuid <<PK>>
+  --
+  *usuario_id : uuid <<FK>>
+  *dia_semana : integer <<CHECK 1-6>>
+  *hora_inicio : time
+  *hora_fin : time
+}
+
+entity "cursos_criticos" as tbl_cursos {
+  *id : uuid <<PK>>
+  --
+  *codigo : varchar(20) <<UQ>>
+  *nombre : varchar(120)
+  *ciclo : integer
+  *es_prioritario : boolean
+}
+
+entity "temas_curriculares" as tbl_temas {
+  *id : uuid <<PK>>
+  --
+  *curso_id : uuid <<FK>>
+  *unidad : integer
+  *titulo : varchar(150)
+  *descripcion : text
+}
+
+entity "espacios_fisicos" as tbl_espacios {
+  *id : uuid <<PK>>
+  --
+  *codigo_ambiente : varchar(30) <<UQ>>
+  *pabellon : varchar(50)
+  *capacidad : integer
+  *activo : boolean
+}
+
+entity "ofertas_mentoria" as tbl_ofertas {
+  *id : uuid <<PK>>
+  --
+  *mentor_id : uuid <<FK>>
+  *curso_id : uuid <<FK>>
+  *tema_id : uuid <<FK>>
+  *modalidad : varchar(20) <<CHECK>>
+  *aforo_maximo : integer
+  *fecha_inicio : timestamptz
+  *fecha_fin : timestamptz
+  *estado : varchar(30) <<CHECK>>
+}
+
+entity "sesiones_mentoria" as tbl_sesiones {
+  *id : uuid <<PK>>
+  --
+  *oferta_id : uuid <<FK, UQ>>
+  *espacio_id : uuid <<FK>>
+  *enlace_virtual : varchar(255)
+  *estado : varchar(30) <<CHECK>>
+  *quorum_alcanzado : boolean
+}
+
+entity "reservas_cupos" as tbl_reservas {
+  *id : uuid <<PK>>
+  --
+  *sesion_id : uuid <<FK>>
+  *mentoreado_id : uuid <<FK>>
+  *estado : varchar(30) <<CHECK>>
+  *fecha_reserva : timestamptz
+  *fecha_ratificacion : timestamptz
+}
+
+entity "asistencias_sesiones" as tbl_asistencias {
+  *id : uuid <<PK>>
+  --
+  *sesion_id : uuid <<FK>>
+  *estudiante_id : uuid <<FK>>
+  *estado : varchar(20) <<CHECK>>
+  *metodo_checkin : varchar(30)
+  *fecha_checkin : timestamptz
+}
+
+entity "bitacoras_pedagogicas" as tbl_bitacoras {
+  *id : uuid <<PK>>
+  --
+  *sesion_id : uuid <<FK, UQ>>
+  *mentor_id : uuid <<FK>>
+  *temas_impartidos : text
+  *observaciones : text
+  *hash_sha256 : varchar(64)
+  *estado_visado : varchar(20) <<CHECK>>
+  *fecha_registro : timestamptz
+}
+
+tbl_usuarios ||--o| tbl_consentimientos
+tbl_usuarios ||--o{ tbl_usuario_roles
+tbl_roles ||--o{ tbl_usuario_roles
+tbl_usuarios ||--o| tbl_perfiles
+tbl_usuarios ||--o{ tbl_disponibilidad
+
+tbl_cursos ||--o{ tbl_temas
+tbl_usuarios ||--o{ tbl_ofertas
+tbl_cursos ||--o{ tbl_ofertas
+tbl_temas ||--o{ tbl_ofertas
+
+tbl_ofertas ||--|| tbl_sesiones
+tbl_espacios ||--o{ tbl_sesiones
+
+tbl_sesiones ||--o{ tbl_reservas
+tbl_usuarios ||--o{ tbl_reservas
+
+tbl_sesiones ||--o{ tbl_asistencias
+tbl_usuarios ||--o{ tbl_asistencias
+
+tbl_sesiones ||--o| tbl_bitacoras
+@enduml

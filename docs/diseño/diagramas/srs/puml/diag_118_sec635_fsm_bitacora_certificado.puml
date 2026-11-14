@@ -1,0 +1,57 @@
+/'
+  Diagrama: Diagrama 6.19: Máquina de Estados Finitos - Ciclo de Vida de BitacoraPedagogica y CertificadoHoras
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.19: FSM de BitacoraPedagogica y CertificadoHoras\nSistema Web P2P - EPIS UPT
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+skinparam state {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+    ArrowColor #2B3A42
+}
+
+[*] --> PENDIENTE_REGISTRO : Sesión culminada (Ventana perentoria de 48h - RN-12)
+
+state PENDIENTE_REGISTRO {
+  PENDIENTE_REGISTRO : Espera reporte temático y asistencia
+}
+
+PENDIENTE_REGISTRO --> REGISTRADA : Mentor envía bitácora con hash SHA-256
+PENDIENTE_REGISTRO --> VENCIDA_NO_REGISTRADA : Expiran 48h sin registro (horas no computables)
+
+state REGISTRADA {
+  REGISTRADA : Sometida a fiscalización administrativa
+}
+
+REGISTRADA --> VISADA_APROBADA : Comisión de Tutoría aprueba contenidos (RN-14)
+REGISTRADA --> OBSERVADA : Discrepancia temática o documental
+
+state OBSERVADA {
+  OBSERVADA : Requiere subsanación por el mentor
+}
+
+OBSERVADA --> REGISTRADA : Mentor subsana observaciones
+
+state VISADA_APROBADA {
+  VISADA_APROBADA : Horas computables formalmente
+}
+
+VISADA_APROBADA --> CERTIFICADO_EMITIDO : Suma >= 20 horas semestrales auditadas (RN-14)
+
+state CERTIFICADO_EMITIDO {
+  CERTIFICADO_EMITIDO : Folio correlativo institucional asignado
+  CERTIFICADO_EMITIDO : Documento PDF/A compilado con ReportLab
+  CERTIFICADO_EMITIDO : Código QR institucional de validación en línea
+}
+
+CERTIFICADO_EMITIDO --> [*]
+VENCIDA_NO_REGISTRADA --> [*]
+@enduml

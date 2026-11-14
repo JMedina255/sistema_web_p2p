@@ -1,0 +1,27 @@
+/'
+  Diagrama: Diagrama 6.6: Diagrama de Casos de Uso - MOD-02: Ofertas de Mentoría y Gestión de Recursos
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.6: Diagrama de Casos de Uso - MOD-02: Ofertas de Mentoría y Gestión de Recursos
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+actor "Estudiante Mentor" as Mentor #EBF3FB
+actor "Administrador (EPIS)" as Admin #FEF9C3
+
+rectangle "MOD-02: Ofertas de Mentoría y Gestión de Recursos" {
+  usecase "CUS-006: Publicar oferta\nde mentoría académica" as CUS06
+  usecase "CUS-008: Consultar disponibilidad\nde espacios y recursos" as CUS08
+}
+
+Mentor --> CUS06
+Mentor --> CUS08
+Admin --> CUS08
+@enduml

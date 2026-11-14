@@ -1,0 +1,147 @@
+/'
+  Diagrama: Diagrama 6.15.2: Diagrama de Secuencia - CUS-010: Gestionar asignación de roles de usuario
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.2: Diagrama de Secuencia - CUS-010: Gestionar asignación y revocación de roles institucionales de usuario\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Autoridad Institucional\n(Administrador / Director EPIS)" as Admin
+participant "Vista React\n(AdminDashboardView.tsx)" as UI
+participant "Adaptador Cliente\n(roleService.ts / ApiRoleAdapter)" as Client
+participant "Controlador FastAPI\n(endpoints/roles.py)" as API
+participant "Servicio Backend\n(role_service.py / RoleService)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Acceso al panel administrativo y consulta de nómina de usuarios ==
+Admin -> UI: click ["Gestión de Roles"]
+activate UI
+UI -> Client: listUsers() [Bearer JWT]
+activate Client
+Client -> API: GET /api/v1/roles/users
+activate API
+
+API -> API: require_admin_role(current_user): valida JWT y claim roles conteniendo 'administrador'
+
+alt [E001] Privilegios administrativos insuficientes (rol no administrador)
+    API --> Client: HTTP 403 Forbidden {"detail": "FORBIDDEN: Se requieren privilegios de Administrador."}
+    Client -> UI: displayAccessDenied(403, "Acceso Restringido")
+    Admin -> UI: click ["Entendido"]
+    UI -> UI: redirectToAuthorizedView()
+else [E002] Error de conexión o timeout en base de datos
+    API -> Service: list_users()
+    activate Service
+    Service -> DB: SELECT u.id, u.email, array_agg(r.nombre) FROM usuarios u...
+    activate DB
+    DB --> Service: Timeout / Conexión rechazada
+    deactivate DB
+    Service --> API: Lanza OperationalError
+    deactivate Service
+    API --> Client: HTTP 503 Service Unavailable {"detail": "SERVICE_UNAVAILABLE: No se pudo conectar a BD."}
+    Client -> UI: displayServiceUnavailable(503)
+    Admin -> UI: click ["Reintentar Carga"]
+    UI -> Client: listUsers()
+else Token válido y conexión activa
+    API -> Service: list_users()
+    activate Service
+    Service -> DB: SELECT u.id, u.email, u.nombres, u.apellidos, array_agg(r.nombre) AS roles\nFROM usuarios u LEFT JOIN roles_usuarios ru ON u.id = ru.id_usuario\nLEFT JOIN roles r ON ru.id_rol = r.id GROUP BY u.id
+    activate DB
+    DB --> Service: Nómina de usuarios con roles asignados
+    deactivate DB
+    Service --> API: UserRoleListResponseDTO
+    deactivate Service
+    API --> Client: HTTP 200 OK UserRoleListResponseDTO
+    Client -> UI: displayUserTable(users)
+end
+deactivate API
+deactivate Client
+deactivate UI
+
+== Fase 2: Búsqueda y selección de usuario para modificación ==
+Admin -> UI: enter (query: "2020-119001" o "estudiante@upt.pe")
+activate UI
+Admin -> UI: click ["Buscar"]
+UI -> Client: searchUsers(query)
+activate Client
+Client -> API: GET /api/v1/roles/users?query={query}
+activate API
+API -> Service: search_users(query)
+activate Service
+Service -> DB: SELECT u.* FROM usuarios u WHERE email ILIKE :q OR codigo ILIKE :q
+activate DB
+DB --> Service: Resultados coincidentes
+deactivate DB
+Service --> API: Nómina filtrada
+deactivate Service
+API --> Client: HTTP 200 OK
+deactivate API
+Client -> UI: displaySearchResults(results)
+deactivate Client
+
+alt [A001] Búsqueda sin coincidencias en el padrón institucional
+    UI -> UI: displayNoResultsMessage()
+    Admin -> UI: click ["Limpiar Búsqueda"]
+    UI -> UI: resetSearchAndReload()
+else Usuario localizado
+    UI -> UI: highlightUserRow(targetUser)
+    Admin -> UI: click ["Modificar Roles"]
+    UI -> UI: openRoleAssignmentModal(targetUser, currentRoles)
+end
+deactivate UI
+
+== Fase 3: Modificación atómica de roles y registro de auditoría ==
+Admin -> UI: toggleRoles (assign: 'mentor')
+activate UI
+Admin -> UI: click ["Guardar Asignación"]
+UI -> Client: assignRoles(target_user_id, selected_roles)
+activate Client
+Client -> API: POST /api/v1/roles/assign {"user_id": target_id, "roles": selected_roles}
+activate API
+
+API -> Service: assign_roles(admin_id, target_user_id, selected_roles)
+activate Service
+
+alt [E003] Intento de dejar al usuario sin ningún rol asignado (len(selected_roles) == 0)
+    Service --> API: Lanza HTTPException(400, "EMPTY_ROLE_SET_PROHIBITED")
+    API --> Client: HTTP 400 Bad Request {"detail": "EMPTY_ROLE_SET_PROHIBITED: Todo usuario debe tener al menos un rol."}
+    Client -> UI: displayEmptyRolesError(400, "Todo usuario debe tener al menos un rol.")
+    Admin -> UI: selectRoleCheckbox ('mentoreado')
+    UI -> UI: enableSaveButton()
+else [E004] Intento de auto-revocación del rol Administrador (target_id == current_user_id)
+    Service --> API: Lanza HTTPException(400, "CANNOT_REVOKE_OWN_ADMIN")
+    API --> Client: HTTP 400 Bad Request {"detail": "CANNOT_REVOKE_OWN_ADMIN: No puede auto-revocarse el rol Administrador."}
+    Client -> UI: displaySelfRevocationError(400, "No puede auto-revocarse el rol Administrador.")
+    Admin -> UI: click ["Restablecer Selección"]
+    UI -> UI: resetAdminCheckbox()
+else Asignación válida y conforme a RBAC
+    Service -> DB: BEGIN TRANSACTION
+    activate DB
+    Service -> DB: DELETE FROM roles_usuarios WHERE id_usuario = :target_id
+    Service -> DB: INSERT INTO roles_usuarios (id_usuario, id_rol) VALUES (:target_id, :rol_id)...
+    Service -> DB: INSERT INTO auditoria_admin (admin_id, target_user_id, accion='ROLE_CHANGE', ip, fecha) VALUES (...)
+    Service -> DB: COMMIT
+    DB --> Service: Transacción ACID confirmada exitosamente
+    deactivate DB
+    
+    Service --> API: RoleAssignResponseDTO {"success": true, "updated_roles": selected_roles}
+    API --> Client: HTTP 200 OK RoleAssignResponseDTO
+    Client -> UI: displayRoleUpdateSuccess(updated_roles)
+    
+    UI -> UI: updateTableInMemory()
+    UI -> UI: closeAssignmentModal()
+    UI --> Admin: displaySuccessNotification
+end
+deactivate Service
+deactivate API
+deactivate Client
+deactivate UI
+@enduml

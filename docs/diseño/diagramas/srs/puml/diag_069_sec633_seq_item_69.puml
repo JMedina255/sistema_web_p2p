@@ -1,0 +1,111 @@
+/'
+  Diagrama: Diagrama 69: Diagrama UML
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.3: Diagrama de Secuencia - CUS-006: Publicar oferta de mentoría académica\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
+participant "interface : UI\n(OfferPublishView.tsx)" as UI
+participant "clientAdapter : Client\n(offerService.ts / apiClient.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/offers.py)" as API
+participant "Servicio Backend\n(offer_service.py / OfferService)" as Service
+database "postgresDB : Database\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Configuración de la sesión y selección curricular ==
+Mentor -> UI: selectCourse(selectedCourseId)
+activate UI
+UI -> Client: fetchCourseDetail(selectedCourseId)
+activate Client
+Client -> API: GET /api/v1/curriculum/courses/{id}
+activate API
+API -> Service: get_course_by_id(id)
+activate Service
+Service -> DB: SELECT * FROM asignaturas WHERE id_asignatura = :id\nSELECT * FROM temas_curriculares WHERE id_asignatura = :id
+activate DB
+DB --> Service: Asignatura y lista de temas silábicos (Topic[])
+deactivate DB
+Service --> API: CourseDetailResponse
+deactivate Service
+API --> Client: HTTP 200 OK CourseDetailResponse
+deactivate API
+Client -> UI: displayTopicsAndForm(temas, defaultCapacity, suggestedSpace)
+deactivate Client
+deactivate UI
+
+== Fase 2: Ingreso de parámetros, validación de reglas de aforo y antelación ==
+Mentor -> UI: enter (topicId, startDateTime, duration, modality, assignedSpace)
+activate UI
+Mentor -> UI: click ["Verificar y Publicar"]
+UI -> UI: validateOfferPayload(payload)
+
+alt [E001] Campos obligatorios incompletos o sintaxis inválida
+    UI -> UI: displayValidationErrors(fieldErrors)
+    Mentor -> UI: enterMissingFields(payload)
+    Mentor -> UI: click ["Verificar y Publicar"]
+else Formulario válido en cliente
+    UI -> Client: publishOffer(payload: PublishOfferPayload)
+    activate Client
+    Client -> API: POST /api/v1/offers PublishOfferPayload [Bearer JWT]
+    activate API
+    API -> API: _extract_caller_and_admin_status(authorization, payload.mentor_email)
+
+    alt [E005] Discrepancia de identidad o suplantación de mentor
+        API --> Client: HTTP 403 Forbidden {"detail": "No tiene autorización para publicar ofertas en nombre de otro usuario."}
+        Client -> UI: displaySecurityError(403, "No tiene autorización para publicar ofertas en nombre de otro usuario.")
+    else Identidad de mentor verificada
+        API -> Service: publish_offer(db, payload, caller_email, is_admin)
+        activate Service
+
+        Service -> Service: validate_mentor_eligibility(db, effective_email)
+        Service -> DB: SELECT * FROM usuario_roles ur JOIN roles r ON ur.id_rol = r.id_rol\nWHERE ur.email = :email AND ur.activo = true AND r.nombre_rol IN ('mentor', 'administrador')
+        activate DB
+        DB --> Service: Roles del usuario y perfil académico (ciclo_actual)
+        deactivate DB
+
+        alt [E004] Mentor no elegible por ciclo insuficiente o falta de rol (RN-03)
+            Service --> API: Lanza HTTPException(403, "Infracción de RN-03: Solo los estudiantes habilitados con rol de mentor (ciclo >= VII)...")
+            API --> Client: HTTP 403 Forbidden {"detail": "Infracción de RN-03: Solo los estudiantes habilitados..."}
+            Client -> UI: displayEligibilityError(403, "Infracción de RN-03: Solo los estudiantes habilitados con rol de mentor...")
+        else Mentor acreditado (ciclo >= VII)
+            Service -> Service: calculate_advance_hours(payload.fecha_inicio)
+
+            alt [E002] Incumplimiento de antelación mínima de 24 horas (fecha_inicio <= now_utc + 24h)
+                Service --> API: Lanza HTTPException(400, "Infracción de RN-04: Toda mentoría debe publicarse con una antelación superior a 24 horas...")
+                API --> Client: HTTP 400 Bad Request {"detail": "Infracción de RN-04: Toda mentoría debe publicarse..."}
+                Client -> UI: displayAdvanceTimeError(400, "Infracción de RN-04: Toda mentoría debe publicarse con antelación > 24h")
+            else [E003] Aforo no conforme con la modalidad (aforo != 10 presencial o != 20 virtual)
+                Service --> API: Lanza HTTPException(400, "Infracción de RN-05: El aforo reglamentario...")
+                API --> Client: HTTP 400 Bad Request {"detail": "Infracción de RN-05: El aforo reglamentario..."}
+                Client -> UI: displayCapacityError(400, "Infracción de RN-05: El aforo reglamentario...")
+            else Parámetros de mérito, aforo y antelación válidos
+                == Fase 3: Persistencia transaccional de la oferta y confirmación en cliente ==
+                Service -> DB: sesion_db = SesionMentoria(codigo_sesion=code, mentor_email=..., estado='PUBLICADA', ...)
+                Service -> DB: db.add(sesion_db)\ndb.commit()\ndb.refresh(sesion_db)
+                activate DB
+                DB --> Service: Transacción confirmada (id_sesion, codigo_sesion='SES-XXXX')
+                deactivate DB
+                
+                Service --> API: PublishOfferResponse (id_oferta=..., codigo_sesion='SES-XXXX', estado='PUBLICADA')
+                API --> Client: HTTP 201 Created PublishOfferResponse
+                Client -> UI: showSuccessScreen(codigo_sesion='SES-XXXX', estado='PUBLICADA')
+                UI --> Mentor: displayPublishedConfirmation
+            end
+        end
+        deactivate Service
+    end
+    deactivate API
+    deactivate Client
+end
+deactivate UI
+@enduml

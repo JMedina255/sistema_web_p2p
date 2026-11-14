@@ -1,0 +1,86 @@
+/'
+  Diagrama: Diagrama 6.15.20: Diagrama de Secuencia - CUS-011: Generar reportes e indicadores analíticos
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.20: Diagrama de Secuencia - CUS-011: Generar reportes consolidados e indicadores analíticos de gestión\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Administrador / Calidad ICACIT" as Admin
+participant "Vista React\n(AnalyticsDashboardView.tsx)" as UI
+participant "Adaptador Cliente\n(analyticsService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/analytics.py)" as API
+participant "Servicio Backend\n(analytics_service.py)" as Service
+participant "Generador de Hojas de Cálculo\n(Excel / OpenPyXL Engine)" as Excel
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Acceso al panel analítico y configuración de parámetros ==
+Admin -> UI: click ["Reportes y Analítica"]
+activate UI
+UI -> Client: getKpiSummary(semester="2026-I") [Bearer JWT]
+activate Client
+Client -> API: GET /api/v1/analytics/reports/kpis?semester=2026-I
+activate API
+API -> Service: calculate_kpis(semester="2026-I")
+activate Service
+Service -> DB: SELECT count(s.id) as total_sesiones, sum(s.duracion_minutos)/60.0 as total_horas,\n       avg(CASE WHEN s.estado = 'CONFIRMADA' THEN 1 ELSE 0 END)*100 as tasa_quorum,\n       avg(CASE WHEN a.asistio = true THEN 1 ELSE 0 END)*100 as tasa_asistencia\nFROM sesiones_mentoria s LEFT JOIN asistencias_sesion a ON s.id = a.sesion_id WHERE s.semestre = '2026-I'
+activate DB
+DB --> Service: Métricas agregadas
+deactivate DB
+Service --> API: KpiSummaryDTO
+deactivate Service
+API --> Client: HTTP 200 OK KpiSummaryDTO
+deactivate API
+Client -> UI: displayKpiCardsAndCharts(kpis)
+deactivate Client
+
+== Fase 2: Ajuste de filtros temporales y selección de formato de exportación ==
+Admin -> UI: enter (startDate, endDate, courseId, format="xlsx")
+UI -> UI: validateDateConsistency(startDate, endDate)
+
+alt [E001] Rango de fechas inconsistente o fechas futuras
+    UI -> UI: displayDateRangeError()
+    Admin -> UI: enter (validStartDate, validEndDate)
+    UI -> UI: updateDateSelector()
+else Rango temporal válido
+    Admin -> UI: click ["Exportar Informe Consolidado"]
+    UI -> Client: exportReport(format="xlsx", startDate, endDate, courseId)
+    activate Client
+    Client -> API: GET /api/v1/analytics/export?format=xlsx&start_date={start_date}&end_date={end_date}&course_id={course_id} [Bearer JWT]
+    activate API
+    API -> Service: export_report(format, start_date, end_date, course_id)
+    activate Service
+    
+    == Fase 3: Generación del documento analítico y descarga segura ==
+    Service -> DB: SELECT * FROM sesiones_mentoria s JOIN bitacoras_pedagogicas b ON s.id = b.sesion_id...
+    activate DB
+    DB --> Service: Registros consolidados
+    deactivate DB
+    
+    Service -> Excel: compile_workbook(resumen_kpi, sesiones, asistencias, materias_criticas)
+    activate Excel
+    Excel --> Service: StreamBinarioXLSX (Libro con 4 pestañas estructuradas)
+    deactivate Excel
+    
+    Service -> DB: INSERT INTO auditoria_admin (admin_id, accion='EXPORT_REPORT', entidad='analytics', fecha=NOW())
+    
+    Service --> API: StreamingResponse(content=stream, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    deactivate Service
+    API --> Client: HTTP 200 OK (Stream Binario XLSX)
+    deactivate API
+    Client -> UI: triggerExcelDownload()
+    deactivate Client
+    
+    UI --> Admin: displayExcelDownloadedConfirmation
+end
+deactivate UI
+@enduml

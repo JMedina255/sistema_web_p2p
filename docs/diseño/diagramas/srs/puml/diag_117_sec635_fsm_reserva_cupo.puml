@@ -1,0 +1,53 @@
+/'
+  Diagrama: Diagrama 6.18: Máquina de Estados Finitos - Ciclo de Vida de ReservaCupo
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.18: FSM del Ciclo de Vida de ReservaCupo\nSistema Web P2P - EPIS UPT
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+skinparam state {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+    ArrowColor #2B3A42
+}
+
+[*] --> PENDIENTE_CONFIRMACION : Reserva de cupo con cerrojo pesimista FOR UPDATE (RN-05)
+
+state PENDIENTE_CONFIRMACION {
+  PENDIENTE_CONFIRMACION : Cupo bloqueado temporalmente
+  PENDIENTE_CONFIRMACION : Ventana abierta hasta T-24h
+}
+
+PENDIENTE_CONFIRMACION --> CONFIRMADA : Estudiante ratifica asistencia antes de T-24h (RN-08)
+PENDIENTE_CONFIRMACION --> CANCELADA_USUARIO : Estudiante desiste voluntariamente antes de T-24h (RN-10)
+PENDIENTE_CONFIRMACION --> NO_CONFIRMADA : Vence plazo T-24h sin ratificación (RN-08)
+
+state CONFIRMADA {
+  CONFIRMADA : Computa formalmente para quórum
+  CONFIRMADA : Pase QR dinámico habilitado
+}
+
+CONFIRMADA --> CANCELADA_USUARIO : Desistimiento extraordinario justificado
+CONFIRMADA --> ASISTIO : Check-in exitoso con pase QR TOTP o lista (RN-12)
+CONFIRMADA --> INASISTENCIA : Cierre de bitácora sin registro de check-in (RN-12)
+
+state ASISTIO {
+  ASISTIO : Habilitado para responder encuesta (24h)
+}
+
+state INASISTENCIA {
+  INASISTENCIA : Inhabilitado para evaluar
+}
+
+NO_CONFIRMADA --> [*] : Cupo liberado inmediatamente
+CANCELADA_USUARIO --> [*] : Cupo liberado inmediatamente
+ASISTIO --> [*]
+INASISTENCIA --> [*]
+@enduml

@@ -1,0 +1,96 @@
+/'
+  Diagrama: Diagrama 6.15.15: Diagrama de Secuencia - CUS-013: Registrar bitácora pedagógica de sesión
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.15: Diagrama de Secuencia - CUS-013: Registrar bitácora pedagógica y reporte formativo\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
+participant "Vista React\n(BitacoraFormView.tsx)" as UI
+participant "Adaptador Cliente\n(bitacoraService.ts / ApiBitacoraAdapter)" as Client
+participant "Controlador FastAPI\n(endpoints/bitacora.py)" as API
+participant "Servicio Backend\n(bitacora_service.py / BitacoraService)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Apertura de bitácora y verificación de plazo límite a 48h ==
+Mentor -> UI: click ["Completar Bitácora Pedagógica"]
+activate UI
+UI -> Client: verifySessionDeadline(sessionId)
+activate Client
+Client -> API: GET /api/v1/sessions/{session_id}/bitacora-eligibility [Bearer JWT]
+activate API
+API -> Service: check_bitacora_eligibility(session_id)
+activate Service
+Service -> DB: SELECT fecha_fin, estado FROM sesiones_mentoria WHERE id = :sid
+activate DB
+DB --> Service: Datos de finalización de sesión
+deactivate DB
+
+alt [E001] Plazo límite de 48 horas post-sesión vencido (now_utc > fecha_fin + 48h, RN-12)
+    Service --> API: Lanza HTTPException(400, "DEADLINE_EXCEEDED")
+    API --> Client: HTTP 400 Bad Request {"detail": "DEADLINE_EXCEEDED: Plazo reglamentario de 48h vencido."}
+    Client -> UI: displayDeadlineExceededError(400)
+    Mentor -> UI: click ["Solicitar Desbloqueo a Coordinación"]
+    UI -> UI: openExtensionForm()
+else Dentro del plazo reglamentario de 48 horas
+    Service --> API: BitacoraEligibilityDTO {"eligible": true}
+    API --> Client: HTTP 200 OK {"eligible": true}
+    Client -> UI: displayBitacoraForm(eligible=true)
+end
+deactivate Service
+deactivate API
+deactivate Client
+deactivate UI
+
+== Fase 2: Ingreso de evidencias pedagógicas y validación de contenido ==
+Mentor -> UI: selectTopicsCheckboxes (coveredTopics)
+activate UI
+Mentor -> UI: selectDifficulty (difficultyLevel="Medio")
+Mentor -> UI: enter (observacionesPedagogicas)
+Mentor -> UI: click ["Guardar y Firmar Bitácora"]
+UI -> UI: validatePedagogicalObservations(observacionesPedagogicas)
+
+alt [E002] Descripción pedagógica insuficiente (< 50 caracteres)
+    UI -> UI: displayLengthError(required=50)
+    Mentor -> UI: enter (expandedObservations >= 50 chars)
+    Mentor -> UI: click ["Guardar y Firmar Bitácora"]
+else Contenido sustantivo válido
+    UI -> Client: submitBitacora(sessionId, payload)
+    activate Client
+    Client -> API: POST /api/v1/sessions/{session_id}/bitacora BitacoraCreateRequest [Bearer JWT]
+    activate API
+    API -> Service: create_bitacora(mentor_id, session_id, payload)
+    activate Service
+    
+    == Fase 3: Persistencia transaccional y certificación de horas ==
+    Service -> Service: Calcula hash SHA-256(temas + observaciones + mentor_id + timestamp)
+    Service -> DB: BEGIN TRANSACTION
+    activate DB
+    Service -> DB: INSERT INTO bitacoras_pedagogicas (sesion_id, mentor_id, temas_cubiertos, observaciones, nivel_dificultad, hash_firma, fecha_registro)\nVALUES (:sid, :mid, :temas, :obs, :dif, :hash, NOW()) RETURNING id
+    Service -> DB: UPDATE sesiones_mentoria SET estado = 'BITACORA_REGISTRADA' WHERE id = :sid
+    Service -> DB: COMMIT
+    DB --> Service: Transacción confirmada
+    deactivate DB
+    
+    Service --> API: BitacoraResponseDTO {"id": id_bitacora, "hash_firma": hash, "estado": "BITACORA_REGISTRADA"}
+    deactivate Service
+    API --> Client: HTTP 201 Created BitacoraResponseDTO
+    deactivate API
+    Client -> UI: displayBitacoraSuccess(id_bitacora, hash)
+    deactivate Client
+    
+    UI -> UI: redirectToSessionHistory()
+    UI --> Mentor: displayBitacoraCreatedConfirmation
+end
+deactivate UI
+@enduml

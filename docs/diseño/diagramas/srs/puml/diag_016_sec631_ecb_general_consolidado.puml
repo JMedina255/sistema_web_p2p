@@ -1,0 +1,79 @@
+/'
+  Diagrama: Diagrama 6.13: Diagrama de Análisis de Objetos (Modelo ECB) - Flujo General de Mentorías P2P
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama de Análisis de Objetos (Modelo ECB) - Flujo General de Mentorías P2P\nSistema Web P2P - EPIS UPT
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+skinparam actor {
+    BackgroundColor #E9ECEF
+    BorderColor #1D2D44
+}
+skinparam boundary {
+    BackgroundColor #E8F4F8
+    BorderColor #2B3A42
+}
+skinparam control {
+    BackgroundColor #FFF2DF
+    BorderColor #D97706
+}
+skinparam entity {
+    BackgroundColor #E8F8F5
+    BorderColor #0D9488
+}
+
+actor "Estudiante Mentoreado" as ActEst
+actor "Estudiante Mentor" as ActMen
+actor "Administrador EPIS" as ActAdm
+actor "Servicio Cron Backend" as ActCron
+
+boundary "UI_CatalogoYRecomendaciones" as B_Rec
+boundary "UI_ReservaYConfirmacion" as B_Res
+boundary "UI_OfertasYEspacios" as B_Of
+boundary "UI_AsistenciaYBitacora" as B_Bit
+boundary "UI_CertificadosYAdmin" as B_Adm
+
+control "ControladorRecomendaciones" as C_Rec
+control "ControladorReservas" as C_Res
+control "ControladorMentorias" as C_Of
+control "ControladorBitacoras" as C_Bit
+control "ControladorAdmin" as C_Adm
+control "ControladorQuorumCron" as C_Cron
+
+entity "Usuario" as E_User
+entity "CursoCritico" as E_Cur
+entity "OfertaMentoria" as E_Of
+entity "SesionMentoria" as E_Ses
+entity "ReservaCupo" as E_Res
+entity "BitacoraPedagogica" as E_Bit
+entity "CertificadoHoras" as E_Cert
+
+ActEst --> B_Rec : 1. Explora recomendaciones Top-k
+B_Rec --> C_Rec : 1.1. inferirRecomendaciones()
+C_Rec ..> E_Cur : 1.2. similitudCoseno()
+C_Rec --> B_Rec : 1.3. retornoTopK()
+
+ActEst --> B_Res : 2. Reserva cupo de sesion
+B_Res --> C_Res : 2.1. reservarCupoPesimista(FOR UPDATE)
+C_Res --> E_Ses : 2.2. bloquearSesion()
+C_Res --> E_Res : 2.3. registrarReserva()
+
+ActCron --> C_Cron : 3. Dispara corte T-24h
+C_Cron --> E_Res : 3.1. revocarNoConfirmadas()
+C_Cron --> E_Ses : 3.2. evaluarQuorumMinimo()
+
+ActMen --> B_Bit : 4. Cierra sesion y firma bitacora (SHA-256)
+B_Bit --> C_Bit : 4.1. registrarBitacora()
+C_Bit --> E_Bit : 4.2. persistirBitacoraConHash()
+
+ActAdm --> B_Adm : 5. Visa bitacoras y emite certificado
+B_Adm --> C_Adm : 5.1. emitirCertificadoOficial()
+C_Adm --> E_Cert : 5.2. compilarPDFConQR()
+@enduml

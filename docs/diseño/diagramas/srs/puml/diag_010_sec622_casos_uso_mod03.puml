@@ -1,0 +1,25 @@
+/'
+  Diagrama: Diagrama 6.7: Diagrama de Casos de Uso - MOD-03: Perfil del Mentor y Plan de Aprendizaje
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.7: Diagrama de Casos de Uso - MOD-03: Perfil del Mentor y Plan de Aprendizaje
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+actor "Usuario Institucional\n(Mentoreado / Mentor)" as User #EBF3FB
+
+rectangle "MOD-03: Perfil del Mentor y Plan de Aprendizaje" {
+  usecase "CUS-005: Gestionar perfil formativo\ny disponibilidad horaria" as CUS05
+  usecase "CUS-021: Explorar catálogo curricular\nde asignaturas filtro" as CUS21
+}
+
+User --> CUS05
+User --> CUS21
+@enduml

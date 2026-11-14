@@ -1,0 +1,82 @@
+/'
+  Diagrama: Diagrama 6.15.18: Diagrama de Secuencia - CUS-019: Gestionar insignias y reputación gamificada
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.18: Diagrama de Secuencia - CUS-019: Gestionar insignias y reputación gamificada\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Estudiante Mentor / Alumno" as User
+participant "Vista React\n(GamificationView.tsx)" as UI
+participant "Adaptador Cliente\n(gamificationService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/gamification.py)" as API
+participant "Servicio Backend\n(reputation_service.py)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Consulta de insignias personales y progreso de nivel ==
+User -> UI: click ["Insignias y Reputación"]
+activate UI
+UI -> Client: getUserBadges() [Bearer JWT]
+activate Client
+Client -> API: GET /api/v1/gamification/badges
+activate API
+API -> Service: get_user_badges(user_id)
+activate Service
+Service -> DB: SELECT b.*, ub.fecha_obtencion, ub.progreso FROM insignias b\nLEFT JOIN insignias_usuarios ub ON b.id = ub.insignia_id AND ub.usuario_id = :uid
+activate DB
+DB --> Service: Catálogo de insignias y estado de avance
+deactivate DB
+Service --> API: BadgeListResponseDTO
+deactivate Service
+API --> Client: HTTP 200 OK BadgeListResponseDTO
+deactivate API
+Client -> UI: displayBadgesShowcase(badges)
+deactivate Client
+deactivate UI
+
+== Fase 2: Exploración de criterios de logro y detalle de insignia ==
+User -> UI: selectBadgeCard (badgeId="mentor-destacado")
+activate UI
+UI -> UI: displayBadgeDetailsSidebar(badgeInfo)
+deactivate UI
+
+== Fase 3: Visualización del cuadro de honor institucional (Leaderboard) ==
+User -> UI: click ["Cuadro de Honor de la Escuela"]
+activate UI
+UI -> Client: getLeaderboard() [Bearer JWT]
+activate Client
+Client -> API: GET /api/v1/gamification/leaderboard
+activate API
+API -> Service: calculate_rank()
+activate Service
+Service -> DB: SELECT u.id, u.nombres, u.apellidos, u.codigo_estudiante, r.score_global, r.modo_anonimo\nFROM reputacion_usuarios r JOIN usuarios u ON r.usuario_id = u.id ORDER BY r.score_global DESC LIMIT 10
+activate DB
+DB --> Service: Top-10 mentores ordenados por reputación RN-13
+deactivate DB
+
+alt [A001] Visualización en el cuadro de honor con alias anónimo (modo_anonimo = true)
+    Service -> Service: Anonimiza nombres oficiales reemplazándolos por seudónimo (ej. "Mentor EPIS-742")
+    Service --> API: LeaderboardResponseDTO (con registros anonimizados)
+    API --> Client: HTTP 200 OK
+    Client -> UI: displayLeaderboardAnonymous(ranking)
+else Perfil público estándar
+    Service --> API: LeaderboardResponseDTO (nombres públicos)
+    API --> Client: HTTP 200 OK LeaderboardResponseDTO
+    Client -> UI: displayLeaderboardTable(ranking)
+end
+deactivate Service
+deactivate API
+deactivate Client
+
+UI --> User: displayLeaderboardView
+deactivate UI
+@enduml

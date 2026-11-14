@@ -1,0 +1,96 @@
+/'
+  Diagrama: Diagrama 6.15.6: Diagrama de Secuencia - CUS-021: Explorar catálogo curricular de asignaturas filtro
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.6: Diagrama de Secuencia - CUS-021: Explorar catálogo curricular de asignaturas filtro\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Estudiante Mentoreado / Mentor" as User
+participant "Vista React\n(CurriculumCatalogView.tsx)" as UI
+participant "Adaptador Cliente\n(curriculumService.ts / ApiCurriculumAdapter)" as Client
+participant "Controlador FastAPI\n(endpoints/curriculum.py)" as API
+participant "Servicio Backend\n(curriculum_service.py / CurriculumService)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Navegación por ciclo académico y selección de asignatura ==
+User -> UI: click ["Catálogo Curricular"]
+activate UI
+UI -> Client: getCourses() [Bearer JWT]
+activate Client
+Client -> API: GET /api/v1/curriculum/courses
+activate API
+API -> Service: get_courses()
+activate Service
+
+alt [E001] Falla de conexión con el repositorio curricular
+    Service -> DB: SELECT c.*, count(t.id) FROM cursos c...
+    activate DB
+    DB --> Service: Timeout / Conexión rechazada
+    deactivate DB
+    Service --> API: Lanza OperationalError
+    API --> Client: HTTP 503 Service Unavailable {"detail": "CURRICULUM_SERVICE_UNAVAILABLE: Repositorio no disponible."}
+    Client -> UI: displayCurriculumError(503)
+    User -> UI: click ["Reintentar Carga"]
+    UI -> Client: getCourses()
+else Conexión exitosa y consulta de cursos
+    Service -> DB: SELECT c.*, count(t.id) as total_temas FROM cursos c\nLEFT JOIN temas_curriculares t ON c.id = t.curso_id\nWHERE c.activo = true GROUP BY c.id ORDER BY c.ciclo, c.nombre
+    activate DB
+    DB --> Service: Listado jerárquico de asignaturas (ciclos I al X)
+    deactivate DB
+    Service --> API: CourseListResponseDTO
+    API --> Client: HTTP 200 OK CourseListResponseDTO
+    Client -> UI: displayCurriculumGrid(courses)
+end
+deactivate Service
+deactivate API
+deactivate Client
+deactivate UI
+
+== Fase 2: Búsqueda y filtrado interactivo de cursos ==
+User -> UI: enter (filterText: "Algoritmos", ciclo=3)
+activate UI
+UI -> UI: filterCoursesInState(filterText, ciclo)
+
+alt [A001] Búsqueda curricular sin coincidencias
+    UI -> UI: displayNoMatchesPanel()
+    User -> UI: click ["Restablecer Filtros"]
+    UI -> UI: resetFiltersAndRestore()
+else Cursos coincidentes localizados
+    UI -> UI: displayFilteredCourses()
+end
+deactivate UI
+
+== Fase 3: Despliegue de temarios silábicos y vinculación con mentorías ==
+User -> UI: selectCourseCard(courseId)
+activate UI
+UI -> Client: getCourseTopics(courseId)
+activate Client
+Client -> API: GET /api/v1/curriculum/courses/{course_id}/topics
+activate API
+API -> Service: get_topics(course_id)
+activate Service
+Service -> DB: SELECT * FROM temas_curriculares WHERE curso_id = :cid ORDER BY unidad, semana
+activate DB
+DB --> Service: Lista de temas silábicos con ofertas activas asociadas
+deactivate DB
+Service --> API: TopicListResponseDTO
+deactivate Service
+API --> Client: HTTP 200 OK TopicListResponseDTO
+deactivate API
+Client -> UI: displayTopicAccordion(topics)
+deactivate Client
+
+UI -> UI: expandTopicAccordion()
+UI --> User: displayTopicListAccordion
+deactivate UI
+@enduml

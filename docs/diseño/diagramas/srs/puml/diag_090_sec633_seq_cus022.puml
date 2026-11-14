@@ -1,0 +1,98 @@
+/'
+  Diagrama: Diagrama 6.15.24: Diagrama de Secuencia - CUS-022: Gestionar catálogo de temas y materias críticas
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.24: Diagrama de Secuencia - CUS-022: Gestionar catálogo de temas curriculares, asignaturas filtro y malla oficial\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Administrador Institucional\n(UserRole.administrador)" as Admin
+participant "Vista React\n(AdminCurriculumView.tsx)" as UI
+participant "Adaptador Cliente\n(curriculumService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/curriculum.py)" as API
+participant "Servicio Backend\n(curriculum_service.py)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Consulta del árbol curricular y selección de asignatura ==
+Admin -> UI: click ["Gestión de Malla y Temarios"]
+activate UI
+UI -> Client: getCoursesFullTree() [Bearer JWT]
+activate Client
+Client -> API: GET /api/v1/curriculum/courses
+activate API
+API -> Service: get_courses_tree()
+activate Service
+Service -> DB: SELECT * FROM cursos ORDER BY ciclo, nombre
+activate DB
+DB --> Service: Malla curricular ordenada por ciclo
+deactivate DB
+Service --> API: CourseTreeResponseDTO
+deactivate Service
+API --> Client: HTTP 200 OK CourseTreeResponseDTO
+deactivate API
+Client -> UI: displayCourseTree(coursesTree)
+deactivate Client
+
+== Fase 2: Ingreso de datos del nuevo tema curricular silábico ==
+Admin -> UI: clickCourse ["Ver Asignatura"]
+Admin -> UI: click ["Agregar Nuevo Tema Curricular"]
+UI -> UI: openNewTopicModal()
+Admin -> UI: enter (unidad=2, titulo="Grafos y Dijkstra", semana=7, descripcion="Teoría y algoritmos")
+Admin -> UI: click ["Registrar Tema Curricular"]
+UI -> UI: validateWeekNumber(semana)
+
+alt [E002] Número de semana académica fuera de rango semestral (semana < 1 o > 17)
+    UI -> UI: displayWeekOutOfRangeError()
+    Admin -> UI: enter (validWeekNumber)
+    UI -> UI: updateFormWeek()
+else Semana lectiva válida
+    UI -> Client: createTopic(courseId, payload)
+    activate Client
+    Client -> API: POST /api/v1/curriculum/courses/{course_id}/topics TopicCreateRequest [Bearer JWT]
+    activate API
+    API -> Service: create_topic(course_id, payload)
+    activate Service
+    
+    Service -> DB: SELECT id FROM temas_curriculares WHERE curso_id = :cid AND unidad = :u AND titulo = :t
+    activate DB
+    DB --> Service: Tema existente o nulo
+    deactivate DB
+    
+    alt [E001] Tema curricular duplicado en la misma unidad didáctica
+        Service --> API: Lanza HTTPException(409, "DUPLICATE_TOPIC")
+        API --> Client: HTTP 409 Conflict {"detail": "DUPLICATE_TOPIC: Ya existe un tema con ese título en la unidad."}
+        Client -> UI: displayDuplicateTopicError(409)
+        Admin -> UI: enter (adjustedTitle)
+        UI -> UI: enableSaveButton()
+    else Tema nuevo y válido
+        == Fase 3: Persistencia transaccional y actualización del catálogo ==
+        Service -> DB: BEGIN TRANSACTION
+        activate DB
+        Service -> DB: INSERT INTO temas_curriculares (curso_id, unidad, semana, titulo, descripcion, activo=true)\nVALUES (:cid, :u, :sem, :t, :desc, true) RETURNING id
+        Service -> DB: COMMIT
+        DB --> Service: Transacción confirmada (id_tema)
+        deactivate DB
+        
+        Service --> API: TopicResponseDTO {"id": id_tema, "titulo": t, "semana": sem}
+        API --> Client: HTTP 201 Created TopicResponseDTO
+        Client -> UI: displayTopicCreatedSuccess(id_tema)
+        
+        UI -> UI: closeNewTopicModal()
+        UI -> UI: appendTopicToTree(id_tema)
+        UI --> Admin: displayTopicRegisteredConfirmation
+    end
+    deactivate Service
+    deactivate API
+    deactivate Client
+end
+deactivate UI
+@enduml

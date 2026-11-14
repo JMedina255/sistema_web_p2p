@@ -1,0 +1,210 @@
+/'
+  Diagrama: Diagrama 6.15: Diagrama de Secuencia General del Ciclo Transaccional de Mentorías
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15: Diagrama de Secuencia General del Ciclo de Reserva, Ratificación y Quórum
+Sistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Estudiante Mentoreado" as User
+participant "Vista React (SPA)
+(BookingModal / StudentBookings)" as UI
+participant "Adaptador Cliente
+(bookingService.ts)" as Client
+participant "Controlador FastAPI
+(endpoints/bookings.py)" as API
+participant "Servicio Backend
+(booking_service.py)" as Service
+database "PostgreSQL DB
+(SQLAlchemy / Supabase)" as DB
+participant "Planificador Cron
+(Celery / SchedulerWorker)" as Cron
+participant "Servicio Email
+(SMTP UPT)" as Mail
+actor "Estudiante Mentor" as Mentor
+
+== 1. Reserva Concurrente de Cupo (CUS-004) ==
+User -> UI: Clic en "Reservar Cupo" (idSesion)
+activate UI
+UI -> Client: reserveSeat(idSesion)
+activate Client
+Client -> API: POST /api/v1/bookings/reserve {"id_sesion": idSesion} [Bearer JWT]
+activate API
+API -> Service: reserve_seat(idSesion, user_email)
+activate Service
+Service -> DB: BEGIN TRANSACTION
+activate DB
+Service -> DB: SELECT * FROM sesiones_mentoria WHERE id = :idSesion FOR UPDATE OF sesiones_mentoria
+DB --> Service: Registro Sesion (aforo, cupos_ocupados)
+alt Cupos disponibles > 0 y Elegibilidad Validada
+    Service -> DB: INSERT INTO reservas_cupo (id_usuario, id_sesion, estado='PENDIENTE_CONFIRMACION', ticket_hash=SHA256(...))
+    Service -> DB: UPDATE sesiones_mentoria SET cupos_ocupados = cupos_ocupados + 1 WHERE id = :idSesion
+    Service -> DB: COMMIT
+    DB --> Service: Transacción confirmada
+    Service --> API: BookingResponseDTO {idReserva, estado: 'PENDIENTE_CONFIRMACION'}
+    API --> Client: HTTP 201 Created {idReserva, estado: 'PENDIENTE_CONFIRMACION'}
+    Client --> UI: Comprobante provisional
+    UI --> User: Muestra confirmación y plazo hasta T-24h
+else Conflicto de aforo o estudiante no elegible
+    Service -> DB: ROLLBACK
+    Service --> API: Lanza HTTPException(409, "Aforo agotado o colisión concurrente")
+    API --> Client: HTTP 409 Conflict {"detail": "Aforo agotado"}
+    Client --> UI: Captura error 409
+    UI --> User: Alerta de denegación de reserva
+end
+deactivate DB
+deactivate Service
+deactivate API
+deactivate Client
+deactivate UI
+
+== 2. Ratificación de Asistencia antes de T-24h (CUS-024) ==
+User -> UI: Clic en "Confirmar Asistencia" (idReserva)
+activate UI
+UI -> Client: confirmBooking(idReserva)
+activate Client
+Client -> API: POST /api/v1/bookings/{idReserva}/confirm [Bearer JWT]
+activate API
+API -> Service: confirm_booking(idReserva, user_email)
+activate Service
+Service -> DB: SELECT * FROM reservas_cupo r JOIN sesiones_mentoria s ON r.id_sesion = s.id WHERE r.id = :idReserva
+activate DB
+DB --> Service: Datos Reserva y Sesión
+deactivate DB
+alt Tiempo restante >= 24 horas (now_utc <= s.fecha_inicio - 24h)
+    Service -> DB: UPDATE reservas_cupo SET estado = 'CONFIRMADA', fecha_confirmacion = NOW() WHERE id = :idReserva
+    activate DB
+    Service -> DB: COMMIT
+    DB --> Service: Confirmado
+    deactivate DB
+    Service -> Mail: Despacha ticket digital con código QR de asistencia
+    activate Mail
+    Mail --> Service: Despacho OK
+    deactivate Mail
+    Service --> API: BookingConfirmDTO {estado: 'CONFIRMADA', pase_asistencia: 'PASS-8472'}
+    API --> Client: HTTP 200 OK {estado: 'CONFIRMADA', pase_asistencia: 'PASS-8472'}
+    Client --> UI: Pase digital confirmado
+    UI --> User: Despliega ticket digital y acceso formal
+else Plazo cerrado (now_utc > s.fecha_inicio - 24h)
+    Service --> API: Lanza HTTPException(400, "Ventana de ratificación vencida")
+    API --> Client: HTTP 400 Bad Request {"detail": "Ventana de ratificación vencida"}
+    Client --> UI: Captura error 400
+    UI --> User: Informa revocación reglamentaria
+end
+deactivate Service
+deactivate API
+deactivate Client
+deactivate UI
+
+== 3. Corte Automatizado y Cómputo de Quórum en T-24h (CUS-023) ==
+Cron -> API: Disparo automático de corte de quórum (sesiones a T=24h)
+activate API
+API -> Service: evaluate_all_active_quorums()
+activate Service
+Service -> DB: BEGIN TRANSACTION
+activate DB
+Service -> DB: UPDATE reservas_cupo SET estado = 'NO_CONFIRMADA' WHERE id_sesion = :idSesion AND estado = 'PENDIENTE_CONFIRMACION'
+Service -> DB: SELECT COUNT(*) FROM reservas_cupo WHERE id_sesion = :idSesion AND estado = 'CONFIRMADA'
+DB --> Service: confirmed_count (ej. 4)
+deactivate DB
+
+alt confirmed_count >= 3 (Quórum Reglamentario >= 3 confirmados, RN-05)
+    Service -> DB: UPDATE sesiones_mentoria SET estado = 'CONFIRMADA' WHERE id = :idSesion
+    activate DB
+    Service -> DB: COMMIT
+    DB --> Service: Confirmada
+    deactivate DB
+    Service -> Mail: Notifica realización confirmada al Mentor y a Mentoreados
+    activate Mail
+    Mail --> Service: Correo enviado
+    deactivate Mail
+    Service --> API: QuorumBatchSummaryDTO
+    API --> Cron: HTTP 200 OK (Quórum alcanzado)
+else confirmed_count < 3 (Quórum Insuficiente)
+    Service -> DB: UPDATE sesiones_mentoria SET estado = 'QUORUM_INSUFICIENTE' WHERE id = :idSesion
+    activate DB
+    Service -> DB: COMMIT
+    DB --> Service: Estado contingencia
+    deactivate DB
+    Service -> Mail: Envía alerta urgente de resolución a Mentor (CUS-007)
+    activate Mail
+    Mail --> Mentor: Notificación de contingencia
+    deactivate Mail
+    Service --> API: QuorumAlertDTO
+    API --> Cron: HTTP 200 OK (Alerta emitida)
+    
+    Mentor -> UI: Accede a panel de contingencia de sesión
+    activate UI
+    alt Mentor selecciona "Dictar de Todas Formas"
+        Mentor -> UI: Clic "Dictar de Todas Formas"
+        UI -> Client: submitQuorumDecision(idSesion, 'PROCEED')
+        activate Client
+        Client -> API: POST /api/v1/offers/{idSesion}/quorum-decision {"decision": 'PROCEED'}
+        API -> Service: process_quorum_decision(idSesion, 'PROCEED')
+        Service -> DB: UPDATE sesiones_mentoria SET estado = 'CONFIRMADA'
+        activate DB
+        Service -> DB: COMMIT
+        DB --> Service: Sesión confirmada
+        deactivate DB
+        Service -> Mail: Confirma dictado a los inscritos
+        activate Mail
+        Mail --> Service: Mail OK
+        deactivate Mail
+        Service --> API: QuorumDecisionResponseDTO
+        API --> Client: HTTP 200 OK
+        Client --> UI: Dictado confirmado
+        UI --> Mentor: Notificación de éxito
+    else Mentor selecciona "Reprogramar Sesión"
+        Mentor -> UI: Clic "Reprogramar Sesión" con nueva fecha (> 24h)
+        UI -> Client: submitQuorumDecision(idSesion, 'RESCHEDULE', new_start)
+        Client -> API: POST /api/v1/offers/{idSesion}/quorum-decision {"decision": 'RESCHEDULE', ...}
+        API -> Service: process_quorum_decision(idSesion, 'RESCHEDULE', new_start)
+        Service -> DB: UPDATE sesiones_mentoria SET estado = 'PUBLICADA', fecha_inicio = :new_start
+        activate DB
+        Service -> DB: COMMIT
+        DB --> Service: Reprogramada
+        deactivate DB
+        Service -> Mail: Notifica reprogramación a los inscritos
+        activate Mail
+        Mail --> Service: Mail OK
+        deactivate Mail
+        Service --> API: QuorumDecisionResponseDTO
+        API --> Client: HTTP 200 OK
+        Client --> UI: Reprogramación confirmada
+        UI --> Mentor: Sesión reprogramada
+    else Mentor selecciona "Cancelar Sesión"
+        Mentor -> UI: Clic "Cancelar sin Penalización" con justificativo
+        UI -> Client: submitQuorumDecision(idSesion, 'CANCEL', reason)
+        Client -> API: POST /api/v1/offers/{idSesion}/quorum-decision {"decision": 'CANCEL', ...}
+        API -> Service: process_quorum_decision(idSesion, 'CANCEL', reason)
+        Service -> DB: UPDATE sesiones_mentoria SET estado = 'CANCELADA_QUORUM'
+        activate DB
+        Service -> DB: UPDATE reservas_cupo SET estado = 'CANCELADA_SISTEMA' WHERE id_sesion = :idSesion
+        Service -> DB: COMMIT
+        DB --> Service: Cancelada
+        deactivate DB
+        Service -> Mail: Informa anulación solidaria a confirmados
+        activate Mail
+        Mail --> Service: Mail OK
+        deactivate Mail
+        Service --> API: QuorumDecisionResponseDTO
+        API --> Client: HTTP 200 OK
+        Client --> UI: Cancelación confirmada
+        UI --> Mentor: Cancelación registrada
+    end
+    deactivate Client
+    deactivate UI
+end
+deactivate Service
+deactivate API
+@enduml

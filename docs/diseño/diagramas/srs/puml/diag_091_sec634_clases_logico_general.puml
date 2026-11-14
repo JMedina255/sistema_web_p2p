@@ -1,0 +1,122 @@
+/'
+  Diagrama: Diagrama 6.16: Diagrama de Clases del Modelo Lógico del Sistema Web P2P
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama de Clases del Modelo Lógico General - Sistema Web P2P EPIS UPT
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam class {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+    ArrowColor #2B3A42
+}
+
+class Usuario {
+  -id: UUID
+  -codigo_estudiante: String
+  -email: String
+  -nombres: String
+  -apellidos: String
+  -activo: Boolean
+  +validarEmailUpt(): Boolean
+}
+
+class ConsentimientoLegal {
+  -id: UUID
+  -usuario_id: UUID
+  -ip_address: String
+  -user_agent: String
+  -fecha_aceptacion: DateTime
+}
+
+class CursoCritico {
+  -id: UUID
+  -codigo: String
+  -nombre: String
+  -ciclo: Integer
+  -es_prioritario: Boolean
+}
+
+class TemaCurricular {
+  -id: UUID
+  -curso_id: UUID
+  -unidad: Integer
+  -titulo: String
+}
+
+class OfertaMentoria {
+  -id: UUID
+  -mentor_id: UUID
+  -curso_id: UUID
+  -tema_id: UUID
+  -modalidad: String
+  -aforo_maximo: Integer
+  -fecha_inicio: DateTime
+  -estado: String
+}
+
+class SesionMentoria {
+  -id: UUID
+  -oferta_id: UUID
+  -espacio_id: UUID
+  -enlace_virtual: String
+  -estado: String
+  -quorum_alcanzado: Boolean
+}
+
+class ReservaCupo {
+  -id: UUID
+  -sesion_id: UUID
+  -mentoreado_id: UUID
+  -estado: String
+  -fecha_reserva: DateTime
+  +confirmar(): Void
+  +cancelar(): Void
+}
+
+class AsistenciaSesion {
+  -id: UUID
+  -sesion_id: UUID
+  -estudiante_id: UUID
+  -estado: String
+  -metodo_checkin: String
+  -fecha_checkin: DateTime
+}
+
+class BitacoraPedagogica {
+  -id: UUID
+  -sesion_id: UUID
+  -mentor_id: UUID
+  -temas_impartidos: Text
+  -observaciones: Text
+  -hash_sha256: String
+  -estado_visado: String
+  +calcularHash(): String
+}
+
+class CertificadoHoras {
+  -id: UUID
+  -mentor_id: UUID
+  -folio_correlativo: String
+  -horas_acreditadas: Float
+  -hash_documento: String
+  -url_qr: String
+  -fecha_emision: DateTime
+}
+
+Usuario "1" *-- "0..1" ConsentimientoLegal
+CursoCritico "1" *-- "1..*" TemaCurricular
+Usuario "1" -- "0..*" OfertaMentoria : publica
+OfertaMentoria "1" *-- "1" SesionMentoria
+SesionMentoria "1" *-- "0..*" ReservaCupo
+SesionMentoria "1" *-- "0..*" AsistenciaSesion
+SesionMentoria "1" *-- "0..1" BitacoraPedagogica
+Usuario "1" -- "0..*" CertificadoHoras : recibe
+@enduml

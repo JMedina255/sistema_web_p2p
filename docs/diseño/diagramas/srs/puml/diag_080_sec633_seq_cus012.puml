@@ -1,0 +1,107 @@
+/'
+  Diagrama: Diagrama 6.15.14: Diagrama de Secuencia - CUS-012: Registrar asistencia a sesión de mentoría
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.14: Diagrama de Secuencia - CUS-012: Registrar asistencia interactiva mediante código QR dinámico\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
+actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as Mentoreado
+participant "Vista React (Mentor / Alumno)\n(SessionAttendanceView.tsx)" as UI
+participant "Adaptador Cliente\n(attendanceService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/attendance.py)" as API
+participant "Servicio Backend\n(attendance_service.py)" as Service
+participant "Servicio WebSocket\n(FastAPI WS Manager)" as WS
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Apertura de sesión y generación de token dinámico de asistencia ==
+Mentor -> UI: click ["Iniciar Pase de Asistencia Digital"]
+activate UI
+UI -> Client: getAttendanceToken(sessionId)
+activate Client
+Client -> API: GET /api/v1/sessions/{session_id}/attendance/token [Bearer JWT]
+activate API
+API -> Service: generate_totp_token(session_id)
+activate Service
+Service -> Service: Genera token TOTP con ciclo de rotación de 30 segundos
+Service --> API: AttendanceTokenDTO {"totp_token": token, "expires_in": 30}
+deactivate Service
+API --> Client: HTTP 200 OK AttendanceTokenDTO
+deactivate API
+Client -> UI: displayQrCodeAndRoster(totp_token, expires_in=30)
+deactivate Client
+deactivate UI
+
+== Fase 2: Escaneo de código QR y validación de reserva y ventana horaria ==
+Mentoreado -> UI: scanQrCode (qrToken: "TOTP-928192")
+activate UI
+Mentoreado -> UI: click ["Registrar Mi Asistencia"]
+UI -> Client: registerCheckIn(sessionId, qrToken)
+activate Client
+Client -> API: POST /api/v1/sessions/{session_id}/attendance/check-in {"qr_token": token} [Bearer JWT]
+activate API
+API -> Service: record_checkin(session_id, mentoreado_id, qr_token)
+activate Service
+
+alt [E001] Código QR o token TOTP expirado (> 30 segundos)
+    Service --> API: Lanza HTTPException(400, "QR_TOKEN_EXPIRED")
+    API --> Client: HTTP 400 Bad Request {"detail": "QR_TOKEN_EXPIRED: Escanee el código QR actualizado."}
+    Client -> UI: displayQrExpiredWarning(400)
+    Mentoreado -> UI: click ["Escanear Nuevo Código"]
+    UI -> UI: captureNewToken()
+else Token TOTP vigente
+    Service -> DB: SELECT id FROM reservas_cupo WHERE id_sesion = :sid AND id_estudiante = :uid AND estado = 'CONFIRMADA'
+    activate DB
+    DB --> Service: Reserva confirmada o nulo
+    deactivate DB
+    
+    alt [E002] Estudiante sin reserva previa confirmada en la sesión
+        Service --> API: Lanza HTTPException(403, "NO_CONFIRMED_BOOKING")
+        API --> Client: HTTP 403 Forbidden {"detail": "NO_CONFIRMED_BOOKING: No registra reserva confirmada."}
+        Client -> UI: displayNoConfirmedBookingAlert(403)
+        Mentoreado -> UI: click ["Entendido"]
+        UI -> UI: closeScanner()
+    else Reserva ratificada verificada
+        alt [E003] Check-in fuera del intervalo temporal reglamentario (fuera de [inicio-15m, fin+30m])
+            Service --> API: Lanza HTTPException(400, "CHECKIN_WINDOW_CLOSED")
+            API --> Client: HTTP 400 Bad Request {"detail": "CHECKIN_WINDOW_CLOSED: Fuera de ventana reglamentaria."}
+            Client -> UI: displayCheckinWindowClosed(400)
+            Mentoreado -> UI: click ["Aceptar"]
+            UI -> UI: redirectToHome()
+        else Dentro del intervalo horario de la sesión
+            == Fase 3: Persistencia de asistencia y actualización reactiva en tiempo real ==
+            Service -> DB: BEGIN TRANSACTION
+            activate DB
+            Service -> DB: INSERT INTO asistencias_sesion (sesion_id, estudiante_id, fecha_checkin, asistio, ip_origen)\nVALUES (:sid, :uid, NOW(), true, :ip)\nON CONFLICT (sesion_id, estudiante_id) DO UPDATE SET asistio = true, fecha_checkin = NOW()
+            Service -> DB: COMMIT
+            DB --> Service: Asistencia persistida
+            deactivate DB
+            
+            Service -> WS: broadcast_attendance_event(session_id, {"student_id": uid, "status": "PRESENTE"})
+            activate WS
+            WS --> UI: pushWsAttendanceUpdate(student_id, "PRESENTE")
+            deactivate WS
+            UI -> UI: updateAttendanceRoster(student_id, "PRESENTE")
+            
+            Service --> API: AttendanceResponseDTO {"success": true, "asistio": true}
+            API --> Client: HTTP 200 OK AttendanceResponseDTO
+            Client -> UI: displayCheckinSuccessNotification()
+            UI --> Mentoreado: displayCheckinConfirmation
+        end
+    end
+end
+deactivate Service
+deactivate API
+deactivate Client
+deactivate UI
+@enduml

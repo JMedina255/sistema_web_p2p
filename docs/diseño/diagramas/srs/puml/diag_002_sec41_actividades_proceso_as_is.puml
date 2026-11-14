@@ -1,0 +1,42 @@
+/'
+  Diagrama: Diagrama 4.1: Diagrama de Actividades del Proceso Actual de Asesoría Informal (As-Is)
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Proceso Actual de Asesoría Académica Informal (As-Is) - EPIS-UPT
+skinparam activity {
+  BackgroundColor white
+  BorderColor #555555
+  ArrowColor #333333
+}
+
+|Estudiante (I - IV Ciclo)|
+start
+:Identifica vacíos conceptuales en materia filtro;
+:Publica consulta en grupo de WhatsApp / Telegram;
+
+if (¿Algún estudiante superior responde?) then (No)
+  :Permanece sin asesoría pedagógica;
+  :Acude tardíamente a tutoría docente regular;
+  :Alto riesgo de rezago o desaprobación;
+  stop
+else (Sí)
+  |Compañero / Mentor Informal|
+  :Acepta ayudar de manera voluntaria y ocasional;
+  |Estudiante (I - IV Ciclo)|
+  :Coordina horario y tema por chat privado;
+  |Compañero / Mentor Informal|
+  :Busca aula libre en el pabellón empíricamente\no crea enlace de videollamada personal;
+  |Estudiante (I - IV Ciclo)|
+  :Asiste a la sesión informal;
+  |Compañero / Mentor Informal|
+  :Explica dudas sin temario silábico estructurado;
+  |Comité de Tutoría / Dirección EPIS|
+  :Sin registro de asistencia ni temas tratados;
+  :Sin métricas de demanda académica institucional;
+  :Sin reconocimiento formal de horas para el mentor;
+  stop
+endif
+@enduml

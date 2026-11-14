@@ -1,0 +1,95 @@
+/'
+  Diagrama: Diagrama 6.15.19: Diagrama de Secuencia - CUS-009: Notificar eventos críticos y alertas temporales
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.19: Diagrama de Secuencia - CUS-009: Notificar eventos críticos y alertas de confirmación a T-24h\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+participant "Planificador\n(SchedulerWorker / Celery)" as Cron
+actor "Usuario Institucional\n(Mentor / Alumno)" as User
+participant "Vista React\n(NotificationBell.tsx)" as UI
+participant "Adaptador Cliente\n(notificationService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/notifications.py)" as API
+participant "Servicio Backend\n(notification_service.py)" as Service
+participant "Servicio SMTP UPT\n(EmailService)" as SMTP
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Conexión al canal de notificaciones e inicialización de alertas ==
+User -> UI: click ["Campana de Notificaciones"]
+activate UI
+UI -> Client: subscribeNotifications() & getUnread() [Bearer JWT]
+activate Client
+Client -> API: GET /api/v1/notifications/stream (SSE)
+activate API
+Client -> API: GET /api/v1/notifications/unread
+API -> Service: get_unread(user_id)
+activate Service
+Service -> DB: SELECT * FROM notificaciones_eventos WHERE usuario_id = :uid AND leida = false ORDER BY fecha_creacion DESC
+activate DB
+DB --> Service: Nómina de alertas no leídas
+deactivate DB
+Service --> API: UnreadNotificationsDTO
+deactivate Service
+API --> Client: HTTP 200 OK UnreadNotificationsDTO
+Client -> UI: displayUnreadBadge(unreadCount)
+
+== Fase 2: Generación asíncrona de evento crítico y despacho multicanal ==
+Cron -> Service: dispatch_critical_event(user_id, event_type, message, reference_id)
+activate Service
+Service -> DB: INSERT INTO notificaciones_eventos (usuario_id, tipo_evento, mensaje, referencia_id, leida=false, fecha_creacion=NOW())\nVALUES (...) RETURNING id
+activate DB
+DB --> Service: Alerta persistida
+deactivate DB
+
+Service -> API: push_sse_event(user_id, notification_data)
+API --> Client: SSE Stream Event: "critical_alert" {mensaje, id}
+Client -> UI: updateNotificationBadge(unreadCount + 1)
+
+alt [E001] Falla de despacho en servicio SMTP institucional de respaldo
+    Service -> SMTP: send_alert_email(email, subject, message)
+    activate SMTP
+    SMTP --> Service: SMTPException / Conexión rechazada
+    deactivate SMTP
+    Service -> Service: logger.warning("SMTP dispatch failed, falling back to SSE only")
+    Service --> API: Evento despachado (degradación controlada, entrega vía web preservada)
+else Despacho SMTP exitoso
+    Service -> SMTP: send_alert_email(email, subject, message)
+    activate SMTP
+    SMTP --> User: Aviso institucional en buzón universitario @upt.pe
+    deactivate SMTP
+    Service --> API: Multichannel Dispatch OK
+end
+deactivate Service
+
+== Fase 3: Recepción reactiva en cliente y lectura de notificación ==
+User -> UI: clickIcon ["Campana"]
+UI -> UI: openNotificationPanel()
+User -> UI: selectNotificationItem(notificationId)
+UI -> Client: markAsRead(notificationId)
+Client -> API: POST /api/v1/notifications/{id}/mark-read [Bearer JWT]
+API -> Service: mark_notification_as_read(notificationId, user_id)
+activate Service
+Service -> DB: UPDATE notificaciones_eventos SET leida = true WHERE id = :id
+activate DB
+DB --> Service: Confirmación de actualización
+deactivate DB
+Service --> API: NotificationMarkReadResponseDTO {"success": true}
+deactivate Service
+API --> Client: HTTP 200 OK
+Client -> UI: decreaseUnreadCounter()
+UI -> UI: decrementNotificationCounter()
+UI --> User: displayReferencedSessionView
+deactivate Client
+deactivate API
+deactivate UI
+@enduml

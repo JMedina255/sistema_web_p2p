@@ -1,0 +1,240 @@
+/'
+  Diagrama: Diagrama 6.15.1: Diagrama de Secuencia - CUS-001: Iniciar sesión institucional con 2FA
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.1: Diagrama de Secuencia - CUS-001: Iniciar sesión institucional con 2FA y formalización de consentimiento digital\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Usuario Institucional\n(Estudiante / Mentor / Administrador)" as User
+participant "Vista React\n(LoginOtpView.tsx / ConsentModalView.tsx)" as UI
+participant "Adaptador Cliente\n(authService.ts / consentService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/auth.py / consent.py)" as API
+participant "Servicio Backend\n(auth_service.py / consent_service.py)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+participant "Servicio SMTP UPT\n(EmailService)" as SMTP
+
+== Fase 1: Validación de identidad institucional y solicitud de OTP ==
+User -> UI: enter (email: "usuario@upt.pe")
+activate UI
+User -> UI: click ["Continuar"]
+UI -> Client: requestOtp(email)
+activate Client
+Client -> API: POST /api/v1/auth/otp/request {"email": email}
+activate API
+
+API -> API: Valida sintaxis con Pydantic (EmailStr) y comprueba email.endswith("@upt.pe")
+
+alt [E001] Dominio de correo no termina en @upt.pe
+    API --> Client: HTTP 400 Bad Request {"detail": "INVALID_DOMAIN: El acceso está reservado a @upt.pe."}
+    Client -> UI: displayDomainError(400, "INVALID_DOMAIN: El acceso está reservado a @upt.pe.")
+    User -> UI: click ["Corregir Correo"]
+    UI -> UI: resetEmailField()
+else Dominio universitario válido
+    API -> Service: request_otp(email)
+    activate Service
+    Service -> DB: SELECT * FROM usuarios WHERE email = :email AND activo = true
+    activate DB
+    DB --> Service: Registro de usuario (activo)
+    deactivate DB
+    
+    alt [E002] Cuenta institucional inactiva o suspendida (activo = false)
+        Service --> API: Lanza HTTPException(403, "ACCOUNT_SUSPENDED")
+        API --> Client: HTTP 403 Forbidden {"detail": "ACCOUNT_SUSPENDED: Su cuenta registra suspensión administrativa."}
+        Client -> UI: displayAccountSuspendedModal(403, "Cuenta inhabilitada por suspensión.")
+        User -> UI: click ["Aceptar"]
+        UI -> UI: resetForm()
+    else Cuenta activa y habilitada
+        Service --> API: Correo verificado y habilitado
+        API --> Client: HTTP 200 OK {"status": "ELIGIBLE"}
+        Client -> UI: displayOtpRequestForm(email, eligible=true)
+    end
+    deactivate Service
+end
+deactivate API
+deactivate Client
+deactivate UI
+
+== Fase 2: Generación criptográfica, despacho SMTP y verificación de código temporal ==
+User -> UI: click ["Solicitar Código de Acceso"]
+activate UI
+UI -> Client: requestOtp(email)
+activate Client
+Client -> API: POST /api/v1/auth/otp/request {"email": email}
+activate API
+API -> Service: generate_and_dispatch_otp(email)
+activate Service
+
+Service -> Service: Genera código seguro (secrets.randbelow(900000) + 100000)
+Service -> Service: Calcula hash criptográfico SHA-256(otp_code)
+Service -> DB: INSERT INTO credenciales_otp (id_usuario, hash_otp, expira_en=NOW()+5m)
+activate DB
+DB --> Service: Confirmación de persistencia (challenge_id)
+deactivate DB
+
+Service -> SMTP: send_otp_email(email, otp_plano)
+activate SMTP
+SMTP --> Service: Despacho SMTP exitoso (HTTP 200 / SMTP OK)
+deactivate SMTP
+
+Service --> API: OTP_SENT exitoso {"challenge_id": id, "expires_in": 300}
+deactivate Service
+API --> Client: HTTP 200 OK {"message": "OTP_SENT", "challengeId": id, "expires_in": 300}
+deactivate API
+Client -> UI: displayOtpModal(challengeId, expiresIn=300)
+deactivate Client
+deactivate UI
+
+opt [A002] Reenvío de código temporal por retraso en buzón (> 60s) o caducidad
+    User -> UI: click ["Reenviar código OTP"]
+    activate UI
+    UI -> Client: resendOtp(challengeId)
+    activate Client
+    Client -> API: POST /api/v1/auth/otp/resend {"challengeId": challengeId}
+    activate API
+    API -> Service: resend_otp(challenge_id)
+    activate Service
+    Service -> DB: UPDATE credenciales_otp SET consumido = true WHERE id = :challenge_id
+    activate DB
+    DB --> Service: Desafío previo invalidado
+    deactivate DB
+    Service -> Service: Genera nueva clave aleatoria de 6 dígitos
+    Service -> SMTP: send_otp_email(email, nuevo_otp)
+    activate SMTP
+    SMTP --> Service: SMTP OK
+    deactivate SMTP
+    Service --> API: OTP_SENT
+    deactivate Service
+    API --> Client: HTTP 200 OK {"message": "OTP_SENT"}
+    deactivate API
+    Client -> UI: displayOtpResentAlert(expiresIn=300)
+    deactivate Client
+    deactivate UI
+end
+
+User -> UI: enter (otpCode: "123456")
+activate UI
+User -> UI: click ["Verificar e Ingresar"]
+UI -> Client: verifyOtp(challengeId, otpCode)
+activate Client
+Client -> API: POST /api/v1/auth/otp/verify {"challengeId": challengeId, "otp": otpCode}
+activate API
+API -> Service: verify_otp(challenge_id, otpCode)
+activate Service
+
+Service -> DB: SELECT * FROM credenciales_otp WHERE id = :challenge_id AND consumido = false
+activate DB
+DB --> Service: Registro OTP persistido
+deactivate DB
+
+alt [E003] Código temporal OTP incorrecto
+    Service -> DB: UPDATE credenciales_otp SET intentos_fallidos = intentos_fallidos + 1
+    activate DB
+    DB --> Service: Actualizado
+    deactivate DB
+    Service --> API: Lanza HTTPException(400, "INVALID_OTP")
+    API --> Client: HTTP 400 Bad Request {"detail": "INVALID_OTP: El código no coincide."}
+    Client -> UI: displayOtpError(400, "INVALID_OTP: Código erróneo. Le quedan X intentos")
+    User -> UI: click ["Reintentar"]
+    UI -> UI: clearOtpInputs()
+else [E004] Código temporal OTP expirado (NOW() > expira_en)
+    Service --> API: Lanza HTTPException(400, "EXPIRED_OTP")
+    API --> Client: HTTP 400 Bad Request {"detail": "EXPIRED_OTP: El código ha caducado por límite de 5 min."}
+    Client -> UI: displayOtpExpiredAlert(400, "EXPIRED_OTP: Código caducado.")
+    User -> UI: click ["Solicitar Nuevo Código"]
+    UI -> UI: resetOtpForm()
+else [E005] Bloqueo temporal por exceso de intentos (intentos_fallidos >= 3)
+    Service -> DB: UPDATE usuarios SET bloqueado_hasta = NOW() + INTERVAL '15 MINUTES'
+    activate DB
+    DB --> Service: Usuario bloqueado
+    deactivate DB
+    Service --> API: Lanza HTTPException(429, "MAX_ATTEMPTS_EXCEEDED")
+    API --> Client: HTTP 429 Too Many Requests {"detail": "MAX_ATTEMPTS_EXCEEDED: Acceso bloqueado por 15 minutos."}
+    Client -> UI: displayBlockedSecurityModal(429, "Acceso bloqueado por 15 minutos.")
+    User -> UI: click ["Volver al Inicio"]
+    UI -> UI: redirectToInitialLogin()
+else Código válido y vigente
+    Service -> DB: UPDATE credenciales_otp SET consumido = true WHERE id = :challenge_id
+    activate DB
+    DB --> Service: Desafío invalidado
+    deactivate DB
+    Service --> API: OTP validado exitosamente {"temp_token": temp_token}
+    deactivate Service
+    API --> Client: HTTP 200 OK {"temp_token": temp_token}
+    deactivate API
+    Client -> UI: displayConsentOrProceed(temp_token)
+    deactivate Client
+    deactivate UI
+end
+
+== Fase 3: Formalización de consentimiento legal digital y emisión de sesión ==
+UI -> Client: getConsentStatus(email)
+activate UI
+activate Client
+Client -> API: GET /api/v1/consent/status?email={email}
+activate API
+API -> Service: get_consent_status(email)
+activate Service
+Service -> DB: SELECT * FROM consentimientos_legales WHERE email = :email AND revocado = false
+activate DB
+DB --> Service: Registro de consentimiento
+deactivate DB
+
+alt [A001] Acceso recurrente con consentimiento formalizado previo (has_consented = true)
+    Service -> Service: create_access_token(sub=email, roles=[UserRole], exp=8h)
+    Service --> API: TokenJWT_Firmado + Perfil
+    API --> Client: HTTP 200 OK {"access_token": token, "token_type": "Bearer", "user": user}
+    Client -> UI: displaySessionDashboard(token, user)
+    UI -> UI: localStorage.setItem('auth_token', token)
+    UI --> User: displaySuccessSessionNotification
+else Primer acceso sin consentimiento legal formalizado
+    Service --> API: Requiere consentimiento {"requires_consent": true, "temp_token": temp_token}
+    API --> Client: HTTP 200 OK {"requires_consent": true}
+    Client -> UI: renderConsentModal(Ley 29733)
+    
+    alt [E006] Rechazo voluntario del consentimiento informado
+        User -> UI: click ["Declinar y Salir"]
+        UI -> UI: displayMandatoryConsentWarning()
+        User -> UI: click ["Confirmar Salida"]
+        UI -> UI: purgeSessionAndReset()
+    else Aceptación de términos legales
+        User -> UI: selectCheckbox ["He leído y acepto los términos..."]
+        User -> UI: click ["Aceptar y Continuar"]
+        UI -> Client: acceptConsent(user_id, version="2026-II-v1.0")
+        activate Client
+        Client -> API: POST /api/v1/consent/accept {"version": "2026-II-v1.0"}
+        activate API
+        API -> Service: register_consent(email, ip, user_agent)
+        activate Service
+        Service -> DB: INSERT INTO consentimientos_legales (usuario_id, ip, user_agent, version, fecha_registro) VALUES (...)
+        activate DB
+        DB --> Service: Registro inmutable persistido
+        deactivate DB
+        
+        Service -> Service: create_access_token(sub=email, roles=[UserRole], exp=8h)
+        Service --> API: TokenJWT_Firmado + Perfil
+        deactivate Service
+        API --> Client: HTTP 200 OK {"access_token": token, "token_type": "Bearer", "user": user}
+        deactivate API
+        Client -> UI: displaySessionDashboard(token, user)
+        deactivate Client
+        
+        UI -> UI: localStorage.setItem('auth_token', token)
+        UI -> UI: Actualiza estado global de autenticación en App.tsx
+        UI --> User: displaySuccessSessionNotification
+    end
+end
+deactivate Service
+deactivate API
+deactivate Client
+deactivate UI
+@enduml
