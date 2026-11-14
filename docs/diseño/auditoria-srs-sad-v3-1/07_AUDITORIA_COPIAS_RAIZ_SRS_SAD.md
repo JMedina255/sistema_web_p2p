@@ -31,9 +31,9 @@ El presente informe audita la generación de copias integrales y autónomas de l
 | Documento | Ubicación | Tamaño (Bytes) | Total Líneas | Secciones `##` | Figuras Renderizadas | Bloques PlantUML (en `<details>`) |
 |:---|:---|:---:|:---:|:---:|:---:|:---:|
 | **SRS Original** | `docs/diseño/FD03-EPIS-Informe SRS de Proyecto.md` | 574,444 | 4,616 | 36 | 119 | 0 (en fuentes `.puml`) |
-| **SRS Copia Raíz** | `SRS.md` | 851,547 | 12,821 | 36 | **119** | **119** |
-| **SAD Original** | `docs/diseño/FD04-EPIS-Informe SAD de Proyecto.md` | 185,839 | 2,368 | 17 | 0 | 14 (crudos en texto) |
-| **SAD Copia Raíz** | `SAD.md` | 190,298 | 2,480 | 17 | **14** | **14** |
+| **SRS Copia Raíz** | `SRS.md` | 851,564 | 12,816 | 36 | **119** | **119** |
+| **SAD Original** | `docs/diseño/FD04-EPIS-Informe SAD de Proyecto.md` | 185,837 | 2,368 | 17 | 0 | 14 (crudos en texto) |
+| **SAD Copia Raíz** | `SAD.md` | 190,296 | 2,480 | 17 | **14** | **14** |
 
 Fuente: Elaboración propia a partir de scripts automatizados de auditoría.
 
@@ -58,9 +58,9 @@ Fuente: Elaboración propia a partir de scripts automatizados de auditoría.
 | Archivo | Ruta Relativa | Hash SHA-256 | Justificación de la Variación |
 |:---|:---|:---|:---|
 | SRS Canónico | `docs/diseño/FD03-EPIS-Informe SRS de Proyecto.md` | `e7f0a836ff89d9597053debf49fccf414171a1ebccfb198067eb27fab697c959` | Versión documental oficial de diseño con figuras relativas a `docs/diseño/`. |
-| SRS Copia Raíz | `SRS.md` | `23ed17be85966a323905db5a570afbc9211ad73a11cf974ac5aa38eebe4cb6d5` | Variación justificada: rutas de imagen actualizadas a `docs/diseño/diagramas/srs/img/` e inclusión de bloques `<details>` con el código PlantUML editable. |
-| SAD Canónico | `docs/diseño/FD04-EPIS-Informe SAD de Proyecto.md` | `5aef91442bb2ac74e2336556e70cb6f5b97fa99a8c6a12fe816fac26c0d42f3e` | Versión documental oficial de arquitectura con 14 bloques de código crudo. |
-| SAD Copia Raíz | `SAD.md` | `c6298394354d9a05762e69a56cc67eb425a8efad74720a0d25c6dab59878f619` | Variación justificada: sustitución de los 14 bloques crudos por figuras PNG visibles, denominación **Figura X**, y preservación del código PlantUML en `<details>`. |
+| SRS Copia Raíz | `SRS.md` | `2920849dbca48cda4e09442facb267a43d2285e3bc90ee22a91d6812c086b281` | Variación justificada: rutas de imagen actualizadas a `docs/diseño/diagramas/srs/img/` e inclusión de bloques `<details>` con el código PlantUML editable. |
+| SAD Canónico | `docs/diseño/FD04-EPIS-Informe SAD de Proyecto.md` | `05befc79a37bfeb7b288de8c221a362e4531b3990ec89155d26674296176d2b6` | Versión documental oficial de arquitectura con 14 bloques de código crudo. |
+| SAD Copia Raíz | `SAD.md` | `1350d3c8b59a781833d688a9f1d4ade116bfc77ae779821253d4c9baee57c2ea` | Variación justificada: sustitución de los 14 bloques crudos por figuras PNG visibles, denominación **Figura X**, y preservación del código PlantUML en `<details>`. |
 
 ---
 

@@ -36,7 +36,7 @@ A través de un pipeline automatizado, reproducible e idempotente desarrollado e
 | **Figuras PNG de alta resolución generadas** | 0 | **119** | +119 (+100%) | **RENDERIZADO** |
 | **Imágenes vinculadas en el cuerpo del SRS** | 0 | **119** | +119 (+100%) | **INCRUSTADO** |
 | **Rutas de imagen rotas / 0 bytes en disco** | N/A | **0** | 0 | **VERIFICADO** |
-| **Volumen de almacenamiento de gráficos** | 0 MB | **11.09 MB** | +11.09 MB | **ALTA CALIDAD** |
+| **Volumen de almacenamiento de gráficos** | 0 MB | **11.60 MB** | +11.60 MB | **ALTA CALIDAD** |
 | **Trazabilidad contra Estándar D-2 (Fuente/Texto)** | 119 | **119 / 119** | 100% | **CONFORME** |
 | **Auditoría Semántica de Narrativas (6.2.3)** | 0 errores | **0 errores** | Invariante | **APROBADO** |
 | **Auditoría Semántica de Secuencia (6.3.3)** | 0 errores | **0 errores** | Invariante | **APROBADO** |
@@ -116,7 +116,7 @@ La siguiente tabla detalla la correspondencia unívoca entre la figura incorpora
 | 063 | **Diagrama 6.14.22: Diagrama de Actividades con Flujo de Objetos - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733** | `diag_063_sec632_act_cus016.puml` | `diag_063_sec632_act_cus016.png` | 58.0 KB | **CONFORME (100%)** |
 | 064 | **Diagrama 6.14.23: Diagrama de Actividades con Flujo de Objetos - CUS-020: Configurar parámetros institucionales y umbrales** | `diag_064_sec632_act_cus020.puml` | `diag_064_sec632_act_cus020.png` | 57.0 KB | **CONFORME (100%)** |
 | 065 | **Diagrama 6.14.24: Diagrama de Actividades con Flujo de Objetos - CUS-022: Gestionar catálogo de temas y materias críticas** | `diag_065_sec632_act_cus022.puml` | `diag_065_sec632_act_cus022.png` | 55.3 KB | **CONFORME (100%)** |
-| 066 | **Diagrama 6.15: Diagrama de Secuencia General del Ciclo Transaccional de Mentorías** | `diag_066_sec633_seq_general_integracion.puml` | `diag_066_sec633_seq_general_integracion.png` | 20.9 KB | **CONFORME (100%)** |
+| 066 | **Diagrama 6.15: Diagrama de Secuencia General del Ciclo Transaccional de Mentorías** | `diag_066_sec633_seq_general_integracion.puml` | `diag_066_sec633_seq_general_integracion.png` | 545.6 KB | **CONFORME (100%)** |
 | 067 | **Diagrama 6.15.1: Diagrama de Secuencia - CUS-001: Iniciar sesión institucional con 2FA** | `diag_067_sec633_seq_cus001.puml` | `diag_067_sec633_seq_cus001.png` | 605.1 KB | **CONFORME (100%)** |
 | 068 | **Diagrama 6.15.2: Diagrama de Secuencia - CUS-010: Gestionar asignación de roles de usuario** | `diag_068_sec633_seq_cus010.puml` | `diag_068_sec633_seq_cus010.png` | 374.3 KB | **CONFORME (100%)** |
 | 069 | **Diagrama 69** | `diag_069_sec633_seq_item_69.puml` | `diag_069_sec633_seq_item_69.png` | 311.8 KB | **CONFORME (100%)** |
