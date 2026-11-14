@@ -16,7 +16,7 @@ def get_mod05():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-012 (Reserva de cupos con control de aforo y concurrencia; trazabilidad técnica hacia RF-002, RF-006, RF-013 y RF-014) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentoreado (`UserRole.mentoreado`), Administrador Institucional (`UserRole.administrador`) |
 | **Interacción** | Fase de Construcción / Iteración Sprint 04 - Sprint 05 |
 | **Descripción** | Permite formalizar una reserva provisional de cupo en estado `PENDIENTE_CONFIRMACION` mediante una petición `POST /api/v1/bookings/reserve` despachada desde el componente cliente `BookingModalView.tsx` hacia el controlador FastAPI `bookings.py`. El backend ejecuta validaciones de seguridad con `decode_access_token` en `app/core/security.py`, comprueba la vigencia del consentimiento legal con `ConsentService.get_consent_status`, adquiere el cerrojo en memoria `_booking_lock` y ejecuta una transacción en PostgreSQL bajo bloqueo pesimista de fila `SELECT ... FOR UPDATE OF sesiones_mentoria` con `SET LOCAL lock_timeout = '5.0s'`. Comprueba que `occupied_seats < sesion.aforo_maximo` (10 presencial / 20 virtual, RN-05) y la antelación mayor a 24 horas (`sesion.fecha_inicio > now_utc + 24h`, RN-04). Genera la entidad ORM `ReservaCupo` con código alfanuméricamente secuencial y hash criptográfico SHA-256 (`ticket_hash`), confirma la transacción con `db.commit()` y retorna el payload serializado `BookingResponse` (HTTP 201 Created). |
@@ -109,7 +109,7 @@ def get_mod05():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-013 (Confirmación anticipada de asistencia a mentoría); RN-04 (Ventana de ratificación previa entre T-48h y T-24h), RN-10 (Control de asistencia y quórum institucional) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentoreado (`UserRole.mentoreado`) |
 | **Interacción** | Fase de Construcción / Iteración Sprint 04 - Sprint 05 |
 | **Descripción** | Permite a los estudiantes mentoreados con reservas provisionales en estado `PENDIENTE_CONFIRMACION` confirmar obligatoriamente su asistencia definitiva dentro de la ventana de ratificación institucional comprendida entre las 48 horas y las 24 horas previas al inicio de la sesión (`sesion.fecha_inicio - 48h <= now_utc <= sesion.fecha_inicio - 24h`). El usuario accede a la vista `StudentBookingsView.tsx` y acciona el botón de confirmación enlazado a `bookingService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/bookings.py` y `app/services/booking_service.py` procesan la petición `POST /api/v1/bookings/{id}/confirm`, verifican la vigencia temporal de la ventana, conmutan el estado de la entidad `ReservaCupo` a `CONFIRMADA`, generan el identificador criptográfico del pase de lista y emiten una respuesta HTTP 200 OK, contribuyendo al cálculo del quórum mínimo (RN-05). |
@@ -152,7 +152,7 @@ def get_mod05():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-014 (Desistimiento voluntario y liberación anticipada de cupos); RN-04 (Antelación mínima de 24 horas para cancelaciones sin sanción institucional) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentoreado (`UserRole.mentoreado`) |
 | **Interacción** | Fase de Construcción / Iteración Sprint 04 - Sprint 05 |
 | **Descripción** | Permite a los estudiantes mentoreados anular voluntariamente una reserva activa en estado `PENDIENTE_CONFIRMACION` o `CONFIRMADA` sin incurrir en penalizaciones académicas, siempre que la solicitud se despache con una antelación mayor a 24 horas respecto al inicio de la sesión (`fecha_inicio > now_utc + 24h`, RN-04). El componente `StudentBookingsView.tsx` despacha `POST /api/v1/bookings/{id}/cancel` hacia `bookings.py` y `app/services/booking_service.py`. El backend adquiere el cerrojo pesimista de fila, actualiza el estado de la reserva a `CANCELADA_ESTUDIANTE`, decrementa el contador de cupos ocupados de la sesión y confirma la transacción ACID con `db.commit()`, notificando al motor de recomendaciones sobre la vacante liberada. |
@@ -188,7 +188,7 @@ def get_mod05():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-015 (Monitoreo desatendido, emisión de recordatorios y evaluación de quórum); RN-05 (Regla de quórum mínimo de 3 estudiantes confirmados), RN-10 (Automatización de eventos temporales a T-24h) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Proceso Demonio en Segundo Plano (`SchedulerWorker`), Administrador Institucional |
 | **Interacción** | Fase de Construcción / Iteración Sprint 06 |
 | **Descripción** | Permite evaluar de forma automatizada y desatendida el cumplimiento del umbral reglamentario de quórum institucional (mínimo 3 estudiantes con asistencia ratificada en presencial o 5 en virtual, RN-05) exactamente 24 horas antes del inicio programado de cada sesión de mentoría. Un proceso en segundo plano o endpoint administrativo `POST /api/v1/quorum/evaluate-all` en `aplicacion/backend/app/api/v1/endpoints/quorum.py` invoca al método `evaluate_all_active_quorums` en `app/services/booking_service.py`. El servicio adquiere un bloqueo pesimista `SELECT ... FOR UPDATE` sobre `sesiones_mentoria`, valida que `quorumevaluated_at` sea nulo para garantizar estricta idempotencia transaccional, cuantifica las reservas en estado `CONFIRMADA`, caduca las reservas no ratificadas a `CANCELADA_NO_CONFIRMADA`; si se alcanza o supera el quórum, promueve automáticamente la sesión a estado `CONFIRMADA`. Si no se alcanza el quórum reglamentario, transiciona la sesión a estado `QUORUM_INSUFICIENTE` y despacha alertas urgentes al mentor para la resolución de contingencia (CUS-007). |
@@ -225,7 +225,7 @@ def get_mod05():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-016 (Gestión resolutiva de sesiones ante quórum insuficiente); RN-04 (Antelación mínima de reprogramación), RN-10 (Resolución de contingencia ante quórum) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentor (`UserRole.mentor`), Administrador Institucional |
 | **Interacción** | Fase de Construcción / Iteración Sprint 06 |
 | **Descripción** | Permite al estudiante mentor tomar una decisión resolutiva cuando su sesión no alcanza el quórum reglamentario de 3 estudiantes a T-24h (estado `QUORUM_INSUFICIENTE`) a través del componente cliente `MentorSessionsView.tsx` y el servicio `offerService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/offers.py` y `app/services/offer_service.py` procesan la petición `POST /api/v1/offers/{id}/quorum-decision`. El mentor cuenta con tres alternativas reglamentarias: 1) Dictar la sesión de todas formas con los estudiantes confirmados (promoción forzada a `CONFIRMADA`), 2) Reprogramar la sesión para una nueva fecha con antelación mínima de 24 horas, o 3) Cancelar la sesión definitivamente liberando a los inscritos sin penalización alguna. La operación se ejecuta bajo una transacción ACID confirmada con `db.commit()`. |

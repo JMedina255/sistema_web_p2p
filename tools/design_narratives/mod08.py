@@ -16,7 +16,7 @@ def get_mod08():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-015 (Monitoreo desatendido, emisión de recordatorios y alertas); RN-04 (Antelación de 24 horas), RN-10 (Control de asistencia y quórum institucional) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Proceso Planificador (`SchedulerWorker`), Estudiante Mentor, Estudiante Mentoreado, Administrador Institucional |
 | **Interacción** | Fase de Construcción / Iteración Sprint 07 - Sprint 08 |
 | **Descripción** | Permite transmitir notificaciones asíncronas y alertas en tiempo real a los usuarios institucionales ante eventos críticos del ciclo de vida de las sesiones de mentoría (tales como recordatorios de ratificación de asistencia a T-24h, confirmación oficial de quórum, reprogramación o cancelación contingente). El frontend gestiona las alertas reactivas a través del componente `NotificationBell.tsx` y el servicio `notificationService.ts`, conectándose al canal de Server-Sent Events (SSE) `/api/v1/notifications/stream`. El backend `aplicacion/backend/app/api/v1/endpoints/notifications.py` y `app/services/notification_service.py` procesan eventos generados por tareas programadas de Celery/APScheduler, persisten la entidad `NotificacionEvento` (`app/models/notification.py`) en PostgreSQL y despachan simultáneamente correos electrónicos de respaldo vía SMTP universitario (`EmailService`), garantizando la notificación oportuna a mentores y estudiantes. |
@@ -53,7 +53,7 @@ def get_mod08():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-025 (Tablero analítico y métricas de rendimiento académico) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Administrador Institucional (`UserRole.administrador`), Director de Escuela EPIS, Comité de Calidad ICACIT |
 | **Interacción** | Fase de Construcción / Iteración Sprint 07 - Sprint 08 |
 | **Descripción** | Permite a las autoridades académicas y evaluadores de acreditación generar informes estadísticos agregados sobre la cobertura, demanda y efectividad del programa de mentorías entre pares mediante el componente cliente `AnalyticsDashboardView.tsx` y el servicio `analyticsService.ts`. El backend en `aplicacion/backend/app/api/v1/endpoints/analytics.py` y `app/services/analytics_service.py` procesa las peticiones `GET /api/v1/analytics/reports/kpis` y `GET /api/v1/analytics/export`. El servicio ejecuta consultas analíticas relacionales en PostgreSQL agrupando métricas por asignatura filtro, ciclo y modalidad (horas dictadas, porcentaje de asistencia efectiva, quórum promedio alcanzado y tasa de demanda no atendida). Permite descargar el consolidado en formato de hoja de cálculo estructurada (`.xlsx` o `.csv`) con metadatos de auditoría institucional. |
@@ -90,7 +90,7 @@ def get_mod08():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-025 (Tablero analítico y métricas de rendimiento académico); Criterios ICACIT de retención y graduación oportuna |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Administrador Institucional, Comisión de Acreditación ICACIT, Director de Escuela EPIS |
 | **Interacción** | Fase de Construcción / Iteración Sprint 07 - Sprint 08 |
 | **Descripción** | Permite a los comités de calidad educativa evaluar el impacto del programa de mentorías en la retención estudiantil y en la reducción del índice de reprobación en materias filtro a través del componente cliente `RetentionDashboardView.tsx` y el servicio `analyticsService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/analytics.py` procesa las peticiones `GET /api/v1/analytics/retention/cohorts` y `GET /api/v1/analytics/retention/impact`. El servicio analiza estadísticamente las cohortes estudiantiles, calculando la correlación entre la participación recurrente en mentorías (asistencia >= 3 sesiones) y la tasa de aprobación de las asignaturas críticas (Cálculo, Física, Algoritmos, Estructuras de Datos). Presenta comparativas entre grupos de control (estudiantes no asistentes) y grupos participantes para respaldar las auditorías ICACIT. |
@@ -127,7 +127,7 @@ def get_mod08():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-026 (Auditoría administrativa de bitácoras, accesos y seguridad); RN-02 (Registro inmutable de consentimiento legal digital Ley Nº 29733) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Oficial de Seguridad de la Información (`UserRole.administrador`), Delegado de Protección de Datos |
 | **Interacción** | Fase de Construcción / Iteración Sprint 07 - Sprint 08 |
 | **Descripción** | Permite a los oficiales de seguridad y autoridades universitarias inspeccionar las trazas de auditoría inmutables del sistema y verificar el estricto cumplimiento de la Ley Nº 29733 (Protección de Datos Personales del Perú) mediante el componente `AuditLogView.tsx` y el servicio `auditService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/audit.py` y `app/services/audit_service.py` exponen los endpoints `GET /api/v1/audit/logs`, `GET /api/v1/audit/consent-traces` y `POST /api/v1/audit/verify-chain`. El sistema verifica la integridad criptográfica de la cadena de bloques o hashes encadenados de auditoría (donde cada registro contiene el SHA-256 del registro anterior), garantizando la no alteración de eventos críticos (inicios de sesión 2FA, modificaciones de roles, aceptaciones y revocaciones de consentimiento legal con direcciones IP y marcas temporales UTC). |
@@ -170,7 +170,7 @@ def get_mod08():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-024 (Priorización institucional y realce algorítmico); RN-04 (Umbral temporal T-24h), RN-05 (Aforos máximos 10 y 20), RN-10 (Quórum mínimo de 3 estudiantes), RN-14 (Horas de acreditación) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Administrador Institucional (`UserRole.administrador`), Director de Escuela EPIS |
 | **Interacción** | Fase de Construcción / Iteración Sprint 07 - Sprint 08 |
 | **Descripción** | Permite a las autoridades de la EPIS-UPT parametrizar y calibrar las reglas de negocio globales y umbrales operacionales del sistema sin requerir modificaciones en el código fuente a través del componente cliente `SystemSettingsView.tsx` y el servicio `configService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/config.py` y `app/services/config_service.py` procesan las peticiones `GET /api/v1/config/parameters` y `PUT /api/v1/config/parameters`. El administrador puede ajustar los aforos máximos presenciales y virtuales (RN-05), la ventana de antelación obligatoria para reservas y cancelaciones (RN-04), el quórum mínimo para confirmación automática de sesiones (RN-10) y el umbral de horas acumuladas para emisión de constancias (RN-14). Los parámetros se persisten en la tabla `parametros_institucionales` (`app/models/config.py`), invalidan la caché global de la aplicación y registran una traza auditada de modificación. |
@@ -213,7 +213,7 @@ def get_mod08():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-005 (Gestión del catálogo de asignaturas y temarios), RF-026 (Auditoría administrativa de bitácoras y materias); RN-11 (Asignaturas filtro prioritarias) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Administrador Institucional (`UserRole.administrador`), Director de Escuela EPIS |
 | **Interacción** | Fase de Construcción / Iteración Sprint 07 - Sprint 08 |
 | **Descripción** | Permite a la Dirección de Escuela y a los administradores actualizar la malla curricular de la EPIS-UPT, gestionar las asignaturas designadas como materias filtro (`es_filtro = true`) y dar de alta, modificar o desactivar temas silábicos de aprendizaje a través del componente cliente `AdminCurriculumView.tsx` y el servicio `curriculumService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/curriculum.py` y `app/services/curriculum_service.py` procesan las peticiones `POST /api/v1/curriculum/courses`, `PUT /api/v1/curriculum/courses/{id}`, `POST /api/v1/curriculum/courses/{id}/topics` y `DELETE /api/v1/curriculum/topics/{id}`. El servicio valida que los temas ingresados correspondan a las unidades didácticas del semestre lectivo vigente (semanas 1 a 17), previene duplicidades conceptuales mediante comprobaciones de unicidad en `temas_curriculares` (`app/models/curriculum.py`) y asegura la consistencia referencial con las ofertas de mentoría y solicitudes de demanda en curso. |
