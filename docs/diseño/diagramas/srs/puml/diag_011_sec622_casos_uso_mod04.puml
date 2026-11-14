@@ -1,0 +1,29 @@
+/'
+  Diagrama: Diagrama 6.8: Diagrama de Casos de Uso - MOD-04: Demanda y Recomendaciones Personalizadas
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.8: Diagrama de Casos de Uso - MOD-04: Demanda y Recomendaciones Personalizadas
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+actor "Estudiante Mentoreado" as Mentoreado #EBF3FB
+actor "Estudiante Mentor" as Mentor #EBF3FB
+actor "Motor EdRecSys" as RecSys #FFF1F2
+
+rectangle "MOD-04: Demanda y Recomendaciones Personalizadas" {
+  usecase "CUS-002: Explorar recomendaciones\npersonalizadas Top-k" as CUS02
+  usecase "CUS-003: Registrar solicitud\nde demanda académica" as CUS03
+}
+
+Mentoreado --> CUS02
+CUS02 ..> RecSys : <<include>>
+Mentoreado --> CUS03
+Mentor --> CUS03
+@enduml

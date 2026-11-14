@@ -1,0 +1,78 @@
+/'
+  Diagrama: Diagrama 6.14: Diagrama de Actividades con Flujo de Objetos del Ciclo de Mentoría
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama de Actividades con Flujo de Objetos del Ciclo de Mentoría\nSistema Web P2P - EPIS UPT
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+|#F8F9FA|Estudiante Mentoreado|
+|#E8F8F5|Estudiante Mentor|
+|#FEF9C3|Sistema Web P2P (Backend)|
+|#FFF1F2|Administración (EPIS)|
+
+|Estudiante Mentor|
+start
+:Publica oferta de mentoría;
+|Sistema Web P2P (Backend)|
+:Valida disponibilidad de espacio;
+:Crea OfertaMentoria [PUBLICADA];
+:Crea SesionMentoria [PROGRAMADA];
+
+|Estudiante Mentoreado|
+:Explora recomendaciones Top-k;
+:Reserva cupo de sesión;
+|Sistema Web P2P (Backend)|
+:Adquiere cerrojo pesimista FOR UPDATE;
+:Crea ReservaCupo [PENDIENTE_CONFIRMACION];
+
+|Estudiante Mentoreado|
+:Ratifica asistencia antes de T-24h;
+|Sistema Web P2P (Backend)|
+:Transiciona ReservaCupo [CONFIRMADA];
+
+|Sistema Web P2P (Backend)|
+:Ejecuta corte automatizado a T-24h;
+if (¿Quórum >= 50% de aforo?) then (Sí)
+  :Transiciona SesionMentoria [CONFIRMADA];
+else (No)
+  :Transiciona SesionMentoria [QUORUM_INSUFICIENTE];
+  |Estudiante Mentor|
+  if (¿Mentor decide continuar?) then (Sí)
+    :Ratifica sesión extraordinaria;
+  else (No)
+    :Cancela sesión;
+    |Sistema Web P2P (Backend)|
+    :SesionMentoria [CANCELADA_QUORUM];
+    stop
+  endif
+endif
+
+|Estudiante Mentor|
+:Desarrolla la sesión de mentoría;
+:Registra bitácora pedagógica antes de 48h;
+|Sistema Web P2P (Backend)|
+:Calcula hash SHA-256 inmutable;
+:Crea BitacoraPedagogica [REGISTRADA];
+:Transiciona SesionMentoria [FINALIZADA];
+
+|Estudiante Mentoreado|
+:Completa encuesta de satisfacción (24h);
+|Sistema Web P2P (Backend)|
+:Actualiza reputación e insignias del mentor;
+
+|Administración (EPIS)|
+:Visa bitácoras docentes;
+if (¿Horas acumuladas >= 20h?) then (Sí)
+  :Emite certificado digital oficial;
+  |Sistema Web P2P (Backend)|
+  :Genera CertificadoHoras [EMITIDO_VALIDADO];
+endif
+stop
+@enduml

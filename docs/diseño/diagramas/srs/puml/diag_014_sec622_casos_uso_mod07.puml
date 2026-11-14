@@ -1,0 +1,27 @@
+/'
+  Diagrama: Diagrama 6.11: Diagrama de Casos de Uso - MOD-07: Gamificación e Incentivos
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.11: Diagrama de Casos de Uso - MOD-07: Gamificación e Incentivos
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+actor "Estudiante Mentor" as Mentor #EBF3FB
+actor "Administrador (EPIS)" as Admin #FEF9C3
+
+rectangle "MOD-07: Gamificación e Incentivos" {
+  usecase "CUS-018: Emitir constancia\ninstitucional de horas" as CUS18
+  usecase "CUS-019: Gestionar insignias\ny reputación gamificada" as CUS19
+}
+
+Mentor --> CUS18
+Admin --> CUS18
+Mentor --> CUS19
+@enduml

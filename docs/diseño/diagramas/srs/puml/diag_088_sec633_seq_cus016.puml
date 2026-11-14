@@ -1,0 +1,107 @@
+/'
+  Diagrama: Diagrama 6.15.22: Diagrama de Secuencia - CUS-016: Auditar trazas de seguridad y consentimiento
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.22: Diagrama de Secuencia - CUS-016: Auditar trazas inmutables de seguridad y consentimientos legales\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Oficial de Seguridad / Delegado DPO\n(UserRole.administrador)" as SecOfficer
+participant "Vista React\n(AuditLogView.tsx)" as UI
+participant "Adaptador Cliente\n(auditService.ts / ApiAuditAdapter)" as Client
+participant "Controlador FastAPI\n(endpoints/audit.py)" as API
+participant "Servicio Backend\n(audit_service.py / AuditService)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Consulta del registro forense de auditoría ==
+SecOfficer -> UI: click ["Auditoría de Seguridad y Ley 29733"]
+activate UI
+UI -> Client: getAuditLogs(limit=50) [Bearer JWT]
+activate Client
+Client -> API: GET /api/v1/audit/logs?limit=50
+activate API
+
+API -> API: require_security_officer_role(current_user)
+
+alt [E001] Permisos insuficientes para auditoría de seguridad
+    API --> Client: HTTP 403 Forbidden {"detail": "FORBIDDEN_AUDIT: Acceso reservado a Oficial de Seguridad."}
+    Client -> UI: displayAccessDeniedModal(403)
+    SecOfficer -> UI: click ["Aceptar"]
+    UI -> UI: redirectToAuthorizedDashboard()
+else Privilegios de seguridad verificados
+    API -> Service: get_logs(limit=50)
+    activate Service
+    Service -> DB: SELECT l.*, u.email FROM log_auditoria_seguridad l\nJOIN usuarios u ON l.usuario_id = u.id ORDER BY l.id DESC LIMIT 50
+    activate DB
+    DB --> Service: Trazas de auditoría forense
+    deactivate DB
+    Service --> API: AuditLogListResponseDTO
+    deactivate Service
+    API --> Client: HTTP 200 OK AuditLogListResponseDTO
+    Client -> UI: displayAuditLogTable(logs)
+end
+deactivate API
+deactivate Client
+
+== Fase 2: Filtrado por usuario y verificación de traza legal de consentimiento ==
+SecOfficer -> UI: enter (email: "usuario@upt.pe")
+SecOfficer -> UI: click ["Buscar Consentimiento"]
+UI -> Client: getConsentTraces(email)
+activate Client
+Client -> API: GET /api/v1/audit/consent-traces?email={email} [Bearer JWT]
+activate API
+API -> Service: get_consent_traces(email)
+activate Service
+Service -> DB: SELECT * FROM consentimientos_legales WHERE email = :email ORDER BY fecha_registro ASC
+activate DB
+DB --> Service: Trazas de formalización (UUID, versión, IP, User-Agent, UTC, revocado)
+deactivate DB
+Service --> API: ConsentTraceListDTO
+deactivate Service
+API --> Client: HTTP 200 OK ConsentTraceListDTO
+deactivate API
+Client -> UI: displayConsentTraceModal(traces)
+deactivate Client
+
+== Fase 3: Verificación criptográfica de la cadena de auditoría (Hash Chain) ==
+SecOfficer -> UI: click ["Verificar Integridad de Cadena de Logs"]
+UI -> Client: verifyLogChain()
+activate Client
+Client -> API: POST /api/v1/audit/verify-chain [Bearer JWT]
+activate API
+API -> Service: verify_chain_integrity()
+activate Service
+
+Service -> DB: SELECT id, hash_bloque, hash_anterior, datos_evento FROM log_auditoria_seguridad ORDER BY id ASC
+activate DB
+DB --> Service: Todos los registros de auditoría
+deactivate DB
+
+Service -> Service: Itera recursivamente recomputando SHA256(hash_anterior + datos_evento)
+
+alt [E002] Inconsistencia detectada en la cadena criptográfica de logs (discrepancia de hash)
+    Service --> API: Lanza HTTPException(409, "AUDIT_TAMPERING_DETECTED: Discrepancia en ID {broken_id}")
+    API --> Client: HTTP 409 Conflict {"detail": "AUDIT_TAMPERING_DETECTED"}
+    Client -> UI: displayTamperingAlert(409, broken_id)
+    SecOfficer -> UI: click ["Descargar Informe Forense"]
+    UI -> UI: exportForensicDump()
+else Cadena 100% íntegra (0 discrepancias)
+    Service --> API: VerifyChainResponseDTO {"status": "VALID", "records_verified": count, "tampering_detected": false}
+    API --> Client: HTTP 200 OK VerifyChainResponseDTO
+    Client -> UI: displayIntegrityVerifiedBadge()
+    UI --> SecOfficer: displayChainIntegrityConfirmation
+end
+deactivate Service
+deactivate API
+deactivate Client
+deactivate UI
+@enduml

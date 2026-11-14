@@ -1,0 +1,105 @@
+/'
+  Diagrama: Diagrama 6.15.13: Diagrama de Secuencia - CUS-007: Decisión del mentor ante quórum insuficiente
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.13: Diagrama de Secuencia - CUS-007: Decisión del mentor ante quórum insuficiente\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
+participant "Vista React\n(MentorSessionsView.tsx)" as UI
+participant "Adaptador Cliente\n(offerService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/offers.py)" as API
+participant "Servicio Backend\n(offer_service.py)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+participant "Servicio SMTP UPT\n(EmailService)" as SMTP
+actor "Estudiantes Inscritos" as Students
+
+== Fase 1: Acceso a la sesión con quórum insuficiente y visualización de opciones ==
+Mentor -> UI: click ["Mis Sesiones"]
+activate UI
+Mentor -> UI: clickButton ["Gestionar Sesión"]
+UI -> UI: openQuorumDecisionModal()
+
+== Fase 2: Elección de la resolución y verificación de parámetros ==
+alt Decisión == 'RESCHEDULE' con nueva fecha ingresada
+    Mentor -> UI: selectOption ["Reprogramar Sesión"]
+    Mentor -> UI: enter (newStartDateTime, newEndDateTime)
+    UI -> UI: validateAdvanceNotice(newStartDateTime)
+    
+    alt [E001] Fecha de reprogramación con menos de 24 horas de antelación
+        UI -> UI: displayRescheduleDateError()
+        Mentor -> UI: enter (validStartDateTime > 24h)
+        UI -> UI: enableRescheduleConfirmButton()
+    end
+else Decisión == 'CANCEL' con motivo de cancelación
+    Mentor -> UI: selectOption ["Cancelar Sesión"]
+    
+    alt [E002] Justificación de cancelación definitiva vacía
+        UI -> UI: displayEmptyReasonError()
+        Mentor -> UI: enter (validCancellationReason)
+        UI -> UI: enableCancelConfirmButton()
+    end
+else Decisión == 'PROCEED' (Dictar de todas formas)
+    Mentor -> UI: selectOption ["Dictar de Todas Formas"]
+end
+
+Mentor -> UI: click ["Confirmar Decisión Resolutiva"]
+UI -> Client: submitQuorumDecision(offerId, decision, payload)
+activate Client
+Client -> API: POST /api/v1/offers/{offer_id}/quorum-decision {"decision": d, ...} [Bearer JWT]
+activate API
+API -> Service: process_quorum_decision(mentor_id, offer_id, decision, payload)
+activate Service
+
+== Fase 3: Persistencia de la resolución y notificación a los estudiantes ==
+Service -> DB: BEGIN TRANSACTION
+activate DB
+
+alt Decisión == 'PROCEED' (Confirmar dictado a pesar del quórum bajo)
+    Service -> DB: UPDATE sesiones_mentoria SET estado = 'CONFIRMADA' WHERE id = :oid
+    Service -> DB: COMMIT
+    Service -> SMTP: notify_students_session_confirmed(enrolled_emails)
+    activate SMTP
+    SMTP --> Students: Notificación: Tu sesión de mentoría se dictará según lo programado
+    deactivate SMTP
+else Decisión == 'RESCHEDULE' (Reprogramar sesión)
+    Service -> DB: UPDATE sesiones_mentoria SET estado = 'PUBLICADA', fecha_inicio = :new_start, fecha_fin = :new_end WHERE id = :oid
+    Service -> DB: UPDATE reservas_cupo SET estado = 'PENDIENTE_CONFIRMACION' WHERE id_sesion = :oid
+    Service -> DB: COMMIT
+    Service -> SMTP: notify_students_session_rescheduled(enrolled_emails, new_start)
+    activate SMTP
+    SMTP --> Students: Notificación: La sesión ha sido reprogramada
+    deactivate SMTP
+else Decisión == 'CANCEL' (Cancelar definitivamente)
+    Service -> DB: UPDATE sesiones_mentoria SET estado = 'CANCELADA_QUORUM', motivo_cancelacion = :reason WHERE id = :oid
+    Service -> DB: UPDATE reservas_cupo SET estado = 'CANCELADA_SISTEMA' WHERE id_sesion = :oid
+    Service -> DB: COMMIT
+    Service -> SMTP: notify_students_session_cancelled(enrolled_emails, reason)
+    activate SMTP
+    SMTP --> Students: Notificación: Sesión cancelada por no alcanzar quórum reglamentario
+    deactivate SMTP
+end
+deactivate DB
+
+Service --> API: QuorumResolutionResponseDTO {"success": true, "new_state": estado}
+deactivate Service
+API --> Client: HTTP 200 OK QuorumResolutionResponseDTO
+deactivate API
+Client -> UI: displayQuorumResolutionSuccess(new_state)
+deactivate Client
+
+UI -> UI: closeQuorumDecisionModal()
+UI -> UI: updateSessionCardState(new_state)
+UI --> Mentor: displayQuorumDecisionConfirmation
+deactivate UI
+@enduml

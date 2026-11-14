@@ -1,0 +1,43 @@
+/'
+  Diagrama: Diagrama 6.13.22: Análisis de Objetos (Modelo ECB) - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733\nSistema Web P2P - EPIS UPT
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+skinparam actor {
+    BackgroundColor #E9ECEF
+    BorderColor #1D2D44
+}
+skinparam boundary {
+    BackgroundColor #E8F4F8
+    BorderColor #2B3A42
+}
+skinparam control {
+    BackgroundColor #FFF2DF
+    BorderColor #D97706
+}
+skinparam entity {
+    BackgroundColor #E8F8F5
+    BorderColor #0D9488
+}
+
+actor "Actor Institucional" as ActUser
+boundary "UI_AdminAuditView" as B_Main
+control "AuditService" as C_Main
+entity "ConsentimientoLegal" as E_Main
+
+ActUser --> B_Main : 1. Solicita operacion (Auditar trazas de seguridad y consentimiento Ley 29733)
+B_Main --> C_Main : 1.1. ejecutarAccion(payload)
+C_Main ..> E_Main : 1.2. validarReglasYPersistir()
+E_Main --> C_Main : 1.3. estadoActualizado(OK)
+C_Main --> B_Main : 1.4. confirmarResultado(DTO)
+B_Main --> ActUser : 2. Despliega estado en pantalla
+@enduml

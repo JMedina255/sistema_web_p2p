@@ -1,0 +1,72 @@
+/'
+  Diagrama: Diagrama 4.2: Diagrama de Actividades del Proceso Propuesto de Mentorías P2P (To-Be)
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Proceso Propuesto de Mentorías Académicas P2P (To-Be) - EPIS-UPT
+skinparam activity {
+  BackgroundColor white
+  BorderColor #333333
+  ArrowColor #222222
+}
+
+|Estudiante Mentoreado|
+start
+:Inicia sesión con correo UPT y código OTP / Google;
+if (¿Primer acceso?) then (Sí)
+  :Formaliza consentimiento informado digital (Ley 29733);
+endif
+
+|Estudiante Mentor (VII-X)|
+:Publica oferta de mentoría (Materia, Temario, Modalidad);
+
+|Sistema Web P2P (Backend / EdRecSys)|
+:Valida aula física libre o enlace virtual institucional;
+:Ejecuta motor EdRecSys (Similitud Coseno + Reputación);
+:Despliega ranking adaptativo Top-k al estudiante;
+
+|Estudiante Mentoreado|
+:Explora cartelera o registra solicitud en banco de demanda;
+:Reserva cupo (Cerrojo pesimista FOR UPDATE);
+:Ratifica asistencia obligatoria antes de T-24h;
+
+|Sistema Web P2P (Backend / Servicio Cron)|
+:Ejecuta corte automatizado a T-24h y libera no ratificados;
+if (¿Quórum confirmados >= 50% de aforo?) then (Sí)
+  :Confirma sesión y notifica a participantes;
+else (No)
+  :Transiciona a QUORUM_INSUFICIENTE;
+  |Estudiante Mentor (VII-X)|
+  if (¿Mentor decide continuar sesión extraordinaria?) then (Sí)
+    :Ratifica realización de la sesión;
+  else (No)
+    |Sistema Web P2P (Backend / Servicio Cron)|
+    :Cancela sesión, libera ambiente y notifica a inscritos;
+    stop
+  endif
+endif
+
+|Mentor y Estudiantes|
+:Desarrollan la sesión de mentoría presencial o virtual;
+:Estudiantes marcan asistencia con pase QR dinámico TOTP (30s);
+
+|Estudiante Mentor (VII-X)|
+:Registra bitácora pedagógica antes de 48h (Firma SHA-256);
+
+|Estudiante Mentoreado|
+:Responde encuesta de satisfacción CSAT (Ventana 24h);
+
+|Sistema Web P2P (Backend / EdRecSys)|
+:Actualiza reputación e insignias de mérito del mentor;
+:Acumula horas académicas auditables en su expediente;
+
+|Comité de Tutoría / Dirección EPIS|
+:Supervisa tablero analítico de retención e indicadores ICACIT;
+:Visa bitácoras docentes y audita horas efectivas;
+if (¿Horas acumuladas del mentor >= Umbral 20 horas?) then (Sí)
+  :Emite certificado digital oficial PDF foliado con código QR;
+endif
+stop
+@enduml

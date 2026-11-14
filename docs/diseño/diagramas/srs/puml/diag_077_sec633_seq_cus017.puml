@@ -1,0 +1,82 @@
+/'
+  Diagrama: Diagrama 6.15.11: Diagrama de Secuencia - CUS-017: Desistir voluntariamente de reserva
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.11: Diagrama de Secuencia - CUS-017: Desistir voluntariamente de reserva de cupo sin penalidad antes de T-24h\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as User
+participant "Vista React\n(StudentBookingsView.tsx)" as UI
+participant "Adaptador Cliente\n(bookingService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/bookings.py)" as API
+participant "Servicio Backend\n(booking_service.py)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Solicitud de desistimiento y verificación de plazos ==
+User -> UI: clickCardButton ["Cancelar Reserva"]
+activate UI
+UI -> UI: openCancellationModal()
+
+alt [E001] Desistimiento tardío con menos de 24 horas de antelación (fecha_inicio <= now_utc + 24h)
+    UI -> Client: checkCancellationDeadline(bookingId)
+    activate Client
+    Client -> API: GET /api/v1/bookings/{id}/cancellation-eligibility
+    activate API
+    API -> Service: check_cancellation_eligibility(booking_id)
+    activate Service
+    Service -> DB: SELECT s.fecha_inicio FROM reservas_cupo r JOIN sesiones_mentoria s ON r.id_sesion = s.id WHERE r.id = :bid
+    activate DB
+    DB --> Service: Horario de sesión (T < 24h)
+    deactivate DB
+    Service --> API: CancellationEligibilityDTO {"eligible": false, "reason": "LATE_CANCELLATION"}
+    deactivate Service
+    API --> Client: HTTP 400 Bad Request {"detail": "LATE_CANCELLATION_PROHIBITED: Menos de 24h de antelación."}
+    deactivate API
+    Client -> UI: displayLateCancellationProhibited(400)
+    deactivate Client
+    User -> UI: click ["Entendido"]
+    UI -> UI: closeCancellationModal()
+else Antelación superior a 24 horas (cumple RN-04)
+    == Fase 2: Confirmación y procesamiento atómico de liberación de cupo ==
+    User -> UI: enter (cancellationReason)
+    User -> UI: click ["Confirmar Cancelación"]
+    UI -> Client: cancelBooking(bookingId, reason)
+    activate Client
+    Client -> API: POST /api/v1/bookings/{id}/cancel {"reason": reason} [Bearer JWT]
+    activate API
+    API -> Service: cancel_booking(booking_id, user_email, reason)
+    activate Service
+    
+    Service -> DB: BEGIN TRANSACTION
+    activate DB
+    Service -> DB: SELECT * FROM reservas_cupo WHERE id = :bid FOR UPDATE
+    Service -> DB: SELECT * FROM sesiones_mentoria WHERE id = :sid FOR UPDATE
+    Service -> DB: UPDATE reservas_cupo SET estado = 'CANCELADA_ESTUDIANTE', fecha_cancelacion = NOW(), motivo_cancelacion = :reason WHERE id = :bid
+    Service -> DB: UPDATE sesiones_mentoria SET cupos_ocupados = cupos_ocupados - 1 WHERE id = :sid
+    Service -> DB: COMMIT
+    DB --> Service: Transacción ACID confirmada
+    deactivate DB
+    
+    Service --> API: BookingResponseDTO {"id": booking_id, "estado": "CANCELADA_ESTUDIANTE"}
+    deactivate Service
+    API --> Client: HTTP 200 OK BookingResponseDTO
+    deactivate API
+    Client -> UI: displayCancellationSuccess()
+    deactivate Client
+    
+    UI -> UI: closeCancellationModal()
+    UI -> UI: updateCardToCancelled()
+    UI --> User: displayBookingCancelledConfirmation
+end
+deactivate UI
+@enduml

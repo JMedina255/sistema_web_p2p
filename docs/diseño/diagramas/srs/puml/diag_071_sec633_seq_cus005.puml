@@ -1,0 +1,103 @@
+/'
+  Diagrama: Diagrama 6.15.5: Diagrama de Secuencia - CUS-005: Gestionar perfil académico y disponibilidad horaria
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.5: Diagrama de Secuencia - CUS-005: Gestionar perfil formativo y disponibilidad horaria\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
+participant "Vista React\n(ProfileAvailabilityView.tsx)" as UI
+participant "Adaptador Cliente\n(profileService.ts / ApiProfileAdapter)" as Client
+participant "Controlador FastAPI\n(endpoints/profiles.py)" as API
+participant "Servicio Backend\n(profile_service.py / ProfileService)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Consulta del perfil académico y visualización de la matriz horaria ==
+Mentor -> UI: click ["Mi Perfil y Disponibilidad"]
+activate UI
+UI -> Client: getMyProfile() [Bearer JWT]
+activate Client
+Client -> API: GET /api/v1/profiles/me
+activate API
+API -> Service: get_profile(user_id)
+activate Service
+Service -> DB: SELECT p.*, d.* FROM perfiles_academicos p\nLEFT JOIN disponibilidad_horaria d ON p.id = d.perfil_id\nWHERE p.usuario_id = :uid
+activate DB
+DB --> Service: Perfil formativo y franjas horarias existentes
+deactivate DB
+Service --> API: ProfileResponseDTO
+deactivate Service
+API --> Client: HTTP 200 OK ProfileResponseDTO
+deactivate API
+Client -> UI: displayProfileAndSlots(profile, slots)
+deactivate Client
+deactivate UI
+
+== Fase 2: Edición de datos formativos y selección de bloques de disponibilidad ==
+Mentor -> UI: enter (biografia, materiasDominio)
+activate UI
+Mentor -> UI: toggleSlot (dia="Lunes", franja="08:00-10:00")
+UI -> UI: updateAvailabilityState(slots)
+
+Mentor -> UI: click ["Guardar Cambios y Disponibilidad"]
+UI -> UI: validateProfileData(biografia, slots)
+
+alt [E001] Matriz de disponibilidad horaria semanal vacía (cero bloques marcados)
+    UI -> UI: displayEmptySlotsWarning()
+    Mentor -> UI: toggleSlot (dia="Martes", franja="10:00-12:00")
+    Mentor -> UI: click ["Guardar Cambios y Disponibilidad"]
+else [E002] Biografía excede 500 caracteres o contiene scripts no autorizados
+    UI -> UI: displayBioLengthError()
+    Mentor -> UI: enter (adjustedBiography)
+    Mentor -> UI: click ["Guardar Cambios y Disponibilidad"]
+else Datos válidos en cliente
+    == Fase 3: Persistencia transaccional de disponibilidad y perfil ==
+    UI -> Client: updateProfile(payload)
+    activate Client
+    Client -> API: PUT /api/v1/profiles/me ProfileUpdateRequest [Bearer JWT]
+    activate API
+    API -> Service: update_profile_and_availability(mentor_id, payload)
+    activate Service
+    
+    Service -> DB: BEGIN TRANSACTION
+    activate DB
+    Service -> DB: UPDATE perfiles_academicos SET biografia = :bio, materias = :m WHERE usuario_id = :uid
+    
+    alt [E003] Conflicto de concurrencia al actualizar perfil (versión obsoleta)
+        DB --> Service: Concurrency Conflict / Row Version Mismatch
+        Service -> DB: ROLLBACK
+        Service --> API: Lanza HTTPException(409, "CONCURRENCY_CONFLICT")
+        API --> Client: HTTP 409 Conflict {"detail": "CONCURRENCY_CONFLICT: Modificado desde otra sesión."}
+        Client -> UI: displayConcurrencyConflict(409)
+        Mentor -> UI: click ["Recargar Perfil"]
+        UI -> Client: getMyProfile()
+    else Transacción atómica exitosa
+        Service -> DB: DELETE FROM disponibilidad_horaria WHERE perfil_id = :pid
+        Service -> DB: INSERT INTO disponibilidad_horaria (perfil_id, dia_semana, hora_inicio, hora_fin) VALUES (:pid, :dia, :hi, :hf)...
+        Service -> DB: COMMIT
+        DB --> Service: Transacción confirmada exitosamente
+        deactivate DB
+        
+        Service --> API: ProfileResponseDTO
+        API --> Client: HTTP 200 OK ProfileResponseDTO
+        Client -> UI: displayProfileUpdatedSuccess(profile)
+        
+        UI -> UI: updateLocalCache(profile)
+        UI --> Mentor: displayProfileUpdatedConfirmation
+    end
+    deactivate Service
+    deactivate API
+    deactivate Client
+end
+deactivate UI
+@enduml

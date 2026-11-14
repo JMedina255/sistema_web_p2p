@@ -1,0 +1,106 @@
+/'
+  Diagrama: Diagrama 6.4: Diagrama de Casos de Uso General Consolidado del Sistema Web P2P (CUS-001 al CUS-024)
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.4: Diagrama de Casos de Uso General Consolidado (CUS-001 al CUS-024)\nSistema Web P2P - EPIS UPT
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+actor "Usuario Institucional" as User #EBF3FB
+actor "Estudiante Mentoreado" as Mentoreado #EBF3FB
+actor "Estudiante Mentor" as Mentor #EBF3FB
+actor "Administrador (EPIS)" as Admin #FEF9C3
+actor "Servicio Cron Backend" as Cron #FFF1F2
+
+Mentoreado -up-|> User
+Mentor -up-|> User
+Admin -up-|> User
+
+rectangle "Sistema Web P2P de Mentorías Académicas EPIS-UPT" {
+
+  package "MOD-01: Seguridad y Gobernanza" {
+    usecase "CUS-001: Iniciar sesión con 2FA\ny consentimiento Ley 29733" as CUS01
+    usecase "CUS-010: Gestionar asignación\nde roles de usuario" as CUS10
+  }
+
+  package "MOD-02: Ofertas de Mentoría y Recursos" {
+    usecase "CUS-006: Publicar oferta\nde mentoría académica" as CUS06
+    usecase "CUS-008: Consultar disponibilidad\nde espacios y recursos" as CUS08
+  }
+
+  package "MOD-03: Perfil y Plan de Aprendizaje" {
+    usecase "CUS-005: Gestionar perfil\ny disponibilidad horaria" as CUS05
+    usecase "CUS-021: Explorar catálogo\ncurricular de asignaturas filtro" as CUS21
+  }
+
+  package "MOD-04: Demanda y Recomendaciones" {
+    usecase "CUS-002: Explorar recomendaciones\npersonalizadas Top-k" as CUS02
+    usecase "CUS-003: Registrar solicitud\nde demanda académica" as CUS03
+  }
+
+  package "MOD-05: Quórum y Cancelaciones" {
+    usecase "CUS-004: Reservar cupo\nde mentoría académica" as CUS04
+    usecase "CUS-024: Ratificar asistencia\na sesión de mentoría" as CUS24
+    usecase "CUS-017: Desistir voluntariamente\nde reserva de cupo" as CUS17
+    usecase "CUS-023: Evaluar quórum\nautomático a T-24h" as CUS23
+    usecase "CUS-007: Decisión ante\nquórum insuficiente" as CUS07
+  }
+
+  package "MOD-06: Asistencia, Bitácoras y Feedback" {
+    usecase "CUS-012: Registrar asistencia\ncon pase QR dinámico" as CUS12
+    usecase "CUS-013: Registrar bitácora\ndocente con SHA-256" as CUS13
+    usecase "CUS-014: Visualizar historial\ny bitácoras académicas" as CUS14
+  }
+
+  package "MOD-07: Gamificación e Incentivos" {
+    usecase "CUS-018: Emitir constancia\ninstitucional de horas" as CUS18
+    usecase "CUS-019: Gestionar insignias\ny reputación gamificada" as CUS19
+  }
+
+  package "MOD-08: Analítica y Configuración" {
+    usecase "CUS-009: Notificar eventos\ncríticos y alertas temporales" as CUS09
+    usecase "CUS-011: Generar reportes\ne indicadores de analítica" as CUS11
+    usecase "CUS-015: Consultar métricas\nde retención y desempeño" as CUS15
+    usecase "CUS-016: Auditar trazas de\nseguridad y consentimiento" as CUS16
+    usecase "CUS-020: Configurar parámetros\ninstitucionales y umbrales" as CUS20
+    usecase "CUS-022: Gestionar catálogo\nde temas y materias críticas" as CUS22
+  }
+}
+
+User --> CUS01
+Admin --> CUS10
+
+Mentor --> CUS06
+Mentor --> CUS08
+Mentor --> CUS07
+Mentor --> CUS13
+Mentor --> CUS18
+Mentor --> CUS19
+
+User --> CUS05
+User --> CUS21
+User --> CUS14
+
+Mentoreado --> CUS02
+Mentoreado --> CUS03
+Mentoreado --> CUS04
+Mentoreado --> CUS24
+Mentoreado --> CUS17
+Mentoreado --> CUS12
+
+Cron --> CUS23
+Cron --> CUS09
+
+Admin --> CUS11
+Admin --> CUS15
+Admin --> CUS16
+Admin --> CUS20
+Admin --> CUS22
+@enduml

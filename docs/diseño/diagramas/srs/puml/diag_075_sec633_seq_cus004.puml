@@ -1,0 +1,159 @@
+/'
+  Diagrama: Diagrama 6.15.9: Diagrama de Secuencia - CUS-004: Reservar cupo de mentoría académica
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.9: Diagrama de Secuencia - CUS-004: Reservar cupo de mentoría académica\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as User
+participant "Vista React\n(BookingModalView.tsx / RecommendationFeedView.tsx)" as UI
+participant "Adaptador Cliente\n(bookingService.ts / ApiBookingAdapter)" as Client
+participant "Controlador FastAPI\n(endpoints/bookings.py)" as API
+participant "Servicio Backend\n(booking_service.py / consent_service.py)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Exploración en Cartelera y Apertura del Diálogo Modal ==
+User -> UI: clickOfferCard ["Reservar Cupo"]
+activate UI
+UI -> UI: onSelectOffer: monta BookingModalView.tsx con offer, userEmail
+
+alt [E001] Oferta en cartelera sin vacantes disponibles (available_slots <= 0)
+    UI -> UI: displayCapacityExhaustedWarning()
+    User -> UI: click ["Volver a Cartelera"]
+    UI -> UI: closeModal()
+else [E002] Reserva duplicada activa para el mismo estudiante
+    UI -> Client: checkActiveBooking(offer.id, userEmail)
+    activate Client
+    Client -> API: GET /api/v1/bookings/check-duplicate?session_id={session_id}
+    activate API
+    API -> Service: check_active_booking(session_id, userEmail)
+    activate Service
+    Service -> DB: SELECT id FROM reservas_cupo WHERE id_sesion = :sid AND estudiante_email = :email AND estado IN ('PENDIENTE_CONFIRMACION', 'CONFIRMADA')
+    activate DB
+    DB --> Service: Reserva activa existente
+    deactivate DB
+    Service --> API: ActiveBookingResultDTO {"has_active": true}
+    deactivate Service
+    API --> Client: HTTP 400 Bad Request {"detail": "ALREADY_BOOKED"}
+    deactivate API
+    Client -> UI: displayDuplicateBookingError(400, "ALREADY_BOOKED")
+    deactivate Client
+    User -> UI: click ["Aceptar"]
+    UI -> UI: closeModal()
+else Tarjeta con vacantes y sin duplicidad previa
+    == Fase 2: Verificación de Precondiciones y Reglas de Negocio en Cliente ==
+    User -> UI: click ["Confirmar Reserva"]
+    UI -> UI: setIsSubmitting(true)
+    
+    alt [E003] Sesión institucional no autenticada o token JWT expirado
+        UI -> UI: displaySessionExpired()
+        User -> UI: click ["Iniciar Sesión"]
+        UI -> UI: redirectToLoginView()
+    else [E004] Conflicto de rol de mentor (Autoreserva Prohibida: offer.mentor_email === userEmail)
+        UI -> UI: displaySelfBookingError()
+        User -> UI: click ["Cerrar"]
+        UI -> UI: closeModal()
+    else [E005] Ausencia o revocación de consentimiento legal digital Ley N° 29733
+        UI -> Client: getConsentStatus(userEmail)
+        activate Client
+        Client -> API: GET /api/v1/consent/status
+        activate API
+        API --> Client: HTTP 403 Forbidden {"detail": "CONSENT_REQUIRED"}
+        deactivate API
+        Client -> UI: displayConsentRequiredModal()
+        deactivate Client
+        User -> UI: click ["Aceptar y Continuar"]
+        UI -> UI: setConsentAccepted()
+    else Precondiciones en cliente verificadas
+        == Fase 3: Transacción Atómica con Bloqueo Pesimista en Base de Datos ==
+        UI -> Client: reserveSeat(offer.id, userEmail)
+        activate Client
+        Client -> API: POST /api/v1/bookings/reserve {"id_sesion": id, "estudiante_email": email} [Bearer JWT]
+        activate API
+        API -> Service: reserve_seat(session_id, user_email)
+        activate Service
+        
+        Service -> Service: _booking_lock.acquire(timeout=5.0)
+        
+        alt [E009] Timeout de concurrencia en adquisición de cerrojo (_booking_lock timeout)
+            Service --> API: Lanza HTTPException(503, "DATABASE_BUSY")
+            API --> Client: HTTP 503 Service Unavailable {"detail": "DATABASE_BUSY: Servicio sobrecargado."}
+            Client -> UI: displayDatabaseBusyAlert(503)
+            User -> UI: click ["Reintentar Reserva"]
+            UI -> Client: reserveSeat(offer.id, userEmail)
+        else Cerrojo en memoria adquirido
+            Service -> DB: BEGIN TRANSACTION
+            activate DB
+            Service -> DB: SET LOCAL lock_timeout = '5.0s'
+            Service -> DB: SELECT * FROM sesiones_mentoria WHERE id = :sid FOR UPDATE OF sesiones_mentoria
+            DB --> Service: Fila bloqueada pesimistamente (aforo_maximo, cupos_ocupados, estado)
+            
+            alt [E006] Sesión de mentoría inexistente o cancelada concurrentemente
+                Service -> DB: ROLLBACK
+                Service --> API: Lanza HTTPException(404, "SESSION_NOT_FOUND")
+                API --> Client: HTTP 404 Not Found {"detail": "SESSION_NOT_FOUND"}
+                Client -> UI: displaySessionNotFound(404)
+                User -> UI: click ["Volver a Cartelera"]
+                UI -> UI: closeModal()
+            else [E007] Ventana de antelación menor a 24 horas (now_utc > fecha_inicio - 24h, RN-04)
+                Service -> DB: ROLLBACK
+                Service --> API: Lanza HTTPException(400, "RESERVATION_WINDOW_CLOSED")
+                API --> Client: HTTP 400 Bad Request {"detail": "RESERVATION_WINDOW_CLOSED"}
+                Client -> UI: displayReservationWindowClosed(400)
+                User -> UI: click ["Entendido"]
+                UI -> UI: closeModal()
+            else [E008] Aforo agotado en el instante del cerrojo (cupos_ocupados >= aforo_maximo, RN-05)
+                Service -> DB: ROLLBACK
+                Service --> API: Lanza HTTPException(409, "CAPACITY_EXCEEDED")
+                API --> Client: HTTP 409 Conflict {"detail": "CAPACITY_EXCEEDED: Último cupo reservado."}
+                Client -> UI: displayCapacityExceeded(409)
+                User -> UI: click ["Ver Otras Sesiones"]
+                UI -> UI: closeModal()
+            else Condiciones de reserva válidas y aforo garantizado
+                Service -> Service: Genera ticket_hash = SHA256(uid + sid + timestamp)
+                Service -> DB: INSERT INTO reservas_cupo (id_usuario, id_sesion, estado='PENDIENTE_CONFIRMACION', ticket_hash)\nVALUES (:uid, :sid, 'PENDIENTE_CONFIRMACION', :th) RETURNING id
+                Service -> DB: UPDATE sesiones_mentoria SET cupos_ocupados = cupos_ocupados + 1 WHERE id = :sid
+                
+                alt [E010] Error inesperado en base de datos al confirmar transacción
+                    DB --> Service: Database Write Error
+                    Service -> DB: ROLLBACK
+                    Service --> API: Lanza HTTPException(500, "TRANSACTION_FAILED")
+                    API --> Client: HTTP 500 Internal Server Error {"detail": "TRANSACTION_FAILED"}
+                    Client -> UI: displayTransactionFailed(500)
+                    User -> UI: click ["Reintentar"]
+                    UI -> Client: reserveSeat(offer.id, userEmail)
+                else Transacción confirmada exitosamente
+                    Service -> DB: COMMIT
+                    DB --> Service: Transacción ACID confirmada
+                    Service -> Service: _booking_lock.release()
+                    
+                    == Fase 4: Confirmación Provisional y Notificación de Plazo Límite ==
+                    Service --> API: BookingCreateResponseDTO {"id": id_reserva, "estado": "PENDIENTE_CONFIRMACION", "deadline": t_minus_24h}
+                    API --> Client: HTTP 201 Created BookingCreateResponseDTO
+                    Client -> UI: displayBookingSuccessModal(id_reserva, deadline)
+                    
+                    UI -> UI: setIsSubmitting(false)
+                    User -> UI: click ["Ir a Mis Reservas"]
+                    UI -> UI: unmountBookingModal()
+                    UI --> User: displayStudentBookingsDashboard
+                end
+            end
+            deactivate DB
+        end
+        deactivate Service
+        deactivate API
+        deactivate Client
+    end
+end
+deactivate UI
+@enduml

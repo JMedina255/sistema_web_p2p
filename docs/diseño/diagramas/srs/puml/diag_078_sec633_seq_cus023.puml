@@ -1,0 +1,102 @@
+/'
+  Diagrama: Diagrama 6.15.12: Diagrama de Secuencia - CUS-023: Evaluar quórum automático a T-24h
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.12: Diagrama de Secuencia - CUS-023: Evaluar automáticamente el quórum reglamentario de sesiones de mentoría a T-24h\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+participant "Planificador\n(SchedulerWorker / Celery)" as Cron
+actor "Administrador Institucional\n(UserRole.administrador)" as Admin
+participant "Vista React\n(AdminDashboardView.tsx / MentorSessionsView.tsx)" as UI
+participant "Adaptador Cliente\n(quorumService.ts / apiClient)" as Client
+participant "Controlador FastAPI\n(endpoints/quorum.py)" as API
+participant "Servicio Backend\n(booking_service.py / simulation_service.py)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+participant "Servicio SMTP UPT\n(EmailService)" as SMTP
+actor "Estudiante Mentor" as Mentor
+actor "Estudiante Mentoreado" as Mentoreado
+
+== Fase 1: Disparo de la tarea programada y localización de sesiones a T-24h ==
+alt Disparo automatizado por demonio programado
+    Cron -> API: Disparo automático de corte de quórum a T-24h
+else Disparo administrativo o simulado desde consola
+    Admin -> UI: click ["Evaluar Quórum Masivo"]
+    activate UI
+    UI -> Client: triggerQuorumEvaluation() [Bearer JWT]
+    activate Client
+    Client -> API: POST /api/v1/quorum/evaluate-all
+    deactivate Client
+    deactivate UI
+end
+activate API
+API -> Service: evaluate_all_active_quorums()
+activate Service
+
+Service -> DB: SELECT * FROM sesiones_mentoria\nWHERE estado = 'PUBLICADA' AND fecha_inicio <= NOW() + INTERVAL '24 HOURS'
+activate DB
+DB --> Service: Lista de sesiones en ventana T-24h
+deactivate DB
+
+== Fase 2: Cuantificación de confirmaciones y verificación de umbral de quórum ==
+loop Para cada sesión en ventana T-24h
+    Service -> DB: SELECT count(*) FROM reservas_cupo WHERE id_sesion = :sid AND estado = 'CONFIRMADA'
+    activate DB
+    DB --> Service: confirmed_count (número de estudiantes ratificados)
+    deactivate DB
+    
+    alt [A001] Quórum insuficiente a T-24h (confirmed_count < 3 estudiantes, RN-05)
+        Service -> DB: BEGIN TRANSACTION
+        activate DB
+        Service -> DB: UPDATE sesiones_mentoria SET estado = 'QUORUM_INSUFICIENTE' WHERE id = :sid
+        Service -> DB: INSERT INTO auditoria_evaluacion (sesion_id, estado_anterior='PUBLICADA', nuevo_estado='QUORUM_INSUFICIENTE', quorum_logrado=confirmed_count, fecha=NOW())
+        Service -> DB: COMMIT
+        DB --> Service: Transacción confirmada
+        deactivate DB
+        
+        Service -> SMTP: send_urgent_quorum_alert(mentor_email, session_id, confirmed_count)
+        activate SMTP
+        SMTP --> Mentor: Alerta urgente: Sesión no alcanzó quórum de 3 alumnos
+        deactivate SMTP
+        
+        Service -> UI: pushNotificationQuorumInsufficient(session_id)
+        Service --> API: A001-1.4 Sesión en QUORUM_INSUFICIENTE
+    else Quórum reglamentario alcanzado (confirmed_count >= 3 estudiantes)
+        == Fase 3: Confirmación oficial de sesión y notificación de viabilidad ==
+        Service -> DB: BEGIN TRANSACTION
+        activate DB
+        Service -> DB: UPDATE sesiones_mentoria SET estado = 'CONFIRMADA' WHERE id = :sid
+        Service -> DB: INSERT INTO auditoria_evaluacion (sesion_id, estado_anterior='PUBLICADA', nuevo_estado='CONFIRMADA', quorum_logrado=confirmed_count, fecha=NOW())
+        Service -> DB: COMMIT
+        DB --> Service: Transacción confirmada
+        deactivate DB
+        
+        Service -> SMTP: send_session_confirmed_email(mentor_email, session_data)
+        activate SMTP
+        SMTP --> Mentor: Correo oficial de dictado de sesión
+        deactivate SMTP
+        
+        Service -> SMTP: send_confirmation_to_students(enrolled_emails, session_data)
+        activate SMTP
+        SMTP --> Mentoreado: Correo oficial: Sesión confirmada con quórum reglamentario
+        deactivate SMTP
+        
+        Service -> UI: pushNotificationQuorumConfirmed(session_id)
+        Service --> API: SessionQuorumResultDTO {"session_id": sid, "status": "CONFIRMADA", "confirmed_students": confirmed_count}
+    end
+end
+
+Service --> API: BatchQuorumEvaluationSummaryDTO
+deactivate Service
+API --> Cron: HTTP 200 OK (Ciclo completado)
+deactivate API
+@enduml

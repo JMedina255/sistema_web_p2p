@@ -1,0 +1,30 @@
+/'
+  Diagrama: Diagrama 6.10: Diagrama de Casos de Uso - MOD-06: Asistencia, Bitácoras y Feedback
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.10: Diagrama de Casos de Uso - MOD-06: Asistencia, Bitácoras y Feedback
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+actor "Estudiante Mentoreado" as Mentoreado #EBF3FB
+actor "Estudiante Mentor" as Mentor #EBF3FB
+
+rectangle "MOD-06: Asistencia, Bitácoras y Feedback" {
+  usecase "CUS-012: Registrar asistencia\na sesión de mentoría" as CUS12
+  usecase "CUS-013: Registrar bitácora\nacadémica de sesión" as CUS13
+  usecase "CUS-014: Visualizar historial\ny bitácoras académicas" as CUS14
+}
+
+Mentoreado --> CUS12
+Mentor --> CUS12
+Mentor --> CUS13
+Mentoreado --> CUS14
+Mentor --> CUS14
+@enduml

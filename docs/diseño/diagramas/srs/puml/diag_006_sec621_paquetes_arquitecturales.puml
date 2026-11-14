@@ -1,0 +1,102 @@
+/'
+  Diagrama: Diagrama 6.3: Diagrama de Paquetes Arquitecturales y Subsistemas del Sistema Web P2P
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama de Paquetes Arquitecturales y Subsistemas del Sistema Web P2P
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+package "Capa de Presentación (Frontend SPA - React 18 / TypeScript)" as PKG_FRONT #EBF3FB {
+  package "Vistas de Usuario (UI Views)" as PKG_VIEWS {
+    [LoginOtpView]
+    [ConsentModalView]
+    [ProfileAvailabilityView]
+    [RecommendationsView]
+    [PublishMentorshipView]
+    [BookingModalView]
+    [QrScannerView / QrPassView]
+    [BitacoraRegisterView]
+    [AdminAnalyticsView]
+    [AdminCertificatesView]
+  }
+  package "Adaptadores de Cliente (HTTP / State)" as PKG_CLIENT {
+    [apiClient (Axios)]
+    [authService]
+    [mentorshipService]
+    [bookingService]
+    [bitacoraService]
+  }
+  PKG_VIEWS ..> PKG_CLIENT : invoca
+}
+
+package "Capa de Aplicación y API RESTful (Python / FastAPI)" as PKG_API #F0FDF4 {
+  package "Controladores (Endpoints v1)" as PKG_ENDPOINTS {
+    [auth.py]
+    [consent.py]
+    [roles.py]
+    [curriculum.py]
+    [recommendations.py]
+    [mentorships.py]
+    [bookings.py]
+    [attendance.py]
+    [bitacora.py]
+    [certificates.py]
+    [analytics.py]
+  }
+  package "Esquemas de Datos (Pydantic v2)" as PKG_SCHEMAS {
+    [AuthSchemas]
+    [BookingSchemas]
+    [MentorshipSchemas]
+    [BitacoraSchemas]
+    [CertificateSchemas]
+  }
+  PKG_ENDPOINTS ..> PKG_SCHEMAS : valida
+}
+
+package "Capa de Servicios y Dominio (Lógica de Negocio)" as PKG_DOMAIN #FEF9C3 {
+  package "Servicios de Negocio (Services)" as PKG_SERVICES {
+    [AuthService]
+    [ConsentService]
+    [RecommendationService (EdRecSys)]
+    [MentorshipService]
+    [BookingService (Locks pesimistas)]
+    [QuorumCronService]
+    [AttendanceService (TOTP QR)]
+    [BitacoraService (SHA-256)]
+    [CertificateService]
+    [AnalyticsService]
+  }
+  package "Entidades ORM (SQLAlchemy 2.0)" as PKG_MODELS {
+    [Usuario / Rol]
+    [Perfil / Disponibilidad]
+    [Curso / Tema]
+    [Oferta / Sesion]
+    [Reserva / Asistencia]
+    [Bitacora / Evaluacion]
+    [Certificado / Insignia]
+  }
+  PKG_SERVICES ..> PKG_MODELS : manipula
+}
+
+package "Capa de Persistencia e Infraestructura Externa" as PKG_INFRA #FFF1F2 {
+  database "PostgreSQL 15 (Supabase)" as DB_PG {
+    [15 Tablas Relacionales]
+    [Políticas RLS]
+    [Constraints chk_sesion]
+  }
+  [Servidor SMTP UPT (Emails)] as EXT_SMTP
+  [Generador PDF (ReportLab)] as EXT_PDF
+}
+
+PKG_CLIENT ..> PKG_ENDPOINTS : peticiones HTTPS / JSON
+PKG_ENDPOINTS ..> PKG_SERVICES : orquesta
+PKG_SERVICES ..> DB_PG : transacciones ACID
+PKG_SERVICES ..> EXT_SMTP : despacha correos
+PKG_SERVICES ..> EXT_PDF : compila certificados
+@enduml

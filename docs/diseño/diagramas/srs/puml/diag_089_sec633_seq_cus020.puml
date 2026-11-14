@@ -1,0 +1,98 @@
+/'
+  Diagrama: Diagrama 6.15.23: Diagrama de Secuencia - CUS-020: Configurar parámetros institucionales y umbrales
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.23: Diagrama de Secuencia - CUS-020: Configurar parámetros operativos institucionales y umbrales\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Administrador Institucional\n(UserRole.administrador)" as Admin
+participant "Vista React\n(SystemSettingsView.tsx)" as UI
+participant "Adaptador Cliente\n(configService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/config.py)" as API
+participant "Servicio Backend\n(config_service.py)" as Service
+participant "Caché de Aplicación\n(Redis / MemoryCache)" as Cache
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Consulta de parámetros vigentes y despliegue del panel ==
+Admin -> UI: click ["Configuración del Sistema"]
+activate UI
+UI -> Client: getParameters() [Bearer JWT]
+activate Client
+Client -> API: GET /api/v1/config/parameters
+activate API
+API -> Service: get_parameters()
+activate Service
+Service -> DB: SELECT clave, valor, descripcion, valor_min, valor_max FROM parametros_institucionales WHERE activo = true
+activate DB
+DB --> Service: Catálogo de parámetros base
+deactivate DB
+Service --> API: ParameterListResponseDTO
+deactivate Service
+API --> Client: HTTP 200 OK ParameterListResponseDTO
+deactivate API
+Client -> UI: displayParametersForm(parameters)
+deactivate Client
+
+== Fase 2: Edición de umbrales y validación de rangos permitidos ==
+Admin -> UI: enter (quorumMinimo=4, aforoPresencial=10)
+Admin -> UI: click ["Guardar Parámetros Institucionales"]
+UI -> UI: validateValueRanges(parameters)
+
+alt [E001] Parámetro fuera de los rangos institucionales permitidos
+    UI -> UI: displayOutOfRangeError()
+    Admin -> UI: enter (correctedParameterValue)
+    UI -> UI: enableSaveButton()
+else Valores en rangos admisibles
+    UI -> Client: updateParameters(payload)
+    activate Client
+    Client -> API: PUT /api/v1/config/parameters ParameterUpdatePayload [Bearer JWT]
+    activate API
+    
+    alt [E002] Reautenticación de seguridad requerida (cambios críticos sin contraseña secundaria)
+        API --> Client: HTTP 401 Unauthorized {"detail": "REAUTH_REQUIRED: Confirmación de credenciales requerida."}
+        Client -> UI: displayReauthModal()
+        Admin -> UI: enter (adminSecondaryPassword)
+        Admin -> UI: click ["Verificar"]
+        UI -> Client: reauthenticateAdmin(credentials)
+        Client -> API: POST /api/v1/auth/reauth
+        API --> Client: HTTP 200 OK {"reauth_token": token}
+        Client -> UI: setReauthToken(token)
+    else Autorización confirmada
+        API -> Service: update_parameters(admin_id, payload)
+        activate Service
+        
+        == Fase 3: Persistencia transaccional, purga de caché y aplicación en caliente ==
+        Service -> DB: BEGIN TRANSACTION
+        activate DB
+        Service -> DB: UPDATE parametros_institucionales SET valor = :val, fecha_modificacion = NOW(), modificado_por = :uid WHERE clave = :key
+        Service -> DB: INSERT INTO log_auditoria_seguridad (usuario_id, evento='PARAM_UPDATE', detalle=:key, fecha=NOW())
+        Service -> DB: COMMIT
+        DB --> Service: Transacción confirmada
+        deactivate DB
+        
+        Service -> Cache: purge_system_config_cache()
+        activate Cache
+        Cache --> Service: Caché invalidada en caliente
+        deactivate Cache
+        
+        Service --> API: ParameterUpdateResponseDTO {"success": true, "updated_keys": keys}
+        deactivate Service
+        API --> Client: HTTP 200 OK ParameterUpdateResponseDTO
+        Client -> UI: displayParametersUpdatedSuccess(updated_keys)
+        UI --> Admin: displayParametersUpdatedConfirmation
+    end
+    deactivate API
+    deactivate Client
+end
+deactivate UI
+@enduml

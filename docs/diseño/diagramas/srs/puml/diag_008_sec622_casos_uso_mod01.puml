@@ -1,0 +1,28 @@
+/'
+  Diagrama: Diagrama 6.5: Diagrama de Casos de Uso - MOD-01: Seguridad, Autenticación y Gobernanza
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.5: Diagrama de Casos de Uso - MOD-01: Seguridad, Autenticación y Gobernanza
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+actor "Usuario Institucional" as User #EBF3FB
+actor "Administrador (EPIS)" as Admin #FEF9C3
+actor "Servicio Correo SMTP" as SMTP #FFF1F2
+
+rectangle "MOD-01: Seguridad, Autenticación y Gobernanza" {
+  usecase "CUS-001: Iniciar sesión con 2FA\ny consentimiento Ley 29733" as CUS01
+  usecase "CUS-010: Gestionar asignación\nde roles de usuario" as CUS10
+}
+
+User --> CUS01
+CUS01 ..> SMTP : <<include>>
+Admin --> CUS10
+@enduml

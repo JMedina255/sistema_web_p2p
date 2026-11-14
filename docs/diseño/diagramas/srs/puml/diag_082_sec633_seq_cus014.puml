@@ -1,0 +1,83 @@
+/'
+  Diagrama: Diagrama 6.15.16: Diagrama de Secuencia - CUS-014: Visualizar historial y bitácoras académicas
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.16: Diagrama de Secuencia - CUS-014: Visualizar historial académico integral y bitácoras pedagógicas\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Estudiante Mentoreado / Mentor" as User
+participant "Vista React\n(HistorySessionsView.tsx)" as UI
+participant "Adaptador Cliente\n(historyService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/history.py)" as API
+participant "Servicio Backend\n(history_service.py)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Consulta del historial y aplicación de filtros cronológicos ==
+User -> UI: click ["Mi Historial"]
+activate UI
+UI -> Client: getUserHistory() [Bearer JWT]
+activate Client
+Client -> API: GET /api/v1/history/sessions
+activate API
+API -> Service: get_user_history(user_id)
+activate Service
+Service -> DB: SELECT s.*, b.hash_firma, a.asistio FROM sesiones_mentoria s\nLEFT JOIN bitacoras_pedagogicas b ON s.id = b.sesion_id\nLEFT JOIN asistencias_sesion a ON s.id = a.sesion_id\nWHERE s.id_mentor = :uid OR a.estudiante_id = :uid ORDER BY s.fecha_inicio DESC
+activate DB
+DB --> Service: Historial de sesiones y asistencias
+deactivate DB
+
+alt [A001] Historial académico vacío para usuario nuevo (cero registros)
+    Service --> API: EmptyHistoryDTO []
+    API --> Client: HTTP 200 OK []
+    Client -> UI: displayEmptyHistoryAlert()
+    User -> UI: click ["Explorar Cartelera"]
+    UI -> UI: redirectToRecommendations()
+else Historial con registros consolidados
+    Service --> API: UserHistoryResponseDTO
+    API --> Client: HTTP 200 OK UserHistoryResponseDTO
+    Client -> UI: displayHistoryTimeline(history)
+end
+deactivate Service
+deactivate API
+deactivate Client
+deactivate UI
+
+== Fase 2: Búsqueda y filtrado por materia o período académico ==
+User -> UI: enter (searchQuery: "Algoritmos", semester="2026-I")
+activate UI
+UI -> UI: filterHistoryInState(searchQuery, semester)
+deactivate UI
+
+== Fase 3: Visualización de bitácora pedagógica y comprobante de asistencia ==
+User -> UI: clickCardButton ["Ver Bitácora Pedagógica"]
+activate UI
+UI -> Client: getSessionBitacora(sessionId)
+activate Client
+Client -> API: GET /api/v1/history/bitacora/{session_id} [Bearer JWT]
+activate API
+API -> Service: get_bitacora_detail(session_id)
+activate Service
+Service -> DB: SELECT b.*, u.nombres as mentor_nombre FROM bitacoras_pedagogicas b\nJOIN usuarios u ON b.mentor_id = u.id WHERE b.sesion_id = :sid
+activate DB
+DB --> Service: Detalle pedagógico y firma digital SHA-256
+deactivate DB
+Service --> API: BitacoraDetailDTO
+deactivate Service
+API --> Client: HTTP 200 OK BitacoraDetailDTO
+deactivate API
+Client -> UI: displayBitacoraDetailModal(bitacoraDetail)
+deactivate Client
+
+UI --> User: displayBitacoraDetailModal
+deactivate UI
+@enduml

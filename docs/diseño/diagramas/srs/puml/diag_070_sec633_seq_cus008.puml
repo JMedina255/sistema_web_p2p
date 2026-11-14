@@ -1,0 +1,80 @@
+/'
+  Diagrama: Diagrama 6.15.4: Diagrama de Secuencia - CUS-008: Consultar disponibilidad de espacios y recursos
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.4: Diagrama de Secuencia - CUS-008: Consultar disponibilidad de espacios físicos y aulas de la EPIS\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
+participant "Vista React\n(OfferPublishView.tsx / SpacesModal)" as UI
+participant "Adaptador Cliente\n(offerService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/offers.py)" as API
+participant "Servicio Backend\n(offer_service.py)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Definición de criterios temporales y despacho de consulta ==
+Mentor -> UI: enter (date, startTime, endTime)
+activate UI
+Mentor -> UI: click ["Consultar Aulas Disponibles"]
+UI -> Client: checkSpaceAvailability(date, startTime, endTime)
+activate Client
+
+Client -> API: GET /api/v1/offers/spaces/availability?date={date}&start_time={start_time}&end_time={end_time} [Bearer JWT]
+activate API
+API -> Service: check_space_availability(date, start_time, end_time)
+activate Service
+
+alt [E001] Horario fuera de la jornada institucional (fuera del intervalo 08:00 - 20:00, RN-07)
+    Service --> API: Lanza HTTPException(400, "OPERATIONAL_HOURS_VIOLATION")
+    API --> Client: HTTP 400 Bad Request {"detail": "OPERATIONAL_HOURS_VIOLATION: Operación sólo entre 08:00 y 20:00 horas."}
+    Client -> UI: displayOperationalHoursError(400, "OPERATIONAL_HOURS_VIOLATION")
+    Mentor -> UI: enter (correctedStartTime, correctedEndTime)
+    Mentor -> UI: click ["Consultar Aulas Disponibles"]
+else Rango horario reglamentario válido
+    == Fase 2: Verificación de ocupación en base de datos y renderización de resultados ==
+    alt [E002] Falla de conexión o timeout con repositorio de infraestructura
+        Service -> DB: Conexión y consulta de aulas (timeout)
+        activate DB
+        DB --> Service: Timeout de conexión en PostgreSQL
+        deactivate DB
+        Service --> API: Lanza OperationalError
+        API --> Client: HTTP 503 Service Unavailable {"detail": "INFRASTRUCTURE_UNAVAILABLE: No se pudo verificar disponibilidad."}
+        Client -> UI: displayInfrastructureUnavailable(503)
+        Mentor -> UI: click ["Reintentar Consulta"]
+        UI -> Client: checkSpaceAvailability(date, startTime, endTime)
+    else Conexión exitosa y consulta ejecutada
+        Service -> DB: SELECT a.id, a.codigo, a.capacidad, a.equipamiento FROM aulas a\nWHERE a.activa = true AND a.id NOT IN (\n  SELECT aula_id FROM sesiones_mentoria\n  WHERE fecha = :fecha AND NOT (hora_fin <= :start OR hora_inicio >= :end)\n  AND estado IN ('PUBLICADA', 'CONFIRMADA')\n)
+        activate DB
+        DB --> Service: Lista de aulas disponibles
+        deactivate DB
+        Service --> API: AvailableSpacesResponseDTO
+        API --> Client: HTTP 200 OK AvailableSpacesResponseDTO
+        Client -> UI: displayAvailableSpaces(availableSpaces)
+        
+        alt [A001] Aulas físicas agotadas (cero registros libres)
+            UI -> UI: displayNoSpacesAlert()
+            Mentor -> UI: click ["Cambiar a Modalidad Virtual"]
+            UI -> UI: setModalityVirtual(capacity=20, meet=true)
+        else Aulas físicas disponibles
+            Mentor -> UI: selectSpace (selectedSpaceId)
+            Mentor -> UI: click ["Asignar Aula a la Oferta"]
+            UI -> UI: assignSpaceToForm(selectedSpaceId)
+            UI --> Mentor: displaySpaceAssignedConfirmation
+        end
+    end
+end
+deactivate Service
+deactivate API
+deactivate Client
+deactivate UI
+@enduml

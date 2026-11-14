@@ -1,0 +1,26 @@
+/'
+  Diagrama: Diagrama 2.1: Organigrama Funcional del Equipo Consultor C-SharkTeam
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+top to bottom direction
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #444444
+}
+
+rectangle "C-SharkTeam\nDirección General del Proyecto" as DIR
+
+rectangle "Ingeniería de Backend, Algoritmos\ny Persistencia Relacional\n\nRenzo Antonio Antayhua Mamani\n• Servicios RESTful en FastAPI\n• Motor de Recomendación EdRecSys\n• Persistencia Relacional PostgreSQL / RLS\n• Transaccionalidad Pesimista y Quórum\n• Batería de Pruebas Backend (Pytest)" as BACK
+
+rectangle "Ingeniería de Frontend, UI/UX\ny Accesibilidad Universal\n\nJoan Cristian Medina Quispe\n• Aplicación Web Responsiva (React SPA)\n• Design System Institucional (Tailwind)\n• Accesibilidad Web WCAG 2.1 Nivel AA\n• Gestión de Estado y Clientes HTTP\n• Batería de Pruebas Frontend (Vitest)" as FRONT
+
+rectangle "Interacción con Cliente Institucional\nEPIS-UPT\n\n• Dirección de Escuela (Convalidación)\n• Coordinación de Tutoría (Cursos Filtro)\n• Estudiantes Mentores y Mentoreados" as INSTITUCION
+
+DIR --> BACK
+DIR --> FRONT
+BACK --> INSTITUCION
+FRONT --> INSTITUCION
+@enduml

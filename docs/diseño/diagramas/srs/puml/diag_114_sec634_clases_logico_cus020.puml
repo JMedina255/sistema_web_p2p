@@ -1,0 +1,35 @@
+/'
+  Diagrama: Diagrama 6.16.23: Diagrama de Clases Lógico Parcial - CUS-020: Configurar parámetros institucionales y umbrales
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama de Clases Lógico Parcial - CUS-020: Configurar parámetros institucionales y umbrales\nSistema Web P2P - EPIS UPT
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam class {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+    ArrowColor #2B3A42
+}
+
+class "AdminService" as Controller {
+  +ejecutarOperacion(payload: DTO): ResponseDTO
+  -validarReglasNegocio(db: Session): Boolean
+}
+
+class "ParametroInstitucional" as Entity {
+  -id: UUID
+  -estado: String
+  -fecha_creacion: DateTime
+  +actualizarEstado(nuevo: String): Void
+}
+
+Controller ..> Entity : manipula
+@enduml

@@ -1,0 +1,177 @@
+/'
+  Diagrama: Diagrama 6.2: Diagrama de Clases Conceptuales del Dominio - Sistema Web P2P EPIS-UPT
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama de Clases Conceptuales del Dominio - Sistema Web P2P EPIS-UPT
+hide methods
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+skinparam class {
+  BackgroundColor #F8F9FA
+  BorderColor #2B3A42
+  ArrowColor #2B3A42
+}
+
+class Usuario {
+  +id_usuario: UUID
+  +codigo_estudiante: String
+  +correo_institucional: String
+  +nombres: String
+  +apellidos: String
+  +activo: Boolean
+  +fecha_registro: DateTime
+}
+
+class ConsentimientoLegal {
+  +id_consentimiento: UUID
+  +id_usuario: UUID
+  +ip_address: String
+  +user_agent: String
+  +fecha_aceptacion: DateTime
+}
+
+class Rol {
+  +id_rol: Integer
+  +codigo_rol: String
+  +nombre_rol: String
+}
+
+class PerfilFormativo {
+  +id_perfil: UUID
+  +id_usuario: UUID
+  +biografia: Text
+  +ciclo_actual: Integer
+  +reputacion_promedio: Float
+  +horas_dictadas_total: Float
+}
+
+class DisponibilidadHoraria {
+  +id_disponibilidad: UUID
+  +id_usuario: UUID
+  +dia_semana: Integer
+  +hora_inicio: Time
+  +hora_fin: Time
+}
+
+class CursoCritico {
+  +id_curso: UUID
+  +codigo_curso: String
+  +nombre_curso: String
+  +ciclo_sugerido: Integer
+  +es_prioritario: Boolean
+}
+
+class TemaCurricular {
+  +id_tema: UUID
+  +id_curso: UUID
+  +unidad_silabica: Integer
+  +titulo_tema: String
+  +descripcion_conceptual: Text
+}
+
+class OfertaMentoria {
+  +id_oferta: UUID
+  +id_mentor: UUID
+  +id_curso: UUID
+  +id_tema: UUID
+  +modalidad: String
+  +aforo_maximo: Integer
+  +fecha_hora_inicio: DateTime
+  +fecha_hora_fin: DateTime
+  +estado_oferta: String
+}
+
+class EspacioFisico {
+  +id_espacio: UUID
+  +codigo_ambiente: String
+  +pabellon: String
+  +capacidad: Integer
+  +es_activo: Boolean
+}
+
+class SesionMentoria {
+  +id_sesion: UUID
+  +id_oferta: UUID
+  +id_espacio: UUID
+  +enlace_virtual: String
+  +estado_sesion: String
+  +quorum_alcanzado: Boolean
+}
+
+class ReservaCupo {
+  +id_reserva: UUID
+  +id_sesion: UUID
+  +id_mentoreado: UUID
+  +estado_reserva: String
+  +fecha_reserva: DateTime
+  +fecha_ratificacion: DateTime
+}
+
+class AsistenciaSesion {
+  +id_asistencia: UUID
+  +id_sesion: UUID
+  +id_estudiante: UUID
+  +estado_asistencia: String
+  +metodo_checkin: String
+  +timestamp_checkin: DateTime
+}
+
+class BitacoraPedagogica {
+  +id_bitacora: UUID
+  +id_sesion: UUID
+  +id_mentor: UUID
+  +temas_impartidos: Text
+  +observaciones_docentes: Text
+  +hash_sha256: String
+  +estado_visado: String
+  +fecha_registro: DateTime
+}
+
+class EvaluacionCalidad {
+  +id_evaluacion: UUID
+  +id_sesion: UUID
+  +id_estudiante: UUID
+  +puntuacion_estrellas: Integer
+  +comentario_cualitativo: Text
+  +fecha_evaluacion: DateTime
+}
+
+class CertificadoHoras {
+  +id_certificado: UUID
+  +id_mentor: UUID
+  +folio_correlativo: String
+  +horas_acreditadas: Float
+  +hash_documento: String
+  +url_qr_verificacion: String
+  +fecha_emision: DateTime
+}
+
+Usuario "1" -- "0..1" ConsentimientoLegal : formaliza
+Usuario "1" -- "1..*" Rol : posee
+Usuario "1" -- "1" PerfilFormativo : define
+Usuario "1" -- "0..*" DisponibilidadHoraria : agenda
+
+CursoCritico "1" -- "1..*" TemaCurricular : desglosa
+Usuario "1" -- "0..*" OfertaMentoria : publica (como mentor)
+CursoCritico "1" -- "0..*" OfertaMentoria : clasifica
+TemaCurricular "1" -- "0..*" OfertaMentoria : especifica
+
+OfertaMentoria "1" -- "1" SesionMentoria : materializa
+EspacioFisico "0..1" -- "0..*" SesionMentoria : alberga
+
+SesionMentoria "1" -- "0..*" ReservaCupo : gestiona cupos
+Usuario "1" -- "0..*" ReservaCupo : inscribe (como mentoreado)
+
+SesionMentoria "1" -- "0..*" AsistenciaSesion : controla
+SesionMentoria "1" -- "0..1" BitacoraPedagogica : documenta
+SesionMentoria "1" -- "0..*" EvaluacionCalidad : recibe
+
+Usuario "1" -- "0..*" CertificadoHoras : acredita
+@enduml

@@ -1,0 +1,94 @@
+/'
+  Diagrama: Diagrama 6.15.10: Diagrama de Secuencia - CUS-024: Ratificar asistencia a sesión de mentoría
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.10: Diagrama de Secuencia - CUS-024: Ratificar asistencia obligatoria a sesión de mentoría a T-24h\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as User
+participant "Vista React\n(StudentBookingsView.tsx)" as UI
+participant "Adaptador Cliente\n(bookingService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/bookings.py)" as API
+participant "Servicio Backend\n(booking_service.py)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+
+== Fase 1: Identificación de reservas pendientes y verificación de ventana temporal ==
+User -> UI: click ["Mis Reservas"]
+activate UI
+UI -> Client: getMyBookings() [Bearer JWT]
+activate Client
+Client -> API: GET /api/v1/bookings/my-bookings
+activate API
+API -> Service: get_user_bookings(user_email)
+activate Service
+Service -> DB: SELECT r.*, s.fecha_inicio, s.modalidad FROM reservas_cupo r\nJOIN sesiones_mentoria s ON r.id_sesion = s.id WHERE r.estudiante_email = :email
+activate DB
+DB --> Service: Lista de reservas del estudiante
+deactivate DB
+Service --> API: BookingListResponseDTO
+deactivate Service
+API --> Client: HTTP 200 OK BookingListResponseDTO
+deactivate API
+Client -> UI: displayBookingsList(bookings)
+deactivate Client
+
+== Fase 2: Despacho de ratificación y validación de reglas de negocio ==
+User -> UI: clickCardButton ["Confirmar Asistencia"]
+UI -> UI: openConfirmationModal()
+User -> UI: click ["Sí, Confirmo mi Asistencia Definitiva"]
+
+UI -> Client: confirmBooking(bookingId)
+activate Client
+Client -> API: POST /api/v1/bookings/{id}/confirm [Bearer JWT]
+activate API
+API -> Service: confirm_booking(booking_id, user_email)
+activate Service
+
+Service -> DB: SELECT r.*, s.fecha_inicio FROM reservas_cupo r\nJOIN sesiones_mentoria s ON r.id_sesion = s.id\nWHERE r.id = :bid AND r.estudiante_email = :email
+activate DB
+DB --> Service: Datos de reserva y horario de sesión
+deactivate DB
+
+alt [E001] Intento de ratificación anticipada fuera de ventana (now_utc < fecha_inicio - 48h)
+    Service --> API: Lanza HTTPException(400, "CONFIRMATION_NOT_OPEN")
+    API --> Client: HTTP 400 Bad Request {"detail": "CONFIRMATION_NOT_OPEN: La ventana abre 48h antes del inicio."}
+    Client -> UI: displayConfirmationNotOpen(400)
+    User -> UI: click ["Entendido"]
+    UI -> UI: closeConfirmationModal()
+else [E002] Ventana de ratificación vencida a T-24h (now_utc > fecha_inicio - 24h)
+    Service --> API: Lanza HTTPException(400, "CONFIRMATION_WINDOW_EXPIRED")
+    API --> Client: HTTP 400 Bad Request {"detail": "CONFIRMATION_WINDOW_EXPIRED: Ventana cerró a T-24h."}
+    Client -> UI: displayConfirmationExpired(400)
+    User -> UI: click ["Aceptar"]
+    UI -> UI: refreshBookingsList()
+else Dentro de la ventana reglamentaria [T-48h, T-24h]
+    == Fase 3: Transición atómica de estado y emisión de pase de asistencia ==
+    Service -> DB: BEGIN TRANSACTION
+    activate DB
+    Service -> DB: UPDATE reservas_cupo SET estado = 'CONFIRMADA', fecha_confirmacion = NOW() WHERE id = :bid
+    Service -> DB: COMMIT
+    DB --> Service: Transacción confirmada
+    deactivate DB
+    
+    Service --> API: BookingResponseDTO {"id": booking_id, "estado": "CONFIRMADA", "pass_code": "PASS-8472"}
+    API --> Client: HTTP 200 OK BookingResponseDTO
+    Client -> UI: displayPassCodeModal(booking_id, pass_code)
+    
+    UI -> UI: updateCardToConfirmed()
+    UI --> User: displayAttendanceConfirmedNotification
+end
+deactivate Service
+deactivate API
+deactivate Client
+deactivate UI
+@enduml

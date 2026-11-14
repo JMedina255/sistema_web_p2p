@@ -1,0 +1,91 @@
+/'
+  Diagrama: Diagrama 6.15.7: Diagrama de Secuencia - CUS-002: Explorar recomendaciones personalizadas Top-k
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama 6.15.7: Diagrama de Secuencia - CUS-002: Explorar recomendaciones personalizadas Top-k\nSistema Web P2P - EPIS UPT
+
+autonumber
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam sequenceBoxBorderColor #1E3A8A
+skinparam sequenceBoxBackgroundColor #F0F4F8
+
+actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as User
+participant "Vista React\n(RecommendationFeedView.tsx)" as UI
+participant "Adaptador Cliente\n(recommendationService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/recommendations.py)" as API
+participant "Servicio Backend\n(recommendation_service.py)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+participant "Modal Reserva\n(BookingModalView.tsx)" as BookingModal
+
+== Fase 1: Acceso a la cartelera y solicitud de recomendaciones Top-k ==
+User -> UI: click ["Cartelera de Mentorías"]
+activate UI
+UI -> Client: getTopKRecommendations(limit=6) [Bearer JWT]
+activate Client
+Client -> API: GET /api/v1/recommendations/top-k?limit=6
+activate API
+API -> Service: get_top_k_recommendations(user_id, limit=6)
+activate Service
+
+alt [E001] Error interno de cómputo o timeout en base de datos
+    Service --> API: Lanza HTTPException(500, "RECOMMENDER_ENGINE_ERROR")
+    API --> Client: HTTP 500 Internal Server Error {"detail": "RECOMMENDER_ENGINE_ERROR"}
+    Client -> UI: displayRecommenderError(500)
+    User -> UI: click ["Reintentar Cartelera"]
+    UI -> Client: getTopKRecommendations()
+else Motor operativo
+    Service -> DB: SELECT * FROM perfiles_academicos WHERE usuario_id = :uid
+    activate DB
+    DB --> Service: Perfil del estudiante e historial de asignaturas
+    deactivate DB
+    
+    alt [A001] Estudiante nuevo sin historial académico (Cold Start Fallback)
+        Service -> DB: SELECT s.* FROM sesiones_mentoria s\nJOIN temas_curriculares t ON s.id_tema = t.id\nJOIN cursos c ON t.curso_id = c.id\nWHERE c.es_filtro = true AND s.estado = 'PUBLICADA' ORDER BY s.aforo_maximo DESC LIMIT 6
+        activate DB
+        DB --> Service: Sesiones populares en cursos filtro
+        deactivate DB
+        Service --> API: FallbackRecommendationDTO (populares)
+        API --> Client: HTTP 200 OK FallbackRecommendationDTO
+        Client -> UI: displayFallbackRecommendations(fallbackList)
+        Mentor -> UI: click ["Configurar Mis Materias"]
+    else Perfil con historial académico activo
+        == Fase 2: Ejecución del algoritmo de emparejamiento y ordenamiento de compatibilidad ==
+        Service -> DB: SELECT s.*, t.titulo, c.nombre, c.es_filtro FROM sesiones_mentoria s\nJOIN temas_curriculares t ON s.id_tema = t.id\nJOIN cursos c ON t.curso_id = c.id\nWHERE s.estado = 'PUBLICADA' AND s.fecha_inicio > NOW() + INTERVAL '24 HOURS'\nAND s.cupos_ocupados < s.aforo_maximo
+        activate DB
+        DB --> Service: Candidatas a mentoría activas
+        deactivate DB
+        
+        alt [A002] Cartelera vacía por ausencia de sesiones disponibles (0 ofertas)
+            Service --> API: EmptyListDTO []
+            API --> Client: HTTP 200 OK []
+            Client -> UI: displayEmptyFeedNotification()
+            User -> UI: click ["Registrar Demanda"]
+            UI -> UI: openDemandModal()
+        else Ofertas disponibles
+            Service -> Service: Computa Score = 0.5*Similitud + 0.3*FactorFiltro + 0.2*Urgencia
+            Service -> Service: Ordena descendentemente y toma las 6 mejores
+            Service --> API: TopKRecommendationResponseDTO
+            API --> Client: HTTP 200 OK TopKRecommendationResponseDTO
+            Client -> UI: displayTopKCards(recommendations)
+            
+            == Fase 3: Selección de sesión para reserva de cupo ==
+            User -> UI: clickOfferCard ["Reservar Cupo"]
+            UI -> BookingModal: openBookingModal(offer_id, user_id)
+            activate BookingModal
+            BookingModal -> UI: renderBookingModal(offer_id, user_id)
+            deactivate BookingModal
+            UI --> User: displayBookingModalTransfer
+        end
+    end
+end
+deactivate Service
+deactivate API
+deactivate Client
+deactivate UI
+@enduml

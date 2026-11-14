@@ -1,0 +1,44 @@
+/'
+  Diagrama: Diagrama 6.14.5: Diagrama de Actividades con Flujo de Objetos - CUS-005: Gestionar perfil formativo y disponibilidad horaria
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Visual Paradigm / UML 2.5
+  Extracción automatizada: Fase D02 (H03)
+'/
+@startuml
+title Diagrama de Actividades con Flujo de Objetos - CUS-005: Gestionar perfil formativo y disponibilidad horaria\nSistema Web P2P - EPIS UPT
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+
+|#F8F9FA|Actor Institucional|
+|#E8F8F5|Sistema Web P2P (Backend)|
+|#FFF2DF|Persistencia (PostgreSQL)|
+
+|Actor Institucional|
+start
+:Inicia accion para Gestionar perfil formativo y disponibilidad horaria;
+:Envía formulario / petición técnica;
+
+|Sistema Web P2P (Backend)|
+:Valida esquema Pydantic y reglas de negocio;
+if (¿Datos válidos y reglas conformes?) then (Sí)
+  :Inicia transacción ACID;
+  |Persistencia (PostgreSQL)|
+  :Ejecuta operaciones SQL sobre PerfilFormativo;
+  :Transiciona estado de la entidad;
+  |Sistema Web P2P (Backend)|
+  :Confirma transacción (commit);
+  :Genera Response DTO;
+  |Actor Institucional|
+  :Visualiza confirmación exitosa en Vista React;
+  stop
+else (No)
+  |Sistema Web P2P (Backend)|
+  :Genera error controlado (HTTP 4xx);
+  |Actor Institucional|
+  :Visualiza mensaje de alerta descriptivo;
+  stop
+endif
+@enduml
