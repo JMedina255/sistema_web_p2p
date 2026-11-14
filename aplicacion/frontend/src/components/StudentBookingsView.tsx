@@ -24,6 +24,7 @@ import {
   BookingException,
 } from '../services/bookingService';
 import { authService } from '../services/authService';
+import { attendanceService } from '../services/attendanceService';
 import { PostSessionSurveyModal } from './PostSessionSurveyModal';
 
 /**
@@ -290,6 +291,13 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
   const [evaluatedBookings, setEvaluatedBookings] = useState<Set<number>>(new Set());
   const [componentMountTime] = useState<number>(() => currentTime ?? Date.now());
 
+  // Estado para Check-in de Asistencia Digital en Vivo (RF17)
+  const [checkinBooking, setCheckinBooking] = useState<BookingDetailResponse | null>(null);
+  const [checkinCode, setCheckinCode] = useState<string>('');
+  const [isSubmittingCheckin, setIsSubmittingCheckin] = useState<boolean>(false);
+  const [checkinError, setCheckinError] = useState<string | null>(null);
+  const [checkinSuccess, setCheckinSuccess] = useState<string | null>(null);
+
   // Referencias para accesibilidad y focus trap en diálogos
   const confirmCancelBtnRef = useRef<HTMLButtonElement>(null);
   const cancelDismissBtnRef = useRef<HTMLButtonElement>(null);
@@ -465,6 +473,63 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
     }
   };
 
+  const handleOpenCheckinModal = (booking: BookingDetailResponse) => {
+    setCheckinBooking(booking);
+    setCheckinCode('');
+    setCheckinError(null);
+    setCheckinSuccess(null);
+  };
+
+  const handleCloseCheckinModal = () => {
+    setCheckinBooking(null);
+    setCheckinCode('');
+    setCheckinError(null);
+    setCheckinSuccess(null);
+  };
+
+  const handleSubmitCheckin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!checkinBooking) return;
+    if (checkinCode.trim().length !== 6) {
+      setCheckinError('El código numérico TOTP debe tener exactamente 6 dígitos.');
+      return;
+    }
+
+    setIsSubmittingCheckin(true);
+    setCheckinError(null);
+    setCheckinSuccess(null);
+
+    try {
+      const userEmail = effectiveEmail || authService.getCurrentUser()?.email;
+      const resp = await attendanceService.checkIn(checkinBooking.id_sesion, {
+        numeric_code: checkinCode.trim(),
+        estudiante_email: userEmail,
+      });
+
+      setCheckinSuccess(resp.mensaje || '¡Asistencia registrada exitosamente!');
+      setNotificationMessage({
+        type: 'success',
+        text: `¡Asistencia confirmada en vivo para la sesión ${checkinBooking.codigo_sesion}! Tu presencia ha sido acreditada en el sistema.`,
+      });
+
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id_reserva === checkinBooking.id_reserva
+            ? { ...b, estado: 'ASISTIDA' as BookingStatus, asistio: true, asistencia_confirmada: true }
+            : b
+        )
+      );
+
+      setTimeout(() => {
+        handleCloseCheckinModal();
+      }, 1200);
+    } catch (err: unknown) {
+      setCheckinError(err instanceof Error ? err.message : 'Error al registrar la asistencia.');
+    } finally {
+      setIsSubmittingCheckin(false);
+    }
+  };
+
   // Gestión de foco accesible para diálogos
   useEffect(() => {
     if (confirmingBooking) {
@@ -490,6 +555,8 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
           handleCloseConfirmDialog();
         } else if (cancellingBooking && !isSubmittingCancel) {
           handleCloseCancelDialog();
+        } else if (checkinBooking && !isSubmittingCheckin) {
+          handleCloseCheckinModal();
         }
       }
     };
@@ -500,6 +567,8 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
     isSubmittingConfirm,
     cancellingBooking,
     isSubmittingCancel,
+    checkinBooking,
+    isSubmittingCheckin,
     handleCloseConfirmDialog,
     handleCloseCancelDialog,
   ]);
@@ -1129,6 +1198,30 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                     >
                       ✓ Asistencia Confirmada
                     </span>
+                  )}
+
+                  {/* Botón de Check-in TOTP / QR en Vivo si la sesión tiene cupo confirmado y no ha sido conmutada a ASISTIDA aún */}
+                  {booking.estado === 'CONFIRMADA' && (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenCheckinModal(booking)}
+                      style={{
+                        backgroundColor: '#0284C7',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '9px 16px',
+                        fontSize: '13px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                      }}
+                    >
+                      📱 Registrar Asistencia (TOTP / QR)
+                    </button>
                   )}
 
                   {/* Evaluación de Calidad y Satisfacción Post-Mentoría (T-38 / RF18 / RN-12 / RN-13) */}
@@ -1762,6 +1855,155 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Accesible de Check-in de Asistencia Digital TOTP / QR (RF17) */}
+      {checkinBooking && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="checkin-dialog-title"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.55)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '16px',
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              borderRadius: '12px',
+              maxWidth: '480px',
+              width: '100%',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: '#002147',
+                color: '#FFFFFF',
+                padding: '16px 20px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <h3 id="checkin-dialog-title" style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
+                📱 Check-in de Asistencia en Vivo (RF17)
+              </h3>
+              <button
+                type="button"
+                onClick={handleCloseCheckinModal}
+                disabled={isSubmittingCheckin}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#FFFFFF',
+                  fontSize: '18px',
+                  cursor: 'pointer',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleSubmitCheckin} style={{ padding: '20px' }}>
+              <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+                Ingresa el <strong>código numérico TOTP de 6 dígitos</strong> proyectado por tu mentor en pantalla o ingresa el código del QR:
+              </p>
+
+              <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '12px', marginBottom: '16px' }}>
+                <div style={{ fontSize: '12px', color: '#64748B' }}>Sesión formativa:</div>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: '#1E293B' }}>
+                  {checkinBooking.nombre_asignatura || checkinBooking.codigo_sesion}
+                </div>
+                <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px' }}>
+                  Reserva: <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{checkinBooking.codigo_reserva}</span>
+                </div>
+              </div>
+
+              {checkinSuccess && (
+                <div style={{ backgroundColor: '#DEF7EC', border: '1px solid #31C48D', color: '#03543F', padding: '10px 14px', borderRadius: '6px', fontSize: '13px', marginBottom: '14px' }}>
+                  ✅ {checkinSuccess}
+                </div>
+              )}
+
+              {checkinError && (
+                <div style={{ backgroundColor: '#FEE2E2', border: '1px solid #F87171', color: '#991B1B', padding: '10px 14px', borderRadius: '6px', fontSize: '13px', marginBottom: '14px' }}>
+                  ⚠️ {checkinError}
+                </div>
+              )}
+
+              <div style={{ marginBottom: '16px' }}>
+                <label htmlFor="totp-code-input" style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#1E293B', marginBottom: '6px' }}>
+                  Código TOTP (6 dígitos):
+                </label>
+                <input
+                  id="totp-code-input"
+                  type="text"
+                  maxLength={6}
+                  placeholder="Ej. 492817"
+                  value={checkinCode}
+                  onChange={(e) => setCheckinCode(e.target.value.replace(/\D/g, ''))}
+                  disabled={isSubmittingCheckin}
+                  autoFocus
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: '6px',
+                    border: '1px solid #CBD5E1',
+                    fontSize: '18px',
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.2em',
+                    textAlign: 'center',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={handleCloseCheckinModal}
+                  disabled={isSubmittingCheckin}
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #CBD5E1',
+                    borderRadius: '6px',
+                    padding: '8px 16px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: '#475569',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingCheckin || checkinCode.length !== 6}
+                  style={{
+                    backgroundColor: isSubmittingCheckin || checkinCode.length !== 6 ? '#94A3B8' : '#0284C7',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '8px 18px',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: '#FFFFFF',
+                    cursor: isSubmittingCheckin || checkinCode.length !== 6 ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {isSubmittingCheckin ? 'Validando...' : '✓ Validar Asistencia'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
