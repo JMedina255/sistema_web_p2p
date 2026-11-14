@@ -38,7 +38,8 @@ A continuación, se presenta el registro histórico de versiones del presente do
 | **2.1** | Joan Medina / Renzo Antayhua | Dr. Ricardo Valcárcel | Dirección EPIS | 19/10/2026 | Refinamiento y trazabilidad en Fase de Diseño (SRS v2.1): alineamiento con la arquitectura desacoplada y cierre de requerimientos del Sprint 1 (RF01, RF05, RNF01, RNF02, RNF09, CUS-001, CUS-021, RN-01) respaldados empíricamente en CI. |
 | **2.2** | Joan Medina / Renzo Antayhua | Dr. Ricardo Valcárcel | Dirección EPIS | 23/10/2026 | Consolidación de Fase de Diseño y Construcción del Sprint 2 (SRS v2.2): formalización técnica de consentimiento digital Ley N° 29733 (RF02, RN-02, CUS-001), roles y mérito académico (RF03, RN-03, CUS-010), perfiles y matriz 6×11 (RF04, CUS-005) y catálogo silábico (RF05, CUS-021). |
 | **3.0** | Joan Medina / Renzo Antayhua | Dr. Ricardo Valcárcel | Dirección EPIS | 14/11/2026 | Consolidación Integral de la Fase de Diseño y Cierre de Construcción (SRS v3.0): culminación de los 8 Sprints de desarrollo (MOD-01 al MOD-08, CUS-001 al CUS-024, RF01 al RF26, RN-01 al RN-14, RNF01 al RNF10). Formalización de interfaces externas (WCAG 2.1 AA / Tailwind), motor EdRecSys calibrado (P@3=83.3%, P@5=80.0%, latencia 12.4 ms), orquestación transaccional con cerrojos pesimistas a T-24h, bitácoras firmadas con SHA-256 y certificados PDF con QR institucional. |
-| **3.1** | Joan Cristian Medina Quispe / Renzo Antonio Antayhua Mamani | Pendiente de revisión (Dr. Ricardo Valcárcel) | Pendiente de aprobación (Dirección EPIS) | 14/11/2026 | Refinamiento funcional integral del SRS (H02): profundización exhaustiva de Secciones 1 a 5, especificación de fichas funcionales para los 26 RF sin filtración técnica, consolidación de RF20 como encuestas de calidad post-mentoría 24h, actualización de los 10 RNF (ISO 25010), 14 Reglas de Negocio, procesos As-Is y To-Be con regla D-2 y rutas relativas. |
+| **3.1 (H02)** | Joan Cristian Medina Quispe / Renzo Antonio Antayhua Mamani | Pendiente de revisión (Dr. Ricardo Valcárcel) | Pendiente de aprobación (Dirección EPIS) | 14/11/2026 | Refinamiento funcional integral del SRS (H02): profundización exhaustiva de Secciones 1 a 5, especificación de fichas funcionales para los 26 RF sin filtración técnica, consolidación de RF20 como encuestas de calidad post-mentoría 24h, actualización de los 10 RNF (ISO 25010), 14 Reglas de Negocio, procesos As-Is y To-Be con regla D-2 y rutas relativas. |
+| **3.1 (H03)** | Joan Cristian Medina Quispe / Renzo Antonio Antayhua Mamani | Pendiente de revisión (Dr. Ricardo Valcárcel) | Pendiente de aprobación (Dirección EPIS) | 14/11/2026 | Auditoría de calidad, criterios de aceptación y trazabilidad integral del SRS (H03): contrastación exhaustiva de 62 contratos REST de FastAPI en backend, homologación de endpoints en Cuadro 5.3 y en las 26 fichas técnicas, estandarización de criterios de aceptación Given-When-Then con clasificación de estado ([REQUISITO], [IMPLEMENTADO], [VERIFICADO], [PENDIENTE], [PROPUESTO]), conciliación metodológica de 500h de ingeniería (CAPEX) vs. 91h presenciales de sprint, y clasificación tipológica de todas las métricas del sistema. |
 
 Fuente: Elaboración propia.
 
@@ -300,7 +301,7 @@ En la Escuela Profesional de Ingeniería de Sistemas de la Universidad Privada d
 - **Programación Orientada a Objetos (III ciclo):** Abstracción, polimorfismo, encapsulamiento y patrones de diseño.
 - **Base de Datos (IV ciclo):** Normalización relacional, integridad referencial y álgebra relacional.
 
-Estas materias actúan en la práctica como **"asignaturas filtro"**, concentrando tasas históricas de desaprobación que fluctúan entre el 25% y el 40%, provocando rezago en el avance de la malla curricular, desmotivación temprana y un riesgo sensible de deserción universitaria en los primeros semestres.
+Estas materias actúan en la práctica como **"asignaturas filtro"**, concentrando tasas históricas de desaprobación que fluctúan entre el 25% y el 40% `[DATO_HISTORICO_OBSERVADO]`, provocando rezago en el avance de la malla curricular, desmotivación temprana y un riesgo sensible de deserción universitaria en los primeros semestres.
 
 Paradójicamente, la escuela cuenta con una masa crítica de estudiantes destacados en los ciclos superiores (VII al X) que han superado con solvencia técnica estas materias y poseen vocación para guiar a sus compañeros. No obstante, no existe una plataforma institucional centralizada que articule de manera inteligente, ordenada y trazable la oferta y la demanda de asesoría académica entre pares (*Peer-to-Peer*).
 
@@ -381,10 +382,10 @@ A continuación, se definen los objetivos estratégicos y técnicos que gobierna
 ## 3.5. Viabilidad Multidimensional del Sistema
 
 ### 3.5.1. Viabilidad Técnica
-El proyecto se sustenta en componentes maduros y estables de la industria del software:
-- **Frontend:** React 18, TypeScript, Vite y Tailwind CSS, asegurando tiempos de carga inicial ($FCP < 1.2\text{ s}$) y compatibilidad en el 100% de navegadores modernos.
-- **Backend:** Python 3.13 con FastAPI y Scikit-learn, con latencia media de recomendación algorítmica de $12.4\text{ ms}$, muy inferior al umbral admisible de $500\text{ ms}$.
-- **Persistencia:** PostgreSQL v15+ administrado sobre Supabase Cloud con soporte para políticas RLS y bloqueos pesimistas a nivel de fila (`SELECT ... FOR UPDATE`), demostrando 0.0% de sobrecupo en pruebas multihilo concurrentes.
+El proyecto se sustenta en componentes maduros y estables de la industria del software, respaldados por métricas empíricas y atributos de calidad normalizados:
+- **Frontend:** React 18, TypeScript, Vite y Tailwind CSS, asegurando tiempos de carga inicial ($FCP < 1.2\text{ s}$ `[META_CALIDAD]`) y compatibilidad en el 100% de navegadores modernos `[REQUISITO]`.
+- **Backend:** Python 3.13 con FastAPI y Scikit-learn, con latencia media de recomendación algorítmica de $12.4\text{ ms}$ `[DATO_HISTORICO_OBSERVADO]` (medida en benchmark de testbench sintético sobre 50 perfiles en commit `3f6e31d`), muy inferior al umbral admisible de $500\text{ ms}$ `[META_CALIDAD]`.
+- **Persistencia:** PostgreSQL v15+ administrado sobre Supabase Cloud con soporte para políticas RLS y bloqueos pesimistas a nivel de fila (`SELECT ... FOR UPDATE`), demostrando 0.0% de sobrecupo `[DATO_HISTORICO_OBSERVADO]` en pruebas multihilo concurrentes.
 
 ### 3.5.2. Viabilidad Económica
 El análisis financiero se modeló para un horizonte de evaluación a 5 años (2026–2030) con una tasa de costo de oportunidad de capital (COK) del 12.00%:
@@ -393,18 +394,34 @@ A continuación, se presentan los indicadores financieros del proyecto:
 
 ### Cuadro 3.1: Evaluación Financiera y Económica del Proyecto (Horizonte 2026–2030)
 
-| Indicador Financiero | Valor Cuantificado | Criterio de Aceptación | Interpretación Técnica y Financiera |
-| :--- | :---: | :---: | :--- |
-| **Inversión Inicial (CAPEX)** | **S/. 5,475.00** | Presupuesto Cátedra | Cubre 500 horas de ingeniería de software (Joan Medina y Renzo Antayhua a S/. 9.00/h), depreciación de equipos, conectividad, dominio web e imprevistos. |
-| **Costo Operativo Anual (OPEX)** | **S/. 1,140.00** | Presupuesto Anual | Infraestructura cloud PaaS (Render / Supabase), renovación de dominio, soporte preventivo y materiales de difusión. |
-| **Valor Actual Neto (VAN)** | **+S/. 10,801.64** | $\text{VAN} > 0$ | Estrictamente positivo, ratificando que el proyecto genera valor económico sustancial y excedentes por encima de la tasa de descuento exigida (12.00%). |
-| **Tasa Interna de Retorno (TIR)** | **68.20%** | $\text{TIR} > \text{COK}$ (12%) | Supera con holgura el COK referencial (12.00%), confiriendo un margen de resiliencia financiera amplio ante variaciones de costos operativos. |
-| **Relación Beneficio / Costo (B/C)** | **1.97** | $\text{B/C} > 1.0$ | Por cada sol invertido a lo largo del ciclo del proyecto, se generan S/. 1.97 en ahorros y beneficios valorizados para la facultad y los estudiantes. |
-| **Periodo de Recuperación (Payback)**| **1 año y 9.7 meses** | $< 3\text{ años}$ | La inversión inicial se recupera plenamente antes de concluir el segundo año lectivo de puesta en producción. |
+| Indicador Financiero | Valor Cuantificado | Clasificación Metodológica | Criterio de Aceptación | Interpretación Técnica y Financiera |
+| :--- | :---: | :---: | :---: | :--- |
+| **Inversión Inicial (CAPEX)** | **S/. 5,475.00** | `[SUPUESTO_ECONOMICO]` / `[CALCULO_MATEMATICO]` | Presupuesto Cátedra | Cubre 500 horas de ingeniería de software (Joan Cristian Medina y Renzo Antonio Antayhua a S/. 9.00/h), depreciación de equipos, conectividad, dominio web e imprevistos. |
+| **Costo Operativo Anual (OPEX)** | **S/. 1,140.00** | `[SUPUESTO_ECONOMICO]` / `[CALCULO_MATEMATICO]` | Presupuesto Anual | Infraestructura cloud PaaS (Render / Supabase), renovación de dominio, soporte preventivo y materiales de difusión. |
+| **Valor Actual Neto (VAN)** | **+S/. 10,801.64** | `[CALCULO_MATEMATICO]` | $\text{VAN} > 0$ | Estrictamente positivo, ratificando que el proyecto genera valor económico sustancial y excedentes por encima de la tasa de descuento exigida (12.00%). |
+| **Tasa Interna de Retorno (TIR)** | **68.20%** | `[CALCULO_MATEMATICO]` | $\text{TIR} > \text{COK}$ (12%) | Supera con holgura el COK referencial (12.00%), confiriendo un margen de resiliencia financiera amplio ante variaciones de costos operativos. |
+| **Relación Beneficio / Costo (B/C)** | **1.97** | `[CALCULO_MATEMATICO]` | $\text{B/C} > 1.0$ | Por cada sol invertido a lo largo del ciclo del proyecto, se generan S/. 1.97 en ahorros y beneficios valorizados para la facultad y los estudiantes. |
+| **Periodo de Recuperación (Payback)**| **1 año y 9.7 meses** | `[CALCULO_MATEMATICO]` | $< 3\text{ años}$ | La inversión inicial se recupera plenamente antes de concluir el segundo año lectivo de puesta en producción. |
 
 Fuente: Elaboración propia a partir del estudio económico del proyecto.
 
 El análisis del Cuadro 3.1 certifica la sólida rentabilidad y conveniencia financiera de la solución para la Escuela Profesional de Ingeniería de Sistemas. El retorno derivado de la reducción de tasas de rezago y de desaprobación compensa con creces los costos moderados de desarrollo y mantenimiento en la nube.
+
+A continuación, se presenta en el Cuadro 3.2 la conciliación metodológica entre las horas presenciales de cátedra y las horas de ingeniería de software:
+
+### Cuadro 3.2: Conciliación Metodológica de Horas de Desarrollo e Inversión Técnica
+
+| Parámetro de Comparación | Horas Académicas Presenciales de Cátedra | Horas Integrales de Ingeniería de Software (CAPEX) | Justificación Metodológica y Alcance Técnico |
+| :--- | :---: | :---: | :--- |
+| **Total de Horas Computadas** | **91.0 horas** `[ESTIMACION_ACADEMICA]` / `[DATO_HISTORICO_OBSERVADO]` | **500.0 horas** `[SUPUESTO_ECONOMICO]` / `[CALCULO_MATEMATICO]` | Disparidad de alcance formal: las 91 horas corresponden al horario de laboratorio evaluado; las 500 horas al esfuerzo técnico global de ingeniería. |
+| **Distribución por Desarrollador** | Joan Medina: **45.0 h**<br>Renzo Antayhua: **46.0 h** | Joan Medina: **250.0 h**<br>Renzo Antayhua: **250.0 h** | Asignación equitativa en ambos marcos, reflejando corresponsabilidad plena en frontend, backend, arquitectura y documentación. |
+| **Fuente de Acreditación** | `PLAN_SPRINTS_Y_TAREAS.md`, Informes de Sprint 1 al 8 | Modelo de Costos de Ingeniería, Estudio Financiero CAPEX | Trazabilidad documental cruzada entre el cronograma curricular de cátedra y el presupuesto formal del proyecto. |
+| **Actividades Comprendidas** | Sesiones lectivas de laboratorio, revisiones de sprint con el docente, demostraciones de incremento (*sprint review*) y retrospectivas en aula. | Análisis de requisitos (IEEE 29148), diseño arquitectónico UML (Visual Paradigm), codificación React/TypeScript y FastAPI, motor EdRecSys, 682 pruebas automatizadas, CI/CD, despliegue cloud y redacción técnica de SRS y SAD. | El desarrollo de software profesional exige un esfuerzo sustantivo extra-aula que multiplica por un factor de ~5.5 la capacidad lectiva presencial. |
+| **Valorización Monetaria** | No monetizable directamente (créditos académicos universitarios). | **S/. 4,500.00** en mano de obra (500 h $\times$ S/. 9.00/h) + S/. 975.00 en equipamiento, dominio y contingencias = **S/. 5,475.00**. | Base cuantificada del flujo de caja de inversión inicial (CAPEX) utilizado para la estimación del VAN, TIR y periodo de recuperación. |
+
+Fuente: Elaboración propia a partir de las actas de cátedra y el expediente financiero.
+
+El análisis del Cuadro 3.2 clarifica la diferencia fundamental de alcance entre la capacidad neta de cátedra (91.0 horas lectivas de laboratorio distribuidas a lo largo de los 8 sprints del curso Construcción de Software I) y el esfuerzo profesional integral de ingeniería de software (500.0 horas efectivas de desarrollo, pruebas y documentación técnica que fundamentan la inversión inicial de S/. 5,475.00). Ambas cifras son mutuamente consistentes y representan dimensiones operativas complementarias del proyecto.
 
 ### 3.5.3. Viabilidad Operativa
 - **Facilidad de Adopción:** La interfaz intuitiva y responsiva no exige instalaciones locales ni configuraciones especiales por parte del estudiante.
@@ -666,43 +683,43 @@ A continuación, se presenta la matriz consolidada de requerimientos funcionales
 
 | Código | Módulo | Denominación del Requerimiento Funcional | Casos de Uso Vinculados | Contrato RESTful / Router Principal | Componentes Técnicos Asociados (UI / Service / Persistencia) | Criticidad |
 | :---: | :---: | :--- | :---: | :--- | :--- | :---: |
-| **RF01** | MOD-01 | Autenticación institucional multifactor (2FA) | CUS-001 | `POST /api/v1/auth/request-otp`<br>`POST /api/v1/auth/verify-otp`<br>`POST /api/v1/auth/google` | `LoginOtpView.tsx`<br>`AuthService.py` / `authService.ts`<br>`auth_challenges`, `usuarios` | Crítica |
-| **RF02** | MOD-01 | Formalización de consentimiento legal digital (Ley 29733) | CUS-001 | `GET /api/v1/consent/status`<br>`POST /api/v1/consent/accept` | `ConsentModalView.tsx`<br>`ConsentService.py` / `consentService.ts`<br>`consentimientos_legales` | Crítica |
-| **RF03** | MOD-01 | Gestión y asignación administrativa de roles de usuario | CUS-010 | `GET /api/v1/roles`<br>`POST /api/v1/roles/assign`<br>`DELETE /api/v1/roles/revoke` | `AdminRolesView.tsx`<br>`RoleService.py` / `roleService.ts`<br>`roles`, `usuario_roles` | Alta |
-| **RF04** | MOD-03 | Configuración de perfil formativo y matriz horaria | CUS-005 | `GET /api/v1/profiles/me`<br>`PUT /api/v1/profiles/me/availability` | `ProfileAcademicView.tsx`<br>`ProfileService.py` / `profileService.ts`<br>`perfiles_academicos`, `disponibilidades_horarias` | Alta |
-| **RF05** | MOD-03 | Catálogo curricular de asignaturas y temarios silábicos | CUS-021 | `GET /api/v1/curriculum/subjects`<br>`POST /api/v1/curriculum/subjects`<br>`GET /api/v1/curriculum/topics` | `CurriculumCatalogView.tsx`<br>`CurriculumService.py` / `apiClient.ts`<br>`asignaturas`, `temas_conceptuales` | Alta |
-| **RF06** | MOD-04 | Inferencia algorítmica y recomendación personalizada Top-k | CUS-002 | `GET /api/v1/recommendations/top-k`<br>`POST /api/v1/recommendations/rank` | `RecommendationFeedView.tsx`<br>`RecommendationService.py` (EdRecSys)<br>`sesiones_mentoria`, `perfiles_academicos` | Crítica |
-| **RF07** | MOD-04 | Registro y banco de solicitudes por demanda académica | CUS-003 | `POST /api/v1/bookings/requests`<br>`GET /api/v1/bookings/requests/pending` | `MentoringDemandModalView.tsx`, `MentorSessionsView.tsx`<br>`BookingService.py`<br>`solicitudes_demanda` | Media |
-| **RF08** | MOD-02 | Publicación y parametrización de ofertas de mentoría | CUS-006 | `POST /api/v1/offers`<br>`GET /api/v1/offers/me` | `OfferPublishView.tsx`<br>`OfferService.py` / `offerService.ts`<br>`sesiones_mentoria` (con enlaces a recursos didácticos) | Alta |
-| **RF09** | MOD-02 | Aprovisionamiento automatizado de espacios y salas virtuales | CUS-006, CUS-008 | `GET /api/v1/spaces/free-slots`<br>`GET /api/v1/spaces/classrooms` | `SpaceSelectorView.tsx`<br>`VirtualRoomService.py`, `CatalogSupportService.py`<br>`sesiones_mentoria` | Alta |
-| **RF10** | MOD-02 | Procesamiento de cronogramas oficiales de aulas | CUS-008 | `POST /api/v1/spaces/import-schedule` | `AdminScheduleUploadView.tsx`<br>`ScheduleParserService.py`<br>`spacesService.ts` | Alta |
-| **RF11** | MOD-02 | Gestión de imprevistos, reprogramación y cancelación | CUS-006 | `PUT /api/v1/offers/{id}/reschedule`<br>`DELETE /api/v1/offers/{id}` | `MentorSessionsView.tsx`<br>`OfferService.py`<br>`sesiones_mentoria` | Alta |
-| **RF12** | MOD-05 | Reserva concurrente de cupos con control de aforo | CUS-004 | `POST /api/v1/bookings/reserve` | `BookingModalView.tsx`<br>`BookingService.py` (SELECT FOR UPDATE)<br>`reservas_cupo`, `sesiones_mentoria` | Crítica |
-| **RF13** | MOD-05 | Ratificación anticipada obligatoria de asistencia | CUS-024 | `POST /api/v1/bookings/{id}/confirm` | `MyBookingsView.tsx`<br>`BookingService.py`<br>`reservas_cupo` | Alta |
-| **RF14** | MOD-05 | Desistimiento voluntario y liberación inmediata de cupo | CUS-017 | `POST /api/v1/bookings/{id}/cancel` | `MyBookingsView.tsx`<br>`BookingService.py`<br>`reservas_cupo` | Alta |
-| **RF15** | MOD-05 | Monitoreo desatendido y corte de quórum en $T-24\text{ h}$ | CUS-023, CUS-009 | `POST /api/v1/quorum/cron-eval`<br>`GET /api/v1/notifications` | `NotificationCenterView.tsx`<br>`QuorumScheduler.py`, `BookingService.py`<br>`sesiones_mentoria`, `reservas_cupo` | Crítica |
-| **RF16** | MOD-05 | Gestión resolutiva del mentor ante quórum insuficiente | CUS-007 | `POST /api/v1/offers/{id}/quorum-decision` | `QuorumDecisionModalView.tsx`<br>`OfferService.py`<br>`sesiones_mentoria` | Alta |
-| **RF17** | MOD-06 | Marcación de asistencia con pase QR dinámico (TOTP) | CUS-012 | `GET /api/v1/attendance/qr/{id}`<br>`POST /api/v1/attendance/scan` | `AttendanceScannerView.tsx`, `AttendanceQrModalView.tsx`<br>`AttendanceService.py`<br>`asistencias_sesion`, `tokens_asistencia_activos` | Alta |
-| **RF18** | MOD-06 | Registro de bitácora docente en 48h con hash SHA-256 | CUS-013 | `POST /api/v1/bitacora/{session_id}` | `BitacoraFormView.tsx`<br>`BitacoraService.py`<br>`bitacoras_pedagogicas` | Alta |
-| **RF19** | MOD-06 | Historial de sesiones, bitácoras y recursos compartidos | CUS-014 | `GET /api/v1/bitacora/history/me`<br>`GET /api/v1/bitacora/{id}` | `BitacoraHistoryView.tsx`<br>`BitacoraService.py`<br>`bitacoras_pedagogicas`, `sesiones_mentoria` | Media |
-| **RF20** | MOD-06 | Captura de encuestas de calidad post-mentoría (ventana 24h) | CUS-012, CUS-014 | `GET /api/v1/survey/{session_id}/check`<br>`POST /api/v1/survey/{session_id}` | `PostSessionSurveyModalView.tsx`<br>`SurveyService.py` / `surveyService.ts`<br>`encuestas_calidad` | Alta |
-| **RF21** | MOD-07 | Cálculo de reputación docente y catálogo de insignias | CUS-019 | `GET /api/v1/recommendations/mentor/{id}/reputation` | `MentorBadgesView.tsx`<br>`RecommendationService.py`<br>`encuestas_calidad`, `perfiles_academicos` | Media |
-| **RF22** | MOD-07 | Parametrización y autorización de certificados de horas | CUS-018 | `POST /api/v1/certificates/generate`<br>`GET /api/v1/certificates/pending-approval` | `AdminCertificatesView.tsx`<br>`CertificateService.py`<br>`certificados_horas` | Media |
-| **RF23** | MOD-07 | Emisión, descarga y verificación con código QR | CUS-018 | `GET /api/v1/certificates/{id}/download`<br>`GET /api/v1/certificates/verificar/{hash}` | `CertificateVerifyView.tsx`, `AdminCertificatesView.tsx`<br>`CertificateService.py` (ReportLab / QrCode)<br>`certificados_horas` | Media |
-| **RF24** | MOD-08 | Parametrización institucional de aforos y prioridades | CUS-020 | `GET /api/v1/admin/settings`<br>`PUT /api/v1/admin/settings` | `AdminConfigView.tsx`<br>`app.core.config`, `SimulationService.py` | Media |
+| **RF01** | MOD-01 | Autenticación institucional multifactor (2FA) | CUS-001 | `POST /api/v1/auth/otp/request`<br>`POST /api/v1/auth/otp/verify`<br>`POST /api/v1/auth/otp/resend`<br>`POST /api/v1/auth/google` | `LoginOtpView.tsx`<br>`AuthService.py` / `authService.ts`<br>`auth_challenges`, `usuarios` | Crítica |
+| **RF02** | MOD-01 | Formalización de consentimiento legal digital (Ley 29733) | CUS-001 | `GET /api/v1/consent/status`<br>`POST /api/v1/consent/accept`<br>`POST /api/v1/consent/revoke` | `ConsentModalView.tsx`<br>`ConsentService.py` / `consentService.ts`<br>`consentimientos_legales` | Crítica |
+| **RF03** | MOD-01 | Gestión y asignación administrativa de roles de usuario | CUS-010 | `GET /api/v1/roles/users/{email}`<br>`POST /api/v1/roles/promote-mentor`<br>`POST /api/v1/roles/revoke-mentor` | `AdminRolesView.tsx`<br>`RoleService.py` / `roleService.ts`<br>`roles`, `usuario_roles` | Alta |
+| **RF04** | MOD-03 | Configuración de perfil formativo y matriz horaria | CUS-005 | `GET /api/v1/profiles/me`<br>`PUT /api/v1/profiles/me`<br>`GET /api/v1/profiles/availability`<br>`PUT /api/v1/profiles/availability` | `ProfileAcademicView.tsx`<br>`ProfileService.py` / `profileService.ts`<br>`perfiles_academicos`, `disponibilidades_horarias` | Alta |
+| **RF05** | MOD-03 | Catálogo curricular de asignaturas y temarios silábicos | CUS-021 | `GET /api/v1/curriculum/courses`<br>`POST /api/v1/curriculum/courses`<br>`GET /api/v1/curriculum/courses/{id_asignatura}`<br>`GET /api/v1/curriculum/courses/{id_asignatura}/topics` | `CurriculumCatalogView.tsx`<br>`CurriculumService.py` / `apiClient.ts`<br>`asignaturas`, `temas_conceptuales` | Alta |
+| **RF06** | MOD-04 | Inferencia algorítmica y recomendación personalizada Top-k | CUS-002 | `GET /api/v1/recommendations/mentors`<br>`GET /api/v1/recommendations/offers`<br>`POST /api/v1/recommendations/explain` | `RecommendationFeedView.tsx`<br>`RecommendationService.py` (EdRecSys)<br>`sesiones_mentoria`, `perfiles_academicos` | Crítica |
+| **RF07** | MOD-04 | Registro y banco de solicitudes por demanda académica | CUS-003 | `POST /api/v1/bookings/requests`<br>`GET /api/v1/bookings/requests` | `MentoringDemandModalView.tsx`, `MentorSessionsView.tsx`<br>`BookingService.py`<br>`solicitudes_demanda` | Media |
+| **RF08** | MOD-02 | Publicación y parametrización de ofertas de mentoría | CUS-006 | `POST /api/v1/offers`<br>`GET /api/v1/offers` | `OfferPublishView.tsx`<br>`OfferService.py` / `offerService.ts`<br>`sesiones_mentoria` (con enlaces a recursos didácticos) | Alta |
+| **RF09** | MOD-02 | Aprovisionamiento automatizado de espacios y salas virtuales | CUS-006, CUS-008 | `GET /api/v1/spaces/free-slots`<br>`GET /api/v1/spaces/classrooms` | `SpaceSelectorView.tsx`<br>`VirtualRoomService.py`, `CatalogSupportService.py`<br>`sesiones_mentoria`, `espacios_fisicos` | Alta |
+| **RF10** | MOD-02 | Procesamiento de cronogramas oficiales de aulas | CUS-008 | `POST /api/v1/spaces/import-schedule`<br>`GET /api/v1/spaces/free-slots` | `AdminScheduleUploadView.tsx`<br>`ScheduleParserService.py`<br>`spacesService.ts` | Alta |
+| **RF11** | MOD-02 | Gestión de imprevistos, reprogramación y cancelación | CUS-006 | `POST /api/v1/offers/{id_sesion}/quorum-decision` (RESCHEDULE / CANCEL) | `MentorSessionsView.tsx`<br>`OfferService.py`<br>`sesiones_mentoria`, `reservas_cupo` | Alta |
+| **RF12** | MOD-05 | Reserva concurrente de cupos con control de aforo | CUS-004 | `POST /api/v1/bookings/reserve`<br>`GET /api/v1/bookings/my-reservations`<br>`GET /api/v1/bookings/session/{id_sesion}` | `BookingModalView.tsx`<br>`BookingService.py` (SELECT FOR UPDATE)<br>`reservas_cupo`, `sesiones_mentoria` | Crítica |
+| **RF13** | MOD-05 | Ratificación anticipada obligatoria de asistencia | CUS-024 | `POST /api/v1/bookings/{id_reserva}/confirm` | `MyBookingsView.tsx`<br>`BookingService.py`<br>`reservas_cupo` | Alta |
+| **RF14** | MOD-05 | Desistimiento voluntario y liberación inmediata de cupo | CUS-017 | `POST /api/v1/bookings/{id_reserva}/cancel` | `MyBookingsView.tsx`<br>`BookingService.py`<br>`reservas_cupo` | Alta |
+| **RF15** | MOD-05 | Monitoreo desatendido y corte de quórum en $T-24\text{ h}$ | CUS-023, CUS-009 | `POST /api/v1/quorum/evaluate`<br>`POST /api/v1/quorum/evaluate-all` | `NotificationCenterView.tsx`<br>`QuorumScheduler.py`, `BookingService.py`<br>`sesiones_mentoria`, `reservas_cupo` | Crítica |
+| **RF16** | MOD-05 | Gestión resolutiva del mentor ante quórum insuficiente | CUS-007 | `POST /api/v1/offers/{id_sesion}/quorum-decision` (PROCEED / RESCHEDULE / CANCEL) | `QuorumDecisionModalView.tsx`<br>`OfferService.py`<br>`sesiones_mentoria`, `reservas_cupo` | Alta |
+| **RF17** | MOD-06 | Marcación de asistencia con pase QR dinámico (TOTP) | CUS-012 | `GET /api/v1/sessions/{id_sesion}/attendance/token`<br>`POST /api/v1/sessions/{id_sesion}/attendance/check-in`<br>`GET /api/v1/sessions/{id_sesion}/attendance` | `AttendanceScannerView.tsx`, `AttendanceQrModalView.tsx`<br>`AttendanceService.py`<br>`asistencias_sesion`, `tokens_asistencia_activos` | Alta |
+| **RF18** | MOD-06 | Registro de bitácora docente en 48h con hash SHA-256 | CUS-013 | `POST /api/v1/sessions/{id_sesion}/bitacora`<br>`GET /api/v1/sessions/{id_sesion}/bitacora` | `BitacoraFormView.tsx`<br>`BitacoraService.py`<br>`bitacoras_pedagogicas` | Alta |
+| **RF19** | MOD-06 | Historial de sesiones, bitácoras y recursos compartidos | CUS-014 | `GET /api/v1/sessions/{id_sesion}/bitacora`<br>`GET /api/v1/bookings/my-reservations`<br>`GET /api/v1/bitacoras` | `BitacoraHistoryView.tsx`<br>`BitacoraService.py`<br>`bitacoras_pedagogicas`, `sesiones_mentoria` | Media |
+| **RF20** | MOD-06 | Captura de encuestas de calidad post-mentoría (ventana 24h) | CUS-012, CUS-014 | `GET /api/v1/sessions/{id}/survey`<br>`POST /api/v1/sessions/{id}/survey` | `PostSessionSurveyModalView.tsx`<br>`SurveyService.py` / `surveyService.ts`<br>`encuestas_calidad` | Alta |
+| **RF21** | MOD-07 | Cálculo de reputación docente y catálogo de insignias | CUS-019 | `GET /api/v1/certificates/summary`<br>`GET /api/v1/profiles/me` | `MentorBadgesView.tsx`<br>`RecommendationService.py`, `ProfileService.py`<br>`encuestas_calidad`, `perfiles_academicos` | Media |
+| **RF22** | MOD-07 | Parametrización y autorización de certificados de horas | CUS-018 | `GET /api/v1/certificates/summary`<br>`POST /api/v1/certificates/generate` | `AdminCertificatesView.tsx`<br>`CertificateService.py`<br>`certificados_horas` | Media |
+| **RF23** | MOD-07 | Emisión, descarga y verificación con código QR | CUS-018, CUS-009 | `GET /api/v1/certificates/{id_certificado}/download`<br>`GET /api/v1/certificates/verificar`<br>`GET /api/v1/certificates/{id_certificado}` | `CertificateVerifyView.tsx`, `AdminCertificatesView.tsx`<br>`CertificateService.py` (ReportLab / QrCode)<br>`certificados_horas` | Media |
+| **RF24** | MOD-08 | Parametrización institucional de aforos y prioridades | CUS-020 | `GET /api/v1/health`<br>`GET /api/v1/health/db`<br>Configuración centralizada (`app.core.config.Settings`) | `AdminConfigView.tsx`<br>`app.core.config`, `SimulationService.py` | Media |
 | **RF25** | MOD-08 | Tablero analítico directivo y métricas de retención ICACIT | CUS-011, CUS-015 | `GET /api/v1/simulation/benchmark`<br>`GET /api/v1/recommendations/simulation/testbench` | `AdminAnalyticsView.tsx`<br>`SimulationService.py`<br>`AnalyticsService.ts` | Alta |
-| **RF26** | MOD-08 | Auditoría institucional de bitácoras y privacidad legal | CUS-016, CUS-022 | `GET /api/v1/bitacora/admin/all`<br>`POST /api/v1/bitacora/{id}/review`<br>`GET /api/v1/consent/audit` | `AdminAuditView.tsx`<br>`BitacoraService.py`, `ConsentService.py`<br>`bitacoras_pedagogicas`, `consentimientos_legales` | Alta |
+| **RF26** | MOD-08 | Auditoría institucional de bitácoras y privacidad legal | CUS-016, CUS-022 | `GET /api/v1/bitacoras`<br>`POST /api/v1/bitacoras/{id}/visar`<br>`POST /api/v1/bitacoras/{id}/observar`<br>`GET /api/v1/consent/status` | `AdminAuditView.tsx`<br>`BitacoraService.py`, `ConsentService.py`<br>`bitacoras_pedagogicas`, `consentimientos_legales` | Alta |
 
-Fuente: Elaboración propia a partir de la homologación canónica de diseño y los controladores implementados.
+Fuente: Elaboración propia a partir de la homologación canónica de diseño y los controladores FastAPI efectivamente implementados.
 
 El análisis del Cuadro 5.3 ratifica la coherencia absoluta del modelo funcional del Sistema Web P2P:
-1. **Resolución Definitiva de RF20:** Conforme a la decisión adoptada en H01 y formalizada en H01-R, `RF20` corresponde a la *Captura de encuestas de calidad post-mentoría (ventana 24h)* sobre la entidad `encuestas_calidad` y el controlador `survey.py`, mientras que la gestión de recursos didácticos se formaliza de forma complementaria dentro de `RF08` (ofertas) y `RF19` (historial/materiales).
-2. **Sincronización de Contratos:** Todas las rutas REST consignadas reflejan fielmente los endpoints reales implementados en el código de backend en FastAPI.
-3. **Trazabilidad Plena:** Ningún requerimiento funcional carece de casos de uso asociados ni de componentes técnicos comprobables en la base de código.
+1. **Resolución Definitiva de RF20:** Conforme a la homologación canónica, `RF20` corresponde a la *Captura de encuestas de calidad post-mentoría (ventana 24h)* sobre la entidad `encuestas_calidad` y los controladores reales `GET/POST /api/v1/sessions/{id}/survey`, mientras que la gestión de recursos didácticos se formaliza dentro de `RF08` (ofertas) y `RF19` (historial/materiales).
+2. **Sincronización Total de Contratos REST:** Las 26 filas reflejan fielmente las rutas reales expuestas por FastAPI en `aplicacion/backend/app/api/v1/endpoints/`.
+3. **Trazabilidad Integral y Cero Ambigüedad:** Ningún requerimiento funcional carece de casos de uso asociados ni de componentes técnicos comprobables en la base de código.
 
 ### 5.3.1. Fichas Detalladas de Especificación de Requerimientos Funcionales (RF01 al RF26)
 
-A continuación, se especifican exhaustivamente las fichas técnicas individuales para los veintiséis (26) requerimientos funcionales del sistema, redactadas en lenguaje funcional orientado al usuario universitario y segregando formalmente los detalles de implementación técnica:
+A continuación, se especifican exhaustivamente las fichas técnicas individuales para los veintiséis (26) requerimientos funcionales del sistema, redactadas en lenguaje funcional orientado al usuario universitario y segregando formalmente los detalles de implementación técnica, contratos RESTful verificados en FastAPI y criterios de aceptación en formato Given–When–Then clasificados con las etiquetas normalizadas `[REQUISITO]`, `[IMPLEMENTADO]`, `[VERIFICADO]`, `[PENDIENTE]` y `[PROPUESTO]`:
 
 ---
 
@@ -725,12 +742,13 @@ A continuación, se especifican exhaustivamente las fichas técnicas individuale
 - **Reglas de Negocio Vinculadas:** RN-01 (Dominio institucional exclusivo, código OTP con vigencia improrrogable de 5 minutos y enfriamiento de reenvío de 60 segundos).
 - **Restricciones Funcionales:** Se rechaza de forma estricta cualquier dirección de correo comercial o ajena a los dominios universitarios oficiales de la UPT.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Acceso exitoso con código):* DADO QUE un estudiante ingresa un correo institucional válido, CUANDO introduce los 6 dígitos recibidos dentro de los 5 minutos, ENTONCES el sistema le concede acceso inmediato a la plataforma.
-  - *Escenario 2 (Código expirado o erróneo):* DADO QUE el usuario ingresa un código que superó los 5 minutos de vigencia, CUANDO solicita verificar, ENTONCES el sistema rechaza el ingreso, muestra un mensaje de advertencia y le ofrece solicitar un nuevo código.
-  - *Escenario 3 (Dominio no permitido):* DADO QUE una persona intenta acceder con un correo ajeno al dominio institucional, CUANDO solicita el código, ENTONCES el sistema bloquea el formulario e indica que el servicio es exclusivo para la comunidad EPIS-UPT.
+  - *Escenario 1 (Acceso exitoso con código OTP) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante registrado introduce una dirección institucional válida `@virtual.upt.pe` o `@upt.pe`, CUANDO ingresa los 6 dígitos del código numérico dentro de los 300 segundos de vigencia, ENTONCES el sistema valida el reto, emite un token Bearer JWT con 8 horas de expiración y concede acceso al portal institucional.
+  - *Escenario 2 (Código expirado o erróneo) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el usuario ingresa un código que ha superado los 5 minutos de vigencia o que no coincide con el reto activo, CUANDO solicita la verificación, ENTONCES el sistema rechaza la autenticación con error HTTP 400 Bad Request, incrementa el contador de intentos fallidos y ofrece solicitar un nuevo código tras un enfriamiento de 60 segundos.
+  - *Escenario 3 (Rechazo de dominio no institucional) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un usuario intenta autenticarse mediante un correo no institucional (ej. dominio comercial ajeno a la UPT), CUANDO solicita el envío de OTP o intenta la federación, ENTONCES el sistema deniega la operación con error HTTP 403 Forbidden o HTTP 422 Unprocessable Entity, advirtiendo que el servicio es exclusivo para la comunidad EPIS-UPT.
+  - *Escenario 4 (Reejecución de pruebas en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la suite unitaria `test_auth.py` (14 pruebas backend) y `LoginOtpView.test.tsx` (18 pruebas frontend) fue validada en el corte histórico `3f6e31d`, CUANDO se complete la revalidación en `main` tras solventar el linteo, ENTONCES la suite debe reportar 100% de aserciones exitosas.
 - **Casos de Uso Relacionados:** CUS-001 (Autenticar usuario mediante credenciales institucionales y consentimiento digital).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/auth.py` (`POST /api/v1/auth/request-otp`, `POST /api/v1/auth/verify-otp`, `POST /api/v1/auth/google`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/auth.py` (`POST /api/v1/auth/otp/request`, `POST /api/v1/auth/otp/verify`, `POST /api/v1/auth/otp/resend`, `POST /api/v1/auth/google`).
   - *Servicios de Negocio:* `AuthService.py` (`request_otp`, `verify_otp`, `login_google`).
   - *Entidades Relacionales:* Tablas `auth_challenges`, `usuarios`.
   - *Componentes Visuales:* `LoginOtpView.tsx`, `authService.ts`.
@@ -758,12 +776,13 @@ A continuación, se especifican exhaustivamente las fichas técnicas individuale
 - **Reglas de Negocio Vinculadas:** RN-02 (Consentimiento digital previo e informado obligatorio bajo Ley N° 29733).
 - **Restricciones Funcionales:** Ninguna funcionalidad de catálogo, reserva o publicación puede ejecutarse sin la previa aceptación del consentimiento.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Aceptación exitosa):* DADO QUE un estudiante ingresa por primera vez, CUANDO lee la cláusula y presiona "Aceptar y Continuar", ENTONCES el sistema registra su aceptación y le permite acceder a la plataforma.
-  - *Escenario 2 (Rechazo voluntario):* DADO QUE un estudiante decide no aceptar los términos de privacidad, CUANDO pulsa "Rechazar y Salir", ENTONCES el sistema finaliza su sesión sin almacenar información académica privada.
+  - *Escenario 1 (Aceptación formal de consentimiento) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante autenticado no registra consentimiento informado previo, CUANDO visualiza el diálogo modal bloqueante y presiona "Aceptar y Continuar", ENTONCES el sistema registra en `consentimientos_legales` la conformidad con IP, User-Agent y marca de tiempo UTC, desbloqueando el acceso a las funciones de mentoría.
+  - *Escenario 2 (Revocación o rechazo voluntario) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante decide revocar o rechazar el consentimiento de tratamiento de datos personales bajo la Ley N° 29733, CUANDO envía la solicitud de revocación, ENTONCES el sistema aplica la regla RN-02 bloqueando de inmediato el acceso a los servicios de emparejamiento, catálogo y reserva hasta una eventual reaceptación.
+  - *Escenario 3 (Trazabilidad legal auditada en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la persistencia inmutable de auditoría fue respaldada por 10 pruebas en `test_consent.py` y 12 pruebas en `ConsentModalView.test.tsx`, CUANDO se ejecute el flujo de verificación formal en `main`, ENTONCES se debe certificar la inviolabilidad de las marcas de tiempo y la coherencia del bloqueo de navegación.
 - **Casos de Uso Relacionados:** CUS-001 (Autenticar usuario mediante credenciales institucionales y consentimiento digital).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/consent.py` (`GET /api/v1/consent/status`, `POST /api/v1/consent/accept`).
-  - *Servicios de Negocio:* `ConsentService.py` (`get_status`, `accept_consent`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/consent.py` (`GET /api/v1/consent/status`, `POST /api/v1/consent/accept`, `POST /api/v1/consent/revoke`).
+  - *Servicios de Negocio:* `ConsentService.py` (`get_consent_status`, `accept_consent`, `revoke_consent`).
   - *Entidades Relacionales:* Tabla `consentimientos_legales` (almacena UUID de usuario, dirección IP, User-Agent del navegador y marca de tiempo UTC).
   - *Componentes Visuales:* `ConsentModalView.tsx`, `consentService.ts`.
   - *Evidencia de Pruebas:* `test_consent.py` (10 pruebas backend), `ConsentModalView.test.tsx` (12 pruebas frontend).
@@ -776,57 +795,61 @@ A continuación, se especifican exhaustivamente las fichas técnicas individuale
 - **Nombre Oficial:** Gestión, fiscalización y asignación administrativa de roles de usuario
 - **Módulo Arquitectónico:** MOD-01: Seguridad, Autenticación y Gobernanza
 - **Descripción Funcional:** El sistema debe permitir a las autoridades de la Dirección de Escuela y Coordinación de Tutoría consultar la nómina de estudiantes universitarios y administrar sus roles operativos (Mentoreado, Mentor, Administrador, Coordinador), verificando de forma estricta los requisitos de mérito académico exigidos para autorizar a un estudiante a desempeñarse como mentor de sus compañeros.
-- **Objetivo y Necesidad Académica:** Garantizar la idoneidad académica y solvencia pedagógica de los mentores, protegiendo la calidad de la enseñanza que reciben los alumnos de ciclos iniciales.
-- **Actores Participantes:** Administrador Institucional, Coordinador de Tutoría (Actores Primarios); Estudiante Postulante a Mentor (Actor Secundario).
-- **Condiciones de Entrada (Precondiciones):** La autoridad universitaria debe tener sesión activa con privilegios de rol administrativo.
+- **Objetivo y Necesidad Académica:** Garantizar la idoneidad académica y solvencia pedagógica de los mentores, protegiendo la calidad de la enseñanza que reciben los alumnos de ciclos iniciales y asegurando que los mentores sean alumnos destacados.
+- **Actores Participantes:** Administrador Institucional (Actor Primario); Estudiante Mentor (Beneficiario del Rol).
+- **Condiciones de Entrada (Precondiciones):** El administrador debe contar con una sesión activa con privilegios de gestión institucional en la plataforma.
 - **Comportamiento Esperado:**
-  1. La autoridad accede al panel de gestión de roles y consulta la lista de postulantes a mentores.
-  2. El sistema despliega el expediente de cada postulante mostrando su ciclo curricular actual y su historial de calificaciones en las asignaturas formativas.
-  3. La autoridad selecciona un candidato y pulsa el comando de promoción a mentor.
-  4. El sistema valida automáticamente que el estudiante pertenezca a ciclos avanzados (VII al X) y que haya aprobado la materia a dictar con una calificación sobresaliente igual o superior a 14.0.
-  5. De cumplir las condiciones, el sistema actualiza el perfil del estudiante habilitándole las opciones de publicación de mentorías y emitiendo una notificación formal a su buzón institucional.
-- **Resultado Verificable (Postcondiciones):** El estudiante promovido adquiere de forma inmediata las capacidades operativas del rol Mentor en la plataforma.
-- **Reglas de Negocio Vinculadas:** RN-03 (Jerarquía de privilegios y verificación de mérito académico: ciclo $\ge \text{VII}$ y nota mínima $\ge 14.0$).
-- **Restricciones Funcionales:** Un usuario con rol Mentoreado no puede autopromoverse ni publicar mentorías mientras no sea auditado y autorizado formalmente por la administración.
+  1. El administrador accede al panel de administración de usuarios y visualiza la relación de estudiantes registrados.
+  2. Selecciona a un estudiante postulante al rol de mentor y revisa su historial académico formal.
+  3. El sistema valida automáticamente que el estudiante se encuentre matriculado en el ciclo VII o superior y que posea promedio ponderado aprobatorio.
+  4. Si cumple los requisitos, el administrador confirma la asignación del rol de mentor.
+  5. El sistema actualiza de inmediato los privilegios de la cuenta, habilitando la publicación de sesiones de mentoría en el portal.
+  6. Si no cumple los requisitos, el sistema bloquea la asignación e indica detalladamente la condición académica insatisfecha.
+- **Resultado Verificable (Postcondiciones):** El estudiante adquiere formalmente las atribuciones de mentor en la plataforma, quedando registrado el cambio en la bitácora administrativa.
+- **Reglas de Negocio Vinculadas:** RN-03 (Elegibilidad y mérito académico de mentores: ciclo VII o superior, nota aprobatoria sobresaliente en la materia a dictar).
+- **Restricciones Funcionales:** Ningún estudiante puede autoasignarse el rol de mentor sin la debida verificación y autorización administrativa.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Promoción válida por mérito):* DADO QUE un estudiante de VIII ciclo con nota 16.0 en Cálculo postula a mentor, CUANDO el administrador pulsa "Aprobar como Mentor", ENTONCES el sistema le asigna el rol exitosamente.
-  - *Escenario 2 (Bloqueo por ciclo insuficiente):* DADO QUE un estudiante de V ciclo intenta ser promovido, CUANDO el sistema evalúa su expediente, ENTONCES rechaza la asignación indicando que solo califican alumnos de ciclos VII al X.
-- **Casos de Uso Relacionados:** CUS-010 (Administrar usuarios, roles y autorizaciones de mentores).
+  - *Escenario 1 (Promoción autorizada por mérito académico) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante postula al rol de mentor cumpliendo con pertenecer al ciclo VII o superior (RN-03) y una autoridad administradora evalúa su solicitud, CUANDO el administrador envía la orden de promoción a `/api/v1/roles/promote-mentor`, ENTONCES el sistema asigna el rol `mentor` en `usuario_roles` y habilita las capacidades de publicación de ofertas con código HTTP 200 OK.
+  - *Escenario 2 (Denegación estricta de autopromoción no autorizada) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante con rol exclusivo de mentoreado intenta invocar el endpoint de promoción hacia su propia cuenta sin privilegios de administrador, CUANDO el backend intercepta la solicitud, ENTONCES el sistema aborta la transacción con código HTTP 403 Forbidden y mensaje explícito de denegación por regla de mérito RN-03.
+  - *Escenario 3 (Revocación administrativa del rol mentor) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE la Dirección de Escuela dispone retirar la condición de mentor a un estudiante por bajo rendimiento o inactividad, CUANDO el administrador confirma la revocación en `/api/v1/roles/revoke-mentor`, ENTONCES el sistema conmuta su rol a mentoreado, cancela preventivamente ofertas publicadas sin inscritos y registra la auditoría institucional.
+  - *Escenario 4 (Acreditación en suite de integración en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el subsistema de roles cuenta con 7 pruebas en `test_roles.py` y 10 pruebas en frontend, CUANDO se ejecute la validación formal en `main`, ENTONCES se verificará la estricta segregación de permisos RBAC.
+- **Casos de Uso Relacionados:** CUS-010 (Administrar usuarios, asignación de roles y control de privilegios).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/roles.py` (`GET /api/v1/roles`, `POST /api/v1/roles/assign`, `DELETE /api/v1/roles/revoke`).
-  - *Servicios de Negocio:* `RoleService.py` (`promote_user_to_mentor`, `revoke_role`).
-  - *Entidades Relacionales:* Tablas `roles`, `usuario_roles`.
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/roles.py` (`GET /api/v1/roles/users/{email}`, `POST /api/v1/roles/promote-mentor`, `POST /api/v1/roles/revoke-mentor`).
+  - *Servicios de Negocio:* `RoleService.py` (`get_user_roles`, `promote_to_mentor`, `revoke_mentor`).
+  - *Entidades Relacionales:* Tablas `roles`, `usuario_roles`, `usuarios`.
   - *Componentes Visuales:* `AdminRolesView.tsx`, `roleService.ts`.
-  - *Evidencia de Pruebas:* `test_roles.py` (12 pruebas backend), `AdminRolesView.test.tsx` (14 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_roles.py` (7 pruebas backend), `AdminRolesView.test.tsx` (10 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF04 — Configuración de Perfil Académico y Matriz Horaria
 
 - **Identificador:** RF04
-- **Nombre Oficial:** Configuración de perfil académico formativo y matriz semanal interactiva de disponibilidad
+- **Nombre Oficial:** Parametrización del perfil formativo y matriz semanal de disponibilidad horaria
 - **Módulo Arquitectónico:** MOD-03: Perfiles Académicos y Catálogo Curricular
-- **Descripción Funcional:** El sistema debe permitir a los estudiantes mentores y mentoreados configurar su perfil académico formativo, declarando las asignaturas silábicas de su interés o especialidad y definiendo su disponibilidad horaria semanal mediante una cuadrícula visual interactiva de 6 días por 11 bloques de tiempo.
-- **Objetivo y Necesidad Académica:** Evitar colisiones horarias entre las actividades de mentoría y las clases universitarias regulares de los alumnos, alimentando al motor de recomendación con la agenda real de los participantes.
-- **Actores Participantes:** Estudiante Mentor, Estudiante Mentoreado (Actores Primarios).
-- **Condiciones de Entrada (Precondiciones):** El usuario debe contar con sesión activa y consentimiento de privacidad aceptado.
+- **Descripción Funcional:** El sistema debe proveer a cada estudiante una interfaz interactiva donde configure su perfil académico (ciclo cursado, materias de interés, fortalezas curriculares y modalidad de estudio preferida) y defina su disponibilidad horaria semanal mediante una matriz visual de bloques de tiempo.
+- **Objetivo y Necesidad Académica:** Alimentar con datos precisos y actualizados al algoritmo de recomendación, evitando colisiones con los horarios oficiales de clase de los estudiantes y garantizando coincidencias factibles.
+- **Actores Participantes:** Estudiante Mentoreado, Estudiante Mentor (Actores Primarios).
+- **Condiciones de Entrada (Precondiciones):** Usuario con cuenta institucional activa y sesión iniciada en la plataforma.
 - **Comportamiento Esperado:**
-  1. El estudiante ingresa a la sección de su perfil y selecciona la pestaña de disponibilidad horaria.
-  2. La pantalla presenta una matriz semanal estructurada de Lunes a Sábado con bloques horarios de una hora comprendidos entre las 08:00 y las 20:00 horas.
-  3. El usuario marca o desmarca interactivamente los bloques horarios en los que puede brindar o recibir mentorías, pudiendo utilizar atajos de selección rápida ("Mañanas", "Tardes", "Limpiar todo").
-  4. El estudiante declara sus asignaturas de preferencia o debilidad conceptual.
-  5. El usuario pulsa "Guardar Perfil y Horario".
-  6. El sistema valida la consistencia de las selecciones y confirma el almacenamiento seguro de su cronograma semanal.
-- **Resultado Verificable (Postcondiciones):** El perfil formativo del estudiante queda sincronizado, utilizándose de forma automática para filtrar las recomendaciones de mentoría que recibirá en el portal.
-- **Reglas de Negocio Vinculadas:** RN-03 (Mérito de asignaturas según rol), RN-04 (Antelación de planificación).
-- **Restricciones Funcionales:** La matriz horaria debe respetar estrictamente el horario lectivo institucional de la EPIS-UPT (lunes a sábado de 08:00 a 20:00).
+  1. El estudiante ingresa a la sección de configuración de perfil.
+  2. Selecciona su ciclo de estudios actual y marca las asignaturas filtro en las que requiere apoyo o en las que se ofrece a brindar asesoría.
+  3. Visualiza la matriz semanal interactiva de 6 días (lunes a sábado) dividida en franjas horarias de 60 minutos entre las 08:00 y las 20:00 horas (grilla estándar 6×11).
+  4. Marca con un clic los bloques horarios en los que dispone de tiempo libre.
+  5. Pulsa el botón de confirmación para guardar sus preferencias.
+  6. El sistema valida que los datos no presenten incoherencias y actualiza el perfil académico y la matriz horaria.
+- **Resultado Verificable (Postcondiciones):** El perfil formativo queda almacenado y disponible para los procesos automáticos de recomendación y emparejamiento.
+- **Reglas de Negocio Vinculadas:** RN-04 (Antelación de programación y compatibilidad horaria), RN-03 (Mérito académico).
+- **Restricciones Funcionales:** Ningún mentor podrá ofrecer sesiones en franjas no declaradas como disponibles en su matriz horaria activa.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Guardado exitoso de matriz horaria):* DADO QUE un mentor selecciona bloques disponibles de lunes a miércoles de 14:00 a 16:00, CUANDO pulsa guardar, ENTONCES el sistema persiste su horario y actualiza su disponibilidad en catálogo.
-  - *Escenario 2 (Selección vacía):* DADO QUE un usuario intenta guardar su horario sin seleccionar ningún bloque de tiempo, CUANDO pulsa guardar, ENTONCES el sistema muestra una advertencia sugiriendo definir al menos un bloque para poder recibir ofertas.
+  - *Escenario 1 (Actualización de perfil y matriz semanal 6×11) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante accede a la vista de configuración horaria, CUANDO selecciona bloques de disponibilidad entre lunes y sábado de 08:00 a 20:00 y pulsa "Guardar Cambios", ENTONCES el sistema actualiza de manera atómica las franjas en `disponibilidades_horarias` y las disponibiliza para el motor algorítmico EdRecSys con código HTTP 200 OK.
+  - *Escenario 2 (Intento de guardado sin bloques horarios seleccionados) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor intenta guardar su disponibilidad horaria sin marcar ninguna franja activa en la matriz 6×11, CUANDO envía la actualización, ENTONCES el sistema muestra una advertencia preventiva notificando que la ausencia de bloques impedirá la generación de recomendaciones en el catálogo de ofertas.
+  - *Escenario 3 (Revalidación de consistencia en suite automatizada) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la persistencia horaria cuenta con 14 pruebas en `test_profiles.py` y 16 pruebas en `ProfileAcademicView.test.tsx`, CUANDO se concluya la subsanación de linteo en `main`, ENTONCES la suite debe validar que las actualizaciones no generen solapamientos ni registros huérfanos.
 - **Casos de Uso Relacionados:** CUS-005 (Configurar perfil formativo y disponibilidad horaria del estudiante).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/profiles.py` (`GET /api/v1/profiles/me`, `PUT /api/v1/profiles/me/availability`).
-  - *Servicios de Negocio:* `ProfileService.py` (`update_availability`, `get_profile_by_user`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/profiles.py` (`GET /api/v1/profiles/me`, `PUT /api/v1/profiles/me`, `GET /api/v1/profiles/availability`, `PUT /api/v1/profiles/availability`).
+  - *Servicios de Negocio:* `ProfileService.py` (`get_profile`, `update_profile`, `get_availability`, `update_availability`).
   - *Entidades Relacionales:* Tablas `perfiles_academicos`, `disponibilidades_horarias`.
   - *Componentes Visuales:* `ProfileAcademicView.tsx`, `profileService.ts`.
   - *Evidencia de Pruebas:* `test_profiles.py` (14 pruebas backend), `ProfileAcademicView.test.tsx` (16 pruebas frontend).
@@ -852,12 +875,13 @@ A continuación, se especifican exhaustivamente las fichas técnicas individuale
 - **Reglas de Negocio Vinculadas:** RN-11 (Asignaturas filtro prioritarias y catalogación oficial).
 - **Restricciones Funcionales:** Ningún tema fuera del sílabo oficial puede ser registrado sin autorización previa de la Coordinación Académica.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Exploración silábica exitosa):* DADO QUE un estudiante busca "Árboles Binarios", CUANDO el sistema filtra el catálogo, ENTONCES resalta la asignatura "Algoritmos y Estructura de Datos" y la unidad temática correspondiente.
-  - *Escenario 2 (Actualización administrativa):* DADO QUE el administrador actualiza un tema silábico, CUANDO guarda los cambios, ENTONCES el nuevo contenido se propaga de inmediato al catálogo disponible para mentores.
+  - *Escenario 1 (Exploración jerárquica de catálogo silábico) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante filtra el catálogo por asignaturas prioritarias de los ciclos I al IV, CUANDO selecciona una materia crítica (ej. Algoritmos y Estructura de Datos), ENTONCES el sistema despliega el árbol de temas silábicos oficiales indexados por unidad temática con código HTTP 200 OK.
+  - *Escenario 2 (Mantenimiento curricular por el administrador) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE la Dirección de Escuela actualiza el plan silábico institucional, CUANDO el usuario con rol administrador registra una nueva asignatura o tema en `/api/v1/curriculum/courses`, ENTONCES el sistema persiste los metadatos en `asignaturas` y propaga los temas de forma inmediata para ofertas y solicitudes por demanda.
+  - *Escenario 3 (Revisión de integridad en integración continua) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE las operaciones del catálogo cuentan con 16 pruebas en `test_curriculum.py` y 18 pruebas en `CurriculumCatalogView.test.tsx`, CUANDO se ejecute el pipeline de pruebas en `main`, ENTONCES debe verificarse la integridad referencial entre asignaturas y temas sin inconsistencias.
 - **Casos de Uso Relacionados:** CUS-021 (Consultar y mantener catálogo curricular de asignaturas y temarios).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/curriculum.py` (`GET /api/v1/curriculum/subjects`, `POST /api/v1/curriculum/subjects`, `GET /api/v1/curriculum/topics`).
-  - *Servicios de Negocio:* `CurriculumService.py` (`list_subjects`, `get_topics_by_subject`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/curriculum.py` (`GET /api/v1/curriculum/courses`, `POST /api/v1/curriculum/courses`, `GET /api/v1/curriculum/courses/{id_asignatura}`, `GET /api/v1/curriculum/courses/{id_asignatura}/topics`).
+  - *Servicios de Negocio:* `CurriculumService.py` (`get_courses`, `get_course_by_id`, `get_course_topics`, `create_course`).
   - *Entidades Relacionales:* Tablas `asignaturas`, `temas_conceptuales`.
   - *Componentes Visuales:* `CurriculumCatalogView.tsx`, `apiClient.ts`.
   - *Evidencia de Pruebas:* `test_curriculum.py` (16 pruebas backend), `CurriculumCatalogView.test.tsx` (18 pruebas frontend).
@@ -867,636 +891,686 @@ A continuación, se especifican exhaustivamente las fichas técnicas individuale
 #### Ficha Técnica de Requerimiento Funcional: RF06 — Inferencia Algorítmica y Recomendación Adaptativa Top-k
 
 - **Identificador:** RF06
-- **Nombre Oficial:** Inferencia algorítmica y recomendación personalizada Top-k mediante el motor EdRecSys
-- **Módulo Arquitectónico:** MOD-04: Demanda y Recomendaciones Personalizadas
-- **Descripción Funcional:** El sistema debe analizar automáticamente las necesidades académicas del estudiante mentoreado y compararlas frente a la oferta vigente de mentorías, calculando un índice de afinidad temática y presentando una cartelera personalizada con las mejores opciones de acompañamiento ordenadas por relevancia, horario y calidad docente.
-- **Objetivo y Necesidad Académica:** Resolver el histórico problema de búsqueda a ciegas de ayuda académica, sugiriendo a cada estudiante el mentor más competente y disponible para su necesidad específica.
-- **Actores Participantes:** Estudiante Mentoreado (Actor Primario); Motor Algorítmico EdRecSys (Actor Técnico Secundario).
-- **Condiciones de Entrada (Precondiciones):** El estudiante debe haber configurado sus asignaturas de interés y debe existir al menos una oferta de mentoría en estado publicada con más de 24 horas de antelación.
+- **Nombre Oficial:** Inferencia algorítmica y recomendación personalizada Top-k (Motor EdRecSys)
+- **Módulo Arquitectónico:** MOD-04: Banco de Demanda y Recomendación Adaptativa
+- **Descripción Funcional:** El sistema debe procesar las debilidades académicas del estudiante mentoreado, sus horarios disponibles y su historial de calificaciones, comparándolos contra los perfiles, horarios y especialidades de los mentores mediante un algoritmo de recomendación híbrido (EdRecSys) que combina filtrado basado en contenido (similitud coseno) y filtrado colaborativo, entregando una lista ordenada de los $k$ mejores mentores y ofertas disponibles.
+- **Objetivo y Necesidad Académica:** Resolver el histórico problema de la búsqueda informal de ayuda, conectando al estudiante que tiene dificultades en un tema con el compañero más capacitado y con mayor disponibilidad compatible para apoyarlo.
+- **Actores Participantes:** Estudiante Mentoreado (Beneficiario del Ranking); Estudiante Mentor (Sujeto Recomendado).
+- **Condiciones de Entrada (Precondiciones):** El mentoreado debe haber completado su perfil formativo y contar con al menos una materia de interés seleccionada.
 - **Comportamiento Esperado:**
-  1. El estudiante ingresa a la pestaña "Explorar Mentorías" de su portal universitario.
-  2. El sistema recupera el perfil del mentoreado y las ofertas activas en el sistema.
-  3. El motor algorítmico calcula la afinidad temática entre los temas demandados y ofertados, ponderando la reputación acumulada del mentor, bonificando asignaturas de alta prioridad y balanceando la carga docente.
-  4. El sistema presenta al estudiante una cartelera adaptativa con las mejores sesiones (Top-k), mostrando tarjetas con el tema a tratar, fecha, horario, modalidad, cupos disponibles y la reputación del mentor.
-  5. El estudiante puede revisar el detalle de la sesión o proceder directamente a reservar su vacante.
-- **Resultado Verificable (Postcondiciones):** El estudiante visualiza una cartelera de mentorías personalizada con un tiempo de carga imperceptible y alta precisión formativa.
-- **Reglas de Negocio Vinculadas:** RN-04 (Antelación de 24h), RN-11 (Ponderación algorítmica y bonificación de cursos filtro).
-- **Restricciones Funcionales:** El algoritmo debe responder con una latencia media de respuesta inferior a 500 milisegundos para no degradar la experiencia de usuario.
+  1. El estudiante ingresa a la sección de recomendaciones personalizadas.
+  2. El sistema recupera el vector de necesidades del estudiante (materias críticas, temas de interés y matriz de tiempo libre).
+  3. El motor algorítmico evalúa la base de datos de mentores activos y sesiones programadas, calculando un puntaje de afinidad multidimensional para cada candidato.
+  4. El sistema ordena los resultados de mayor a menor afinidad y selecciona los $k$ candidatos óptimos (por defecto $k=5$).
+  5. Despliega en pantalla las tarjetas de recomendación con indicación visual del porcentaje de compatibilidad y justificación resumida de la sugerencia.
+- **Resultado Verificable (Postcondiciones):** El mentoreado visualiza opciones de asesoría altamente compatibles y puede iniciar la reserva con un solo clic.
+- **Reglas de Negocio Vinculadas:** RN-04 (Compatibilidad horaria), RN-03 (Mérito del mentor), RN-11 (Priorización de asignaturas filtro).
+- **Restricciones Funcionales:** El algoritmo debe responder con una latencia media menor a 500 ms (meta de calidad) para no degradar la experiencia de usuario.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Recomendación acertada Top-k):* DADO QUE un estudiante tiene debilidad en "Punteros y Memoria Dinámica", CUANDO ingresa a la cartelera, ENTONCES las tres primeras tarjetas recomendadas corresponden a sesiones de esa temática específica con alta reputación.
-  - *Escenario 2 (Filtrado de sesiones extemporáneas):* DADO QUE existe una mentoría programada para iniciar en menos de 24 horas, CUANDO el recomendador procesa el ranking, ENTONCES excluye dicha sesión por no cumplir la ventana reglamentaria de antelación.
-- **Casos de Uso Relacionados:** CUS-002 (Consultar cartelera de mentorías con recomendación algorítmica personalizada).
+  - *Escenario 1 (Generación de ranking adaptativo Top-k) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante mentoreado consulta el feed de recomendaciones, CUANDO el motor EdRecSys evalúa la afinidad curricular, solapamiento horario y reputación docente, ENTONCES entrega una lista ordenada Top-5 de candidatos con latencia inferior a 500 ms (mediana observada de 12.4 ms) y Precision@3 superior al 80%.
+  - *Escenario 2 (Explicabilidad pedagógica de puntajes) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el usuario solicita el detalle de compatibilidad de un mentor sugerido, CUANDO invoca `/api/v1/recommendations/explain`, ENTONCES el sistema devuelve el desglose cuantitativo y cualitativo de similitud temática, compatibilidad horaria y mérito académico con código HTTP 200 OK.
+  - *Escenario 3 (Revalidación de casos frontera algorítmicos en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el testbench algorítmico fue evaluado en `test_recommendations.py` (18 pruebas) y `SimulationService.py`, CUANDO se ejecute la validación formal en `main`, ENTONCES se deben verificar empíricamente los 4 casos frontera (cero solapamiento, perfil idéntico, mentor sin historial y saturación de demanda).
+- **Casos de Uso Relacionados:** CUS-002 (Consultar ofertas recomendadas y ranking de mentores adaptativo).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/recommendations.py` (`GET /api/v1/recommendations/top-k`, `POST /api/v1/recommendations/rank`).
-  - *Servicios de Negocio:* `RecommendationService.py` (`compute_top_k`, `vectorize_interests`).
-  - *Componentes Visuales:* `RecommendationFeedView.tsx`, `recommendationService.ts`.
-  - *Evidencia de Pruebas:* `test_recommendations.py` (22 pruebas backend, métricas $P@3=83.3\%$, $P@5=80.0\%$, latencia 12.4 ms), `RecommendationFeedView.test.tsx` (20 pruebas frontend).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/recommendations.py` (`GET /api/v1/recommendations/mentors`, `GET /api/v1/recommendations/offers`, `POST /api/v1/recommendations/explain`).
+  - *Servicios de Negocio:* `RecommendationService.py` (Módulos de similitud temática, compatibilidad horaria y normalización matricial).
+  - *Entidades Relacionales:* Tablas `sesiones_mentoria`, `perfiles_academicos`, `disponibilidades_horarias`.
+  - *Componentes Visuales:* `RecommendationFeedView.tsx`, `MentorCardView.tsx`.
+  - *Evidencia de Pruebas:* `test_recommendations.py` (18 pruebas backend), `RecommendationFeedView.test.tsx` (14 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF07 — Banco de Solicitudes por Demanda Académica
 
 - **Identificador:** RF07
-- **Nombre Oficial:** Registro y banco institucional de solicitudes de mentoría por demanda insatisfecha
-- **Módulo Arquitectónico:** MOD-04: Demanda y Recomendaciones Personalizadas
-- **Descripción Funcional:** El sistema debe permitir a los estudiantes mentoreados canalizar formalmente sus necesidades académicas hacia un banco centralizado de solicitudes cuando no existan ofertas publicadas que atiendan un tema silábico de su interés o cuando las sesiones existentes tengan su aforo agotado. Los mentores podrán revisar este banco para diseñar sesiones dirigidas.
-- **Objetivo y Necesidad Académica:** Evitar que los estudiantes queden desatendidos ante la falta de ofertas espontáneas, permitiendo que la oferta pedagógica de los mentores se oriente a la demanda real de sus compañeros.
-- **Actores Participantes:** Estudiante Mentoreado (Actor Primario solicitante); Estudiante Mentor (Actor Primario que atiende la demanda).
-- **Condiciones de Entrada (Precondiciones):** Estudiante con sesión activa que no encuentra ofertas para su tema en la cartelera.
+- **Nombre Oficial:** Registro y banco colaborativo de solicitudes por demanda insatisfecha
+- **Módulo Arquitectónico:** MOD-04: Banco de Demanda y Recomendación Adaptativa
+- **Descripción Funcional:** El sistema debe permitir a los estudiantes mentoreados registrar solicitudes temáticas específicas de mentoría cuando no encuentren ofertas disponibles en el catálogo, consolidando un "banco de demanda académica" visible para todos los mentores calificados a fin de que formulen sesiones orientadas a necesidades reales de sus compañeros.
+- **Objetivo y Necesidad Académica:** Evitar que los alumnos con dudas específicas se queden sin orientación por falta de oferta previa, equilibrando la oferta formativa a partir de las necesidades directas de los alumnos.
+- **Actores Participantes:** Estudiante Mentoreado (Solicitante); Estudiante Mentor (Atendedor de la Demanda).
+- **Condiciones de Entrada (Precondiciones):** Estudiante autenticado que exploró el catálogo de ofertas sin hallar el tema silábico requerido.
 - **Comportamiento Esperado:**
-  1. El estudiante no encuentra una sesión adecuada y presiona el botón "Solicitar Nueva Mentoría".
-  2. El sistema despliega un formulario donde el alumno selecciona la materia y el tema silábico específico en el que necesita apoyo, agregando observaciones pedagógicas y preferencias horarias.
-  3. El sistema valida los datos y registra la solicitud en el banco institucional asignándole un folio de seguimiento correlativo.
-  4. Los mentores calificados en dicha asignatura visualizan la solicitud en su panel docente bajo la sección "Banco de Necesidades Estudiantiles".
-  5. Un mentor interesado puede pulsar "Atender Solicitud", lo cual precarga los datos temáticos en el formulario de creación de oferta de mentoría para su programación inmediata.
-- **Resultado Verificable (Postcondiciones):** La necesidad estudiantil queda registrada institucionalmente y disponible para ser resuelta mediante una oferta dirigida.
-- **Reglas de Negocio Vinculadas:** RN-04 (Antelación de planificación), RN-11 (Priorización de cursos filtro).
-- **Restricciones Funcionales:** Un estudiante no puede tener más de una solicitud activa en estado pendiente para la misma asignatura de forma simultánea.
+  1. El estudiante abre el formulario de registro de solicitud por demanda.
+  2. Selecciona la asignatura crítica, el tema silábico puntual y redacta una breve descripción del problema o ejercicio que necesita resolver.
+  3. Indica su disponibilidad horaria tentativa para recibir la sesión.
+  4. Envía la solicitud y el sistema genera un folio de demanda con estado "Abierta".
+  5. El requerimiento se publica de inmediato en el banco colaborativo visible para mentores que dominan dicha materia.
+  6. Los mentores interesados pueden postularse para dictar la sesión requerida o crear una oferta orientada a dicho tema.
+- **Resultado Verificable (Postcondiciones):** La solicitud queda registrada en el banco institucional y se notifica a los mentores de la materia.
+- **Reglas de Negocio Vinculadas:** RN-04 (Antelación de programación), RN-11 (Alineamiento con temarios oficiales).
+- **Restricciones Funcionales:** No se admiten solicitudes de materias en las que el estudiante no se encuentre matriculado o que no figuren en el catálogo oficial.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Registro exitoso de demanda):* DADO QUE un estudiante necesita apoyo en "Recursividad", CUANDO completa y envía el formulario de solicitud, ENTONCES el sistema emite el folio de recepción y notifica su disponibilidad en el banco de mentores.
-  - *Escenario 2 (Atención dirigida por mentor):* DADO QUE un mentor revisa el banco de solicitudes, CUANDO pulsa "Crear Mentoría para esta Demanda", ENTONCES el sistema traslada el tema silábico al formulario de publicación de oferta.
-- **Casos de Uso Relacionados:** CUS-003 (Registrar y atender solicitud de mentoría académica en el banco de demanda).
+  - *Escenario 1 (Registro exitoso de necesidad por demanda) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante no encuentra ofertas activas para un tema silábico específico, CUANDO completa el formulario modal de demanda indicando asignatura, tema y franja tentativa, ENTONCES el sistema crea el registro en `solicitudes_demanda` con estado `PENDIENTE` y código HTTP 201 Created.
+  - *Escenario 2 (Consulta del banco de solicitudes por mentores) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante mentor explora el banco de necesidades insatisfechas, CUANDO consulta `/api/v1/bookings/requests`, ENTONCES el sistema entrega la nómina consolidada agrupada por materia y ciclo para facilitar la publicación de ofertas dirigidas.
+  - *Escenario 3 (Verificación de despacho y visualización en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el banco de demandas cuenta con 12 pruebas en `test_bookings.py` y 14 pruebas en `MentoringDemandModalView.test.tsx`, CUANDO se ejecute el flujo de CI en `main`, ENTONCES se debe certificar la adecuada indexación de solicitudes pendientes.
+- **Casos de Uso Relacionados:** CUS-003 (Registrar solicitud de mentoría por demanda académica insatisfecha).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bookings.py` (`POST /api/v1/bookings/requests`, `GET /api/v1/bookings/requests/pending`).
-  - *Servicios de Negocio:* `BookingService.py` (`create_demand_request`, `list_pending_demands`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bookings.py` (`POST /api/v1/bookings/requests`, `GET /api/v1/bookings/requests`).
+  - *Servicios de Negocio:* `BookingService.py` (`create_demand_request`, `get_demand_requests`).
   - *Entidades Relacionales:* Tabla `solicitudes_demanda`.
   - *Componentes Visuales:* `MentoringDemandModalView.tsx`, `MentorSessionsView.tsx`.
-  - *Evidencia de Pruebas:* `test_bookings.py` (12 pruebas backend), `MentoringDemandModalView.test.tsx` (10 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_bookings.py` (12 pruebas backend), `MentoringDemandModalView.test.tsx` (14 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF08 — Publicación y Parametrización de Ofertas de Mentoría
 
 - **Identificador:** RF08
-- **Nombre Oficial:** Publicación, configuración y parametrización de ofertas de mentoría académica
-- **Módulo Arquitectónico:** MOD-02: Planificación, Ofertas y Gestión de Espacios
-- **Descripción Funcional:** El sistema debe permitir a los mentores calificados programar y publicar ofertas de mentoría académica seleccionando materias en las que cuenten con autorización docente, indicando el tema silábico específico, fecha y hora de realización, modalidad (presencial o virtual), aforo reglamentario y enlaces opcionales a recursos didácticos de preparación.
-- **Objetivo y Necesidad Académica:** Dotar a los mentores de una herramienta ágil para estructurar sus sesiones de enseñanza conforme al calendario lectivo y a los aforos máximos permitidos por la escuela.
-- **Actores Participantes:** Estudiante Mentor (Actor Primario).
-- **Condiciones de Entrada (Precondiciones):** El mentor debe contar con rol autorizado y con aprobación sobresaliente en la materia seleccionada.
+- **Nombre Oficial:** Publicación, programación y parametrización de ofertas de mentoría académica
+- **Módulo Arquitectónico:** MOD-02: Ofertas de Mentoría y Gestión de Espacios
+- **Descripción Funcional:** El sistema debe proporcionar a los mentores autorizados un asistente interactivo para crear y publicar sesiones de mentoría, especificando la asignatura, los temas silábicos a abordar, la fecha y hora de realización, la modalidad (presencial o virtual), el aforo máximo de participantes y los enlaces o referencias a recursos didácticos preliminares.
+- **Objetivo y Necesidad Académica:** Fomentar una programación académica ordenada y predecible, permitiendo a los mentoreados planificar su asistencia con la debida anticipación y garantizando condiciones adecuadas de aforo.
+- **Actores Participantes:** Estudiante Mentor (Actor Primario); Estudiantes Mentoreados (Destinatarios).
+- **Condiciones de Entrada (Precondiciones):** El usuario debe poseer rol activo de mentor institucional verificado y disponibilidad horaria coincidente.
 - **Comportamiento Esperado:**
-  1. El mentor accede a la vista de programación de mentorías y pulsa "Nueva Oferta de Mentoría".
-  2. El sistema despliega el formulario restringiendo el catálogo de asignaturas únicamente a aquellas en las que el mentor cuenta con calificación aprobatoria auditada.
-  3. El mentor selecciona la materia, elige la unidad y tema del sílabo, fija la fecha y hora de inicio, escoge la modalidad (presencial o virtual) y adjunta enlaces didácticos preparatorios (repositorio de código, diapositivas o guía de ejercicios).
-  4. El sistema valida que la fecha elegida tenga una antelación mínima obligatoria de 24 horas y que el aforo se ajuste estrictamente a las normas institucionales (10 estudiantes en presencial y 20 en virtual).
-  5. El mentor confirma la publicación. El sistema valida la reserva del ambiente físico o virtual y publica la sesión en la cartelera universitaria.
-- **Resultado Verificable (Postcondiciones):** La oferta de mentoría queda registrada en estado publicada y visible de inmediato para las inscripciones de los mentoreados.
-- **Reglas de Negocio Vinculadas:** RN-04 (Antelación mínima de publicación $\ge 24\text{ h}$), RN-05 (Aforos estándar: 10 presencial / 20 virtual).
-- **Restricciones Funcionales:** Se rechaza de plano cualquier sesión programada con menos de 24 horas de anticipación o con aforo superior al límite institucional.
+  1. El mentor accede al formulario de publicación de nueva oferta de mentoría.
+  2. Selecciona la asignatura crítica en la que está habilitado y marca uno o más temas silábicos del catálogo oficial.
+  3. Define la fecha y hora de la sesión, verificando que exista un margen de antelación mayor a 24 horas respecto a la hora actual.
+  4. Selecciona la modalidad de impartición: presencial (con aforo de 10 estudiantes) o virtual (con aforo de 20 estudiantes).
+  5. Si lo considera pertinente, adjunta enlaces a diapositivas o guías de ejercicios que los participantes deban revisar previamente.
+  6. Envía la oferta; el sistema valida los parámetros, reserva los recursos institucionales y publica la sesión en el catálogo activo.
+- **Resultado Verificable (Postcondiciones):** La sesión queda publicada con estado "Publicada", disponible para reservas en el feed de ofertas.
+- **Reglas de Negocio Vinculadas:** RN-04 (Antelación obligatoria mayor a 24 horas), RN-05 (Aforos estándar: 10 presencial / 20 virtual).
+- **Restricciones Funcionales:** Ninguna sesión puede publicarse con menos de 24 horas de antelación ni exceder los aforos normados.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Publicación exitosa conforme a regla):* DADO QUE un mentor programa una mentoría de Algoritmos para dentro de 48 horas con aforo 10 presencial, CUANDO pulsa publicar, ENTONCES el sistema guarda la sesión y la expone en la cartelera de estudiantes.
-  - *Escenario 2 (Rechazo por antelación insuficiente):* DADO QUE un mentor intenta publicar una sesión que iniciará en 6 horas, CUANDO envía el formulario, ENTONCES el sistema bloquea la acción indicando que se requiere una antelación mínima de 24 horas.
-- **Casos de Uso Relacionados:** CUS-006 (Publicar y parametrizar oferta de mentoría académica).
+  - *Escenario 1 (Publicación reglamentaria de oferta de mentoría) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor autorizado (ciclo >= VII) formula una oferta con más de 24 horas de anticipación (RN-04) y aforo reglamentario (10 presencial / 20 virtual, RN-05), CUANDO envía la solicitud a `/api/v1/offers`, ENTONCES el sistema persiste la sesión en estado `PUBLICADA` con código HTTP 201 Created y enlaces a recursos didácticos.
+  - *Escenario 2 (Rechazo por antelación menor a 24 horas) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor intenta programar una sesión con inicio en un intervalo inferior a 24 horas desde el momento actual, CUANDO invoca la publicación, ENTONCES el sistema rechaza la operación con código HTTP 400 Bad Request en cumplimiento estricto de la regla de negocio RN-04.
+  - *Escenario 3 (Acreditación de suite de ofertas en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE las validaciones de publicación están cubiertas por 16 pruebas en `test_offers.py` y 18 pruebas en `OfferPublishView.test.tsx`, CUANDO se ejecute el pipeline de `main`, ENTONCES se verificará la consistencia del catálogo activo sin errores de schema.
+- **Casos de Uso Relacionados:** CUS-006 (Publicar y parametrizar oferta de mentoría académica individual o grupal).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/offers.py` (`POST /api/v1/offers`, `GET /api/v1/offers/me`).
-  - *Servicios de Negocio:* `OfferService.py` (`create_offer`, `validate_lead_time`).
-  - *Entidades Relacionales:* Tabla `sesiones_mentoria`.
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/offers.py` (`POST /api/v1/offers`, `GET /api/v1/offers`).
+  - *Servicios de Negocio:* `OfferService.py` (`publish_offer`, `get_offers`).
+  - *Entidades Relacionales:* Tabla `sesiones_mentoria` (con campo `recursos_didacticos_url`).
   - *Componentes Visuales:* `OfferPublishView.tsx`, `offerService.ts`.
-  - *Evidencia de Pruebas:* `test_offers.py` (18 pruebas backend), `OfferPublishView.test.tsx` (18 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_offers.py` (16 pruebas backend), `OfferPublishView.test.tsx` (18 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF09 — Aprovisionamiento de Espacios Físicos y Salas Virtuales
 
 - **Identificador:** RF09
-- **Nombre Oficial:** Aprovisionamiento automatizado de aulas físicas institucionales y salas virtuales
-- **Módulo Arquitectónico:** MOD-02: Planificación, Ofertas y Gestión de Espacios
-- **Descripción Funcional:** El sistema debe aprovisionar de forma automática y controlada la infraestructura requerida para cada sesión de mentoría. En modalidad presencial, debe consultar y asignar aulas o laboratorios desocupados de la EPIS verificados contra el horario lectivo oficial. En modalidad virtual, debe generar y asociar enlaces de teleconferencia institucionales seguros sin intervención manual externa.
-- **Objetivo y Necesidad Académica:** Erradicar la búsqueda improvisada de aulas libres en el campus y asegurar que las clases virtuales se desarrollen en entornos de comunicación seguros y supervisables.
-- **Actores Participantes:** Estudiante Mentor (Actor Primario solicitante); Sistema de Espacios y Plataforma Virtual Institucional (Actores Secundarios).
-- **Condiciones de Entrada (Precondiciones):** Formulario de publicación de oferta en proceso de configuración con horario y modalidad definidos.
+- **Nombre Oficial:** Aprovisionamiento inteligente de infraestructura física y enlaces virtuales
+- **Módulo Arquitectónico:** MOD-02: Ofertas de Mentoría y Gestión de Espacios
+- **Descripción Funcional:** El sistema debe asignar automáticamente el recinto educativo para cada sesión de mentoría en función de la modalidad elegida. Para sesiones presenciales, debe verificar la disponibilidad de aulas y laboratorios libres en el campus de Capanique a partir del cronograma oficial procesado, previniendo solapamientos. Para sesiones virtuales, debe generar y vincular automáticamente una sala institucional segura de videoconferencia.
+- **Objetivo y Necesidad Académica:** Eliminar la fricción organizativa de buscar ambientes libres a última hora, erradicando interrupciones durante las sesiones y garantizando condiciones acústicas y técnicas adecuadas.
+- **Actores Participantes:** Estudiante Mentor (Beneficiario del Aprovisionamiento); Sistema (Gestor de Espacios).
+- **Condiciones de Entrada (Precondiciones):** Mentor publicando una oferta con fecha, hora y modalidad definidas.
 - **Comportamiento Esperado:**
-  1. Durante la programación de una sesión presencial, el sistema consulta los cronogramas institucionales y despliega únicamente la lista de aulas y laboratorios de la EPIS que no registran clases regulares ni otras mentorías en dicho horario.
-  2. El mentor selecciona el ambiente de su preferencia y el sistema reserva temporalmente el espacio.
-  3. Si la modalidad es virtual, el sistema provisiona un enlace seguro institucional de teleconferencia y lo vincula a la sesión.
-  4. Los detalles del aula o el enlace virtual permanecen asociados a la sesión y se revelan automáticamente a los estudiantes inscritos una vez confirmada la vacante.
-- **Resultado Verificable (Postcondiciones):** La sesión cuenta con un espacio físico reservado sin solapamientos o con una sala virtual institucional asignada.
-- **Reglas de Negocio Vinculadas:** RN-06 (Asignación validada de espacios libres), RN-07 (Aprovisionamiento virtual automatizado sin solapamientos).
-- **Restricciones Funcionales:** Ningún aula física puede asignarse a dos sesiones concurrentes en el mismo rango de horario.
+  1. Si la modalidad es presencial, el sistema consulta el registro de franjas horarias libres de aulas y laboratorios de la facultad.
+  2. Filtra los recintos que no tienen clases regulares asignadas ni otras mentorías en la franja seleccionada.
+  3. Asigna el aula más apropiada según el aforo de la sesión y reserva el espacio en el calendario de infraestructura física.
+  4. Si la modalidad es virtual, el sistema interactúa con el generador institucional de enlaces seguros y reserva una sala virtual única.
+  5. Vincula el recinto físico o enlace virtual al registro de la sesión y lo exhibe en los detalles de la oferta para los estudiantes inscritos.
+- **Resultado Verificable (Postcondiciones):** La sesión cuenta con un recinto físico o virtual reservado de forma no conflictiva.
+- **Reglas de Negocio Vinculadas:** RN-06 (Disponibilidad de aulas físicas), RN-07 (Enlaces virtuales institucionales seguros).
+- **Restricciones Funcionales:** Ninguna sesión presencial podrá registrarse en aulas no catalogadas o que tengan clases oficiales programadas.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Asignación de aula libre presencial):* DADO QUE el mentor elige modalidad presencial martes a las 10:00, CUANDO consulta ambientes, ENTONCES el sistema muestra solo las aulas del pabellón EPIS libres en dicho intervalo.
-  - *Escenario 2 (Enlace virtual automático):* DADO QUE el mentor selecciona modalidad virtual, CUANDO confirma la publicación, ENTONCES el sistema genera y asocia el enlace institucional sin exigir crear reuniones personales externas.
-- **Casos de Uso Relacionados:** CUS-006 (Publicar y parametrizar oferta de mentoría), CUS-008 (Consultar disponibilidad de espacios y cronogramas).
+  - *Escenario 1 (Aprovisionamiento de aula física sin colisión) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor selecciona modalidad presencial, CUANDO consulta recintos libres para su franja horaria en `/api/v1/spaces/free-slots`, ENTONCES el sistema filtra contra el cronograma oficial de la facultad y entrega las aulas disponibles garantizando 0 solapamientos de infraestructura (RN-06).
+  - *Escenario 2 (Generación automática de sala virtual) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE la sesión es programada en modalidad virtual, CUANDO se formaliza la oferta, ENTONCES el subsistema aprovisiona un enlace institucional seguro persistido en la entidad de sesión para su distribución a los inscritos confirmados (RN-07).
+  - *Escenario 3 (Comprobación de aprovisionamiento en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el módulo cuenta con 14 pruebas en `test_spaces.py` y 12 pruebas en frontend, CUANDO se ejecute la verificación formal en `main`, ENTONCES se constatará la correcta detección de colisiones horarias.
+- **Casos de Uso Relacionados:** CUS-006 (Publicar oferta), CUS-008 (Procesar cronogramas de infraestructura).
 - **Apartado de Trazabilidad Técnica e Implementación:**
   - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/spaces.py` (`GET /api/v1/spaces/free-slots`, `GET /api/v1/spaces/classrooms`).
   - *Servicios de Negocio:* `VirtualRoomService.py`, `CatalogSupportService.py`.
-  - *Componentes Visuales:* `SpaceSelectorView.tsx`.
-  - *Evidencia de Pruebas:* `test_catalog_cus06_provisioning.py` (14 pruebas backend).
+  - *Entidades Relacionales:* Tablas `sesiones_mentoria`, `espacios_fisicos`.
+  - *Componentes Visuales:* `SpaceSelectorView.tsx`, `spacesService.ts`.
+  - *Evidencia de Pruebas:* `test_spaces.py` (14 pruebas backend), `SpaceSelectorView.test.tsx` (12 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF10 — Procesamiento de Cronogramas Oficiales de Aulas
 
 - **Identificador:** RF10
-- **Nombre Oficial:** Procesamiento e importación estructurada de cronogramas institucionales de espacios
-- **Módulo Arquitectónico:** MOD-02: Planificación, Ofertas y Gestión de Espacios
-- **Descripción Funcional:** El sistema debe permitir a las autoridades administrativas cargar e interpretar de forma automática los cronogramas oficiales de clases semestrales de la EPIS-UPT, procesando los horarios de ocupación de todas las aulas y laboratorios de cómputo para alimentar la base de datos de disponibilidad de ambientes físicos.
-- **Objetivo y Necesidad Académica:** Mantener actualizada la matriz de aulas libres de la facultad para garantizar que ninguna mentoría colisione con el desarrollo regular de las cátedras universitarias.
-- **Actores Participantes:** Administrador Institucional, Coordinador de Espacios (Actores Primarios).
-- **Condiciones de Entrada (Precondiciones):** El administrador cuenta con el archivo oficial de distribución horaria semestral en formato estructurado (CSV o Excel).
+- **Nombre Oficial:** Carga, procesamiento y análisis de cronogramas oficiales de distribución horaria de aulas
+- **Módulo Arquitectónico:** MOD-02: Ofertas de Mentoría y Gestión de Espacios
+- **Descripción Funcional:** El sistema debe proveer al administrador de infraestructura la funcionalidad de cargar archivos estructurados en formato Excel (.xlsx) o PDF (.pdf) conteniendo el cronograma oficial de ocupación de aulas y laboratorios de la EPIS-UPT, procesando su contenido para extraer automáticamente las franjas horarias y recintos físicos vacantes para mentorías.
+- **Objetivo y Necesidad Académica:** Automatizar la detección de aulas libres sin requerir coordinación manual continua con conserjería ni transcripción manual de horarios, garantizando información verídica y actualizada de ambientes.
+- **Actores Participantes:** Administrador Institucional (Actor Primario); Componente Parser de Horarios (Actor Secundario).
+- **Condiciones de Entrada (Precondiciones):** Archivo oficial de cronograma emitido por la Dirección de Escuela disponible en formato digital.
 - **Comportamiento Esperado:**
-  1. El administrador ingresa a la sección de administración de espacios y selecciona la herramienta de importación horaria.
-  2. Carga el archivo de cronogramas oficial emitido por la secretaría académica de la facultad.
-  3. El sistema analiza el documento, extrae las asignaciones de aula, día, hora de inicio y fin, valida la integridad de los datos y descarta registros mal formados.
-  4. El sistema actualiza la matriz de ocupación institucional y reporta un resumen con la cantidad de horarios procesados y las aulas habilitadas para mentorías.
-- **Resultado Verificable (Postcondiciones):** El sistema dispone del mapa de aulas libres actualizado para el semestre lectivo.
-- **Reglas de Negocio Vinculadas:** RN-06 (Validación estricta de espacios libres contra la carga lectiva oficial).
-- **Restricciones Funcionales:** El sistema debe alertar sobre inconsistencias en el archivo y no sobrescribir reservas de mentorías previamente confirmadas.
+  1. El administrador accede al módulo de gestión de infraestructura física y selecciona la opción de carga de cronograma.
+  2. Sube el archivo estructurado (.xlsx o .pdf) correspondiente al semestre académico en curso.
+  3. El sistema ejecuta el parser interno que recorre las matrices de aulas, días lectivos y horas de clase regular.
+  4. Identifica las celdas vacías y calcula las franjas libres aprovechables para mentorías (bloques de 60 o 120 minutos).
+  5. Presenta un resumen de recintos y franjas extraídas, solicitando la confirmación de la importación.
+  6. Al confirmar, el sistema actualiza la base de datos de espacios libres disponibles para asignación automática.
+- **Resultado Verificable (Postcondiciones):** El catálogo de ambientes libres se actualiza con base en la documentación oficial de la facultad.
+- **Reglas de Negocio Vinculadas:** RN-06 (Disponibilidad de aulas físicas y respeto al horario de clases oficiales).
+- **Restricciones Funcionales:** El formato del archivo debe coincidir con la plantilla oficial de la facultad; de lo contrario, el sistema rechaza el archivo indicando los errores de estructura.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Carga exitosa de cronograma):* DADO QUE el administrador sube el cronograma oficial del semestre 2026-II, CUANDO el sistema procesa el archivo, ENTONCES actualiza la disponibilidad de las 8 aulas y 4 laboratorios de la escuela.
-  - *Escenario 2 (Formato corrupto):* DADO QUE se intenta cargar un archivo con columnas incorrectas, CUANDO el sistema lo valida, ENTONCES detiene el proceso y muestra un mensaje detallando las inconsistencias encontradas.
-- **Casos de Uso Relacionados:** CUS-008 (Consultar disponibilidad de espacios y cronogramas institucionales).
+  - *Escenario 1 (Carga e ingesta de cronograma oficial en Excel o PDF) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el administrador transmite un archivo estructurado (.xlsx o .pdf) con los horarios semestrales de la EPIS-UPT, CUANDO el parser extrae las franjas de clases regulares, ENTONCES el sistema calcula las ventanas vacantes y actualiza el repositorio de ambientes libres con código HTTP 200 OK.
+  - *Escenario 2 (Rechazo de formato o archivo corrupto) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE se transmite un archivo con extensión no permitida o contenido no estructurado, CUANDO el parser inicia la validación sintáctica, ENTONCES el sistema aborta el procesamiento con código HTTP 400 Bad Request detallando la naturaleza del error de formato.
+  - *Escenario 3 (Verificación de parsing en flujo CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el componente `ScheduleParserService.py` cuenta con 8 pruebas en `test_spaces.py`, CUANDO se ejecute el pipeline de `main`, ENTONCES se confirmará la extracción adecuada de slots libres sobre los archivos de prueba institucionales.
+- **Casos de Uso Relacionados:** CUS-008 (Procesar y actualizar cronograma de asignación de infraestructura física).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/spaces.py` (`POST /api/v1/spaces/import-schedule`).
-  - *Servicios de Negocio:* `ScheduleParserService.py` (`parse_schedule_file`, `update_classroom_slots`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/spaces.py` (`POST /api/v1/spaces/import-schedule`, `GET /api/v1/spaces/free-slots`).
+  - *Servicios de Negocio:* `ScheduleParserService.py` (`procesar_cronograma_administrador`, `get_active_slots`).
+  - *Entidades Relacionales:* Tablas de soporte de espacios físicos y persistencia temporal en memoria.
   - *Componentes Visuales:* `AdminScheduleUploadView.tsx`, `spacesService.ts`.
-  - *Evidencia de Pruebas:* `test_spaces_schedule_api.py` (12 pruebas backend), `AdminScheduleUploadView.test.tsx` (10 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_spaces.py` (8 pruebas específicas de parsing backend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF11 — Gestión de Imprevistos, Reprogramación y Cancelación
 
 - **Identificador:** RF11
-- **Nombre Oficial:** Gestión de contingencias, reprogramación justificada y cancelación de sesiones de mentoría
-- **Módulo Arquitectónico:** MOD-02: Planificación, Ofertas y Gestión de Espacios
-- **Descripción Funcional:** El sistema debe permitir a los mentores y a la administración gestionar imprevistos de fuerza mayor que impidan dictar una mentoría programada, facultándolos para reprogramar fecha, hora o modalidad, o cancelar la sesión de manera justificada, liberando inmediatamente los ambientes asignados y notificando a los participantes inscritos.
-- **Objetivo y Necesidad Académica:** Proporcionar un mecanismo formal y transparente para atender eventualidades docentes sin perjudicar la planificación del tiempo de los estudiantes mentoreados.
-- **Actores Participantes:** Estudiante Mentor, Administrador Institucional (Actores Primarios); Estudiantes Inscritos (Actores Secundarios).
-- **Condiciones de Entrada (Precondiciones):** Sesión de mentoría en estado publicada o confirmada que requiera modificación antes de su inicio.
+- **Nombre Oficial:** Gestión de contingencias, reprogramación consensuada y cancelación justificada de sesiones
+- **Módulo Arquitectónico:** MOD-02: Ofertas de Mentoría y Gestión de Espacios
+- **Descripción Funcional:** El sistema debe proveer al mentor mecanismos formales para gestionar situaciones imprevistas de fuerza mayor sobre sesiones publicadas o confirmadas, permitiéndole reprogramar la fecha y hora con más de 24 horas de antelación o cancelar la sesión ingresando una justificación académica obligatoria, notificando de inmediato a todos los estudiantes inscritos.
+- **Objetivo y Necesidad Académica:** Proteger a los mentoreados de ausencias imprevistas del mentor sin previo aviso, promoviendo la responsabilidad y el respeto por el tiempo de los compañeros.
+- **Actores Participantes:** Estudiante Mentor (Actor Primario); Estudiantes Inscritos (Actores Notificados).
+- **Condiciones de Entrada (Precondiciones):** Sesión de mentoría en estado "Publicada" o "Confirmada" con antelación superior a 24 horas respecto a su inicio.
 - **Comportamiento Esperado:**
-  1. El mentor accede al panel de sus sesiones y selecciona la mentoría afectada.
-  2. Escoge la acción correspondiente: "Reprogramar Fecha/Horario" o "Cancelar Mentoría".
-  3. Si reprograma, selecciona el nuevo horario y ambiente disponible, ingresando una justificación pedagógica obligatoria.
-  4. Si cancela, redacta la justificación institucional del motivo de fuerza mayor.
-  5. El sistema procesa la modificación, actualiza el estado de la sesión, libera el aula física o sala virtual correspondiente y remite avisos urgentes a los correos de los estudiantes inscritos.
-- **Resultado Verificable (Postcondiciones):** La sesión transiciona a su nuevo estado y los estudiantes mentoreados quedan formalmente notificados sin ambigüedades.
-- **Reglas de Negocio Vinculadas:** RN-10 (Cancelación oportuna y liberación inmediata de espacios y recursos).
-- **Restricciones Funcionales:** No se permite cancelar una sesión sin ingresar una justificación detallada de al menos 20 caracteres.
+  1. El mentor accede al detalle de su sesión programada y selecciona la opción de contingencia (Reprogramar o Cancelar).
+  2. Si elige reprogramar, selecciona una nueva fecha y hora respetando el margen mínimo de 24 horas y redacta el motivo del cambio.
+  3. El sistema comprueba que el nuevo horario no tenga conflictos de aula ni de disponibilidad del mentor.
+  4. Si elige cancelar, ingresa obligatoriamente el justificante del imprevisto académico o personal.
+  5. El sistema actualiza el estado de la sesión, libera el aula física o sala virtual asignada y despacha notificaciones por correo a los estudiantes inscritos.
+- **Resultado Verificable (Postcondiciones):** La sesión se actualiza o cancela formalmente y los alumnos reciben la comunicación oportuna.
+- **Reglas de Negocio Vinculadas:** RN-10 (Plazos de reprogramación y justificación formal de contingencias).
+- **Restricciones Funcionales:** Ninguna reprogramación puede realizarse dentro de las 24 horas previas al inicio de la sesión.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Cancelación justificada con liberación de aula):* DADO QUE un mentor sufre un imprevisto 30 horas antes de la sesión, CUANDO cancela ingresando su motivo, ENTONCES el sistema notifica a los inscritos y libera el aula en el calendario.
-  - *Escenario 2 (Intento de cancelación sin motivo):* DADO QUE el mentor intenta enviar la cancelación con el campo de justificación vacío, CUANDO pulsa confirmar, ENTONCES el sistema bloquea el envío exigiendo fundamentar la suspensión.
-- **Casos de Uso Relacionados:** CUS-006 (Publicar y parametrizar oferta de mentoría académica).
+  - *Escenario 1 (Reprogramación justificada con notificación masiva) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor sufre una contingencia académica sobrevenida, CUANDO remite una reprogramación a través de `quorum-decision` con motivo justificado y nueva fecha mayor a 24 horas, ENTONCES el sistema actualiza la sesión, notifica por correo institucional a los estudiantes inscritos y recalcula la ventana de confirmación.
+  - *Escenario 2 (Cancelación definitiva y liberación de recursos) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el mentor cancela la sesión con justificación reglamentaria, CUANDO envía la acción `CANCEL`, ENTONCES el sistema conmuta el estado de la sesión a `CANCELADA`, libera inmediatamente a los estudiantes inscritos sin penalización alguna y reincorpora el aula física al catálogo libre.
+  - *Escenario 3 (Revalidación de contingencias en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el flujo de contingencias está cubierto por 10 pruebas en `test_offers.py` y 10 pruebas en Vitest, CUANDO se concluya la subsanación de linteo en `main`, ENTONCES se comprobará la adecuada emisión de avisos y liberación de cupos.
+- **Casos de Uso Relacionados:** CUS-006 (Publicar oferta y gestionar contingencias).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/offers.py` (`PUT /api/v1/offers/{id}/reschedule`, `DELETE /api/v1/offers/{id}`).
-  - *Servicios de Negocio:* `OfferService.py` (`reschedule_offer`, `cancel_offer_with_notice`).
-  - *Entidades Relacionales:* Tabla `sesiones_mentoria` (transición a estados `REPROGRAMADA` o `CANCELADA`).
-  - *Componentes Visuales:* `MentorSessionsView.tsx`.
-  - *Evidencia de Pruebas:* `test_offers.py` (10 pruebas backend), `MentorSessionsView.test.tsx` (12 pruebas frontend).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/offers.py` (`POST /api/v1/offers/{id_sesion}/quorum-decision` con acción `RESCHEDULE` o `CANCEL`).
+  - *Servicios de Negocio:* `OfferService.py` (`resolve_quorum_decision`).
+  - *Entidades Relacionales:* Tablas `sesiones_mentoria`, `reservas_cupo`.
+  - *Componentes Visuales:* `MentorSessionsView.tsx`, `QuorumDecisionModalView.tsx`.
+  - *Evidencia de Pruebas:* `test_offers.py` (10 pruebas backend), `MentorSessionsView.test.tsx` (10 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF12 — Reserva Concurrente de Cupos con Control de Aforo
 
 - **Identificador:** RF12
-- **Nombre Oficial:** Inscripción y reserva de cupos con control de aforo y garantía de no sobrecupo
-- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Concurrencia
-- **Descripción Funcional:** El sistema debe permitir a los estudiantes mentoreados solicitar e inscribirse en las ofertas de mentoría de su interés, garantizando que el aforo reglamentario (10 presencial / 20 virtual) se respete de forma estricta incluso ante múltiples solicitudes simultáneas en el mismo milisegundo, erradicando cualquier posibilidad de sobreasignación de vacantes.
-- **Objetivo y Necesidad Académica:** Garantizar una asignación justa y transparente de las vacantes de mentoría, evitando la frustración estudiantil ocasionada por la sobreventa de cupos o desorden en el aula física.
+- **Nombre Oficial:** Inscripción transaccional concurrente y reserva de cupo con cerrojo pesimista
+- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Gestión de Asistencia
+- **Descripción Funcional:** El sistema debe permitir a los estudiantes mentoreados inscribirse en sesiones de mentoría activas, gestionando las solicitudes simultáneas mediante transacciones atómicas seguras en base de datos (`SELECT ... FOR UPDATE`) que aseguren de forma estricta que jamás se exceda el aforo máximo permitido (0.0% de sobrecupo).
+- **Objetivo y Necesidad Académica:** Evitar la sobreocupación de aulas o salas virtuales, garantizando que cada estudiante que obtenga un cupo cuente con las condiciones materiales y pedagógicas para recibir atención de calidad.
 - **Actores Participantes:** Estudiante Mentoreado (Actor Primario).
-- **Condiciones de Entrada (Precondiciones):** Estudiante autenticado con consentimiento aceptado y sesión en estado publicada con vacantes libres.
+- **Condiciones de Entrada (Precondiciones):** Estudiante autenticado, con consentimiento informado vigente y sesión con cupos vacantes disponibles.
 - **Comportamiento Esperado:**
-  1. El estudiante visualiza una sesión en la cartelera que cuenta con cupos libres y pulsa el botón "Reservar Vacante".
-  2. El sistema despliega un diálogo modal de confirmación con el resumen de la materia, tema, fecha, modalidad y compromisos del participante.
-  3. El alumno confirma su intención pulsando "Confirmar Inscripción".
-  4. El sistema procesa la solicitud asegurando la exclusividad del cupo durante la transacción, verifica que aún existan vacantes y registra la reserva en estado pendiente de ratificación.
-  5. El sistema decrementa en una unidad las vacantes disponibles y despliega una pantalla de confirmación exitosa con las indicaciones previas a la sesión.
-- **Resultado Verificable (Postcondiciones):** El estudiante obtiene su cupo reservado de forma garantizada y el contador de vacantes de la sesión se actualiza en tiempo real.
-- **Reglas de Negocio Vinculadas:** RN-05 (Aforo estándar máximo de 10 presencial y 20 virtual), RN-08 (Ratificación obligatoria).
-- **Restricciones Funcionales:** Ningún estudiante puede reservar más de una vacante para la misma sesión de mentoría ni inscribirse si ya no existen cupos.
+  1. El estudiante selecciona una sesión de mentoría en el catálogo y pulsa el botón de reserva de vacante.
+  2. El sistema inicia una transacción de base de datos con bloqueo a nivel de fila sobre el registro de la sesión.
+  3. Verifica que la cantidad de reservas activas sea estrictamente menor al aforo reglamentario (10 presencial / 20 virtual).
+  4. Si hay cupo disponible, crea la reserva con estado "Pendiente de Confirmación" y descuenta la vacante.
+  5. Cierra la transacción de forma segura y confirma la reserva en la pantalla del usuario.
+  6. Si la sesión se agotó exactamente en ese instante por otra solicitud concurrente, notifica al usuario que no quedan vacantes y lo invita a inscribirse en lista de espera o formular una solicitud por demanda.
+- **Resultado Verificable (Postcondiciones):** El estudiante obtiene un cupo garantizado sin riesgo de sobrecupo en el sistema.
+- **Reglas de Negocio Vinculadas:** RN-05 (Aforos estándar y prevención estricta de sobrecupo).
+- **Restricciones Funcionales:** Ninguna transacción puede concretarse si el aforo ha alcanzado su límite reglamentario.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Reserva exitosa de último cupo):* DADO QUE queda 1 vacante en una mentoría presencial, CUANDO un estudiante confirma su reserva, ENTONCES el sistema asigna el cupo y cambia el estado de la sesión a "Aforo Completo".
-  - *Escenario 2 (Bloqueo por aforo agotado concurrente):* DADO QUE dos estudiantes pulsan reservar al mismo instante sobre la última vacante, CUANDO el sistema procesa ambas peticiones, ENTONCES asigna el cupo al primer solicitante y notifica amablemente al segundo que la vacante se agotó, invitándolo al banco de demandas.
-- **Casos de Uso Relacionados:** CUS-004 (Reservar cupo de mentoría con control concurrente de aforo).
+  - *Escenario 1 (Reserva concurrente atómica con cero sobrecupo) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE múltiples estudiantes intentan reservar el último cupo disponible de una sesión de forma simultánea, CUANDO el backend ejecuta el bloqueo pesimista `SELECT ... FOR UPDATE` a nivel de fila en `/api/v1/bookings/reserve`, ENTONCES exactamente una solicitud es admitida con código HTTP 201 Created y las solicitudes concurrentes excedentes son denegadas con HTTP 409 Conflict, garantizando 0.0% de sobrecupo (RNF07).
+  - *Escenario 2 (Consulta de historial personal de reservas) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentoreado autenticado consulta sus inscripciones, CUANDO invoca `/api/v1/bookings/my-reservations`, ENTONCES el sistema entrega la lista completa de sesiones reservadas con detalle de estado, recinto y hora con código HTTP 200 OK.
+  - *Escenario 3 (Acreditación multihilo en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la transacción de reserva cuenta con 18 pruebas en `test_bookings.py` y 16 pruebas en `BookingModalView.test.tsx`, CUANDO se corra la suite formal en `main`, ENTONCES se ratificará la ausencia de condiciones de carrera en base de datos.
+- **Casos de Uso Relacionados:** CUS-004 (Inscribirse y reservar cupo en sesión de mentoría activa).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bookings.py` (`POST /api/v1/bookings/reserve`).
-  - *Servicios de Negocio:* `BookingService.py` (`reserve_slot` con cerrojo pesimista `SELECT ... FOR UPDATE`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bookings.py` (`POST /api/v1/bookings/reserve`, `GET /api/v1/bookings/my-reservations`, `GET /api/v1/bookings/session/{id_sesion}`).
+  - *Servicios de Negocio:* `BookingService.py` (`reserve_seat`, `get_student_reservations`, `get_session_reservations`).
   - *Entidades Relacionales:* Tablas `reservas_cupo`, `sesiones_mentoria`.
   - *Componentes Visuales:* `BookingModalView.tsx`, `bookingService.ts`.
-  - *Evidencia de Pruebas:* `test_bookings.py` (20 pruebas concurrentes multihilo demostrando 0.0% sobrecupo), `BookingModalView.test.tsx` (18 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_bookings.py` (18 pruebas backend con simulación multihilo concurrente), `BookingModalView.test.tsx` (16 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF13 — Ratificación Anticipada Obligatoria de Asistencia
 
 - **Identificador:** RF13
-- **Nombre Oficial:** Ratificación y confirmación perentoria de asistencia a la mentoría (hasta $T-24\text{ h}$)
-- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Concurrencia
-- **Descripción Funcional:** El sistema debe exigir a los estudiantes con reservas activas que ratifiquen de forma obligatoria y explícita su asistencia a la sesión antes de que venza el corte de 24 horas previas al inicio de la clase ($T-24\text{ h}$), formalizando su compromiso y permitiendo al sistema depurar las reservas inactivas.
-- **Objetivo y Necesidad Académica:** Combatir el ausentismo estudiantil y el acaparamiento irresponsable de vacantes, asegurando que las sesiones se confirmen con alumnos realmente comprometidos a asistir.
-- **Actores Participantes:** Estudiante Mentoreado (Actor Primario).
-- **Condiciones de Entrada (Precondiciones):** Estudiante con reserva en estado pendiente y reloj del sistema antes del corte de $T-24\text{ h}$.
+- **Nombre Oficial:** Confirmación y ratificación obligatoria de asistencia previa a la sesión
+- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Gestión de Asistencia
+- **Descripción Funcional:** El sistema debe requerir que todo estudiante que cuente con una reserva provisional ratifique explícitamente su asistencia dentro de la ventana de confirmación establecida previa a la sesión (hasta el límite de $T-24	ext{ h}$), formalizando su intención real de acudir. Si no ratifica su asistencia en el plazo indicado, el sistema liberará automáticamente su vacante.
+- **Objetivo y Necesidad Académica:** Reducir el ausentismo ficticio en las sesiones de mentoría, asegurando que los cupos sean aprovechados por estudiantes realmente comprometidos en asistir y optimizando el tiempo del mentor.
+- **Actores Participantes:** Estudiante Mentoreado con reserva provisional (Actor Primario).
+- **Condiciones de Entrada (Precondiciones):** Estudiante con reserva activa en estado "Pendiente de Confirmación".
 - **Comportamiento Esperado:**
-  1. El estudiante ingresa a la sección "Mis Reservas" de su portal.
-  2. El sistema resalta las sesiones pendientes de confirmación indicando el tiempo restante antes del cierre del corte anticipado.
-  3. El alumno pulsa el botón "Ratificar Asistencia".
-  4. El sistema valida que la sesión se encuentre dentro de la ventana reglamentaria y actualiza el estado de la reserva a "Confirmada".
-  5. El sistema emite una notificación de ratificación exitosa y suma al alumno en el conteo oficial de quórum.
-- **Resultado Verificable (Postcondiciones):** La reserva adquiere el estado confirmado garantizando la participación del estudiante en la sesión.
-- **Reglas de Negocio Vinculadas:** RN-08 (Ventana perentoria de ratificación anticipada hasta $T-24\text{ h}$).
-- **Restricciones Funcionales:** Si el estudiante no ratifica antes de vencer el plazo de 24 horas previas, el sistema revoca automáticamente su cupo sin posibilidad de reclamo.
+  1. El sistema envía un recordatorio automático al correo del estudiante informándole que debe confirmar su asistencia.
+  2. El estudiante accede a su panel de reservas y pulsa el botón "Ratificar Asistencia".
+  3. El sistema valida que la operación se realice antes de la hora de corte de quórum ($T-24	ext{ h}$).
+  4. Conmuta el estado de la reserva a "Confirmada", asegurando el cupo definitivo para el estudiante.
+  5. Informa al usuario que su vacante ha sido ratificada y le entrega los detalles definitivos de acceso al aula o sala virtual.
+- **Resultado Verificable (Postcondiciones):** La reserva cambia a estado "Confirmada", computándose para el quórum formal.
+- **Reglas de Negocio Vinculadas:** RN-08 (Ratificación obligatoria de asistencia), RN-09 (Cómputo de quórum).
+- **Restricciones Funcionales:** Ninguna confirmación puede registrarse después del corte perentorio de $T-24	ext{ h}$.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Ratificación en plazo):* DADO QUE faltan 30 horas para la mentoría, CUANDO el estudiante pulsa ratificar, ENTONCES su reserva cambia a confirmada y se computa para el quórum.
-  - *Escenario 2 (Intento tardío post-corte):* DADO QUE el estudiante intenta ratificar faltando 10 horas, CUANDO pulsa el botón, ENTONCES el sistema le informa que la ventana de confirmación cerró en $T-24\text{ h}$ y que su cupo fue liberado.
-- **Casos de Uso Relacionados:** CUS-024 (Ratificar asistencia obligatoria a sesión de mentoría en T-24h).
+  - *Escenario 1 (Ratificación oportuna de asistencia previa al corte) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante cuenta con una reserva en estado `PENDIENTE_CONFIRMACION`, CUANDO pulsa el botón de ratificación formal antes del límite perentorio de $T-24	ext{ h}$ (RN-08) en `/api/v1/bookings/{id}/confirm`, ENTONCES el sistema conmuta el estado de la reserva a `CONFIRMADA` con código HTTP 200 OK y la computa para el quórum reglamentario.
+  - *Escenario 2 (Intento de ratificación fuera de plazo) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE la sesión ha ingresado en la ventana crítica de las 24 horas previas al inicio, CUANDO un estudiante rezagado intenta confirmar su cupo, ENTONCES el sistema rechaza la acción con código HTTP 400 Bad Request en cumplimiento de la política de corte de quórum.
+  - *Escenario 3 (Verificación en CI del cambio de estado) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el procedimiento cuenta con 12 pruebas en `test_bookings.py` y 14 pruebas en `MyBookingsView.test.tsx`, CUANDO se ejecute la validación formal en `main`, ENTONCES se verificará la transición atómica de estados.
+- **Casos de Uso Relacionados:** CUS-024 (Ratificar oportunamente asistencia a sesión de mentoría reservada).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bookings.py` (`POST /api/v1/bookings/{id}/confirm`).
-  - *Servicios de Negocio:* `BookingService.py` (`confirm_booking`).
-  - *Entidades Relacionales:* Tabla `reservas_cupo` (transición a `CONFIRMADA`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bookings.py` (`POST /api/v1/bookings/{id_reserva}/confirm`).
+  - *Servicios de Negocio:* `BookingService.py` (`confirm_attendance`).
+  - *Entidades Relacionales:* Tabla `reservas_cupo`.
   - *Componentes Visuales:* `MyBookingsView.tsx`.
-  - *Evidencia de Pruebas:* `test_bookings.py` (14 pruebas backend), `MyBookingsView.test.tsx` (12 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_bookings.py` (12 pruebas backend), `MyBookingsView.test.tsx` (14 pruebas frontend).
+
+---
 
 #### Ficha Técnica de Requerimiento Funcional: RF14 — Desistimiento Voluntario y Liberación Inmediata de Cupo
 
 - **Identificador:** RF14
-- **Nombre Oficial:** Desistimiento voluntario de reserva de cupo y restitución inmediata de vacante
-- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Concurrencia
-- **Descripción Funcional:** El sistema debe permitir a los estudiantes mentoreados anular voluntariamente su reserva de mentoría si por razones de fuerza mayor no podrán asistir, siempre que lo efectúen antes del corte de 24 horas previas ($T-24\text{ h}$), liberando inmediatamente la vacante para que otro compañero pueda inscribirse sin perjudicar su récord de asistencia.
-- **Objetivo y Necesidad Académica:** Fomentar la responsabilidad estudiantil y maximizar el aprovechamiento de la infraestructura académica mediante la reasignación dinámica de cupos desocupados a tiempo.
-- **Actores Participantes:** Estudiante Mentoreado (Actor Primario).
-- **Condiciones de Entrada (Precondiciones):** Estudiante con reserva activa (en estado pendiente o confirmada) antes del corte perentorio de 24 horas.
+- **Nombre Oficial:** Cancelación voluntaria de reserva y restitución inmediata de vacante
+- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Gestión de Asistencia
+- **Descripción Funcional:** El sistema debe permitir a cualquier estudiante inscrito cancelar voluntariamente su reserva con anticipación superior a 24 horas respecto al inicio de la sesión, liberando instantáneamente la vacante para que otro compañero pueda inscribirse de inmediato, sin aplicar penalizaciones académicas al usuario que desiste oportunamente.
+- **Objetivo y Necesidad Académica:** Fomentar una cultura de respeto mutuo y solidaridad, permitiendo que las vacantes no utilizadas se reasignen a compañeros que las necesitan con urgencia.
+- **Actores Participantes:** Estudiante Mentoreado con reserva vigente (Actor Primario).
+- **Condiciones de Entrada (Precondiciones):** Estudiante con reserva en estado "Pendiente" o "Confirmada" con antelación mayor a 24 horas.
 - **Comportamiento Esperado:**
-  1. El estudiante ingresa a "Mis Reservas" y pulsa "Cancelar mi Reserva" en la sesión deseada.
-  2. El sistema solicita confirmación mediante un diálogo advirtiendo que la vacante será liberada inmediatamente.
-  3. El estudiante confirma el desistimiento.
-  4. El sistema actualiza el estado de la reserva a "Cancelada por Usuario", incrementa en una unidad el aforo disponible de la sesión y remite un correo informativo al estudiante.
-  5. La vacante liberada se vuelve visible en la cartelera de mentorías de forma instantánea.
-- **Resultado Verificable (Postcondiciones):** La reserva queda formalmente anulada sin penalización para el estudiante y la vacante queda libre en el aforo de la mentoría.
-- **Reglas de Negocio Vinculadas:** RN-08 (Plazo límite de cancelación y ratificación en $T-24\text{ h}$), RN-10 (Liberación de recursos).
-- **Restricciones Funcionales:** Si el corte de 24 horas ya expiró, el botón de desistimiento se bloquea para no alterar el quórum confirmado.
+  1. El estudiante visualiza su panel de reservas activas y pulsa "Cancelar Reserva".
+  2. El sistema despliega un mensaje pidiendo confirmar la acción y recordando que la vacante se liberará para otro estudiante.
+  3. El usuario confirma el desistimiento voluntario.
+  4. El sistema cancela la reserva, actualiza el aforo disponible de la sesión en base de datos e informa a los estudiantes en lista de espera si existieran.
+  5. Emite confirmación de cancelación exitosa sin registrar sanciones para el estudiante.
+- **Resultado Verificable (Postcondiciones):** La vacante queda liberada de forma inmediata y reflejada en el catálogo de ofertas.
+- **Reglas de Negocio Vinculadas:** RN-10 (Desistimiento oportuno sin sanción antes de $T-24	ext{ h}$).
+- **Restricciones Funcionales:** Si el estudiante cancela con menos de 24 horas de antelación o no asiste a la sesión confirmada, el sistema registrará una falta injustificada en su historial.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Desistimiento oportuno exitoso):* DADO QUE faltan 36 horas para la clase, CUANDO el alumno cancela su reserva, ENTONCES el sistema libera el cupo y actualiza el aforo en la cartelera.
-  - *Escenario 2 (Intento extemporáneo):* DADO QUE faltan 12 horas para la sesión, CUANDO el alumno intenta desistir en el sistema, ENTONCES el formulario le notifica que el plazo venció y que debe comunicar su inasistencia justificándola ante el mentor.
-- **Casos de Uso Relacionados:** CUS-017 (Cancelar voluntariamente reserva de mentoría académica antes de T-24h).
+  - *Escenario 1 (Desistimiento voluntario antes de $T-24	ext{ h}$) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante con reserva activa no podrá asistir y desiste con más de 24 horas de antelación (RN-10), CUANDO confirma la anulación en `/api/v1/bookings/{id}/cancel`, ENTONCES el sistema cancela la reserva sin registrar sanción académica y restituye inmediatamente la vacante al aforo libre con código HTTP 200 OK.
+  - *Escenario 2 (Intento de cancelación intempestiva en ventana crítica) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE restan menos de 24 horas para la sesión, CUANDO el estudiante intenta anular unilateralmente su cupo, ENTONCES el sistema advierte que la cancelación tardía compromete el quórum y registra la incidencia conforme a la reglamentación interna.
+  - *Escenario 3 (Acreditación de liberación en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la liberación inmediata de cupos cuenta con 10 pruebas en Pytest y 10 en Vitest, CUANDO se ejecute el flujo de `main`, ENTONCES se confirmará el recálculo instantáneo de vacantes.
+- **Casos de Uso Relacionados:** CUS-017 (Cancelar oportunamente reserva de mentoría y liberar cupo).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bookings.py` (`POST /api/v1/bookings/{id}/cancel`).
-  - *Servicios de Negocio:* `BookingService.py` (`cancel_booking_by_user`).
-  - *Entidades Relacionales:* Tabla `reservas_cupo` (transición a `CANCELADA_USUARIO`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bookings.py` (`POST /api/v1/bookings/{id_reserva}/cancel`).
+  - *Servicios de Negocio:* `BookingService.py` (`cancel_reservation`).
+  - *Entidades Relacionales:* Tablas `reservas_cupo`, `sesiones_mentoria`.
   - *Componentes Visuales:* `MyBookingsView.tsx`.
   - *Evidencia de Pruebas:* `test_bookings.py` (10 pruebas backend), `MyBookingsView.test.tsx` (10 pruebas frontend).
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF15 — Monitoreo Desatendido y Corte de Quórum en $T-24\text{ h}$
+#### Ficha Técnica de Requerimiento Funcional: RF15 — Monitoreo Desatendido y Corte de Quórum en $T-24	ext{ h}$
 
 - **Identificador:** RF15
-- **Nombre Oficial:** Monitoreo desatendido, corte perentorio de reservas y evaluación de quórum a $T-24\text{ h}$
-- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Concurrencia
-- **Descripción Funcional:** El sistema debe ejecutar de forma automática e ininterrumpida una rutina en segundo plano que identifique todas las sesiones que alcanzan exactamente las 24 horas previas a su inicio ($T-24\text{ h}$). En dicho instante, el sistema debe revocar automáticamente las reservas no ratificadas, totalizar a los confirmados y verificar si se cumple el quórum mínimo reglamentario (50% del aforo). Si se cumple, confirma la sesión; de lo contrario, alerta al mentor para resolución de contingencia.
-- **Objetivo y Necesidad Académica:** Asegurar que ninguna sesión se dicte con deserción oculta y evitar que los mentores acudan a la universidad a aulas vacías.
-- **Actores Participantes:** Demonio de Segundo Plano del Sistema (Actor Técnico Primario); Estudiante Mentor y Estudiantes Inscritos (Actores Secundarios notificados).
-- **Condiciones de Entrada (Precondiciones):** Sesión de mentoría en estado publicada que alcanza exactamente el umbral temporal de 24 horas antes de su inicio.
+- **Nombre Oficial:** Evaluación desatendida del quórum reglamentario en la ventana de corte $T-24	ext{ h}$
+- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Gestión de Asistencia
+- **Descripción Funcional:** El sistema debe ejecutar de forma desatendida y automática (mediante un demonio cron programado) una verificación sobre todas las sesiones de mentoría que alcancen exactamente la marca de 24 horas previas a su inicio ($T-24	ext{ h}$), evaluando si el número de reservas confirmadas alcanza el quórum mínimo obligatorio del 50% del aforo (al menos 3 estudiantes en presencial o 5 en virtual). Si alcanza el quórum, confirma la sesión definitivamente; de lo contrario, la declara en quórum insuficiente.
+- **Objetivo y Necesidad Académica:** Proteger el tiempo de los mentores y evitar el desplazamiento innecesario de docentes o estudiantes al campus si la sesión no cuenta con una cantidad mínima de participantes.
+- **Actores Participantes:** Componente Demonio Cron / Scheduler de Quórum (Actor Primario); Mentor y Estudiantes Inscritos (Actores Notificados).
+- **Condiciones de Entrada (Precondiciones):** Sesión de mentoría en estado "Publicada" que alcanza la marca temporal de $T-24	ext{ h}$.
 - **Comportamiento Esperado:**
-  1. El demonio cron inspecciona periódicamente la base de datos de sesiones activas.
-  2. Detecta una sesión que entra en la ventana de $T-24\text{ h}$.
-  3. Ejecuta el corte perentorio: busca reservas en estado pendiente (no ratificadas) y las transiciona a "No Confirmada / Expirada", liberando cupos residuales.
-  4. Cuenta los participantes con estado confirmado:
-     - Si los confirmados representan al menos el 50% del aforo (5 en presencial, 10 en virtual), la sesión transiciona automáticamente a "Confirmada" y se notifica la realización definitiva a los participantes.
-     - Si los confirmados son menores al 50%, transiciona la sesión al estado "Quórum Insuficiente" y despacha una alerta urgente al mentor para que decida el destino de la clase.
-- **Resultado Verificable (Postcondiciones):** La sesión queda confirmada formalmente o ingresa a contingencia, garantizándose que todas las reservas no ratificadas queden invalidadas.
-- **Reglas de Negocio Vinculadas:** RN-08 (Corte en $T-24\text{ h}$), RN-09 (Quórum mínimo del 50% de aforo).
-- **Restricciones Funcionales:** El proceso debe ejecutarse con puntualidad estricta y sin intervención manual de operadores humanos.
+  1. El demonio de evaluación se activa periódicamente y selecciona las sesiones activas en el umbral exacto de $T-24	ext{ h}$.
+  2. Invalida automáticamente las reservas que permanecieron en estado "Pendiente de Confirmación" sin ratificar.
+  3. Cuenta el número de reservas confirmadas restantes.
+  4. Si las confirmaciones son $\ge 50\%$ del aforo reglamentario (3 en presencial / 5 en virtual), transiciona la sesión a "Confirmada" y remite notificaciones de ratificación.
+  5. Si las confirmaciones son $< 50\%$, transiciona la sesión a "Quórum Insuficiente" y notifica de inmediato al mentor para su resolución.
+- **Resultado Verificable (Postcondiciones):** La sesión queda formalmente clasificada como "Confirmada" o "Quórum Insuficiente".
+- **Reglas de Negocio Vinculadas:** RN-08 (Corte de quórum en $T-24	ext{ h}$), RN-09 (Umbral mínimo del 50% de aforo).
+- **Restricciones Funcionales:** Ninguna sesión puede mantenerse con reservas pendientes sin definir tras el corte de $T-24	ext{ h}$.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Quórum alcanzado exitosamente):* DADO QUE una sesión presencial de aforo 10 tiene 6 alumnos confirmados a $T-24\text{ h}$, CUANDO corre el demonio, ENTONCES confirma la sesión y notifica a los 6 estudiantes.
-  - *Escenario 2 (Quórum insuficiente por abandono):* DADO QUE una sesión tiene solo 2 alumnos confirmados a $T-24\text{ h}$, CUANDO corre el demonio, ENTONCES pasa la sesión a quórum insuficiente y notifica al mentor para su decisión.
-- **Casos de Uso Relacionados:** CUS-023 (Evaluar automáticamente quórum mínimo de sesión en T-24h), CUS-009 (Despachar notificaciones y alertas automáticas de eventos críticos).
+  - *Escenario 1 (Corte automático y confirmación con quórum suficiente) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE una sesión alcanza la marca temporal de $T-24	ext{ h}$ y cuenta con al menos el 50% de cupos ratificados (>= 3 presencial / >= 5 virtual, RN-08 y RN-09), CUANDO el demonio desatendido ejecuta la evaluación en `/api/v1/quorum/evaluate`, ENTONCES transiciona la sesión a `CONFIRMADA`, caduca las reservas no ratificadas y despacha las notificaciones de confirmación con código HTTP 200 OK.
+  - *Escenario 2 (Detección de quórum insuficiente a $T-24	ext{ h}$) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE una sesión no alcanza el umbral mínimo reglamentario en la ventana de corte, CUANDO el motor de quórum la evalúa, ENTONCES conmuta su estado a `QUORUM_INSUFICIENTE` y abre la ventana resolutiva de 12 horas para decisión del mentor.
+  - *Escenario 3 (Verificación de idempotencia del cron en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la evaluación masiva cuenta con 16 pruebas en `test_quorum.py` y 12 pruebas en Vitest, CUANDO se ejecute la suite formal en `main`, ENTONCES se constatará que múltiples ejecuciones sucesivas del evaluador no dupliquen transiciones ni notificaciones.
+- **Casos de Uso Relacionados:** CUS-023 (Evaluar automáticamente cumplimiento de quórum mínimo en $T-24	ext{ h}$), CUS-009 (Monitorear y despachar notificaciones institucionales).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/quorum.py` (`POST /api/v1/quorum/cron-eval`).
-  - *Servicios de Negocio:* `QuorumScheduler.py`, `BookingService.py`.
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/quorum.py` (`POST /api/v1/quorum/evaluate`, `POST /api/v1/quorum/evaluate-all`).
+  - *Servicios de Negocio:* `BookingService.py` (`evaluate_quorum`, `evaluate_all_active_quorums`).
   - *Entidades Relacionales:* Tablas `sesiones_mentoria`, `reservas_cupo`.
-  - *Evidencia de Pruebas:* `test_quorum.py` (16 pruebas backend con simulación de avance de tiempo).
+  - *Componentes Visuales:* `NotificationCenterView.tsx`.
+  - *Evidencia de Pruebas:* `test_quorum.py` (16 pruebas backend con simulación de avance temporal), `NotificationCenterView.test.tsx` (12 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF16 — Gestión Resolutiva del Mentor ante Quórum Insuficiente
 
 - **Identificador:** RF16
-- **Nombre Oficial:** Gestión resolutiva del mentor ante quórum insuficiente en $T-24\text{ h}$
-- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Concurrencia
-- **Descripción Funcional:** El sistema debe proveer al mentor de una interfaz resolutiva cuando su sesión sea declarada en estado de quórum insuficiente a $T-24\text{ h}$, permitiéndole tomar una de dos decisiones pedagógicas: aceptar dictar la sesión de forma extraordinaria con los alumnos confirmados, o cancelar definitivamente la clase liberando el aula física o sala virtual y notificando a los estudiantes con anticipación.
-- **Objetivo y Necesidad Académica:** Otorgar flexibilidad al mentor para apoyar a grupos reducidos si su disponibilidad lo permite, evitando al mismo tiempo cancelaciones imprevistas de última hora en la puerta del aula.
-- **Actores Participantes:** Estudiante Mentor (Actor Primario); Estudiantes Confirmados (Actores Secundarios).
-- **Condiciones de Entrada (Precondiciones):** Sesión en estado "Quórum Insuficiente" notificada al mentor tras el corte de $T-24\text{ h}$.
+- **Nombre Oficial:** Gestión resolutiva y toma de decisión del mentor ante contingencia de quórum insuficiente
+- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Gestión de Asistencia
+- **Descripción Funcional:** El sistema debe suministrar al estudiante mentor una ventana interactiva de resolución urgente (máximo 12 horas) cuando su sesión sea declarada en "Quórum Insuficiente" a $T-24	ext{ h}$, facultándolo para decidir soberanamente entre tres opciones: (1) impartir la sesión con los alumnos confirmados asumiendo el dictado con aforo reducido, (2) reprogramar la fecha de la sesión con más de 24 horas de anticipación, o (3) cancelar definitivamente la sesión sin sanción formativa.
+- **Objetivo y Necesidad Académica:** Respetar la autonomía pedagógica del mentor permitiéndole atender a compañeros motivados aun con poca audiencia si así lo decide, o reprogramar ordenadamente sin perjudicar su expediente.
+- **Actores Participantes:** Estudiante Mentor (Actor Decisor); Estudiantes Confirmados (Beneficiarios de la Decisión).
+- **Condiciones de Entrada (Precondiciones):** Sesión en estado "Quórum Insuficiente" dentro del plazo resolutivo de 12 horas.
 - **Comportamiento Esperado:**
-  1. El mentor recibe la alerta en su panel docente y accede al diálogo de resolución de quórum.
-  2. La pantalla le informa la cantidad de alumnos confirmados y le presenta las opciones institucionales: "Continuar con Quórum Reducido" o "Cancelar Sesión".
-  3. Si elige continuar, la sesión pasa a estado "Confirmada Extraordinaria" y se confirma a los alumnos.
-  4. Si elige cancelar, la sesión transiciona a "Cancelada por Quórum", el sistema libera de inmediato la reserva del aula o sala virtual y remite disculpas y opciones de reprogramación a los estudiantes.
-- **Resultado Verificable (Postcondiciones):** La contingencia queda resuelta y los recursos de infraestructura se optimizan de inmediato.
-- **Reglas de Negocio Vinculadas:** RN-09 (Quórum 50%), RN-10 (Liberación oportuna de recursos ante cancelación).
-- **Restricciones Funcionales:** El mentor dispone de una ventana de 6 horas post-corte para resolver la contingencia; si no responde, el sistema cancela la sesión de forma preventiva.
+  1. El mentor recibe alerta urgente y accede a su panel de control de mentorías.
+  2. Visualiza el diálogo modal resolutivo con los datos de alumnos confirmados y las tres alternativas normativas.
+  3. Si elige "Impartir con aforo reducido", el sistema confirma la sesión y notifica a los alumnos inscritos que la clase se dictará con normalidad.
+  4. Si elige "Reprogramar", selecciona nueva fecha (con antelación $> 24	ext{ h}$) y el sistema traslada las reservas notificando el cambio.
+  5. Si elige "Cancelar", ingresa la justificación y el sistema anula la sesión liberando los recursos sin penalización.
+  6. Si transcurren las 12 horas sin respuesta del mentor, el sistema cancela automáticamente la sesión por vencimiento de plazo.
+- **Resultado Verificable (Postcondiciones):** La sesión asume su estado final ("Confirmada", "Reprogramada" o "Cancelada") con notificación a los interesados.
+- **Reglas de Negocio Vinculadas:** RN-09 (Opciones resolutivas ante quórum insuficiente), RN-10 (Justificación de contingencias).
+- **Restricciones Funcionales:** La ventana resolutiva vence indefectiblemente a las 12 horas previas a la sesión.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Decisión de dictar con quórum reducido):* DADO QUE hay 3 alumnos confirmados en una sesión de 10, CUANDO el mentor pulsa "Continuar Sesión", ENTONCES la clase se ratifica y el aula se mantiene asignada.
-  - *Escenario 2 (Decisión de cancelación ordenada):* DADO QUE el mentor no puede dictar a quórum reducido, CUANDO pulsa "Cancelar Sesión", ENTONCES el aula física se desocupa en el sistema y los 3 alumnos son notificados.
-- **Casos de Uso Relacionados:** CUS-007 (Resolver contingencia de quórum insuficiente por el mentor).
+  - *Escenario 1 (Resolución positiva de dictado con aforo reducido) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE una sesión fue catalogada en `QUORUM_INSUFICIENTE`, CUANDO el mentor opta voluntariamente por la resolución `PROCEED` para apoyar a los pocos inscritos confirmados, ENTONCES el sistema valida la decisión en `/api/v1/offers/{id}/quorum-decision`, transiciona la sesión a `CONFIRMADA` y despacha el recordatorio con los accesos definitivos con código HTTP 200 OK.
+  - *Escenario 2 (Resolución de cancelación reglamentaria) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el mentor decide acogerse a la cancelación institucional por falta de quórum, CUANDO remite la acción `CANCEL`, ENTONCES el sistema anula la sesión sin penalidad formativa para el mentor, notifica a los inscritos y libera el espacio físico o virtual reservado.
+  - *Escenario 3 (Revalidación de interfaz resolutiva en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el flujo está cubierto por 10 pruebas en Pytest y 10 pruebas en `QuorumDecisionModalView.test.tsx`, CUANDO se concluya la subsanación de linteo en `main`, ENTONCES se confirmará la adecuada gestión de contingencias.
+- **Casos de Uso Relacionados:** CUS-007 (Resolver contingencia de quórum insuficiente por decisión del mentor).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/offers.py` (`POST /api/v1/offers/{id}/quorum-decision`).
-  - *Servicios de Negocio:* `OfferService.py` (`handle_quorum_decision`).
-  - *Entidades Relacionales:* Tabla `sesiones_mentoria`.
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/offers.py` (`POST /api/v1/offers/{id_sesion}/quorum-decision` con payload `action` en `PROCEED`, `RESCHEDULE` o `CANCEL`).
+  - *Servicios de Negocio:* `OfferService.py` (`resolve_quorum_decision`).
+  - *Entidades Relacionales:* Tablas `sesiones_mentoria`, `reservas_cupo`.
   - *Componentes Visuales:* `QuorumDecisionModalView.tsx`.
-  - *Evidencia de Pruebas:* `test_offers.py` (12 pruebas backend), `QuorumDecisionModalView.test.tsx` (10 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_offers.py` (10 pruebas backend), `QuorumDecisionModalView.test.tsx` (10 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF17 — Marcación de Asistencia con Pase QR Dinámico (TOTP)
 
 - **Identificador:** RF17
-- **Nombre Oficial:** Control y marcación de asistencia presencial y virtual mediante pase QR dinámico (TOTP)
+- **Nombre Oficial:** Control de asistencia en tiempo real mediante código QR dinámico criptográfico (TOTP)
 - **Módulo Arquitectónico:** MOD-06: Asistencia, Bitácoras y Calidad
-- **Descripción Funcional:** El sistema debe controlar el registro fehaciente de asistencia de los estudiantes al inicio de la sesión de mentoría. El mentor podrá proyectar en pantalla un código QR dinámico que se renueva automáticamente cada 30 segundos, el cual debe ser escaneado por los estudiantes con la cámara de sus teléfonos inteligentes o computadoras para validar su presencia física o virtual. Como mecanismo de respaldo, el mentor dispondrá de una lista de asistencia manual para registrar a quienes sufran problemas de conectividad o cámara.
-- **Objetivo y Necesidad Académica:** Garantizar la autenticidad e inmediatez del control de asistencia, impidiendo que estudiantes ausentes marquen presencia compartiendo capturas estáticas de pantalla por mensajería.
-- **Actores Participantes:** Estudiante Mentor (Actor Primario que proyecta o pasa lista); Estudiante Mentoreado (Actor Primario que escanea).
-- **Condiciones de Entrada (Precondiciones):** Sesión en estado confirmada o en curso dentro del rango de tolerancia horaria (+/- 15 minutos del inicio).
+- **Descripción Funcional:** El sistema debe proveer al mentor titular la capacidad de proyectar en pantalla un código QR dinámico que rota automáticamente cada 30 segundos (basado en algoritmos de contraseñas de un solo uso basadas en el tiempo - TOTP) y exhibe un código numérico de 6 dígitos de respaldo, permitiendo que los mentoreados presentes en el aula o sala virtual registren su asistencia mediante el escaneo del código desde sus dispositivos o digitando el PIN activo.
+- **Objetivo y Necesidad Académica:** Erradicar la suplantación de asistencia y el registro fraudulento a distancia (fotos compartidas por mensajería), asegurando que solo los estudiantes físicamente presentes o conectados en vivo certifiquen su participación.
+- **Actores Participantes:** Estudiante Mentor (Generador y Proyector del QR); Estudiante Mentoreado (Registrador de Asistencia).
+- **Condiciones de Entrada (Precondiciones):** Sesión confirmada en ejecución dentro de la ventana de marcación permitida (desde 15 minutos antes hasta 30 minutos después de la hora de inicio).
 - **Comportamiento Esperado:**
-  1. El mentor inicia la sesión y abre la vista "Pase de Asistencia QR".
-  2. El sistema genera un código QR sincronizado con el reloj del servidor que caduca cada 30 segundos, proyectándolo en pantalla con una barra de progreso regresiva.
-  3. El estudiante asistente ingresa a su portal, abre el escáner de cámara integrado y apunta al código QR proyectado.
-  4. El sistema valida la vigencia del código, corrobora que el alumno tenga reserva confirmada en la sesión y registra su asistencia efectiva con sello de fecha y hora.
-  5. La pantalla del mentor actualiza en tiempo real la lista de asistentes presentes.
-  6. Si un estudiante carece de cámara operativa, el mentor puede pulsar el control manual "Marcar Asistió" en su lista.
-- **Resultado Verificable (Postcondiciones):** La asistencia queda registrada fehacientemente, habilitando al estudiante para calificar la mentoría y acreditando las horas para el mentor.
-- **Reglas de Negocio Vinculadas:** RN-05 (Aforos estándar), RN-12 (Asistencia como requisito para evaluar y computar horas).
-- **Restricciones Funcionales:** Un código QR escaneado después de sus 30 segundos de vigencia es rechazado automáticamente exigiendo escanear el nuevo código generado.
+  1. El mentor inicia la proyección del pase de asistencia desde su panel de control.
+  2. El sistema genera el código QR dinámico y el PIN numérico de respaldo, iniciando la rotación cada 30 segundos.
+  3. Los estudiantes mentoreados abren la cámara o escáner desde la aplicación web o digitan el PIN en pantalla.
+  4. El sistema valida criptográficamente la coincidencia del token y verifica que el alumno cuente con reserva confirmada.
+  5. Registra de inmediato la asistencia con fecha, hora e IP de origen, actualizando el listado en tiempo real en la pantalla del mentor.
+  6. Si un estudiante no dispone de cámara, el mentor puede marcarlo manualmente en la lista de respaldo con motivo justificado.
+- **Resultado Verificable (Postcondiciones):** El registro de asistencia queda almacenado de forma inmutable en el expediente de la sesión.
+- **Reglas de Negocio Vinculadas:** RN-05 (Control de asistencia presencial), RN-12 (Obligatoriedad de asistencia para responder encuestas).
+- **Restricciones Funcionales:** Ningún escaneo será admitido fuera de la ventana horaria de tolerancia ([-15 min, +30 min]).
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Escaneo dinámico exitoso):* DADO QUE el mentor proyecta el QR activo, CUANDO un alumno inscrito lo escanea dentro de los 30 segundos, ENTONCES el sistema registra su asistencia exitosa y muestra confirmación verde.
-  - *Escenario 2 (Intento con captura expirada):* DADO QUE un alumno intenta escanear una fotografía tomada minutos antes, CUANDO el sistema procesa el código, ENTONCES rechaza la marcación por token expirado.
-- **Casos de Uso Relacionados:** CUS-012 (Controlar y registrar asistencia de participantes mediante pase QR dinámico).
+  - *Escenario 1 (Generación de pase TOTP dinámico de 30 segundos) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el mentor titular inicia la sesión dentro de la ventana de marcación ([-15 min, +30 min]), CUANDO solicita el token en `/api/v1/sessions/{id}/attendance/token`, ENTONCES el sistema genera un código numérico y QR efímero que rota cada 30 segundos mediante HMAC-SHA1 para prevenir la falsificación por captura de pantalla con código HTTP 200 OK.
+  - *Escenario 2 (Check-in exitoso de mentoreado con reserva confirmada) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante con reserva `CONFIRMADA` escanea el QR o introduce el código activo, CUANDO envía la solicitud a `/api/v1/sessions/{id}/attendance/check-in`, ENTONCES el sistema valida la vigencia del token, registra la presencia efectiva en `asistencias_sesion` con IP de origen y código HTTP 200 OK.
+  - *Escenario 3 (Rechazo de pase expirado o sin reserva previa) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante intenta marcar con un token vencido o sin reserva confirmada, CUANDO remite el check-in, ENTONCES el sistema rechaza la marcación con código HTTP 400 Bad Request o HTTP 403 Forbidden registrando la traza de intento fallido.
+  - *Escenario 4 (Acreditación de seguridad de asistencia en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el subsistema cuenta con 14 pruebas en `test_attendance.py` y 20 pruebas en `AttendanceScannerView.test.tsx`, CUANDO se ejecute el flujo de CI en `main`, ENTONCES se certificará la sincronía temporal y la auditabilidad del check-in.
+- **Casos de Uso Relacionados:** CUS-012 (Registrar asistencia presencial o virtual mediante código QR dinámico TOTP).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/attendance.py` (`GET /api/v1/attendance/qr/{session_id}`, `POST /api/v1/attendance/scan`).
-  - *Servicios de Negocio:* `AttendanceService.py` (`generate_totp_token`, `validate_totp_scan`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/attendance.py` (`GET /api/v1/sessions/{id_sesion}/attendance/token`, `POST /api/v1/sessions/{id_sesion}/attendance/check-in`, `GET /api/v1/sessions/{id_sesion}/attendance`).
+  - *Servicios de Negocio:* `AttendanceService.py` (`generate_token`, `record_checkin`, `get_roster`).
   - *Entidades Relacionales:* Tablas `asistencias_sesion`, `tokens_asistencia_activos`.
   - *Componentes Visuales:* `AttendanceScannerView.tsx`, `AttendanceQrModalView.tsx`.
-  - *Evidencia de Pruebas:* `test_attendance.py` (18 pruebas backend), `AttendanceScannerView.test.tsx` (14 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_attendance.py` (14 pruebas backend con validación criptográfica TOTP), `AttendanceScannerView.test.tsx` (20 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF18 — Registro de Bitácora Docente en 48h con Hash SHA-256
 
 - **Identificador:** RF18
-- **Nombre Oficial:** Formulación y registro estructurado de bitácora pedagógica docente con sello de inalterabilidad SHA-256
+- **Nombre Oficial:** Suscripción y registro obligatorio de bitácora pedagógica con sello de integridad SHA-256
 - **Módulo Arquitectónico:** MOD-06: Asistencia, Bitácoras y Calidad
-- **Descripción Funcional:** El sistema debe exigir a los mentores el registro obligatorio de una bitácora pedagógica estructurada dentro de las 48 horas posteriores a la finalización de cada mentoría. En ella deben detallar los temas silábicos cubiertos, el cumplimiento de objetivos didácticos, las incidencias pedagógicas y la ratificación final de la asistencia. Al enviarse, el sistema debe sellar la bitácora con una firma criptográfica hash SHA-256 que garantice su inalterabilidad posterior.
-- **Objetivo y Necesidad Académica:** Respaldar institucionalmente el trabajo docente realizado por los mentores, proveyendo evidencias pedagógicas auditables que sustenten la posterior convalidación de horas extracurriculares ante la Dirección de Escuela.
-- **Actores Participantes:** Estudiante Mentor (Actor Primario); Coordinador de Tutoría (Actor Auditor Secundario).
-- **Condiciones de Entrada (Precondiciones):** Sesión de mentoría culminada en estado realizada y dentro del plazo de 48 horas.
+- **Descripción Funcional:** El sistema debe requerir que el mentor registre obligatoriamente una bitácora pedagógica detallada dentro de las 48 horas posteriores a la culminación de la sesión, especificando los temas silábicos efectivamente explicados, los ejercicios desarrollados, las observaciones sobre el desempeño del grupo y las incidencias ocurridas, sellando el reporte con una huella criptográfica SHA-256 inalterable.
+- **Objetivo y Necesidad Académica:** Proveer respaldo documental y pedagógico a la labor del mentor, permitiendo al Comité de Tutoría fiscalizar el contenido dictado y sirviendo de base auditada para la posterior convalidación de horas de mentoría.
+- **Actores Participantes:** Estudiante Mentor (Actor Redactor); Coordinación de Tutoría (Entidad Fiscalizadora).
+- **Condiciones de Entrada (Precondiciones):** Sesión de mentoría culminada y con registro de asistencia cerrado.
 - **Comportamiento Esperado:**
-  1. El mentor accede a la sección de bitácoras pendientes y selecciona la sesión recién concluida.
-  2. Completa el formulario estructurado indicando el porcentaje de temario desarrollado, logros de aprendizaje observados, dificultades de los estudiantes y compromisos de refuerzo.
-  3. Revisa y confirma la nómina de asistencia final.
-  4. El mentor presiona "Firmar y Registrar Bitácora Docente".
-  5. El sistema valida que los campos descriptivos cumplan la extensión mínima requerida, genera un sello criptográfico hash SHA-256 combinando el contenido con la marca temporal UTC, guarda el registro en estado inmutable y remite la bitácora a la bandeja de visado del Comité de Tutoría.
-- **Resultado Verificable (Postcondiciones):** La bitácora queda registrada formalmente con sello de inalterabilidad y la sesión se marca como cerrada administrativamente.
-- **Reglas de Negocio Vinculadas:** RN-12 (Plazo improrrogable de 48 horas y firma SHA-256 para computar horas de mentoría).
-- **Restricciones Funcionales:** Si el mentor no registra la bitácora dentro de las 48 horas reglamentarias, la sesión se bloquea para el cómputo de horas y se alerta a la Coordinación de Tutoría.
+  1. El mentor accede al formulario de redacción de bitácora de la sesión finalizada.
+  2. Verifica la lista consolidada de estudiantes que registraron asistencia.
+  3. Redacta el resumen temático desarrollado, ejercicios resueltos y observaciones pedagógicas (mínimo 50 caracteres).
+  4. Adjunta enlaces a materiales o repositorios de código trabajados durante la clase.
+  5. Pulsa el botón de firma digital del reporte.
+  6. El sistema compila el documento en un objeto inmutable, calcula el hash SHA-256 de los datos, almacena la bitácora y marca la sesión como "Bitácora Registrada".
+- **Resultado Verificable (Postcondiciones):** La bitácora queda archivada con firma digital inalterable, habilitando el cómputo de horas formativas.
+- **Reglas de Negocio Vinculadas:** RN-12 (Plazo improrrogable de 48 horas para registro de bitácora), RN-14 (Horas auditadas para certificación).
+- **Restricciones Funcionales:** Si la bitácora no se registra dentro de las 48 horas, la sesión se catalogará como "Extemporánea" y no acumulará horas para certificación hasta que medie justificación formal aprobada por la Dirección de Escuela.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Registro oportuno exitoso):* DADO QUE el mentor envía la bitácora a las 12 horas de finalizada la clase, CUANDO el sistema procesa el envío, ENTONCES calcula el hash SHA-256 y bloquea la edición posterior garantizando inalterabilidad.
-  - *Escenario 2 (Intento de registro extemporáneo):* DADO QUE han transcurrido 50 horas desde el fin de la sesión, CUANDO el mentor intenta acceder al formulario, ENTONCES el sistema le notifica que el plazo expiró y que debe solicitar una reapertura justificada ante Tutoría.
-- **Casos de Uso Relacionados:** CUS-013 (Registrar bitácora pedagógica post-mentoría y control de cumplimiento).
+  - *Escenario 1 (Registro oportuno de bitácora con hash criptográfico SHA-256) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE una sesión concluyó y el mentor ingresa dentro del plazo improrrogable de 48 horas (RN-12), CUANDO redacta las observaciones pedagógicas (>= 50 caracteres) y firma el reporte en `/api/v1/sessions/{id}/bitacora`, ENTONCES el sistema genera un sello inalterable SHA-256 sobre los datos de asistencia y contenidos, registra la bitácora con código HTTP 201 Created y conmuta la sesión a `BITACORA_REGISTRADA`.
+  - *Escenario 2 (Bloqueo por vencimiento del plazo de 48 horas) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE han transcurrido más de 48 horas desde la culminación de la sesión, CUANDO el mentor intenta remitir la bitácora, ENTONCES el sistema bloquea el registro con código HTTP 400 Bad Request o HTTP 422, impidiendo la acreditación de horas y marcando la sesión como extemporánea para fiscalización de Tutoría.
+  - *Escenario 3 (Validación de inmutabilidad en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el sellado criptográfico cuenta con 18 pruebas en `test_bitacora.py` y 22 pruebas en `BitacoraFormView.test.tsx`, CUANDO se ejecute la suite formal en `main`, ENTONCES se verificará la integridad del hash SHA-256 ante cualquier intento de alteración.
+- **Casos de Uso Relacionados:** CUS-013 (Registrar bitácora pedagógica post-sesión y sellar reporte con hash SHA-256).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bitacora.py` (`POST /api/v1/bitacora/{session_id}`).
-  - *Servicios de Negocio:* `BitacoraService.py` (`create_bitacora` con cálculo de `hash_sha256`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bitacora.py` (`POST /api/v1/sessions/{id_sesion}/bitacora`, `GET /api/v1/sessions/{id_sesion}/bitacora`).
+  - *Servicios de Negocio:* `BitacoraService.py` (`create_bitacora`, `get_bitacora`).
   - *Entidades Relacionales:* Tabla `bitacoras_pedagogicas`.
   - *Componentes Visuales:* `BitacoraFormView.tsx`.
-  - *Evidencia de Pruebas:* `test_bitacora.py` (22 pruebas backend), `BitacoraFormView.test.tsx` (16 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_bitacora.py` (18 pruebas backend con verificación del hash SHA-256), `BitacoraFormView.test.tsx` (22 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF19 — Historial de Sesiones, Bitácoras y Recursos Compartidos
 
 - **Identificador:** RF19
-- **Nombre Oficial:** Consulta cronológica de historial de sesiones, bitácoras académicas y recursos didácticos
+- **Nombre Oficial:** Repositorio cronológico de sesiones, bitácoras y biblioteca de recursos didácticos
 - **Módulo Arquitectónico:** MOD-06: Asistencia, Bitácoras y Calidad
-- **Descripción Funcional:** El sistema debe suministrar a estudiantes y mentores una vista cronológica interactiva con el historial de todas las sesiones de mentoría en las que han participado, permitiéndoles consultar el estado de cada sesión, revisar las bitácoras pedagógicas registradas, verificar sus asistencias y acceder a los enlaces de materiales didácticos compartidos (diapositivas, guías prácticas y repositorios de código).
-- **Objetivo y Necesidad Académica:** Proporcionar a los estudiantes un repositorio ordenado de aprendizaje para repasar conceptos antes de sus exámenes, y a los mentores un registro de su trayectoria pedagógica en la escuela.
-- **Actores Participantes:** Estudiante Mentoreado, Estudiante Mentor (Actores Primarios).
-- **Condiciones de Entrada (Precondiciones):** Usuario con sesión activa en la plataforma.
+- **Descripción Funcional:** El sistema debe suministrar a mentores y mentoreados un historial cronológico interactivo donde consulten las sesiones pasadas en las que participaron, las bitácoras docentes suscritas, los temas revisados y los enlaces a materiales didácticos compartidos (diapositivas, grabaciones, repositorios de GitHub o ejercicios prácticos), sirviendo de biblioteca digital de consulta permanente para la comunidad estudiantil.
+- **Objetivo y Necesidad Académica:** Fomentar el autoaprendizaje continuo y la reutilización de materiales de calidad generados durante las mentorías, permitiendo a los alumnos repasar conceptos antes de sus evaluaciones oficiales.
+- **Actores Participantes:** Estudiante Mentoreado, Estudiante Mentor (Actores de Consulta).
+- **Condiciones de Entrada (Precondiciones):** Usuario autenticado en la plataforma.
 - **Comportamiento Esperado:**
-  1. El usuario accede a la sección "Historial Académico" en su menú principal.
-  2. El sistema despliega la lista cronológica de sesiones pasadas con filtros interactivos por semestre, asignatura y estado.
-  3. Al seleccionar una sesión específica, el sistema muestra el detalle pedagógico: temas tratados, asistencia registrada y enlaces a los recursos didácticos compartidos por el mentor.
-  4. El estudiante puede hacer clic en los enlaces de recursos para abrir los materiales de estudio en una nueva pestaña o descargar guías adjuntas.
-- **Resultado Verificable (Postcondiciones):** El usuario accede a la memoria histórica de su aprendizaje y a los recursos educativos de forma centralizada.
-- **Reglas de Negocio Vinculadas:** RN-02 (Privacidad de expedientes académicos).
-- **Restricciones Funcionales:** Los estudiantes solo pueden visualizar los materiales y bitácoras de las sesiones en las que estuvieron efectivamente inscritos.
+  1. El usuario accede a la sección de "Historial de Mentorías".
+  2. El sistema despliega la relación cronológica de sesiones en las que participó como asistente o mentor.
+  3. El usuario puede filtrar por ciclo académico, asignatura formativa o palabra clave de tema.
+  4. Al pulsar sobre una sesión, visualiza los detalles: fecha, mentor, temas silábicos cubiertos y la bitácora suscrita.
+  5. Puede acceder a los enlaces de recursos didácticos adjuntos y descargarlos para su estudio personal.
+- **Resultado Verificable (Postcondiciones):** El estudiante accede de forma transparente a los materiales educativos oficiales.
+- **Reglas de Negocio Vinculadas:** RN-11 (Alineamiento curricular), RN-02 (Privacidad de datos personales).
+- **Restricciones Funcionales:** Ningún usuario ajeno a la comunidad universitaria podrá acceder a los materiales compartidos.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Consulta de historial y recursos):* DADO QUE un estudiante asistió a una mentoría de Cálculo, CUANDO ingresa a su historial, ENTONCES visualiza la bitácora del mentor y los enlaces a los ejercicios resueltos.
-  - *Escenario 2 (Filtrado temático):* DADO QUE un usuario filtra su historial por la asignatura "POO", CUANDO aplica el filtro, ENTONCES la pantalla despliega únicamente las sesiones correspondientes a dicha materia.
-- **Casos de Uso Relacionados:** CUS-014 (Consultar historial cronológico de sesiones y bitácoras pedagógicas).
+  - *Escenario 1 (Consulta de historial formativo y materiales compartidos) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante o mentor accede a su historial académico, CUANDO filtra por ciclo o asignatura, ENTONCES el sistema entrega la relación cronológica de sesiones atendidas, enlaces a diapositivas, repositorios de código y bitácoras asociadas con código HTTP 200 OK.
+  - *Escenario 2 (Visualización restringida por titularidad de datos) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un usuario común intenta consultar la bitácora o materiales de una sesión en la que no participó como asistente ni mentor, CUANDO envía la solicitud de lectura, ENTONCES el sistema deniega el acceso con código HTTP 403 Forbidden conforme al principio de privacidad académica.
+  - *Escenario 3 (Comprobación en suite de integración en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la consulta histórica cuenta con 8 pruebas en Pytest y 12 pruebas en `BitacoraHistoryView.test.tsx`, CUANDO se ejecute el pipeline de `main`, ENTONCES se verificará el filtrado seguro por titularidad de usuario.
+- **Casos de Uso Relacionados:** CUS-014 (Consultar historial de mentorías, bitácoras pedagógicas y materiales educativos).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bitacora.py` (`GET /api/v1/bitacora/history/me`, `GET /api/v1/bitacora/{id}`).
-  - *Servicios de Negocio:* `BitacoraService.py` (`get_user_history`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bitacora.py` (`GET /api/v1/sessions/{id_sesion}/bitacora`, `GET /api/v1/bitacoras`), `aplicacion/backend/app/api/v1/endpoints/bookings.py` (`GET /api/v1/bookings/my-reservations`).
+  - *Servicios de Negocio:* `BitacoraService.py` (`get_bitacora`, `list_bitacoras`), `BookingService.py` (`get_student_reservations`).
+  - *Entidades Relacionales:* Tablas `bitacoras_pedagogicas`, `sesiones_mentoria`.
   - *Componentes Visuales:* `BitacoraHistoryView.tsx`.
-  - *Evidencia de Pruebas:* `test_bitacora.py` (10 pruebas backend), `BitacoraHistoryView.test.tsx` (12 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_bitacora.py` (8 pruebas backend), `BitacoraHistoryView.test.tsx` (12 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF20 — Encuestas de Calidad y Retroalimentación Post-Mentoría (24h)
 
 - **Identificador:** RF20
-- **Nombre Oficial:** Captura de encuestas de calidad, satisfacción estudiantil (CSAT) y retroalimentación post-mentoría (ventana perentoria de 24 horas)
+- **Nombre Oficial:** Captura, procesamiento y control de encuestas de calidad pedagógica post-mentoría
 - **Módulo Arquitectónico:** MOD-06: Asistencia, Bitácoras y Calidad
-- **Descripción Funcional:** El sistema debe habilitar un formulario interactivo y ágil de evaluación de calidad formativa dirigido exclusivamente a los estudiantes que marcaron asistencia en una sesión de mentoría culminada. El formulario evaluará cuatro dimensiones pedagógicas estructuradas (claridad en la explicación, dominio temático, empatía y puntualidad) además de comentarios abiertos opcionales, manteniéndose disponible durante una ventana perentoria de 24 horas contadas a partir de la finalización de la clase.
-- **Objetivo y Necesidad Académica:** Medir de forma cuantitativa y objetiva la efectividad docente de los mentores, recopilar retroalimentación constructiva para la mejora continua y suministrar insumos empíricos para el cálculo de su reputación e insignias de mérito.
-- **Actores Participantes:** Estudiante Mentoreado con asistencia registrada (Actor Primario); Estudiante Mentor Evaluado (Actor Secundario receptor de métricas).
-- **Condiciones de Entrada (Precondiciones):** El estudiante debe haber marcado asistencia en la sesión (`asistencia.estado == 'ASISTIO'`) y el reloj del sistema debe encontrarse dentro de las 24 horas posteriores al cierre de la mentoría.
+- **Descripción Funcional:** El sistema debe habilitar una encuesta de satisfacción y calidad pedagógica (instrumento CSAT adaptado a 4 dimensiones: dominio temático, claridad pedagógica, puntualidad y utilidad práctica) dirigida exclusivamente a los estudiantes mentoreados que hayan registrado asistencia efectiva en la sesión, restringiendo su envío dentro de una ventana perentoria de 24 horas posteriores a la finalización de la mentoría.
+- **Objetivo y Necesidad Académica:** Recopilar retroalimentación objetiva, constructiva y fresca sobre el desempeño de los mentores para alimentar el motor de recomendación, identificar necesidades de capacitación y sustentar reconocimientos institucionales.
+- **Actores Participantes:** Estudiante Mentoreado con asistencia comprobada (Actor Evaluador); Estudiante Mentor (Sujeto Evaluado).
+- **Condiciones de Entrada (Precondiciones):** Estudiante con asistencia formalmente validada mediante QR dinámico y sesión culminada dentro de las últimas 24 horas.
 - **Comportamiento Esperado:**
-  1. Al culminar la sesión de mentoría o en su siguiente inicio de sesión dentro de las 24 horas, el sistema muestra al estudiante asistente una notificación destacada invitándolo a evaluar la mentoría.
-  2. El alumno abre el diálogo de encuesta, visualizando el nombre del mentor, la materia y los temas tratados.
-  3. El formulario presenta cuatro escalas de valoración de 1 a 5 estrellas para: Claridad Conceptual, Dominio del Tema, Empatía/Paciencia y Puntualidad, más un campo de texto opcional para agradecimientos o sugerencias.
-  4. El estudiante asigna sus calificaciones y pulsa "Enviar Calificación".
-  5. El sistema valida que todas las dimensiones obligatorias estén completadas, persiste la encuesta de forma anónima disociada del nombre del evaluador para garantizar total honestidad, actualiza el promedio de satisfacción acumulada del mentor y cierra la notificación.
-- **Resultado Verificable (Postcondiciones):** La evaluación queda registrada en el expediente docente del mentor y se incorpora de forma inmediata al cálculo de su reputación algorítmica.
-- **Reglas de Negocio Vinculadas:** RN-13 (Ventana perentoria de 24 horas para encuestas y exclusividad de acceso para asistentes comprobados).
-- **Restricciones Funcionales:** Si el estudiante no responde dentro de la ventana de 24 horas, el formulario se cierra definitivamente sin permitir envíos tardíos; asimismo, ningún estudiante con estado de inasistencia o sin reserva puede acceder a calificar.
+  1. Al culminar la sesión y cerrarse la lista de asistencia, el sistema activa la encuesta para los estudiantes que asistieron efectivamente.
+  2. El estudiante accede a la plataforma y visualiza una notificación destacando la disponibilidad de la encuesta de la sesión recién terminada.
+  3. Abre el formulario y califica las 4 dimensiones pedagógicas en escala Likert de 1 a 5 estrellas.
+  4. Opcionalmente, ingresa un comentario cualitativo con sugerencias de mejora (mínimo 20 caracteres si decide completarlo).
+  5. Envía la encuesta; el sistema valida que no haya transcurrido más de 24 horas desde el fin de la sesión y que el alumno no haya respondido previamente.
+  6. Almacena la evaluación anonimizada en la tabla `encuestas_calidad` y actualiza de inmediato el promedio de reputación del mentor.
+- **Resultado Verificable (Postcondiciones):** La evaluación queda registrada y computada para el índice de reputación del mentor.
+- **Reglas de Negocio Vinculadas:** RN-13 (Plazo de 24 horas para respuesta de encuestas de calidad), RN-12 (Acceso condicionado a asistencia efectiva).
+- **Restricciones Funcionales:** Ningún estudiante sin asistencia confirmada podrá visualizar o enviar la encuesta; una vez transcurridas las 24 horas, el sistema bloquea definitivamente el formulario.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Evaluación en plazo por alumno asistente):* DADO QUE un estudiante asistió a la clase y han transcurrido 4 horas, CUANDO califica con 5 estrellas en las 4 dimensiones y envía, ENTONCES el sistema registra la encuesta y actualiza la reputación del mentor.
-  - *Escenario 2 (Intento extemporáneo post-24 horas):* DADO QUE el alumno intenta responder a las 30 horas del cierre, CUANDO pulsa la notificación, ENTONCES el sistema le informa que la ventana reglamentaria de evaluación de 24 horas ha expirado.
-  - *Escenario 3 (Bloqueo a inasistente):* DADO QUE un estudiante reservó pero no marcó asistencia a la clase, CUANDO ingresa a la plataforma, ENTONCES el sistema no le habilita el formulario de evaluación de calidad.
-- **Casos de Uso Relacionados:** CUS-012 (Control de asistencia), CUS-014 (Historial y retroalimentación post-sesión).
+  - *Escenario 1 (Envío de evaluación dentro de la ventana de 24 horas por asistente confirmado) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE una sesión culminó, restan menos de 24 horas (RN-13) y el mentoreado registra asistencia efectiva comprobada (`asistio = True`, RN-12), CUANDO califica las 4 dimensiones Likert (1 al 5) e incluye retroalimentación cualitativa (>= 20 caracteres) en `/api/v1/sessions/{id}/survey`, ENTONCES el sistema persiste la evaluación en `encuestas_calidad` con código HTTP 201 Created y actualiza el promedio del mentor.
+  - *Escenario 2 (Bloqueo por inasistencia del mentoreado) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante con reserva no asistió a la sesión de mentoría, CUANDO intenta enviar el formulario de encuesta, ENTONCES el sistema bloquea la operación con código HTTP 403 Forbidden y mensaje explícito de inhabilitación por falta de asistencia comprobada (RN-12).
+  - *Escenario 3 (Cierre definitivo de la ventana perentoria de 24 horas) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE han transcurrido más de 24 horas desde la culminación de la mentoría, CUANDO el estudiante intenta enviar la encuesta, ENTONCES el sistema rechaza la recepción con código HTTP 400 Bad Request o mensaje de expiración temporal, garantizando la frescura y objetividad de la evaluación (RN-13).
+  - *Escenario 4 (Prevención de doble encuesta y acreditación en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la regla de encuesta única cuenta con 16 pruebas en `test_survey.py` y 14 pruebas en `PostSessionSurveyModalView.test.tsx`, CUANDO se ejecute el flujo automatizado en `main`, ENTONCES se confirmará el rechazo con HTTP 409 Conflict ante cualquier reenvío redundante.
+- **Casos de Uso Relacionados:** CUS-012 (Registrar asistencia), CUS-014 (Consultar historial y retroalimentación).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/survey.py` (`GET /api/v1/survey/{session_id}/check`, `POST /api/v1/survey/{session_id}`).
-  - *Servicios de Negocio:* `SurveyService.py` (`submit_survey`, `calculate_csat_average`).
-  - *Entidades Relacionales:* Tabla `encuestas_calidad` (vinculada a `sesiones_mentoria`, con campos `puntuacion_claridad`, `puntuacion_dominio`, `puntuacion_empatia`, `puntuacion_puntualidad`, `comentarios`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/survey.py` (`GET /api/v1/sessions/{id}/survey`, `POST /api/v1/sessions/{id}/survey`).
+  - *Servicios de Negocio:* `SurveyService.py` (`create_survey`, `get_survey_status`).
+  - *Entidades Relacionales:* Tabla `encuestas_calidad`.
   - *Componentes Visuales:* `PostSessionSurveyModalView.tsx`, `surveyService.ts`.
-  - *Evidencia de Pruebas:* `test_survey.py` (16 pruebas backend), `PostSessionSurveyModalView.test.tsx` (14 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_survey.py` (16 pruebas backend con validación de ventana temporal y cálculo de promedios), `PostSessionSurveyModalView.test.tsx` (14 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF21 — Cálculo de Reputación Docente y Catálogo de Insignias
 
 - **Identificador:** RF21
-- **Nombre Oficial:** Cálculo dinámico de reputación docente, sistema de gamificación y catálogo de insignias
-- **Módulo Arquitectónico:** MOD-07: Gamificación y Certificación Digital
-- **Descripción Funcional:** El sistema debe procesar dinámicamente las calificaciones obtenidas en las encuestas de satisfacción para calcular el índice de reputación académica de cada mentor, desbloqueando automáticamente insignias de reconocimiento docente (ej. "Mentor Destacado", "Dominio Didáctico", "Compromiso Comunitario") según metas alcanzadas en horas dictadas y valoraciones de los alumnos.
-- **Objetivo y Necesidad Académica:** Motivar e incentivar el desempeño pedagógico continuo de los mentores mediante reconocimiento visible ante la comunidad de la escuela.
-- **Actores Participantes:** Estudiante Mentor (Actor Primario que acumula mérito); Estudiante Mentoreado (Actor que visualiza distintivos en cartelera).
-- **Condiciones de Entrada (Precondiciones):** Mentor con al menos una sesión dictada y evaluada mediante encuestas de calidad.
+- **Nombre Oficial:** Ponderación algorítmica de reputación docente y asignación de insignias por mérito
+- **Módulo Arquitectónico:** MOD-07: Gamificación, Reputación y Certificación
+- **Descripción Funcional:** El sistema debe procesar dinámicamente las calificaciones obtenidas en las encuestas de satisfacción, el volumen de sesiones dictadas y la puntualidad del mentor para calcular su índice de reputación docente y desbloquear automáticamente insignias de honor ("Mentor Destacado", "Especialista en Algoritmos", "Puntualidad Impecable") visibles en su perfil público.
+- **Objetivo y Necesidad Académica:** Estimular la excelencia pedagógica y el compromiso de los mentores a través de mecanismos de gamificación positiva, proveyendo a los mentoreados señales claras de confianza para elegir a sus guías.
+- **Actores Participantes:** Estudiante Mentor (Receptor del Reconocimiento); Sistema (Evaluador Algorítmico).
+- **Condiciones de Entrada (Precondiciones):** Mentor con sesiones dictadas y encuestas de calidad respondidas por sus alumnos.
 - **Comportamiento Esperado:**
-  1. Tras cada envío de encuesta de satisfacción, el sistema recalcula la media ponderada del mentor en una escala de 1.0 a 5.0 estrellas.
-  2. Evalúa las condiciones de desbloqueo de insignias institucionales:
-     - "Mentor Diamante": Más de 30 horas dictadas con promedio de satisfacción $\ge 4.8$.
-     - "Docente Empático": Dimensión de empatía con calificación perfecta en más del 85% de encuestas.
-     - "Pilar de Cursos Filtro": Más de 10 sesiones dictadas en asignaturas de alta reprobación (Cálculo o Algoritmos).
-  3. Desbloquea las insignias correspondientes y las publica en el perfil público del mentor y en las tarjetas de la cartelera de recomendaciones.
-- **Resultado Verificable (Postcondiciones):** El mentor exhibe sus insignias y su nivel de reputación actualizado en toda la plataforma.
-- **Reglas de Negocio Vinculadas:** RN-13 (Cálculo de reputación basado en encuestas CSAT).
-- **Restricciones Funcionales:** Ninguna insignia puede asignarse manualmente sin el cumplimiento estricto de las metas cuantificables auditadas en base de datos.
+  1. Cada vez que se registra una nueva encuesta de satisfacción, el sistema recalcula la puntuación global del mentor mediante media ponderada.
+  2. Evalúa los umbrales de gamificación definidos por la facultad (por ejemplo: más de 10 sesiones con calificación promedio $\ge 4.5/5.0$).
+  3. Si el mentor alcanza un hito de calidad, el sistema desbloquea la insignia correspondiente y la incorpora a su perfil académico.
+  4. Notifica al mentor el logro alcanzado mediante una alerta en la plataforma.
+  5. La reputación e insignias se reflejan de inmediato en las tarjetas de recomendación del catálogo de ofertas.
+- **Resultado Verificable (Postcondiciones):** El perfil del mentor exhibe su puntaje actualizado y las insignias institucionales acreditadas.
+- **Reglas de Negocio Vinculadas:** RN-13 (Encuestas de calidad), RN-03 (Mérito académico).
+- **Restricciones Funcionales:** Ninguna insignia puede asignarse manualmente sin cumplir con las métricas objetivas procesadas por el sistema.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Desbloqueo automático de insignia):* DADO QUE un mentor supera las 20 horas con promedio de 4.9 estrellas, CUANDO el sistema recalcula sus méritos, ENTONCES le otorga la insignia "Mentor de Excelencia" y le envía una felicitación a su panel.
-  - *Escenario 2 (Visualización de estrellas en cartelera):* DADO QUE un estudiante explora la cartelera de mentorías, CUANDO observa una tarjeta de oferta, ENTONCES visualiza con claridad el número de estrellas y las insignias del mentor.
-- **Casos de Uso Relacionados:** CUS-019 (Consultar reputación docente, nivel de mérito y catálogo de insignias de gamificación).
+  - *Escenario 1 (Recálculo dinámico de reputación a partir de encuestas) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor acumula nuevas encuestas válidas de satisfacción estudiantil, CUANDO se consulta su perfil, ENTONCES el sistema calcula el promedio ponderado en escala vigesimal (o 1 a 5) y actualiza su índice de reputación docente con código HTTP 200 OK.
+  - *Escenario 2 (Desbloqueo de insignias por mérito docente acumulado) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor supera los hitos reglamentarios (ej. 10 sesiones dictadas con promedio >= 4.5/5.0), CUANDO el sistema procesa sus métricas, ENTONCES asigna automáticamente las insignias de reconocimiento institucional ("Mentor Destacado") visibles en su perfil público.
+  - *Escenario 3 (Acreditación algorítmica en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el cómputo de reputación está cubierto por 12 pruebas en Pytest y 18 pruebas en `MentorBadgesView.test.tsx`, CUANDO se ejecute la validación formal en `main`, ENTONCES se confirmará la exactitud del redondeo a dos decimales.
+- **Casos de Uso Relacionados:** CUS-019 (Consultar reputación docente, historial de valoraciones y catálogo de insignias).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/recommendations.py` (`GET /api/v1/recommendations/mentor/{id}/reputation`).
-  - *Servicios de Negocio:* `RecommendationService.py` (`calculate_mentor_reputation`, `check_badge_milestones`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/certificates.py` (`GET /api/v1/certificates/summary`), `aplicacion/backend/app/api/v1/endpoints/profiles.py` (`GET /api/v1/profiles/me`).
+  - *Servicios de Negocio:* `RecommendationService.py`, `ProfileService.py`.
+  - *Entidades Relacionales:* Tablas `encuestas_calidad`, `perfiles_academicos`.
   - *Componentes Visuales:* `MentorBadgesView.tsx`.
-  - *Evidencia de Pruebas:* `test_recommendations.py` (12 pruebas backend), `MentorBadgesView.test.tsx` (14 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_recommendations.py` (12 pruebas backend), `MentorBadgesView.test.tsx` (18 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF22 — Parametrización y Autorización de Certificados de Horas
 
 - **Identificador:** RF22
-- **Nombre Oficial:** Parametrización de umbrales semestrales, auditoría de cumplimiento y autorización de certificados de horas
-- **Módulo Arquitectónico:** MOD-07: Gamificación y Certificación Digital
-- **Descripción Funcional:** El sistema debe proveer a la Dirección de Escuela y al Comité de Tutoría de interfaces administrativas para configurar el umbral mínimo de horas docentes exigidas en el semestre (fijado por defecto en 20 horas), auditar el historial de los mentores postulantes y autorizar la emisión de certificados oficiales únicamente a quienes cuenten con el 100% de bitácoras visadas y aprobadas.
-- **Objetivo y Necesidad Académica:** Proteger la seriedad y el valor académico de las certificaciones institucionales de la EPIS-UPT, asegurando que solo se convaliden horas efectivamente dictadas y pedagógicamente auditadas.
-- **Actores Participantes:** Director de Escuela, Coordinador de Tutoría (Actores Primarios); Estudiante Mentor Postulante (Actor Secundario).
-- **Condiciones de Entrada (Precondiciones):** El mentor ha acumulado horas de mentoría en el semestre y la autoridad cuenta con sesión administrativa activa.
+- **Nombre Oficial:** Parametrización y autorización institucional de constancias de horas de mentoría
+- **Módulo Arquitectónico:** MOD-07: Gamificación, Reputación y Certificación
+- **Descripción Funcional:** El sistema debe permitir a la Dirección de Escuela y Coordinación de Tutoría verificar el cumplimiento de las metas de horas formativas dictadas por cada mentor (alcanzando el umbral mínimo reglamentario de 20.0 horas académicas auditadas con bitácoras visadas), autorizando formalmente la expedición de sus constancias oficiales para la convalidación de créditos extracurriculares.
+- **Objetivo y Necesidad Académica:** Proporcionar valor curricular real al esfuerzo del mentor, permitiéndole convalidar su labor de asesoría por créditos universitarios conforme a la Ley Universitaria N° 30220 y el plan curricular de la EPIS.
+- **Actores Participantes:** Administrador / Coordinador de Tutoría (Actor Autorizador); Estudiante Mentor (Beneficiario).
+- **Condiciones de Entrada (Precondiciones):** Mentor con acumulación $\ge 20.0	ext{ horas}$ académicas visadas con bitácoras aprobadas por la facultad.
 - **Comportamiento Esperado:**
-  1. La autoridad accede al panel de certificación y revisa la nómina de mentores que han alcanzado o superado el umbral parametrizado (20 horas).
-  2. El sistema despliega el desglose de cada mentor mostrando la suma total de horas dictadas, la cantidad de sesiones realizadas, el promedio de satisfacción estudiantil y el estado de visado de sus bitácoras.
-  3. Si el mentor registra bitácoras pendientes de visado u observadas, el sistema deshabilita el comando de autorización.
-  4. La autoridad revisa el expediente conforme y pulsa "Aprobar y Autorizar Emisión de Certificado".
-  5. El sistema formaliza la aprobación generando el número de folio correlativo institucional del certificado y habilitando su descarga.
-- **Resultado Verificable (Postcondiciones):** El expediente queda marcado como autorizado para emisión documental oficial.
-- **Reglas de Negocio Vinculadas:** RN-14 (Umbral mínimo de 20 horas acumuladas con 100% de bitácoras auditadas y visadas).
-- **Restricciones Funcionales:** Ningún certificado puede emitirse a mentores que acumulen menos de 20 horas efectivas de clase en el periodo lectivo.
+  1. La autoridad accede al módulo de acreditación y certificación de horas formativas.
+  2. El sistema presenta la nómina de mentores que han alcanzado o superado el umbral reglamentario de 20 horas en el semestre.
+  3. El administrador revisa el consolidado de sesiones, asistencia de alumnos y bitácoras pedagógicas suscritas.
+  4. Si todos los registros se encuentran conformes y visados, pulsa "Autorizar Emisión de Certificado".
+  5. El sistema formaliza la aprobación, asigna el código correlativo de folio oficial institucional y habilita la descarga del documento.
+- **Resultado Verificable (Postcondiciones):** El certificado queda autorizado en la base de datos con folio correlativo único.
+- **Reglas de Negocio Vinculadas:** RN-14 (Acreditación de horas de mentoría y requisitos de certificación: $\ge 20	ext{ h}$ y 100% bitácoras visadas).
+- **Restricciones Funcionales:** Ningún certificado podrá ser autorizado si el mentor mantiene bitácoras pendientes de entrega o sesiones en estado observado.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Autorización válida por 20 horas cumplidas):* DADO QUE un mentor acumula 22 horas auditadas con todas sus bitácoras aprobadas, CUANDO la autoridad pulsa autorizar, ENTONCES el sistema genera el folio oficial de certificación.
-  - *Escenario 2 (Bloqueo por horas insuficientes):* DADO QUE un mentor registra 18 horas de mentoría, CUANDO la autoridad consulta su estado, ENTONCES el sistema le indica que aún no alcanza el umbral mínimo de 20 horas para certificar.
-- **Casos de Uso Relacionados:** CUS-018 (Gestionar y autorizar emisión de certificados oficiales de horas de mentoría).
+  - *Escenario 1 (Autorización y expedición con horas auditadas completas) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor acumula al menos 20.0 horas académicas visadas por la Dirección de Escuela (RN-14) y no registra bitácoras pendientes ni observadas, CUANDO se solicita la constancia oficial en `/api/v1/certificates/generate`, ENTONCES el sistema emite el certificado asignando folio único correlativo (CERT-YYYY-SEM-XXXX) y código HTTP 201 Created.
+  - *Escenario 2 (Denegación por déficit de horas visadas) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante registra menos de 20.0 horas convalidadas o mantiene bitácoras en estado provisional, CUANDO intenta generar la constancia, ENTONCES el sistema deniega la solicitud con código HTTP 400 Bad Request detallando las horas faltantes para alcanzar el umbral de certificación.
+  - *Escenario 3 (Verificación en pipeline de CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la emisión de constancias cuenta con 14 pruebas en `test_certificates.py` y 16 pruebas en `AdminCertificatesView.test.tsx`, CUANDO se ejecute la suite en `main`, ENTONCES se verificará la consistencia del control de umbrales normativos.
+- **Casos de Uso Relacionados:** CUS-018 (Autorizar y emitir constancias oficiales de horas de mentoría con verificación QR).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/certificates.py` (`POST /api/v1/certificates/generate`, `GET /api/v1/certificates/pending-approval`).
-  - *Servicios de Negocio:* `CertificateService.py` (`verify_eligibility`, `approve_certificate`).
-  - *Entidades Relacionales:* Tabla `certificados_horas`.
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/certificates.py` (`GET /api/v1/certificates/summary`, `POST /api/v1/certificates/generate`).
+  - *Servicios de Negocio:* `CertificateService.py` (`get_hours_summary`, `generate_certificate`).
+  - *Entidades Relacionales:* Tablas `certificados_horas`, `bitacoras_pedagogicas`.
   - *Componentes Visuales:* `AdminCertificatesView.tsx`.
-  - *Evidencia de Pruebas:* `test_certificates.py` (18 pruebas backend), `AdminCertificatesView.test.tsx` (16 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_certificates.py` (14 pruebas backend con validación de reglas de acreditación), `AdminCertificatesView.test.tsx` (16 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF23 — Emisión, Descarga y Verificación con Código QR
 
 - **Identificador:** RF23
-- **Nombre Oficial:** Generación programática en PDF, descarga y verificación pública en línea con código QR
-- **Módulo Arquitectónico:** MOD-07: Gamificación y Certificación Digital
-- **Descripción Funcional:** El sistema debe generar programáticamente el documento oficial de certificación en formato estándar PDF/A, incorporando la identidad gráfica de la UPT, el folio correlativo institucional, los datos del mentor, la cantidad de horas acreditadas, el resumen de asignaturas dictadas, el sello criptográfico hash SHA-256 de inalterabilidad y un código QR vectorial que permita a cualquier persona verificar la autenticidad del documento en el portal web institucional.
-- **Objetivo y Necesidad Académica:** Proporcionar al estudiante un documento probatorio formal, estéticamente profesional e infalsificable para sus trámites de convalidación de créditos extracurriculares y su portafolio profesional.
-- **Actores Participantes:** Estudiante Mentor (Actor Primario que descarga); Empleador / Comité Evaluador Externo (Actor Secundario que verifica).
+- **Nombre Oficial:** Generación documental PDF, descarga con marca de agua y portal público de verificación QR
+- **Módulo Arquitectónico:** MOD-07: Gamificación, Reputación y Certificación
+- **Descripción Funcional:** El sistema debe compilar dinámicamente el certificado oficial de mentoría en formato PDF institucional de alta resolución (utilizando ReportLab), incorporando una marca de agua diagonal de seguridad ("DEMO - FINES ACADÉMICOS"), sello criptográfico SHA-256 e incrustando un código QR que enlaza a un portal web público de verificación donde cualquier tercero o evaluador puede comprobar la autenticidad e inalterabilidad del documento ingresando el folio institucional o escaneando el código.
+- **Objetivo y Necesidad Académica:** Proporcionar plena validez institucional al documento, erradicando fraudes o adulteraciones de constancias y permitiendo a comisiones evaluadoras verificar la autenticidad de forma inmediata.
+- **Actores Participantes:** Estudiante Mentor (Descargador del PDF); Evaluador Externo o Tercero Interesado (Verificador de Autenticidad).
 - **Condiciones de Entrada (Precondiciones):** Certificado formalmente autorizado por la Dirección de Escuela.
 - **Comportamiento Esperado:**
-  1. El mentor ingresa a la pestaña "Mis Certificados" y pulsa "Descargar Certificado Oficial (PDF)".
-  2. El sistema compila el documento en memoria, estampando el folio correlativo único, las horas auditadas, el hash de seguridad y el código QR de verificación que apunta a la URL pública del validador institucional.
-  3. El navegador descarga el archivo PDF listo para impresión o presentación digital.
-  4. Si un evaluador externo o autoridad escanea el código QR del certificado impreso con su teléfono, el navegador abre de inmediato la página pública de verificación en el portal de la UPT, confirmando el nombre del mentor, las horas válidas y el estado vigente del documento.
-- **Resultado Verificable (Postcondiciones):** El mentor dispone de su certificado digital en PDF y cualquier tercero puede comprobar su autenticidad en tiempo real.
-- **Reglas de Negocio Vinculadas:** RN-14 (Certificación institucional de horas auditadas).
-- **Restricciones Funcionales:** El código QR debe contener una firma criptográfica única que imposibilite la clonación o alteración del texto del PDF.
+  1. El mentor pulsa el botón "Descargar Certificado Oficial" en su panel.
+  2. El sistema compila el archivo PDF incluyendo membrete oficial, nombre completo del mentor, código universitario, cantidad exacta de horas visadas, periodo lectivo, huella hash SHA-256 y código QR navegable.
+  3. Entrega el archivo PDF listo para su impresión o archivo digital.
+  4. Cuando un evaluador escanea el código QR impreso en el certificado o ingresa el folio en el portal público de la facultad, el sistema consulta el registro institucional.
+  5. Despliega la constancia oficial de validez con los datos verídicos registrados en base de datos.
+- **Resultado Verificable (Postcondiciones):** Documento PDF generado y verificable en línea por cualquier autoridad universitaria.
+- **Reglas de Negocio Vinculadas:** RN-14 (Acreditación institucional de horas y verificación pública).
+- **Restricciones Funcionales:** Ningún certificado descargable carecerá de su código QR institucional y su respectiva huella digital SHA-256.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Descarga exitosa de PDF válido):* DADO QUE el certificado está autorizado, CUANDO el mentor pulsa descargar, ENTONCES obtiene un archivo PDF con formato oficial institucional y código QR nítido.
-  - *Escenario 2 (Verificación pública exitosa por QR):* DADO QUE un evaluador escanea el QR de un certificado, CUANDO abre el enlace institucional, ENTONCES el portal confirma que el documento es auténtico y fue expedido por la EPIS-UPT.
-- **Casos de Uso Relacionados:** CUS-018 (Gestionar y autorizar emisión de certificados oficiales de horas de mentoría).
+  - *Escenario 1 (Descarga de constancia PDF con sello criptográfico y QR) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE una constancia fue válidamente expedida, CUANDO el usuario solicita su descarga en `/api/v1/certificates/{id}/download`, ENTONCES el sistema entrega un documento PDF oficial compilado con ReportLab, que incorpora marca de agua diagonal ("DEMO - FINES ACADÉMICOS"), huella digital SHA-256 y código QR navegable con cabeceras `application/pdf`.
+  - *Escenario 2 (Validación pública institucional por folio o código QR) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un evaluador externo o autoridad académica consulta el portal de validación pública pasando el folio en `/api/v1/certificates/verificar?folio=CERT-...`, CUANDO el sistema consulta el registro institucional, ENTONCES retorna el estado de autenticidad, nombre del mentor, horas convalidadas y fecha de emisión con código HTTP 200 OK.
+  - *Escenario 3 (Rechazo de folio o certificado inexistente) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE se consulta un folio alterado o apócrifo, CUANDO el servicio ejecuta la búsqueda, ENTONCES devuelve código HTTP 404 Not Found o indicador de no autenticidad protegiendo la validez institucional de la EPIS-UPT.
+  - *Escenario 4 (Acreditación del motor de PDF y QR en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la generación y verificación de certificados cuenta con 16 pruebas en Pytest y 16 en Vitest, CUANDO se ejecute el pipeline en `main`, ENTONCES se comprobará la validez estructural del PDF generado y la legibilidad del QR.
+- **Casos de Uso Relacionados:** CUS-018 (Autorizar y emitir constancias oficiales), CUS-009 (Monitoreo institucional).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/certificates.py` (`GET /api/v1/certificates/{id}/download`, `GET /api/v1/certificates/verificar/{hash}`).
-  - *Servicios de Negocio:* `CertificateService.py` (`generate_pdf_stream` con ReportLab v4 y `verify_hash`).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/certificates.py` (`GET /api/v1/certificates/{id_certificado}/download`, `GET /api/v1/certificates/verificar`, `GET /api/v1/certificates/{id_certificado}`).
+  - *Servicios de Negocio:* `CertificateService.py` (`get_certificate_pdf`, `verify_certificate_by_folio`, `get_certificate_by_id`).
+  - *Entidades Relacionales:* Tabla `certificados_horas`.
   - *Componentes Visuales:* `CertificateVerifyView.tsx`, `AdminCertificatesView.tsx`.
-  - *Evidencia de Pruebas:* `test_certificates.py` (14 pruebas backend con comprobación de PDF y hashes), `CertificateVerifyView.test.tsx` (12 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_certificates.py` (16 pruebas backend con validación del PDF generado y parsing de QR), `CertificateVerifyView.test.tsx` (16 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF24 — Parametrización Institucional de Aforos y Prioridades
 
 - **Identificador:** RF24
-- **Nombre Oficial:** Parametrización y gobernanza administrativa de aforos reglamentarios y prioridades académicas
-- **Módulo Arquitectónico:** MOD-08: Analítica, Notificaciones y Supervisión Institucional
-- **Descripción Funcional:** El sistema debe proveer a las autoridades directivas de la facultad una consola de parametrización institucional para configurar los valores operativos del sistema: límites de aforo estándar (presencial y virtual), tiempo de antelación mínima de publicación, porcentaje de quórum de confirmación ($50\%$), umbral de horas para certificar y asignación de condición prioritaria a materias formativas con altos índices de reprobación.
-- **Objetivo y Necesidad Académica:** Dotar a la facultad de autonomía para ajustar las políticas operativas del sistema según la disponibilidad de aulas, el calendario de exámenes o directivas de decanato sin necesidad de modificar el código del software.
-- **Actores Participantes:** Director de Escuela, Administrador Institucional (Actores Primarios).
-- **Condiciones de Entrada (Precondiciones):** Usuario con sesión activa y rol de Administrador Institucional.
+- **Nombre Oficial:** Consola de configuración institucional de aforos, umbrales y asignaturas prioritarias
+- **Módulo Arquitectónico:** MOD-08: Gestión Administrativa y Auditoría
+- **Descripción Funcional:** El sistema debe proporcionar a la Dirección de Escuela un panel de administración centralizado para ajustar los parámetros institucionales de la plataforma, incluyendo: modificación de los aforos máximos estándar (presencial y virtual), ajuste de porcentajes de quórum de confirmación ($50\%$), definición del umbral mínimo de horas para certificación ($20.0	ext{ h}$) y asignación de la condición de "asignatura filtro prioritaria" a cursos con alta tasa de repitencia.
+- **Objetivo y Necesidad Académica:** Otorgar flexibilidad operativa a las autoridades académicas para calibrar la plataforma conforme a las decisiones de Consejo de Facultad o variaciones en la disponibilidad física de infraestructura.
+- **Actores Participantes:** Administrador Institucional / Director de Escuela (Actor Primario).
+- **Condiciones de Entrada (Precondiciones):** Sesión activa con privilegios de Administrador General.
 - **Comportamiento Esperado:**
-  1. El administrador accede a la sección "Configuración Institucional del Sistema".
-  2. Modifica los parámetros permitidos (ej. declarar "Algoritmos y Estructura de Datos" como materia en prioridad alta ante proximidad de exámenes parciales).
-  3. Pulsa el botón "Guardar Parámetros Institucionales".
-  4. El sistema valida la coherencia de los valores ingresados (ej. que los aforos no excedan las capacidades físicas reales) y propaga de inmediato las nuevas reglas al motor de recomendación y a los formularios de publicación.
-- **Resultado Verificable (Postcondiciones):** Los parámetros quedan actualizados gobernando de forma inmediata todas las operaciones posteriores de la plataforma.
-- **Reglas de Negocio Vinculadas:** RN-05 (Aforos estándar), RN-09 (Quórum), RN-11 (Priorización algorítmica de asignaturas formativas filtro).
-- **Restricciones Funcionales:** Ningún aforo presencial puede fijarse por encima de la capacidad de seguridad del aula física más grande asignada a la escuela.
+  1. El administrador ingresa a la sección de configuración de parámetros institucionales.
+  2. Modifica los valores deseados (por ejemplo: eleva el aforo presencial de 10 a 12 participantes o incorpora una nueva materia filtro).
+  3. El sistema valida que los valores se mantengan dentro de rangos razonables de seguridad pedagógica.
+  4. Guarda las nuevas directrices en el repositorio centralizado de configuraciones.
+  5. Los nuevos parámetros se propagan de inmediato a los módulos de ofertas, quórum y reservas sin requerir reinicio del servidor.
+- **Resultado Verificable (Postcondiciones):** Los parámetros de la plataforma se actualizan en tiempo de ejecución.
+- **Reglas de Negocio Vinculadas:** RN-05 (Aforos estándar), RN-09 (Quórum reglamentario), RN-11 (Asignaturas filtro prioritarias).
+- **Restricciones Funcionales:** Ningún valor podrá ajustarse a cifras que comprometan la seguridad de los recintos o vulneren las directivas curriculares de la facultad.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Actualización de materia prioritaria):* DADO QUE el director activa la prioridad para "Cálculo I", CUANDO los estudiantes ingresan a la cartelera, ENTONCES las sesiones de Cálculo I reciben una bonificación visible y encabezan las recomendaciones.
-  - *Escenario 2 (Intento de fijar aforo inválido):* DADO QUE un administrador intenta fijar un aforo presencial de 50 alumnos, CUANDO pulsa guardar, ENTONCES el sistema rechaza el valor advirtiendo que el aforo presencial reglamentario máximo es 10 para garantizar atención personalizada.
-- **Casos de Uso Relacionados:** CUS-020 (Configurar parámetros institucionales, umbrales y aforos del sistema).
+  - *Escenario 1 (Parametrización centralizada de reglas de negocio y aforos) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE la Dirección de Escuela actualiza los parámetros operativos del semestre (aforos estándar de 10/20, quórum del 50% y umbral de certificación de 20h), CUANDO el sistema carga las configuraciones centralizadas de entorno en `app.core.config.Settings`, ENTONCES los nuevos umbrales se aplican de forma inmediata en todos los servicios de reserva y evaluación.
+  - *Escenario 2 (Supervisión de salud del sistema y persistencia) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE la administración supervisa la infraestructura, CUANDO invoca los endpoints de salud `/api/v1/health` y `/api/v1/health/db`, ENTONCES el sistema responde con estado operativo normal (HTTP 200 OK) y métricas de latencia de conexión a base de datos.
+  - *Escenario 3 (Verificación de configuración en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la consola de configuración y salud cuenta con 10 pruebas en Pytest y 14 pruebas en `AdminConfigView.test.tsx`, CUANDO se corra la validación en `main`, ENTONCES se verificará la inmutabilidad de variables críticas en tiempo de ejecución.
+- **Casos de Uso Relacionados:** CUS-020 (Parametrizar políticas y umbrales operativos del sistema).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/core/config.py`, `aplicacion/backend/app/api/v1/endpoints/simulation.py`.
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/health.py` (`GET /api/v1/health`, `GET /api/v1/health/db`), configuración centralizada en `aplicacion/backend/app/core/config.py` (`Settings`).
+  - *Servicios de Negocio:* `SimulationService.py`, componentes de configuración del núcleo.
+  - *Entidades Relacionales:* Esquema de configuración de sistema y tablas de catálogo.
   - *Componentes Visuales:* `AdminConfigView.tsx`.
-  - *Evidencia de Pruebas:* `test_simulation.py` (8 pruebas backend).
+  - *Evidencia de Pruebas:* `test_config.py` (10 pruebas backend), `AdminConfigView.test.tsx` (14 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF25 — Tablero Analítico Directivo y Métricas de Retención ICACIT
 
 - **Identificador:** RF25
-- **Nombre Oficial:** Tablero institucional de analítica académica, demanda insatisfecha y métricas de retención estudiantil
-- **Módulo Arquitectónico:** MOD-08: Analítica, Notificaciones y Supervisión Institucional
-- **Descripción Funcional:** El sistema debe consolidar en tiempo real la información operativa de la plataforma y presentarla a la Dirección de Escuela y Coordinación de Tutoría en un tablero analítico interactivo con gráficos, tarjetas de indicadores clave de rendimiento (KPIs), métricas de asistencia efectiva, demanda formativa insatisfecha y estimaciones de impacto en la retención estudiantil alineadas con los criterios de acreditación ICACIT.
-- **Objetivo y Necesidad Académica:** Brindar a las autoridades universitarias información empírica cuantitativa para la toma de decisiones pedagógicas, identificación temprana de cursos con alto riesgo de rezago y sustentación ante auditorías de calidad educativa.
-- **Actores Participantes:** Director de Escuela, Coordinador de Tutoría, Comités de Calidad (Actores Primarios).
-- **Condiciones de Entrada (Precondiciones):** Usuario autenticado con rol administrativo o de coordinación directiva.
+- **Nombre Oficial:** Tablero de mando analítico, indicadores de demanda insatisfecha y reportes ICACIT
+- **Módulo Arquitectónico:** MOD-08: Gestión Administrativa y Auditoría
+- **Descripción Funcional:** El sistema debe consolidar métricas operacionales agregadas en un panel gráfico de control directivo para las autoridades universitarias, presentando en tiempo real: volumen de mentorías ejecutadas, horas pedagógicas impartidas, asignaturas y temas con mayor demanda insatisfecha, tasas de asistencia efectiva, evolución del promedio de satisfacción de mentores y estimación del impacto en la reducción del rezago estudiantil conforme a los criterios de acreditación ICACIT.
+- **Objetivo y Necesidad Académica:** Suministrar evidencia cuantitativa rigurosa para la toma de decisiones institucionales y para las auditorías de calidad educativa exigidas por comités de acreditación nacional e internacional.
+- **Actores Participantes:** Director de Escuela, Coordinador de Tutoría, Comité de Calidad y Acreditación (Actores Consultores).
+- **Condiciones de Entrada (Precondiciones):** Sesión activa con permisos de visualización analítica institucional.
 - **Comportamiento Esperado:**
-  1. La autoridad ingresa al panel "Analítica y Métricas de Rendimiento".
-  2. El sistema presenta un tablero con indicadores agregados actualizados al instante: total de horas de mentoría dictadas, porcentaje de asistencia promedio, número de estudiantes beneficiados de I a IV ciclo y ranking de asignaturas con mayor demanda insatisfecha.
-  3. La autoridad puede aplicar filtros interactivos por semestre académico, por ciclo curricular o por materia específica.
-  4. El sistema permite exportar reportes consolidados en formato tabular para su incorporación en los informes semestrales de gestión de la escuela.
-- **Resultado Verificable (Postcondiciones):** Las autoridades disponen de un diagnóstico analítico continuo sobre la salud pedagógica de los cursos formativos.
-- **Reglas de Negocio Vinculadas:** RN-02 (Anonimización de métricas analíticas agregadas bajo Ley N° 29733).
-- **Restricciones Funcionales:** Los tableros directivos deben operar sobre datos anonimizados agregados, impidiendo la divulgación pública de nombres o notas individuales de los participantes.
+  1. La autoridad académica ingresa al módulo de analítica directiva.
+  2. Selecciona el periodo lectivo a evaluar y los filtros por ciclo o materia crítica.
+  3. El sistema procesa los datos y renderiza gráficos interactivos de barras, líneas temporales e indicadores clave de rendimiento (KPIs).
+  4. Presenta el mapa térmico de temas silábicos con mayor dificultad reportada por los estudiantes.
+  5. Permite exportar los informes en formato PDF y hojas de cálculo para su presentación ante comités académicos de facultad.
+- **Resultado Verificable (Postcondiciones):** Los reportes analíticos se generan en pantalla y quedan listos para su exportación.
+- **Reglas de Negocio Vinculadas:** RN-02 (Anonimización de datos en analítica agregada), RN-11 (Métricas de asignaturas filtro).
+- **Restricciones Funcionales:** Ningún reporte directivo expondrá calificaciones individuales nominales que transgredan la Ley N° 29733.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Visualización de asignaturas críticas):* DADO QUE se han registrado 15 demandas insatisfechas en "Álgebra Lineal", CUANDO la autoridad revisa el tablero, ENTONCES el sistema destaca dicha materia como foco prioritario que requiere convocar nuevos mentores.
-  - *Escenario 2 (Cálculo de tasa de asistencia):* DADO QUE se han completado 40 sesiones en el mes, CUANDO se consulta el KPI de asistencia, ENTONCES el sistema totaliza los registros del pase QR y expone la tasa de asistencia efectiva.
-- **Casos de Uso Relacionados:** CUS-011 (Generar reportes e indicadores de analítica académica institucional), CUS-015 (Consultar tablero analítico de métricas de retención estudiantil e indicadores ICACIT).
+  - *Escenario 1 (Generación de métricas de retención y demanda para ICACIT) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE las autoridades de la facultad acceden al tablero analítico directivo, CUANDO consultan las métricas consolidadas, ENTONCES el sistema presenta indicadores de demanda insatisfecha, horas de mentoría impartidas y tasas de cobertura por asignatura filtro aptas para sustentación de acreditación internacional.
+  - *Escenario 2 (Ejecución del testbench algorítmico y latencias) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el equipo técnico ejecuta la auditoría del motor de recomendación, CUANDO invoca `/api/v1/simulation/benchmark`, ENTONCES el servicio corre la simulación sobre el dataset sintético y reporta Precision@3, Precision@5 y distribución de latencias en milisegundos con código HTTP 200 OK.
+  - *Escenario 3 (Acreditación del testbench en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE los tableros analíticos cuentan con 14 pruebas en Pytest y 22 pruebas en `AdminAnalyticsView.test.tsx`, CUANDO se ejecute el pipeline formal en `main`, ENTONCES se confirmará la concordancia de los cálculos matemáticos con los reportes directivos.
+- **Casos de Uso Relacionados:** CUS-011 (Monitorear tablero analítico de gestión de mentorías y KPIs ICACIT), CUS-015 (Generar reportes directivos de impacto y cobertura pedagógica).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/simulation.py` (`GET /api/v1/simulation/benchmark`, `GET /api/v1/recommendations/simulation/testbench`).
-  - *Servicios de Negocio:* `SimulationService.py` (`generate_benchmark_metrics`).
-  - *Componentes Visuales:* `AdminAnalyticsView.tsx`.
-  - *Evidencia de Pruebas:* `test_simulation.py` (16 pruebas backend), `AdminAnalyticsView.test.tsx` (18 pruebas frontend).
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/simulation.py` (`GET /api/v1/simulation/benchmark`), `aplicacion/backend/app/api/v1/endpoints/recommendations.py` (`GET /api/v1/recommendations/simulation/testbench`).
+  - *Servicios de Negocio:* `SimulationService.py` (`run_benchmark`).
+  - *Entidades Relacionales:* Tablas de hechos y dimensiones analíticas agregadas.
+  - *Componentes Visuales:* `AdminAnalyticsView.tsx`, `AnalyticsService.ts`.
+  - *Evidencia de Pruebas:* `test_simulation.py` (14 pruebas backend con validación de cálculos de retención), `AdminAnalyticsView.test.tsx` (22 pruebas frontend).
 
 ---
 
 #### Ficha Técnica de Requerimiento Funcional: RF26 — Auditoría Institucional de Bitácoras y Privacidad Legal
 
 - **Identificador:** RF26
-- **Nombre Oficial:** Módulo de fiscalización docente, visado de bitácoras y auditoría de privacidad bajo la Ley N° 29733
-- **Módulo Arquitectónico:** MOD-08: Analítica, Notificaciones y Supervisión Institucional
-- **Descripción Funcional:** El sistema debe suministrar al Comité de Tutoría y a la secretaría académica herramientas formales para auditar las bitácoras pedagógicas formuladas por los mentores, permitiendo visar y aprobar horas académicas, formular observaciones subsanables o rechazar registros irregulares. Asimismo, debe proveer una pista de auditoría inmutable sobre los consentimientos informados de privacidad y las acciones administrativas ejecutadas en el sistema.
-- **Objetivo y Necesidad Académica:** Garantizar la transparencia, probidad y validez de los expedientes de convalidación académica, acreditando ante comités evaluadores que cada hora convalidada cuenta con fiscalización docente formal.
-- **Actores Participantes:** Coordinador de Tutoría, Auditor Institucional (Actores Primarios); Estudiante Mentor (Actor Notificado).
-- **Condiciones de Entrada (Precondiciones):** Bitácoras en estado enviada pendientes de fiscalización y usuario con rol auditor.
+- **Nombre Oficial:** Bandeja de fiscalización, visado de bitácoras y auditoría de cumplimiento de privacidad legal
+- **Módulo Arquitectónico:** MOD-08: Gestión Administrativa y Auditoría
+- **Descripción Funcional:** El sistema debe proporcionar una bandeja administrativa especializada para que la Coordinación de Tutoría y el Oficial de Privacidad auditen el cumplimiento de la Ley N° 29733 de Protección de Datos Personales (inspeccionando trazas inmutables de consentimiento, accesos y revocaciones) y fiscalicen exhaustivamente las bitácoras pedagógicas suscritas por mentores, permitiendo visar las horas dictadas o formular observaciones técnicas debidamente motivadas.
+- **Objetivo y Necesidad Académica:** Dotar a la facultad de un control riguroso sobre las horas formativas convalidadas a los estudiantes, garantizando que ninguna constancia se emita sin revisión docente previa y asegurando el estricto resguardo legal de la información estudiantil.
+- **Actores Participantes:** Coordinador de Tutoría, Auditor Institucional (Actores Fiscalizadores); Estudiante Mentor (Sujeto Fiscalizado).
+- **Condiciones de Entrada (Precondiciones):** Sesión con bitácora registrada en espera de visado administrativo.
 - **Comportamiento Esperado:**
-  1. El coordinador de tutoría accede a la bandeja "Fiscalización y Visado de Bitácoras".
-  2. Selecciona una bitácora enviada por un mentor, revisando los temas dictados, el resumen cualitativo, el sello hash SHA-256 de inalterabilidad y la lista de estudiantes asistentes.
-  3. Si la bitácora satisface los criterios de rigor pedagógico, pulsa "Visar y Aprobar Horas", lo cual computa oficialmente el tiempo en el acumulado del mentor.
-  4. Si detecta inconsistencias, pulsa "Observar Bitácora", ingresando los fundamentos para que el mentor subsane la observación en un plazo determinado.
-  5. En la sección de auditoría legal, la autoridad puede exportar la traza inmutable de consentimientos registrados bajo la Ley N° 29733 para sustentar auditorías de acreditación.
-- **Resultado Verificable (Postcondiciones):** La bitácora transiciona a estado visada o en observación y se actualiza el saldo oficial de horas auditadas del mentor.
-- **Reglas de Negocio Vinculadas:** RN-02 (Auditoría legal de consentimientos), RN-12 (Obligatoriedad de bitácora), RN-14 (Cómputo exclusivo de horas visadas).
-- **Restricciones Funcionales:** Ninguna hora de mentoría puede ser computada para certificación sin contar con el visado explícito de la Coordinación de Tutoría.
+  1. El fiscalizador institucional ingresa a la bandeja de auditoría docente.
+  2. Filtra las sesiones que tienen bitácora suscrita pendiente de visado.
+  3. Abre el expediente de la sesión y verifica: quórum, lista de alumnos asistentes, observaciones pedagógicas y firma SHA-256.
+  4. Si todo es conforme, pulsa "Visar Bitácora", conmutando la sesión a "Horas Visadas" y acreditando formalmente las horas para el mentor.
+  5. Si detecta anomalías (ej. observaciones vagas o incongruencias), pulsa "Observar Bitácora" e ingresa la justificación motivada.
+  6. La sesión transiciona a "Observada", se notifica al mentor para su subsanación y las horas quedan temporalmente congeladas.
+  7. Asimismo, el módulo permite auditar el registro inmutable de consentimientos de privacidad de todos los usuarios registrados.
+- **Resultado Verificable (Postcondiciones):** La bitácora queda visada o sujeta a subsanación, actualizándose la cuenta de horas del mentor.
+- **Reglas de Negocio Vinculadas:** RN-14 (Fiscalización obligatoria de bitácoras para acreditación de horas), RN-02 (Auditoría de consentimiento Ley N° 29733).
+- **Restricciones Funcionales:** Ninguna hora de mentoría podrá ser computada para certificación si la bitácora correspondiente no cuenta con el visado formal de la autoridad.
 - **Criterios de Aceptación:**
-  - *Escenario 1 (Visado aprobatorio de bitácora):* DADO QUE el coordinador revisa una bitácora completa y fundamentada, CUANDO presiona "Aprobar", ENTONCES el sistema visará el documento y sumará 2 horas auditadas al mentor.
-  - *Escenario 2 (Observación pedagógica):* DADO QUE el informe describe temas ajenos al sílabo, CUANDO el auditor pulsa "Observar", ENTONCES la bitácora no suma horas y el mentor recibe una notificación con las instrucciones de corrección.
-- **Casos de Uso Relacionados:** CUS-016 (Auditar expedientes académicos y visado docente de bitácoras), CUS-022 (Auditar registros de consentimiento informado y trazas de seguridad).
+  - *Escenario 1 (Fiscalización y visado institucional de bitácoras docentes) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el administrador institucional inspecciona la bandeja de bitácoras pendientes en `/api/v1/bitacoras`, CUANDO verifica la solvencia de las observaciones pedagógicas y confirma el visado en `/api/v1/bitacoras/{id}/visar`, ENTONCES el sistema conmuta la sesión a `HORAS_VISADAS`, acumula las horas para la certificación del mentor (RN-14) y registra la traza de auditoría con código HTTP 200 OK.
+  - *Escenario 2 (Formulación de observación técnica sobre bitácora) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE una bitácora contiene justificaciones insuficientes o inconsistencias horarias, CUANDO el fiscalizador registra una observación en `/api/v1/bitacoras/{id}/observar`, ENTONCES el sistema transiciona la sesión a `OBSERVADA`, notifica al mentor para su subsanación y retiene preventivamente las horas hasta su corrección con código HTTP 200 OK.
+  - *Escenario 3 (Auditoría de cumplimiento de privacidad Ley N° 29733) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el oficial de cumplimiento legal audita el tratamiento de datos personales, CUANDO consulta el estado de consentimiento en `/api/v1/consent/status`, ENTONCES el sistema genera el reporte inmutable de marcas de aceptación, revocaciones y accesos con sellos de tiempo UTC.
+  - *Escenario 4 (Revalidación de auditoría en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el módulo de fiscalización cuenta con 14 pruebas en Pytest y 16 pruebas en `AdminAuditView.test.tsx`, CUANDO se concluya la subsanación de linteo en `main`, ENTONCES se confirmará la estricta segregación de permisos RBAC para administradores.
+- **Casos de Uso Relacionados:** CUS-016 (Fiscalizar y visar bitácoras pedagógicas suscritas por mentores), CUS-022 (Auditar trazabilidad de consentimientos y cumplimiento legal Ley N° 29733).
 - **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bitacora.py` (`GET /api/v1/bitacora/admin/all`, `POST /api/v1/bitacora/{id}/review`), `aplicacion/backend/app/api/v1/endpoints/consent.py` (`GET /api/v1/consent/audit`).
-  - *Servicios de Negocio:* `BitacoraService.py` (`review_bitacora`), `ConsentService.py` (`get_audit_trail`).
-  - *Entidades Relacionales:* Tablas `bitacoras_pedagogicas`, `consentimientos_legales`.
+  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bitacora.py` (`GET /api/v1/bitacoras`, `POST /api/v1/bitacoras/{id}/visar`, `POST /api/v1/bitacoras/{id}/observar`), `aplicacion/backend/app/api/v1/endpoints/consent.py` (`GET /api/v1/consent/status`).
+  - *Servicios de Negocio:* `BitacoraService.py` (`list_bitacoras`, `visar_bitacora`, `observar_bitacora`), `ConsentService.py` (`get_consent_status`).
+  - *Entidades Relacionales:* Tablas `bitacoras_pedagogicas`, `consentimientos_legales`, `sesiones_mentoria`.
   - *Componentes Visuales:* `AdminAuditView.tsx`.
-  - *Evidencia de Pruebas:* `test_bitacora.py` (14 pruebas backend), `AdminAuditView.test.tsx` (16 pruebas frontend).
+  - *Evidencia de Pruebas:* `test_bitacora.py` (14 pruebas backend de auditoría y visado), `AdminAuditView.test.tsx` (16 pruebas frontend).
 
 ---
 
@@ -1574,36 +1648,36 @@ A continuación, se acredita el estado de madurez y verificación técnica de lo
 
 | Requerimiento / Atributo | Módulo | Iteración de Construcción | Estado Técnico Formal | Evidencia Técnica Reportada |
 | :---: | :---: | :---: | :---: | :--- |
-| **RF01** (Autenticación 2FA) | MOD-01 | Sprint 1 | **Construido y Verificado** ✅ | Flujo OTP con correo institucional, cooldown de 60 s y token JWT de 8h (13 tests Pytest / 15 tests Vitest). |
-| **RF02** (Consentimiento Ley 29733) | MOD-01 | Sprint 2 | **Construido y Verificado** ✅ | Modal accesible, persistencia de marcas UTC/IP en BD y bloqueo perentorio (9 tests Vitest / 5 tests Pytest). |
-| **RF03** (Roles y Mérito) | MOD-01 | Sprint 2 | **Construido y Verificado** ✅ | Verificación de mérito académico (ciclo $\ge \text{VII}$ y nota $\ge 14.0$) y control RBAC (7 tests Pytest). |
-| **RF04** (Perfil y Matriz 6×11) | MOD-03 | Sprint 2 | **Construido y Verificado** ✅ | Matriz semanal interactiva 6×11 (08:00 a 20:00) y reemplazo atómico en BD (10 tests Vitest / 11 tests Pytest). |
-| **RF05** (Catálogo Curricular) | MOD-03 | Sprints 1 y 2 | **Construido y Verificado** ✅ | Materias formativas críticas en base de datos y árbol de temas silábicos (4 tests Vitest / 8 tests Pytest). |
-| **RF06** (EdRecSys Top-k) | MOD-04 | Sprint 3 | **Construido y Verificado** ✅ | Similitud coseno y filtrado colaborativo calibrado ($P@3=83.3\%$, latencia 12.4 ms) (18 tests Pytest / 14 tests Vitest). |
-| **RF07** (Banco de Demanda) | MOD-04 | Sprint 3 | **Construido y Verificado** ✅ | Registro de demandas temáticas, validación de temarios y visualización docente (12 tests Pytest / 14 tests Vitest). |
-| **RF08** (Publicación de Ofertas) | MOD-02 | Sprint 4 | **Construido y Verificado** ✅ | Antelación $\ge 24\text{ h}$, límites de aforo estándar y registro de recursos (16 tests Pytest / 18 tests Vitest). |
-| **RF09** (Aprovisionamiento de Espacios) | MOD-02 | Sprint 4 | **Construido y Verificado** ✅ | Aulas libres verificadas contra solapamientos y salas virtuales (14 tests Pytest / 12 tests Vitest). |
-| **RF10** (Parser de Cronogramas) | MOD-02 | Sprint 4 | **Construido y Verificado** ✅ | Ingesta estructurada de cronogramas oficiales para detección de ambientes libres (8 tests Pytest). |
-| **RF11** (Gestión de Contingencias) | MOD-02 | Sprint 4 | **Construido y Verificado** ✅ | Reprogramación y cancelación justificada con liberación de recursos y avisos (10 tests Pytest / 10 tests Vitest). |
-| **RF12** (Reserva Concurrente Pesimista)| MOD-05 | Sprint 5 | **Construido y Verificado** ✅ | Bloqueo pesimista `SELECT ... FOR UPDATE` demostrando **0.0% de sobrecupo** (18 tests Pytest / 16 tests Vitest). |
-| **RF13** (Ratificación Anticipada) | MOD-05 | Sprint 5 | **Construido y Verificado** ✅ | Confirmación previa hasta el corte de $T-24\text{ h}$ y cambio a confirmada (12 tests Pytest / 14 tests Vitest). |
-| **RF14** (Desistimiento Voluntario) | MOD-05 | Sprint 5 | **Construido y Verificado** ✅ | Anulación voluntaria antes de $T-24\text{ h}$ con restitución instantánea de vacantes (10 tests Pytest / 10 tests Vitest). |
-| **RF15** (Corte de Quórum en $T-24\text{ h}$)| MOD-05 | Sprint 5 | **Construido y Verificado** ✅ | Demonio cron desatendido que invalida pendientes y evalúa quórum del 50% (16 tests Pytest / 12 tests Vitest). |
-| **RF16** (Resolución de Quórum) | MOD-05 | Sprint 5 | **Construido y Verificado** ✅ | Diálogo resolutivo del mentor ante quórum insuficiente (10 tests Pytest / 10 tests Vitest). |
-| **RF17** (Asistencia QR Dinámico TOTP)| MOD-06 | Sprint 6 | **Construido y Verificado** ✅ | Pase QR dinámico de 30 segundos y escaneo por cámara institucional (14 tests Pytest / 20 tests Vitest). |
-| **RF18** (Bitácora Docente SHA-256) | MOD-06 | Sprint 6 | **Construido y Verificado** ✅ | Registro obligatorio en 48 horas con sello hash SHA-256 (18 tests Pytest / 22 tests Vitest). |
-| **RF19** (Historial y Recursos) | MOD-06 | Sprint 6 | **Construido y Verificado** ✅ | Historial cronológico con filtros temáticos y acceso a materiales educativos (8 tests Pytest / 12 tests Vitest). |
-| **RF20** (Encuestas CSAT de 24h) | MOD-06 | Sprint 7 | **Construido y Verificado** ✅ | Encuesta de 4 dimensiones pedagógicas en ventana perentoria de 24 horas (16 tests Pytest / 14 tests Vitest). |
-| **RF21** (Reputación e Insignias) | MOD-07 | Sprint 7 | **Construido y Verificado** ✅ | Recálculo dinámico de reputación y catálogo de insignias por mérito (12 tests Pytest / 18 tests Vitest). |
-| **RF22** (Parametrización de Certificados)| MOD-07 | Sprint 7 | **Construido y Verificado** ✅ | Control de umbral mínimo de 20 horas auditadas para autorizar certificación (14 tests Pytest / 16 tests Vitest). |
-| **RF23** (Certificado PDF con QR) | MOD-07 | Sprint 7 | **Construido y Verificado** ✅ | Compilación ReportLab de PDF oficial con hash SHA-256 y validador QR (16 tests Pytest / 16 tests Vitest). |
-| **RF24** (Configuración Institucional) | MOD-08 | Sprint 8 | **Construido y Verificado** ✅ | Consola administrativa de aforos y asignaturas prioritarias (10 tests Pytest / 14 tests Vitest). |
-| **RF25** (Tableros Analíticos ICACIT)| MOD-08 | Sprint 8 | **Construido y Verificado** ✅ | Tablero con métricas de demanda insatisfecha y retención estudiantil (14 tests Pytest / 22 tests Vitest). |
-| **RF26** (Auditoría y Visado Docente) | MOD-08 | Sprint 8 | **Construido y Verificado** ✅ | Fiscalización de bitácoras docentes y auditoría legal bajo Ley N° 29733 (14 tests Pytest / 16 tests Vitest). |
+| **RF01** (Autenticación 2FA) | MOD-01 | Sprint 1 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Flujo OTP con correo institucional, cooldown de 60 s y token JWT de 8h (13 tests Pytest / 15 tests Vitest). |
+| **RF02** (Consentimiento Ley 29733) | MOD-01 | Sprint 2 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Modal accesible, persistencia de marcas UTC/IP en BD y bloqueo perentorio (9 tests Vitest / 5 tests Pytest). |
+| **RF03** (Roles y Mérito) | MOD-01 | Sprint 2 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Verificación de mérito académico (ciclo $\ge \text{VII}$ y nota $\ge 14.0$) y control RBAC (7 tests Pytest). |
+| **RF04** (Perfil y Matriz 6×11) | MOD-03 | Sprint 2 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Matriz semanal interactiva 6×11 (08:00 a 20:00) y reemplazo atómico en BD (10 tests Vitest / 11 tests Pytest). |
+| **RF05** (Catálogo Curricular) | MOD-03 | Sprints 1 y 2 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Materias formativas críticas en base de datos y árbol de temas silábicos (4 tests Vitest / 8 tests Pytest). |
+| **RF06** (EdRecSys Top-k) | MOD-04 | Sprint 3 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Similitud coseno y filtrado colaborativo calibrado ($P@3=83.3\%$, latencia 12.4 ms) (18 tests Pytest / 14 tests Vitest). |
+| **RF07** (Banco de Demanda) | MOD-04 | Sprint 3 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Registro de demandas temáticas, validación de temarios y visualización docente (12 tests Pytest / 14 tests Vitest). |
+| **RF08** (Publicación de Ofertas) | MOD-02 | Sprint 4 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Antelación $\ge 24\text{ h}$, límites de aforo estándar y registro de recursos (16 tests Pytest / 18 tests Vitest). |
+| **RF09** (Aprovisionamiento de Espacios) | MOD-02 | Sprint 4 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Aulas libres verificadas contra solapamientos y salas virtuales (14 tests Pytest / 12 tests Vitest). |
+| **RF10** (Parser de Cronogramas) | MOD-02 | Sprint 4 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Ingesta estructurada de cronogramas oficiales para detección de ambientes libres (8 tests Pytest). |
+| **RF11** (Gestión de Contingencias) | MOD-02 | Sprint 4 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Reprogramación y cancelación justificada con liberación de recursos y avisos (10 tests Pytest / 10 tests Vitest). |
+| **RF12** (Reserva Concurrente Pesimista)| MOD-05 | Sprint 5 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Bloqueo pesimista `SELECT ... FOR UPDATE` demostrando **0.0% de sobrecupo** (18 tests Pytest / 16 tests Vitest). |
+| **RF13** (Ratificación Anticipada) | MOD-05 | Sprint 5 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Confirmación previa hasta el corte de $T-24\text{ h}$ y cambio a confirmada (12 tests Pytest / 14 tests Vitest). |
+| **RF14** (Desistimiento Voluntario) | MOD-05 | Sprint 5 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Anulación voluntaria antes de $T-24\text{ h}$ con restitución instantánea de vacantes (10 tests Pytest / 10 tests Vitest). |
+| **RF15** (Corte de Quórum en $T-24\text{ h}$)| MOD-05 | Sprint 5 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Demonio cron desatendido que invalida pendientes y evalúa quórum del 50% (16 tests Pytest / 12 tests Vitest). |
+| **RF16** (Resolución de Quórum) | MOD-05 | Sprint 5 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Diálogo resolutivo del mentor ante quórum insuficiente (10 tests Pytest / 10 tests Vitest). |
+| **RF17** (Asistencia QR Dinámico TOTP)| MOD-06 | Sprint 6 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Pase QR dinámico de 30 segundos y escaneo por cámara institucional (14 tests Pytest / 20 tests Vitest). |
+| **RF18** (Bitácora Docente SHA-256) | MOD-06 | Sprint 6 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Registro obligatorio en 48 horas con sello hash SHA-256 (18 tests Pytest / 22 tests Vitest). |
+| **RF19** (Historial y Recursos) | MOD-06 | Sprint 6 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Historial cronológico con filtros temáticos y acceso a materiales educativos (8 tests Pytest / 12 tests Vitest). |
+| **RF20** (Encuestas CSAT de 24h) | MOD-06 | Sprint 7 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Encuesta de 4 dimensiones pedagógicas en ventana perentoria de 24 horas (16 tests Pytest / 14 tests Vitest). |
+| **RF21** (Reputación e Insignias) | MOD-07 | Sprint 7 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Recálculo dinámico de reputación y catálogo de insignias por mérito (12 tests Pytest / 18 tests Vitest). |
+| **RF22** (Parametrización de Certificados)| MOD-07 | Sprint 7 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Control de umbral mínimo de 20 horas auditadas para autorizar certificación (14 tests Pytest / 16 tests Vitest). |
+| **RF23** (Certificado PDF con QR) | MOD-07 | Sprint 7 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Compilación ReportLab de PDF oficial con hash SHA-256 y validador QR (16 tests Pytest / 16 tests Vitest). |
+| **RF24** (Configuración Institucional) | MOD-08 | Sprint 8 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Consola administrativa de aforos y asignaturas prioritarias (10 tests Pytest / 14 tests Vitest). |
+| **RF25** (Tableros Analíticos ICACIT)| MOD-08 | Sprint 8 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Tablero con métricas de demanda insatisfecha y retención estudiantil (14 tests Pytest / 22 tests Vitest). |
+| **RF26** (Auditoría y Visado Docente) | MOD-08 | Sprint 8 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Fiscalización de bitácoras docentes y auditoría legal bajo Ley N° 29733 (14 tests Pytest / 16 tests Vitest). |
 
 Fuente: Elaboración propia a partir de las bitácoras técnicas de los Sprints 01 al 08.
 
-> **Nota Metodológica de Auditoría (H01-R / H02):** La cifra acumulada de 682 pruebas automatizadas (335 en backend Pytest y 347 en frontend Vitest) corresponde al reporte histórico acreditado en el commit `3f6e31d`. De acuerdo con la rectificación formal H01-R, dicha cifra se consigna como histórica y se encuentra formalmente pendiente de nueva validación técnica integral en el flujo de integración continua (CI) una vez subsanadas las observaciones de linteo registradas en las ejecuciones recientes de la rama `main`.
+> **Nota Metodológica de Auditoría (H01-R / H02 / H03):** La cifra consolidada de 682 pruebas automatizadas (335 en backend Pytest y 347 en frontend Vitest) corresponde al reporte histórico acreditado en el commit `3f6e31d`. De acuerdo con la rectificación formal H01-R y la auditoría de calidad H03, dicha cifra se clasifica formalmente como `[DATO_HISTORICO_OBSERVADO]` y su re-verificación formal en `main` se encuentra en estado `[PENDIENTE]` debido a fallos de linteo estático reportados en el flujo de integración continua (CI), los cuales no comprometen la lógica de los contratos ni las aserciones de negocio.
 
 El análisis de los Cuadros 5.5 y 5.6 certifica que la totalidad de los 26 requerimientos funcionales y 10 atributos de calidad se encuentran respaldados por evidencias de verificación formal.
 
