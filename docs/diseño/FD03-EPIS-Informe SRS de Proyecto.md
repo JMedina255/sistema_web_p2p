@@ -1418,82 +1418,151 @@ A continuación, se presentan los 24 casos de uso canónicos estructurados en lo
 | Atributo | Detalle |
 |---|---|
 | **Id Caso de Uso** | **UC-001** (CUS-001) |
-| **Nombre** | Iniciar sesión institucional con 2FA y formalización de consentimiento digital |
+| **Nombre** | Iniciar sesión institucional con 2FA y autenticación federada Google Workspace |
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
-| **Requisito ID (RF)** | RF-001 (Autenticación multifactor 2FA institucional), RF-002 (Formalización de consentimiento digital Ley 29733); RN-01 (Dominio institucional @upt.pe y OTP con TTL de 5 minutos), RN-02 (Consentimiento informado legal digital) |
+| **Requisito ID (RF)** | RF-001 (Autenticación multifactor 2FA institucional), RF-002 (Formalización de consentimiento digital Ley 29733); RN-01 (Dominio institucional @virtual.upt.pe y @upt.pe con OTP de 5 minutos y cooldown de 60 segundos), RN-02 (Consentimiento informado legal digital) |
 | **Versión** | 2.0 |
 | **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
-| **Actores** | Usuario Institucional (`UserRole.mentoreado`, `UserRole.mentor`, `UserRole.administrador`), Servicio de Correo SMTP / UPT (`EmailService`) |
-| **Interacción** | Fase de Construcción / Iteración Sprint 01 - Sprint 02 |
-| **Descripción** | Permite autenticar la identidad del usuario universitario mediante flujo 2FA sin contraseñas estáticas, validando la pertenencia al dominio oficial `@upt.pe` a través del controlador `aplicacion/backend/app/api/v1/endpoints/auth.py`. El backend genera un código OTP numérico criptográficamente seguro de 6 dígitos con expiración de 300 segundos persistido con hash en base de datos (`app/models/auth.py`), despacha el correo mediante `auth_service.py` (`AuthService.request_otp`) y valida el ingreso en `POST /api/v1/auth/verify-otp`. Verifica el estado del consentimiento informado en `app/services/consent_service.py` (`ConsentService.get_consent_status`); si es nuevo, despliega `ConsentModalView.tsx` y formaliza la aceptación persistiendo IP, User-Agent y timestamp en `consentimientos_legales` (`app/models/consent.py`). Tras la validación, expide un token JWT criptográfico (`HS256`) con 8 horas de vigencia (`ACCESS_TOKEN_EXPIRE_MINUTES = 480`) y claims de roles (`UserRole`), retornando el payload al frontend `LoginOtpView.tsx` para su almacenamiento seguro en `localStorage`. |
-| **Referencias** | Guía SWEBOK v3.0 (Capítulo 1: Requisitos de Software y Capítulo 2: Diseño de Software)<br>Estándar ISO/IEC/IEEE 29148:2018 y Criterios de Acreditación ICACIT<br>Documento de Arquitectura de Software (SAD v2.0 - MOD-01: Seguridad, Autenticación y Gobernanza)<br>Ley Nº 29733 de Protección de Datos Personales del Perú y D.S. Nº 003-2013-JUS |
-| **Anexos** | `aplicacion/frontend/src/components/LoginOtpView.tsx`<br>`aplicacion/frontend/src/components/ConsentModalView.tsx`<br>`aplicacion/frontend/src/services/authService.ts` (`AuthService`, `apiClient`)<br>`aplicacion/frontend/src/services/consentService.ts` (`ConsentService`)<br>`aplicacion/backend/app/api/v1/endpoints/auth.py` (`POST /api/v1/auth/request-otp`, `POST /api/v1/auth/verify-otp`)<br>`aplicacion/backend/app/api/v1/endpoints/consent.py` (`GET /api/v1/consent/status`, `POST /api/v1/consent/accept`)<br>`aplicacion/backend/app/services/auth_service.py` (`AuthService.request_otp`, `AuthService.verify_otp`)<br>`aplicacion/backend/app/models/auth.py` (`Usuario`, `CodigoOTP`), `app/models/consent.py` (`ConsentimientoLegal`) |
-| **Precondiciones** | 1. El usuario posee una cuenta activa perteneciente al dominio oficial `@upt.pe` en la tabla `usuarios`.<br>2. El servicio SMTP institucional se encuentra configurado en `app/core/config.py` con credenciales operativas.<br>3. El usuario no registra suspensión administrativa en `usuarios.activo = true`. |
-| **PostCondiciones** | 1. Token JWT institucional (`HS256`) generado y almacenado en `localStorage` con vigencia estricta de 8 horas.<br>2. Traza inmutable de auditoría registrada en la tabla física `consentimientos_legales` con UUID, IP, User-Agent y marca de tiempo UTC.<br>3. Redirección reactiva en cliente al panel principal según el rol asignado (`mentoreado`, `mentor` o `administrador`). |
+| **Actores** | Estudiante Mentoreado, Estudiante Mentor, Administrador Institucional (Primarios); Servicio SMTP Gmail Institucional, Google Identity Services GIS (Secundarios) |
+| **Interacción** | Fase de Construcción / Iteración Sprint 01 - Sprint 02 (Actualización Post-Sprint 08 con Google Identity y SMTP real) |
+| **Descripción** | Permite autenticar la identidad del usuario universitario mediante flujo dual sin contraseñas estáticas, validando la pertenencia al dominio oficial @virtual.upt.pe o @upt.pe a través del controlador aplicacion/backend/app/api/v1/endpoints/auth.py. El usuario puede autenticarse mediante credencial federada de Google Workspace UPT utilizando el SDK oficial de Google Identity Services (GIS), o solicitando un código OTP numérico criptográficamente seguro de 6 dígitos con expiración de 300 segundos persistido en la tabla auth_challenges (app/models/auth.py) y despachado mediante el transporte SMTP Gmail institucional de auth_service.py (AuthService.request_otp). El código se valida en POST /api/v1/auth/otp/verify. El sistema verifica el estado del consentimiento informado bajo la Ley Nº 29733 en app/services/consent_service.py; si es nuevo, despliega ConsentModalView.tsx y formaliza la aceptación persistiendo IP, User-Agent y timestamp en consentimientos_legales (app/models/consent.py). Tras la validación, expide un token JWT criptográfico (HS256) con 8 horas de vigencia (ACCESS_TOKEN_EXPIRE_MINUTES = 480) y claims de roles institucionales, retornando el payload al frontend LoginOtpView.tsx para su almacenamiento seguro en localStorage. |
+| **Referencias** | Guía SWEBOK v3.0 (Capítulo 1: Requisitos de Software y Capítulo 2: Diseño de Software)<br>Estándar ISO/IEC/IEEE 29148:2018 y Criterios de Acreditación ICACIT<br>Documento de Arquitectura de Software (SAD v3.0 - MOD-01: Seguridad, Autenticación y Gobernanza)<br>Ley Nº 29733 de Protección de Datos Personales del Perú y D.S. Nº 003-2013-JUS |
+| **Anexos** | aplicacion/frontend/src/components/LoginOtpView.tsx<br>aplicacion/frontend/src/components/ConsentModalView.tsx<br>aplicacion/frontend/src/services/authService.ts (AuthService, apiClient)<br>aplicacion/frontend/src/services/consentService.ts (ConsentService)<br>aplicacion/backend/app/api/v1/endpoints/auth.py (POST /api/v1/auth/otp/request, POST /api/v1/auth/otp/verify, POST /api/v1/auth/otp/resend, POST /api/v1/auth/google)<br>aplicacion/backend/app/api/v1/endpoints/consent.py (GET /api/v1/consent/status, POST /api/v1/consent/accept)<br>aplicacion/backend/app/services/auth_service.py (AuthService.request_otp, AuthService.verify_otp)<br>aplicacion/backend/app/services/email_service.py (EmailService.send_otp_email)<br>aplicacion/backend/app/models/auth.py (AuthChallenge), app/models/consent.py (ConsentimientoLegal) |
+| **Precondiciones** | 1. El usuario posee una cuenta activa perteneciente al dominio oficial @virtual.upt.pe o @upt.pe.<br>2. El servicio SMTP institucional o el cliente Google Identity Services se encuentra configurado en el backend con credenciales operativas.<br>3. El usuario no registra suspensión administrativa en usuarios.activo = true. |
+| **PostCondiciones** | 1. Token JWT institucional (HS256) generado y almacenado en localStorage con vigencia estricta de 8 horas.<br>2. Traza inmutable de auditoría registrada en la tabla física consentimientos_legales con UUID, IP, User-Agent y marca de tiempo UTC.<br>3. Redirección reactiva en cliente al panel principal según el rol asignado (mentoreado, mentor o administrador). |
 
 ##### Flujo Normal de Eventos
 
 | Usuario | Sistema |
 |---|---|
-| **Fase 1: Validación de identidad institucional y solicitud de OTP** | |
-| **1.** El usuario accede a la vista de autenticación `LoginOtpView.tsx`, ingresa su dirección de correo institucional en el cuadro de texto `"Correo Institucional"` (`input[type="email"]`) y hace clic en el botón `"Continuar"`. | **2.** En `authService.ts`, la función `requestOtp(email)` despacha una petición `POST /api/v1/auth/request-otp` con payload JSON `{"email": email}` hacia el controlador `auth.py`. El backend valida con Pydantic (`EmailStr`) la sintaxis y comprueba que `email.endswith("@upt.pe")`. Ejecuta `SELECT * FROM usuarios WHERE email = :email AND activo = true`. (Si el dominio es ajeno a la universidad, salta a E001). (Si la cuenta está inactiva o suspendida, salta a E002). |
-| **Fase 2: Generación criptográfica, despacho SMTP y verificación de código temporal** | |
-| **3.** El usuario revisa en pantalla el correo verificado y presiona el botón `"Solicitar Código de Acceso"`. | **4.** En `auth_service.py`, `AuthService.request_otp()` genera un código numérico aleatorio seguro mediante `secrets.randbelow(900000) + 100000`, calcula su hash SHA-256 y lo almacena en la tabla temporal con expiración `NOW() + INTERVAL '5 MINUTES'` (RN-01). Invoca a `EmailService.send_otp_email()` para despachar el correo SMTP. Retorna HTTP 200 `{"message": "OTP_SENT"}`. En cliente, `LoginOtpView.tsx` despliega el modal con seis casillas individuales numéricas, inicializa el temporizador regresivo de 300 segundos en color azul institucional y enfoca la primera casilla. (Si el usuario no recibe el código en su buzón tras 60 segundos o el temporizador expira, salta a A002). |
-| **5.** El usuario consulta su bandeja institucional, copia el código de 6 dígitos, lo ingresa en las casillas del componente y hace clic en `"Verificar e Ingresar"`. | **6.** En `authService.ts`, se despacha `POST /api/v1/auth/verify-otp` con payload `{"email": email, "otp_code": code}`. `auth_service.py` recupera el registro, compara el hash y valida `expira_en > NOW()`. Si coincide, invalida el OTP usado y consulta `ConsentService.get_consent_status(email)`. (Si el código es incorrecto, salta a E003). (Si el código ha expirado, salta a E004). (Si se superan los 3 intentos fallidos consecutivos, salta a E005). (Si el usuario ya cuenta con consentimiento digital previo, salta a A001). |
-| **Fase 3: Formalización de consentimiento legal digital y emisión de sesión** | |
-| **7.** El cliente renderiza el componente `ConsentModalView.tsx`. El usuario lee los términos de tratamiento de datos personales en el panel con barra de desplazamiento vertical, marca la casilla de verificación `"He leído y acepto los términos de consentimiento informado bajo la Ley Nº 29733"` y presiona el botón `"Aceptar y Continuar"`. (Si el usuario desmarca o rechaza los términos, salta a E006). | **8.** En `consentService.ts`, se invoca `POST /api/v1/consent/accept` enviando el identificador de usuario y la versión de términos. El backend inserta en `consentimientos_legales` el registro inmutable con IP de origen (`client.host`), User-Agent y timestamp UTC. Seguidamente, `security.py` genera el token JWT firmado mediante `create_access_token` incluyendo los claims `sub: email`, `roles: [UserRole]`, `exp: now + 8h`. El backend retorna HTTP 200 con `access_token` y perfil. En `App.tsx`, el token se persiste en `localStorage.setItem('auth_token', token)`, se actualiza el estado global de autenticación y se redirige al panel correspondiente al rol, mostrando una notificación flotante en color verde de éxito: *"¡Sesión institucional iniciada exitosamente! Bienvenido al Sistema de Mentorías EPIS-UPT"*. |
+| **Fase 1: Validación de identidad institucional y selección del método de acceso** | |
+| **1.** El usuario accede a la vista de autenticación `LoginOtpView.tsx`, donde visualiza las opciones de acceso institucional: ingreso directo federado con Google Workspace UPT o ingreso por código OTP por correo. Si opta por código OTP, ingresa su dirección de correo institucional en el cuadro de texto `"Correo Institucional"` (`input[type="email"]`) y hace clic en el botón `"Enviar Código OTP"`. | **2.** En `authService.ts`, la función `requestOtp(email)` despacha una petición `POST /api/v1/auth/otp/request` con payload JSON `{"email": email}` hacia el controlador `auth.py`. El backend valida con Pydantic (`EmailStr`) la sintaxis y comprueba que `email.endswith("@virtual.upt.pe")` o `email.endswith("@upt.pe")`. Ejecuta `SELECT * FROM usuarios WHERE email = :email AND activo = true`. (Si el dominio es ajeno a la universidad, salta a E001). (Si el usuario prefiere autenticarse con Google Workspace UPT mediante el botón oficial, salta a A001). (Si la cuenta está inactiva o suspendida, salta a E002). |
+| **Fase 2: Generación criptográfica, despacho SMTP y verificación de código temporal OTP** | |
+| **3.** El usuario revisa en pantalla el correo verificado y presiona el botón `"Enviar Código OTP"`. | **4.** En `auth_service.py`, `AuthService.request_otp()` genera un código numérico aleatorio seguro mediante `secrets.randbelow(900000) + 100000`, registra el desafío en la tabla física `auth_challenges` con expiración `NOW() + INTERVAL '5 MINUTES'` y cooldown de 60 segundos (RN-01). Invoca a `EmailService.send_otp_email()` para despachar el correo SMTP institucional. Retorna HTTP 200 con `challenge_id` y `expires_at`. En cliente, `LoginOtpView.tsx` conmuta al paso de verificación, inicializa el temporizador regresivo de 300 segundos en color azul institucional y enfoca el campo del código. (Si el usuario no recibe el código en su buzón tras 60 segundos o el temporizador expira, salta a A002). |
+| **5.** El usuario consulta su bandeja institucional, copia el código de 6 dígitos numéricos, lo ingresa en el componente y hace clic en el botón `"Verificar y Acceder"`. (Si el usuario decide corregir el correo o cancelar el desafío, salta a A004). | **6.** En `authService.ts`, se despacha `POST /api/v1/auth/otp/verify` con payload `{"challenge_id": challengeId, "otp_code": cleanOtp}`. `auth_service.py` recupera el registro, compara el código y valida `expira_en > NOW()`. Si coincide, invalida el OTP usado marcándolo como consumido y consulta `ConsentService.get_consent_status(email)`. (Si el código es incorrecto, salta a E003). (Si el código ha expirado, salta a E004). (Si se superan los 3 intentos fallidos consecutivos, salta a E005). (Si el usuario ya cuenta con consentimiento digital previo, salta a A003). |
+| **Fase 3: Formalización de consentimiento legal digital Ley 29733 y emisión de sesión** | |
+| **7.** El cliente renderiza el componente modal `ConsentModalView.tsx`. El usuario lee los términos de tratamiento de datos personales en el panel con barra de desplazamiento vertical, marca la casilla de verificación `"He leído y acepto los términos de consentimiento informado bajo la Ley Nº 29733"` y presiona el botón `"Aceptar y Continuar"`. (Si el usuario desmarca o rechaza los términos, salta a E006). | **8.** En `consentService.ts`, se invoca `POST /api/v1/consent/accept` enviando el identificador de usuario y la versión de términos. El backend inserta en `consentimientos_legales` el registro inmutable con IP de origen (`client.host`), User-Agent y timestamp UTC (RN-02). Seguidamente, `security.py` genera el token JWT firmado mediante `create_access_token` incluyendo los claims `sub: email`, `roles: [UserRole]`, `exp: now + 8h`. El backend retorna HTTP 200 con `access_token` y perfil. En `App.tsx`, el token se persiste en `localStorage`, se actualiza el estado global de autenticación y se redirige al panel correspondiente al rol, mostrando una notificación flotante en color verde de éxito: *"¡Sesión institucional iniciada exitosamente! Bienvenido al Sistema de Mentorías EPIS-UPT"*. (Si la comunicación con el servidor falla durante la emisión de sesión, salta a E007). |
 
 ##### Flujos Alternativos
 
-##### Flujo alternativo A001: Acceso recurrente con consentimiento digital previamente formalizado
+##### Flujo alternativo A001: Autenticación federada directa con Google Workspace institucional (GIS)
 | Usuario | Sistema |
 |---|---|
-| **A001-1.1** El usuario completa satisfactoriamente el paso 5 introduciendo el código OTP válido. | **A001-1.2** En `auth.py`, `ConsentService.get_consent_status` retorna `has_consented = true` tras localizar en `consentimientos_legales` el registro activo sin revocación. |
-| **A001-1.3** El usuario visualiza la pantalla de carga con indicador circular de progreso en color azul institucional. | **A001-1.4** El sistema omite la renderización de `ConsentModalView.tsx`, emite directamente el token JWT firmado de sesión con sus roles asignados y retorna al paso 8 del Flujo Normal de Eventos. |
+| **A001-1.1** El usuario visualiza el contenedor de Google Identity Services en `LoginOtpView.tsx` y hace clic en el botón `"Continuar con Google Workspace UPT"`. | **A001-1.2** El navegador despliega el diálogo nativo One-Tap o la ventana emergente de Google Accounts solicitando la selección de la cuenta `@virtual.upt.pe` o `@upt.pe`. |
+| **A001-1.3** El usuario selecciona su cuenta institucional y concede la autorización de identidad. | **A001-1.4** Google Identity Services emite un ID Token criptográfico JWT firmado. En `authService.ts`, la función `loginWithGoogle(idToken)` despacha una petición `POST /api/v1/auth/google` enviando la credencial. En `auth.py`, `auth_service.py` valida la firma del token con los certificados públicos de Google, verifica el `client_id` oficial, comprueba que el dominio corresponda a `@virtual.upt.pe` o `@upt.pe`, y consulta el estado de consentimiento informado en `ConsentService.get_consent_status(email)` y retorna al paso 6 del Flujo Normal de Eventos. |
 
-##### Flujo alternativo A002: Reenvío de código temporal por retraso en buzón o caducidad
+##### Flujo alternativo A002: Reenvío de código temporal por retraso en buzón tras cumplir el cooldown
 | Usuario | Sistema |
 |---|---|
-| **A002-1.1** El usuario constata la ausencia del código en su buzón tras 60 segundos o la finalización del temporizador regresivo de 5 minutos, y hace clic en el enlace `"Reenviar código OTP"`. | **A002-1.2** En `LoginOtpView.tsx`, se valida que hayan transcurrido al menos 60 segundos desde la última solicitud. Despacha nuevamente `POST /api/v1/auth/request-otp` hacia el backend. |
-| **A002-1.3** El usuario visualiza la actualización del temporizador regresivo reiniciado a 5 minutos en color azul institucional y una alerta en color ámbar: *"Se ha remitido un nuevo código de acceso a su buzón institucional"*. | **A002-1.4** El backend invalida el código anterior, genera una nueva clave aleatoria de 6 dígitos, la despacha vía SMTP y retorna al paso 4 del Flujo Normal de Eventos. |
+| **A002-1.1** El usuario constata la ausencia del código en su buzón tras 60 segundos o la finalización del temporizador regresivo de 5 minutos, y hace clic en el enlace `"Reenviar código OTP"`. | **A002-1.2** En `LoginOtpView.tsx`, se valida que hayan transcurrido al menos 60 segundos desde la última solicitud. Despacha una petición `POST /api/v1/auth/otp/resend` con payload `{"challenge_id": challenge.challengeId}` hacia el controlador `auth.py`. |
+| **A002-1.3** El usuario visualiza la actualización del temporizador regresivo reiniciado a 5 minutos en color azul institucional y una alerta en color ámbar: *"Se ha generado y enviado un nuevo código OTP. El anterior ha sido invalidado"*. | **A002-1.4** El backend invalida el desafío anterior, genera una nueva clave aleatoria de 6 dígitos, la despacha vía SMTP Gmail institucional y retorna al paso 4 del Flujo Normal de Eventos. |
+
+##### Flujo alternativo A003: Acceso recurrente con consentimiento digital previamente formalizado
+| Usuario | Sistema |
+|---|---|
+| **A003-1.1** El usuario completa satisfactoriamente el paso 5 introduciendo el código OTP válido. | **A003-1.2** En `auth.py`, `ConsentService.get_consent_status` retorna `has_consented = true` tras localizar en `consentimientos_legales` el registro activo sin revocación. |
+| **A003-1.3** El usuario visualiza la pantalla de carga con indicador circular de progreso en color azul institucional. | **A003-1.4** El sistema omite la renderización de `ConsentModalView.tsx`, emite directamente el token JWT firmado de sesión con sus roles asignados y retorna al paso 8 del Flujo Normal de Eventos. |
+
+##### Flujo alternativo A004: Cancelación del desafío y cambio de correo institucional
+| Usuario | Sistema |
+|---|---|
+| **A004-1.1** Durante el paso de ingreso de código OTP, el usuario constata que escribió erróneamente su correo y hace clic en el enlace `"Cambiar de correo institucional"`. | **A004-1.2** `LoginOtpView.tsx` invoca `authService.cancelChallenge()`, purga el `challengeId` del estado local y restablece las variables del componente. |
+| **A004-1.3** El usuario observa la transición limpia de regreso hacia la pantalla inicial de ingreso de correo. | **A004-1.4** El sistema enfoca nuevamente el cuadro de texto `"Correo Institucional"` y retorna al paso 1 del Flujo Normal de Eventos sin generar registros. |
 
 ##### Flujos de Excepción
 
 ##### Flujo de excepción E001: Dominio de correo no institucional
 | Usuario | Sistema |
 |---|---|
-| | **E001-1.1** En el paso 2 del Flujo Normal, `auth.py` comprueba que la cadena ingresada no termina en `@upt.pe`. Lanza `HTTPException(status_code=400, detail="INVALID_DOMAIN: El acceso está reservado exclusivamente a cuentas institucionales @upt.pe.")`.<br><br>En `authService.ts`, captura el error 400 y propaga la excepción hacia el componente. `LoginOtpView.tsx` despliega una etiqueta de advertencia en color rojo: *"Acceso denegado: Ingrese únicamente su correo institucional universitario (@upt.pe)"*. Presenta el botón `<button onClick={handleReset}>Corregir Correo</button>`. |
+| | **E001-1.1** En el paso 2 del Flujo Normal, `auth.py` comprueba que la cadena ingresada no termina en `@virtual.upt.pe` ni `@upt.pe`. Lanza `HTTPException(status_code=400, detail="INVALID_DOMAIN: Acceso restringido: Solo se permiten correos institucionales con dominio @virtual.upt.pe o @upt.pe.")`.<br><br>En `authService.ts`, captura el error 400 y propaga la excepción hacia el componente. `LoginOtpView.tsx` despliega una etiqueta de advertencia en color rojo: *"Acceso restringido: Solo se permiten correos institucionales con dominio @virtual.upt.pe o @upt.pe."*. Presenta el botón `"Corregir Correo"`. |
 | **E001-1.2** Hace clic en el botón "Corregir Correo". | **E001-1.3** Limpia el cuadro de texto `"Correo Institucional"`, le asigna el foco automáticamente y retorna al paso 1 del Flujo Normal de Eventos. |
 
 ##### Flujo de excepción E002: Cuenta institucional inactiva o suspendida
 | Usuario | Sistema |
 |---|---|
-| | **E002-1.1** En el paso 2 del Flujo Normal, `auth.py` ejecuta `SELECT activo FROM usuarios WHERE email = :email` y detecta `activo = false`. Lanza `HTTPException(status_code=403, detail="ACCOUNT_SUSPENDED: Su cuenta institucional registra suspensión administrativa.")`.<br><br>En `LoginOtpView.tsx`, se captura el error 403 y se despliega un cuadro de diálogo modal en color rojo con el mensaje: *"Cuenta inhabilitada. Su registro se encuentra en estado inactivo. Por favor, comuníquese con la Dirección de Escuela EPIS-UPT"*. Presenta el botón `<button onClick={handleCloseModal}>Aceptar</button>`. |
+| | **E002-1.1** En el paso 2 del Flujo Normal, `auth.py` ejecuta `SELECT activo FROM usuarios WHERE email = :email` y detecta `activo = false`. Lanza `HTTPException(status_code=403, detail="ACCOUNT_SUSPENDED: Su cuenta institucional registra suspensión administrativa.")`.<br><br>En `LoginOtpView.tsx`, se captura el error 403 y se despliega un cuadro de diálogo modal en color rojo con el mensaje: *"Cuenta inhabilitada. Su registro se encuentra en estado inactivo. Por favor, comuníquese con la Dirección de Escuela EPIS-UPT"*. Presenta el botón `"Aceptar"`. |
 | **E002-1.2** Hace clic en el botón "Aceptar". | **E002-1.3** Cierra el cuadro modal, restablece el formulario inicial y finaliza la sesión sin generar registros de autenticación. |
 
 ##### Flujo de excepción E003: Código temporal OTP incorrecto
 | Usuario | Sistema |
 |---|---|
-| | **E003-1.1** En el paso 6 del Flujo Normal, `auth_service.py` comprueba que el hash del código introducido no coincide con el persistido en base de datos. Incrementa el contador `intentos_fallidos += 1` y lanza `HTTPException(status_code=400, detail="INVALID_OTP: El código ingresado no coincide con el enviado a su buzón.")`.<br><br>En `LoginOtpView.tsx`, se captura el error y se muestra una alerta en color rojo indicando el error y el número de intentos restantes (e.g. *"Código erróneo. Le quedan 2 intentos antes del bloqueo temporal"*). Presenta el botón `<button onClick={handleClearOtp}>Reintentar</button>`. |
-| **E003-1.2** Hace clic en el botón "Reintentar". | **E003-1.3** Limpia las seis casillas numéricas, posiciona el cursor en la primera casilla y retorna al paso 5 del Flujo Normal de Eventos. |
+| | **E003-1.1** En el paso 6 del Flujo Normal, `auth_service.py` comprueba que el código introducido no coincide con el persistido en base de datos. Incrementa el contador `intentos_fallidos += 1` y lanza `HTTPException(status_code=400, detail="INVALID_OTP: El código ingresado no coincide con el enviado a su buzón institucional.")`.<br><br>En `LoginOtpView.tsx`, se captura el error y se muestra una alerta en color rojo indicando el error y el número de intentos restantes (e.g. *"El código debe contener exactamente 6 dígitos numéricos válidos"*). Presenta el botón `"Reintentar"`. |
+| **E003-1.2** Hace clic en el botón "Reintentar". | **E003-1.3** Limpia el campo de entrada numérica, posiciona el cursor en la casilla y retorna al paso 5 del Flujo Normal de Eventos. |
 
 ##### Flujo de excepción E004: Código temporal OTP expirado
 | Usuario | Sistema |
 |---|---|
-| | **E004-1.1** En el paso 6 del Flujo Normal, `auth_service.py` comprueba que `NOW() > expira_en` (plazo de 5 minutos excedido conforme a RN-01). Lanza `HTTPException(status_code=400, detail="EXPIRED_OTP: El código temporal ha caducado por límite de tiempo de 5 minutos.")`.<br><br>En `LoginOtpView.tsx`, se captura el error y se despliega una alerta en color ámbar: *"El código temporal ha caducado. Por favor, solicite uno nuevo para ingresar"*. Presenta el botón `<button onClick={handleRequestNewOtp}>Solicitar Nuevo Código</button>`. |
-| **E004-1.2** Hace clic en el botón "Solicitar Nuevo Código". | **E004-1.3** Restablece las casillas numéricas, reinicia el temporizador regresivo y retorna al paso 3 del Flujo Normal de Eventos. |
+| | **E004-1.1** En el paso 6 del Flujo Normal, `auth_service.py` comprueba que `NOW() > expira_en` (plazo de 5 minutos excedido conforme a RN-01). Lanza `HTTPException(status_code=400, detail="EXPIRED_OTP: El código temporal OTP ha expirado (5 minutos). Por favor solicita un nuevo código.")`.<br><br>En `LoginOtpView.tsx`, se captura el error y se despliega una alerta en color ámbar: *"El código OTP ha expirado (5 minutos). Por favor solicita un nuevo código."*. Presenta el botón `"Solicitar Nuevo Código"`. |
+| **E004-1.2** Hace clic en el botón "Solicitar Nuevo Código". | **E004-1.3** Restablece el formulario, reinicia el temporizador regresivo y retorna al paso 3 del Flujo Normal de Eventos. |
 
 ##### Flujo de excepción E005: Bloqueo temporal por exceso de intentos fallidos
 | Usuario | Sistema |
 |---|---|
-| | **E005-1.1** En el paso 6 del Flujo Normal, `auth_service.py` evalúa `intentos_fallidos >= 3`. Invalida inmediatamente el OTP, bloquea temporalmente la emisión para el correo por 15 minutos en memoria/base de datos y lanza `HTTPException(status_code=429, detail="MAX_ATTEMPTS_EXCEEDED: Se ha superado el límite de 3 intentos fallidos consecutivos. Acceso bloqueado por 15 minutos.")`.<br><br>En `LoginOtpView.tsx`, se bloquean todas las casillas de entrada y se despliega un panel de seguridad en color rojo indicando el bloqueo temporal. Presenta el botón `<button onClick={handleResetToLogin}>Volver al Inicio</button>`. |
+| | **E005-1.1** En el paso 6 del Flujo Normal, `auth_service.py` evalúa `intentos_fallidos >= 3`. Invalida inmediatamente el OTP, bloquea temporalmente la emisión para el correo por 15 minutos en base de datos y lanza `HTTPException(status_code=429, detail="MAX_ATTEMPTS_EXCEEDED: Se ha superado el límite de 3 intentos fallidos consecutivos. Acceso bloqueado temporalmente.")`.<br><br>En `LoginOtpView.tsx`, se bloquea el campo de entrada y se despliega un panel de seguridad en color rojo indicando el bloqueo temporal. Presenta el botón `"Volver al Inicio"`. |
 | **E005-1.2** Hace clic en el botón "Volver al Inicio". | **E005-1.3** Redirige a la vista inicial de autenticación, restablece el formulario y retorna al paso 1 del Flujo Normal de Eventos. |
 
 ##### Flujo de excepción E006: Rechazo voluntario del consentimiento informado
 | Usuario | Sistema |
 |---|---|
-| | **E006-1.1** En el paso 7 del Flujo Normal, el usuario no marca la casilla de verificación o presiona el botón `"Declinar y Salir"`. `ConsentModalView.tsx` captura la acción sin enviar petición de aceptación.<br><br>Despliega un cuadro de diálogo modal en color ámbar advirtiendo que la formalización del consentimiento legal bajo la Ley Nº 29733 es un requisito obligatorio e indispensable para utilizar los servicios de la plataforma. Presenta el botón `<button onClick={handleConfirmExit}>Confirmar Salida</button>` y el botón `<button onClick={handleReopenTerms}>Revisar Términos</button>`. |
-| **E006-1.2** Hace clic en el botón "Confirmar Salida". | **E006-1.3** Destruye la sesión provisional, purga los datos temporales del formulario, emite notificación informativa y retorna al paso 1 del Flujo Normal de Eventos. |
+| | **E006-1.1** En el paso 7 del Flujo Normal, el usuario no marca la casilla de verificación o presiona el botón `"Declinar y Salir"`. `ConsentModalView.tsx` captura la acción sin enviar petición de aceptación.<br><br>Despliega un cuadro de diálogo modal en color ámbar advirtiendo que la formalización del consentimiento legal bajo la Ley Nº 29733 es un requisito obligatorio e indispensable para utilizar los servicios de la plataforma. Presenta el botón `"Confirmar Salida"` y el botón `"Revisar Términos"`. |
+| **E006-1.2** Hace clic en el botón "Confirmar Salida". | **E006-1.3** Destruye la sesión provisional, purga los datos temporales del formulario, emite notificación informativa y retorna al paso 1 del Flujo Normal de Eventos sin generar registros. |
+
+##### Flujo de excepción E007: Fallo de conectividad o indisponibilidad del servicio de autenticación
+| Usuario | Sistema |
+|---|---|
+| | **E007-1.1** En el paso 8 del Flujo Normal, la conexión con el servidor sufre timeout o interrupción de red. `authService.ts` captura el error y lanza `AuthException("Error inesperado de comunicación con el servicio de autenticación.")`.<br><br>En `LoginOtpView.tsx`, se despliega un banner de error en color rojo con el mensaje de indisponibilidad. Presenta el botón `"Reintentar Conexión"`. |
+| **E007-1.2** Hace clic en el botón "Reintentar Conexión". | **E007-1.3** Restablece los controles y retorna al paso 1 del Flujo Normal de Eventos sin generar registros. |
+
+##### Especificación Exhaustiva de Interfaz de Usuario y Comportamiento Visual
+
+La interfaz de usuario del componente `LoginOtpView.tsx` está diseñada conforme a las directrices de accesibilidad institucional:
+1. **Contenedor Principal:** Tarjeta centralizada con fondo en color blanco puro, bordes redondeados y sombra suave, con un borde exterior sutil en color gris claro.
+2. **Encabezado Institucional:** Emblema institucional superior con fondo en color azul institucional y tipografía en color dorado institucional con el texto `"UPT"`. Título principal en tipografía destacada en color azul institucional `"Iniciar Sesión Institucional"` y párrafo explicativo en color gris secundario: `"Ingresa tu correo institucional @upt.pe para recibir un código de verificación temporal."`.
+3. **Acceso Federado con Google Identity Services (GIS):** Contenedor `#googleSignInBtnContainer` que aloja el botón oficial de Google con tema delineado, tamaño grande, texto `"Continuar con Google"` y ancho adaptativo. En caso de indisponibilidad del SDK, se renderiza un botón alternativo en color blanco puro con borde gris claro y el icono oficial de Google acompañado del texto `"Continuar con Google Workspace UPT"`.
+4. **Divisor Visual:** Línea divisoria horizontal en color gris claro con texto central en tipografía reducida y color gris neutro: `"O CON CÓDIGO OTP POR CORREO"`.
+5. **Formulario de Solicitud de Correo:** Cuadro de texto con etiqueta visible `"Correo Institucional"`, borde en color gris claro y texto de ejemplo institucional. Botón principal de acción en color azul institucional y tipografía en color blanco puro con el texto `"Enviar Código OTP"`.
+6. **Vista de Desafío OTP:** Despliega el subtítulo en color gris secundario indicando el correo al que se despachó el código, seguido de un cuadro de texto para el ingreso de los 6 dígitos numéricos con tipografía monoespaciada en color azul institucional. Cuenta con un temporizador regresivo de 5 minutos en color azul institucional y un botón de reenvío con texto `"Reenviar código OTP"` deshabilitado en color gris claro mientras el contador de cooldown permanezca activo. Incluye el enlace de acción secundaria en color azul institucional `"Cambiar de correo institucional"`.
+7. **Notificaciones y Alertas:** Banner de alerta ante errores con fondo en color rojo suave, borde en color rojo claro y texto en color rojo oscuro. Mensajes informativos con fondo en color azul suave, borde en color azul claro y texto en color azul marino. Notificaciones de éxito con fondo en color verde suave, borde en color verde claro y texto en color verde oscuro.
+8. **Accesibilidad WCAG 2.1 AA:** Elementos con atributos semánticos `role="alert"` para mensajes de error y `role="status"` para confirmaciones. Soporte de navegación por teclado mediante tabulación secuencial y foco visual contrastado.
+
+##### Criterios de Aceptación Formativos (Given-When-Then)
+
+```gherkin
+Escenario 1: Autenticación exitosa mediante código temporal OTP institucional
+  DADO QUE el estudiante o mentor posee una cuenta institucional activa con dominio "@virtual.upt.pe" o "@upt.pe"
+  CUANDO ingresa su dirección de correo en LoginOtpView y presiona el botón "Enviar Código OTP"
+  Y digita en el formulario el código numérico de 6 dígitos recibido en su buzón dentro de los 5 minutos de vigencia
+  Y presiona el botón "Verificar y Acceder"
+  ENTONCES el sistema valida satisfactoriamente el desafío en POST /api/v1/auth/otp/verify
+  Y emite un token JWT criptográfico con vigencia de 8 horas continuas persistido en localStorage
+  Y redirige al usuario hacia el panel correspondiente a su rol institucional desplegando un mensaje de bienvenida.
+  Evidencia de Prueba: test_auth.py::test_verify_otp_success / LoginOtpView.test.tsx
+
+Escenario 2: Autenticación federada exitosa mediante Google Identity Services (GIS)
+  DADO QUE el usuario universitario se encuentra en la pantalla de inicio de sesión
+  CUANDO pulsa el botón oficial "Continuar con Google Workspace UPT"
+  Y selecciona su cuenta institucional activa con dominio "@virtual.upt.pe" o "@upt.pe" en el diálogo de Google
+  ENTONCES el sistema recibe la credencial firmada y despacha la petición POST /api/v1/auth/google
+  Y el backend valida la firma criptográfica con los servidores de Google emitiendo el token de sesión JWT institucional
+  Y formaliza el acceso directo al panel del rol correspondiente.
+  Evidencia de Prueba: test_auth.py::test_google_auth_success / authService.test.ts
+
+Escenario 3: Rechazo de acceso ante ingreso de correo no institucional
+  DADO QUE un usuario ingresa una dirección de correo perteneciente a un dominio comercial o externo (ej. "@gmail.com")
+  CUANDO presiona el botón "Enviar Código OTP"
+  ENTONCES el sistema bloquea la solicitud en el cliente y en el endpoint POST /api/v1/auth/otp/request retornando HTTP 400
+  Y despliega en pantalla un mensaje de error en color rojo: "Acceso restringido: Solo se permiten correos institucionales con dominio @virtual.upt.pe o @upt.pe."
+  Y no genera ningún registro en la tabla física auth_challenges ni emite códigos por correo.
+  Evidencia de Prueba: test_auth.py::test_request_otp_invalid_domain / LoginOtpView.test.tsx
+
+Escenario 4: Rechazo de ingreso por código temporal OTP expirado tras superar los 5 minutos
+  DADO QUE el usuario solicitó un código OTP y transcurrieron más de 300 segundos desde su emisión
+  CUANDO ingresa el código numérico en el formulario y presiona el botón "Verificar y Acceder"
+  ENTONCES el backend rechaza la verificación retornando HTTP 400 con código de error "EXPIRED_OTP"
+  Y el componente LoginOtpView despliega una notificación de advertencia en color ámbar solicitando la generación de un nuevo código
+  Y mantiene habilitado el botón "Reenviar código OTP" tras haberse superado el cooldown reglamentario.
+  Evidencia de Prueba: test_auth.py::test_verify_otp_expired / authService.test.ts
+```
 
 #### CUS-010 - Gestionar asignación de roles de usuario
 
@@ -1835,42 +1904,122 @@ A continuación, se presentan los 24 casos de uso canónicos estructurados en lo
 |---|---|
 | **Id Caso de Uso** | **UC-003** (CUS-003) |
 | **Nombre** | Registrar solicitud de mentoría por demanda académica no atendida |
-| **Tipo** | Obligatorio ( X ) / Opcional (   ) |
-| **Requisito ID (RF)** | RF-007 (Registro y banco de solicitudes por demanda); RN-04 (Antelación de planificación institucional) |
+| **Tipo** | Obligatorio (   ) / Opcional ( X ) |
+| **Requisito ID (RF)** | RF-007 (Banco de solicitudes por demanda académica); RN-04 (Antelación de planificación institucional), RN-11 (Priorización curricular de materias formativas filtro); RNF04, RNF09 |
 | **Versión** | 2.0 |
 | **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
-| **Actores** | Estudiante Mentoreado (`UserRole.mentoreado`) |
-| **Interacción** | Fase de Construcción / Iteración Sprint 03 - Sprint 04 |
-| **Descripción** | Permite a los estudiantes mentoreados expresar una necesidad formativa insatisfecha cuando no existen ofertas disponibles sobre un tema curricular específico a través del formulario modal en `RecommendationFeedView.tsx` y el servicio `recommendationService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/recommendations.py` y `app/services/recommendation_service.py` procesan la petición `POST /api/v1/recommendations/demand`, validando los campos con Pydantic (`DemandCreateRequest`). El sistema verifica que el estudiante no cuente con una solicitud idéntica en estado `PENDIENTE` para el mismo tema, persiste el registro en la tabla `demandas_academicas` e incrementa el contador de demanda agrupada en caché para alertar a los mentores calificados en su panel de publicación (CUS-006). |
-| **Referencias** | Guía SWEBOK v3.0 (Capítulo 1: Requisitos de Software y Capítulo 2: Diseño de Software)<br>Estándar ISO/IEC/IEEE 29148:2018 y Criterios ICACIT 2026<br>Documento de Arquitectura de Software (SAD v2.0 - MOD-03: Motor de Recomendación Inteligente EdRecSys)<br>Gestión de Demanda Académica EPIS-UPT |
-| **Anexos** | `aplicacion/frontend/src/components/RecommendationFeedView.tsx` (Subcomponente de Solicitud de Demanda)<br>`aplicacion/frontend/src/services/recommendationService.ts` (`RecommendationService.createDemand`)<br>`aplicacion/backend/app/api/v1/endpoints/recommendations.py` (`POST /api/v1/recommendations/demand`)<br>`aplicacion/backend/app/services/recommendation_service.py` (`RecommendationService.create_demand_request`)<br>`aplicacion/backend/app/models/curriculum.py` (`TemaCurricular`), `app/models/profile.py` (`DemandaAcademica`) |
-| **Precondiciones** | 1. Mentoreado autenticado con token JWT institucional activo.<br>2. Tema curricular seleccionado perteneciente a una asignatura vigente en el catálogo oficial.<br>3. Inexistencia de solicitud pendiente previa idéntica del mismo estudiante para dicho tema. |
-| **PostCondiciones** | 1. Registro insertado en la tabla `demandas_academicas` con `estado = 'PENDIENTE'` y marca de tiempo UTC.<br>2. Incremento atómico del acumulador de solicitudes del tema para priorización algorítmica.<br>3. Notificación de confirmación en cliente y cierre del modal de demanda. |
+| **Actores** | Estudiante Mentoreado (`UserRole.mentoreado`, Primario); Estudiante Mentor (`UserRole.mentor`, Secundario) |
+| **Interacción** | Fase de Construcción / Iteración Sprint 03 - Sprint 04 (Actualización Post-Sprint 08 con Banco de Demanda) |
+| **Descripción** | Permite a los estudiantes mentoreados canalizar una necesidad formativa insatisfecha hacia el banco institucional de solicitudes por demanda cuando no existan ofertas vigentes que atiendan un tema silábico de interés o cuando el aforo de las sesiones publicadas se encuentre totalmente agotado. La interacción se inicia mediante el componente modal accesible MentoringDemandModalView.tsx, desplegable desde el panel de lista vacía en RecommendationFeedView.tsx o desde la alerta de sobrecupo en BookingModalView.tsx. El estudiante selecciona una asignatura curricular formativa y una unidad o tema silábico específico, ingresando opcionalmente una justificación u observación pedagógica. La petición se procesa en bookingService.ts y se despacha hacia el endpoint POST /api/v1/bookings/requests en el controlador aplicacion/backend/app/api/v1/endpoints/bookings.py. El servicio booking_service.py valida la integridad de los datos, descarta la existencia de solicitudes duplicadas activas para el mismo estudiante y tema, e inserta el registro en la tabla física solicitudes_demanda (app/models/booking.py) con estado 'PENDIENTE' y folio institucional correlativo #DEM-{id}. La solicitud queda disponible de forma inmediata en el panel de mentores (MentorSessionsView.tsx, pestaña "Banco de Solicitudes por Demanda") para formular sesiones de mentoría dirigida. |
+| **Referencias** | Guía SWEBOK v3.0 (Capítulo 1: Requisitos de Software y Capítulo 2: Diseño de Software)<br>Estándar ISO/IEC/IEEE 29148:2018 y Criterios ICACIT 2026<br>Documento de Arquitectura de Software (SAD v3.0 - MOD-04: Demanda y Recomendaciones Personalizadas)<br>Modelo de Gestión de Demanda Académica EPIS-UPT |
+| **Anexos** | aplicacion/frontend/src/components/MentoringDemandModalView.tsx<br>aplicacion/frontend/src/components/RecommendationFeedView.tsx<br>aplicacion/frontend/src/components/BookingModalView.tsx<br>aplicacion/frontend/src/components/MentorSessionsView.tsx<br>aplicacion/frontend/src/services/bookingService.ts (BookingService, ApiBookingAdapter)<br>aplicacion/frontend/src/services/apiClient.ts (fetchCourses, fetchCourseDetail)<br>aplicacion/backend/app/api/v1/endpoints/bookings.py (POST /api/v1/bookings/requests, GET /api/v1/bookings/requests)<br>aplicacion/backend/app/services/booking_service.py (BookingService.create_demand_request)<br>aplicacion/backend/app/models/booking.py (SolicitudDemanda), app/models/curriculum.py (Asignatura, TemaConceptual) |
+| **Precondiciones** | 1. Estudiante mentoreado autenticado con token JWT institucional activo en localStorage.<br>2. Catálogo oficial de asignaturas críticas y temarios silábicos disponible en la base de datos.<br>3. Consentimiento informado digital formalizado previamente bajo la Ley Nº 29733. |
+| **PostCondiciones** | 1. Registro formal insertado en la tabla física solicitudes_demanda con estado 'PENDIENTE' y folio institucional correlativo #DEM-{id}.<br>2. Solicitud disponible de forma inmediata en el Banco de Solicitudes por Demanda de los mentores acreditados en MentorSessionsView.tsx.<br>3. Despliegue de confirmación en cliente con resumen de solicitud y retorno ordenado a la cartelera de mentorías. |
 
 ##### Flujo Normal de Eventos
 
 | Usuario | Sistema |
 |---|---|
-| **Fase 1: Apertura del formulario de demanda y selección temática** | |
-| **1.** El mentoreado hace clic en el botón `"Registrar Demanda de Tema"` en la cabecera de `RecommendationFeedView.tsx` o en el catálogo curricular. | **2.** El sistema abre una ventana modal `"Solicitud de Mentoría por Demanda"`. Despacha la consulta de asignaturas y temas silábicos para poblar las listas desplegables. Renderiza los campos: selección de curso, tema curricular específico, franja horaria preferida (mañana, tarde o noche), modalidad predilecta (Presencial/Virtual) y un cuadro de texto para comentarios adicionales. |
-| **Fase 2: Ingreso de preferencias y despacho de solicitud** | |
-| **3.** El mentoreado selecciona la asignatura, el tema silábico específico, marca su franja horaria predilecta y presiona el botón `"Enviar Solicitud"`. | **4.** En `RecommendationFeedView.tsx`, se valida que se hayan seleccionado la materia y el tema. En `recommendationService.ts`, se despacha `POST /api/v1/recommendations/demand` con el payload `DemandCreateRequest`. En `recommendations.py`, `recommendation_service.py` ejecuta una verificación para descartar duplicados activos: `SELECT id FROM demandas_academicas WHERE estudiante_id = :uid AND tema_id = :tid AND estado = 'PENDIENTE'`. (Si faltan campos obligatorios en el formulario, salta a E001). (Si el estudiante ya cuenta con una solicitud pendiente para el mismo tema, salta a E002). |
-| **Fase 3: Registro transaccional e indexación de demanda grupal** | |
-| **5.** El mentoreado visualiza el indicador de procesamiento en el botón de envío. | **6.** En `recommendation_service.py`, se ejecuta `INSERT INTO demandas_academicas (estudiante_id, tema_id, franja_preferida, modalidad_preferida, estado, fecha_solicitud) VALUES (...)`. Se confirma la transacción con `db.commit()` y se actualiza el agregado de solicitudes por tema en caché. Retorna HTTP 201 Created con el objeto `DemandResponse`. En cliente, `RecommendationFeedView.tsx` cierra el modal y despliega una notificación flotante en color verde de éxito: *"Tu solicitud de demanda ha sido registrada exitosamente. Los mentores habilitados recibirán una alerta sobre la necesidad formativa de este tema."* |
+| **Fase 1: Apertura del formulario de demanda y carga del catálogo silábico** | |
+| **1.** El mentoreado visualiza la ausencia de sesiones afines en `RecommendationFeedView.tsx` o un aviso de aforo colapsado en `BookingModalView.tsx`, y hace clic en el botón `"Registrar Solicitud por Demanda"`. | **2.** En `MentoringDemandModalView.tsx`, se abre la ventana modal con cabecera en color azul institucional y título `"📋 Registrar Solicitud de Mentoría por Demanda"`. El hook `useEffect` invoca `fetchCourses(true)` en `apiClient.ts` para obtener la lista de materias formativas. El sistema renderiza el selector de asignaturas y consulta automáticamente los temas silábicos de la primera materia mediante `fetchCourseDetail(id)`. (Si el modal es invocado desde una sesión específica con aforo agotado, salta a A001). (Si la consulta del catálogo curricular falla por pérdida de red, salta a E004). |
+| **Fase 2: Selección temática, justificación pedagógica y validación de reglas** | |
+| **3.** El mentoreado selecciona la asignatura deseada en la lista desplegable `"Asignatura Curricular"`, selecciona la unidad o tema de aprendizaje en `"Tema o Unidad Específica"`, redacta su justificación en el área de texto `"Observaciones o Justificación de Necesidad Formativa"` y presiona el botón `"Enviar Solicitud"`. | **4.** En `MentoringDemandModalView.tsx`, se valida que se hayan seleccionado identificadores positivos para la materia y el tema. Se activa el estado transicional `isSubmitting = true` con texto `"Registrando..."`. En `bookingService.ts`, se despacha una petición `POST /api/v1/bookings/requests` enviando el payload `{"id_asignatura": selectedCourseId, "id_tema": selectedTopicId, "observaciones": observaciones}` hacia el controlador `bookings.py`. El backend valida con Pydantic (`SolicitudDemandaCreate`) la integridad de los datos. En `booking_service.py`, se ejecuta una consulta para verificar que no exista una solicitud activa en estado `PENDIENTE` para el mismo estudiante y tema: `SELECT id_demanda FROM solicitudes_demanda WHERE estudiante_email = :email AND id_tema = :tid AND estado = 'PENDIENTE'`. (Si el mentoreado omite seleccionar la asignatura o el tema silábico, salta a E001). (Si la materia seleccionada no cuenta con temarios silábicos registrados, salta a E002). (Si el estudiante ya cuenta con una solicitud activa idéntica para ese mismo tema, salta a E003). (Si el mentoreado decide cancelar el registro o pulsa la tecla Escape, salta a A002). |
+| **Fase 3: Registro transaccional en el banco de demanda y confirmación visual** | |
+| **5.** El mentoreado observa el estado de procesamiento en pantalla con los controles temporalmente bloqueados. | **6.** En `booking_service.py`, se ejecuta la inserción relacional `INSERT INTO solicitudes_demanda (estudiante_email, id_asignatura, id_tema, observaciones, estado, created_at) VALUES (...)`. Se confirma la transacción con `db.commit()` y se retorna HTTP 201 Created con el payload `SolicitudDemandaResponse`. En cliente, `MentoringDemandModalView.tsx` oculta el formulario y conmuta al panel de confirmación de éxito con fondo blanco, círculo en color verde claro con marca de verificación en color verde oscuro, título `"¡Solicitud Registrada con Éxito!"` y el folio institucional `#DEM-{id}` asignado, explicando que los mentores acreditados podrán formular ofertas dirigidas. El usuario pulsa el botón `"Entendido"` para cerrar el diálogo modal y retornar a la cartelera. (Si ocurre un error interno en la base de datos durante la persistencia, salta a E004). |
+
+##### Flujos Alternativos
+
+##### Flujo alternativo A001: Invocación del modal desde alerta de aforo agotado en reserva con preselección
+| Usuario | Sistema |
+|---|---|
+| **A001-1.1** En `BookingModalView.tsx`, el mentoreado constata que los cupos de una sesión de su interés se han agotado (`available_slots <= 0`) y hace clic en el botón de acción secundaria `"Registrar Solicitud por Demanda"`. | **A001-1.2** `BookingModalView.tsx` invoca el callback de apertura transfiriendo las propiedades `preselectedCourseId` y `preselectedTopicId` hacia `MentoringDemandModalView.tsx`. |
+| **A001-1.3** El mentoreado observa que el modal se abre con la asignatura y el tema silábico de la sesión original ya preseleccionados en las listas desplegables. | **A001-1.4** El sistema bloquea las selecciones correspondientes, enfoca directamente el cuadro de texto `"Observaciones o Justificación de Necesidad Formativa"` y retorna al paso 3 del Flujo Normal de Eventos. |
+
+##### Flujo alternativo A002: Cancelación voluntaria del registro de demanda con botón Cancelar o tecla Escape
+| Usuario | Sistema |
+|---|---|
+| **A002-1.1** El mentoreado hace clic en el botón `"Cancelar"`, pulsa el botón de cierre en la cabecera del modal o presiona la tecla `Escape` en su teclado. | **A002-1.2** `MentoringDemandModalView.tsx` captura el evento, cancela las peticiones asíncronas en curso y purga el estado local del formulario. |
+| **A002-1.3** El mentoreado observa el cierre suave del cuadro de diálogo modal retornando el foco a la vista anterior. | **A002-1.4** El sistema desmonta la ventana modal del árbol de componentes y finaliza el caso de uso sin generar registros. |
 
 ##### Flujos de Excepción
 
-##### Flujo de excepción E001: Formulario de demanda incompleto
+##### Flujo de excepción E001: Formulario de solicitud incompleto por omisión de asignatura o tema
 | Usuario | Sistema |
 |---|---|
-| | **E001-1.1** En el paso 4 del Flujo Normal, el validador en cliente o Pydantic en `recommendations.py` comprueba que no se ha seleccionado tema o asignatura. Lanza `HTTPException(status_code=422, detail="VALIDATION_ERROR: Debe seleccionar obligatoriamente una materia y tema curricular para registrar su demanda.")`.<br><br>En el modal de demanda, se resaltan los campos vacíos con borde en color rojo y texto explicativo. |
-| **E001-1.2** Selecciona la asignatura y el tema silábico en los desplegables. | **E001-1.3** Rehabilita el botón `"Enviar Solicitud"` y retorna al paso 3 del Flujo Normal de Eventos. |
+| | **E001-1.1** En el paso 4 del Flujo Normal, el usuario presiona el botón `"Enviar Solicitud"` sin haber seleccionado una materia o un tema silábico (`selectedCourseId === 0` o `selectedTopicId === 0`). `MentoringDemandModalView.tsx` bloquea el envío y despliega un banner de alerta en color rojo con el mensaje: *"Por favor seleccione una asignatura y un tema curricular válido."*. |
+| **E001-1.2** El estudiante selecciona la asignatura y el tema en las listas desplegables. | **E001-1.3** Oculta la alerta de error, rehabilita el botón de envío y retorna al paso 3 del Flujo Normal de Eventos. |
 
-##### Flujo de excepción E002: Solicitud duplicada de demanda pendiente
+##### Flujo de excepción E002: Asignatura formativa sin temarios silábicos disponibles en catálogo
 | Usuario | Sistema |
 |---|---|
-| | **E002-1.1** En el paso 4 del Flujo Normal, `recommendation_service.py` detecta un registro previo en estado `PENDIENTE` para la misma tupla `(estudiante_id, tema_id)`. Lanza `HTTPException(status_code=409, detail="DUPLICATE_DEMAND: Ya mantienes una solicitud activa registrada para este tema. Los mentores ya pueden visualizar esta necesidad formativa.")`.<br><br>En el modal, se despliega una alerta en color ámbar explicando la existencia previa de la solicitud. Presenta el botón `<button onClick={handleCloseModal}>Entendido</button>`. |
-| **E002-1.2** Hace clic en el botón "Entendido". | **E002-1.3** Cierra la ventana modal sin generar registros redundantes y retorna al paso 1 del Flujo Normal de Eventos. |
+| | **E002-1.1** En el paso 4 del Flujo Normal, tras seleccionar una asignatura, la consulta `fetchCourseDetail(id)` retorna una lista de temas vacía (`detail.temas.length === 0`). El selector de temas se deshabilita mostrando la opción: *"No hay temas registrados para esta materia"*, y el botón `"Enviar Solicitud"` se bloquea en color gris claro. |
+| **E002-1.2** El estudiante cambia la selección hacia otra asignatura formativa que sí contenga temarios silábicos activos. | **E002-1.3** Carga reactivamente los temas disponibles, rehabilita el botón de acción y retorna al paso 3 del Flujo Normal de Eventos. |
+
+##### Flujo de excepción E003: Solicitud duplicada activa para el mismo estudiante y tema silábico
+| Usuario | Sistema |
+|---|---|
+| | **E003-1.1** En el paso 4 del Flujo Normal, `booking_service.py` localiza una tupla activa previa en `solicitudes_demanda` con el mismo correo y tema en estado `PENDIENTE`. Lanza `HTTPException(status_code=400, detail="Ya mantienes una solicitud activa registrada para este tema en el banco de demanda.")`.<br><br>En `bookingService.ts`, captura el error y propaga el mensaje hacia el modal. `MentoringDemandModalView.tsx` despliega una alerta en color ámbar explicando la preexistencia de la solicitud. Presenta el botón `"Entendido"`. |
+| **E003-1.2** Hace clic en el botón "Entendido". | **E003-1.3** Cierra la ventana modal sin generar registros redundantes y finaliza el caso de uso sin generar registros. |
+
+##### Flujo de excepción E004: Error de comunicación con el servicio de reservas y banco de demanda
+| Usuario | Sistema |
+|---|---|
+| | **E004-1.1** En el paso 2 o 6 del Flujo Normal, ocurre pérdida de enlace o indisponibilidad en el backend (`HTTP 500` o `HTTP 503`). `bookingService.ts` o `apiClient.ts` captura la excepción de red.<br><br>En `MentoringDemandModalView.tsx`, se restablece `isSubmitting = false` y se despliega un banner de alerta en color rojo: *"Error al registrar la solicitud por demanda."*. Presenta el botón `"Reintentar"`. |
+| **E004-1.2** Hace clic en el botón "Reintentar". | **E004-1.3** Mantiene los datos redactados en el formulario y retorna al paso 1 del Flujo Normal de Eventos sin generar registros. |
+
+##### Especificación Exhaustiva de Interfaz de Usuario y Comportamiento Visual
+
+La interfaz de usuario del componente `MentoringDemandModalView.tsx` está diseñada bajo principios de usabilidad y accesibilidad WCAG 2.1 AA:
+1. **Capa de Superposición (Overlay):** Fondo fijo con cobertura total de pantalla en color gris pizarra oscuro semitransparente con desenfoque de fondo (*backdrop blur*), bloqueando clics en elementos subyacentes.
+2. **Contenedor Modal:** Cuadro de diálogo centralizado en color blanco puro con esquinas redondeadas, sombra pronunciada de elevación y diseño responsivo adaptativo con un ancho máximo estandarizado.
+3. **Cabecera Institucional:** Barra superior en color azul institucional con tipografía en color blanco puro conteniendo el título `"📋 Registrar Solicitud de Mentoría por Demanda"`, subtítulo explicativo en color celeste grisáceo `"Caso de Uso CUS03 / RF07 — Banco Institucional EPIS UPT"` y botón de cierre en la esquina derecha con símbolo de aspa en color blanco puro.
+4. **Párrafo Orientador:** Texto explicativo en color gris azulado detallando que si el estudiante no encuentra sesiones activas o las plazas están agotadas, puede registrar su necesidad para que mentores de ciclos superiores formulen ofertas específicas.
+5. **Selectores Desplegables:** Campo de selección `"Asignatura Curricular"` con etiqueta en color gris oscuro y asterisco obligatorio en color rojo. Al cambiar de asignatura, el campo dependiente `"Tema o Unidad Específica"` se actualiza en tiempo real mostrando el código de unidad silábica y el nombre del tema.
+6. **Área de Justificación Pedagógica:** Campo de texto multilínea con tres filas de altura, borde en color gris claro y texto de sugerencia (*placeholder*) en color gris tenue: `"Ej: Requiero nivelación en límites algebraicos y aplicaciones de derivadas para la próxima práctica calificada."`.
+7. **Botones de Control:** En la parte inferior derecha, botón secundario `"Cancelar"` con fondo en color gris claro, borde gris y texto en gris oscuro; y botón principal de envío `"Enviar Solicitud"` con fondo en color azul institucional y texto en blanco puro (deshabilitado en color gris pizarra cuando los campos no están completos o mostrando `"Registrando..."` durante el despacho).
+8. **Panel de Confirmación de Éxito:** Tras la persistencia exitosa, el modal transmuta a una tarjeta de felicitación con un círculo central en color verde claro conteniendo el símbolo de verificación en color verde oscuro, título en color verde bosque `"¡Solicitud Registrada con Éxito!"`, párrafo explicativo con el folio institucional en negrita `"#DEM-{id}"`, recuadro de detalles con fondo gris muy suave conteniendo el estado en color azul institucional, correo del solicitante y marca de tiempo UTC, y botón `"Entendido"` en color azul institucional.
+9. **Accesibilidad WCAG 2.1 AA:** Diálogo modal con atributos `role="dialog"`, `aria-modal="true"` y `aria-labelledby="demand-modal-title"`. Cierre automático mediante la tecla `Escape` y navegación completa por teclado con tabulación accesible.
+
+##### Criterios de Aceptación Formativos (Given-When-Then)
+
+```gherkin
+Escenario 1: Registro exitoso de solicitud de demanda académica desde cartelera vacía
+  DADO QUE el estudiante mentoreado se encuentra autenticado en el sistema
+  Y visualiza la cartelera de recomendaciones vacía o sin ofertas sobre su tema de interés en RecommendationFeedView
+  CUANDO hace clic en el botón "Registrar Solicitud por Demanda"
+  Y selecciona una asignatura crítica (ej. "Algoritmos y Estructuras de Datos") y un tema silábico específico
+  Y redacta su justificación pedagógica presionando el botón "Enviar Solicitud"
+  ENTONCES el sistema valida los datos y ejecuta POST /api/v1/bookings/requests
+  Y persiste el registro en la tabla física solicitudes_demanda en estado "PENDIENTE" asignando un folio correlativo #DEM-{id}
+  Y despliega en pantalla el panel de confirmación en color verde con los detalles de la solicitud registrada.
+  Evidencia de Prueba: test_bookings.py::test_create_demand_request_success / MentoringDemandModalView.test.tsx
+
+Escenario 2: Preselección automática ante redirección por aforo colapsado en reserva
+  DADO QUE el mentoreado intenta reservar una sesión de mentoría en BookingModalView cuyo aforo se encuentra agotado (0 vacantes)
+  CUANDO presiona el botón alternativo "Registrar Solicitud por Demanda"
+  ENTONCES el sistema abre MentoringDemandModalView con la asignatura y el tema de la sesión agotada preseleccionados automáticamente
+  Y enfoca directamente el cuadro de texto de justificación pedagógica
+  Y permite al estudiante enviar la solicitud sin requerir rebuscar la materia en el catálogo.
+  Evidencia de Prueba: BookingModalView.test.tsx / MentoringDemandModalView.test.tsx
+
+Escenario 3: Bloqueo de envío ante campos obligatorios sin seleccionar
+  DADO QUE el estudiante tiene abierto el modal de solicitud de demanda académica
+  CUANDO no selecciona ninguna asignatura curricular o tema silábico válido
+  Y presiona el botón "Enviar Solicitud"
+  ENTONCES el componente bloquea la emisión de la petición HTTP
+  Y despliega un banner de alerta en color rojo con el texto: "Por favor seleccione una asignatura y un tema curricular válido."
+  Y mantiene los controles en pantalla sin registrar datos en la base de datos.
+  Evidencia de Prueba: MentoringDemandModalView.test.tsx::test_validation_empty_fields
+
+Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitudes del portal del mentor
+  DADO QUE una solicitud de demanda académica ha sido registrada exitosamente por un mentoreado
+  CUANDO un estudiante mentor acreditado de ciclos superiores accede a su panel en MentorSessionsView
+  Y hace clic en la pestaña "Banco de Solicitudes por Demanda (RF07)"
+  ENTONCES el sistema consulta el endpoint GET /api/v1/bookings/requests
+  Y despliega la tarjeta de la solicitud con el folio #DEM-{id}, código de curso, tema silábico y justificación
+  Y presenta al mentor el botón para formular una nueva oferta de mentoría dirigida a cubrir dicha demanda.
+  Evidencia de Prueba: test_bookings.py::test_list_demand_requests / MentorSessionsView.test.tsx
+```
 
 
 ---
@@ -2586,6 +2735,7 @@ A continuación, se presentan los 24 casos de uso canónicos estructurados en lo
 |---|---|
 | | **E002-1.1** En el paso 4 del Flujo Normal, Pydantic en `curriculum.py` comprueba que el campo `semana` es menor a 1 o mayor a 17 (duración máxima del semestre lectivo universitario). Lanza `HTTPException(status_code=422, detail="VALIDATION_ERROR: El número de semana académica debe estar comprendido estrictamente entre 1 y 17.")`.<br><br>En `AdminCurriculumView.tsx`, se resalta el campo numérico de semana en color rojo. |
 | **E002-1.2** Ingresa un número de semana válido dentro del intervalo 1 a 17. | **E002-1.3** Actualiza el valor en el estado del formulario y retorna al paso 4 del Flujo Normal de Eventos. |
+
 
 ---
 
@@ -5314,11 +5464,13 @@ alt Cupos disponibles > 0 y Elegibilidad Validada
     Service --> API: BookingResponseDTO {idReserva, estado: 'PENDIENTE_CONFIRMACION'}
     API --> Client: HTTP 201 Created {idReserva, estado: 'PENDIENTE_CONFIRMACION'}
     Client --> UI: Comprobante provisional
+    UI --> User: Muestra confirmación y plazo hasta T-24h
 else Conflicto de aforo o estudiante no elegible
     Service -> DB: ROLLBACK
     Service --> API: Lanza HTTPException(409, "Aforo agotado o colisión concurrente")
     API --> Client: HTTP 409 Conflict {"detail": "Aforo agotado"}
     Client --> UI: Captura error 409
+    UI --> User: Alerta de denegación de reserva
 end
 deactivate DB
 deactivate Service
@@ -5352,10 +5504,12 @@ alt Tiempo restante >= 24 horas (now_utc <= s.fecha_inicio - 24h)
     Service --> API: BookingConfirmDTO {estado: 'CONFIRMADA', pase_asistencia: 'PASS-8472'}
     API --> Client: HTTP 200 OK {estado: 'CONFIRMADA', pase_asistencia: 'PASS-8472'}
     Client --> UI: Pase digital confirmado
+    UI --> User: Despliega ticket digital y acceso formal
 else Plazo cerrado (now_utc > s.fecha_inicio - 24h)
     Service --> API: Lanza HTTPException(400, "Ventana de ratificación vencida")
     API --> Client: HTTP 400 Bad Request {"detail": "Ventana de ratificación vencida"}
     Client --> UI: Captura error 400
+    UI --> User: Informa revocación reglamentaria
 end
 deactivate Service
 deactivate API
@@ -5419,6 +5573,7 @@ else confirmed_count < 3 (Quórum Insuficiente)
         Service --> API: QuorumDecisionResponseDTO
         API --> Client: HTTP 200 OK
         Client --> UI: Dictado confirmado
+        UI --> Mentor: Notificación de éxito
     else Mentor selecciona "Reprogramar Sesión"
         Mentor -> UI: Clic "Reprogramar Sesión" con nueva fecha (> 24h)
         UI -> Client: submitQuorumDecision(idSesion, 'RESCHEDULE', new_start)
@@ -5436,6 +5591,7 @@ else confirmed_count < 3 (Quórum Insuficiente)
         Service --> API: QuorumDecisionResponseDTO
         API --> Client: HTTP 200 OK
         Client --> UI: Reprogramación confirmada
+        UI --> Mentor: Sesión reprogramada
     else Mentor selecciona "Cancelar Sesión"
         Mentor -> UI: Clic "Cancelar sin Penalización" con justificativo
         UI -> Client: submitQuorumDecision(idSesion, 'CANCEL', reason)
@@ -5454,6 +5610,7 @@ else confirmed_count < 3 (Quórum Insuficiente)
         Service --> API: QuorumDecisionResponseDTO
         API --> Client: HTTP 200 OK
         Client --> UI: Cancelación confirmada
+        UI --> Mentor: Cancelación registrada
     end
     deactivate Client
     deactivate UI
@@ -5666,6 +5823,7 @@ alt [A001] Acceso recurrente con consentimiento formalizado previo (has_consente
     API --> Client: HTTP 200 OK {"access_token": token, "token_type": "Bearer", "user": user}
     Client -> UI: displaySessionDashboard(token, user)
     UI -> UI: localStorage.setItem('auth_token', token)
+    UI --> User: displaySuccessSessionNotification
 else Primer acceso sin consentimiento legal formalizado
     Service --> API: Requiere consentimiento {"requires_consent": true, "temp_token": temp_token}
     API --> Client: HTTP 200 OK {"requires_consent": true}
@@ -5700,6 +5858,7 @@ else Primer acceso sin consentimiento legal formalizado
         
         UI -> UI: localStorage.setItem('auth_token', token)
         UI -> UI: Actualiza estado global de autenticación en App.tsx
+        UI --> User: displaySuccessSessionNotification
     end
 end
 deactivate Service
@@ -5852,6 +6011,7 @@ else Asignación válida y conforme a RBAC
     
     UI -> UI: updateTableInMemory()
     UI -> UI: closeAssignmentModal()
+    UI --> Admin: displaySuccessNotification
 end
 deactivate Service
 deactivate API
@@ -5967,6 +6127,7 @@ else Formulario válido en cliente
                 Service --> API: PublishOfferResponse (id_oferta=..., codigo_sesion='SES-XXXX', estado='PUBLICADA')
                 API --> Client: HTTP 201 Created PublishOfferResponse
                 Client -> UI: showSuccessScreen(codigo_sesion='SES-XXXX', estado='PUBLICADA')
+                UI --> Mentor: displayPublishedConfirmation
             end
         end
         deactivate Service
@@ -6052,6 +6213,7 @@ else Rango horario reglamentario válido
             Mentor -> UI: selectSpace (selectedSpaceId)
             Mentor -> UI: click ["Asignar Aula a la Oferta"]
             UI -> UI: assignSpaceToForm(selectedSpaceId)
+            UI --> Mentor: displaySpaceAssignedConfirmation
         end
     end
 end
@@ -6163,6 +6325,7 @@ else Datos válidos en cliente
         Client -> UI: displayProfileUpdatedSuccess(profile)
         
         UI -> UI: updateLocalCache(profile)
+        UI --> Mentor: displayProfileUpdatedConfirmation
     end
     deactivate Service
     deactivate API
@@ -6268,6 +6431,7 @@ Client -> UI: displayTopicAccordion(topics)
 deactivate Client
 
 UI -> UI: expandTopicAccordion()
+UI --> User: displayTopicListAccordion
 deactivate UI
 @enduml
 ```
@@ -6360,6 +6524,7 @@ else Motor operativo
             activate BookingModal
             BookingModal -> UI: renderBookingModal(offer_id, user_id)
             deactivate BookingModal
+            UI --> User: displayBookingModalTransfer
         end
     end
 end
@@ -6462,6 +6627,7 @@ else Formulario válido en cliente
         Client -> UI: displayDemandCreatedSuccess(id_demanda)
         
         UI -> UI: closeModal()
+        UI --> User: displayDemandRegisteredConfirmation
     end
     deactivate Service
     deactivate API
@@ -6624,6 +6790,7 @@ else Tarjeta con vacantes y sin duplicidad previa
                     UI -> UI: setIsSubmitting(false)
                     User -> UI: click ["Ir a Mis Reservas"]
                     UI -> UI: unmountBookingModal()
+                    UI --> User: displayStudentBookingsDashboard
                 end
             end
             deactivate DB
@@ -6727,6 +6894,7 @@ else Dentro de la ventana reglamentaria [T-48h, T-24h]
     Client -> UI: displayPassCodeModal(booking_id, pass_code)
     
     UI -> UI: updateCardToConfirmed()
+    UI --> User: displayAttendanceConfirmedNotification
 end
 deactivate Service
 deactivate API
@@ -6816,6 +6984,7 @@ else Antelación superior a 24 horas (cumple RN-04)
     
     UI -> UI: closeCancellationModal()
     UI -> UI: updateCardToCancelled()
+    UI --> User: displayBookingCancelledConfirmation
 end
 deactivate UI
 @enduml
@@ -7033,6 +7202,7 @@ deactivate Client
 
 UI -> UI: closeQuorumDecisionModal()
 UI -> UI: updateSessionCardState(new_state)
+UI --> Mentor: displayQuorumDecisionConfirmation
 deactivate UI
 @enduml
 ```
@@ -7141,6 +7311,7 @@ else Token TOTP vigente
             Service --> API: AttendanceResponseDTO {"success": true, "asistio": true}
             API --> Client: HTTP 200 OK AttendanceResponseDTO
             Client -> UI: displayCheckinSuccessNotification()
+            UI --> Mentoreado: displayCheckinConfirmation
         end
     end
 end
@@ -7246,6 +7417,7 @@ else Contenido sustantivo válido
     deactivate Client
     
     UI -> UI: redirectToSessionHistory()
+    UI --> Mentor: displayBitacoraCreatedConfirmation
 end
 deactivate UI
 @enduml
@@ -7333,6 +7505,8 @@ API --> Client: HTTP 200 OK BitacoraDetailDTO
 deactivate API
 Client -> UI: displayBitacoraDetailModal(bitacoraDetail)
 deactivate Client
+
+UI --> User: displayBitacoraDetailModal
 deactivate UI
 @enduml
 ```
@@ -7450,6 +7624,7 @@ API --> Client: HTTP 200 OK (Stream PDF)
 deactivate API
 Client -> UI: triggerBrowserDownload(stream)
 deactivate Client
+UI --> Mentor: displayDownloadPdfCompleted
 deactivate UI
 @enduml
 ```
@@ -7535,6 +7710,8 @@ end
 deactivate Service
 deactivate API
 deactivate Client
+
+UI --> User: displayLeaderboardView
 deactivate UI
 @enduml
 ```
@@ -7635,6 +7812,7 @@ deactivate Service
 API --> Client: HTTP 200 OK
 Client -> UI: decreaseUnreadCounter()
 UI -> UI: decrementNotificationCounter()
+UI --> User: displayReferencedSessionView
 deactivate Client
 deactivate API
 deactivate UI
@@ -7725,6 +7903,8 @@ else Rango temporal válido
     deactivate API
     Client -> UI: triggerExcelDownload()
     deactivate Client
+    
+    UI --> Admin: displayExcelDownloadedConfirmation
 end
 deactivate UI
 @enduml
@@ -7825,6 +8005,7 @@ API --> Client: HTTP 200 OK (Stream Binario PDF)
 deactivate API
 Client -> UI: triggerPdfDownload()
 deactivate Client
+UI --> Evaluador: displayIcacitDossierDownloadedConfirmation
 deactivate UI
 @enduml
 ```
@@ -7932,6 +8113,7 @@ else Cadena 100% íntegra (0 discrepancias)
     Service --> API: VerifyChainResponseDTO {"status": "VALID", "records_verified": count, "tampering_detected": false}
     API --> Client: HTTP 200 OK VerifyChainResponseDTO
     Client -> UI: displayIntegrityVerifiedBadge()
+    UI --> SecOfficer: displayChainIntegrityConfirmation
 end
 deactivate Service
 deactivate API
@@ -8034,6 +8216,7 @@ else Valores en rangos admisibles
         deactivate Service
         API --> Client: HTTP 200 OK ParameterUpdateResponseDTO
         Client -> UI: displayParametersUpdatedSuccess(updated_keys)
+        UI --> Admin: displayParametersUpdatedConfirmation
     end
     deactivate API
     deactivate Client
@@ -8135,6 +8318,7 @@ else Semana lectiva válida
         
         UI -> UI: closeNewTopicModal()
         UI -> UI: appendTopicToTree(id_tema)
+        UI --> Admin: displayTopicRegisteredConfirmation
     end
     deactivate Service
     deactivate API
