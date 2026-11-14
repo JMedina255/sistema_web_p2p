@@ -1,0 +1,47 @@
+/'
+  Diagrama SAD: Diagrama 11.5: Máquina de Estados Finitos de la Reserva de Cupo (9 Estados Canónicos)
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Kruchten 4+1 / UML 2.5 / C4 Nivel 2
+  Extracción automatizada: Documento SAD Oficial
+'/
+@startuml
+title Diagrama 11.5: Máquina de Estados Finitos de la Reserva de Cupo (9 Estados Canónicos)\nEntidad reservas_cupo — Sistema Web P2P (EPIS-UPT)
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 8
+skinparam fontSize 10
+
+state "PENDIENTE_CONFIRMACION\n[Inscripción provisional, cupo bloqueado]" as R_Pendiente #DBEAFE
+state "CONFIRMADA\n[Ratificada por el estudiante antes de T-24h]" as R_Confirmada #DCFCE7
+state "CANCELADA_USUARIO\n[Desistimiento voluntario antes de T-24h]" as R_CancUsuario #FEE2E2
+state "NO_CONFIRMADA\n[Corte T-24h: caducó por falta de ratificación]" as R_NoConf #FEF3C7
+state "CANCELADA_NO_CONFIRMADA\n[Purga automática de vacante caducada]" as R_CancNoConf #FEE2E2
+state "CANCELADA_SISTEMA\n[Sesión anulada por el mentor o administración]" as R_CancSistema #FEE2E2
+state "CANCELADA_SISTEMA_QUORUM\n[Sesión anulada por quórum insuficiente]" as R_CancQuorum #FEE2E2
+state "ASISTIDA\n[Presencia efectiva validada con pase QR TOTP]" as R_Asistida #DCFCE7
+state "INASISTENCIA\n[Falta no justificada constatada en bitácora]" as R_Inasistencia #FCA5A5
+
+[*] --> R_Pendiente : POST /api/v1/bookings/reserve (SELECT FOR UPDATE)
+
+R_Pendiente --> R_Confirmada : Estudiante ratifica asistencia antes de T-24h (RN-08)
+R_Pendiente --> R_CancUsuario : Desistimiento voluntario antes de T-24h (RN-10)
+R_Confirmada --> R_CancUsuario : Desistimiento voluntario antes de T-24h (RN-10)
+
+R_Pendiente --> R_NoConf : Corte desatendido en T-24h sin ratificación previa
+R_NoConf --> R_CancNoConf : Purga y liberación formal de vacante en aforo
+
+R_Confirmada --> R_CancSistema : Mentor o administrador cancela la sesión (RN-10)
+R_Confirmada --> R_CancQuorum : Sesión cancelada por falta de quórum (RN-09)
+R_Pendiente --> R_CancSistema : Sesión cancelada por mentor
+
+R_Confirmada --> R_Asistida : Check-in con QR TOTP validado en aula (RN-12)
+R_Confirmada --> R_Inasistencia : Mentor constata ausencia al cerrar bitácora (RN-12)
+
+R_CancUsuario --> [*]
+R_CancNoConf --> [*]
+R_CancSistema --> [*]
+R_CancQuorum --> [*]
+R_Asistida --> [*]
+R_Inasistencia --> [*]
+@enduml

@@ -1,0 +1,39 @@
+/'
+  Diagrama SAD: Diagrama 6.1: Límites del Sistema Web P2P y Sistemas Externos
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Kruchten 4+1 / UML 2.5 / C4 Nivel 2
+  Extracción automatizada: Documento SAD Oficial
+'/
+@startuml
+title Diagrama 6.1: Diagrama Contextual del Sistema Web P2P\nEPIS - UPT (2026)
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 8
+skinparam defaultFontSize 11
+left to right direction
+
+actor "Estudiante Mentoreado\n(I - IV Ciclo)" as Alumno
+actor "Estudiante Mentor\n(VII - X Ciclo)" as Mentor
+actor "Administrador / Tutoría\n(Dirección EPIS)" as Admin
+actor "Demonio Cron Backend\n(Tareas Desatendidas)" as Cron <<Sistema>>
+
+rectangle "Sistema Web P2P de Mentorías Académicas" as Core #E3F2FD {
+  component "Módulos Canónicos Oficiales\n(MOD-01 al MOD-08)" as Modulos
+  component "Motor de Recomendación en-proceso\n(EdRecSys - Scikit-learn / NumPy)" as RecSys
+  component "Motor Vectorial de Constancias\n(ReportLab Engine - PDF Streaming)" as PDFEngine
+  Modulos --> RecSys : Inferencia Top-k (12.4 ms)
+  Modulos --> PDFEngine : Compilación de Certificados
+}
+
+cloud "Servidor SMTP Institucional\nCorreo UPT (@upt.pe:587)" as SMTP
+cloud "Infraestructura Institucional EPIS\nAulas y Laboratorios / Salas Virtuales" as Infra
+
+Alumno --> Core : Perfil, Reserva, Ratificación, Asistencia QR, Encuesta
+Mentor --> Core : Ofertas, Aulas, Pase QR, Bitácora SHA-256, Certificado
+Admin --> Core : Roles, Visado de Horas, Analítica ICACIT, Auditoría
+Cron --> Core : Corte automático T-24h (/api/v1/quorum/evaluate-all)
+
+Core --> SMTP : Despacho OTP (2FA) y Notificaciones de Quórum
+Core --> Infra : Validación de no solapamiento y asignación de aulas
+@enduml

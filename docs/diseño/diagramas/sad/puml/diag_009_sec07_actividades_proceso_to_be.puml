@@ -1,0 +1,60 @@
+/'
+  Diagrama SAD: Diagrama 7.2: Diagrama de Actividades del Proceso Propuesto (To-Be) de Mentorías P2P
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Kruchten 4+1 / UML 2.5 / C4 Nivel 2
+  Extracción automatizada: Documento SAD Oficial
+'/
+@startuml
+title Diagrama 7.2: Diagrama de Actividades del Proceso Propuesto (To-Be)\nSistema Web P2P - EPIS UPT (2026)
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+|Estudiante Mentoreado|
+start
+:Inicia sesión con correo @upt.pe y código 2FA (OTP 5m);\nAcepta consentimiento informado digital (Ley N° 29733);
+
+|Estudiante Mentor|
+:Publica oferta de mentoría académica (RN-04 >= 24h);\nDefine temario silábico, fecha y aforo estándar (RN-05);
+
+|Sistema Web P2P (FastAPI / EdRecSys)|
+:Asigna aula física libre sin solapamiento (RN-06)\no valida enlace virtual institucional (RN-07);
+:Publica sesión en cartelera y ejecuta motor EdRecSys en-proceso;
+
+|Estudiante Mentoreado|
+:Consulta feed personalizado Top-k (latencia 12.4 ms);\nFormaliza reserva de cupo bajo cerrojo pesimista FOR UPDATE;\nRatifica asistencia obligatoria (CUS-024) antes de T-24h;
+
+|Demonio Cron Backend|
+:Ejecuta corte automatizado en T-24h (RN-08 / RN-09);\nRevoca reservas no ratificadas a NO_CONFIRMADA;\nEvalúa si confirmados >= 50% del aforo máximo;
+
+if (¿Quórum >= 50% alcanzado?) then (Sí)
+  |Sistema Web P2P (FastAPI / EdRecSys)|
+  :Transiciona sesión a CONFIRMADA;\nNotifica por email a mentor y participantes confirmados;
+else (No)
+  |Sistema Web P2P (FastAPI / EdRecSys)|
+  :Transiciona a QUORUM_INSUFICIENTE;\nDispara alerta de resolución de contingencia al Mentor;
+  |Estudiante Mentor|
+  if (¿Mentor decide dictar de forma excepcional?) then (Sí)
+    :Ratifica realización extraordinaria (CUS-007);\nSesión pasa a CONFIRMADA;
+  else (No)
+    |Sistema Web P2P (FastAPI / EdRecSys)|
+    :Sesión en CANCELADA_QUORUM; reservas en CANCELADA_SISTEMA;\nLibera aula física o sala virtual y notifica a inscritos;
+    stop
+  endif
+endif
+
+|Estudiante Mentor & Mentoreados|
+:Desarrollan la sesión formativa en el horario pautado;\nMentor proyecta pase QR dinámico TOTP de 30 segundos;\nEstudiantes escanean QR o registran check-in asistencial;
+
+|Estudiante Mentor|
+:Registra bitácora docente antes de 48h (RN-12)\ncon temas desarrollados, dificultad y firma hash SHA-256;
+
+|Estudiante Mentoreado|
+:Responde encuesta de satisfacción CSAT en ventana de 24h (RN-13);
+
+|Comité de Tutoría & Dirección EPIS|
+:Audita bitácora docente, valida firmas y visa horas efectivas;\nAlcanzado el umbral reglamentario (>= 20.0 horas visadas, RN-14);\nEmite constancia digital en PDF con folio único, hash SHA-256 y QR;
+stop
+@enduml

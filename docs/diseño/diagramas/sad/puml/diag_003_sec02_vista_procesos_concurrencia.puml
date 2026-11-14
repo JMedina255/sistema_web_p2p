@@ -1,0 +1,77 @@
+/'
+  Diagrama SAD: Diagrama 2.3: Vista de Procesos, Concurrencia y Sincronización Transaccional
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Kruchten 4+1 / UML 2.5 / C4 Nivel 2
+  Extracción automatizada: Documento SAD Oficial
+'/
+@startuml
+title Diagrama 2.3: Vista de Procesos, Concurrencia y Sincronización Transaccional\nSistema Web P2P - EPIS UPT (2026)
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+participant "Clientes Concurrentes\n(React 19 SPA)" as Clients
+participant "Event Loop FastAPI\n(Uvicorn ASGI)" as EventLoop
+participant "Servicio de Negocio\n(Booking / Quorum)" as Service
+participant "Pool de Conexiones DB\n(SQLAlchemy Engine)" as DBPool
+database "Motor PostgreSQL\n(Transacciones ACID)" as EngineDB
+
+== Flujo 1: Reserva Concurrente con Cerrojo Pesimista (RNF07 / RN-05) ==
+Clients -> EventLoop: POST /api/v1/bookings/reserve (Payload JSON)
+activate EventLoop
+EventLoop -> Service: reserve_seat(payload, caller_email)
+activate Service
+Service -> DBPool: db.begin() -> Transacción ACID
+activate DBPool
+DBPool -> EngineDB: SELECT * FROM sesiones_mentoria WHERE id_sesion = :id FOR UPDATE
+activate EngineDB
+note over EngineDB: Adquiere cerrojo pesimista de fila.\nOtras transacciones sobre esta sesión esperan.
+EngineDB --> DBPool: Tupla de Sesión bloqueada
+DBPool -> EngineDB: SELECT COUNT(*) FROM reservas_cupo WHERE id_sesion = :id AND estado IN ('PENDIENTE_CONFIRMACION', 'CONFIRMADA')
+EngineDB --> DBPool: ocupados_count
+alt ocupados_count < aforo_maximo
+    DBPool -> EngineDB: INSERT INTO reservas_cupo (estado = 'PENDIENTE_CONFIRMACION')
+    DBPool -> EngineDB: COMMIT TRANSACTION
+    EngineDB --> DBPool: Transacción confirmada
+    DBPool --> Service: Objeto Reserva persistido
+    Service --> EventLoop: Reserva formalizada (201 Created)
+    EventLoop --> Clients: 201 Created (Cupo asegurado, 0.0% sobrecupo)
+else Aforo agotado (ocupados_count >= aforo_maximo)
+    DBPool -> EngineDB: ROLLBACK TRANSACTION
+    EngineDB --> DBPool: Rollback completado (Cerrojo liberado)
+    DBPool --> Service: Error de capacidad
+    Service --> EventLoop: HTTPException(409, detail="CAPACITY_EXCEEDED")
+    EventLoop --> Clients: 409 Conflict ("Aforo completo. No quedan vacantes.")
+end
+deactivate EngineDB
+deactivate DBPool
+deactivate Service
+deactivate EventLoop
+
+== Flujo 2: Corte Desatendido de Quórum en T-24h (RN-08 / RN-09) ==
+EventLoop -> Service: evaluate_cutoff_daemon()
+activate EventLoop
+activate Service
+Service -> DBPool: db.begin()
+activate DBPool
+DBPool -> EngineDB: SELECT * FROM sesiones_mentoria WHERE fecha_inicio <= now() + 24h AND estado = 'PUBLICADA' FOR UPDATE
+activate EngineDB
+loop Para cada sesión en corte
+    DBPool -> EngineDB: UPDATE reservas_cupo SET estado = 'NO_CONFIRMADA' WHERE id_sesion = :id AND estado = 'PENDIENTE_CONFIRMACION'
+    DBPool -> EngineDB: SELECT COUNT(*) FROM reservas_cupo WHERE id_sesion = :id AND estado = 'CONFIRMADA'
+    EngineDB --> DBPool: confirmados_count
+    alt confirmados_count >= aforo_maximo * 0.5 (Quórum >= 50%)
+        DBPool -> EngineDB: UPDATE sesiones_mentoria SET estado = 'CONFIRMADA'
+    else confirmados_count < aforo_maximo * 0.5 (Quórum insuficiente)
+        DBPool -> EngineDB: UPDATE sesiones_mentoria SET estado = 'QUORUM_INSUFICIENTE'
+    end
+end
+DBPool -> EngineDB: COMMIT TRANSACTION
+deactivate EngineDB
+deactivate DBPool
+Service --> EventLoop: Reporte de cortes procesados
+deactivate Service
+deactivate EventLoop
+@enduml

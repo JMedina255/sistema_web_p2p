@@ -1,0 +1,66 @@
+/'
+  Diagrama SAD: Diagrama 9.1: Componentes de Software y Módulos Canónicos del Backend
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Kruchten 4+1 / UML 2.5 / C4 Nivel 2
+  Extracción automatizada: Documento SAD Oficial
+'/
+@startuml
+title Diagrama 9.1: Componentes de Software y Módulos Canónicos del Backend\nSistema Web P2P - EPIS UPT (2026)
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 8
+skinparam defaultFontSize 10
+
+package "Capa de Presentación (React 19 SPA)" {
+  component "Componentes de Dominio UI\n(Views & Modals)" as UI
+  component "Cliente de API Tipado\n(apiClient.ts con Interceptor JWT)" as ApiClient
+  UI --> ApiClient
+}
+
+package "Capa de Aplicación y Lógica (FastAPI REST)" {
+  component "Middleware de Seguridad & JWT\n(security.py / dependencies.py)" as Security
+  component "Enrutadores Versionados\n(/api/v1/...)" as Routers
+  ApiClient --> Routers : HTTPS / JSON (OpenAPI 3.0)
+  Routers ..> Security : Inyección de usuario autenticado
+
+  component "MOD-01: Seguridad & Gobernanza\n(AuthService, ConsentService, RoleService)" as M1
+  component "MOD-02: Ofertas & Recursos\n(OfferService)" as M2
+  component "MOD-03: Perfil & Catálogo\n(ProfileService, CurriculumService)" as M3
+  component "MOD-04: Demanda & RecSys\n(RecommendationService - EdRecSys)" as M4
+  component "MOD-05: Quórum & Cancelaciones\n(BookingService, QuorumCronService)" as M5
+  component "MOD-06: Asistencia & Bitácoras\n(AttendanceService, BitacoraService, SurveyService)" as M6
+  component "MOD-07: Gamificación & Certificados\n(CertificateService - ReportLab)" as M7
+  component "MOD-08: Analítica & Configuración\n(AnalyticsService, AuditService)" as M8
+
+  Routers --> M1
+  Routers --> M2
+  Routers --> M3
+  Routers --> M4
+  Routers --> M5
+  Routers --> M6
+  Routers --> M7
+  Routers --> M8
+
+  interface "Repositorio Relacional\n(SQLAlchemy ORM Models)" as Repo
+  interface "Despachador SMTP\n(smtplib / Correo UPT)" as Notice
+
+  M1 ..> Repo
+  M2 ..> Repo
+  M3 ..> Repo
+  M4 ..> Repo
+  M5 ..> Repo
+  M6 ..> Repo
+  M7 ..> Repo
+  M8 ..> Repo
+
+  M1 ..> Notice : Despacho OTP
+  M5 ..> Notice : Alertas de quórum T-24h
+}
+
+database "PostgreSQL 16 Relacional\n(Supabase Cloud con RLS)" as DB
+cloud "Servidor SMTP (@upt.pe)" as SMTP
+
+Repo --> DB : TCP 5432 / SSL
+Notice --> SMTP : Port 587 / TLS
+@enduml

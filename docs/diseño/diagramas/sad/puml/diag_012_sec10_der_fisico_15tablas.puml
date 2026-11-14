@@ -1,0 +1,221 @@
+/'
+  Diagrama SAD: Diagrama 10.1: Diagrama Entidad-Relación Físico (15 Tablas Relacionales en PostgreSQL / Supabase)
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Kruchten 4+1 / UML 2.5 / C4 Nivel 2
+  Extracción automatizada: Documento SAD Oficial
+'/
+@startuml
+title Diagrama 10.1: Diagrama Entidad-Relación Físico (15 Tablas Relacionales)\nSistema Web P2P - PostgreSQL 16 / Supabase
+
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam entity {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+    ArrowColor #2B3A42
+}
+
+entity "asignaturas" as asignaturas {
+  *id_asignatura : integer <<PK>>
+  --
+  *codigo_curso : varchar(20) <<UQ>>
+  *nombre_curso : varchar(150)
+  *ciclo_plan : integer
+  *creditos : integer
+  *es_prioritaria : boolean
+  *factor_ponderacion : float
+  *estado_activo : boolean
+  *created_at : timestamptz
+}
+
+entity "temas_conceptuales" as temas {
+  *id_tema : integer <<PK>>
+  --
+  *id_asignatura : integer <<FK>>
+  *nombre_tema : varchar(150)
+  descripcion_silabo : text
+  *unidad_silabica : integer
+  *estado_activo : boolean
+  *created_at : timestamptz
+}
+
+entity "auth_challenges" as auth_challenges {
+  *id_challenge : varchar(64) <<PK>>
+  --
+  *email : varchar(255)
+  *code_hash : varchar(255)
+  *code_salt : varchar(64)
+  *created_at : timestamptz
+  *expires_at : timestamptz
+  *resend_available_at : timestamptz
+  *consumed : boolean
+  *attempts : integer
+}
+
+entity "consentimientos_legales" as consentimientos {
+  *id_consentimiento : integer <<PK>>
+  --
+  *email : varchar(255)
+  *terms_version : varchar(50)
+  *accepted : boolean
+  *consented_at : timestamptz
+  ip_address : varchar(45)
+  user_agent : text
+}
+
+entity "roles" as roles {
+  *id_rol : integer <<PK>>
+  --
+  *nombre_rol : varchar(50) <<UQ>>
+  descripcion : text
+}
+
+entity "usuario_roles" as usuario_roles {
+  *id_usuario_rol : integer <<PK>>
+  --
+  *email : varchar(255)
+  *id_rol : integer <<FK>>
+  *fecha_asignacion : timestamptz
+  asignado_por : varchar(255)
+  *activo : boolean
+}
+
+entity "perfiles_academicos" as perfiles {
+  *id_perfil : integer <<PK>>
+  --
+  *email : varchar(255) <<UQ>>
+  codigo_estudiante : varchar(20)
+  nombres : varchar(100)
+  apellidos : varchar(100)
+  *ciclo_actual : integer <<CHECK 1-10>>
+  *rol_postulacion : varchar(30)
+  materias_interes : jsonb
+  temas_seleccionados : jsonb
+  biografia : text
+  *modalidad_preferida : varchar(30)
+  *updated_at : timestamptz
+}
+
+entity "disponibilidades_horarias" as disponibilidades {
+  *id_disponibilidad : integer <<PK>>
+  --
+  *email : varchar(255)
+  *dia_semana : integer <<CHECK 1-6>>
+  *hora_inicio : varchar(10)
+  *hora_fin : varchar(10)
+  *created_at : timestamptz
+}
+
+entity "sesiones_mentoria" as sesiones {
+  *id_sesion : integer <<PK>>
+  --
+  *codigo_sesion : varchar(20) <<UQ>>
+  *mentor_email : varchar(255)
+  *id_asignatura : integer <<FK>>
+  *id_tema : integer <<FK>>
+  *fecha_inicio : timestamptz
+  *duracion_minutos : integer <<CHECK 60,90>>
+  *modalidad : varchar(20) <<CHECK>>
+  *aforo_maximo : integer <<CHECK 10,20>>
+  *espacio_asignado : varchar(255)
+  notas_adicionales : text
+  *estado : varchar(30) <<CHECK>>
+  quorumevaluated_at : timestamptz
+  *created_at : timestamptz
+}
+
+entity "reservas_cupo" as reservas {
+  *id_reserva : integer <<PK>>
+  --
+  *codigo_reserva : varchar(20) <<UQ>>
+  *id_sesion : integer <<FK>>
+  *estudiante_email : varchar(255)
+  *estado : varchar(30) <<CHECK>>
+  *fecha_reserva : timestamptz
+  fecha_ratificacion : timestamptz
+  motivo_cancelacion : text
+  ticket_hash : varchar(64)
+  *created_at : timestamptz
+  *updated_at : timestamptz
+}
+
+entity "solicitudes_demanda" as demandas {
+  *id_demanda : integer <<PK>>
+  --
+  *estudiante_email : varchar(255)
+  *id_asignatura : integer <<FK>>
+  *id_tema : integer <<FK>>
+  observaciones : text
+  *estado : varchar(20) <<CHECK>>
+  *created_at : timestamptz
+}
+
+entity "asistencias_sesion" as asistencias {
+  *id_asistencia : integer <<PK>>
+  --
+  *id_sesion : integer <<FK>>
+  *estudiante_email : varchar(255)
+  *asistio : boolean
+  fecha_checkin : timestamptz
+  ip_origen : varchar(45)
+  *created_at : timestamptz
+}
+
+entity "bitacoras_pedagogicas" as bitacoras {
+  *id_bitacora : integer <<PK>>
+  --
+  *id_sesion : integer <<FK, UQ>>
+  *id_mentor : varchar(255)
+  *temas_cubiertos : jsonb
+  *observaciones : text
+  *nivel_dificultad : varchar(20) <<CHECK>>
+  *hash_firma : varchar(64)
+  *horas_declaradas : float
+  *visado_administrador : boolean
+  *created_at : timestamptz
+}
+
+entity "encuestas_calidad" as encuestas {
+  *id_encuesta : integer <<PK>>
+  --
+  *id_sesion : integer <<FK>>
+  *estudiante_email : varchar(255)
+  *calificacion_general : integer <<CHECK 1-5>>
+  *dominio_tema : integer <<CHECK 1-5>>
+  *claridad_explicacion : integer <<CHECK 1-5>>
+  *puntualidad : integer <<CHECK 1-5>>
+  comentarios : text
+  *created_at : timestamptz
+}
+
+entity "certificados_horas" as certificados {
+  *id_certificado : integer <<PK>>
+  --
+  *id_mentor : varchar(255)
+  *codigo_folio : varchar(50) <<UQ>>
+  *periodo_academico : varchar(20)
+  *horas_acreditadas : float <<CHECK >= 20.0>>
+  *hash_firma : varchar(64)
+  *estado : varchar(30)
+  *created_at : timestamptz
+}
+
+' Relaciones estructurales
+asignaturas ||--o{ temas : "contiene"
+asignaturas ||--o{ sesiones : "clasifica"
+temas ||--o{ sesiones : "temario de"
+roles ||--o{ usuario_roles : "asignado en"
+
+sesiones ||--o{ reservas : "contiene inscripciones"
+sesiones ||--o| bitacoras : "formaliza pedagógicamente"
+sesiones ||--o{ asistencias : "registra presencias"
+sesiones ||--o{ encuestas : "recibe evaluaciones"
+
+asignaturas ||--o{ demandas : "demanda de"
+temas ||--o{ demandas : "tema solicitado"
+@enduml

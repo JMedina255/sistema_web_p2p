@@ -1,0 +1,57 @@
+/'
+  Diagrama SAD: Diagrama 2.1: Vista de Escenarios Arquitectónicos Nucleares (+1 de Kruchten)
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Kruchten 4+1 / UML 2.5 / C4 Nivel 2
+  Extracción automatizada: Documento SAD Oficial
+'/
+@startuml
+title Diagrama 2.1: Vista de Escenarios Arquitectónicos Nucleares (+1 de Kruchten)\nSistema Web P2P - EPIS UPT (2026)
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam usecase {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+    ArrowColor #2B3A42
+}
+
+skinparam actor {
+    BackgroundColor #E9ECEF
+    BorderColor #1D2D44
+}
+
+actor "Estudiante Mentoreado\n(I - IV Ciclo)" as Alumno
+actor "Estudiante Mentor\n(VII - X Ciclo)" as Mentor
+actor "Comité de Tutoría /\nDirección EPIS" as Admin
+actor "Demonio Cron Backend\n(Evaluador Quórum)" as Cron <<Sistema>>
+
+rectangle "Escenarios de Alto Impacto Arquitectónico (+1)" {
+    usecase "E1: Acceso Seguro 2FA &\nConsentimiento Ley 29733 (CUS-001)" as E1
+    usecase "E2: Emparejamiento Híbrido\nTop-k EdRecSys en-proceso (CUS-002)" as E2
+    usecase "E3: Bloqueo Concurrente Pesimista\nSELECT FOR UPDATE en Reservas (CUS-004)" as E3
+    usecase "E4: Corte de Quórum en T-24h\ny Contingencia del Mentor (CUS-023/CUS-007)" as E4
+    usecase "E5: Asistencia QR TOTP 30s &\nBitácora SHA-256 en 48h (CUS-012/CUS-013)" as E5
+    usecase "E6: Acreditación y Emisión Digital\nCertificados PDF con QR (CUS-018)" as E6
+}
+
+Alumno --> E1
+Mentor --> E1
+Admin --> E1
+
+Alumno --> E2
+Alumno --> E3
+Cron --> E4
+Mentor --> E4
+Alumno --> E5
+Mentor --> E5
+Admin --> E6
+Mentor --> E6
+
+E3 ..> E2 : <<aprovecha catálogo>>
+E4 ..> E3 : <<evalúa aforo ratificado>>
+E5 ..> E4 : <<valida reservas confirmadas>>
+E6 ..> E5 : <<audita bitácoras visadas>>
+@enduml
