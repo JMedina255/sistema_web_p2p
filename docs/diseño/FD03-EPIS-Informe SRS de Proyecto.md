@@ -241,28 +241,7 @@ La organización interna de C-SharkTeam se rige por un esquema de alta cohesión
 
 ### Diagrama 2.1: Organigrama Funcional del Equipo Consultor C-SharkTeam
 
-```plantuml
-@startuml
-top to bottom direction
-skinparam rectangle {
-  BackgroundColor white
-  BorderColor #444444
-}
-
-rectangle "C-SharkTeam\nDirección General del Proyecto" as DIR
-
-rectangle "Ingeniería de Backend, Algoritmos\ny Persistencia Relacional\n\nRenzo Antonio Antayhua Mamani\n• Servicios RESTful en FastAPI\n• Motor de Recomendación EdRecSys\n• Persistencia Relacional PostgreSQL / RLS\n• Transaccionalidad Pesimista y Quórum\n• Batería de Pruebas Backend (Pytest)" as BACK
-
-rectangle "Ingeniería de Frontend, UI/UX\ny Accesibilidad Universal\n\nJoan Cristian Medina Quispe\n• Aplicación Web Responsiva (React SPA)\n• Design System Institucional (Tailwind)\n• Accesibilidad Web WCAG 2.1 Nivel AA\n• Gestión de Estado y Clientes HTTP\n• Batería de Pruebas Frontend (Vitest)" as FRONT
-
-rectangle "Interacción con Cliente Institucional\nEPIS-UPT\n\n• Dirección de Escuela (Convalidación)\n• Coordinación de Tutoría (Cursos Filtro)\n• Estudiantes Mentores y Mentoreados" as INSTITUCION
-
-DIR --> BACK
-DIR --> FRONT
-BACK --> INSTITUCION
-FRONT --> INSTITUCION
-@enduml
-```
+![Diagrama 2.1: Organigrama Funcional del Equipo Consultor C-SharkTeam](diagramas/srs/img/diag_001_sec24_organigrama_consultor.png)
 
 Fuente: Elaboración propia.
 
@@ -471,44 +450,7 @@ A continuación, se presenta la representación visual del flujo actual:
 
 ### Diagrama 4.1: Diagrama de Actividades del Proceso Actual de Asesoría Informal (As-Is)
 
-```plantuml
-@startuml
-title Proceso Actual de Asesoría Académica Informal (As-Is) - EPIS-UPT
-skinparam activity {
-  BackgroundColor white
-  BorderColor #555555
-  ArrowColor #333333
-}
-
-|Estudiante (I - IV Ciclo)|
-start
-:Identifica vacíos conceptuales en materia filtro;
-:Publica consulta en grupo de WhatsApp / Telegram;
-
-if (¿Algún estudiante superior responde?) then (No)
-  :Permanece sin asesoría pedagógica;
-  :Acude tardíamente a tutoría docente regular;
-  :Alto riesgo de rezago o desaprobación;
-  stop
-else (Sí)
-  |Compañero / Mentor Informal|
-  :Acepta ayudar de manera voluntaria y ocasional;
-  |Estudiante (I - IV Ciclo)|
-  :Coordina horario y tema por chat privado;
-  |Compañero / Mentor Informal|
-  :Busca aula libre en el pabellón empíricamente\no crea enlace de videollamada personal;
-  |Estudiante (I - IV Ciclo)|
-  :Asiste a la sesión informal;
-  |Compañero / Mentor Informal|
-  :Explica dudas sin temario silábico estructurado;
-  |Comité de Tutoría / Dirección EPIS|
-  :Sin registro de asistencia ni temas tratados;
-  :Sin métricas de demanda académica institucional;
-  :Sin reconocimiento formal de horas para el mentor;
-  stop
-endif
-@enduml
-```
+![Diagrama 4.1: Diagrama de Actividades del Proceso Actual de Asesoría Informal (As-Is)](diagramas/srs/img/diag_002_sec41_actividades_proceso_as_is.png)
 
 Fuente: Elaboración propia a partir del levantamiento de información en la EPIS-UPT.
 
@@ -536,74 +478,7 @@ A continuación, se presenta la representación del flujo gobernado:
 
 ### Diagrama 4.2: Diagrama de Actividades del Proceso Propuesto de Mentorías P2P (To-Be)
 
-```plantuml
-@startuml
-title Proceso Propuesto de Mentorías Académicas P2P (To-Be) - EPIS-UPT
-skinparam activity {
-  BackgroundColor white
-  BorderColor #333333
-  ArrowColor #222222
-}
-
-|Estudiante Mentoreado|
-start
-:Inicia sesión con correo UPT y código OTP / Google;
-if (¿Primer acceso?) then (Sí)
-  :Formaliza consentimiento informado digital (Ley 29733);
-endif
-
-|Estudiante Mentor (VII-X)|
-:Publica oferta de mentoría (Materia, Temario, Modalidad);
-
-|Sistema Web P2P (Backend / EdRecSys)|
-:Valida aula física libre o enlace virtual institucional;
-:Ejecuta motor EdRecSys (Similitud Coseno + Reputación);
-:Despliega ranking adaptativo Top-k al estudiante;
-
-|Estudiante Mentoreado|
-:Explora cartelera o registra solicitud en banco de demanda;
-:Reserva cupo (Cerrojo pesimista FOR UPDATE);
-:Ratifica asistencia obligatoria antes de T-24h;
-
-|Sistema Web P2P (Backend / Servicio Cron)|
-:Ejecuta corte automatizado a T-24h y libera no ratificados;
-if (¿Quórum confirmados >= 50% de aforo?) then (Sí)
-  :Confirma sesión y notifica a participantes;
-else (No)
-  :Transiciona a QUORUM_INSUFICIENTE;
-  |Estudiante Mentor (VII-X)|
-  if (¿Mentor decide continuar sesión extraordinaria?) then (Sí)
-    :Ratifica realización de la sesión;
-  else (No)
-    |Sistema Web P2P (Backend / Servicio Cron)|
-    :Cancela sesión, libera ambiente y notifica a inscritos;
-    stop
-  endif
-endif
-
-|Mentor y Estudiantes|
-:Desarrollan la sesión de mentoría presencial o virtual;
-:Estudiantes marcan asistencia con pase QR dinámico TOTP (30s);
-
-|Estudiante Mentor (VII-X)|
-:Registra bitácora pedagógica antes de 48h (Firma SHA-256);
-
-|Estudiante Mentoreado|
-:Responde encuesta de satisfacción CSAT (Ventana 24h);
-
-|Sistema Web P2P (Backend / EdRecSys)|
-:Actualiza reputación e insignias de mérito del mentor;
-:Acumula horas académicas auditables en su expediente;
-
-|Comité de Tutoría / Dirección EPIS|
-:Supervisa tablero analítico de retención e indicadores ICACIT;
-:Visa bitácoras docentes y audita horas efectivas;
-if (¿Horas acumuladas del mentor >= Umbral 20 horas?) then (Sí)
-  :Emite certificado digital oficial PDF foliado con código QR;
-endif
-stop
-@enduml
-```
+![Diagrama 4.2: Diagrama de Actividades del Proceso Propuesto de Mentorías P2P (To-Be)](diagramas/srs/img/diag_003_sec42_actividades_proceso_to_be.png)
 
 Fuente: Elaboración propia a partir del diseño de procesos de C-SharkTeam.
 
@@ -1714,35 +1589,7 @@ El ciclo de vida del desarrollo de software del proyecto se fundamenta en la met
 
 ### Diagrama 6.1: Fases del Ciclo de Vida del Desarrollo de Software (Metodología UWE - Semestre 2026-II)
 
-```plantuml
-@startuml
-title Fases de Desarrollo del Sistema Web P2P (Metodología UWE - Semestre 2026-II)
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam activity {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-start
-:29 Ago 2026;
-:FASE 1: Especificación de Requisitos y Gobernanza Legal\nSemanas 1-3 (Sprints 1 y 2)\n• Levantamiento de información y entrevistas estructuradas\n• Definición de RF01-RF26, RN-01 a RN-14 y RNF01-RNF10 (ISO 25010)\n• Protocolo formal de Consentimiento Digital bajo Ley N° 29733\n• Autenticación multifactor 2FA institucional;
-
-:FASE 2: Diseño del Sistema y Modelado de Datos Relacional\nSemanas 4-6 (Sprints 2 y 3)\n• Arquitectura desacoplada en 3 capas y modularización (MOD-01 al MOD-08)\n• Modelado relacional PostgreSQL (15 tablas) con políticas RLS\n• Prototipos de alta fidelidad en React SPA y diseño de navegación UWE;
-
-:FASE 3: Construcción del Software y Motor Algorítmico\nSemanas 7-11 (Sprints 3 al 6)\n• Microservicios RESTful en Python (FastAPI)\n• Motor híbrido EdRecSys (Similitud Coseno + Filtrado Colaborativo)\n• Orquestación de quórum con cerrojos pesimistas a T-24h (FOR UPDATE)\n• Marcación QR TOTP y bitácoras docentes con hash SHA-256;
-
-:FASE 4: Verificación Integral, Gamificación y Cierre\nSemanas 12-14 (Sprints 7 y 8)\n• Gamificación e insignias por mérito docente\n• Emisión de certificados digitales oficiales PDF con QR institucional\n• Tableros de analítica institucional y supervisión directiva\n• Batería de 627 pruebas automatizadas (280 backend, 347 frontend);
-
-:FASE 5: Piloto Institucional y Cierre del Semestre\nSemanas 15-16 (Diciembre 2026)\n• Despliegue en producción sobre infraestructura PaaS (Supabase / Render)\n• Prueba piloto con estudiantes de I a X ciclo de la EPIS-UPT\n• Evaluación de usabilidad SUS (>75 puntos) y entrega formal de versión 3.0;
-:14 Dic 2026;
-stop
-@enduml
-```
+![Diagrama 6.1: Fases del Ciclo de Vida del Desarrollo de Software (Metodología UWE - Semestre 2026-II)](diagramas/srs/img/diag_004_sec60_ciclo_vida_metodologia.png)
 
 Fuente: Elaboración propia.
 
@@ -1774,179 +1621,7 @@ El modelo conceptual formaliza las entidades del dominio de la EPIS-UPT, captura
 
 ### Diagrama 6.2: Diagrama de Clases Conceptuales del Dominio - Sistema Web P2P EPIS-UPT
 
-```plantuml
-@startuml
-title Diagrama de Clases Conceptuales del Dominio - Sistema Web P2P EPIS-UPT
-hide methods
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam class {
-  BackgroundColor #F8F9FA
-  BorderColor #2B3A42
-  ArrowColor #2B3A42
-}
-
-class Usuario {
-  +id_usuario: UUID
-  +codigo_estudiante: String
-  +correo_institucional: String
-  +nombres: String
-  +apellidos: String
-  +activo: Boolean
-  +fecha_registro: DateTime
-}
-
-class ConsentimientoLegal {
-  +id_consentimiento: UUID
-  +id_usuario: UUID
-  +ip_address: String
-  +user_agent: String
-  +fecha_aceptacion: DateTime
-}
-
-class Rol {
-  +id_rol: Integer
-  +codigo_rol: String
-  +nombre_rol: String
-}
-
-class PerfilFormativo {
-  +id_perfil: UUID
-  +id_usuario: UUID
-  +biografia: Text
-  +ciclo_actual: Integer
-  +reputacion_promedio: Float
-  +horas_dictadas_total: Float
-}
-
-class DisponibilidadHoraria {
-  +id_disponibilidad: UUID
-  +id_usuario: UUID
-  +dia_semana: Integer
-  +hora_inicio: Time
-  +hora_fin: Time
-}
-
-class CursoCritico {
-  +id_curso: UUID
-  +codigo_curso: String
-  +nombre_curso: String
-  +ciclo_sugerido: Integer
-  +es_prioritario: Boolean
-}
-
-class TemaCurricular {
-  +id_tema: UUID
-  +id_curso: UUID
-  +unidad_silabica: Integer
-  +titulo_tema: String
-  +descripcion_conceptual: Text
-}
-
-class OfertaMentoria {
-  +id_oferta: UUID
-  +id_mentor: UUID
-  +id_curso: UUID
-  +id_tema: UUID
-  +modalidad: String
-  +aforo_maximo: Integer
-  +fecha_hora_inicio: DateTime
-  +fecha_hora_fin: DateTime
-  +estado_oferta: String
-}
-
-class EspacioFisico {
-  +id_espacio: UUID
-  +codigo_ambiente: String
-  +pabellon: String
-  +capacidad: Integer
-  +es_activo: Boolean
-}
-
-class SesionMentoria {
-  +id_sesion: UUID
-  +id_oferta: UUID
-  +id_espacio: UUID
-  +enlace_virtual: String
-  +estado_sesion: String
-  +quorum_alcanzado: Boolean
-}
-
-class ReservaCupo {
-  +id_reserva: UUID
-  +id_sesion: UUID
-  +id_mentoreado: UUID
-  +estado_reserva: String
-  +fecha_reserva: DateTime
-  +fecha_ratificacion: DateTime
-}
-
-class AsistenciaSesion {
-  +id_asistencia: UUID
-  +id_sesion: UUID
-  +id_estudiante: UUID
-  +estado_asistencia: String
-  +metodo_checkin: String
-  +timestamp_checkin: DateTime
-}
-
-class BitacoraPedagogica {
-  +id_bitacora: UUID
-  +id_sesion: UUID
-  +id_mentor: UUID
-  +temas_impartidos: Text
-  +observaciones_docentes: Text
-  +hash_sha256: String
-  +estado_visado: String
-  +fecha_registro: DateTime
-}
-
-class EvaluacionCalidad {
-  +id_evaluacion: UUID
-  +id_sesion: UUID
-  +id_estudiante: UUID
-  +puntuacion_estrellas: Integer
-  +comentario_cualitativo: Text
-  +fecha_evaluacion: DateTime
-}
-
-class CertificadoHoras {
-  +id_certificado: UUID
-  +id_mentor: UUID
-  +folio_correlativo: String
-  +horas_acreditadas: Float
-  +hash_documento: String
-  +url_qr_verificacion: String
-  +fecha_emision: DateTime
-}
-
-Usuario "1" -- "0..1" ConsentimientoLegal : formaliza
-Usuario "1" -- "1..*" Rol : posee
-Usuario "1" -- "1" PerfilFormativo : define
-Usuario "1" -- "0..*" DisponibilidadHoraria : agenda
-
-CursoCritico "1" -- "1..*" TemaCurricular : desglosa
-Usuario "1" -- "0..*" OfertaMentoria : publica (como mentor)
-CursoCritico "1" -- "0..*" OfertaMentoria : clasifica
-TemaCurricular "1" -- "0..*" OfertaMentoria : especifica
-
-OfertaMentoria "1" -- "1" SesionMentoria : materializa
-EspacioFisico "0..1" -- "0..*" SesionMentoria : alberga
-
-SesionMentoria "1" -- "0..*" ReservaCupo : gestiona cupos
-Usuario "1" -- "0..*" ReservaCupo : inscribe (como mentoreado)
-
-SesionMentoria "1" -- "0..*" AsistenciaSesion : controla
-SesionMentoria "1" -- "0..1" BitacoraPedagogica : documenta
-SesionMentoria "1" -- "0..*" EvaluacionCalidad : recibe
-
-Usuario "1" -- "0..*" CertificadoHoras : acredita
-@enduml
-```
+![Diagrama 6.2: Diagrama de Clases Conceptuales del Dominio - Sistema Web P2P EPIS-UPT](diagramas/srs/img/diag_005_sec62_clases_conceptuales_dominio.png)
 
 Fuente: Elaboración propia.
 
@@ -1959,104 +1634,7 @@ La arquitectura de software del Sistema Web P2P adopta un patrón en **Capas Des
 
 ### Diagrama 6.3: Diagrama de Paquetes Arquitecturales y Subsistemas del Sistema Web P2P
 
-```plantuml
-@startuml
-title Diagrama de Paquetes Arquitecturales y Subsistemas del Sistema Web P2P
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-package "Capa de Presentación (Frontend SPA - React 18 / TypeScript)" as PKG_FRONT #EBF3FB {
-  package "Vistas de Usuario (UI Views)" as PKG_VIEWS {
-    [LoginOtpView]
-    [ConsentModalView]
-    [ProfileAvailabilityView]
-    [RecommendationsView]
-    [PublishMentorshipView]
-    [BookingModalView]
-    [QrScannerView / QrPassView]
-    [BitacoraRegisterView]
-    [AdminAnalyticsView]
-    [AdminCertificatesView]
-  }
-  package "Adaptadores de Cliente (HTTP / State)" as PKG_CLIENT {
-    [apiClient (Axios)]
-    [authService]
-    [mentorshipService]
-    [bookingService]
-    [bitacoraService]
-  }
-  PKG_VIEWS ..> PKG_CLIENT : invoca
-}
-
-package "Capa de Aplicación y API RESTful (Python / FastAPI)" as PKG_API #F0FDF4 {
-  package "Controladores (Endpoints v1)" as PKG_ENDPOINTS {
-    [auth.py]
-    [consent.py]
-    [roles.py]
-    [curriculum.py]
-    [recommendations.py]
-    [mentorships.py]
-    [bookings.py]
-    [attendance.py]
-    [bitacora.py]
-    [certificates.py]
-    [analytics.py]
-  }
-  package "Esquemas de Datos (Pydantic v2)" as PKG_SCHEMAS {
-    [AuthSchemas]
-    [BookingSchemas]
-    [MentorshipSchemas]
-    [BitacoraSchemas]
-    [CertificateSchemas]
-  }
-  PKG_ENDPOINTS ..> PKG_SCHEMAS : valida
-}
-
-package "Capa de Servicios y Dominio (Lógica de Negocio)" as PKG_DOMAIN #FEF9C3 {
-  package "Servicios de Negocio (Services)" as PKG_SERVICES {
-    [AuthService]
-    [ConsentService]
-    [RecommendationService (EdRecSys)]
-    [MentorshipService]
-    [BookingService (Locks pesimistas)]
-    [QuorumCronService]
-    [AttendanceService (TOTP QR)]
-    [BitacoraService (SHA-256)]
-    [CertificateService]
-    [AnalyticsService]
-  }
-  package "Entidades ORM (SQLAlchemy 2.0)" as PKG_MODELS {
-    [Usuario / Rol]
-    [Perfil / Disponibilidad]
-    [Curso / Tema]
-    [Oferta / Sesion]
-    [Reserva / Asistencia]
-    [Bitacora / Evaluacion]
-    [Certificado / Insignia]
-  }
-  PKG_SERVICES ..> PKG_MODELS : manipula
-}
-
-package "Capa de Persistencia e Infraestructura Externa" as PKG_INFRA #FFF1F2 {
-  database "PostgreSQL 15 (Supabase)" as DB_PG {
-    [15 Tablas Relacionales]
-    [Políticas RLS]
-    [Constraints chk_sesion]
-  }
-  [Servidor SMTP UPT (Emails)] as EXT_SMTP
-  [Generador PDF (ReportLab)] as EXT_PDF
-}
-
-PKG_CLIENT ..> PKG_ENDPOINTS : peticiones HTTPS / JSON
-PKG_ENDPOINTS ..> PKG_SERVICES : orquesta
-PKG_SERVICES ..> DB_PG : transacciones ACID
-PKG_SERVICES ..> EXT_SMTP : despacha correos
-PKG_SERVICES ..> EXT_PDF : compila certificados
-@enduml
-```
+![Diagrama 6.3: Diagrama de Paquetes Arquitecturales y Subsistemas del Sistema Web P2P](diagramas/srs/img/diag_006_sec621_paquetes_arquitecturales.png)
 
 Fuente: Elaboración propia.
 
@@ -2069,108 +1647,7 @@ Los casos de uso del Sistema Web P2P especifican la interacción funcional entre
 
 ### Diagrama 6.4: Diagrama de Casos de Uso General Consolidado del Sistema Web P2P (CUS-001 al CUS-024)
 
-```plantuml
-@startuml
-title Diagrama 6.4: Diagrama de Casos de Uso General Consolidado (CUS-001 al CUS-024)\nSistema Web P2P - EPIS UPT
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Usuario Institucional" as User #EBF3FB
-actor "Estudiante Mentoreado" as Mentoreado #EBF3FB
-actor "Estudiante Mentor" as Mentor #EBF3FB
-actor "Administrador (EPIS)" as Admin #FEF9C3
-actor "Servicio Cron Backend" as Cron #FFF1F2
-
-Mentoreado -up-|> User
-Mentor -up-|> User
-Admin -up-|> User
-
-rectangle "Sistema Web P2P de Mentorías Académicas EPIS-UPT" {
-
-  package "MOD-01: Seguridad y Gobernanza" {
-    usecase "CUS-001: Iniciar sesión con 2FA\ny consentimiento Ley 29733" as CUS01
-    usecase "CUS-010: Gestionar asignación\nde roles de usuario" as CUS10
-  }
-
-  package "MOD-02: Ofertas de Mentoría y Recursos" {
-    usecase "CUS-006: Publicar oferta\nde mentoría académica" as CUS06
-    usecase "CUS-008: Consultar disponibilidad\nde espacios y recursos" as CUS08
-  }
-
-  package "MOD-03: Perfil y Plan de Aprendizaje" {
-    usecase "CUS-005: Gestionar perfil\ny disponibilidad horaria" as CUS05
-    usecase "CUS-021: Explorar catálogo\ncurricular de asignaturas filtro" as CUS21
-  }
-
-  package "MOD-04: Demanda y Recomendaciones" {
-    usecase "CUS-002: Explorar recomendaciones\npersonalizadas Top-k" as CUS02
-    usecase "CUS-003: Registrar solicitud\nde demanda académica" as CUS03
-  }
-
-  package "MOD-05: Quórum y Cancelaciones" {
-    usecase "CUS-004: Reservar cupo\nde mentoría académica" as CUS04
-    usecase "CUS-024: Ratificar asistencia\na sesión de mentoría" as CUS24
-    usecase "CUS-017: Desistir voluntariamente\nde reserva de cupo" as CUS17
-    usecase "CUS-023: Evaluar quórum\nautomático a T-24h" as CUS23
-    usecase "CUS-007: Decisión ante\nquórum insuficiente" as CUS07
-  }
-
-  package "MOD-06: Asistencia, Bitácoras y Feedback" {
-    usecase "CUS-012: Registrar asistencia\ncon pase QR dinámico" as CUS12
-    usecase "CUS-013: Registrar bitácora\ndocente con SHA-256" as CUS13
-    usecase "CUS-014: Visualizar historial\ny bitácoras académicas" as CUS14
-  }
-
-  package "MOD-07: Gamificación e Incentivos" {
-    usecase "CUS-018: Emitir constancia\ninstitucional de horas" as CUS18
-    usecase "CUS-019: Gestionar insignias\ny reputación gamificada" as CUS19
-  }
-
-  package "MOD-08: Analítica y Configuración" {
-    usecase "CUS-009: Notificar eventos\ncríticos y alertas temporales" as CUS09
-    usecase "CUS-011: Generar reportes\ne indicadores de analítica" as CUS11
-    usecase "CUS-015: Consultar métricas\nde retención y desempeño" as CUS15
-    usecase "CUS-016: Auditar trazas de\nseguridad y consentimiento" as CUS16
-    usecase "CUS-020: Configurar parámetros\ninstitucionales y umbrales" as CUS20
-    usecase "CUS-022: Gestionar catálogo\nde temas y materias críticas" as CUS22
-  }
-}
-
-User --> CUS01
-Admin --> CUS10
-
-Mentor --> CUS06
-Mentor --> CUS08
-Mentor --> CUS07
-Mentor --> CUS13
-Mentor --> CUS18
-Mentor --> CUS19
-
-User --> CUS05
-User --> CUS21
-User --> CUS14
-
-Mentoreado --> CUS02
-Mentoreado --> CUS03
-Mentoreado --> CUS04
-Mentoreado --> CUS24
-Mentoreado --> CUS17
-Mentoreado --> CUS12
-
-Cron --> CUS23
-Cron --> CUS09
-
-Admin --> CUS11
-Admin --> CUS15
-Admin --> CUS16
-Admin --> CUS20
-Admin --> CUS22
-@enduml
-```
+![Diagrama 6.4: Diagrama de Casos de Uso General Consolidado del Sistema Web P2P (CUS-001 al CUS-024)](diagramas/srs/img/diag_007_sec622_casos_uso_general_24cus.png)
 
 Fuente: Elaboración propia.
 
@@ -2178,30 +1655,7 @@ Fuente: Elaboración propia.
 
 ### Diagrama 6.5: Diagrama de Casos de Uso - MOD-01: Seguridad, Autenticación y Gobernanza
 
-```plantuml
-@startuml
-title Diagrama 6.5: Diagrama de Casos de Uso - MOD-01: Seguridad, Autenticación y Gobernanza
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Usuario Institucional" as User #EBF3FB
-actor "Administrador (EPIS)" as Admin #FEF9C3
-actor "Servicio Correo SMTP" as SMTP #FFF1F2
-
-rectangle "MOD-01: Seguridad, Autenticación y Gobernanza" {
-  usecase "CUS-001: Iniciar sesión con 2FA\ny consentimiento Ley 29733" as CUS01
-  usecase "CUS-010: Gestionar asignación\nde roles de usuario" as CUS10
-}
-
-User --> CUS01
-CUS01 ..> SMTP : <<include>>
-Admin --> CUS10
-@enduml
-```
+![Diagrama 6.5: Diagrama de Casos de Uso - MOD-01: Seguridad, Autenticación y Gobernanza](diagramas/srs/img/diag_008_sec622_casos_uso_mod01.png)
 
 Fuente: Elaboración propia.
 
@@ -2209,29 +1663,7 @@ Fuente: Elaboración propia.
 
 ### Diagrama 6.6: Diagrama de Casos de Uso - MOD-02: Ofertas de Mentoría y Gestión de Recursos
 
-```plantuml
-@startuml
-title Diagrama 6.6: Diagrama de Casos de Uso - MOD-02: Ofertas de Mentoría y Gestión de Recursos
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Estudiante Mentor" as Mentor #EBF3FB
-actor "Administrador (EPIS)" as Admin #FEF9C3
-
-rectangle "MOD-02: Ofertas de Mentoría y Gestión de Recursos" {
-  usecase "CUS-006: Publicar oferta\nde mentoría académica" as CUS06
-  usecase "CUS-008: Consultar disponibilidad\nde espacios y recursos" as CUS08
-}
-
-Mentor --> CUS06
-Mentor --> CUS08
-Admin --> CUS08
-@enduml
-```
+![Diagrama 6.6: Diagrama de Casos de Uso - MOD-02: Ofertas de Mentoría y Gestión de Recursos](diagramas/srs/img/diag_009_sec622_casos_uso_mod02.png)
 
 Fuente: Elaboración propia.
 
@@ -2239,27 +1671,7 @@ Fuente: Elaboración propia.
 
 ### Diagrama 6.7: Diagrama de Casos de Uso - MOD-03: Perfil del Mentor y Plan de Aprendizaje
 
-```plantuml
-@startuml
-title Diagrama 6.7: Diagrama de Casos de Uso - MOD-03: Perfil del Mentor y Plan de Aprendizaje
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Usuario Institucional\n(Mentoreado / Mentor)" as User #EBF3FB
-
-rectangle "MOD-03: Perfil del Mentor y Plan de Aprendizaje" {
-  usecase "CUS-005: Gestionar perfil formativo\ny disponibilidad horaria" as CUS05
-  usecase "CUS-021: Explorar catálogo curricular\nde asignaturas filtro" as CUS21
-}
-
-User --> CUS05
-User --> CUS21
-@enduml
-```
+![Diagrama 6.7: Diagrama de Casos de Uso - MOD-03: Perfil del Mentor y Plan de Aprendizaje](diagramas/srs/img/diag_010_sec622_casos_uso_mod03.png)
 
 Fuente: Elaboración propia.
 
@@ -2267,31 +1679,7 @@ Fuente: Elaboración propia.
 
 ### Diagrama 6.8: Diagrama de Casos de Uso - MOD-04: Demanda y Recomendaciones Personalizadas
 
-```plantuml
-@startuml
-title Diagrama 6.8: Diagrama de Casos de Uso - MOD-04: Demanda y Recomendaciones Personalizadas
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Estudiante Mentoreado" as Mentoreado #EBF3FB
-actor "Estudiante Mentor" as Mentor #EBF3FB
-actor "Motor EdRecSys" as RecSys #FFF1F2
-
-rectangle "MOD-04: Demanda y Recomendaciones Personalizadas" {
-  usecase "CUS-002: Explorar recomendaciones\npersonalizadas Top-k" as CUS02
-  usecase "CUS-003: Registrar solicitud\nde demanda académica" as CUS03
-}
-
-Mentoreado --> CUS02
-CUS02 ..> RecSys : <<include>>
-Mentoreado --> CUS03
-Mentor --> CUS03
-@enduml
-```
+![Diagrama 6.8: Diagrama de Casos de Uso - MOD-04: Demanda y Recomendaciones Personalizadas](diagramas/srs/img/diag_011_sec622_casos_uso_mod04.png)
 
 Fuente: Elaboración propia.
 
@@ -2299,35 +1687,7 @@ Fuente: Elaboración propia.
 
 ### Diagrama 6.9: Diagrama de Casos de Uso - MOD-05: Quórum, Confirmación y Cancelaciones
 
-```plantuml
-@startuml
-title Diagrama 6.9: Diagrama de Casos de Uso - MOD-05: Quórum, Confirmación y Cancelaciones
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Estudiante Mentoreado" as Mentoreado #EBF3FB
-actor "Estudiante Mentor" as Mentor #EBF3FB
-actor "Servicio Cron Backend" as Cron #FFF1F2
-
-rectangle "MOD-05: Quórum, Confirmación y Cancelaciones" {
-  usecase "CUS-004: Reservar cupo\nde mentoría académica" as CUS04
-  usecase "CUS-024: Ratificar asistencia\na sesión de mentoría" as CUS24
-  usecase "CUS-017: Desistir voluntariamente\nde reserva" as CUS17
-  usecase "CUS-023: Evaluar quórum\nautomático a T-24h" as CUS23
-  usecase "CUS-007: Decisión del mentor\nante quórum insuficiente" as CUS07
-}
-
-Mentoreado --> CUS04
-Mentoreado --> CUS24
-Mentoreado --> CUS17
-Cron --> CUS23
-Mentor --> CUS07
-@enduml
-```
+![Diagrama 6.9: Diagrama de Casos de Uso - MOD-05: Quórum, Confirmación y Cancelaciones](diagramas/srs/img/diag_012_sec622_casos_uso_mod05.png)
 
 Fuente: Elaboración propia.
 
@@ -2335,32 +1695,7 @@ Fuente: Elaboración propia.
 
 ### Diagrama 6.10: Diagrama de Casos de Uso - MOD-06: Asistencia, Bitácoras y Feedback
 
-```plantuml
-@startuml
-title Diagrama 6.10: Diagrama de Casos de Uso - MOD-06: Asistencia, Bitácoras y Feedback
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Estudiante Mentoreado" as Mentoreado #EBF3FB
-actor "Estudiante Mentor" as Mentor #EBF3FB
-
-rectangle "MOD-06: Asistencia, Bitácoras y Feedback" {
-  usecase "CUS-012: Registrar asistencia\na sesión de mentoría" as CUS12
-  usecase "CUS-013: Registrar bitácora\nacadémica de sesión" as CUS13
-  usecase "CUS-014: Visualizar historial\ny bitácoras académicas" as CUS14
-}
-
-Mentoreado --> CUS12
-Mentor --> CUS12
-Mentor --> CUS13
-Mentoreado --> CUS14
-Mentor --> CUS14
-@enduml
-```
+![Diagrama 6.10: Diagrama de Casos de Uso - MOD-06: Asistencia, Bitácoras y Feedback](diagramas/srs/img/diag_013_sec622_casos_uso_mod06.png)
 
 Fuente: Elaboración propia.
 
@@ -2368,29 +1703,7 @@ Fuente: Elaboración propia.
 
 ### Diagrama 6.11: Diagrama de Casos de Uso - MOD-07: Gamificación e Incentivos
 
-```plantuml
-@startuml
-title Diagrama 6.11: Diagrama de Casos de Uso - MOD-07: Gamificación e Incentivos
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Estudiante Mentor" as Mentor #EBF3FB
-actor "Administrador (EPIS)" as Admin #FEF9C3
-
-rectangle "MOD-07: Gamificación e Incentivos" {
-  usecase "CUS-018: Emitir constancia\ninstitucional de horas" as CUS18
-  usecase "CUS-019: Gestionar insignias\ny reputación gamificada" as CUS19
-}
-
-Mentor --> CUS18
-Admin --> CUS18
-Mentor --> CUS19
-@enduml
-```
+![Diagrama 6.11: Diagrama de Casos de Uso - MOD-07: Gamificación e Incentivos](diagramas/srs/img/diag_014_sec622_casos_uso_mod07.png)
 
 Fuente: Elaboración propia.
 
@@ -2398,36 +1711,7 @@ Fuente: Elaboración propia.
 
 ### Diagrama 6.12: Diagrama de Casos de Uso - MOD-08: Analítica, Notificaciones y Configuración
 
-```plantuml
-@startuml
-title Diagrama 6.12: Diagrama de Casos de Uso - MOD-08: Analítica, Notificaciones y Configuración
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Administrador (EPIS)" as Admin #FEF9C3
-actor "Servicio Cron Backend" as Cron #FFF1F2
-
-rectangle "MOD-08: Analítica, Notificaciones y Configuración" {
-  usecase "CUS-009: Notificar eventos\ncríticos y alertas temporales" as CUS09
-  usecase "CUS-011: Generar reportes e\nindicadores de analítica" as CUS11
-  usecase "CUS-015: Consultar métricas\nde retención y desempeño" as CUS15
-  usecase "CUS-016: Auditar trazas de\nseguridad y consentimiento" as CUS16
-  usecase "CUS-020: Configurar parámetros\ninstitucionales y umbrales" as CUS20
-  usecase "CUS-022: Gestionar catálogo\nde temas y materias críticas" as CUS22
-}
-
-Cron --> CUS09
-Admin --> CUS11
-Admin --> CUS15
-Admin --> CUS16
-Admin --> CUS20
-Admin --> CUS22
-@enduml
-```
+![Diagrama 6.12: Diagrama de Casos de Uso - MOD-08: Analítica, Notificaciones y Configuración](diagramas/srs/img/diag_015_sec622_casos_uso_mod08.png)
 
 Fuente: Elaboración propia.
 
@@ -3791,81 +3075,7 @@ A continuación, se presenta el diagrama general de análisis de objetos corresp
 
 ### Diagrama 6.13: Diagrama de Análisis de Objetos (Modelo ECB) - Flujo General de Mentorías P2P
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - Flujo General de Mentorías P2P\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Estudiante Mentoreado" as ActEst
-actor "Estudiante Mentor" as ActMen
-actor "Administrador EPIS" as ActAdm
-actor "Servicio Cron Backend" as ActCron
-
-boundary "UI_CatalogoYRecomendaciones" as B_Rec
-boundary "UI_ReservaYConfirmacion" as B_Res
-boundary "UI_OfertasYEspacios" as B_Of
-boundary "UI_AsistenciaYBitacora" as B_Bit
-boundary "UI_CertificadosYAdmin" as B_Adm
-
-control "ControladorRecomendaciones" as C_Rec
-control "ControladorReservas" as C_Res
-control "ControladorMentorias" as C_Of
-control "ControladorBitacoras" as C_Bit
-control "ControladorAdmin" as C_Adm
-control "ControladorQuorumCron" as C_Cron
-
-entity "Usuario" as E_User
-entity "CursoCritico" as E_Cur
-entity "OfertaMentoria" as E_Of
-entity "SesionMentoria" as E_Ses
-entity "ReservaCupo" as E_Res
-entity "BitacoraPedagogica" as E_Bit
-entity "CertificadoHoras" as E_Cert
-
-ActEst --> B_Rec : 1. Explora recomendaciones Top-k
-B_Rec --> C_Rec : 1.1. inferirRecomendaciones()
-C_Rec ..> E_Cur : 1.2. similitudCoseno()
-C_Rec --> B_Rec : 1.3. retornoTopK()
-
-ActEst --> B_Res : 2. Reserva cupo de sesion
-B_Res --> C_Res : 2.1. reservarCupoPesimista(FOR UPDATE)
-C_Res --> E_Ses : 2.2. bloquearSesion()
-C_Res --> E_Res : 2.3. registrarReserva()
-
-ActCron --> C_Cron : 3. Dispara corte T-24h
-C_Cron --> E_Res : 3.1. revocarNoConfirmadas()
-C_Cron --> E_Ses : 3.2. evaluarQuorumMinimo()
-
-ActMen --> B_Bit : 4. Cierra sesion y firma bitacora (SHA-256)
-B_Bit --> C_Bit : 4.1. registrarBitacora()
-C_Bit --> E_Bit : 4.2. persistirBitacoraConHash()
-
-ActAdm --> B_Adm : 5. Visa bitacoras y emite certificado
-B_Adm --> C_Adm : 5.1. emitirCertificadoOficial()
-C_Adm --> E_Cert : 5.2. compilarPDFConQR()
-@enduml
-```
+![Diagrama 6.13: Diagrama de Análisis de Objetos (Modelo ECB) - Flujo General de Mentorías P2P](diagramas/srs/img/diag_016_sec631_ecb_general_consolidado.png)
 
 Fuente: Elaboración propia.
 
@@ -3877,45 +3087,7 @@ El análisis de objetos para `CUS-001` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.1: Análisis de Objetos (Modelo ECB) - CUS-001: Iniciar sesión institucional con 2FA
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-001: Iniciar sesión institucional con 2FA\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_LoginOtpView" as B_Main
-control "AuthService" as C_Main
-entity "Usuario" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Iniciar sesión institucional con 2FA)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.1: Análisis de Objetos (Modelo ECB) - CUS-001: Iniciar sesión institucional con 2FA](diagramas/srs/img/diag_017_sec631_ecb_cus001.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-01.
 
@@ -3928,45 +3100,7 @@ El análisis de objetos para `CUS-010` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.2: Análisis de Objetos (Modelo ECB) - CUS-010: Gestionar asignación de roles de usuario
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-010: Gestionar asignación de roles de usuario\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_AdminRolesView" as B_Main
-control "RoleService" as C_Main
-entity "Usuario" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Gestionar asignación de roles de usuario)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.2: Análisis de Objetos (Modelo ECB) - CUS-010: Gestionar asignación de roles de usuario](diagramas/srs/img/diag_018_sec631_ecb_cus010.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-01.
 
@@ -3979,45 +3113,7 @@ El análisis de objetos para `CUS-006` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.3: Análisis de Objetos (Modelo ECB) - CUS-006: Publicar oferta de mentoría académica
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-006: Publicar oferta de mentoría académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_PublishMentorshipView" as B_Main
-control "MentorshipService" as C_Main
-entity "OfertaMentoria" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Publicar oferta de mentoría académica)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.3: Análisis de Objetos (Modelo ECB) - CUS-006: Publicar oferta de mentoría académica](diagramas/srs/img/diag_019_sec631_ecb_cus006.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-02.
 
@@ -4030,45 +3126,7 @@ El análisis de objetos para `CUS-008` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.4: Análisis de Objetos (Modelo ECB) - CUS-008: Consultar disponibilidad de espacios y recursos
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-008: Consultar disponibilidad de espacios y recursos\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_SpaceSelectorView" as B_Main
-control "SpaceService" as C_Main
-entity "EspacioFisico" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Consultar disponibilidad de espacios y recursos)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.4: Análisis de Objetos (Modelo ECB) - CUS-008: Consultar disponibilidad de espacios y recursos](diagramas/srs/img/diag_020_sec631_ecb_cus008.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-02.
 
@@ -4081,45 +3139,7 @@ El análisis de objetos para `CUS-005` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.5: Análisis de Objetos (Modelo ECB) - CUS-005: Gestionar perfil formativo y disponibilidad horaria
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-005: Gestionar perfil formativo y disponibilidad horaria\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_ProfileAvailabilityView" as B_Main
-control "ProfileService" as C_Main
-entity "PerfilFormativo" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Gestionar perfil formativo y disponibilidad horaria)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.5: Análisis de Objetos (Modelo ECB) - CUS-005: Gestionar perfil formativo y disponibilidad horaria](diagramas/srs/img/diag_021_sec631_ecb_cus005.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-03.
 
@@ -4132,45 +3152,7 @@ El análisis de objetos para `CUS-021` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.6: Análisis de Objetos (Modelo ECB) - CUS-021: Explorar catálogo curricular de asignaturas filtro
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-021: Explorar catálogo curricular de asignaturas filtro\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_CurriculumCatalogView" as B_Main
-control "CurriculumService" as C_Main
-entity "CursoCritico" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Explorar catálogo curricular de asignaturas filtro)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.6: Análisis de Objetos (Modelo ECB) - CUS-021: Explorar catálogo curricular de asignaturas filtro](diagramas/srs/img/diag_022_sec631_ecb_cus021.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-03.
 
@@ -4183,45 +3165,7 @@ El análisis de objetos para `CUS-002` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.7: Análisis de Objetos (Modelo ECB) - CUS-002: Explorar recomendaciones personalizadas Top-k
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-002: Explorar recomendaciones personalizadas Top-k\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_RecommendationsView" as B_Main
-control "RecommendationService" as C_Main
-entity "PerfilFormativo" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Explorar recomendaciones personalizadas Top-k)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.7: Análisis de Objetos (Modelo ECB) - CUS-002: Explorar recomendaciones personalizadas Top-k](diagramas/srs/img/diag_023_sec631_ecb_cus002.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-04.
 
@@ -4234,45 +3178,7 @@ El análisis de objetos para `CUS-003` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.8: Análisis de Objetos (Modelo ECB) - CUS-003: Registrar solicitud de demanda académica
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-003: Registrar solicitud de demanda académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_DemandsBankView" as B_Main
-control "DemandService" as C_Main
-entity "SolicitudDemanda" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Registrar solicitud de demanda académica)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.8: Análisis de Objetos (Modelo ECB) - CUS-003: Registrar solicitud de demanda académica](diagramas/srs/img/diag_024_sec631_ecb_cus003.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-04.
 
@@ -4285,45 +3191,7 @@ El análisis de objetos para `CUS-004` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.9: Análisis de Objetos (Modelo ECB) - CUS-004: Reservar cupo de mentoría académica
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-004: Reservar cupo de mentoría académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_BookingModalView" as B_Main
-control "BookingService" as C_Main
-entity "SesionMentoria" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Reservar cupo de mentoría académica)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.9: Análisis de Objetos (Modelo ECB) - CUS-004: Reservar cupo de mentoría académica](diagramas/srs/img/diag_025_sec631_ecb_cus004.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -4336,45 +3204,7 @@ El análisis de objetos para `CUS-024` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.10: Análisis de Objetos (Modelo ECB) - CUS-024: Ratificar asistencia a sesión de mentoría
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-024: Ratificar asistencia a sesión de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_StudentBookingsView" as B_Main
-control "BookingService" as C_Main
-entity "ReservaCupo" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Ratificar asistencia a sesión de mentoría)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.10: Análisis de Objetos (Modelo ECB) - CUS-024: Ratificar asistencia a sesión de mentoría](diagramas/srs/img/diag_026_sec631_ecb_cus024.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -4387,45 +3217,7 @@ El análisis de objetos para `CUS-017` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.11: Análisis de Objetos (Modelo ECB) - CUS-017: Desistir voluntariamente de reserva
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-017: Desistir voluntariamente de reserva\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_StudentBookingsView" as B_Main
-control "BookingService" as C_Main
-entity "ReservaCupo" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Desistir voluntariamente de reserva)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.11: Análisis de Objetos (Modelo ECB) - CUS-017: Desistir voluntariamente de reserva](diagramas/srs/img/diag_027_sec631_ecb_cus017.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -4438,45 +3230,7 @@ El análisis de objetos para `CUS-023` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.12: Análisis de Objetos (Modelo ECB) - CUS-023: Evaluar quórum automático a T-24h
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-023: Evaluar quórum automático a T-24h\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_NotificationCenterView" as B_Main
-control "QuorumCronService" as C_Main
-entity "SesionMentoria" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Evaluar quórum automático a T-24h)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.12: Análisis de Objetos (Modelo ECB) - CUS-023: Evaluar quórum automático a T-24h](diagramas/srs/img/diag_028_sec631_ecb_cus023.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -4489,45 +3243,7 @@ El análisis de objetos para `CUS-007` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.13: Análisis de Objetos (Modelo ECB) - CUS-007: Decisión del mentor ante quórum insuficiente
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-007: Decisión del mentor ante quórum insuficiente\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_MentorSessionActionView" as B_Main
-control "MentorshipService" as C_Main
-entity "SesionMentoria" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Decisión del mentor ante quórum insuficiente)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.13: Análisis de Objetos (Modelo ECB) - CUS-007: Decisión del mentor ante quórum insuficiente](diagramas/srs/img/diag_029_sec631_ecb_cus007.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -4540,45 +3256,7 @@ El análisis de objetos para `CUS-012` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.14: Análisis de Objetos (Modelo ECB) - CUS-012: Registrar asistencia a sesión de mentoría
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-012: Registrar asistencia a sesión de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_QrScannerView" as B_Main
-control "AttendanceService" as C_Main
-entity "AsistenciaSesion" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Registrar asistencia a sesión de mentoría)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.14: Análisis de Objetos (Modelo ECB) - CUS-012: Registrar asistencia a sesión de mentoría](diagramas/srs/img/diag_030_sec631_ecb_cus012.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-06.
 
@@ -4591,45 +3269,7 @@ El análisis de objetos para `CUS-013` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.15: Análisis de Objetos (Modelo ECB) - CUS-013: Registrar bitácora académica de sesión
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-013: Registrar bitácora académica de sesión\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_BitacoraRegisterView" as B_Main
-control "BitacoraService" as C_Main
-entity "BitacoraPedagogica" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Registrar bitácora académica de sesión)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.15: Análisis de Objetos (Modelo ECB) - CUS-013: Registrar bitácora académica de sesión](diagramas/srs/img/diag_031_sec631_ecb_cus013.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-06.
 
@@ -4642,45 +3282,7 @@ El análisis de objetos para `CUS-014` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.16: Análisis de Objetos (Modelo ECB) - CUS-014: Visualizar historial y bitácoras académicas
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-014: Visualizar historial y bitácoras académicas\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_BitacoraHistoryView" as B_Main
-control "BitacoraService" as C_Main
-entity "BitacoraPedagogica" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Visualizar historial y bitácoras académicas)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.16: Análisis de Objetos (Modelo ECB) - CUS-014: Visualizar historial y bitácoras académicas](diagramas/srs/img/diag_032_sec631_ecb_cus014.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-06.
 
@@ -4693,45 +3295,7 @@ El análisis de objetos para `CUS-018` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.17: Análisis de Objetos (Modelo ECB) - CUS-018: Emitir constancia institucional de horas de mentoría
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-018: Emitir constancia institucional de horas de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_AdminCertificatesView" as B_Main
-control "CertificateService" as C_Main
-entity "CertificadoHoras" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Emitir constancia institucional de horas de mentoría)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.17: Análisis de Objetos (Modelo ECB) - CUS-018: Emitir constancia institucional de horas de mentoría](diagramas/srs/img/diag_033_sec631_ecb_cus018.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-07.
 
@@ -4744,45 +3308,7 @@ El análisis de objetos para `CUS-019` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.18: Análisis de Objetos (Modelo ECB) - CUS-019: Gestionar insignias y reputación gamificada
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-019: Gestionar insignias y reputación gamificada\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_MentorBadgesView" as B_Main
-control "GamificationService" as C_Main
-entity "Insignia" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Gestionar insignias y reputación gamificada)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.18: Análisis de Objetos (Modelo ECB) - CUS-019: Gestionar insignias y reputación gamificada](diagramas/srs/img/diag_034_sec631_ecb_cus019.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-07.
 
@@ -4795,45 +3321,7 @@ El análisis de objetos para `CUS-009` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.19: Análisis de Objetos (Modelo ECB) - CUS-009: Notificar eventos críticos y alertas temporales
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-009: Notificar eventos críticos y alertas temporales\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_NotificationCenterView" as B_Main
-control "NotificationService" as C_Main
-entity "Notificacion" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Notificar eventos críticos y alertas temporales)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.19: Análisis de Objetos (Modelo ECB) - CUS-009: Notificar eventos críticos y alertas temporales](diagramas/srs/img/diag_035_sec631_ecb_cus009.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -4846,45 +3334,7 @@ El análisis de objetos para `CUS-011` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.20: Análisis de Objetos (Modelo ECB) - CUS-011: Generar reportes e indicadores de analítica académica
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-011: Generar reportes e indicadores de analítica académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_AdminAnalyticsView" as B_Main
-control "AnalyticsService" as C_Main
-entity "KpiAcademico" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Generar reportes e indicadores de analítica académica)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.20: Análisis de Objetos (Modelo ECB) - CUS-011: Generar reportes e indicadores de analítica académica](diagramas/srs/img/diag_036_sec631_ecb_cus011.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -4897,45 +3347,7 @@ El análisis de objetos para `CUS-015` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.21: Análisis de Objetos (Modelo ECB) - CUS-015: Consultar métricas de retención y desempeño
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-015: Consultar métricas de retención y desempeño\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_AdminAnalyticsView" as B_Main
-control "AnalyticsService" as C_Main
-entity "KpiAcademico" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Consultar métricas de retención y desempeño)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.21: Análisis de Objetos (Modelo ECB) - CUS-015: Consultar métricas de retención y desempeño](diagramas/srs/img/diag_037_sec631_ecb_cus015.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -4948,45 +3360,7 @@ El análisis de objetos para `CUS-016` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.22: Análisis de Objetos (Modelo ECB) - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_AdminAuditView" as B_Main
-control "AuditService" as C_Main
-entity "ConsentimientoLegal" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Auditar trazas de seguridad y consentimiento Ley 29733)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.22: Análisis de Objetos (Modelo ECB) - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733](diagramas/srs/img/diag_038_sec631_ecb_cus016.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -4999,45 +3373,7 @@ El análisis de objetos para `CUS-020` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.23: Análisis de Objetos (Modelo ECB) - CUS-020: Configurar parámetros institucionales y umbrales
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-020: Configurar parámetros institucionales y umbrales\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_AdminSettingsView" as B_Main
-control "AdminService" as C_Main
-entity "ParametroInstitucional" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Configurar parámetros institucionales y umbrales)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.23: Análisis de Objetos (Modelo ECB) - CUS-020: Configurar parámetros institucionales y umbrales](diagramas/srs/img/diag_039_sec631_ecb_cus020.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -5050,45 +3386,7 @@ El análisis de objetos para `CUS-022` descompone las responsabilidades arquitec
 
 #### Diagrama 6.13.24: Análisis de Objetos (Modelo ECB) - CUS-022: Gestionar catálogo de temas y materias críticas
 
-```plantuml
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-022: Gestionar catálogo de temas y materias críticas\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_AdminCurriculumView" as B_Main
-control "CurriculumService" as C_Main
-entity "CursoCritico" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Gestionar catálogo de temas y materias críticas)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
+![Diagrama 6.13.24: Análisis de Objetos (Modelo ECB) - CUS-022: Gestionar catálogo de temas y materias críticas](diagramas/srs/img/diag_040_sec631_ecb_cus022.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -5102,80 +3400,7 @@ El diagrama de actividades con flujo de objetos modela la dinámica operacional 
 
 ### Diagrama 6.14: Diagrama de Actividades con Flujo de Objetos del Ciclo de Mentoría
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos del Ciclo de Mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Estudiante Mentoreado|
-|#E8F8F5|Estudiante Mentor|
-|#FEF9C3|Sistema Web P2P (Backend)|
-|#FFF1F2|Administración (EPIS)|
-
-|Estudiante Mentor|
-start
-:Publica oferta de mentoría;
-|Sistema Web P2P (Backend)|
-:Valida disponibilidad de espacio;
-:Crea OfertaMentoria [PUBLICADA];
-:Crea SesionMentoria [PROGRAMADA];
-
-|Estudiante Mentoreado|
-:Explora recomendaciones Top-k;
-:Reserva cupo de sesión;
-|Sistema Web P2P (Backend)|
-:Adquiere cerrojo pesimista FOR UPDATE;
-:Crea ReservaCupo [PENDIENTE_CONFIRMACION];
-
-|Estudiante Mentoreado|
-:Ratifica asistencia antes de T-24h;
-|Sistema Web P2P (Backend)|
-:Transiciona ReservaCupo [CONFIRMADA];
-
-|Sistema Web P2P (Backend)|
-:Ejecuta corte automatizado a T-24h;
-if (¿Quórum >= 50% de aforo?) then (Sí)
-  :Transiciona SesionMentoria [CONFIRMADA];
-else (No)
-  :Transiciona SesionMentoria [QUORUM_INSUFICIENTE];
-  |Estudiante Mentor|
-  if (¿Mentor decide continuar?) then (Sí)
-    :Ratifica sesión extraordinaria;
-  else (No)
-    :Cancela sesión;
-    |Sistema Web P2P (Backend)|
-    :SesionMentoria [CANCELADA_QUORUM];
-    stop
-  endif
-endif
-
-|Estudiante Mentor|
-:Desarrolla la sesión de mentoría;
-:Registra bitácora pedagógica antes de 48h;
-|Sistema Web P2P (Backend)|
-:Calcula hash SHA-256 inmutable;
-:Crea BitacoraPedagogica [REGISTRADA];
-:Transiciona SesionMentoria [FINALIZADA];
-
-|Estudiante Mentoreado|
-:Completa encuesta de satisfacción (24h);
-|Sistema Web P2P (Backend)|
-:Actualiza reputación e insignias del mentor;
-
-|Administración (EPIS)|
-:Visa bitácoras docentes;
-if (¿Horas acumuladas >= 20h?) then (Sí)
-  :Emite certificado digital oficial;
-  |Sistema Web P2P (Backend)|
-  :Genera CertificadoHoras [EMITIDO_VALIDADO];
-endif
-stop
-@enduml
-```
+![Diagrama 6.14: Diagrama de Actividades con Flujo de Objetos del Ciclo de Mentoría](diagramas/srs/img/diag_041_sec632_act_general_consolidado.png)
 
 Fuente: Elaboración propia.
 
@@ -5187,46 +3412,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.1: Diagrama de Actividades con Flujo de Objetos - CUS-001: Iniciar sesión institucional con 2FA
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-001: Iniciar sesión institucional con 2FA\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Iniciar sesión institucional con 2FA;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre Usuario;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.1: Diagrama de Actividades con Flujo de Objetos - CUS-001: Iniciar sesión institucional con 2FA](diagramas/srs/img/diag_042_sec632_act_cus001.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-01.
 
@@ -5239,46 +3425,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.2: Diagrama de Actividades con Flujo de Objetos - CUS-010: Gestionar asignación de roles de usuario
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-010: Gestionar asignación de roles de usuario\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Gestionar asignación de roles de usuario;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre Usuario;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.2: Diagrama de Actividades con Flujo de Objetos - CUS-010: Gestionar asignación de roles de usuario](diagramas/srs/img/diag_043_sec632_act_cus010.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-01.
 
@@ -5291,46 +3438,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.3: Diagrama de Actividades con Flujo de Objetos - CUS-006: Publicar oferta de mentoría académica
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-006: Publicar oferta de mentoría académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Publicar oferta de mentoría académica;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre OfertaMentoria;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.3: Diagrama de Actividades con Flujo de Objetos - CUS-006: Publicar oferta de mentoría académica](diagramas/srs/img/diag_044_sec632_act_cus006.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-02.
 
@@ -5343,46 +3451,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.4: Diagrama de Actividades con Flujo de Objetos - CUS-008: Consultar disponibilidad de espacios y recursos
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-008: Consultar disponibilidad de espacios y recursos\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Consultar disponibilidad de espacios y recursos;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre EspacioFisico;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.4: Diagrama de Actividades con Flujo de Objetos - CUS-008: Consultar disponibilidad de espacios y recursos](diagramas/srs/img/diag_045_sec632_act_cus008.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-02.
 
@@ -5395,46 +3464,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.5: Diagrama de Actividades con Flujo de Objetos - CUS-005: Gestionar perfil formativo y disponibilidad horaria
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-005: Gestionar perfil formativo y disponibilidad horaria\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Gestionar perfil formativo y disponibilidad horaria;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre PerfilFormativo;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.5: Diagrama de Actividades con Flujo de Objetos - CUS-005: Gestionar perfil formativo y disponibilidad horaria](diagramas/srs/img/diag_046_sec632_act_cus005.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-03.
 
@@ -5447,46 +3477,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.6: Diagrama de Actividades con Flujo de Objetos - CUS-021: Explorar catálogo curricular de asignaturas filtro
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-021: Explorar catálogo curricular de asignaturas filtro\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Explorar catálogo curricular de asignaturas filtro;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre CursoCritico;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.6: Diagrama de Actividades con Flujo de Objetos - CUS-021: Explorar catálogo curricular de asignaturas filtro](diagramas/srs/img/diag_047_sec632_act_cus021.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-03.
 
@@ -5499,46 +3490,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.7: Diagrama de Actividades con Flujo de Objetos - CUS-002: Explorar recomendaciones personalizadas Top-k
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-002: Explorar recomendaciones personalizadas Top-k\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Explorar recomendaciones personalizadas Top-k;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre PerfilFormativo;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.7: Diagrama de Actividades con Flujo de Objetos - CUS-002: Explorar recomendaciones personalizadas Top-k](diagramas/srs/img/diag_048_sec632_act_cus002.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-04.
 
@@ -5551,46 +3503,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.8: Diagrama de Actividades con Flujo de Objetos - CUS-003: Registrar solicitud de demanda académica
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-003: Registrar solicitud de demanda académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Registrar solicitud de demanda académica;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre SolicitudDemanda;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.8: Diagrama de Actividades con Flujo de Objetos - CUS-003: Registrar solicitud de demanda académica](diagramas/srs/img/diag_049_sec632_act_cus003.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-04.
 
@@ -5603,46 +3516,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.9: Diagrama de Actividades con Flujo de Objetos - CUS-004: Reservar cupo de mentoría académica
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-004: Reservar cupo de mentoría académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Reservar cupo de mentoría académica;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre SesionMentoria;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.9: Diagrama de Actividades con Flujo de Objetos - CUS-004: Reservar cupo de mentoría académica](diagramas/srs/img/diag_050_sec632_act_cus004.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -5655,46 +3529,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.10: Diagrama de Actividades con Flujo de Objetos - CUS-024: Ratificar asistencia a sesión de mentoría
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-024: Ratificar asistencia a sesión de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Ratificar asistencia a sesión de mentoría;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre ReservaCupo;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.10: Diagrama de Actividades con Flujo de Objetos - CUS-024: Ratificar asistencia a sesión de mentoría](diagramas/srs/img/diag_051_sec632_act_cus024.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -5707,46 +3542,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.11: Diagrama de Actividades con Flujo de Objetos - CUS-017: Desistir voluntariamente de reserva
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-017: Desistir voluntariamente de reserva\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Desistir voluntariamente de reserva;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre ReservaCupo;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.11: Diagrama de Actividades con Flujo de Objetos - CUS-017: Desistir voluntariamente de reserva](diagramas/srs/img/diag_052_sec632_act_cus017.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -5759,46 +3555,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.12: Diagrama de Actividades con Flujo de Objetos - CUS-023: Evaluar quórum automático a T-24h
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-023: Evaluar quórum automático a T-24h\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Evaluar quórum automático a T-24h;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre SesionMentoria;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.12: Diagrama de Actividades con Flujo de Objetos - CUS-023: Evaluar quórum automático a T-24h](diagramas/srs/img/diag_053_sec632_act_cus023.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -5811,46 +3568,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.13: Diagrama de Actividades con Flujo de Objetos - CUS-007: Decisión del mentor ante quórum insuficiente
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-007: Decisión del mentor ante quórum insuficiente\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Decisión del mentor ante quórum insuficiente;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre SesionMentoria;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.13: Diagrama de Actividades con Flujo de Objetos - CUS-007: Decisión del mentor ante quórum insuficiente](diagramas/srs/img/diag_054_sec632_act_cus007.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -5863,46 +3581,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.14: Diagrama de Actividades con Flujo de Objetos - CUS-012: Registrar asistencia a sesión de mentoría
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-012: Registrar asistencia a sesión de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Registrar asistencia a sesión de mentoría;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre AsistenciaSesion;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.14: Diagrama de Actividades con Flujo de Objetos - CUS-012: Registrar asistencia a sesión de mentoría](diagramas/srs/img/diag_055_sec632_act_cus012.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-06.
 
@@ -5915,46 +3594,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.15: Diagrama de Actividades con Flujo de Objetos - CUS-013: Registrar bitácora académica de sesión
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-013: Registrar bitácora académica de sesión\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Registrar bitácora académica de sesión;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre BitacoraPedagogica;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.15: Diagrama de Actividades con Flujo de Objetos - CUS-013: Registrar bitácora académica de sesión](diagramas/srs/img/diag_056_sec632_act_cus013.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-06.
 
@@ -5967,46 +3607,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.16: Diagrama de Actividades con Flujo de Objetos - CUS-014: Visualizar historial y bitácoras académicas
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-014: Visualizar historial y bitácoras académicas\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Visualizar historial y bitácoras académicas;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre BitacoraPedagogica;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.16: Diagrama de Actividades con Flujo de Objetos - CUS-014: Visualizar historial y bitácoras académicas](diagramas/srs/img/diag_057_sec632_act_cus014.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-06.
 
@@ -6019,46 +3620,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.17: Diagrama de Actividades con Flujo de Objetos - CUS-018: Emitir constancia institucional de horas de mentoría
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-018: Emitir constancia institucional de horas de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Emitir constancia institucional de horas de mentoría;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre CertificadoHoras;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.17: Diagrama de Actividades con Flujo de Objetos - CUS-018: Emitir constancia institucional de horas de mentoría](diagramas/srs/img/diag_058_sec632_act_cus018.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-07.
 
@@ -6071,46 +3633,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.18: Diagrama de Actividades con Flujo de Objetos - CUS-019: Gestionar insignias y reputación gamificada
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-019: Gestionar insignias y reputación gamificada\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Gestionar insignias y reputación gamificada;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre Insignia;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.18: Diagrama de Actividades con Flujo de Objetos - CUS-019: Gestionar insignias y reputación gamificada](diagramas/srs/img/diag_059_sec632_act_cus019.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-07.
 
@@ -6123,46 +3646,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.19: Diagrama de Actividades con Flujo de Objetos - CUS-009: Notificar eventos críticos y alertas temporales
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-009: Notificar eventos críticos y alertas temporales\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Notificar eventos críticos y alertas temporales;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre Notificacion;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.19: Diagrama de Actividades con Flujo de Objetos - CUS-009: Notificar eventos críticos y alertas temporales](diagramas/srs/img/diag_060_sec632_act_cus009.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -6175,46 +3659,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.20: Diagrama de Actividades con Flujo de Objetos - CUS-011: Generar reportes e indicadores de analítica académica
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-011: Generar reportes e indicadores de analítica académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Generar reportes e indicadores de analítica académica;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre KpiAcademico;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.20: Diagrama de Actividades con Flujo de Objetos - CUS-011: Generar reportes e indicadores de analítica académica](diagramas/srs/img/diag_061_sec632_act_cus011.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -6227,46 +3672,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.21: Diagrama de Actividades con Flujo de Objetos - CUS-015: Consultar métricas de retención y desempeño
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-015: Consultar métricas de retención y desempeño\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Consultar métricas de retención y desempeño;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre KpiAcademico;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.21: Diagrama de Actividades con Flujo de Objetos - CUS-015: Consultar métricas de retención y desempeño](diagramas/srs/img/diag_062_sec632_act_cus015.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -6279,46 +3685,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.22: Diagrama de Actividades con Flujo de Objetos - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Auditar trazas de seguridad y consentimiento Ley 29733;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre ConsentimientoLegal;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.22: Diagrama de Actividades con Flujo de Objetos - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733](diagramas/srs/img/diag_063_sec632_act_cus016.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -6331,46 +3698,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.23: Diagrama de Actividades con Flujo de Objetos - CUS-020: Configurar parámetros institucionales y umbrales
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-020: Configurar parámetros institucionales y umbrales\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Configurar parámetros institucionales y umbrales;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre ParametroInstitucional;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.23: Diagrama de Actividades con Flujo de Objetos - CUS-020: Configurar parámetros institucionales y umbrales](diagramas/srs/img/diag_064_sec632_act_cus020.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -6383,46 +3711,7 @@ El diagrama de actividades con flujo de objetos modela la secuencia lógica, las
 
 #### Diagrama 6.14.24: Diagrama de Actividades con Flujo de Objetos - CUS-022: Gestionar catálogo de temas y materias críticas
 
-```plantuml
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-022: Gestionar catálogo de temas y materias críticas\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Gestionar catálogo de temas y materias críticas;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre CursoCritico;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
+![Diagrama 6.14.24: Diagrama de Actividades con Flujo de Objetos - CUS-022: Gestionar catálogo de temas y materias críticas](diagramas/srs/img/diag_065_sec632_act_cus022.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -6450,212 +3739,7 @@ Cada diagrama desglosa de manera exhaustiva las responsabilidades y mensajes a t
 
 El diagrama general de secuencia formaliza la visión holística de los flujos temporales y de sincronización entre capas técnicas para el proceso transaccional neurálgico de la plataforma: la orquestación concurrente de Reserva de Cupos (`CUS-004`), Ratificación de Asistencia antes de $T-24	ext{ h}$ (`CUS-024`), y Corte Automatizado de Quórum en $T-24	ext{ h}$ (`CUS-023`) con resolución de contingencia del mentor (`CUS-007`).
 
-```plantuml
-@startuml
-title Diagrama 6.15: Diagrama de Secuencia General del Ciclo de Reserva, Ratificación y Quórum
-Sistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado" as User
-participant "Vista React (SPA)
-(BookingModal / StudentBookings)" as UI
-participant "Adaptador Cliente
-(bookingService.ts)" as Client
-participant "Controlador FastAPI
-(endpoints/bookings.py)" as API
-participant "Servicio Backend
-(booking_service.py)" as Service
-database "PostgreSQL DB
-(SQLAlchemy / Supabase)" as DB
-participant "Planificador Cron
-(Celery / SchedulerWorker)" as Cron
-participant "Servicio Email
-(SMTP UPT)" as Mail
-actor "Estudiante Mentor" as Mentor
-
-== 1. Reserva Concurrente de Cupo (CUS-004) ==
-User -> UI: Clic en "Reservar Cupo" (idSesion)
-activate UI
-UI -> Client: reserveSeat(idSesion)
-activate Client
-Client -> API: POST /api/v1/bookings/reserve {"id_sesion": idSesion} [Bearer JWT]
-activate API
-API -> Service: reserve_seat(idSesion, user_email)
-activate Service
-Service -> DB: BEGIN TRANSACTION
-activate DB
-Service -> DB: SELECT * FROM sesiones_mentoria WHERE id = :idSesion FOR UPDATE OF sesiones_mentoria
-DB --> Service: Registro Sesion (aforo, cupos_ocupados)
-alt Cupos disponibles > 0 y Elegibilidad Validada
-    Service -> DB: INSERT INTO reservas_cupo (id_usuario, id_sesion, estado='PENDIENTE_CONFIRMACION', ticket_hash=SHA256(...))
-    Service -> DB: UPDATE sesiones_mentoria SET cupos_ocupados = cupos_ocupados + 1 WHERE id = :idSesion
-    Service -> DB: COMMIT
-    DB --> Service: Transacción confirmada
-    Service --> API: BookingResponseDTO {idReserva, estado: 'PENDIENTE_CONFIRMACION'}
-    API --> Client: HTTP 201 Created {idReserva, estado: 'PENDIENTE_CONFIRMACION'}
-    Client --> UI: Comprobante provisional
-    UI --> User: Muestra confirmación y plazo hasta T-24h
-else Conflicto de aforo o estudiante no elegible
-    Service -> DB: ROLLBACK
-    Service --> API: Lanza HTTPException(409, "Aforo agotado o colisión concurrente")
-    API --> Client: HTTP 409 Conflict {"detail": "Aforo agotado"}
-    Client --> UI: Captura error 409
-    UI --> User: Alerta de denegación de reserva
-end
-deactivate DB
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-
-== 2. Ratificación de Asistencia antes de T-24h (CUS-024) ==
-User -> UI: Clic en "Confirmar Asistencia" (idReserva)
-activate UI
-UI -> Client: confirmBooking(idReserva)
-activate Client
-Client -> API: POST /api/v1/bookings/{idReserva}/confirm [Bearer JWT]
-activate API
-API -> Service: confirm_booking(idReserva, user_email)
-activate Service
-Service -> DB: SELECT * FROM reservas_cupo r JOIN sesiones_mentoria s ON r.id_sesion = s.id WHERE r.id = :idReserva
-activate DB
-DB --> Service: Datos Reserva y Sesión
-deactivate DB
-alt Tiempo restante >= 24 horas (now_utc <= s.fecha_inicio - 24h)
-    Service -> DB: UPDATE reservas_cupo SET estado = 'CONFIRMADA', fecha_confirmacion = NOW() WHERE id = :idReserva
-    activate DB
-    Service -> DB: COMMIT
-    DB --> Service: Confirmado
-    deactivate DB
-    Service -> Mail: Despacha ticket digital con código QR de asistencia
-    activate Mail
-    Mail --> Service: Despacho OK
-    deactivate Mail
-    Service --> API: BookingConfirmDTO {estado: 'CONFIRMADA', pase_asistencia: 'PASS-8472'}
-    API --> Client: HTTP 200 OK {estado: 'CONFIRMADA', pase_asistencia: 'PASS-8472'}
-    Client --> UI: Pase digital confirmado
-    UI --> User: Despliega ticket digital y acceso formal
-else Plazo cerrado (now_utc > s.fecha_inicio - 24h)
-    Service --> API: Lanza HTTPException(400, "Ventana de ratificación vencida")
-    API --> Client: HTTP 400 Bad Request {"detail": "Ventana de ratificación vencida"}
-    Client --> UI: Captura error 400
-    UI --> User: Informa revocación reglamentaria
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-
-== 3. Corte Automatizado y Cómputo de Quórum en T-24h (CUS-023) ==
-Cron -> API: Disparo automático de corte de quórum (sesiones a T=24h)
-activate API
-API -> Service: evaluate_all_active_quorums()
-activate Service
-Service -> DB: BEGIN TRANSACTION
-activate DB
-Service -> DB: UPDATE reservas_cupo SET estado = 'NO_CONFIRMADA' WHERE id_sesion = :idSesion AND estado = 'PENDIENTE_CONFIRMACION'
-Service -> DB: SELECT COUNT(*) FROM reservas_cupo WHERE id_sesion = :idSesion AND estado = 'CONFIRMADA'
-DB --> Service: confirmed_count (ej. 4)
-deactivate DB
-
-alt confirmed_count >= 3 (Quórum Reglamentario >= 3 confirmados, RN-05)
-    Service -> DB: UPDATE sesiones_mentoria SET estado = 'CONFIRMADA' WHERE id = :idSesion
-    activate DB
-    Service -> DB: COMMIT
-    DB --> Service: Confirmada
-    deactivate DB
-    Service -> Mail: Notifica realización confirmada al Mentor y a Mentoreados
-    activate Mail
-    Mail --> Service: Correo enviado
-    deactivate Mail
-    Service --> API: QuorumBatchSummaryDTO
-    API --> Cron: HTTP 200 OK (Quórum alcanzado)
-else confirmed_count < 3 (Quórum Insuficiente)
-    Service -> DB: UPDATE sesiones_mentoria SET estado = 'QUORUM_INSUFICIENTE' WHERE id = :idSesion
-    activate DB
-    Service -> DB: COMMIT
-    DB --> Service: Estado contingencia
-    deactivate DB
-    Service -> Mail: Envía alerta urgente de resolución a Mentor (CUS-007)
-    activate Mail
-    Mail --> Mentor: Notificación de contingencia
-    deactivate Mail
-    Service --> API: QuorumAlertDTO
-    API --> Cron: HTTP 200 OK (Alerta emitida)
-    
-    Mentor -> UI: Accede a panel de contingencia de sesión
-    activate UI
-    alt Mentor selecciona "Dictar de Todas Formas"
-        Mentor -> UI: Clic "Dictar de Todas Formas"
-        UI -> Client: submitQuorumDecision(idSesion, 'PROCEED')
-        activate Client
-        Client -> API: POST /api/v1/offers/{idSesion}/quorum-decision {"decision": 'PROCEED'}
-        API -> Service: process_quorum_decision(idSesion, 'PROCEED')
-        Service -> DB: UPDATE sesiones_mentoria SET estado = 'CONFIRMADA'
-        activate DB
-        Service -> DB: COMMIT
-        DB --> Service: Sesión confirmada
-        deactivate DB
-        Service -> Mail: Confirma dictado a los inscritos
-        activate Mail
-        Mail --> Service: Mail OK
-        deactivate Mail
-        Service --> API: QuorumDecisionResponseDTO
-        API --> Client: HTTP 200 OK
-        Client --> UI: Dictado confirmado
-        UI --> Mentor: Notificación de éxito
-    else Mentor selecciona "Reprogramar Sesión"
-        Mentor -> UI: Clic "Reprogramar Sesión" con nueva fecha (> 24h)
-        UI -> Client: submitQuorumDecision(idSesion, 'RESCHEDULE', new_start)
-        Client -> API: POST /api/v1/offers/{idSesion}/quorum-decision {"decision": 'RESCHEDULE', ...}
-        API -> Service: process_quorum_decision(idSesion, 'RESCHEDULE', new_start)
-        Service -> DB: UPDATE sesiones_mentoria SET estado = 'PUBLICADA', fecha_inicio = :new_start
-        activate DB
-        Service -> DB: COMMIT
-        DB --> Service: Reprogramada
-        deactivate DB
-        Service -> Mail: Notifica reprogramación a los inscritos
-        activate Mail
-        Mail --> Service: Mail OK
-        deactivate Mail
-        Service --> API: QuorumDecisionResponseDTO
-        API --> Client: HTTP 200 OK
-        Client --> UI: Reprogramación confirmada
-        UI --> Mentor: Sesión reprogramada
-    else Mentor selecciona "Cancelar Sesión"
-        Mentor -> UI: Clic "Cancelar sin Penalización" con justificativo
-        UI -> Client: submitQuorumDecision(idSesion, 'CANCEL', reason)
-        Client -> API: POST /api/v1/offers/{idSesion}/quorum-decision {"decision": 'CANCEL', ...}
-        API -> Service: process_quorum_decision(idSesion, 'CANCEL', reason)
-        Service -> DB: UPDATE sesiones_mentoria SET estado = 'CANCELADA_QUORUM'
-        activate DB
-        Service -> DB: UPDATE reservas_cupo SET estado = 'CANCELADA_SISTEMA' WHERE id_sesion = :idSesion
-        Service -> DB: COMMIT
-        DB --> Service: Cancelada
-        deactivate DB
-        Service -> Mail: Informa anulación solidaria a confirmados
-        activate Mail
-        Mail --> Service: Mail OK
-        deactivate Mail
-        Service --> API: QuorumDecisionResponseDTO
-        API --> Client: HTTP 200 OK
-        Client --> UI: Cancelación confirmada
-        UI --> Mentor: Cancelación registrada
-    end
-    deactivate Client
-    deactivate UI
-end
-deactivate Service
-deactivate API
-@enduml
-```
+![Diagrama 6.15: Diagrama de Secuencia General del Ciclo Transaccional de Mentorías](diagramas/srs/img/diag_066_sec633_seq_general_integracion.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -6668,242 +3752,7 @@ Fuente: Elaboración propia a partir del diseño de MOD-05.
 
 El diagrama de secuencia para `CUS-001` formaliza la interacción temporal y el intercambio de mensajes entre el usuario universitario, la interfaz de autenticación React, el adaptador de cliente, los controladores FastAPI, el servicio de seguridad y correo institucional, y la base de datos relacional siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`), manteniéndola actualizada a la espera de las acciones directas del usuario. Modela con precisión exhaustiva las tres fases del Flujo Normal (solicitud de OTP, verificación de código temporal, y formalización de consentimiento bajo la Ley N° 29733 con emisión de JWT de 8 horas), los dos flujos alternativos (consentimiento previo `A001` y reenvío de OTP `A002`) y los seis flujos de excepción (`E001` a `E006`).
 
-```plantuml
-@startuml
-title Diagrama 6.15.1: Diagrama de Secuencia - CUS-001: Iniciar sesión institucional con 2FA y formalización de consentimiento digital\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Usuario Institucional\n(Estudiante / Mentor / Administrador)" as User
-participant "Vista React\n(LoginOtpView.tsx / ConsentModalView.tsx)" as UI
-participant "Adaptador Cliente\n(authService.ts / consentService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/auth.py / consent.py)" as API
-participant "Servicio Backend\n(auth_service.py / consent_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-participant "Servicio SMTP UPT\n(EmailService)" as SMTP
-
-== Fase 1: Validación de identidad institucional y solicitud de OTP ==
-User -> UI: enter (email: "usuario@upt.pe")
-activate UI
-User -> UI: click ["Continuar"]
-UI -> Client: requestOtp(email)
-activate Client
-Client -> API: POST /api/v1/auth/otp/request {"email": email}
-activate API
-
-API -> API: Valida sintaxis con Pydantic (EmailStr) y comprueba email.endswith("@upt.pe")
-
-alt [E001] Dominio de correo no termina en @upt.pe
-    API --> Client: HTTP 400 Bad Request {"detail": "INVALID_DOMAIN: El acceso está reservado a @upt.pe."}
-    Client -> UI: displayDomainError(400, "INVALID_DOMAIN: El acceso está reservado a @upt.pe.")
-    User -> UI: click ["Corregir Correo"]
-    UI -> UI: resetEmailField()
-else Dominio universitario válido
-    API -> Service: request_otp(email)
-    activate Service
-    Service -> DB: SELECT * FROM usuarios WHERE email = :email AND activo = true
-    activate DB
-    DB --> Service: Registro de usuario (activo)
-    deactivate DB
-    
-    alt [E002] Cuenta institucional inactiva o suspendida (activo = false)
-        Service --> API: Lanza HTTPException(403, "ACCOUNT_SUSPENDED")
-        API --> Client: HTTP 403 Forbidden {"detail": "ACCOUNT_SUSPENDED: Su cuenta registra suspensión administrativa."}
-        Client -> UI: displayAccountSuspendedModal(403, "Cuenta inhabilitada por suspensión.")
-        User -> UI: click ["Aceptar"]
-        UI -> UI: resetForm()
-    else Cuenta activa y habilitada
-        Service --> API: Correo verificado y habilitado
-        API --> Client: HTTP 200 OK {"status": "ELIGIBLE"}
-        Client -> UI: displayOtpRequestForm(email, eligible=true)
-    end
-    deactivate Service
-end
-deactivate API
-deactivate Client
-deactivate UI
-
-== Fase 2: Generación criptográfica, despacho SMTP y verificación de código temporal ==
-User -> UI: click ["Solicitar Código de Acceso"]
-activate UI
-UI -> Client: requestOtp(email)
-activate Client
-Client -> API: POST /api/v1/auth/otp/request {"email": email}
-activate API
-API -> Service: generate_and_dispatch_otp(email)
-activate Service
-
-Service -> Service: Genera código seguro (secrets.randbelow(900000) + 100000)
-Service -> Service: Calcula hash criptográfico SHA-256(otp_code)
-Service -> DB: INSERT INTO credenciales_otp (id_usuario, hash_otp, expira_en=NOW()+5m)
-activate DB
-DB --> Service: Confirmación de persistencia (challenge_id)
-deactivate DB
-
-Service -> SMTP: send_otp_email(email, otp_plano)
-activate SMTP
-SMTP --> Service: Despacho SMTP exitoso (HTTP 200 / SMTP OK)
-deactivate SMTP
-
-Service --> API: OTP_SENT exitoso {"challenge_id": id, "expires_in": 300}
-deactivate Service
-API --> Client: HTTP 200 OK {"message": "OTP_SENT", "challengeId": id, "expires_in": 300}
-deactivate API
-Client -> UI: displayOtpModal(challengeId, expiresIn=300)
-deactivate Client
-deactivate UI
-
-opt [A002] Reenvío de código temporal por retraso en buzón (> 60s) o caducidad
-    User -> UI: click ["Reenviar código OTP"]
-    activate UI
-    UI -> Client: resendOtp(challengeId)
-    activate Client
-    Client -> API: POST /api/v1/auth/otp/resend {"challengeId": challengeId}
-    activate API
-    API -> Service: resend_otp(challenge_id)
-    activate Service
-    Service -> DB: UPDATE credenciales_otp SET consumido = true WHERE id = :challenge_id
-    activate DB
-    DB --> Service: Desafío previo invalidado
-    deactivate DB
-    Service -> Service: Genera nueva clave aleatoria de 6 dígitos
-    Service -> SMTP: send_otp_email(email, nuevo_otp)
-    activate SMTP
-    SMTP --> Service: SMTP OK
-    deactivate SMTP
-    Service --> API: OTP_SENT
-    deactivate Service
-    API --> Client: HTTP 200 OK {"message": "OTP_SENT"}
-    deactivate API
-    Client -> UI: displayOtpResentAlert(expiresIn=300)
-    deactivate Client
-    deactivate UI
-end
-
-User -> UI: enter (otpCode: "123456")
-activate UI
-User -> UI: click ["Verificar e Ingresar"]
-UI -> Client: verifyOtp(challengeId, otpCode)
-activate Client
-Client -> API: POST /api/v1/auth/otp/verify {"challengeId": challengeId, "otp": otpCode}
-activate API
-API -> Service: verify_otp(challenge_id, otpCode)
-activate Service
-
-Service -> DB: SELECT * FROM credenciales_otp WHERE id = :challenge_id AND consumido = false
-activate DB
-DB --> Service: Registro OTP persistido
-deactivate DB
-
-alt [E003] Código temporal OTP incorrecto
-    Service -> DB: UPDATE credenciales_otp SET intentos_fallidos = intentos_fallidos + 1
-    activate DB
-    DB --> Service: Actualizado
-    deactivate DB
-    Service --> API: Lanza HTTPException(400, "INVALID_OTP")
-    API --> Client: HTTP 400 Bad Request {"detail": "INVALID_OTP: El código no coincide."}
-    Client -> UI: displayOtpError(400, "INVALID_OTP: Código erróneo. Le quedan X intentos")
-    User -> UI: click ["Reintentar"]
-    UI -> UI: clearOtpInputs()
-else [E004] Código temporal OTP expirado (NOW() > expira_en)
-    Service --> API: Lanza HTTPException(400, "EXPIRED_OTP")
-    API --> Client: HTTP 400 Bad Request {"detail": "EXPIRED_OTP: El código ha caducado por límite de 5 min."}
-    Client -> UI: displayOtpExpiredAlert(400, "EXPIRED_OTP: Código caducado.")
-    User -> UI: click ["Solicitar Nuevo Código"]
-    UI -> UI: resetOtpForm()
-else [E005] Bloqueo temporal por exceso de intentos (intentos_fallidos >= 3)
-    Service -> DB: UPDATE usuarios SET bloqueado_hasta = NOW() + INTERVAL '15 MINUTES'
-    activate DB
-    DB --> Service: Usuario bloqueado
-    deactivate DB
-    Service --> API: Lanza HTTPException(429, "MAX_ATTEMPTS_EXCEEDED")
-    API --> Client: HTTP 429 Too Many Requests {"detail": "MAX_ATTEMPTS_EXCEEDED: Acceso bloqueado por 15 minutos."}
-    Client -> UI: displayBlockedSecurityModal(429, "Acceso bloqueado por 15 minutos.")
-    User -> UI: click ["Volver al Inicio"]
-    UI -> UI: redirectToInitialLogin()
-else Código válido y vigente
-    Service -> DB: UPDATE credenciales_otp SET consumido = true WHERE id = :challenge_id
-    activate DB
-    DB --> Service: Desafío invalidado
-    deactivate DB
-    Service --> API: OTP validado exitosamente {"temp_token": temp_token}
-    deactivate Service
-    API --> Client: HTTP 200 OK {"temp_token": temp_token}
-    deactivate API
-    Client -> UI: displayConsentOrProceed(temp_token)
-    deactivate Client
-    deactivate UI
-end
-
-== Fase 3: Formalización de consentimiento legal digital y emisión de sesión ==
-UI -> Client: getConsentStatus(email)
-activate UI
-activate Client
-Client -> API: GET /api/v1/consent/status?email={email}
-activate API
-API -> Service: get_consent_status(email)
-activate Service
-Service -> DB: SELECT * FROM consentimientos_legales WHERE email = :email AND revocado = false
-activate DB
-DB --> Service: Registro de consentimiento
-deactivate DB
-
-alt [A001] Acceso recurrente con consentimiento formalizado previo (has_consented = true)
-    Service -> Service: create_access_token(sub=email, roles=[UserRole], exp=8h)
-    Service --> API: TokenJWT_Firmado + Perfil
-    API --> Client: HTTP 200 OK {"access_token": token, "token_type": "Bearer", "user": user}
-    Client -> UI: displaySessionDashboard(token, user)
-    UI -> UI: localStorage.setItem('auth_token', token)
-    UI --> User: displaySuccessSessionNotification
-else Primer acceso sin consentimiento legal formalizado
-    Service --> API: Requiere consentimiento {"requires_consent": true, "temp_token": temp_token}
-    API --> Client: HTTP 200 OK {"requires_consent": true}
-    Client -> UI: renderConsentModal(Ley 29733)
-    
-    alt [E006] Rechazo voluntario del consentimiento informado
-        User -> UI: click ["Declinar y Salir"]
-        UI -> UI: displayMandatoryConsentWarning()
-        User -> UI: click ["Confirmar Salida"]
-        UI -> UI: purgeSessionAndReset()
-    else Aceptación de términos legales
-        User -> UI: selectCheckbox ["He leído y acepto los términos..."]
-        User -> UI: click ["Aceptar y Continuar"]
-        UI -> Client: acceptConsent(user_id, version="2026-II-v1.0")
-        activate Client
-        Client -> API: POST /api/v1/consent/accept {"version": "2026-II-v1.0"}
-        activate API
-        API -> Service: register_consent(email, ip, user_agent)
-        activate Service
-        Service -> DB: INSERT INTO consentimientos_legales (usuario_id, ip, user_agent, version, fecha_registro) VALUES (...)
-        activate DB
-        DB --> Service: Registro inmutable persistido
-        deactivate DB
-        
-        Service -> Service: create_access_token(sub=email, roles=[UserRole], exp=8h)
-        Service --> API: TokenJWT_Firmado + Perfil
-        deactivate Service
-        API --> Client: HTTP 200 OK {"access_token": token, "token_type": "Bearer", "user": user}
-        deactivate API
-        Client -> UI: displaySessionDashboard(token, user)
-        deactivate Client
-        
-        UI -> UI: localStorage.setItem('auth_token', token)
-        UI -> UI: Actualiza estado global de autenticación en App.tsx
-        UI --> User: displaySuccessSessionNotification
-    end
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.1: Diagrama de Secuencia - CUS-001: Iniciar sesión institucional con 2FA](diagramas/srs/img/diag_067_sec633_seq_cus001.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-001.
 
@@ -6913,149 +3762,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-010` modela la gestión y administración de roles de usuario por parte de la Dirección de Escuela y administradores institucionales siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Desglosa los participantes en capas: Autoridad Administradora, `AdminDashboardView.tsx`, `roleService.ts`, `roles.py`, `role_service.py` y PostgreSQL. Abarca la consulta de nómina paginada, la búsqueda de usuarios (con flujo alternativo `A001`), la verificación de autorización RBAC (`E001`), la tolerancia a fallos de persistencia (`E002`), la prohibición de conjuntos de roles vacíos (`E003`) y la protección de gobernanza contra auto-revocación del rol Administrador (`E004`).
 
-```plantuml
-@startuml
-title Diagrama 6.15.2: Diagrama de Secuencia - CUS-010: Gestionar asignación y revocación de roles institucionales de usuario\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Autoridad Institucional\n(Administrador / Director EPIS)" as Admin
-participant "Vista React\n(AdminDashboardView.tsx)" as UI
-participant "Adaptador Cliente\n(roleService.ts / ApiRoleAdapter)" as Client
-participant "Controlador FastAPI\n(endpoints/roles.py)" as API
-participant "Servicio Backend\n(role_service.py / RoleService)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Acceso al panel administrativo y consulta de nómina de usuarios ==
-Admin -> UI: click ["Gestión de Roles"]
-activate UI
-UI -> Client: listUsers() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/roles/users
-activate API
-
-API -> API: require_admin_role(current_user): valida JWT y claim roles conteniendo 'administrador'
-
-alt [E001] Privilegios administrativos insuficientes (rol no administrador)
-    API --> Client: HTTP 403 Forbidden {"detail": "FORBIDDEN: Se requieren privilegios de Administrador."}
-    Client -> UI: displayAccessDenied(403, "Acceso Restringido")
-    Admin -> UI: click ["Entendido"]
-    UI -> UI: redirectToAuthorizedView()
-else [E002] Error de conexión o timeout en base de datos
-    API -> Service: list_users()
-    activate Service
-    Service -> DB: SELECT u.id, u.email, array_agg(r.nombre) FROM usuarios u...
-    activate DB
-    DB --> Service: Timeout / Conexión rechazada
-    deactivate DB
-    Service --> API: Lanza OperationalError
-    deactivate Service
-    API --> Client: HTTP 503 Service Unavailable {"detail": "SERVICE_UNAVAILABLE: No se pudo conectar a BD."}
-    Client -> UI: displayServiceUnavailable(503)
-    Admin -> UI: click ["Reintentar Carga"]
-    UI -> Client: listUsers()
-else Token válido y conexión activa
-    API -> Service: list_users()
-    activate Service
-    Service -> DB: SELECT u.id, u.email, u.nombres, u.apellidos, array_agg(r.nombre) AS roles\nFROM usuarios u LEFT JOIN roles_usuarios ru ON u.id = ru.id_usuario\nLEFT JOIN roles r ON ru.id_rol = r.id GROUP BY u.id
-    activate DB
-    DB --> Service: Nómina de usuarios con roles asignados
-    deactivate DB
-    Service --> API: UserRoleListResponseDTO
-    deactivate Service
-    API --> Client: HTTP 200 OK UserRoleListResponseDTO
-    Client -> UI: displayUserTable(users)
-end
-deactivate API
-deactivate Client
-deactivate UI
-
-== Fase 2: Búsqueda y selección de usuario para modificación ==
-Admin -> UI: enter (query: "2020-119001" o "estudiante@upt.pe")
-activate UI
-Admin -> UI: click ["Buscar"]
-UI -> Client: searchUsers(query)
-activate Client
-Client -> API: GET /api/v1/roles/users?query={query}
-activate API
-API -> Service: search_users(query)
-activate Service
-Service -> DB: SELECT u.* FROM usuarios u WHERE email ILIKE :q OR codigo ILIKE :q
-activate DB
-DB --> Service: Resultados coincidentes
-deactivate DB
-Service --> API: Nómina filtrada
-deactivate Service
-API --> Client: HTTP 200 OK
-deactivate API
-Client -> UI: displaySearchResults(results)
-deactivate Client
-
-alt [A001] Búsqueda sin coincidencias en el padrón institucional
-    UI -> UI: displayNoResultsMessage()
-    Admin -> UI: click ["Limpiar Búsqueda"]
-    UI -> UI: resetSearchAndReload()
-else Usuario localizado
-    UI -> UI: highlightUserRow(targetUser)
-    Admin -> UI: click ["Modificar Roles"]
-    UI -> UI: openRoleAssignmentModal(targetUser, currentRoles)
-end
-deactivate UI
-
-== Fase 3: Modificación atómica de roles y registro de auditoría ==
-Admin -> UI: toggleRoles (assign: 'mentor')
-activate UI
-Admin -> UI: click ["Guardar Asignación"]
-UI -> Client: assignRoles(target_user_id, selected_roles)
-activate Client
-Client -> API: POST /api/v1/roles/assign {"user_id": target_id, "roles": selected_roles}
-activate API
-
-API -> Service: assign_roles(admin_id, target_user_id, selected_roles)
-activate Service
-
-alt [E003] Intento de dejar al usuario sin ningún rol asignado (len(selected_roles) == 0)
-    Service --> API: Lanza HTTPException(400, "EMPTY_ROLE_SET_PROHIBITED")
-    API --> Client: HTTP 400 Bad Request {"detail": "EMPTY_ROLE_SET_PROHIBITED: Todo usuario debe tener al menos un rol."}
-    Client -> UI: displayEmptyRolesError(400, "Todo usuario debe tener al menos un rol.")
-    Admin -> UI: selectRoleCheckbox ('mentoreado')
-    UI -> UI: enableSaveButton()
-else [E004] Intento de auto-revocación del rol Administrador (target_id == current_user_id)
-    Service --> API: Lanza HTTPException(400, "CANNOT_REVOKE_OWN_ADMIN")
-    API --> Client: HTTP 400 Bad Request {"detail": "CANNOT_REVOKE_OWN_ADMIN: No puede auto-revocarse el rol Administrador."}
-    Client -> UI: displaySelfRevocationError(400, "No puede auto-revocarse el rol Administrador.")
-    Admin -> UI: click ["Restablecer Selección"]
-    UI -> UI: resetAdminCheckbox()
-else Asignación válida y conforme a RBAC
-    Service -> DB: BEGIN TRANSACTION
-    activate DB
-    Service -> DB: DELETE FROM roles_usuarios WHERE id_usuario = :target_id
-    Service -> DB: INSERT INTO roles_usuarios (id_usuario, id_rol) VALUES (:target_id, :rol_id)...
-    Service -> DB: INSERT INTO auditoria_admin (admin_id, target_user_id, accion='ROLE_CHANGE', ip, fecha) VALUES (...)
-    Service -> DB: COMMIT
-    DB --> Service: Transacción ACID confirmada exitosamente
-    deactivate DB
-    
-    Service --> API: RoleAssignResponseDTO {"success": true, "updated_roles": selected_roles}
-    API --> Client: HTTP 200 OK RoleAssignResponseDTO
-    Client -> UI: displayRoleUpdateSuccess(updated_roles)
-    
-    UI -> UI: updateTableInMemory()
-    UI -> UI: closeAssignmentModal()
-    UI --> Admin: displaySuccessNotification
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.2: Diagrama de Secuencia - CUS-010: Gestionar asignación de roles de usuario](diagramas/srs/img/diag_068_sec633_seq_cus010.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-010.
 
@@ -7068,113 +3775,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-006` formaliza la programación y publicación de sesiones de mentoría académica por parte de un mentor acreditado siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`interface : UI`), reflejando que la interfaz se actualiza y permanece a la espera de las acciones directas del estudiante mentor. Modela la interacción entre el Estudiante Mentor, la interfaz React (`OfferPublishView.tsx`), los clientes HTTP (`offerService.ts` / `apiClient.ts`), los endpoints FastAPI (`endpoints/curriculum.py` y `endpoints/offers.py`), los servicios de lógica de negocio (`CurriculumService` y `OfferService`) y PostgreSQL. Abarca la recuperación de temas curriculares silábicos, la verificación criptográfica del token JWT (`RN-01`, `E005`), la validación de mérito académico y rol habilitado (`RN-03`, `E004`), la comprobación de antelación mínima de 24 horas (`RN-04`, `E002`), el aforo reglamentario (exactamente 10 presencial o 20 virtual, `RN-05`, `E003`) y la creación transaccional atómica de la entidad `SesionMentoria` en estado `PUBLICADA`.
 
-```plantuml
-@startuml
-title Diagrama 6.15.3: Diagrama de Secuencia - CUS-006: Publicar oferta de mentoría académica\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-participant "interface : UI\n(OfferPublishView.tsx)" as UI
-participant "clientAdapter : Client\n(offerService.ts / apiClient.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/offers.py)" as API
-participant "Servicio Backend\n(offer_service.py / OfferService)" as Service
-database "postgresDB : Database\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Configuración de la sesión y selección curricular ==
-Mentor -> UI: selectCourse(selectedCourseId)
-activate UI
-UI -> Client: fetchCourseDetail(selectedCourseId)
-activate Client
-Client -> API: GET /api/v1/curriculum/courses/{id}
-activate API
-API -> Service: get_course_by_id(id)
-activate Service
-Service -> DB: SELECT * FROM asignaturas WHERE id_asignatura = :id\nSELECT * FROM temas_curriculares WHERE id_asignatura = :id
-activate DB
-DB --> Service: Asignatura y lista de temas silábicos (Topic[])
-deactivate DB
-Service --> API: CourseDetailResponse
-deactivate Service
-API --> Client: HTTP 200 OK CourseDetailResponse
-deactivate API
-Client -> UI: displayTopicsAndForm(temas, defaultCapacity, suggestedSpace)
-deactivate Client
-deactivate UI
-
-== Fase 2: Ingreso de parámetros, validación de reglas de aforo y antelación ==
-Mentor -> UI: enter (topicId, startDateTime, duration, modality, assignedSpace)
-activate UI
-Mentor -> UI: click ["Verificar y Publicar"]
-UI -> UI: validateOfferPayload(payload)
-
-alt [E001] Campos obligatorios incompletos o sintaxis inválida
-    UI -> UI: displayValidationErrors(fieldErrors)
-    Mentor -> UI: enterMissingFields(payload)
-    Mentor -> UI: click ["Verificar y Publicar"]
-else Formulario válido en cliente
-    UI -> Client: publishOffer(payload: PublishOfferPayload)
-    activate Client
-    Client -> API: POST /api/v1/offers PublishOfferPayload [Bearer JWT]
-    activate API
-    API -> API: _extract_caller_and_admin_status(authorization, payload.mentor_email)
-
-    alt [E005] Discrepancia de identidad o suplantación de mentor
-        API --> Client: HTTP 403 Forbidden {"detail": "No tiene autorización para publicar ofertas en nombre de otro usuario."}
-        Client -> UI: displaySecurityError(403, "No tiene autorización para publicar ofertas en nombre de otro usuario.")
-    else Identidad de mentor verificada
-        API -> Service: publish_offer(db, payload, caller_email, is_admin)
-        activate Service
-
-        Service -> Service: validate_mentor_eligibility(db, effective_email)
-        Service -> DB: SELECT * FROM usuario_roles ur JOIN roles r ON ur.id_rol = r.id_rol\nWHERE ur.email = :email AND ur.activo = true AND r.nombre_rol IN ('mentor', 'administrador')
-        activate DB
-        DB --> Service: Roles del usuario y perfil académico (ciclo_actual)
-        deactivate DB
-
-        alt [E004] Mentor no elegible por ciclo insuficiente o falta de rol (RN-03)
-            Service --> API: Lanza HTTPException(403, "Infracción de RN-03: Solo los estudiantes habilitados con rol de mentor (ciclo >= VII)...")
-            API --> Client: HTTP 403 Forbidden {"detail": "Infracción de RN-03: Solo los estudiantes habilitados..."}
-            Client -> UI: displayEligibilityError(403, "Infracción de RN-03: Solo los estudiantes habilitados con rol de mentor...")
-        else Mentor acreditado (ciclo >= VII)
-            Service -> Service: calculate_advance_hours(payload.fecha_inicio)
-
-            alt [E002] Incumplimiento de antelación mínima de 24 horas (fecha_inicio <= now_utc + 24h)
-                Service --> API: Lanza HTTPException(400, "Infracción de RN-04: Toda mentoría debe publicarse con una antelación superior a 24 horas...")
-                API --> Client: HTTP 400 Bad Request {"detail": "Infracción de RN-04: Toda mentoría debe publicarse..."}
-                Client -> UI: displayAdvanceTimeError(400, "Infracción de RN-04: Toda mentoría debe publicarse con antelación > 24h")
-            else [E003] Aforo no conforme con la modalidad (aforo != 10 presencial o != 20 virtual)
-                Service --> API: Lanza HTTPException(400, "Infracción de RN-05: El aforo reglamentario...")
-                API --> Client: HTTP 400 Bad Request {"detail": "Infracción de RN-05: El aforo reglamentario..."}
-                Client -> UI: displayCapacityError(400, "Infracción de RN-05: El aforo reglamentario...")
-            else Parámetros de mérito, aforo y antelación válidos
-                == Fase 3: Persistencia transaccional de la oferta y confirmación en cliente ==
-                Service -> DB: sesion_db = SesionMentoria(codigo_sesion=code, mentor_email=..., estado='PUBLICADA', ...)
-                Service -> DB: db.add(sesion_db)\ndb.commit()\ndb.refresh(sesion_db)
-                activate DB
-                DB --> Service: Transacción confirmada (id_sesion, codigo_sesion='SES-XXXX')
-                deactivate DB
-                
-                Service --> API: PublishOfferResponse (id_oferta=..., codigo_sesion='SES-XXXX', estado='PUBLICADA')
-                API --> Client: HTTP 201 Created PublishOfferResponse
-                Client -> UI: showSuccessScreen(codigo_sesion='SES-XXXX', estado='PUBLICADA')
-                UI --> Mentor: displayPublishedConfirmation
-            end
-        end
-        deactivate Service
-    end
-    deactivate API
-    deactivate Client
-end
-deactivate UI
-@enduml
-```
+![Diagrama 69](diagramas/srs/img/diag_069_sec633_seq_item_69.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-006.
 
@@ -7184,82 +3785,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-008` modela la consulta de disponibilidad de infraestructura física de la EPIS (aulas, laboratorios y salas de estudio) antes de programar sesiones presenciales siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Detalla la interacción entre el Mentor, la interfaz de usuario, `offerService.ts`, el endpoint `GET /api/v1/offers/spaces/availability`, `offer_service.py` y las tablas `aulas` y `sesiones_mentoria`. Incorpora la restricción de horario universitario de 08:00 a 20:00 (`RN-07`, `E001`), la tolerancia a fallos de persistencia (`E002`) y la conmutación guiada hacia modalidad virtual (`A001`) ante saturación de espacios físicos.
 
-```plantuml
-@startuml
-title Diagrama 6.15.4: Diagrama de Secuencia - CUS-008: Consultar disponibilidad de espacios físicos y aulas de la EPIS\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-participant "Vista React\n(OfferPublishView.tsx / SpacesModal)" as UI
-participant "Adaptador Cliente\n(offerService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/offers.py)" as API
-participant "Servicio Backend\n(offer_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Definición de criterios temporales y despacho de consulta ==
-Mentor -> UI: enter (date, startTime, endTime)
-activate UI
-Mentor -> UI: click ["Consultar Aulas Disponibles"]
-UI -> Client: checkSpaceAvailability(date, startTime, endTime)
-activate Client
-
-Client -> API: GET /api/v1/offers/spaces/availability?date={date}&start_time={start_time}&end_time={end_time} [Bearer JWT]
-activate API
-API -> Service: check_space_availability(date, start_time, end_time)
-activate Service
-
-alt [E001] Horario fuera de la jornada institucional (fuera del intervalo 08:00 - 20:00, RN-07)
-    Service --> API: Lanza HTTPException(400, "OPERATIONAL_HOURS_VIOLATION")
-    API --> Client: HTTP 400 Bad Request {"detail": "OPERATIONAL_HOURS_VIOLATION: Operación sólo entre 08:00 y 20:00 horas."}
-    Client -> UI: displayOperationalHoursError(400, "OPERATIONAL_HOURS_VIOLATION")
-    Mentor -> UI: enter (correctedStartTime, correctedEndTime)
-    Mentor -> UI: click ["Consultar Aulas Disponibles"]
-else Rango horario reglamentario válido
-    == Fase 2: Verificación de ocupación en base de datos y renderización de resultados ==
-    alt [E002] Falla de conexión o timeout con repositorio de infraestructura
-        Service -> DB: Conexión y consulta de aulas (timeout)
-        activate DB
-        DB --> Service: Timeout de conexión en PostgreSQL
-        deactivate DB
-        Service --> API: Lanza OperationalError
-        API --> Client: HTTP 503 Service Unavailable {"detail": "INFRASTRUCTURE_UNAVAILABLE: No se pudo verificar disponibilidad."}
-        Client -> UI: displayInfrastructureUnavailable(503)
-        Mentor -> UI: click ["Reintentar Consulta"]
-        UI -> Client: checkSpaceAvailability(date, startTime, endTime)
-    else Conexión exitosa y consulta ejecutada
-        Service -> DB: SELECT a.id, a.codigo, a.capacidad, a.equipamiento FROM aulas a\nWHERE a.activa = true AND a.id NOT IN (\n  SELECT aula_id FROM sesiones_mentoria\n  WHERE fecha = :fecha AND NOT (hora_fin <= :start OR hora_inicio >= :end)\n  AND estado IN ('PUBLICADA', 'CONFIRMADA')\n)
-        activate DB
-        DB --> Service: Lista de aulas disponibles
-        deactivate DB
-        Service --> API: AvailableSpacesResponseDTO
-        API --> Client: HTTP 200 OK AvailableSpacesResponseDTO
-        Client -> UI: displayAvailableSpaces(availableSpaces)
-        
-        alt [A001] Aulas físicas agotadas (cero registros libres)
-            UI -> UI: displayNoSpacesAlert()
-            Mentor -> UI: click ["Cambiar a Modalidad Virtual"]
-            UI -> UI: setModalityVirtual(capacity=20, meet=true)
-        else Aulas físicas disponibles
-            Mentor -> UI: selectSpace (selectedSpaceId)
-            Mentor -> UI: click ["Asignar Aula a la Oferta"]
-            UI -> UI: assignSpaceToForm(selectedSpaceId)
-            UI --> Mentor: displaySpaceAssignedConfirmation
-        end
-    end
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.4: Diagrama de Secuencia - CUS-008: Consultar disponibilidad de espacios y recursos](diagramas/srs/img/diag_070_sec633_seq_cus008.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-008.
 
@@ -7272,105 +3798,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-005` modela la configuración integral del perfil formativo del estudiante mentor y la administración atómica de su matriz semanal de disponibilidad horaria (lunes a sábado, 08:00 a 20:00) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Desglosa las interacciones entre el Estudiante Mentor, `ProfileAvailabilityView.tsx`, `profileService.ts`, `profiles.py`, `profile_service.py` y PostgreSQL. Modela la consulta inicial de perfil, la validación sintáctica de biografía y bloques, el reemplazo atómico transaccional (`DELETE` + `INSERT` en bloque bajo `db.begin()`), y los flujos de excepción por matriz horaria vacía (`E001`), validación de texto (`E002`) y colisión de concurrencia (`E003`).
 
-```plantuml
-@startuml
-title Diagrama 6.15.5: Diagrama de Secuencia - CUS-005: Gestionar perfil formativo y disponibilidad horaria\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-participant "Vista React\n(ProfileAvailabilityView.tsx)" as UI
-participant "Adaptador Cliente\n(profileService.ts / ApiProfileAdapter)" as Client
-participant "Controlador FastAPI\n(endpoints/profiles.py)" as API
-participant "Servicio Backend\n(profile_service.py / ProfileService)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Consulta del perfil académico y visualización de la matriz horaria ==
-Mentor -> UI: click ["Mi Perfil y Disponibilidad"]
-activate UI
-UI -> Client: getMyProfile() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/profiles/me
-activate API
-API -> Service: get_profile(user_id)
-activate Service
-Service -> DB: SELECT p.*, d.* FROM perfiles_academicos p\nLEFT JOIN disponibilidad_horaria d ON p.id = d.perfil_id\nWHERE p.usuario_id = :uid
-activate DB
-DB --> Service: Perfil formativo y franjas horarias existentes
-deactivate DB
-Service --> API: ProfileResponseDTO
-deactivate Service
-API --> Client: HTTP 200 OK ProfileResponseDTO
-deactivate API
-Client -> UI: displayProfileAndSlots(profile, slots)
-deactivate Client
-deactivate UI
-
-== Fase 2: Edición de datos formativos y selección de bloques de disponibilidad ==
-Mentor -> UI: enter (biografia, materiasDominio)
-activate UI
-Mentor -> UI: toggleSlot (dia="Lunes", franja="08:00-10:00")
-UI -> UI: updateAvailabilityState(slots)
-
-Mentor -> UI: click ["Guardar Cambios y Disponibilidad"]
-UI -> UI: validateProfileData(biografia, slots)
-
-alt [E001] Matriz de disponibilidad horaria semanal vacía (cero bloques marcados)
-    UI -> UI: displayEmptySlotsWarning()
-    Mentor -> UI: toggleSlot (dia="Martes", franja="10:00-12:00")
-    Mentor -> UI: click ["Guardar Cambios y Disponibilidad"]
-else [E002] Biografía excede 500 caracteres o contiene scripts no autorizados
-    UI -> UI: displayBioLengthError()
-    Mentor -> UI: enter (adjustedBiography)
-    Mentor -> UI: click ["Guardar Cambios y Disponibilidad"]
-else Datos válidos en cliente
-    == Fase 3: Persistencia transaccional de disponibilidad y perfil ==
-    UI -> Client: updateProfile(payload)
-    activate Client
-    Client -> API: PUT /api/v1/profiles/me ProfileUpdateRequest [Bearer JWT]
-    activate API
-    API -> Service: update_profile_and_availability(mentor_id, payload)
-    activate Service
-    
-    Service -> DB: BEGIN TRANSACTION
-    activate DB
-    Service -> DB: UPDATE perfiles_academicos SET biografia = :bio, materias = :m WHERE usuario_id = :uid
-    
-    alt [E003] Conflicto de concurrencia al actualizar perfil (versión obsoleta)
-        DB --> Service: Concurrency Conflict / Row Version Mismatch
-        Service -> DB: ROLLBACK
-        Service --> API: Lanza HTTPException(409, "CONCURRENCY_CONFLICT")
-        API --> Client: HTTP 409 Conflict {"detail": "CONCURRENCY_CONFLICT: Modificado desde otra sesión."}
-        Client -> UI: displayConcurrencyConflict(409)
-        Mentor -> UI: click ["Recargar Perfil"]
-        UI -> Client: getMyProfile()
-    else Transacción atómica exitosa
-        Service -> DB: DELETE FROM disponibilidad_horaria WHERE perfil_id = :pid
-        Service -> DB: INSERT INTO disponibilidad_horaria (perfil_id, dia_semana, hora_inicio, hora_fin) VALUES (:pid, :dia, :hi, :hf)...
-        Service -> DB: COMMIT
-        DB --> Service: Transacción confirmada exitosamente
-        deactivate DB
-        
-        Service --> API: ProfileResponseDTO
-        API --> Client: HTTP 200 OK ProfileResponseDTO
-        Client -> UI: displayProfileUpdatedSuccess(profile)
-        
-        UI -> UI: updateLocalCache(profile)
-        UI --> Mentor: displayProfileUpdatedConfirmation
-    end
-    deactivate Service
-    deactivate API
-    deactivate Client
-end
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.5: Diagrama de Secuencia - CUS-005: Gestionar perfil académico y disponibilidad horaria](diagramas/srs/img/diag_071_sec633_seq_cus005.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-005.
 
@@ -7380,98 +3808,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-021` modela la navegación por el catálogo curricular oficial de la EPIS-UPT, estructurado jerárquicamente por ciclo académico (I al X), asignaturas y temas silábicos con identificación destacada de materias filtro (`RN-11`) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las interacciones entre los estudiantes (mentoreados y mentores), `CurriculumCatalogView.tsx`, `curriculumService.ts`, `curriculum.py`, `curriculum_service.py` y PostgreSQL. Describe la consulta de cursos con manejo de indisponibilidad (`E001`), el filtrado reactivo de materias con flujo alternativo sin coincidencias (`A001`) y la expansión de temarios con derivación directa hacia la reserva o demanda.
 
-```plantuml
-@startuml
-title Diagrama 6.15.6: Diagrama de Secuencia - CUS-021: Explorar catálogo curricular de asignaturas filtro\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado / Mentor" as User
-participant "Vista React\n(CurriculumCatalogView.tsx)" as UI
-participant "Adaptador Cliente\n(curriculumService.ts / ApiCurriculumAdapter)" as Client
-participant "Controlador FastAPI\n(endpoints/curriculum.py)" as API
-participant "Servicio Backend\n(curriculum_service.py / CurriculumService)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Navegación por ciclo académico y selección de asignatura ==
-User -> UI: click ["Catálogo Curricular"]
-activate UI
-UI -> Client: getCourses() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/curriculum/courses
-activate API
-API -> Service: get_courses()
-activate Service
-
-alt [E001] Falla de conexión con el repositorio curricular
-    Service -> DB: SELECT c.*, count(t.id) FROM cursos c...
-    activate DB
-    DB --> Service: Timeout / Conexión rechazada
-    deactivate DB
-    Service --> API: Lanza OperationalError
-    API --> Client: HTTP 503 Service Unavailable {"detail": "CURRICULUM_SERVICE_UNAVAILABLE: Repositorio no disponible."}
-    Client -> UI: displayCurriculumError(503)
-    User -> UI: click ["Reintentar Carga"]
-    UI -> Client: getCourses()
-else Conexión exitosa y consulta de cursos
-    Service -> DB: SELECT c.*, count(t.id) as total_temas FROM cursos c\nLEFT JOIN temas_curriculares t ON c.id = t.curso_id\nWHERE c.activo = true GROUP BY c.id ORDER BY c.ciclo, c.nombre
-    activate DB
-    DB --> Service: Listado jerárquico de asignaturas (ciclos I al X)
-    deactivate DB
-    Service --> API: CourseListResponseDTO
-    API --> Client: HTTP 200 OK CourseListResponseDTO
-    Client -> UI: displayCurriculumGrid(courses)
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-
-== Fase 2: Búsqueda y filtrado interactivo de cursos ==
-User -> UI: enter (filterText: "Algoritmos", ciclo=3)
-activate UI
-UI -> UI: filterCoursesInState(filterText, ciclo)
-
-alt [A001] Búsqueda curricular sin coincidencias
-    UI -> UI: displayNoMatchesPanel()
-    User -> UI: click ["Restablecer Filtros"]
-    UI -> UI: resetFiltersAndRestore()
-else Cursos coincidentes localizados
-    UI -> UI: displayFilteredCourses()
-end
-deactivate UI
-
-== Fase 3: Despliegue de temarios silábicos y vinculación con mentorías ==
-User -> UI: selectCourseCard(courseId)
-activate UI
-UI -> Client: getCourseTopics(courseId)
-activate Client
-Client -> API: GET /api/v1/curriculum/courses/{course_id}/topics
-activate API
-API -> Service: get_topics(course_id)
-activate Service
-Service -> DB: SELECT * FROM temas_curriculares WHERE curso_id = :cid ORDER BY unidad, semana
-activate DB
-DB --> Service: Lista de temas silábicos con ofertas activas asociadas
-deactivate DB
-Service --> API: TopicListResponseDTO
-deactivate Service
-API --> Client: HTTP 200 OK TopicListResponseDTO
-deactivate API
-Client -> UI: displayTopicAccordion(topics)
-deactivate Client
-
-UI -> UI: expandTopicAccordion()
-UI --> User: displayTopicListAccordion
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.6: Diagrama de Secuencia - CUS-021: Explorar catálogo curricular de asignaturas filtro](diagramas/srs/img/diag_072_sec633_seq_cus021.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-021.
 
@@ -7484,93 +3821,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-002` formaliza la inferencia algorítmica y la entrega de la cartelera personalizada de sesiones de mentoría Top-k siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las llamadas entre el Estudiante Mentoreado, el componente cliente `RecommendationFeedView.tsx`, el adaptador `recommendationService.ts`, el endpoint FastAPI en `recommendations.py`, el motor algorítmico `recommendation_service.py` y las tablas de PostgreSQL. Incorpora el fallback heurístico por popularidad ("Cold Start" `A001`), la contingencia ante cartelera desierta (`A002`), el tratamiento de errores de cómputo (`E001`) y la derivación transaccional hacia la reserva de cupo (`CUS-004`).
 
-```plantuml
-@startuml
-title Diagrama 6.15.7: Diagrama de Secuencia - CUS-002: Explorar recomendaciones personalizadas Top-k\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as User
-participant "Vista React\n(RecommendationFeedView.tsx)" as UI
-participant "Adaptador Cliente\n(recommendationService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/recommendations.py)" as API
-participant "Servicio Backend\n(recommendation_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-participant "Modal Reserva\n(BookingModalView.tsx)" as BookingModal
-
-== Fase 1: Acceso a la cartelera y solicitud de recomendaciones Top-k ==
-User -> UI: click ["Cartelera de Mentorías"]
-activate UI
-UI -> Client: getTopKRecommendations(limit=6) [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/recommendations/top-k?limit=6
-activate API
-API -> Service: get_top_k_recommendations(user_id, limit=6)
-activate Service
-
-alt [E001] Error interno de cómputo o timeout en base de datos
-    Service --> API: Lanza HTTPException(500, "RECOMMENDER_ENGINE_ERROR")
-    API --> Client: HTTP 500 Internal Server Error {"detail": "RECOMMENDER_ENGINE_ERROR"}
-    Client -> UI: displayRecommenderError(500)
-    User -> UI: click ["Reintentar Cartelera"]
-    UI -> Client: getTopKRecommendations()
-else Motor operativo
-    Service -> DB: SELECT * FROM perfiles_academicos WHERE usuario_id = :uid
-    activate DB
-    DB --> Service: Perfil del estudiante e historial de asignaturas
-    deactivate DB
-    
-    alt [A001] Estudiante nuevo sin historial académico (Cold Start Fallback)
-        Service -> DB: SELECT s.* FROM sesiones_mentoria s\nJOIN temas_curriculares t ON s.id_tema = t.id\nJOIN cursos c ON t.curso_id = c.id\nWHERE c.es_filtro = true AND s.estado = 'PUBLICADA' ORDER BY s.aforo_maximo DESC LIMIT 6
-        activate DB
-        DB --> Service: Sesiones populares en cursos filtro
-        deactivate DB
-        Service --> API: FallbackRecommendationDTO (populares)
-        API --> Client: HTTP 200 OK FallbackRecommendationDTO
-        Client -> UI: displayFallbackRecommendations(fallbackList)
-        Mentor -> UI: click ["Configurar Mis Materias"]
-    else Perfil con historial académico activo
-        == Fase 2: Ejecución del algoritmo de emparejamiento y ordenamiento de compatibilidad ==
-        Service -> DB: SELECT s.*, t.titulo, c.nombre, c.es_filtro FROM sesiones_mentoria s\nJOIN temas_curriculares t ON s.id_tema = t.id\nJOIN cursos c ON t.curso_id = c.id\nWHERE s.estado = 'PUBLICADA' AND s.fecha_inicio > NOW() + INTERVAL '24 HOURS'\nAND s.cupos_ocupados < s.aforo_maximo
-        activate DB
-        DB --> Service: Candidatas a mentoría activas
-        deactivate DB
-        
-        alt [A002] Cartelera vacía por ausencia de sesiones disponibles (0 ofertas)
-            Service --> API: EmptyListDTO []
-            API --> Client: HTTP 200 OK []
-            Client -> UI: displayEmptyFeedNotification()
-            User -> UI: click ["Registrar Demanda"]
-            UI -> UI: openDemandModal()
-        else Ofertas disponibles
-            Service -> Service: Computa Score = 0.5*Similitud + 0.3*FactorFiltro + 0.2*Urgencia
-            Service -> Service: Ordena descendentemente y toma las 6 mejores
-            Service --> API: TopKRecommendationResponseDTO
-            API --> Client: HTTP 200 OK TopKRecommendationResponseDTO
-            Client -> UI: displayTopKCards(recommendations)
-            
-            == Fase 3: Selección de sesión para reserva de cupo ==
-            User -> UI: clickOfferCard ["Reservar Cupo"]
-            UI -> BookingModal: openBookingModal(offer_id, user_id)
-            activate BookingModal
-            BookingModal -> UI: renderBookingModal(offer_id, user_id)
-            deactivate BookingModal
-            UI --> User: displayBookingModalTransfer
-        end
-    end
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.7: Diagrama de Secuencia - CUS-002: Explorar recomendaciones personalizadas Top-k](diagramas/srs/img/diag_073_sec633_seq_cus002.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-002.
 
@@ -7580,99 +3831,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-003` describe el registro de necesidades pedagógicas no atendidas por parte de los estudiantes mentoreados siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción temporal entre el Estudiante Mentoreado, el modal de demanda en `RecommendationFeedView.tsx`, `recommendationService.ts`, el endpoint `POST /api/v1/recommendations/demand`, el servicio `recommendation_service.py` y la tabla `demandas_academicas` en PostgreSQL. Detalla la validación de campos obligatorios (`E001`), la detección y rechazo de solicitudes duplicadas (`E002`), y la persistencia transaccional confirmada con `db.commit()` que actualiza el acumulador de demanda en caché.
 
-```plantuml
-@startuml
-title Diagrama 6.15.8: Diagrama de Secuencia - CUS-003: Registrar solicitud de demanda académica\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as User
-participant "Vista React\n(DemandModalView.tsx)" as UI
-participant "Adaptador Cliente\n(recommendationService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/recommendations.py)" as API
-participant "Servicio Backend\n(recommendation_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Apertura del formulario de demanda y selección temática ==
-User -> UI: click ["Registrar Demanda de Tema"]
-activate UI
-UI -> Client: loadAvailableCoursesAndTopics()
-activate Client
-Client -> API: GET /api/v1/curriculum/courses-with-topics
-activate API
-API -> Service: get_courses_with_topics()
-activate Service
-Service -> DB: SELECT * FROM cursos c JOIN temas_curriculares t ON c.id = t.curso_id
-activate DB
-DB --> Service: Asignaturas y temarios silábicos
-deactivate DB
-Service --> API: CoursesWithTopicsDTO
-deactivate Service
-API --> Client: HTTP 200 OK CoursesWithTopicsDTO
-deactivate API
-Client -> UI: displayDemandForm(coursesWithTopics)
-deactivate Client
-deactivate UI
-
-== Fase 2: Ingreso de preferencias y despacho de solicitud ==
-User -> UI: enter (cursoId, temaId, franjaHoraria, modalidad, comentarios)
-activate UI
-User -> UI: click ["Enviar Solicitud"]
-UI -> UI: validateDemandForm(cursoId, temaId)
-
-alt [E001] Formulario de demanda incompleto (tema o materia omitida)
-    UI -> UI: displayValidationErrors(fieldErrors)
-    User -> UI: enter (missingFields)
-    User -> UI: click ["Enviar Solicitud"]
-else Formulario válido en cliente
-    UI -> Client: createDemand(payload)
-    activate Client
-    Client -> API: POST /api/v1/recommendations/demand DemandCreateRequest [Bearer JWT]
-    activate API
-    API -> Service: create_demand_request(user_id, payload)
-    activate Service
-    
-    Service -> DB: SELECT id FROM demandas_academicas\nWHERE estudiante_id = :uid AND tema_id = :tid AND estado = 'PENDIENTE'
-    activate DB
-    DB --> Service: Registro existente o nulo
-    deactivate DB
-    
-    alt [E002] Solicitud duplicada de demanda en estado PENDIENTE
-        Service --> API: Lanza HTTPException(409, "DUPLICATE_DEMAND")
-        API --> Client: HTTP 409 Conflict {"detail": "DUPLICATE_DEMAND: Ya mantienes una solicitud activa para este tema."}
-        Client -> UI: displayDuplicateDemandAlert(409)
-        User -> UI: click ["Entendido"]
-        UI -> UI: closeModal()
-    else Demanda no duplicada
-        == Fase 3: Registro transaccional e indexación de demanda grupal ==
-        Service -> DB: BEGIN TRANSACTION
-        activate DB
-        Service -> DB: INSERT INTO demandas_academicas (estudiante_id, tema_id, franja_horaria, modalidad, comentarios, estado='PENDIENTE')\nVALUES (:uid, :tid, :franja, :mod, :com, 'PENDIENTE') RETURNING id
-        Service -> DB: UPDATE acumuladores_demanda SET total_solicitudes = total_solicitudes + 1 WHERE tema_id = :tid
-        Service -> DB: COMMIT
-        DB --> Service: Transacción confirmada (id_demanda)
-        deactivate DB
-        
-        Service --> API: DemandResponseDTO {"id": id_demanda, "estado": "PENDIENTE"}
-        API --> Client: HTTP 201 Created DemandResponseDTO
-        Client -> UI: displayDemandCreatedSuccess(id_demanda)
-        
-        UI -> UI: closeModal()
-        UI --> User: displayDemandRegisteredConfirmation
-    end
-    deactivate Service
-    deactivate API
-    deactivate Client
-end
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.8: Diagrama de Secuencia - CUS-003: Registrar solicitud de demanda académica](diagramas/srs/img/diag_074_sec633_seq_cus003.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-003.
 
@@ -7685,161 +3844,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-004` formaliza el ciclo transaccional de reserva de cupos con control de aforo y concurrencia crítica bajo PostgreSQL siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela detalladamente las cuatro fases de interacción entre el Estudiante Mentoreado, la interfaz React (`BookingModalView.tsx`), el adaptador `bookingService.ts`, el endpoint `POST /api/v1/bookings/reserve`, el servicio `booking_service.py` y la base de datos relacional. Incluye la adquisición del cerrojo en memoria `_booking_lock`, el bloqueo pesimista de fila `SELECT ... FOR UPDATE OF sesiones_mentoria` con timeout de 5.0s, y los diez flujos de excepción (`E001` a `E010`).
 
-```plantuml
-@startuml
-title Diagrama 6.15.9: Diagrama de Secuencia - CUS-004: Reservar cupo de mentoría académica\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as User
-participant "Vista React\n(BookingModalView.tsx / RecommendationFeedView.tsx)" as UI
-participant "Adaptador Cliente\n(bookingService.ts / ApiBookingAdapter)" as Client
-participant "Controlador FastAPI\n(endpoints/bookings.py)" as API
-participant "Servicio Backend\n(booking_service.py / consent_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Exploración en Cartelera y Apertura del Diálogo Modal ==
-User -> UI: clickOfferCard ["Reservar Cupo"]
-activate UI
-UI -> UI: onSelectOffer: monta BookingModalView.tsx con offer, userEmail
-
-alt [E001] Oferta en cartelera sin vacantes disponibles (available_slots <= 0)
-    UI -> UI: displayCapacityExhaustedWarning()
-    User -> UI: click ["Volver a Cartelera"]
-    UI -> UI: closeModal()
-else [E002] Reserva duplicada activa para el mismo estudiante
-    UI -> Client: checkActiveBooking(offer.id, userEmail)
-    activate Client
-    Client -> API: GET /api/v1/bookings/check-duplicate?session_id={session_id}
-    activate API
-    API -> Service: check_active_booking(session_id, userEmail)
-    activate Service
-    Service -> DB: SELECT id FROM reservas_cupo WHERE id_sesion = :sid AND estudiante_email = :email AND estado IN ('PENDIENTE_CONFIRMACION', 'CONFIRMADA')
-    activate DB
-    DB --> Service: Reserva activa existente
-    deactivate DB
-    Service --> API: ActiveBookingResultDTO {"has_active": true}
-    deactivate Service
-    API --> Client: HTTP 400 Bad Request {"detail": "ALREADY_BOOKED"}
-    deactivate API
-    Client -> UI: displayDuplicateBookingError(400, "ALREADY_BOOKED")
-    deactivate Client
-    User -> UI: click ["Aceptar"]
-    UI -> UI: closeModal()
-else Tarjeta con vacantes y sin duplicidad previa
-    == Fase 2: Verificación de Precondiciones y Reglas de Negocio en Cliente ==
-    User -> UI: click ["Confirmar Reserva"]
-    UI -> UI: setIsSubmitting(true)
-    
-    alt [E003] Sesión institucional no autenticada o token JWT expirado
-        UI -> UI: displaySessionExpired()
-        User -> UI: click ["Iniciar Sesión"]
-        UI -> UI: redirectToLoginView()
-    else [E004] Conflicto de rol de mentor (Autoreserva Prohibida: offer.mentor_email === userEmail)
-        UI -> UI: displaySelfBookingError()
-        User -> UI: click ["Cerrar"]
-        UI -> UI: closeModal()
-    else [E005] Ausencia o revocación de consentimiento legal digital Ley N° 29733
-        UI -> Client: getConsentStatus(userEmail)
-        activate Client
-        Client -> API: GET /api/v1/consent/status
-        activate API
-        API --> Client: HTTP 403 Forbidden {"detail": "CONSENT_REQUIRED"}
-        deactivate API
-        Client -> UI: displayConsentRequiredModal()
-        deactivate Client
-        User -> UI: click ["Aceptar y Continuar"]
-        UI -> UI: setConsentAccepted()
-    else Precondiciones en cliente verificadas
-        == Fase 3: Transacción Atómica con Bloqueo Pesimista en Base de Datos ==
-        UI -> Client: reserveSeat(offer.id, userEmail)
-        activate Client
-        Client -> API: POST /api/v1/bookings/reserve {"id_sesion": id, "estudiante_email": email} [Bearer JWT]
-        activate API
-        API -> Service: reserve_seat(session_id, user_email)
-        activate Service
-        
-        Service -> Service: _booking_lock.acquire(timeout=5.0)
-        
-        alt [E009] Timeout de concurrencia en adquisición de cerrojo (_booking_lock timeout)
-            Service --> API: Lanza HTTPException(503, "DATABASE_BUSY")
-            API --> Client: HTTP 503 Service Unavailable {"detail": "DATABASE_BUSY: Servicio sobrecargado."}
-            Client -> UI: displayDatabaseBusyAlert(503)
-            User -> UI: click ["Reintentar Reserva"]
-            UI -> Client: reserveSeat(offer.id, userEmail)
-        else Cerrojo en memoria adquirido
-            Service -> DB: BEGIN TRANSACTION
-            activate DB
-            Service -> DB: SET LOCAL lock_timeout = '5.0s'
-            Service -> DB: SELECT * FROM sesiones_mentoria WHERE id = :sid FOR UPDATE OF sesiones_mentoria
-            DB --> Service: Fila bloqueada pesimistamente (aforo_maximo, cupos_ocupados, estado)
-            
-            alt [E006] Sesión de mentoría inexistente o cancelada concurrentemente
-                Service -> DB: ROLLBACK
-                Service --> API: Lanza HTTPException(404, "SESSION_NOT_FOUND")
-                API --> Client: HTTP 404 Not Found {"detail": "SESSION_NOT_FOUND"}
-                Client -> UI: displaySessionNotFound(404)
-                User -> UI: click ["Volver a Cartelera"]
-                UI -> UI: closeModal()
-            else [E007] Ventana de antelación menor a 24 horas (now_utc > fecha_inicio - 24h, RN-04)
-                Service -> DB: ROLLBACK
-                Service --> API: Lanza HTTPException(400, "RESERVATION_WINDOW_CLOSED")
-                API --> Client: HTTP 400 Bad Request {"detail": "RESERVATION_WINDOW_CLOSED"}
-                Client -> UI: displayReservationWindowClosed(400)
-                User -> UI: click ["Entendido"]
-                UI -> UI: closeModal()
-            else [E008] Aforo agotado en el instante del cerrojo (cupos_ocupados >= aforo_maximo, RN-05)
-                Service -> DB: ROLLBACK
-                Service --> API: Lanza HTTPException(409, "CAPACITY_EXCEEDED")
-                API --> Client: HTTP 409 Conflict {"detail": "CAPACITY_EXCEEDED: Último cupo reservado."}
-                Client -> UI: displayCapacityExceeded(409)
-                User -> UI: click ["Ver Otras Sesiones"]
-                UI -> UI: closeModal()
-            else Condiciones de reserva válidas y aforo garantizado
-                Service -> Service: Genera ticket_hash = SHA256(uid + sid + timestamp)
-                Service -> DB: INSERT INTO reservas_cupo (id_usuario, id_sesion, estado='PENDIENTE_CONFIRMACION', ticket_hash)\nVALUES (:uid, :sid, 'PENDIENTE_CONFIRMACION', :th) RETURNING id
-                Service -> DB: UPDATE sesiones_mentoria SET cupos_ocupados = cupos_ocupados + 1 WHERE id = :sid
-                
-                alt [E010] Error inesperado en base de datos al confirmar transacción
-                    DB --> Service: Database Write Error
-                    Service -> DB: ROLLBACK
-                    Service --> API: Lanza HTTPException(500, "TRANSACTION_FAILED")
-                    API --> Client: HTTP 500 Internal Server Error {"detail": "TRANSACTION_FAILED"}
-                    Client -> UI: displayTransactionFailed(500)
-                    User -> UI: click ["Reintentar"]
-                    UI -> Client: reserveSeat(offer.id, userEmail)
-                else Transacción confirmada exitosamente
-                    Service -> DB: COMMIT
-                    DB --> Service: Transacción ACID confirmada
-                    Service -> Service: _booking_lock.release()
-                    
-                    == Fase 4: Confirmación Provisional y Notificación de Plazo Límite ==
-                    Service --> API: BookingCreateResponseDTO {"id": id_reserva, "estado": "PENDIENTE_CONFIRMACION", "deadline": t_minus_24h}
-                    API --> Client: HTTP 201 Created BookingCreateResponseDTO
-                    Client -> UI: displayBookingSuccessModal(id_reserva, deadline)
-                    
-                    UI -> UI: setIsSubmitting(false)
-                    User -> UI: click ["Ir a Mis Reservas"]
-                    UI -> UI: unmountBookingModal()
-                    UI --> User: displayStudentBookingsDashboard
-                end
-            end
-            deactivate DB
-        end
-        deactivate Service
-        deactivate API
-        deactivate Client
-    end
-end
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.9: Diagrama de Secuencia - CUS-004: Reservar cupo de mentoría académica](diagramas/srs/img/diag_075_sec633_seq_cus004.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-004.
 
@@ -7849,96 +3854,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-024` formaliza la confirmación obligatoria de asistencia por parte de los estudiantes con reserva en la ventana reglamentaria entre 48 y 24 horas antes del inicio de la sesión (`[T-48h, T-24h]`, `RN-08`) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el Estudiante Mentoreado, el panel `StudentBookingsView.tsx`, `bookingService.ts`, el endpoint `POST /api/v1/bookings/{id}/confirm`, el servicio `booking_service.py` y PostgreSQL. Modela la validación de ventana temporal, la conmutación de estado a `CONFIRMADA`, la emisión del pase digital de asistencia con código alfanumérico y los flujos de excepción por ratificación anticipada (`E001`) o extemporánea (`E002`).
 
-```plantuml
-@startuml
-title Diagrama 6.15.10: Diagrama de Secuencia - CUS-024: Ratificar asistencia obligatoria a sesión de mentoría a T-24h\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as User
-participant "Vista React\n(StudentBookingsView.tsx)" as UI
-participant "Adaptador Cliente\n(bookingService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/bookings.py)" as API
-participant "Servicio Backend\n(booking_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Identificación de reservas pendientes y verificación de ventana temporal ==
-User -> UI: click ["Mis Reservas"]
-activate UI
-UI -> Client: getMyBookings() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/bookings/my-bookings
-activate API
-API -> Service: get_user_bookings(user_email)
-activate Service
-Service -> DB: SELECT r.*, s.fecha_inicio, s.modalidad FROM reservas_cupo r\nJOIN sesiones_mentoria s ON r.id_sesion = s.id WHERE r.estudiante_email = :email
-activate DB
-DB --> Service: Lista de reservas del estudiante
-deactivate DB
-Service --> API: BookingListResponseDTO
-deactivate Service
-API --> Client: HTTP 200 OK BookingListResponseDTO
-deactivate API
-Client -> UI: displayBookingsList(bookings)
-deactivate Client
-
-== Fase 2: Despacho de ratificación y validación de reglas de negocio ==
-User -> UI: clickCardButton ["Confirmar Asistencia"]
-UI -> UI: openConfirmationModal()
-User -> UI: click ["Sí, Confirmo mi Asistencia Definitiva"]
-
-UI -> Client: confirmBooking(bookingId)
-activate Client
-Client -> API: POST /api/v1/bookings/{id}/confirm [Bearer JWT]
-activate API
-API -> Service: confirm_booking(booking_id, user_email)
-activate Service
-
-Service -> DB: SELECT r.*, s.fecha_inicio FROM reservas_cupo r\nJOIN sesiones_mentoria s ON r.id_sesion = s.id\nWHERE r.id = :bid AND r.estudiante_email = :email
-activate DB
-DB --> Service: Datos de reserva y horario de sesión
-deactivate DB
-
-alt [E001] Intento de ratificación anticipada fuera de ventana (now_utc < fecha_inicio - 48h)
-    Service --> API: Lanza HTTPException(400, "CONFIRMATION_NOT_OPEN")
-    API --> Client: HTTP 400 Bad Request {"detail": "CONFIRMATION_NOT_OPEN: La ventana abre 48h antes del inicio."}
-    Client -> UI: displayConfirmationNotOpen(400)
-    User -> UI: click ["Entendido"]
-    UI -> UI: closeConfirmationModal()
-else [E002] Ventana de ratificación vencida a T-24h (now_utc > fecha_inicio - 24h)
-    Service --> API: Lanza HTTPException(400, "CONFIRMATION_WINDOW_EXPIRED")
-    API --> Client: HTTP 400 Bad Request {"detail": "CONFIRMATION_WINDOW_EXPIRED: Ventana cerró a T-24h."}
-    Client -> UI: displayConfirmationExpired(400)
-    User -> UI: click ["Aceptar"]
-    UI -> UI: refreshBookingsList()
-else Dentro de la ventana reglamentaria [T-48h, T-24h]
-    == Fase 3: Transición atómica de estado y emisión de pase de asistencia ==
-    Service -> DB: BEGIN TRANSACTION
-    activate DB
-    Service -> DB: UPDATE reservas_cupo SET estado = 'CONFIRMADA', fecha_confirmacion = NOW() WHERE id = :bid
-    Service -> DB: COMMIT
-    DB --> Service: Transacción confirmada
-    deactivate DB
-    
-    Service --> API: BookingResponseDTO {"id": booking_id, "estado": "CONFIRMADA", "pass_code": "PASS-8472"}
-    API --> Client: HTTP 200 OK BookingResponseDTO
-    Client -> UI: displayPassCodeModal(booking_id, pass_code)
-    
-    UI -> UI: updateCardToConfirmed()
-    UI --> User: displayAttendanceConfirmedNotification
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.10: Diagrama de Secuencia - CUS-024: Ratificar asistencia a sesión de mentoría](diagramas/srs/img/diag_076_sec633_seq_cus024.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-024.
 
@@ -7948,84 +3864,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-017` modela la anulación voluntaria de una reserva de cupo sin penalización académica, condicionada a una antelación mayor a 24 horas (`fecha_inicio > now_utc + 24h`, `RN-04`) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las interacciones entre el Estudiante Mentoreado, `StudentBookingsView.tsx`, `bookingService.ts`, el endpoint `POST /api/v1/bookings/{id}/cancel`, `booking_service.py` y PostgreSQL. Modela la adquisición del cerrojo pesimista de fila, la conmutación a estado `CANCELADA_ESTUDIANTE`, la reducción atómica del contador de cupos ocupados y el rechazo de cancelaciones tardías (`E001`).
 
-```plantuml
-@startuml
-title Diagrama 6.15.11: Diagrama de Secuencia - CUS-017: Desistir voluntariamente de reserva de cupo sin penalidad antes de T-24h\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as User
-participant "Vista React\n(StudentBookingsView.tsx)" as UI
-participant "Adaptador Cliente\n(bookingService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/bookings.py)" as API
-participant "Servicio Backend\n(booking_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Solicitud de desistimiento y verificación de plazos ==
-User -> UI: clickCardButton ["Cancelar Reserva"]
-activate UI
-UI -> UI: openCancellationModal()
-
-alt [E001] Desistimiento tardío con menos de 24 horas de antelación (fecha_inicio <= now_utc + 24h)
-    UI -> Client: checkCancellationDeadline(bookingId)
-    activate Client
-    Client -> API: GET /api/v1/bookings/{id}/cancellation-eligibility
-    activate API
-    API -> Service: check_cancellation_eligibility(booking_id)
-    activate Service
-    Service -> DB: SELECT s.fecha_inicio FROM reservas_cupo r JOIN sesiones_mentoria s ON r.id_sesion = s.id WHERE r.id = :bid
-    activate DB
-    DB --> Service: Horario de sesión (T < 24h)
-    deactivate DB
-    Service --> API: CancellationEligibilityDTO {"eligible": false, "reason": "LATE_CANCELLATION"}
-    deactivate Service
-    API --> Client: HTTP 400 Bad Request {"detail": "LATE_CANCELLATION_PROHIBITED: Menos de 24h de antelación."}
-    deactivate API
-    Client -> UI: displayLateCancellationProhibited(400)
-    deactivate Client
-    User -> UI: click ["Entendido"]
-    UI -> UI: closeCancellationModal()
-else Antelación superior a 24 horas (cumple RN-04)
-    == Fase 2: Confirmación y procesamiento atómico de liberación de cupo ==
-    User -> UI: enter (cancellationReason)
-    User -> UI: click ["Confirmar Cancelación"]
-    UI -> Client: cancelBooking(bookingId, reason)
-    activate Client
-    Client -> API: POST /api/v1/bookings/{id}/cancel {"reason": reason} [Bearer JWT]
-    activate API
-    API -> Service: cancel_booking(booking_id, user_email, reason)
-    activate Service
-    
-    Service -> DB: BEGIN TRANSACTION
-    activate DB
-    Service -> DB: SELECT * FROM reservas_cupo WHERE id = :bid FOR UPDATE
-    Service -> DB: SELECT * FROM sesiones_mentoria WHERE id = :sid FOR UPDATE
-    Service -> DB: UPDATE reservas_cupo SET estado = 'CANCELADA_ESTUDIANTE', fecha_cancelacion = NOW(), motivo_cancelacion = :reason WHERE id = :bid
-    Service -> DB: UPDATE sesiones_mentoria SET cupos_ocupados = cupos_ocupados - 1 WHERE id = :sid
-    Service -> DB: COMMIT
-    DB --> Service: Transacción ACID confirmada
-    deactivate DB
-    
-    Service --> API: BookingResponseDTO {"id": booking_id, "estado": "CANCELADA_ESTUDIANTE"}
-    deactivate Service
-    API --> Client: HTTP 200 OK BookingResponseDTO
-    deactivate API
-    Client -> UI: displayCancellationSuccess()
-    deactivate Client
-    
-    UI -> UI: closeCancellationModal()
-    UI -> UI: updateCardToCancelled()
-    UI --> User: displayBookingCancelledConfirmation
-end
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.11: Diagrama de Secuencia - CUS-017: Desistir voluntariamente de reserva](diagramas/srs/img/diag_077_sec633_seq_cus017.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-017.
 
@@ -8035,104 +3874,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-023` especifica el proceso automatizado y desatendido de evaluación de quórum reglamentario (mínimo 3 estudiantes con asistencia ratificada, `RN-05`) ejecutado exactamente 24 horas antes del inicio de cada sesión de mentoría siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el Proceso Demonio (`SchedulerWorker` / Celery / APScheduler), el controlador de quórum en `quorum.py`, `booking_service.py`, `simulation_service.py`, PostgreSQL y el servicio de correo SMTP. Incluye la promoción automática a `CONFIRMADA` si se cumple el quórum, y la transición a `QUORUM_INSUFICIENTE` con disparo de alertas urgentes (`A001`) si no se alcanza el umbral.
 
-```plantuml
-@startuml
-title Diagrama 6.15.12: Diagrama de Secuencia - CUS-023: Evaluar automáticamente el quórum reglamentario de sesiones de mentoría a T-24h\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-participant "Planificador\n(SchedulerWorker / Celery)" as Cron
-actor "Administrador Institucional\n(UserRole.administrador)" as Admin
-participant "Vista React\n(AdminDashboardView.tsx / MentorSessionsView.tsx)" as UI
-participant "Adaptador Cliente\n(quorumService.ts / apiClient)" as Client
-participant "Controlador FastAPI\n(endpoints/quorum.py)" as API
-participant "Servicio Backend\n(booking_service.py / simulation_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-participant "Servicio SMTP UPT\n(EmailService)" as SMTP
-actor "Estudiante Mentor" as Mentor
-actor "Estudiante Mentoreado" as Mentoreado
-
-== Fase 1: Disparo de la tarea programada y localización de sesiones a T-24h ==
-alt Disparo automatizado por demonio programado
-    Cron -> API: Disparo automático de corte de quórum a T-24h
-else Disparo administrativo o simulado desde consola
-    Admin -> UI: click ["Evaluar Quórum Masivo"]
-    activate UI
-    UI -> Client: triggerQuorumEvaluation() [Bearer JWT]
-    activate Client
-    Client -> API: POST /api/v1/quorum/evaluate-all
-    deactivate Client
-    deactivate UI
-end
-activate API
-API -> Service: evaluate_all_active_quorums()
-activate Service
-
-Service -> DB: SELECT * FROM sesiones_mentoria\nWHERE estado = 'PUBLICADA' AND fecha_inicio <= NOW() + INTERVAL '24 HOURS'
-activate DB
-DB --> Service: Lista de sesiones en ventana T-24h
-deactivate DB
-
-== Fase 2: Cuantificación de confirmaciones y verificación de umbral de quórum ==
-loop Para cada sesión en ventana T-24h
-    Service -> DB: SELECT count(*) FROM reservas_cupo WHERE id_sesion = :sid AND estado = 'CONFIRMADA'
-    activate DB
-    DB --> Service: confirmed_count (número de estudiantes ratificados)
-    deactivate DB
-    
-    alt [A001] Quórum insuficiente a T-24h (confirmed_count < 3 estudiantes, RN-05)
-        Service -> DB: BEGIN TRANSACTION
-        activate DB
-        Service -> DB: UPDATE sesiones_mentoria SET estado = 'QUORUM_INSUFICIENTE' WHERE id = :sid
-        Service -> DB: INSERT INTO auditoria_evaluacion (sesion_id, estado_anterior='PUBLICADA', nuevo_estado='QUORUM_INSUFICIENTE', quorum_logrado=confirmed_count, fecha=NOW())
-        Service -> DB: COMMIT
-        DB --> Service: Transacción confirmada
-        deactivate DB
-        
-        Service -> SMTP: send_urgent_quorum_alert(mentor_email, session_id, confirmed_count)
-        activate SMTP
-        SMTP --> Mentor: Alerta urgente: Sesión no alcanzó quórum de 3 alumnos
-        deactivate SMTP
-        
-        Service -> UI: pushNotificationQuorumInsufficient(session_id)
-        Service --> API: A001-1.4 Sesión en QUORUM_INSUFICIENTE
-    else Quórum reglamentario alcanzado (confirmed_count >= 3 estudiantes)
-        == Fase 3: Confirmación oficial de sesión y notificación de viabilidad ==
-        Service -> DB: BEGIN TRANSACTION
-        activate DB
-        Service -> DB: UPDATE sesiones_mentoria SET estado = 'CONFIRMADA' WHERE id = :sid
-        Service -> DB: INSERT INTO auditoria_evaluacion (sesion_id, estado_anterior='PUBLICADA', nuevo_estado='CONFIRMADA', quorum_logrado=confirmed_count, fecha=NOW())
-        Service -> DB: COMMIT
-        DB --> Service: Transacción confirmada
-        deactivate DB
-        
-        Service -> SMTP: send_session_confirmed_email(mentor_email, session_data)
-        activate SMTP
-        SMTP --> Mentor: Correo oficial de dictado de sesión
-        deactivate SMTP
-        
-        Service -> SMTP: send_confirmation_to_students(enrolled_emails, session_data)
-        activate SMTP
-        SMTP --> Mentoreado: Correo oficial: Sesión confirmada con quórum reglamentario
-        deactivate SMTP
-        
-        Service -> UI: pushNotificationQuorumConfirmed(session_id)
-        Service --> API: SessionQuorumResultDTO {"session_id": sid, "status": "CONFIRMADA", "confirmed_students": confirmed_count}
-    end
-end
-
-Service --> API: BatchQuorumEvaluationSummaryDTO
-deactivate Service
-API --> Cron: HTTP 200 OK (Ciclo completado)
-deactivate API
-@enduml
-```
+![Diagrama 6.15.12: Diagrama de Secuencia - CUS-023: Evaluar quórum automático a T-24h](diagramas/srs/img/diag_078_sec633_seq_cus023.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-023.
 
@@ -8142,107 +3884,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-007` modela la gestión resolutiva que ejecuta el estudiante mentor cuando una sesión no alcanza el quórum a T-24h (estado `QUORUM_INSUFICIENTE`) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las interacciones entre el Mentor, `MentorSessionsView.tsx`, `offerService.ts`, el endpoint `POST /api/v1/offers/{offer_id}/quorum-decision`, `offer_service.py` y PostgreSQL. Abarca las tres alternativas de resolución: dictar de todas formas (`PROCEED`), reprogramar con antelación mayor a 24 horas (`RESCHEDULE`, con validación `E001`), o cancelar definitivamente con justificación obligatoria (`CANCEL`, con validación `E002`), actualizando los estados y notificando a los estudiantes inscritos.
 
-```plantuml
-@startuml
-title Diagrama 6.15.13: Diagrama de Secuencia - CUS-007: Decisión del mentor ante quórum insuficiente\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-participant "Vista React\n(MentorSessionsView.tsx)" as UI
-participant "Adaptador Cliente\n(offerService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/offers.py)" as API
-participant "Servicio Backend\n(offer_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-participant "Servicio SMTP UPT\n(EmailService)" as SMTP
-actor "Estudiantes Inscritos" as Students
-
-== Fase 1: Acceso a la sesión con quórum insuficiente y visualización de opciones ==
-Mentor -> UI: click ["Mis Sesiones"]
-activate UI
-Mentor -> UI: clickButton ["Gestionar Sesión"]
-UI -> UI: openQuorumDecisionModal()
-
-== Fase 2: Elección de la resolución y verificación de parámetros ==
-alt Decisión == 'RESCHEDULE' con nueva fecha ingresada
-    Mentor -> UI: selectOption ["Reprogramar Sesión"]
-    Mentor -> UI: enter (newStartDateTime, newEndDateTime)
-    UI -> UI: validateAdvanceNotice(newStartDateTime)
-    
-    alt [E001] Fecha de reprogramación con menos de 24 horas de antelación
-        UI -> UI: displayRescheduleDateError()
-        Mentor -> UI: enter (validStartDateTime > 24h)
-        UI -> UI: enableRescheduleConfirmButton()
-    end
-else Decisión == 'CANCEL' con motivo de cancelación
-    Mentor -> UI: selectOption ["Cancelar Sesión"]
-    
-    alt [E002] Justificación de cancelación definitiva vacía
-        UI -> UI: displayEmptyReasonError()
-        Mentor -> UI: enter (validCancellationReason)
-        UI -> UI: enableCancelConfirmButton()
-    end
-else Decisión == 'PROCEED' (Dictar de todas formas)
-    Mentor -> UI: selectOption ["Dictar de Todas Formas"]
-end
-
-Mentor -> UI: click ["Confirmar Decisión Resolutiva"]
-UI -> Client: submitQuorumDecision(offerId, decision, payload)
-activate Client
-Client -> API: POST /api/v1/offers/{offer_id}/quorum-decision {"decision": d, ...} [Bearer JWT]
-activate API
-API -> Service: process_quorum_decision(mentor_id, offer_id, decision, payload)
-activate Service
-
-== Fase 3: Persistencia de la resolución y notificación a los estudiantes ==
-Service -> DB: BEGIN TRANSACTION
-activate DB
-
-alt Decisión == 'PROCEED' (Confirmar dictado a pesar del quórum bajo)
-    Service -> DB: UPDATE sesiones_mentoria SET estado = 'CONFIRMADA' WHERE id = :oid
-    Service -> DB: COMMIT
-    Service -> SMTP: notify_students_session_confirmed(enrolled_emails)
-    activate SMTP
-    SMTP --> Students: Notificación: Tu sesión de mentoría se dictará según lo programado
-    deactivate SMTP
-else Decisión == 'RESCHEDULE' (Reprogramar sesión)
-    Service -> DB: UPDATE sesiones_mentoria SET estado = 'PUBLICADA', fecha_inicio = :new_start, fecha_fin = :new_end WHERE id = :oid
-    Service -> DB: UPDATE reservas_cupo SET estado = 'PENDIENTE_CONFIRMACION' WHERE id_sesion = :oid
-    Service -> DB: COMMIT
-    Service -> SMTP: notify_students_session_rescheduled(enrolled_emails, new_start)
-    activate SMTP
-    SMTP --> Students: Notificación: La sesión ha sido reprogramada
-    deactivate SMTP
-else Decisión == 'CANCEL' (Cancelar definitivamente)
-    Service -> DB: UPDATE sesiones_mentoria SET estado = 'CANCELADA_QUORUM', motivo_cancelacion = :reason WHERE id = :oid
-    Service -> DB: UPDATE reservas_cupo SET estado = 'CANCELADA_SISTEMA' WHERE id_sesion = :oid
-    Service -> DB: COMMIT
-    Service -> SMTP: notify_students_session_cancelled(enrolled_emails, reason)
-    activate SMTP
-    SMTP --> Students: Notificación: Sesión cancelada por no alcanzar quórum reglamentario
-    deactivate SMTP
-end
-deactivate DB
-
-Service --> API: QuorumResolutionResponseDTO {"success": true, "new_state": estado}
-deactivate Service
-API --> Client: HTTP 200 OK QuorumResolutionResponseDTO
-deactivate API
-Client -> UI: displayQuorumResolutionSuccess(new_state)
-deactivate Client
-
-UI -> UI: closeQuorumDecisionModal()
-UI -> UI: updateSessionCardState(new_state)
-UI --> Mentor: displayQuorumDecisionConfirmation
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.13: Diagrama de Secuencia - CUS-007: Decisión del mentor ante quórum insuficiente](diagramas/srs/img/diag_079_sec633_seq_cus007.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-007.
 
@@ -8255,109 +3897,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-012` especifica la captura y validación en tiempo real de la asistencia efectiva mediante códigos QR dinámicos basados en TOTP de 30 segundos siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Desglosa los participantes: Estudiante Mentor, Estudiante Mentoreado, `SessionAttendanceView.tsx`, `attendanceService.ts`, `attendance.py`, `attendance_service.py`, WebSockets y PostgreSQL. Modela la rotación criptográfica del token, la verificación de reservas ratificadas y ventana de tolerancia horaria (`-15m` a `+30m`), y los flujos de excepción por caducidad de token (`E001`), ausencia de reserva (`E002`) y fuera de ventana (`E003`).
 
-```plantuml
-@startuml
-title Diagrama 6.15.14: Diagrama de Secuencia - CUS-012: Registrar asistencia interactiva mediante código QR dinámico\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as Mentoreado
-participant "Vista React (Mentor / Alumno)\n(SessionAttendanceView.tsx)" as UI
-participant "Adaptador Cliente\n(attendanceService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/attendance.py)" as API
-participant "Servicio Backend\n(attendance_service.py)" as Service
-participant "Servicio WebSocket\n(FastAPI WS Manager)" as WS
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Apertura de sesión y generación de token dinámico de asistencia ==
-Mentor -> UI: click ["Iniciar Pase de Asistencia Digital"]
-activate UI
-UI -> Client: getAttendanceToken(sessionId)
-activate Client
-Client -> API: GET /api/v1/sessions/{session_id}/attendance/token [Bearer JWT]
-activate API
-API -> Service: generate_totp_token(session_id)
-activate Service
-Service -> Service: Genera token TOTP con ciclo de rotación de 30 segundos
-Service --> API: AttendanceTokenDTO {"totp_token": token, "expires_in": 30}
-deactivate Service
-API --> Client: HTTP 200 OK AttendanceTokenDTO
-deactivate API
-Client -> UI: displayQrCodeAndRoster(totp_token, expires_in=30)
-deactivate Client
-deactivate UI
-
-== Fase 2: Escaneo de código QR y validación de reserva y ventana horaria ==
-Mentoreado -> UI: scanQrCode (qrToken: "TOTP-928192")
-activate UI
-Mentoreado -> UI: click ["Registrar Mi Asistencia"]
-UI -> Client: registerCheckIn(sessionId, qrToken)
-activate Client
-Client -> API: POST /api/v1/sessions/{session_id}/attendance/check-in {"qr_token": token} [Bearer JWT]
-activate API
-API -> Service: record_checkin(session_id, mentoreado_id, qr_token)
-activate Service
-
-alt [E001] Código QR o token TOTP expirado (> 30 segundos)
-    Service --> API: Lanza HTTPException(400, "QR_TOKEN_EXPIRED")
-    API --> Client: HTTP 400 Bad Request {"detail": "QR_TOKEN_EXPIRED: Escanee el código QR actualizado."}
-    Client -> UI: displayQrExpiredWarning(400)
-    Mentoreado -> UI: click ["Escanear Nuevo Código"]
-    UI -> UI: captureNewToken()
-else Token TOTP vigente
-    Service -> DB: SELECT id FROM reservas_cupo WHERE id_sesion = :sid AND id_estudiante = :uid AND estado = 'CONFIRMADA'
-    activate DB
-    DB --> Service: Reserva confirmada o nulo
-    deactivate DB
-    
-    alt [E002] Estudiante sin reserva previa confirmada en la sesión
-        Service --> API: Lanza HTTPException(403, "NO_CONFIRMED_BOOKING")
-        API --> Client: HTTP 403 Forbidden {"detail": "NO_CONFIRMED_BOOKING: No registra reserva confirmada."}
-        Client -> UI: displayNoConfirmedBookingAlert(403)
-        Mentoreado -> UI: click ["Entendido"]
-        UI -> UI: closeScanner()
-    else Reserva ratificada verificada
-        alt [E003] Check-in fuera del intervalo temporal reglamentario (fuera de [inicio-15m, fin+30m])
-            Service --> API: Lanza HTTPException(400, "CHECKIN_WINDOW_CLOSED")
-            API --> Client: HTTP 400 Bad Request {"detail": "CHECKIN_WINDOW_CLOSED: Fuera de ventana reglamentaria."}
-            Client -> UI: displayCheckinWindowClosed(400)
-            Mentoreado -> UI: click ["Aceptar"]
-            UI -> UI: redirectToHome()
-        else Dentro del intervalo horario de la sesión
-            == Fase 3: Persistencia de asistencia y actualización reactiva en tiempo real ==
-            Service -> DB: BEGIN TRANSACTION
-            activate DB
-            Service -> DB: INSERT INTO asistencias_sesion (sesion_id, estudiante_id, fecha_checkin, asistio, ip_origen)\nVALUES (:sid, :uid, NOW(), true, :ip)\nON CONFLICT (sesion_id, estudiante_id) DO UPDATE SET asistio = true, fecha_checkin = NOW()
-            Service -> DB: COMMIT
-            DB --> Service: Asistencia persistida
-            deactivate DB
-            
-            Service -> WS: broadcast_attendance_event(session_id, {"student_id": uid, "status": "PRESENTE"})
-            activate WS
-            WS --> UI: pushWsAttendanceUpdate(student_id, "PRESENTE")
-            deactivate WS
-            UI -> UI: updateAttendanceRoster(student_id, "PRESENTE")
-            
-            Service --> API: AttendanceResponseDTO {"success": true, "asistio": true}
-            API --> Client: HTTP 200 OK AttendanceResponseDTO
-            Client -> UI: displayCheckinSuccessNotification()
-            UI --> Mentoreado: displayCheckinConfirmation
-        end
-    end
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.14: Diagrama de Secuencia - CUS-012: Registrar asistencia a sesión de mentoría](diagramas/srs/img/diag_080_sec633_seq_cus012.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-012.
 
@@ -8367,98 +3907,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-013` modela el registro del reporte formativo post-sesión por parte del estudiante mentor siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el Mentor, `BitacoraFormView.tsx`, `bitacoraService.ts`, `bitacora.py`, `bitacora_service.py` y PostgreSQL. Especifica la validación del plazo reglamentario de 48 horas (`RN-12`, `E001`), la exigencia de al menos 50 caracteres pedagógicos (`E002`), el cómputo de la firma digital criptográfica SHA-256 sobre el contenido pedagógico y la promoción de la sesión a estado `BITACORA_REGISTRADA`.
 
-```plantuml
-@startuml
-title Diagrama 6.15.15: Diagrama de Secuencia - CUS-013: Registrar bitácora pedagógica y reporte formativo\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-participant "Vista React\n(BitacoraFormView.tsx)" as UI
-participant "Adaptador Cliente\n(bitacoraService.ts / ApiBitacoraAdapter)" as Client
-participant "Controlador FastAPI\n(endpoints/bitacora.py)" as API
-participant "Servicio Backend\n(bitacora_service.py / BitacoraService)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Apertura de bitácora y verificación de plazo límite a 48h ==
-Mentor -> UI: click ["Completar Bitácora Pedagógica"]
-activate UI
-UI -> Client: verifySessionDeadline(sessionId)
-activate Client
-Client -> API: GET /api/v1/sessions/{session_id}/bitacora-eligibility [Bearer JWT]
-activate API
-API -> Service: check_bitacora_eligibility(session_id)
-activate Service
-Service -> DB: SELECT fecha_fin, estado FROM sesiones_mentoria WHERE id = :sid
-activate DB
-DB --> Service: Datos de finalización de sesión
-deactivate DB
-
-alt [E001] Plazo límite de 48 horas post-sesión vencido (now_utc > fecha_fin + 48h, RN-12)
-    Service --> API: Lanza HTTPException(400, "DEADLINE_EXCEEDED")
-    API --> Client: HTTP 400 Bad Request {"detail": "DEADLINE_EXCEEDED: Plazo reglamentario de 48h vencido."}
-    Client -> UI: displayDeadlineExceededError(400)
-    Mentor -> UI: click ["Solicitar Desbloqueo a Coordinación"]
-    UI -> UI: openExtensionForm()
-else Dentro del plazo reglamentario de 48 horas
-    Service --> API: BitacoraEligibilityDTO {"eligible": true}
-    API --> Client: HTTP 200 OK {"eligible": true}
-    Client -> UI: displayBitacoraForm(eligible=true)
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-
-== Fase 2: Ingreso de evidencias pedagógicas y validación de contenido ==
-Mentor -> UI: selectTopicsCheckboxes (coveredTopics)
-activate UI
-Mentor -> UI: selectDifficulty (difficultyLevel="Medio")
-Mentor -> UI: enter (observacionesPedagogicas)
-Mentor -> UI: click ["Guardar y Firmar Bitácora"]
-UI -> UI: validatePedagogicalObservations(observacionesPedagogicas)
-
-alt [E002] Descripción pedagógica insuficiente (< 50 caracteres)
-    UI -> UI: displayLengthError(required=50)
-    Mentor -> UI: enter (expandedObservations >= 50 chars)
-    Mentor -> UI: click ["Guardar y Firmar Bitácora"]
-else Contenido sustantivo válido
-    UI -> Client: submitBitacora(sessionId, payload)
-    activate Client
-    Client -> API: POST /api/v1/sessions/{session_id}/bitacora BitacoraCreateRequest [Bearer JWT]
-    activate API
-    API -> Service: create_bitacora(mentor_id, session_id, payload)
-    activate Service
-    
-    == Fase 3: Persistencia transaccional y certificación de horas ==
-    Service -> Service: Calcula hash SHA-256(temas + observaciones + mentor_id + timestamp)
-    Service -> DB: BEGIN TRANSACTION
-    activate DB
-    Service -> DB: INSERT INTO bitacoras_pedagogicas (sesion_id, mentor_id, temas_cubiertos, observaciones, nivel_dificultad, hash_firma, fecha_registro)\nVALUES (:sid, :mid, :temas, :obs, :dif, :hash, NOW()) RETURNING id
-    Service -> DB: UPDATE sesiones_mentoria SET estado = 'BITACORA_REGISTRADA' WHERE id = :sid
-    Service -> DB: COMMIT
-    DB --> Service: Transacción confirmada
-    deactivate DB
-    
-    Service --> API: BitacoraResponseDTO {"id": id_bitacora, "hash_firma": hash, "estado": "BITACORA_REGISTRADA"}
-    deactivate Service
-    API --> Client: HTTP 201 Created BitacoraResponseDTO
-    deactivate API
-    Client -> UI: displayBitacoraSuccess(id_bitacora, hash)
-    deactivate Client
-    
-    UI -> UI: redirectToSessionHistory()
-    UI --> Mentor: displayBitacoraCreatedConfirmation
-end
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.15: Diagrama de Secuencia - CUS-013: Registrar bitácora pedagógica de sesión](diagramas/srs/img/diag_081_sec633_seq_cus013.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-013.
 
@@ -8468,85 +3917,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-014` formaliza la consulta histórica unificada del itinerario de mentorías para estudiantes y mentores siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el usuario universitario, `HistorySessionsView.tsx`, `historyService.ts`, `history.py`, `history_service.py` y las tablas de sesiones, bitácoras y asistencias en PostgreSQL. Detalla la renderización de la línea de tiempo interactiva, el filtrado cronológico por ciclo y materia, el tratamiento de usuarios nuevos con historial vacío (`A001`), y la inspección modal de bitácoras pedagógicas con comprobación de firmas criptográficas.
 
-```plantuml
-@startuml
-title Diagrama 6.15.16: Diagrama de Secuencia - CUS-014: Visualizar historial académico integral y bitácoras pedagógicas\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado / Mentor" as User
-participant "Vista React\n(HistorySessionsView.tsx)" as UI
-participant "Adaptador Cliente\n(historyService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/history.py)" as API
-participant "Servicio Backend\n(history_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Consulta del historial y aplicación de filtros cronológicos ==
-User -> UI: click ["Mi Historial"]
-activate UI
-UI -> Client: getUserHistory() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/history/sessions
-activate API
-API -> Service: get_user_history(user_id)
-activate Service
-Service -> DB: SELECT s.*, b.hash_firma, a.asistio FROM sesiones_mentoria s\nLEFT JOIN bitacoras_pedagogicas b ON s.id = b.sesion_id\nLEFT JOIN asistencias_sesion a ON s.id = a.sesion_id\nWHERE s.id_mentor = :uid OR a.estudiante_id = :uid ORDER BY s.fecha_inicio DESC
-activate DB
-DB --> Service: Historial de sesiones y asistencias
-deactivate DB
-
-alt [A001] Historial académico vacío para usuario nuevo (cero registros)
-    Service --> API: EmptyHistoryDTO []
-    API --> Client: HTTP 200 OK []
-    Client -> UI: displayEmptyHistoryAlert()
-    User -> UI: click ["Explorar Cartelera"]
-    UI -> UI: redirectToRecommendations()
-else Historial con registros consolidados
-    Service --> API: UserHistoryResponseDTO
-    API --> Client: HTTP 200 OK UserHistoryResponseDTO
-    Client -> UI: displayHistoryTimeline(history)
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-
-== Fase 2: Búsqueda y filtrado por materia o período académico ==
-User -> UI: enter (searchQuery: "Algoritmos", semester="2026-I")
-activate UI
-UI -> UI: filterHistoryInState(searchQuery, semester)
-deactivate UI
-
-== Fase 3: Visualización de bitácora pedagógica y comprobante de asistencia ==
-User -> UI: clickCardButton ["Ver Bitácora Pedagógica"]
-activate UI
-UI -> Client: getSessionBitacora(sessionId)
-activate Client
-Client -> API: GET /api/v1/history/bitacora/{session_id} [Bearer JWT]
-activate API
-API -> Service: get_bitacora_detail(session_id)
-activate Service
-Service -> DB: SELECT b.*, u.nombres as mentor_nombre FROM bitacoras_pedagogicas b\nJOIN usuarios u ON b.mentor_id = u.id WHERE b.sesion_id = :sid
-activate DB
-DB --> Service: Detalle pedagógico y firma digital SHA-256
-deactivate DB
-Service --> API: BitacoraDetailDTO
-deactivate Service
-API --> Client: HTTP 200 OK BitacoraDetailDTO
-deactivate API
-Client -> UI: displayBitacoraDetailModal(bitacoraDetail)
-deactivate Client
-
-UI --> User: displayBitacoraDetailModal
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.16: Diagrama de Secuencia - CUS-014: Visualizar historial y bitácoras académicas](diagramas/srs/img/diag_082_sec633_seq_cus014.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-014.
 
@@ -8559,112 +3930,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-018` especifica la emisión institucional y descarga de la constancia de horas de mentoría con validación del umbral reglamentario de 20 horas (`RN-14`) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las llamadas entre el Estudiante Mentor, `CertificateView.tsx`, `certificateService.ts`, `certificates.py`, `certificate_service.py`, el compilador PDF/QR y PostgreSQL. Incorpora el control de umbral con manejo de horas insuficientes (`E001`), la previsualización modal, la generación del documento oficial foliado con sello SHA-256 y código QR institucional, y la descarga binaria segura en formato PDF.
 
-```plantuml
-@startuml
-title Diagrama 6.15.17: Diagrama de Secuencia - CUS-018: Emitir constancia oficial de horas de mentoría\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-participant "Vista React\n(CertificateView.tsx)" as UI
-participant "Adaptador Cliente\n(certificateService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/certificates.py)" as API
-participant "Servicio Backend\n(certificate_service.py)" as Service
-participant "Compilador PDF / QR\n(ReportLab / QREngine)" as PDF
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Consulta de acumulado de horas y verificación de umbral ==
-Mentor -> UI: click ["Mis Certificados"]
-activate UI
-UI -> Client: getHoursSummary() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/certificates/summary
-activate API
-API -> Service: calculate_accredited_hours(mentor_id)
-activate Service
-Service -> DB: SELECT sum(s.duracion_minutos)/60.0 as horas_totales FROM sesiones_mentoria s\nJOIN bitacoras_pedagogicas b ON s.id = b.sesion_id\nWHERE s.id_mentor = :mid AND s.estado = 'BITACORA_REGISTRADA'
-activate DB
-DB --> Service: Total de horas pedagógicas acumuladas
-deactivate DB
-
-alt [E001] Horas acreditadas insuficientes para el umbral institucional (horas_totales < 20.0, RN-14)
-    Service --> API: Lanza HTTPException(400, "INSUFFICIENT_HOURS")
-    API --> Client: HTTP 400 Bad Request {"detail": "INSUFFICIENT_HOURS: Requiere al menos 20 horas (Actual: Xh)."}
-    Client -> UI: displayInsufficientHoursWarning(400)
-    Mentor -> UI: click ["Ver Sesiones Pendientes"]
-    UI -> UI: redirectToPendingSessions()
-else Umbral alcanzado (horas_totales >= 20.0)
-    Service --> API: HoursSummaryDTO {"horas_totales": horas, "eligible": true}
-    API --> Client: HTTP 200 OK HoursSummaryDTO
-    Client -> UI: displayHoursEligible(horas_totales, eligible=true)
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-
-== Fase 2: Solicitud de emisión y previsualización de datos ==
-Mentor -> UI: click ["Emitir Constancia Oficial"]
-activate UI
-UI -> UI: openCertificatePreviewModal()
-Mentor -> UI: click ["Confirmar y Generar PDF Cifrado"]
-
-== Fase 3: Generación criptográfica, persistencia y descarga del PDF ==
-UI -> Client: generateCertificate(semester="2026-I")
-activate Client
-Client -> API: POST /api/v1/certificates/generate {"semester": "2026-I"} [Bearer JWT]
-activate API
-API -> Service: generate_certificate(mentor_id, semester)
-activate Service
-
-Service -> Service: Genera serie alfanumérica única (UPT-EPIS-2026-I-0042)
-Service -> Service: Calcula hash SHA-256 de los datos curriculares
-Service -> PDF: render_certificate_pdf(datos, firma_director, codigo_qr)
-activate PDF
-PDF --> Service: Documento PDF binario oficial compilado
-deactivate PDF
-
-Service -> DB: BEGIN TRANSACTION
-activate DB
-Service -> DB: INSERT INTO certificados_horas (mentor_id, semestre, total_horas, codigo_serie, hash_integridad, url_archivo, fecha_emision)\nVALUES (:mid, :sem, :horas, :serie, :hash, :url, NOW()) RETURNING id
-Service -> DB: COMMIT
-DB --> Service: Certificado persistido
-deactivate DB
-
-Service --> API: CertificateResponseDTO {"id": id_cert, "codigo_serie": serie, "url_descarga": url}
-deactivate Service
-API --> Client: HTTP 201 Created CertificateResponseDTO
-deactivate API
-Client -> UI: displayGeneratedCertificatePreview(id_cert, serie, url)
-deactivate Client
-
-Mentor -> UI: click ["Descargar Constancia en PDF"]
-UI -> Client: downloadCertificate(id_cert)
-activate Client
-Client -> API: GET /api/v1/certificates/{id}/download [Bearer JWT]
-activate API
-API -> Service: get_certificate_download(id_cert)
-activate Service
-Service -> DB: SELECT url_archivo FROM certificados_horas WHERE id = :id_cert
-activate DB
-DB --> Service: Metadata del archivo persistido
-deactivate DB
-Service --> API: Archivo binario (application/pdf)
-deactivate Service
-API --> Client: HTTP 200 OK (Stream PDF)
-deactivate API
-Client -> UI: triggerBrowserDownload(stream)
-deactivate Client
-UI --> Mentor: displayDownloadPdfCompleted
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.17: Diagrama de Secuencia - CUS-018: Emitir constancia institucional de horas de mentoría](diagramas/srs/img/diag_083_sec633_seq_cus018.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-018.
 
@@ -8674,84 +3940,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-019` describe el cálculo de la reputación institucional gamificada y la consulta interactiva de insignias de honor alcanzadas por los mentores siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el Estudiante Mentor, el Estudiante Mentoreado, `GamificationView.tsx`, `gamificationService.ts`, `gamification.py`, `reputation_service.py` y PostgreSQL. Abarca la consulta de la vitrina virtual de insignias (conquistadas y bloqueadas), la inspección lateral de requisitos de logro y el despliegue del Cuadro de Honor (Leaderboard) con soporte de visualización anónima para privacidad (`A001`).
 
-```plantuml
-@startuml
-title Diagrama 6.15.18: Diagrama de Secuencia - CUS-019: Gestionar insignias y reputación gamificada\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor / Alumno" as User
-participant "Vista React\n(GamificationView.tsx)" as UI
-participant "Adaptador Cliente\n(gamificationService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/gamification.py)" as API
-participant "Servicio Backend\n(reputation_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Consulta de insignias personales y progreso de nivel ==
-User -> UI: click ["Insignias y Reputación"]
-activate UI
-UI -> Client: getUserBadges() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/gamification/badges
-activate API
-API -> Service: get_user_badges(user_id)
-activate Service
-Service -> DB: SELECT b.*, ub.fecha_obtencion, ub.progreso FROM insignias b\nLEFT JOIN insignias_usuarios ub ON b.id = ub.insignia_id AND ub.usuario_id = :uid
-activate DB
-DB --> Service: Catálogo de insignias y estado de avance
-deactivate DB
-Service --> API: BadgeListResponseDTO
-deactivate Service
-API --> Client: HTTP 200 OK BadgeListResponseDTO
-deactivate API
-Client -> UI: displayBadgesShowcase(badges)
-deactivate Client
-deactivate UI
-
-== Fase 2: Exploración de criterios de logro y detalle de insignia ==
-User -> UI: selectBadgeCard (badgeId="mentor-destacado")
-activate UI
-UI -> UI: displayBadgeDetailsSidebar(badgeInfo)
-deactivate UI
-
-== Fase 3: Visualización del cuadro de honor institucional (Leaderboard) ==
-User -> UI: click ["Cuadro de Honor de la Escuela"]
-activate UI
-UI -> Client: getLeaderboard() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/gamification/leaderboard
-activate API
-API -> Service: calculate_rank()
-activate Service
-Service -> DB: SELECT u.id, u.nombres, u.apellidos, u.codigo_estudiante, r.score_global, r.modo_anonimo\nFROM reputacion_usuarios r JOIN usuarios u ON r.usuario_id = u.id ORDER BY r.score_global DESC LIMIT 10
-activate DB
-DB --> Service: Top-10 mentores ordenados por reputación RN-13
-deactivate DB
-
-alt [A001] Visualización en el cuadro de honor con alias anónimo (modo_anonimo = true)
-    Service -> Service: Anonimiza nombres oficiales reemplazándolos por seudónimo (ej. "Mentor EPIS-742")
-    Service --> API: LeaderboardResponseDTO (con registros anonimizados)
-    API --> Client: HTTP 200 OK
-    Client -> UI: displayLeaderboardAnonymous(ranking)
-else Perfil público estándar
-    Service --> API: LeaderboardResponseDTO (nombres públicos)
-    API --> Client: HTTP 200 OK LeaderboardResponseDTO
-    Client -> UI: displayLeaderboardTable(ranking)
-end
-deactivate Service
-deactivate API
-deactivate Client
-
-UI --> User: displayLeaderboardView
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.18: Diagrama de Secuencia - CUS-019: Gestionar insignias y reputación gamificada](diagramas/srs/img/diag_084_sec633_seq_cus019.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-019.
 
@@ -8764,97 +3953,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-009` formaliza el despacho multicanal de notificaciones reactivas (Server-Sent Events y correo electrónico SMTP) ante eventos críticos del ciclo de vida de las mentorías siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el Planificador desatendido (`SchedulerWorker`), los usuarios institucionales, el componente `NotificationBell.tsx`, `notificationService.ts`, `notifications.py`, `notification_service.py`, `EmailService` y PostgreSQL. Modela la inicialización del flujo SSE, la persistencia de alertas, la degradación controlada ante fallos del servidor SMTP (`E001`) y la lectura interactiva de notificaciones.
 
-```plantuml
-@startuml
-title Diagrama 6.15.19: Diagrama de Secuencia - CUS-009: Notificar eventos críticos y alertas de confirmación a T-24h\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-participant "Planificador\n(SchedulerWorker / Celery)" as Cron
-actor "Usuario Institucional\n(Mentor / Alumno)" as User
-participant "Vista React\n(NotificationBell.tsx)" as UI
-participant "Adaptador Cliente\n(notificationService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/notifications.py)" as API
-participant "Servicio Backend\n(notification_service.py)" as Service
-participant "Servicio SMTP UPT\n(EmailService)" as SMTP
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Conexión al canal de notificaciones e inicialización de alertas ==
-User -> UI: click ["Campana de Notificaciones"]
-activate UI
-UI -> Client: subscribeNotifications() & getUnread() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/notifications/stream (SSE)
-activate API
-Client -> API: GET /api/v1/notifications/unread
-API -> Service: get_unread(user_id)
-activate Service
-Service -> DB: SELECT * FROM notificaciones_eventos WHERE usuario_id = :uid AND leida = false ORDER BY fecha_creacion DESC
-activate DB
-DB --> Service: Nómina de alertas no leídas
-deactivate DB
-Service --> API: UnreadNotificationsDTO
-deactivate Service
-API --> Client: HTTP 200 OK UnreadNotificationsDTO
-Client -> UI: displayUnreadBadge(unreadCount)
-
-== Fase 2: Generación asíncrona de evento crítico y despacho multicanal ==
-Cron -> Service: dispatch_critical_event(user_id, event_type, message, reference_id)
-activate Service
-Service -> DB: INSERT INTO notificaciones_eventos (usuario_id, tipo_evento, mensaje, referencia_id, leida=false, fecha_creacion=NOW())\nVALUES (...) RETURNING id
-activate DB
-DB --> Service: Alerta persistida
-deactivate DB
-
-Service -> API: push_sse_event(user_id, notification_data)
-API --> Client: SSE Stream Event: "critical_alert" {mensaje, id}
-Client -> UI: updateNotificationBadge(unreadCount + 1)
-
-alt [E001] Falla de despacho en servicio SMTP institucional de respaldo
-    Service -> SMTP: send_alert_email(email, subject, message)
-    activate SMTP
-    SMTP --> Service: SMTPException / Conexión rechazada
-    deactivate SMTP
-    Service -> Service: logger.warning("SMTP dispatch failed, falling back to SSE only")
-    Service --> API: Evento despachado (degradación controlada, entrega vía web preservada)
-else Despacho SMTP exitoso
-    Service -> SMTP: send_alert_email(email, subject, message)
-    activate SMTP
-    SMTP --> User: Aviso institucional en buzón universitario @upt.pe
-    deactivate SMTP
-    Service --> API: Multichannel Dispatch OK
-end
-deactivate Service
-
-== Fase 3: Recepción reactiva en cliente y lectura de notificación ==
-User -> UI: clickIcon ["Campana"]
-UI -> UI: openNotificationPanel()
-User -> UI: selectNotificationItem(notificationId)
-UI -> Client: markAsRead(notificationId)
-Client -> API: POST /api/v1/notifications/{id}/mark-read [Bearer JWT]
-API -> Service: mark_notification_as_read(notificationId, user_id)
-activate Service
-Service -> DB: UPDATE notificaciones_eventos SET leida = true WHERE id = :id
-activate DB
-DB --> Service: Confirmación de actualización
-deactivate DB
-Service --> API: NotificationMarkReadResponseDTO {"success": true}
-deactivate Service
-API --> Client: HTTP 200 OK
-Client -> UI: decreaseUnreadCounter()
-UI -> UI: decrementNotificationCounter()
-UI --> User: displayReferencedSessionView
-deactivate Client
-deactivate API
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.19: Diagrama de Secuencia - CUS-009: Notificar eventos críticos y alertas temporales](diagramas/srs/img/diag_085_sec633_seq_cus009.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-009.
 
@@ -8864,88 +3963,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-011` especifica la agregación analítica de indicadores de mentoría y la exportación de dossiers ejecutivos para la Dirección de Escuela y comités de calidad ICACIT siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el Administrador, `AnalyticsDashboardView.tsx`, `analyticsService.ts`, `analytics.py`, `analytics_service.py`, el compilador de hojas de cálculo y PostgreSQL. Describe la consulta de métricas generales, la validación de intervalos temporales con rechazo de fechas inconsistentes (`E001`), y la serialización y descarga del informe binario consolidado (`.xlsx` o `.csv`).
 
-```plantuml
-@startuml
-title Diagrama 6.15.20: Diagrama de Secuencia - CUS-011: Generar reportes consolidados e indicadores analíticos de gestión\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Administrador / Calidad ICACIT" as Admin
-participant "Vista React\n(AnalyticsDashboardView.tsx)" as UI
-participant "Adaptador Cliente\n(analyticsService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/analytics.py)" as API
-participant "Servicio Backend\n(analytics_service.py)" as Service
-participant "Generador de Hojas de Cálculo\n(Excel / OpenPyXL Engine)" as Excel
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Acceso al panel analítico y configuración de parámetros ==
-Admin -> UI: click ["Reportes y Analítica"]
-activate UI
-UI -> Client: getKpiSummary(semester="2026-I") [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/analytics/reports/kpis?semester=2026-I
-activate API
-API -> Service: calculate_kpis(semester="2026-I")
-activate Service
-Service -> DB: SELECT count(s.id) as total_sesiones, sum(s.duracion_minutos)/60.0 as total_horas,\n       avg(CASE WHEN s.estado = 'CONFIRMADA' THEN 1 ELSE 0 END)*100 as tasa_quorum,\n       avg(CASE WHEN a.asistio = true THEN 1 ELSE 0 END)*100 as tasa_asistencia\nFROM sesiones_mentoria s LEFT JOIN asistencias_sesion a ON s.id = a.sesion_id WHERE s.semestre = '2026-I'
-activate DB
-DB --> Service: Métricas agregadas
-deactivate DB
-Service --> API: KpiSummaryDTO
-deactivate Service
-API --> Client: HTTP 200 OK KpiSummaryDTO
-deactivate API
-Client -> UI: displayKpiCardsAndCharts(kpis)
-deactivate Client
-
-== Fase 2: Ajuste de filtros temporales y selección de formato de exportación ==
-Admin -> UI: enter (startDate, endDate, courseId, format="xlsx")
-UI -> UI: validateDateConsistency(startDate, endDate)
-
-alt [E001] Rango de fechas inconsistente o fechas futuras
-    UI -> UI: displayDateRangeError()
-    Admin -> UI: enter (validStartDate, validEndDate)
-    UI -> UI: updateDateSelector()
-else Rango temporal válido
-    Admin -> UI: click ["Exportar Informe Consolidado"]
-    UI -> Client: exportReport(format="xlsx", startDate, endDate, courseId)
-    activate Client
-    Client -> API: GET /api/v1/analytics/export?format=xlsx&start_date={start_date}&end_date={end_date}&course_id={course_id} [Bearer JWT]
-    activate API
-    API -> Service: export_report(format, start_date, end_date, course_id)
-    activate Service
-    
-    == Fase 3: Generación del documento analítico y descarga segura ==
-    Service -> DB: SELECT * FROM sesiones_mentoria s JOIN bitacoras_pedagogicas b ON s.id = b.sesion_id...
-    activate DB
-    DB --> Service: Registros consolidados
-    deactivate DB
-    
-    Service -> Excel: compile_workbook(resumen_kpi, sesiones, asistencias, materias_criticas)
-    activate Excel
-    Excel --> Service: StreamBinarioXLSX (Libro con 4 pestañas estructuradas)
-    deactivate Excel
-    
-    Service -> DB: INSERT INTO auditoria_admin (admin_id, accion='EXPORT_REPORT', entidad='analytics', fecha=NOW())
-    
-    Service --> API: StreamingResponse(content=stream, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    deactivate Service
-    API --> Client: HTTP 200 OK (Stream Binario XLSX)
-    deactivate API
-    Client -> UI: triggerExcelDownload()
-    deactivate Client
-    
-    UI --> Admin: displayExcelDownloadedConfirmation
-end
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.20: Diagrama de Secuencia - CUS-011: Generar reportes e indicadores analíticos](diagramas/srs/img/diag_086_sec633_seq_cus011.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-011.
 
@@ -8955,97 +3973,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-015` formaliza la inferencia estadística del impacto del programa de mentorías en la retención estudiantil y disminución de reprobación en asignaturas filtro, respaldando los criterios de mejora continua de ICACIT siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las llamadas entre la Comisión de Calidad, `RetentionDashboardView.tsx`, `analyticsService.ts`, `analytics.py`, `analytics_service.py` y PostgreSQL. Modela la comparación entre grupos de control y participantes, la verificación de tamaño muestral mínimo (`A001`), y la generación y exportación del expediente probatorio en formato PDF oficial.
 
-```plantuml
-@startuml
-title Diagrama 6.15.21: Diagrama de Secuencia - CUS-015: Consultar métricas de correlación de retención estudiantil y desempeño\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Comisión de Calidad ICACIT / Admin" as Evaluador
-participant "Vista React\n(RetentionDashboardView.tsx)" as UI
-participant "Adaptador Cliente\n(analyticsService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/analytics.py)" as API
-participant "Servicio Backend\n(analytics_service.py)" as Service
-participant "Compilador PDF ICACIT\n(ReportEngine)" as PDF
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Acceso al módulo de impacto y selección de cohorte ==
-Evaluador -> UI: click ["Impacto y Retención Académica"]
-activate UI
-UI -> Client: getRetentionMetrics() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/analytics/retention/impact
-activate API
-API -> Service: analyze_retention_correlation()
-activate Service
-Service -> DB: SELECT count(DISTINCT estudiante_id) as total_alumnos,\n       avg(CASE WHEN asistencia_count >= 3 THEN tasa_aprobacion ELSE NULL END) as aprobacion_mentoreados,\n       avg(CASE WHEN asistencia_count = 0 THEN tasa_aprobacion ELSE NULL END) as aprobacion_control\nFROM cohortes_academicas
-activate DB
-DB --> Service: Comparativa estadística de cohortes
-deactivate DB
-Service --> API: RetentionImpactDTO
-deactivate Service
-API --> Client: HTTP 200 OK RetentionImpactDTO
-deactivate API
-Client -> UI: displayRetentionChart(metrics)
-deactivate Client
-
-== Fase 2: Segmentación por asignatura filtro y período lectivo ==
-Evaluador -> UI: selectCourseFilter (courseId="algoritmos-epis")
-Evaluador -> UI: click ["Calcular Índice de Impacto"]
-UI -> Client: getCourseRetentionImpact(courseId)
-activate Client
-Client -> API: GET /api/v1/analytics/retention/cohorts?course_id={course_id}
-activate API
-API -> Service: get_course_cohort_stats(course_id)
-activate Service
-Service -> DB: SELECT count(*) as n_muestra, corr(asistencias, nota_final) as r_pearson\nFROM actas_semestrales a JOIN asistencias_sesion s ON a.estudiante_id = s.estudiante_id\nWHERE a.curso_id = :cid
-activate DB
-DB --> Service: Muestra y correlación calculada
-deactivate DB
-
-alt [A001] Muestra insuficiente para inferencia estadística (< 10 registros)
-    Service --> API: RetentionCohortDTO {"n_muestra": n, "significancia": false, "solo_descriptivo": true}
-    API --> Client: HTTP 200 OK
-    Client -> UI: displayInsufficientSampleAlert()
-    Evaluador -> UI: click ["Ampliar Rango a Semestres Anteriores"]
-    UI -> UI: offerExpandedRange()
-else Tamaño muestral suficiente (>= 10 registros)
-    Service --> API: RetentionCohortDTO {"n_muestra": n, "significancia": true, "r_pearson": r}
-    API --> Client: HTTP 200 OK RetentionCohortDTO
-    Client -> UI: displayCorrelationResults(stats)
-end
-deactivate Service
-deactivate API
-deactivate Client
-
-== Fase 3: Visualización de indicadores ICACIT y exportación ==
-Evaluador -> UI: click ["Exportar Evidencia ICACIT"]
-UI -> Client: exportIcacitEvidence(courseId)
-activate Client
-Client -> API: POST /api/v1/analytics/retention/export-evidence {"course_id": cid} [Bearer JWT]
-activate API
-API -> Service: generate_icacit_report(course_id)
-activate Service
-Service -> PDF: compile_icacit_dossier(datos_retencion, tablas_frecuencia, firmas_integridad)
-activate PDF
-PDF --> Service: Documento PDF formal de acreditación
-deactivate PDF
-Service --> API: StreamingResponse(content=pdf_stream, media_type="application/pdf")
-deactivate Service
-API --> Client: HTTP 200 OK (Stream Binario PDF)
-deactivate API
-Client -> UI: triggerPdfDownload()
-deactivate Client
-UI --> Evaluador: displayIcacitDossierDownloadedConfirmation
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.21: Diagrama de Secuencia - CUS-015: Consultar métricas de retención y desempeño](diagramas/srs/img/diag_087_sec633_seq_cus015.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-015.
 
@@ -9055,109 +3983,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-016` modela la auditoría forense inmutable y la verificación de integridad de la cadena criptográfica de logs (Hash Chain) bajo los mandatos de la Ley Nº 29733 y el estándar ISO/IEC 27001 siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Desglosa los participantes: Oficial de Seguridad, `AuditLogView.tsx`, `auditService.ts`, `audit.py`, `audit_service.py` y PostgreSQL. Especifica la restricción RBAC (`E001`), la verificación de trazas de consentimiento, el cálculo iterativo recursivo `SHA256(prev_hash + data)` con detección de manipulaciones (`E002`), y la acreditación de integridad con 0 alteraciones.
 
-```plantuml
-@startuml
-title Diagrama 6.15.22: Diagrama de Secuencia - CUS-016: Auditar trazas inmutables de seguridad y consentimientos legales\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Oficial de Seguridad / Delegado DPO\n(UserRole.administrador)" as SecOfficer
-participant "Vista React\n(AuditLogView.tsx)" as UI
-participant "Adaptador Cliente\n(auditService.ts / ApiAuditAdapter)" as Client
-participant "Controlador FastAPI\n(endpoints/audit.py)" as API
-participant "Servicio Backend\n(audit_service.py / AuditService)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Consulta del registro forense de auditoría ==
-SecOfficer -> UI: click ["Auditoría de Seguridad y Ley 29733"]
-activate UI
-UI -> Client: getAuditLogs(limit=50) [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/audit/logs?limit=50
-activate API
-
-API -> API: require_security_officer_role(current_user)
-
-alt [E001] Permisos insuficientes para auditoría de seguridad
-    API --> Client: HTTP 403 Forbidden {"detail": "FORBIDDEN_AUDIT: Acceso reservado a Oficial de Seguridad."}
-    Client -> UI: displayAccessDeniedModal(403)
-    SecOfficer -> UI: click ["Aceptar"]
-    UI -> UI: redirectToAuthorizedDashboard()
-else Privilegios de seguridad verificados
-    API -> Service: get_logs(limit=50)
-    activate Service
-    Service -> DB: SELECT l.*, u.email FROM log_auditoria_seguridad l\nJOIN usuarios u ON l.usuario_id = u.id ORDER BY l.id DESC LIMIT 50
-    activate DB
-    DB --> Service: Trazas de auditoría forense
-    deactivate DB
-    Service --> API: AuditLogListResponseDTO
-    deactivate Service
-    API --> Client: HTTP 200 OK AuditLogListResponseDTO
-    Client -> UI: displayAuditLogTable(logs)
-end
-deactivate API
-deactivate Client
-
-== Fase 2: Filtrado por usuario y verificación de traza legal de consentimiento ==
-SecOfficer -> UI: enter (email: "usuario@upt.pe")
-SecOfficer -> UI: click ["Buscar Consentimiento"]
-UI -> Client: getConsentTraces(email)
-activate Client
-Client -> API: GET /api/v1/audit/consent-traces?email={email} [Bearer JWT]
-activate API
-API -> Service: get_consent_traces(email)
-activate Service
-Service -> DB: SELECT * FROM consentimientos_legales WHERE email = :email ORDER BY fecha_registro ASC
-activate DB
-DB --> Service: Trazas de formalización (UUID, versión, IP, User-Agent, UTC, revocado)
-deactivate DB
-Service --> API: ConsentTraceListDTO
-deactivate Service
-API --> Client: HTTP 200 OK ConsentTraceListDTO
-deactivate API
-Client -> UI: displayConsentTraceModal(traces)
-deactivate Client
-
-== Fase 3: Verificación criptográfica de la cadena de auditoría (Hash Chain) ==
-SecOfficer -> UI: click ["Verificar Integridad de Cadena de Logs"]
-UI -> Client: verifyLogChain()
-activate Client
-Client -> API: POST /api/v1/audit/verify-chain [Bearer JWT]
-activate API
-API -> Service: verify_chain_integrity()
-activate Service
-
-Service -> DB: SELECT id, hash_bloque, hash_anterior, datos_evento FROM log_auditoria_seguridad ORDER BY id ASC
-activate DB
-DB --> Service: Todos los registros de auditoría
-deactivate DB
-
-Service -> Service: Itera recursivamente recomputando SHA256(hash_anterior + datos_evento)
-
-alt [E002] Inconsistencia detectada en la cadena criptográfica de logs (discrepancia de hash)
-    Service --> API: Lanza HTTPException(409, "AUDIT_TAMPERING_DETECTED: Discrepancia en ID {broken_id}")
-    API --> Client: HTTP 409 Conflict {"detail": "AUDIT_TAMPERING_DETECTED"}
-    Client -> UI: displayTamperingAlert(409, broken_id)
-    SecOfficer -> UI: click ["Descargar Informe Forense"]
-    UI -> UI: exportForensicDump()
-else Cadena 100% íntegra (0 discrepancias)
-    Service --> API: VerifyChainResponseDTO {"status": "VALID", "records_verified": count, "tampering_detected": false}
-    API --> Client: HTTP 200 OK VerifyChainResponseDTO
-    Client -> UI: displayIntegrityVerifiedBadge()
-    UI --> SecOfficer: displayChainIntegrityConfirmation
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.22: Diagrama de Secuencia - CUS-016: Auditar trazas de seguridad y consentimiento](diagramas/srs/img/diag_088_sec633_seq_cus016.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-016.
 
@@ -9167,100 +3993,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-020` describe la calibración dinámica de reglas institucionales y umbrales operacionales sin modificación del código fuente siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las llamadas entre el Administrador Institucional, `SystemSettingsView.tsx`, `configService.ts`, `config.py`, `config_service.py` y PostgreSQL. Modela la consulta de parámetros vigentes, la validación de límites operacionales (`E001`), la exigencia de reautenticación para cambios críticos (`E002`), y la persistencia transaccional con purga inmediata de la memoria caché para aplicación en caliente.
 
-```plantuml
-@startuml
-title Diagrama 6.15.23: Diagrama de Secuencia - CUS-020: Configurar parámetros operativos institucionales y umbrales\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Administrador Institucional\n(UserRole.administrador)" as Admin
-participant "Vista React\n(SystemSettingsView.tsx)" as UI
-participant "Adaptador Cliente\n(configService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/config.py)" as API
-participant "Servicio Backend\n(config_service.py)" as Service
-participant "Caché de Aplicación\n(Redis / MemoryCache)" as Cache
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Consulta de parámetros vigentes y despliegue del panel ==
-Admin -> UI: click ["Configuración del Sistema"]
-activate UI
-UI -> Client: getParameters() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/config/parameters
-activate API
-API -> Service: get_parameters()
-activate Service
-Service -> DB: SELECT clave, valor, descripcion, valor_min, valor_max FROM parametros_institucionales WHERE activo = true
-activate DB
-DB --> Service: Catálogo de parámetros base
-deactivate DB
-Service --> API: ParameterListResponseDTO
-deactivate Service
-API --> Client: HTTP 200 OK ParameterListResponseDTO
-deactivate API
-Client -> UI: displayParametersForm(parameters)
-deactivate Client
-
-== Fase 2: Edición de umbrales y validación de rangos permitidos ==
-Admin -> UI: enter (quorumMinimo=4, aforoPresencial=10)
-Admin -> UI: click ["Guardar Parámetros Institucionales"]
-UI -> UI: validateValueRanges(parameters)
-
-alt [E001] Parámetro fuera de los rangos institucionales permitidos
-    UI -> UI: displayOutOfRangeError()
-    Admin -> UI: enter (correctedParameterValue)
-    UI -> UI: enableSaveButton()
-else Valores en rangos admisibles
-    UI -> Client: updateParameters(payload)
-    activate Client
-    Client -> API: PUT /api/v1/config/parameters ParameterUpdatePayload [Bearer JWT]
-    activate API
-    
-    alt [E002] Reautenticación de seguridad requerida (cambios críticos sin contraseña secundaria)
-        API --> Client: HTTP 401 Unauthorized {"detail": "REAUTH_REQUIRED: Confirmación de credenciales requerida."}
-        Client -> UI: displayReauthModal()
-        Admin -> UI: enter (adminSecondaryPassword)
-        Admin -> UI: click ["Verificar"]
-        UI -> Client: reauthenticateAdmin(credentials)
-        Client -> API: POST /api/v1/auth/reauth
-        API --> Client: HTTP 200 OK {"reauth_token": token}
-        Client -> UI: setReauthToken(token)
-    else Autorización confirmada
-        API -> Service: update_parameters(admin_id, payload)
-        activate Service
-        
-        == Fase 3: Persistencia transaccional, purga de caché y aplicación en caliente ==
-        Service -> DB: BEGIN TRANSACTION
-        activate DB
-        Service -> DB: UPDATE parametros_institucionales SET valor = :val, fecha_modificacion = NOW(), modificado_por = :uid WHERE clave = :key
-        Service -> DB: INSERT INTO log_auditoria_seguridad (usuario_id, evento='PARAM_UPDATE', detalle=:key, fecha=NOW())
-        Service -> DB: COMMIT
-        DB --> Service: Transacción confirmada
-        deactivate DB
-        
-        Service -> Cache: purge_system_config_cache()
-        activate Cache
-        Cache --> Service: Caché invalidada en caliente
-        deactivate Cache
-        
-        Service --> API: ParameterUpdateResponseDTO {"success": true, "updated_keys": keys}
-        deactivate Service
-        API --> Client: HTTP 200 OK ParameterUpdateResponseDTO
-        Client -> UI: displayParametersUpdatedSuccess(updated_keys)
-        UI --> Admin: displayParametersUpdatedConfirmation
-    end
-    deactivate API
-    deactivate Client
-end
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.23: Diagrama de Secuencia - CUS-020: Configurar parámetros institucionales y umbrales](diagramas/srs/img/diag_089_sec633_seq_cus020.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-020.
 
@@ -9270,100 +4003,7 @@ Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-0
 
 El diagrama de secuencia para `CUS-022` formaliza la actualización de la malla curricular y el catálogo silábico de materias críticas por parte de la Dirección de Escuela y administradores siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las llamadas entre el Administrador, `AdminCurriculumView.tsx`, `curriculumService.ts`, `curriculum.py`, `curriculum_service.py` y PostgreSQL. Describe la navegación por el árbol curricular, el alta de nuevos temas silábicos con validación de unicidad (`E001`) y rango semestral de semanas 1 a 17 (`E002`), y la confirmación transaccional con actualización reactiva en la interfaz administrativa.
 
-```plantuml
-@startuml
-title Diagrama 6.15.24: Diagrama de Secuencia - CUS-022: Gestionar catálogo de temas curriculares, asignaturas filtro y malla oficial\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Administrador Institucional\n(UserRole.administrador)" as Admin
-participant "Vista React\n(AdminCurriculumView.tsx)" as UI
-participant "Adaptador Cliente\n(curriculumService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/curriculum.py)" as API
-participant "Servicio Backend\n(curriculum_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Consulta del árbol curricular y selección de asignatura ==
-Admin -> UI: click ["Gestión de Malla y Temarios"]
-activate UI
-UI -> Client: getCoursesFullTree() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/curriculum/courses
-activate API
-API -> Service: get_courses_tree()
-activate Service
-Service -> DB: SELECT * FROM cursos ORDER BY ciclo, nombre
-activate DB
-DB --> Service: Malla curricular ordenada por ciclo
-deactivate DB
-Service --> API: CourseTreeResponseDTO
-deactivate Service
-API --> Client: HTTP 200 OK CourseTreeResponseDTO
-deactivate API
-Client -> UI: displayCourseTree(coursesTree)
-deactivate Client
-
-== Fase 2: Ingreso de datos del nuevo tema curricular silábico ==
-Admin -> UI: clickCourse ["Ver Asignatura"]
-Admin -> UI: click ["Agregar Nuevo Tema Curricular"]
-UI -> UI: openNewTopicModal()
-Admin -> UI: enter (unidad=2, titulo="Grafos y Dijkstra", semana=7, descripcion="Teoría y algoritmos")
-Admin -> UI: click ["Registrar Tema Curricular"]
-UI -> UI: validateWeekNumber(semana)
-
-alt [E002] Número de semana académica fuera de rango semestral (semana < 1 o > 17)
-    UI -> UI: displayWeekOutOfRangeError()
-    Admin -> UI: enter (validWeekNumber)
-    UI -> UI: updateFormWeek()
-else Semana lectiva válida
-    UI -> Client: createTopic(courseId, payload)
-    activate Client
-    Client -> API: POST /api/v1/curriculum/courses/{course_id}/topics TopicCreateRequest [Bearer JWT]
-    activate API
-    API -> Service: create_topic(course_id, payload)
-    activate Service
-    
-    Service -> DB: SELECT id FROM temas_curriculares WHERE curso_id = :cid AND unidad = :u AND titulo = :t
-    activate DB
-    DB --> Service: Tema existente o nulo
-    deactivate DB
-    
-    alt [E001] Tema curricular duplicado en la misma unidad didáctica
-        Service --> API: Lanza HTTPException(409, "DUPLICATE_TOPIC")
-        API --> Client: HTTP 409 Conflict {"detail": "DUPLICATE_TOPIC: Ya existe un tema con ese título en la unidad."}
-        Client -> UI: displayDuplicateTopicError(409)
-        Admin -> UI: enter (adjustedTitle)
-        UI -> UI: enableSaveButton()
-    else Tema nuevo y válido
-        == Fase 3: Persistencia transaccional y actualización del catálogo ==
-        Service -> DB: BEGIN TRANSACTION
-        activate DB
-        Service -> DB: INSERT INTO temas_curriculares (curso_id, unidad, semana, titulo, descripcion, activo=true)\nVALUES (:cid, :u, :sem, :t, :desc, true) RETURNING id
-        Service -> DB: COMMIT
-        DB --> Service: Transacción confirmada (id_tema)
-        deactivate DB
-        
-        Service --> API: TopicResponseDTO {"id": id_tema, "titulo": t, "semana": sem}
-        API --> Client: HTTP 201 Created TopicResponseDTO
-        Client -> UI: displayTopicCreatedSuccess(id_tema)
-        
-        UI -> UI: closeNewTopicModal()
-        UI -> UI: appendTopicToTree(id_tema)
-        UI --> Admin: displayTopicRegisteredConfirmation
-    end
-    deactivate Service
-    deactivate API
-    deactivate Client
-end
-deactivate UI
-@enduml
-```
+![Diagrama 6.15.24: Diagrama de Secuencia - CUS-022: Gestionar catálogo de temas y materias críticas](diagramas/srs/img/diag_090_sec633_seq_cus022.png)
 
 Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-022.
 
@@ -9376,124 +4016,7 @@ El diagrama de clases del modelo lógico formaliza la estructura orientada a obj
 
 ### Diagrama 6.16: Diagrama de Clases del Modelo Lógico del Sistema Web P2P
 
-```plantuml
-@startuml
-title Diagrama de Clases del Modelo Lógico General - Sistema Web P2P EPIS UPT
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class Usuario {
-  -id: UUID
-  -codigo_estudiante: String
-  -email: String
-  -nombres: String
-  -apellidos: String
-  -activo: Boolean
-  +validarEmailUpt(): Boolean
-}
-
-class ConsentimientoLegal {
-  -id: UUID
-  -usuario_id: UUID
-  -ip_address: String
-  -user_agent: String
-  -fecha_aceptacion: DateTime
-}
-
-class CursoCritico {
-  -id: UUID
-  -codigo: String
-  -nombre: String
-  -ciclo: Integer
-  -es_prioritario: Boolean
-}
-
-class TemaCurricular {
-  -id: UUID
-  -curso_id: UUID
-  -unidad: Integer
-  -titulo: String
-}
-
-class OfertaMentoria {
-  -id: UUID
-  -mentor_id: UUID
-  -curso_id: UUID
-  -tema_id: UUID
-  -modalidad: String
-  -aforo_maximo: Integer
-  -fecha_inicio: DateTime
-  -estado: String
-}
-
-class SesionMentoria {
-  -id: UUID
-  -oferta_id: UUID
-  -espacio_id: UUID
-  -enlace_virtual: String
-  -estado: String
-  -quorum_alcanzado: Boolean
-}
-
-class ReservaCupo {
-  -id: UUID
-  -sesion_id: UUID
-  -mentoreado_id: UUID
-  -estado: String
-  -fecha_reserva: DateTime
-  +confirmar(): Void
-  +cancelar(): Void
-}
-
-class AsistenciaSesion {
-  -id: UUID
-  -sesion_id: UUID
-  -estudiante_id: UUID
-  -estado: String
-  -metodo_checkin: String
-  -fecha_checkin: DateTime
-}
-
-class BitacoraPedagogica {
-  -id: UUID
-  -sesion_id: UUID
-  -mentor_id: UUID
-  -temas_impartidos: Text
-  -observaciones: Text
-  -hash_sha256: String
-  -estado_visado: String
-  +calcularHash(): String
-}
-
-class CertificadoHoras {
-  -id: UUID
-  -mentor_id: UUID
-  -folio_correlativo: String
-  -horas_acreditadas: Float
-  -hash_documento: String
-  -url_qr: String
-  -fecha_emision: DateTime
-}
-
-Usuario "1" *-- "0..1" ConsentimientoLegal
-CursoCritico "1" *-- "1..*" TemaCurricular
-Usuario "1" -- "0..*" OfertaMentoria : publica
-OfertaMentoria "1" *-- "1" SesionMentoria
-SesionMentoria "1" *-- "0..*" ReservaCupo
-SesionMentoria "1" *-- "0..*" AsistenciaSesion
-SesionMentoria "1" *-- "0..1" BitacoraPedagogica
-Usuario "1" -- "0..*" CertificadoHoras : recibe
-@enduml
-```
+![Diagrama 6.16: Diagrama de Clases del Modelo Lógico del Sistema Web P2P](diagramas/srs/img/diag_091_sec634_clases_logico_general.png)
 
 Fuente: Elaboración propia.
 
@@ -9505,37 +4028,7 @@ La vista lógica parcial para `CUS-001` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.1: Diagrama de Clases Lógico Parcial - CUS-001: Iniciar sesión institucional con 2FA
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-001: Iniciar sesión institucional con 2FA\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "AuthService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "Usuario" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.1: Diagrama de Clases Lógico Parcial - CUS-001: Iniciar sesión institucional con 2FA](diagramas/srs/img/diag_092_sec634_clases_logico_cus001.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-01.
 
@@ -9548,37 +4041,7 @@ La vista lógica parcial para `CUS-010` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.2: Diagrama de Clases Lógico Parcial - CUS-010: Gestionar asignación de roles de usuario
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-010: Gestionar asignación de roles de usuario\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "RoleService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "Usuario" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.2: Diagrama de Clases Lógico Parcial - CUS-010: Gestionar asignación de roles de usuario](diagramas/srs/img/diag_093_sec634_clases_logico_cus010.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-01.
 
@@ -9591,37 +4054,7 @@ La vista lógica parcial para `CUS-006` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.3: Diagrama de Clases Lógico Parcial - CUS-006: Publicar oferta de mentoría académica
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-006: Publicar oferta de mentoría académica\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "MentorshipService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "OfertaMentoria" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.3: Diagrama de Clases Lógico Parcial - CUS-006: Publicar oferta de mentoría académica](diagramas/srs/img/diag_094_sec634_clases_logico_cus006.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-02.
 
@@ -9634,37 +4067,7 @@ La vista lógica parcial para `CUS-008` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.4: Diagrama de Clases Lógico Parcial - CUS-008: Consultar disponibilidad de espacios y recursos
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-008: Consultar disponibilidad de espacios y recursos\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "SpaceService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "EspacioFisico" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.4: Diagrama de Clases Lógico Parcial - CUS-008: Consultar disponibilidad de espacios y recursos](diagramas/srs/img/diag_095_sec634_clases_logico_cus008.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-02.
 
@@ -9677,37 +4080,7 @@ La vista lógica parcial para `CUS-005` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.5: Diagrama de Clases Lógico Parcial - CUS-005: Gestionar perfil formativo y disponibilidad horaria
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-005: Gestionar perfil formativo y disponibilidad horaria\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "ProfileService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "PerfilFormativo" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.5: Diagrama de Clases Lógico Parcial - CUS-005: Gestionar perfil formativo y disponibilidad horaria](diagramas/srs/img/diag_096_sec634_clases_logico_cus005.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-03.
 
@@ -9720,37 +4093,7 @@ La vista lógica parcial para `CUS-021` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.6: Diagrama de Clases Lógico Parcial - CUS-021: Explorar catálogo curricular de asignaturas filtro
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-021: Explorar catálogo curricular de asignaturas filtro\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "CurriculumService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "CursoCritico" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.6: Diagrama de Clases Lógico Parcial - CUS-021: Explorar catálogo curricular de asignaturas filtro](diagramas/srs/img/diag_097_sec634_clases_logico_cus021.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-03.
 
@@ -9763,37 +4106,7 @@ La vista lógica parcial para `CUS-002` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.7: Diagrama de Clases Lógico Parcial - CUS-002: Explorar recomendaciones personalizadas Top-k
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-002: Explorar recomendaciones personalizadas Top-k\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "RecommendationService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "PerfilFormativo" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.7: Diagrama de Clases Lógico Parcial - CUS-002: Explorar recomendaciones personalizadas Top-k](diagramas/srs/img/diag_098_sec634_clases_logico_cus002.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-04.
 
@@ -9806,37 +4119,7 @@ La vista lógica parcial para `CUS-003` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.8: Diagrama de Clases Lógico Parcial - CUS-003: Registrar solicitud de demanda académica
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-003: Registrar solicitud de demanda académica\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "DemandService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "SolicitudDemanda" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.8: Diagrama de Clases Lógico Parcial - CUS-003: Registrar solicitud de demanda académica](diagramas/srs/img/diag_099_sec634_clases_logico_cus003.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-04.
 
@@ -9849,37 +4132,7 @@ La vista lógica parcial para `CUS-004` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.9: Diagrama de Clases Lógico Parcial - CUS-004: Reservar cupo de mentoría académica
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-004: Reservar cupo de mentoría académica\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "BookingService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "SesionMentoria" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.9: Diagrama de Clases Lógico Parcial - CUS-004: Reservar cupo de mentoría académica](diagramas/srs/img/diag_100_sec634_clases_logico_cus004.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -9892,37 +4145,7 @@ La vista lógica parcial para `CUS-024` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.10: Diagrama de Clases Lógico Parcial - CUS-024: Ratificar asistencia a sesión de mentoría
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-024: Ratificar asistencia a sesión de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "BookingService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "ReservaCupo" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.10: Diagrama de Clases Lógico Parcial - CUS-024: Ratificar asistencia a sesión de mentoría](diagramas/srs/img/diag_101_sec634_clases_logico_cus024.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -9935,37 +4158,7 @@ La vista lógica parcial para `CUS-017` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.11: Diagrama de Clases Lógico Parcial - CUS-017: Desistir voluntariamente de reserva
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-017: Desistir voluntariamente de reserva\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "BookingService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "ReservaCupo" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.11: Diagrama de Clases Lógico Parcial - CUS-017: Desistir voluntariamente de reserva](diagramas/srs/img/diag_102_sec634_clases_logico_cus017.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -9978,37 +4171,7 @@ La vista lógica parcial para `CUS-023` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.12: Diagrama de Clases Lógico Parcial - CUS-023: Evaluar quórum automático a T-24h
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-023: Evaluar quórum automático a T-24h\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "QuorumCronService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "SesionMentoria" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.12: Diagrama de Clases Lógico Parcial - CUS-023: Evaluar quórum automático a T-24h](diagramas/srs/img/diag_103_sec634_clases_logico_cus023.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -10021,37 +4184,7 @@ La vista lógica parcial para `CUS-007` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.13: Diagrama de Clases Lógico Parcial - CUS-007: Decisión del mentor ante quórum insuficiente
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-007: Decisión del mentor ante quórum insuficiente\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "MentorshipService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "SesionMentoria" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.13: Diagrama de Clases Lógico Parcial - CUS-007: Decisión del mentor ante quórum insuficiente](diagramas/srs/img/diag_104_sec634_clases_logico_cus007.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-05.
 
@@ -10064,37 +4197,7 @@ La vista lógica parcial para `CUS-012` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.14: Diagrama de Clases Lógico Parcial - CUS-012: Registrar asistencia a sesión de mentoría
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-012: Registrar asistencia a sesión de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "AttendanceService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "AsistenciaSesion" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.14: Diagrama de Clases Lógico Parcial - CUS-012: Registrar asistencia a sesión de mentoría](diagramas/srs/img/diag_105_sec634_clases_logico_cus012.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-06.
 
@@ -10107,37 +4210,7 @@ La vista lógica parcial para `CUS-013` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.15: Diagrama de Clases Lógico Parcial - CUS-013: Registrar bitácora académica de sesión
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-013: Registrar bitácora académica de sesión\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "BitacoraService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "BitacoraPedagogica" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.15: Diagrama de Clases Lógico Parcial - CUS-013: Registrar bitácora académica de sesión](diagramas/srs/img/diag_106_sec634_clases_logico_cus013.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-06.
 
@@ -10150,37 +4223,7 @@ La vista lógica parcial para `CUS-014` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.16: Diagrama de Clases Lógico Parcial - CUS-014: Visualizar historial y bitácoras académicas
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-014: Visualizar historial y bitácoras académicas\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "BitacoraService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "BitacoraPedagogica" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.16: Diagrama de Clases Lógico Parcial - CUS-014: Visualizar historial y bitácoras académicas](diagramas/srs/img/diag_107_sec634_clases_logico_cus014.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-06.
 
@@ -10193,37 +4236,7 @@ La vista lógica parcial para `CUS-018` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.17: Diagrama de Clases Lógico Parcial - CUS-018: Emitir constancia institucional de horas de mentoría
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-018: Emitir constancia institucional de horas de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "CertificateService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "CertificadoHoras" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.17: Diagrama de Clases Lógico Parcial - CUS-018: Emitir constancia institucional de horas de mentoría](diagramas/srs/img/diag_108_sec634_clases_logico_cus018.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-07.
 
@@ -10236,37 +4249,7 @@ La vista lógica parcial para `CUS-019` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.18: Diagrama de Clases Lógico Parcial - CUS-019: Gestionar insignias y reputación gamificada
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-019: Gestionar insignias y reputación gamificada\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "GamificationService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "Insignia" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.18: Diagrama de Clases Lógico Parcial - CUS-019: Gestionar insignias y reputación gamificada](diagramas/srs/img/diag_109_sec634_clases_logico_cus019.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-07.
 
@@ -10279,37 +4262,7 @@ La vista lógica parcial para `CUS-009` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.19: Diagrama de Clases Lógico Parcial - CUS-009: Notificar eventos críticos y alertas temporales
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-009: Notificar eventos críticos y alertas temporales\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "NotificationService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "Notificacion" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.19: Diagrama de Clases Lógico Parcial - CUS-009: Notificar eventos críticos y alertas temporales](diagramas/srs/img/diag_110_sec634_clases_logico_cus009.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -10322,37 +4275,7 @@ La vista lógica parcial para `CUS-011` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.20: Diagrama de Clases Lógico Parcial - CUS-011: Generar reportes e indicadores de analítica académica
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-011: Generar reportes e indicadores de analítica académica\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "AnalyticsService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "KpiAcademico" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.20: Diagrama de Clases Lógico Parcial - CUS-011: Generar reportes e indicadores de analítica académica](diagramas/srs/img/diag_111_sec634_clases_logico_cus011.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -10365,37 +4288,7 @@ La vista lógica parcial para `CUS-015` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.21: Diagrama de Clases Lógico Parcial - CUS-015: Consultar métricas de retención y desempeño
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-015: Consultar métricas de retención y desempeño\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "AnalyticsService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "KpiAcademico" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.21: Diagrama de Clases Lógico Parcial - CUS-015: Consultar métricas de retención y desempeño](diagramas/srs/img/diag_112_sec634_clases_logico_cus015.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -10408,37 +4301,7 @@ La vista lógica parcial para `CUS-016` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.22: Diagrama de Clases Lógico Parcial - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "AuditService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "ConsentimientoLegal" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.22: Diagrama de Clases Lógico Parcial - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733](diagramas/srs/img/diag_113_sec634_clases_logico_cus016.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -10451,37 +4314,7 @@ La vista lógica parcial para `CUS-020` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.23: Diagrama de Clases Lógico Parcial - CUS-020: Configurar parámetros institucionales y umbrales
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-020: Configurar parámetros institucionales y umbrales\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "AdminService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "ParametroInstitucional" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.23: Diagrama de Clases Lógico Parcial - CUS-020: Configurar parámetros institucionales y umbrales](diagramas/srs/img/diag_114_sec634_clases_logico_cus020.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -10494,37 +4327,7 @@ La vista lógica parcial para `CUS-022` delimita el conjunto de clases de domini
 
 #### Diagrama 6.16.24: Diagrama de Clases Lógico Parcial - CUS-022: Gestionar catálogo de temas y materias críticas
 
-```plantuml
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-022: Gestionar catálogo de temas y materias críticas\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "CurriculumService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "CursoCritico" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
+![Diagrama 6.16.24: Diagrama de Clases Lógico Parcial - CUS-022: Gestionar catálogo de temas y materias críticas](diagramas/srs/img/diag_115_sec634_clases_logico_cus022.png)
 
 Fuente: Elaboración propia a partir del diseño de MOD-08.
 
@@ -10538,65 +4341,7 @@ Para garantizar el determinismo, la integridad referencial y el cumplimiento rig
 
 ### Diagrama 6.17: Máquina de Estados Finitos - Ciclo de Vida de SesionMentoria
 
-```plantuml
-@startuml
-title Diagrama 6.17: FSM del Ciclo de Vida de SesionMentoria\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam state {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-[*] --> PROGRAMADA : Publicación de Oferta (RN-04: T >= 24h)
-
-state PROGRAMADA {
-  PROGRAMADA : Acepta reservas concurrentes
-  PROGRAMADA : Ventana de confirmación abierta
-}
-
-PROGRAMADA --> CONFIRMADA : Corte T-24h y Quórum >= 50% (RN-09)
-PROGRAMADA --> QUORUM_INSUFICIENTE : Corte T-24h y Quórum < 50% (RN-09)
-PROGRAMADA --> CANCELADA_MENTOR : Cancelación justificada por el mentor (RN-10)
-
-state QUORUM_INSUFICIENTE {
-  QUORUM_INSUFICIENTE : Espera resolución del mentor
-}
-
-QUORUM_INSUFICIENTE --> CONFIRMADA : Mentor decide continuar (RN-09)
-QUORUM_INSUFICIENTE --> CANCELADA_QUORUM : Mentor cancela por falta de quórum (RN-10)
-
-state CONFIRMADA {
-  CONFIRMADA : Espacio asegurado (Aula/Virtual)
-  CONFIRMADA : Notificación enviada a participantes
-}
-
-CONFIRMADA --> EN_CURSO : Hora de inicio de la sesión
-CONFIRMADA --> CANCELADA_MENTOR : Imprevisto de fuerza mayor justificado
-
-state EN_CURSO {
-  EN_CURSO : Marcación QR TOTP activa
-  EN_CURSO : Desarrollo de contenidos
-}
-
-EN_CURSO --> FINALIZADA : Cierre de sesión y registro de bitácora en 48h (RN-12)
-
-state FINALIZADA {
-  FINALIZADA : Bitácora firmada con SHA-256
-  FINALIZADA : Encuesta habilitada por 24h (RN-13)
-  FINALIZADA : Horas acumuladas para auditoría
-}
-
-CANCELADA_QUORUM --> [*] : Recursos liberados
-CANCELADA_MENTOR --> [*] : Recursos liberados
-FINALIZADA --> [*]
-@enduml
-```
+![Diagrama 6.17: Máquina de Estados Finitos - Ciclo de Vida de SesionMentoria](diagramas/srs/img/diag_116_sec635_fsm_sesion_mentoria.png)
 
 Fuente: Elaboración propia a partir de los constraints de PostgreSQL (`chk_sesion_estado`).
 
@@ -10604,55 +4349,7 @@ Fuente: Elaboración propia a partir de los constraints de PostgreSQL (`chk_sesi
 
 ### Diagrama 6.18: Máquina de Estados Finitos - Ciclo de Vida de ReservaCupo
 
-```plantuml
-@startuml
-title Diagrama 6.18: FSM del Ciclo de Vida de ReservaCupo\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam state {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-[*] --> PENDIENTE_CONFIRMACION : Reserva de cupo con cerrojo pesimista FOR UPDATE (RN-05)
-
-state PENDIENTE_CONFIRMACION {
-  PENDIENTE_CONFIRMACION : Cupo bloqueado temporalmente
-  PENDIENTE_CONFIRMACION : Ventana abierta hasta T-24h
-}
-
-PENDIENTE_CONFIRMACION --> CONFIRMADA : Estudiante ratifica asistencia antes de T-24h (RN-08)
-PENDIENTE_CONFIRMACION --> CANCELADA_USUARIO : Estudiante desiste voluntariamente antes de T-24h (RN-10)
-PENDIENTE_CONFIRMACION --> NO_CONFIRMADA : Vence plazo T-24h sin ratificación (RN-08)
-
-state CONFIRMADA {
-  CONFIRMADA : Computa formalmente para quórum
-  CONFIRMADA : Pase QR dinámico habilitado
-}
-
-CONFIRMADA --> CANCELADA_USUARIO : Desistimiento extraordinario justificado
-CONFIRMADA --> ASISTIO : Check-in exitoso con pase QR TOTP o lista (RN-12)
-CONFIRMADA --> INASISTENCIA : Cierre de bitácora sin registro de check-in (RN-12)
-
-state ASISTIO {
-  ASISTIO : Habilitado para responder encuesta (24h)
-}
-
-state INASISTENCIA {
-  INASISTENCIA : Inhabilitado para evaluar
-}
-
-NO_CONFIRMADA --> [*] : Cupo liberado inmediatamente
-CANCELADA_USUARIO --> [*] : Cupo liberado inmediatamente
-ASISTIO --> [*]
-INASISTENCIA --> [*]
-@enduml
-```
+![Diagrama 6.18: Máquina de Estados Finitos - Ciclo de Vida de ReservaCupo](diagramas/srs/img/diag_117_sec635_fsm_reserva_cupo.png)
 
 Fuente: Elaboración propia a partir de los constraints de PostgreSQL (`chk_reserva_estado`).
 
@@ -10660,59 +4357,7 @@ Fuente: Elaboración propia a partir de los constraints de PostgreSQL (`chk_rese
 
 ### Diagrama 6.19: Máquina de Estados Finitos - Ciclo de Vida de BitacoraPedagogica y CertificadoHoras
 
-```plantuml
-@startuml
-title Diagrama 6.19: FSM de BitacoraPedagogica y CertificadoHoras\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam state {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-[*] --> PENDIENTE_REGISTRO : Sesión culminada (Ventana perentoria de 48h - RN-12)
-
-state PENDIENTE_REGISTRO {
-  PENDIENTE_REGISTRO : Espera reporte temático y asistencia
-}
-
-PENDIENTE_REGISTRO --> REGISTRADA : Mentor envía bitácora con hash SHA-256
-PENDIENTE_REGISTRO --> VENCIDA_NO_REGISTRADA : Expiran 48h sin registro (horas no computables)
-
-state REGISTRADA {
-  REGISTRADA : Sometida a fiscalización administrativa
-}
-
-REGISTRADA --> VISADA_APROBADA : Comisión de Tutoría aprueba contenidos (RN-14)
-REGISTRADA --> OBSERVADA : Discrepancia temática o documental
-
-state OBSERVADA {
-  OBSERVADA : Requiere subsanación por el mentor
-}
-
-OBSERVADA --> REGISTRADA : Mentor subsana observaciones
-
-state VISADA_APROBADA {
-  VISADA_APROBADA : Horas computables formalmente
-}
-
-VISADA_APROBADA --> CERTIFICADO_EMITIDO : Suma >= 20 horas semestrales auditadas (RN-14)
-
-state CERTIFICADO_EMITIDO {
-  CERTIFICADO_EMITIDO : Folio correlativo institucional asignado
-  CERTIFICADO_EMITIDO : Documento PDF/A compilado con ReportLab
-  CERTIFICADO_EMITIDO : Código QR institucional de validación en línea
-}
-
-CERTIFICADO_EMITIDO --> [*]
-VENCIDA_NO_REGISTRADA --> [*]
-@enduml
-```
+![Diagrama 6.19: Máquina de Estados Finitos - Ciclo de Vida de BitacoraPedagogica y CertificadoHoras](diagramas/srs/img/diag_118_sec635_fsm_bitacora_certificado.png)
 
 Fuente: Elaboración propia.
 
@@ -10725,191 +4370,7 @@ El modelo físico de base de datos materializa la arquitectura de persistencia s
 
 ### Diagrama 6.20: Diagrama Entidad-Relación Físico (15 Tablas Relacionales) - PostgreSQL
 
-```plantuml
-@startuml
-title Diagrama 6.20: Diagrama Entidad-Relación Físico (15 Tablas Relacionales)\nSistema Web P2P - PostgreSQL / Supabase
-hide circle
-skinparam linetype ortho
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam entity {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-entity "usuarios" as tbl_usuarios {
-  *id : uuid <<PK>>
-  --
-  *codigo_estudiante : varchar(20) <<UQ>>
-  *email : varchar(100) <<UQ>>
-  *nombres : varchar(100)
-  *apellidos : varchar(100)
-  *activo : boolean
-  *created_at : timestamptz
-}
-
-entity "roles" as tbl_roles {
-  *id : integer <<PK>>
-  --
-  *codigo : varchar(30) <<UQ>>
-  *nombre : varchar(50)
-}
-
-entity "usuario_roles" as tbl_usuario_roles {
-  *usuario_id : uuid <<PK, FK>>
-  *rol_id : integer <<PK, FK>>
-  --
-  *asignado_en : timestamptz
-}
-
-entity "consentimientos_legales" as tbl_consentimientos {
-  *id : uuid <<PK>>
-  --
-  *usuario_id : uuid <<FK, UQ>>
-  *ip_address : varchar(45)
-  *user_agent : text
-  *version_politica : varchar(20)
-  *aceptado_en : timestamptz
-}
-
-entity "codigos_otp" as tbl_otp {
-  *id : uuid <<PK>>
-  --
-  *email : varchar(100)
-  *codigo_hash : varchar(64)
-  *intentos : integer
-  *expira_en : timestamptz
-  *consumido : boolean
-}
-
-entity "perfiles_formativos" as tbl_perfiles {
-  *id : uuid <<PK>>
-  --
-  *usuario_id : uuid <<FK, UQ>>
-  *biografia : text
-  *ciclo_actual : integer
-  *reputacion : numeric(3,2)
-  *horas_acumuladas : numeric(5,2)
-}
-
-entity "disponibilidades_horarias" as tbl_disponibilidad {
-  *id : uuid <<PK>>
-  --
-  *usuario_id : uuid <<FK>>
-  *dia_semana : integer <<CHECK 1-6>>
-  *hora_inicio : time
-  *hora_fin : time
-}
-
-entity "cursos_criticos" as tbl_cursos {
-  *id : uuid <<PK>>
-  --
-  *codigo : varchar(20) <<UQ>>
-  *nombre : varchar(120)
-  *ciclo : integer
-  *es_prioritario : boolean
-}
-
-entity "temas_curriculares" as tbl_temas {
-  *id : uuid <<PK>>
-  --
-  *curso_id : uuid <<FK>>
-  *unidad : integer
-  *titulo : varchar(150)
-  *descripcion : text
-}
-
-entity "espacios_fisicos" as tbl_espacios {
-  *id : uuid <<PK>>
-  --
-  *codigo_ambiente : varchar(30) <<UQ>>
-  *pabellon : varchar(50)
-  *capacidad : integer
-  *activo : boolean
-}
-
-entity "ofertas_mentoria" as tbl_ofertas {
-  *id : uuid <<PK>>
-  --
-  *mentor_id : uuid <<FK>>
-  *curso_id : uuid <<FK>>
-  *tema_id : uuid <<FK>>
-  *modalidad : varchar(20) <<CHECK>>
-  *aforo_maximo : integer
-  *fecha_inicio : timestamptz
-  *fecha_fin : timestamptz
-  *estado : varchar(30) <<CHECK>>
-}
-
-entity "sesiones_mentoria" as tbl_sesiones {
-  *id : uuid <<PK>>
-  --
-  *oferta_id : uuid <<FK, UQ>>
-  *espacio_id : uuid <<FK>>
-  *enlace_virtual : varchar(255)
-  *estado : varchar(30) <<CHECK>>
-  *quorum_alcanzado : boolean
-}
-
-entity "reservas_cupos" as tbl_reservas {
-  *id : uuid <<PK>>
-  --
-  *sesion_id : uuid <<FK>>
-  *mentoreado_id : uuid <<FK>>
-  *estado : varchar(30) <<CHECK>>
-  *fecha_reserva : timestamptz
-  *fecha_ratificacion : timestamptz
-}
-
-entity "asistencias_sesiones" as tbl_asistencias {
-  *id : uuid <<PK>>
-  --
-  *sesion_id : uuid <<FK>>
-  *estudiante_id : uuid <<FK>>
-  *estado : varchar(20) <<CHECK>>
-  *metodo_checkin : varchar(30)
-  *fecha_checkin : timestamptz
-}
-
-entity "bitacoras_pedagogicas" as tbl_bitacoras {
-  *id : uuid <<PK>>
-  --
-  *sesion_id : uuid <<FK, UQ>>
-  *mentor_id : uuid <<FK>>
-  *temas_impartidos : text
-  *observaciones : text
-  *hash_sha256 : varchar(64)
-  *estado_visado : varchar(20) <<CHECK>>
-  *fecha_registro : timestamptz
-}
-
-tbl_usuarios ||--o| tbl_consentimientos
-tbl_usuarios ||--o{ tbl_usuario_roles
-tbl_roles ||--o{ tbl_usuario_roles
-tbl_usuarios ||--o| tbl_perfiles
-tbl_usuarios ||--o{ tbl_disponibilidad
-
-tbl_cursos ||--o{ tbl_temas
-tbl_usuarios ||--o{ tbl_ofertas
-tbl_cursos ||--o{ tbl_ofertas
-tbl_temas ||--o{ tbl_ofertas
-
-tbl_ofertas ||--|| tbl_sesiones
-tbl_espacios ||--o{ tbl_sesiones
-
-tbl_sesiones ||--o{ tbl_reservas
-tbl_usuarios ||--o{ tbl_reservas
-
-tbl_sesiones ||--o{ tbl_asistencias
-tbl_usuarios ||--o{ tbl_asistencias
-
-tbl_sesiones ||--o| tbl_bitacoras
-@enduml
-```
+![Diagrama 6.20: Diagrama Entidad-Relación Físico (15 Tablas Relacionales) - PostgreSQL](diagramas/srs/img/diag_119_sec636_der_fisico_15tablas.png)
 
 Fuente: Elaboración propia.
 

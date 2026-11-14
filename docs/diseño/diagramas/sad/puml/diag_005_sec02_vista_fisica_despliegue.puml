@@ -1,0 +1,50 @@
+/'
+  Diagrama SAD: Diagrama 2.5: Vista Física y Topología de Despliegue en Red
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Kruchten 4+1 / UML 2.5 / C4 Nivel 2
+  Extracción automatizada: Documento SAD Oficial
+'/
+@startuml
+title Diagrama 2.5: Vista Física y Topología de Despliegue en Red\nSistema Web P2P - EPIS UPT (2026)
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam node {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+}
+
+node "Dispositivos Clientes (Red EPIS-UPT / Internet)" as Node_Client {
+    artifact "Navegador Web Moderno (HTML5/ES2022)\nChrome, Firefox, Edge, Safari (>= 360px)" as App_Client {
+        component "React 19 SPA Build\n(Vite Bundle < 250 KB, Tailwind CSS)" as Comp_SPA
+    }
+}
+
+node "Host de Aplicación Cloud (PaaS Linux / Docker)" as Node_Server {
+    node "Contenedor Proxy Inverso (NGINX Alpine)" as Cont_Nginx {
+        component "Terminación SSL TLS 1.3\nCompresión Gzip / Brotli\nCORS Guard & Reverse Proxy" as Comp_Nginx
+    }
+    node "Contenedor Backend (Python 3.14)" as Cont_FastAPI {
+        component "FastAPI 0.115+ Application\nServidor ASGI Uvicorn (Puerto 8000)\nMotor EdRecSys en-proceso\nMotor ReportLab (PDF Streaming)" as Comp_FastAPI
+    }
+}
+
+node "Servicio Administrado de Datos (Supabase Cloud)" as Node_Cloud {
+    database "PostgreSQL 16 Relacional" as Node_Postgres {
+        component "15 Tablas Normalizadas (3FN)\nPolíticas Row Level Security (RLS)\nCerrojos Pesimistas (SELECT FOR UPDATE)\nÍndices B-Tree & Triggers de Auditoría" as Comp_Postgres
+    }
+}
+
+node "Infraestructura Institucional UPT" as Node_UPT {
+    server "Servidor de Correo SMTP (@upt.pe)\nPuerto 587 / STARTTLS" as Srv_SMTP
+}
+
+' Enlaces de Red
+Comp_SPA --> Comp_Nginx : HTTPS / Port 443 (TLS 1.3)
+Comp_Nginx --> Comp_FastAPI : HTTP / Port 8000 (Red Privada Docker)
+Comp_FastAPI --> Comp_Postgres : TCP / Port 5432 (SSL Certificado Obligatorio)
+Comp_FastAPI --> Srv_SMTP : SMTP Seguro (587 / TLS - OTP y Alertas)
+@enduml

@@ -1,0 +1,57 @@
+/'
+  Diagrama SAD: Diagrama 11.4: Máquina de Estados Finitos de la Sesión de Mentoría (13 Estados Canónicos)
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Kruchten 4+1 / UML 2.5 / C4 Nivel 2
+  Extracción automatizada: Documento SAD Oficial
+'/
+@startuml
+title Diagrama 11.4: Máquina de Estados Finitos de la Sesión de Mentoría (13 Estados Canónicos)\nEntidad sesiones_mentoria — Sistema Web P2P (EPIS-UPT)
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 8
+skinparam fontSize 10
+
+state "PUBLICADA\n[Oferta activa en cartelera]" as S_Publicada #DCFCE7
+state "PENDIENTE_CONFIRMACION\n[Inscripciones abiertas, restan > 24h]" as S_Pendiente #DBEAFE
+state "QUORUM_INSUFICIENTE\n[Corte T-24h: confirmados < 50%]" as S_QuorumIns #FEF3C7
+state "CONFIRMADA\n[Quórum >= 50% o ratificada por mentor]" as S_Confirmada #DCFCE7
+state "EN_CURSO\n[Horario lectivo activo: pase QR TOTP]" as S_EnCurso #E0E7FF
+state "CONCLUIDA\n[Fin de clase: ventana de 48h para bitácora]" as S_Concluida #F3E8FF
+state "BITACORA_REGISTRADA\n[Bitácora suscrita con hash SHA-256]" as S_Bitacora #CFFAFE
+state "HORAS_VISADAS\n[Aprobada oficialmente por Dirección EPIS]" as S_Visadas #D1FAE5
+state "OBSERVADA\n[Dirección requiere subsanación al mentor]" as S_Observada #FED7AA
+state "CANCELADA_SISTEMA\n[Anulada por falta de quórum o imprevisto]" as S_CancSistema #FEE2E2
+state "CANCELADA_MENTOR\n[Anulada voluntariamente con antelación]" as S_CancMentor #FEE2E2
+state "CANCELADA_QUORUM\n[Mentor desiste de dictar sesión deficitaria]" as S_CancQuorum #FEE2E2
+state "FINALIZADA\n[Cierre definitivo del ciclo académico]" as S_Finalizada #E2E8F0
+
+[*] --> S_Publicada : Mentor publica oferta (RN-04 >= 24h)
+S_Publicada --> S_Pendiente : Primer estudiante formaliza reserva (CUS-004)
+S_Pendiente --> S_Confirmada : Corte T-24h desatendido alcanza quórum >= 50% (RN-09)
+S_Pendiente --> S_QuorumIns : Corte T-24h desatendido: confirmados < 50% (RN-09)
+
+S_QuorumIns --> S_Confirmada : Mentor ratifica dictado excepcional (CUS-007)
+S_QuorumIns --> S_CancQuorum : Mentor o sistema cancela sesión por quórum insuficiente (RN-10)
+
+S_Publicada --> S_CancMentor : Mentor anula oferta antes de T-24h (RN-10)
+S_Pendiente --> S_CancMentor : Mentor anula por imprevisto justificado (RN-10)
+S_Pendiente --> S_CancSistema : Cancelación administrativa forzada
+
+S_Confirmada --> S_EnCurso : Arriba hora de inicio de la clase
+S_EnCurso --> S_Concluida : Transcurre duración (60 o 90 min)
+
+S_Concluida --> S_Bitacora : Mentor registra bitácora antes de 48h (RN-12)
+S_Concluida --> S_CancSistema : Expira plazo de 48h sin registrar bitácora
+
+S_Bitacora --> S_Visadas : Dirección EPIS visa y acredita horas oficiales (RN-14)
+S_Bitacora --> S_Observada : Dirección formula observaciones pedagógicas
+
+S_Observada --> S_Bitacora : Mentor subsana observaciones en bitácora
+S_Visadas --> S_Finalizada : Fin de semestre académico lectivo
+
+S_CancQuorum --> [*]
+S_CancMentor --> [*]
+S_CancSistema --> [*]
+S_Finalizada --> [*]
+@enduml

@@ -1,0 +1,81 @@
+/'
+  Diagrama SAD: Diagrama 8.1: Diagrama de Contenedores de Software (C4 Nivel 2 / Metodología UWE)
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Kruchten 4+1 / UML 2.5 / C4 Nivel 2
+  Extracción automatizada: Documento SAD Oficial
+'/
+@startuml
+title Diagrama 8.1: Diagrama de Contenedores del Sistema Web P2P (Modelo C4 Nivel 2)\nEPIS - UPT (2026)
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+skinparam rectangle {
+    BackgroundColor #F8F9FA
+    BorderColor #2B3A42
+}
+
+skinparam database {
+    BackgroundColor #FFF3E0
+    BorderColor #E65100
+}
+
+skinparam actor {
+    BackgroundColor #E9ECEF
+    BorderColor #1D2D44
+}
+
+together {
+    actor "Estudiante Mentoreado\n(I - IV Ciclo)" as Alumno
+    actor "Estudiante Mentor\n(VII - X Ciclo)" as Mentor
+    actor "Comité de Tutoría\n& Dirección EPIS" as Admin
+}
+
+Alumno -[hidden]down-> Mentor
+Mentor -[hidden]down-> Admin
+
+rectangle "Límite del Sistema Web P2P de Mentorías Académicas" #E3F2FD {
+
+    package "Tier de Presentación y Borde Perimetral" as Tier_Edge #FFFFFF {
+        [Contenedor 1: Single-Page Application (SPA)\nReact 19 / TypeScript 5.6 / Vite / Tailwind CSS\n(Navegador del cliente, puerto 443)] as C_SPA
+        [Contenedor 2: Proxy Inverso Perimetral\nNGINX Alpine Linux\n(Terminación SSL TLS 1.3, Brotli y CORS)] as C_Proxy
+    }
+
+    package "Tier de Aplicación y Lógica de Negocio" as Tier_App #FFFFFF {
+        [Contenedor 3: Backend Core REST API\nFastAPI 0.115+ / Python 3.14 / Uvicorn ASGI\n(Controladores, JWT Auth, Cerrojos FOR UPDATE, Cron)] as C_API
+        [Motor Analítico EdRecSys (en-proceso)\nScikit-learn / NumPy / Similitud Coseno\n(Latencia media: 12.4 ms)] as C_RecSys
+        [Motor Vectorial ReportLab (en-proceso)\nGeneración de Constancias PDF con Streaming Directo\n(Folio Correlativo y Código QR)] as C_ReportLab
+    }
+
+    package "Tier de Persistencia Administrada" as Tier_Data #FFFFFF {
+        database "Contenedor 4: Base de Datos Relacional\nPostgreSQL 16 (Supabase Cloud Administrado)\n(15 Tablas Relacionales 3FN, RLS Nativo, ACID)" as C_Postgres
+    }
+
+    Tier_Edge -[hidden]down-> Tier_App
+    Tier_App -[hidden]down-> Tier_Data
+}
+
+together {
+    rectangle "Servidor SMTP Institucional\nCorreo UPT (@upt.pe, Port 587 / TLS)" as Ext_SMTP #FFFDE7
+    rectangle "Infraestructura Institucional EPIS\nAulas y Laboratorios Presenciales" as Ext_Infra #E8F5E9
+}
+
+Ext_SMTP -[hidden]down-> Ext_Infra
+
+' Flujos de comunicación
+Alumno -right-> C_SPA : HTTPS (TLS 1.3)
+Mentor -right-> C_SPA : HTTPS (TLS 1.3)
+Admin -right-> C_SPA : HTTPS (TLS 1.3)
+
+C_SPA -right-> C_Proxy : REST JSON / HTTPS
+C_Proxy -down-> C_API : HTTP / Port 8000 (Red interna Docker)
+C_API -right-> C_RecSys : Inferencia en-proceso
+C_API -right-> C_ReportLab : Compilación en memoria
+
+C_API -down-> C_Postgres : TCP 5432 / SSL (SQLAlchemy AsyncPool)
+C_API -right-> Ext_SMTP : SMTP Seguro (587 / STARTTLS)
+C_API --> Ext_Infra : Validación de solapamiento de horarios
+@enduml

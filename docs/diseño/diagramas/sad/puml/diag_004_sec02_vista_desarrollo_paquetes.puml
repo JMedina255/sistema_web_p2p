@@ -1,0 +1,64 @@
+/'
+  Diagrama SAD: Diagrama 2.4: Vista de Desarrollo y Organización de Paquetes de Software
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Kruchten 4+1 / UML 2.5 / C4 Nivel 2
+  Extracción automatizada: Documento SAD Oficial
+'/
+@startuml
+title Diagrama 2.4: Vista de Desarrollo y Organización de Paquetes de Software\nSistema Web P2P - EPIS UPT (2026)
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+package "Ecosistema Frontend (TypeScript / React 19 SPA)" {
+    package "src/components" {
+        [Vistas de Dominio\n(LoginOtpView, ProfileAvailabilityView,\nCurriculumCatalogView, RecommendationFeedView,\nBookingModalView, StudentBookingsView,\nMentorSessionsView, SessionAttendanceView,\nBitacoraFormView, CertificateDownloadView,\nAdminDashboardView, PostSessionSurveyModal)] as FE_Views
+        [Layout & Componentes Reutilizables\n(AppLayout, NotificationBell, Badges, Modals)] as FE_Common
+    }
+    package "src/services" {
+        [Adaptadores de API REST\n(apiClient, authService, offerService,\nbookingService, recommendationService,\ncertificateService, surveyService)] as FE_Services
+    }
+    package "src/data" {
+        [Modelos & Contratos TypeScript\n(auth.ts, curriculum.ts, booking.ts,\nrecommendation.ts, certificate.ts)] as FE_Types
+    }
+}
+
+package "Ecosistema Backend (FastAPI / Python 3.14 REST)" {
+    package "app/api/v1/endpoints" {
+        [Controladores RESTful\n(auth, consent, roles, profiles, curriculum,\noffers, recommendations, bookings, quorum,\nattendance, bitacora, survey, certificates)] as BE_Routers
+    }
+    package "app/core" {
+        [Seguridad & Dependencias\n(security.py, dependencies.py)] as BE_Security
+        [Configuración Centralizada\n(config.py - Settings BaseSettings)] as BE_Config
+    }
+    package "app/services" {
+        [Servicios de Dominio Puro\n(AuthService, ProfileService, CurriculumService,\nOfferService, RecommendationService [EdRecSys],\nBookingService [ACID], AttendanceService [TOTP],\nBitacoraService [SHA-256], CertificateService [PDF])] as BE_Services
+    }
+    package "app/models" {
+        [Modelos Declarativos ORM\n(15 tablas relacionales SQLAlchemy 2.0)] as BE_Models
+    }
+    package "app/schemas" {
+        [Esquemas DTO Pydantic v2\n(Validación y serialización fuertemente tipada)] as BE_Schemas
+    }
+    package "app/db" {
+        [Gestor de Sesión & Conexiones\n(session.py - get_optional_session)] as BE_Session
+    }
+}
+
+FE_Views --> FE_Services : Invoca operaciones asíncronas
+FE_Views --> FE_Common : Integra componentes UI
+FE_Services ..> FE_Types : Contratos fuertemente tipados
+
+FE_Services ..> BE_Routers : JSON sobre HTTPS (OpenAPI 3.0)
+
+BE_Routers --> BE_Security : Inyecta dependencias (Bearer JWT)
+BE_Routers --> BE_Schemas : Valida payloads de entrada/salida
+BE_Routers --> BE_Services : Delega lógica de negocio pura
+
+BE_Services --> BE_Models : Ejecuta transacciones y consultas
+BE_Services --> BE_Session : Solicita sesión relacional
+BE_Models --> BE_Session : Mapea sobre base de datos
+@enduml

@@ -1,0 +1,46 @@
+/'
+  Diagrama SAD: Diagrama 7.1: Diagrama de Actividades del Proceso As-Is de Mentorías Informales
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Kruchten 4+1 / UML 2.5 / C4 Nivel 2
+  Extracción automatizada: Documento SAD Oficial
+'/
+@startuml
+title Diagrama 7.1: Diagrama de Actividades del Proceso Actual (As-Is)\nAsesoría Académica Informal — EPIS UPT
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+|Estudiante Mentoreado (I - IV Ciclo)|
+start
+:Identifica debilidad conceptual en cursos filtro\n(Cálculo, Algoritmos, POO, BD);
+:Publica consulta en grupos informales de WhatsApp\no busca ayuda mediante contactos personales;
+
+if (¿Algún compañero sobresaliente responde?) then (No)
+  :Permanece con vacíos pedagógicos;
+  :Acude tardíamente a tutoría docente regular;
+  :Alto riesgo de reprobación y rezago;
+  stop
+else (Sí)
+  |Compañero Informal (VII - X Ciclo)|
+  :Acepta brindar ayuda de forma voluntaria;
+  |Estudiante Mentoreado (I - IV Ciclo)|
+  :Coordina horario tentativo por mensajería privada;
+
+  |Compañero Informal (VII - X Ciclo)|
+  :Busca aula libre en pabellón empíricamente\no crea enlace improvisado de Meet/Zoom;
+
+  |Estudiante Mentoreado (I - IV Ciclo)|
+  :Asiste a la reunión pactada;
+
+  |Compañero Informal (VII - X Ciclo)|
+  :Explica dudas sin guía silábica estructurada\nni control de asistencia efectiva;
+
+  |Comité de Tutoría & Dirección EPIS|
+  :Sin registro de temas tratados ni asistencia;
+  :Sin métricas de demanda académica real;
+  :Sin convalidación de horas ni incentivos al mentor;
+  stop
+endif
+@enduml

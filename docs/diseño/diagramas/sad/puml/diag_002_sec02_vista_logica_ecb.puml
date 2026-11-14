@@ -1,0 +1,55 @@
+/'
+  Diagrama SAD: Diagrama 2.2: Vista Lógica en Capas y Subsistemas ECB
+  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
+  Estándar: Kruchten 4+1 / UML 2.5 / C4 Nivel 2
+  Extracción automatizada: Documento SAD Oficial
+'/
+@startuml
+title Diagrama 2.2: Vista Lógica en Capas y Subsistemas ECB\nSistema Web P2P - EPIS UPT (2026)
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 10
+
+package "Capa de Presentación (Frontera / Boundary - React 19 SPA)" #F8F9FA {
+    [Vistas de Autenticación & Consentimiento\n(LoginOtpView, ConsentModalView)] as UI_Auth
+    [Vistas de Catálogo & Recomendación Top-k\n(RecommendationFeedView, CurriculumCatalogView)] as UI_Rec
+    [Vistas de Agendamiento, Reservas & Mis Clases\n(BookingModalView, StudentBookingsView, MentorSessionsView)] as UI_Booking
+    [Vistas de Asistencia QR & Bitácora Docente\n(SessionAttendanceView, BitacoraFormView)] as UI_Attendance
+    [Vistas de Certificación & Analítica Institucional\n(CertificateDownloadView, AdminDashboardView)] as UI_Admin
+}
+
+package "Capa de Aplicación y Negocio (Control - FastAPI / Python 3.14)" #E3F2FD {
+    [Controlador de Seguridad, 2FA & JWT\n(AuthService, ConsentService, RoleService)] as Ctrl_Auth
+    [Motor de Recomendación Híbrido en-proceso\n(EdRecSys Engine - Scikit-learn / NumPy)] as Ctrl_Rec
+    [Coordinador Transaccional de Reservas\n(BookingService - SELECT FOR UPDATE)] as Ctrl_Booking
+    [Orquestador de Quórum T-24h & Cron Jobs\n(QuorumCronService - evaluate_cutoff)] as Ctrl_Quorum
+    [Servicio de Asistencia TOTP & Bitácora SHA-256\n(AttendanceService, BitacoraService)] as Ctrl_Log
+    [Compilador PDF & Gestor de Certificados\n(CertificateService - ReportLab Engine)] as Ctrl_Cert
+}
+
+package "Capa de Persistencia y Dominio (Entidad - PostgreSQL 16 / Supabase)" #FFF3E0 {
+    database "PostgreSQL Relacional (Supabase Cloud)" as DB_Postgres {
+        [Políticas de Seguridad Row Level Security (RLS)\n(Aislamiento Multi-Tenant por auth.jwt())] as Sec_RLS
+        [Tablas Maestras Core (15 Tablas Relacionales)\n(usuarios, perfiles, sesiones, reservas, demandas)] as Tables_Core
+        [Tablas de Trazabilidad, Asistencia, Bitácoras & Certificados\n(asistencias, bitacoras, encuestas, certificados)] as Tables_Audit
+    }
+}
+
+' Flujos de comunicación e interoperabilidad REST
+UI_Auth --> Ctrl_Auth : HTTPS / REST JSON (/api/v1/auth, /consent)
+UI_Rec --> Ctrl_Rec : GET /api/v1/recommendations/offers
+UI_Booking --> Ctrl_Booking : POST /api/v1/bookings/reserve (FOR UPDATE)
+UI_Attendance --> Ctrl_Log : GET /attendance/token, POST /bitacora
+UI_Admin --> Ctrl_Cert : POST /certificates/generate, GET /{id}/download
+
+Ctrl_Auth --> Sec_RLS : Contexto de Rol & Email (JWT)
+Ctrl_Rec --> Tables_Core : Inferencia en-proceso (12.4 ms)
+Ctrl_Booking --> Tables_Core : Transacción ACID Pesimista
+Ctrl_Quorum --> Tables_Core : Corte desatendido T-24h
+Ctrl_Log --> Tables_Audit : Asiento de check-in & Hash SHA-256
+Ctrl_Cert --> Tables_Audit : Verificación de >= 20h y Folio Único
+Sec_RLS --> Tables_Core : Aislamiento de fila transparente
+@enduml
