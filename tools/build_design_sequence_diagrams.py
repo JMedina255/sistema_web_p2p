@@ -30,7 +30,10 @@ El diagrama general de secuencia formaliza la visión holística de los flujos t
 
 ```plantuml
 @startuml
-title Diagrama 6.15: Diagrama de Secuencia General del Ciclo de Reserva, Ratificación y Quórum\nSistema Web P2P - EPIS UPT
+title
+Diagrama 6.15: Diagrama de Secuencia General del Ciclo de Reserva, Ratificación y Quórum
+Sistema Web P2P - EPIS UPT
+end title
 
 autonumber
 skinparam shadowing false
@@ -41,13 +44,13 @@ skinparam sequenceBoxBorderColor #1E3A8A
 skinparam sequenceBoxBackgroundColor #F0F4F8
 
 actor "Estudiante Mentoreado" as User
-participant "Vista React (SPA)\n(BookingModal / StudentBookings)" as UI
-participant "Adaptador Cliente\n(bookingService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/bookings.py)" as API
-participant "Servicio Backend\n(booking_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-participant "Planificador Cron\n(Celery / SchedulerWorker)" as Cron
-participant "Servicio Email\n(SMTP UPT)" as Mail
+participant "Vista React (SPA)\\n(BookingModal / StudentBookings)" as UI
+participant "Adaptador Cliente\\n(bookingService.ts)" as Client
+participant "Controlador FastAPI\\n(endpoints/bookings.py)" as API
+participant "Servicio Backend\\n(booking_service.py)" as Service
+database "PostgreSQL DB\\n(SQLAlchemy / Supabase)" as DB
+participant "Planificador Cron\\n(Celery / SchedulerWorker)" as Cron
+participant "Servicio Email\\n(SMTP UPT)" as Mail
 actor "Estudiante Mentor" as Mentor
 
 == 1. Reserva Concurrente de Cupo (CUS-004) ==

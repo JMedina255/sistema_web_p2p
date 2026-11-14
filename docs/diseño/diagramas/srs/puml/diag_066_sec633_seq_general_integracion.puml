@@ -5,8 +5,10 @@
   Extracción automatizada: Fase D02 (H03)
 '/
 @startuml
-title Diagrama 6.15: Diagrama de Secuencia General del Ciclo de Reserva, Ratificación y Quórum
+title
+Diagrama 6.15: Diagrama de Secuencia General del Ciclo de Reserva, Ratificación y Quórum
 Sistema Web P2P - EPIS UPT
+end title
 
 autonumber
 skinparam shadowing false
@@ -17,20 +19,13 @@ skinparam sequenceBoxBorderColor #1E3A8A
 skinparam sequenceBoxBackgroundColor #F0F4F8
 
 actor "Estudiante Mentoreado" as User
-participant "Vista React (SPA)
-(BookingModal / StudentBookings)" as UI
-participant "Adaptador Cliente
-(bookingService.ts)" as Client
-participant "Controlador FastAPI
-(endpoints/bookings.py)" as API
-participant "Servicio Backend
-(booking_service.py)" as Service
-database "PostgreSQL DB
-(SQLAlchemy / Supabase)" as DB
-participant "Planificador Cron
-(Celery / SchedulerWorker)" as Cron
-participant "Servicio Email
-(SMTP UPT)" as Mail
+participant "Vista React (SPA)\n(BookingModal / StudentBookings)" as UI
+participant "Adaptador Cliente\n(bookingService.ts)" as Client
+participant "Controlador FastAPI\n(endpoints/bookings.py)" as API
+participant "Servicio Backend\n(booking_service.py)" as Service
+database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
+participant "Planificador Cron\n(Celery / SchedulerWorker)" as Cron
+participant "Servicio Email\n(SMTP UPT)" as Mail
 actor "Estudiante Mentor" as Mentor
 
 == 1. Reserva Concurrente de Cupo (CUS-004) ==

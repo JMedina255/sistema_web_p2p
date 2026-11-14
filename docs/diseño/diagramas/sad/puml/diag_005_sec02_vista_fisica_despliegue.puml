@@ -39,7 +39,7 @@ node "Servicio Administrado de Datos (Supabase Cloud)" as Node_Cloud {
 }
 
 node "Infraestructura Institucional UPT" as Node_UPT {
-    server "Servidor de Correo SMTP (@upt.pe)\nPuerto 587 / STARTTLS" as Srv_SMTP
+    node "Servidor de Correo SMTP (@upt.pe)\nPuerto 587 / STARTTLS" as Srv_SMTP
 }
 
 ' Enlaces de Red

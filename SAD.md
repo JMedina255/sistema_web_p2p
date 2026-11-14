@@ -494,7 +494,7 @@ package "Ecosistema Backend (FastAPI / Python 3.14 REST)" {
         [Configuración Centralizada\n(config.py - Settings BaseSettings)] as BE_Config
     }
     package "app/services" {
-        [Servicios de Dominio Puro\n(AuthService, ProfileService, CurriculumService,\nOfferService, RecommendationService [EdRecSys],\nBookingService [ACID], AttendanceService [TOTP],\nBitacoraService [SHA-256], CertificateService [PDF])] as BE_Services
+        [Servicios de Dominio Puro\n(AuthService, ProfileService, CurriculumService,\nOfferService, RecommendationService (EdRecSys),\nBookingService (ACID), AttendanceService (TOTP),\nBitacoraService (SHA-256), CertificateService (PDF))] as BE_Services
     }
     package "app/models" {
         [Modelos Declarativos ORM\n(15 tablas relacionales SQLAlchemy 2.0)] as BE_Models
@@ -580,7 +580,7 @@ node "Servicio Administrado de Datos (Supabase Cloud)" as Node_Cloud {
 }
 
 node "Infraestructura Institucional UPT" as Node_UPT {
-    server "Servidor de Correo SMTP (@upt.pe)\nPuerto 587 / STARTTLS" as Srv_SMTP
+    node "Servidor de Correo SMTP (@upt.pe)\nPuerto 587 / STARTTLS" as Srv_SMTP
 }
 
 ' Enlaces de Red
