@@ -57,7 +57,7 @@ def build_full_srs():
     return full_doc
 
 def main():
-    print("=== ENSAMBLADOR INTEGRAL DEL INFORME SRS DE DISEÑO (v3.0) ===")
+    print("=== ENSAMBLADOR INTEGRAL DEL INFORME SRS DE DISEÑO (v3.1 - H03) ===")
     full_doc = build_full_srs()
     
     target_path = "docs/diseño/FD03-EPIS-Informe SRS de Proyecto.md"
@@ -86,7 +86,7 @@ def main():
     print(f"- Errores en Diagramas de Secuencia (6.3.3): {err_seq}")
     
     if err_narr == 0 and err_seq == 0:
-        print(">>> DOCUMENTO SRS v3.0 VALIDADO Y APROBADO EXITOSAMENTE AL 100% <<<")
+        print(">>> VALIDACIÓN ESTRUCTURAL DEL SRS COMPLETADA AL 100% (REVISIÓN INSTITUCIONAL PENDIENTE) <<<")
     else:
         print("ERROR: Se detectaron inconsistencias en la validación.")
         sys.exit(1)
