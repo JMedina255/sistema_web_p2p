@@ -56,4 +56,7 @@ Thumbs.db
 uploads/
 aplicacion/backend/uploads/
 
+# Documentation build tools
+tools/*.jar
+
 
