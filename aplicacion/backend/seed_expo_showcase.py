@@ -65,6 +65,8 @@ def seed_expo_dataset():
         user_roles_map = {
             "mentor.avanzado@upt.pe": ["mentor", "mentoreado"],
             "ra2022073504@virtual.upt.pe": ["mentoreado", "mentor"],
+            "jm2022074255@virtual.upt.pe": ["mentoreado", "mentor"],
+            "2022074255@upt.pe": ["mentoreado", "mentor"],
             "admin.epis@upt.pe": ["administrador"],
             "mentoreado@upt.pe": ["mentoreado"],
             "2022073504@upt.pe": ["mentor", "mentoreado"],
@@ -127,6 +129,18 @@ def seed_expo_dataset():
                 "modalidad_preferida": "presencial",
             },
             {
+                "email": "jm2022074255@virtual.upt.pe",
+                "codigo_estudiante": "2022074255",
+                "nombres": "Joan Cristian",
+                "apellidos": "Medina Quispe",
+                "ciclo_actual": 5,
+                "rol_postulacion": "mentoreado",
+                "materias_interes": [1, 2, 3, 4, 5],
+                "temas_seleccionados": [1, 2, 5, 9, 10, 14, 18],
+                "biografia": "Estudiante de V ciclo EPIS-UPT enfocado en desarrollo de software, algoritmos y bases de datos.",
+                "modalidad_preferida": "presencial",
+            },
+            {
                 "email": "admin.epis@upt.pe",
                 "codigo_estudiante": "admin.epis",
                 "nombres": "Dirección de Escuela",
@@ -150,7 +164,7 @@ def seed_expo_dataset():
                     setattr(p_obj, k, v)
 
         # Disponibilidad horaria para matching en EdRecSys (Lunes a Viernes)
-        for email in ["mentor.avanzado@upt.pe", "ra2022073504@virtual.upt.pe"]:
+        for email in ["mentor.avanzado@upt.pe", "ra2022073504@virtual.upt.pe", "jm2022074255@virtual.upt.pe"]:
             db.query(DisponibilidadHoraria).filter(DisponibilidadHoraria.email == email).delete()
             for dia in range(1, 6):  # Lun a Vie
                 for h_ini, h_fin in [("08:00", "10:00"), ("10:00", "12:00"), ("14:00", "16:00"), ("16:00", "18:00")]:
@@ -162,8 +176,10 @@ def seed_expo_dataset():
         # 3. Solicitud Temática por Demanda (RF07)
         # ------------------------------------------------------------------
         print("\n[3/7] Aprovisionando Banco de Solicitudes por Demanda (RF07)...")
-        # Limpiar solicitudes demo previas para este mentoreado
-        db.query(SolicitudDemanda).filter(SolicitudDemanda.estudiante_email == "ra2022073504@virtual.upt.pe").delete()
+        # Limpiar solicitudes demo previas para ambos mentoreados
+        db.query(SolicitudDemanda).filter(
+            SolicitudDemanda.estudiante_email.in_(["ra2022073504@virtual.upt.pe", "jm2022074255@virtual.upt.pe"])
+        ).delete()
         solicitud_demo = SolicitudDemanda(
             estudiante_email="ra2022073504@virtual.upt.pe",
             id_asignatura=3,  # Algoritmos y Estructuras de Datos
@@ -172,7 +188,16 @@ def seed_expo_dataset():
             estado="PENDIENTE",
             created_at=now - timedelta(hours=5),
         )
+        solicitud_joan = SolicitudDemanda(
+            estudiante_email="jm2022074255@virtual.upt.pe",
+            id_asignatura=3,  # Algoritmos y Estructuras de Datos
+            id_tema=10,       # Recursividad y Relaciones de Recurrencia
+            observaciones="Solicito sesión práctica de árboles de recursión, método inductivo y análisis de complejidad para el examen parcial.",
+            estado="PENDIENTE",
+            created_at=now - timedelta(hours=3),
+        )
         db.add(solicitud_demo)
+        db.add(solicitud_joan)
         db.commit()
 
         # ------------------------------------------------------------------
@@ -403,15 +428,86 @@ def seed_expo_dataset():
             db.commit()
             db.refresh(s_future)
 
-            r_fut = ReservaCupo(
-                codigo_reserva="RES-EXPO-FUT-RENZO",
-                id_sesion=s_future.id_sesion,
-                estudiante_email="ra2022073504@virtual.upt.pe",
-                estado="PENDIENTE_CONFIRMACION",  # Permite al alumno pulsar Confirmar Asistencia o Desistir
-                fecha_reserva=now - timedelta(hours=3),
-                ticket_hash=generate_ticket_hash("RES-EXPO-FUT-RENZO", s_future.id_sesion, "ra2022073504@virtual.upt.pe", (now - timedelta(hours=3)).isoformat()),
-            )
-            db.add(r_fut)
+        # ------------------------------------------------------------------
+        # Asegurar Reservas para ambos Estudiantes Mentoreados (Renzo y Joan)
+        # ------------------------------------------------------------------
+        students_expo = [
+            ("ra2022073504@virtual.upt.pe", "RENZO"),
+            ("jm2022074255@virtual.upt.pe", "JOAN"),
+        ]
+
+        # 1. Sesión en vivo (SES-EXPO-03-LIVE): CONFIRMADA para probar check-in TOTP en vivo
+        s_live = db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-03-LIVE").first()
+        if s_live:
+            for s_email, s_tag in students_expo:
+                res_code = f"RES-EXPO-LIVE-{s_tag}"
+                r_obj = db.query(ReservaCupo).filter(ReservaCupo.codigo_reserva == res_code).first()
+                if not r_obj:
+                    r_obj = ReservaCupo(
+                        codigo_reserva=res_code,
+                        id_sesion=s_live.id_sesion,
+                        estudiante_email=s_email,
+                        estado="CONFIRMADA",
+                        fecha_reserva=now - timedelta(days=2),
+                        fecha_ratificacion=now - timedelta(days=1),
+                        ticket_hash=generate_ticket_hash(res_code, s_live.id_sesion, s_email, (now - timedelta(days=1)).isoformat()),
+                    )
+                    db.add(r_obj)
+            db.commit()
+
+        # 2. Sesión para bitácora (SES-EXPO-04-BITACORA): CONFIRMADA
+        s_bitacora = db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-04-BITACORA").first()
+        if s_bitacora:
+            for s_email, s_tag in students_expo:
+                res_code = f"RES-EXPO-BIT-{s_tag}"
+                r_obj = db.query(ReservaCupo).filter(ReservaCupo.codigo_reserva == res_code).first()
+                if not r_obj:
+                    r_obj = ReservaCupo(
+                        codigo_reserva=res_code,
+                        id_sesion=s_bitacora.id_sesion,
+                        estudiante_email=s_email,
+                        estado="CONFIRMADA",
+                        fecha_reserva=now - timedelta(days=2),
+                        fecha_ratificacion=now - timedelta(days=1),
+                        ticket_hash=generate_ticket_hash(res_code, s_bitacora.id_sesion, s_email, (now - timedelta(days=1)).isoformat()),
+                    )
+                    db.add(r_obj)
+            db.commit()
+
+        # 3. Sesión para encuesta (SES-EXPO-05-SURVEY): ASISTIDA para probar calificación de 5 estrellas
+        s_survey = db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-05-SURVEY").first()
+        if s_survey:
+            for s_email, s_tag in students_expo:
+                res_code = f"RES-EXPO-SURV-{s_tag}"
+                r_obj = db.query(ReservaCupo).filter(ReservaCupo.codigo_reserva == res_code).first()
+                if not r_obj:
+                    r_obj = ReservaCupo(
+                        codigo_reserva=res_code,
+                        id_sesion=s_survey.id_sesion,
+                        estudiante_email=s_email,
+                        estado="ASISTIDA",
+                        fecha_reserva=now - timedelta(days=2),
+                        fecha_ratificacion=now - timedelta(days=1),
+                        ticket_hash=generate_ticket_hash(res_code, s_survey.id_sesion, s_email, (now - timedelta(days=1)).isoformat()),
+                    )
+                    db.add(r_obj)
+            db.commit()
+
+        # 4. Sesión a futuro (SES-EXPO-07-FUTURE): PENDIENTE_CONFIRMACION para probar confirmar o desistir
+        if s_future:
+            for s_email, s_tag in students_expo:
+                res_code = f"RES-EXPO-FUT-{s_tag}"
+                r_obj = db.query(ReservaCupo).filter(ReservaCupo.codigo_reserva == res_code).first()
+                if not r_obj:
+                    r_obj = ReservaCupo(
+                        codigo_reserva=res_code,
+                        id_sesion=s_future.id_sesion,
+                        estudiante_email=s_email,
+                        estado="PENDIENTE_CONFIRMACION",
+                        fecha_reserva=now - timedelta(hours=3),
+                        ticket_hash=generate_ticket_hash(res_code, s_future.id_sesion, s_email, (now - timedelta(hours=3)).isoformat()),
+                    )
+                    db.add(r_obj)
             db.commit()
 
         # ------------------------------------------------------------------
