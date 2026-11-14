@@ -299,7 +299,9 @@ class AuthService:
         from app.services.role_service import RoleService
 
         user_roles = RoleService.get_user_roles(db, email)
-        if "mentoreado" not in user_roles:
+        if "administrador" in user_roles:
+            user_roles = ["administrador"]
+        elif "mentoreado" not in user_roles:
             user_roles.insert(0, "mentoreado")
 
         if "administrador" in user_roles:
@@ -440,7 +442,9 @@ class AuthService:
         from app.services.role_service import RoleService
 
         user_roles = RoleService.get_user_roles(db, clean_email)
-        if "mentoreado" not in user_roles:
+        if "administrador" in user_roles:
+            user_roles = ["administrador"]
+        elif "mentoreado" not in user_roles:
             user_roles.insert(0, "mentoreado")
 
         if "administrador" in user_roles:

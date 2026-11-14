@@ -72,6 +72,16 @@ export function initUserFromToken(jwtToken: string | null): AuthUser | null {
       : ['mentoreado'];
 
   const roles: UserRole[] = rawRoles.map((r) => r.toLowerCase() as UserRole);
+
+  // El administrador es una autoridad de supervisión institucional; no es estudiante ni conmuta a mentoreado
+  if (roles.includes('administrador')) {
+    return {
+      email,
+      roles: ['administrador'],
+      codigo: email.split('@')[0],
+    };
+  }
+
   if (!roles.includes('mentoreado')) {
     roles.push('mentoreado');
   }
@@ -155,10 +165,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         // En modo mock sin token, emitir token simulado con claims estándar institucional
         const cleanEmail = data.email.trim().toLowerCase();
-        const isOfficialAdmin = cleanEmail === 'admin.epis@upt.pe';
+        const isOfficialAdmin = cleanEmail === 'admin.epis@upt.pe' || cleanEmail.startsWith('admin.');
         const isOfficialMentor = ['mentor.avanzado@upt.pe', '2022073504@upt.pe'].includes(cleanEmail);
-        const mockRoles = isOfficialAdmin
-          ? ['administrador', 'mentoreado']
+        const mockRoles: UserRole[] = isOfficialAdmin
+          ? ['administrador']
           : isOfficialMentor
           ? ['mentor', 'mentoreado']
           : ['mentoreado'];
@@ -190,6 +200,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const switchRole = useCallback(
     (newRole: UserRole) => {
+      // Bloqueo institucional: El rol de administrador es de gobernanza institucional y no puede conmutar a mentoreado
+      if (user?.roles.includes('administrador') || activeRole === 'administrador') {
+        return;
+      }
       if (user && user.roles.includes(newRole)) {
         setActiveRole(newRole);
         if (typeof window !== 'undefined') {
@@ -197,7 +211,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     },
-    [user]
+    [user, activeRole]
   );
 
   const setHasConsented = useCallback((status: boolean) => {

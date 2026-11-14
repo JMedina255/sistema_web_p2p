@@ -92,8 +92,8 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
               </div>
 
-              {/* Conmutador de Roles Disponibles */}
-              {user.roles && user.roles.length > 1 ? (
+              {/* Conmutador de Roles Disponibles (Exclusivo para estudiantes Mentor/Mentoreado; Administrador tiene rol institucional fijo) */}
+              {!user.roles.includes('administrador') && user.roles.length > 1 ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginLeft: '0.5rem' }}>
                   <span style={{ fontSize: '0.72rem', opacity: 0.8 }}>Rol:</span>
                   {user.roles.map((r) => (

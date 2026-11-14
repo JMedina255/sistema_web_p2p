@@ -223,7 +223,7 @@ def seed_demo_environment():
             # Cuentas institucionales reales con el nuevo estándar de correo
             ("ra2022073504@virtual.upt.pe", ["mentoreado"]),
             ("jm2022074255@virtual.upt.pe", ["mentor", "mentoreado"]),
-            ("admin.epis@upt.pe", ["administrador", "mentoreado"]),
+            ("admin.epis@upt.pe", ["administrador"]),
             # Cuentas legacy de pruebas para no alterar tests previos
             ("mentoreado@upt.pe", ["mentoreado"]),
             ("mentor@upt.pe", ["mentor", "mentoreado"]),

@@ -42,7 +42,7 @@ def seed_database():
 
         # 2. Asignar roles a usuarios de prueba
         user_roles_to_seed = [
-            ("admin.epis@upt.pe", ["administrador", "mentoreado"]),
+            ("admin.epis@upt.pe", ["administrador"]),
             ("ra2022073504@virtual.upt.pe", ["mentoreado"]),
             ("jm2022074255@virtual.upt.pe", ["mentor", "mentoreado"]),
             ("2022073504@upt.pe", ["mentor", "mentoreado"]),

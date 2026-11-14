@@ -89,8 +89,8 @@ class AcademicProfileResponse(BaseModel):
     nombres: str | None = None
     apellidos: str | None = None
     ciclo_actual: int = Field(..., ge=1, le=10, description="Ciclo formativo cursado (1 a 10)")
-    rol_postulacion: Literal["mentoreado", "mentor"] = Field(
-        "mentoreado", description="'mentoreado' o 'mentor'"
+    rol_postulacion: Literal["mentoreado", "mentor", "administrador"] = Field(
+        "mentoreado", description="'mentoreado', 'mentor' o 'administrador'"
     )
     materias_interes: list[int] = Field(
         default_factory=list, description="IDs de asignaturas filtro seleccionadas"
@@ -111,8 +111,8 @@ class AcademicProfileUpdate(BaseModel):
     nombres: str | None = None
     apellidos: str | None = None
     ciclo_actual: int = Field(..., ge=1, le=10, description="Ciclo formativo cursado (1 a 10)")
-    rol_postulacion: Literal["mentoreado", "mentor"] = Field(
-        "mentoreado", description="'mentoreado' o 'mentor'"
+    rol_postulacion: Literal["mentoreado", "mentor", "administrador"] = Field(
+        "mentoreado", description="'mentoreado', 'mentor' o 'administrador'"
     )
     materias_interes: list[int] = Field(default_factory=list)
     temas_seleccionados: list[int] = Field(default_factory=list)

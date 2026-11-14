@@ -28,6 +28,9 @@ class RoleService:
                     .all()
                 )
                 role_names = [r[0] for r in roles]
+                # El administrador es autoridad institucional; no posee rol de estudiante mentoreado
+                if "administrador" in role_names:
+                    return ["administrador"]
                 if "mentoreado" not in role_names:
                     role_names.insert(0, "mentoreado")
                 return role_names
@@ -36,16 +39,19 @@ class RoleService:
 
         if clean_email in _memory_user_roles:
             active_roles = list(_memory_user_roles[clean_email])
+            if "administrador" in active_roles:
+                return ["administrador"]
             if "mentoreado" not in active_roles:
                 active_roles.insert(0, "mentoreado")
             return active_roles
 
-        # Roles por omisión para nuevos usuarios en memoria (sin heurísticas de prefijo)
-        initial_roles = ["mentoreado"]
-        if clean_email in ("admin.epis@upt.pe", "admin.demo@upt.pe"):
-            initial_roles.append("administrador")
+        # Roles por omisión para nuevos usuarios en memoria (el administrador no es mentoreado)
+        if clean_email in ("admin.epis@upt.pe", "admin.demo@upt.pe") or clean_email.startswith("admin."):
+            initial_roles = ["administrador"]
         elif clean_email in ("mentor.avanzado@upt.pe", "2022073504@upt.pe", "mentor.demo@upt.pe"):
-            initial_roles.append("mentor")
+            initial_roles = ["mentoreado", "mentor"]
+        else:
+            initial_roles = ["mentoreado"]
 
         _memory_user_roles[clean_email] = set(initial_roles)
         return list(initial_roles)

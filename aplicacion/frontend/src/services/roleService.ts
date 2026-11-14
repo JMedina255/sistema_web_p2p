@@ -38,7 +38,7 @@ function resolveInitialServiceMode(): 'mock' | 'api' {
 class RoleService {
   private mode: 'mock' | 'api' = resolveInitialServiceMode();
   private mockStore: Record<string, string[]> = {
-    'admin.epis@upt.pe': ['administrador', 'mentoreado'],
+    'admin.epis@upt.pe': ['administrador'],
     'mentor.avanzado@upt.pe': ['mentor', 'mentoreado'],
     '2022073504@upt.pe': ['mentor', 'mentoreado'],
     '2022074255@upt.pe': ['mentoreado'],
