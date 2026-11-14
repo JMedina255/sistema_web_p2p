@@ -2,7 +2,7 @@
 
 **Sistema Web P2P de Mentorías Universitarias - EPIS UPT**
 **Versión:** 2.0 (Fase de Diseño / Arquitectura y Construcción)
-**Autores:** Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos
+**Autores:** Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian
 
 ---
 
@@ -33,7 +33,7 @@ A continuación, se presentan los 24 casos de uso canónicos estructurados en lo
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-001 (Autenticación multifactor 2FA institucional), RF-002 (Formalización de consentimiento digital Ley 29733); RN-01 (Dominio institucional @virtual.upt.pe y @upt.pe con OTP de 5 minutos y cooldown de 60 segundos), RN-02 (Consentimiento informado legal digital) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentoreado, Estudiante Mentor, Administrador Institucional (Primarios); Servicio SMTP Gmail Institucional, Google Identity Services GIS (Secundarios) |
 | **Interacción** | Fase de Construcción / Iteración Sprint 01 - Sprint 02 (Actualización Post-Sprint 08 con Google Identity y SMTP real) |
 | **Descripción** | Permite autenticar la identidad del usuario universitario mediante flujo dual sin contraseñas estáticas, validando la pertenencia al dominio oficial @virtual.upt.pe o @upt.pe a través del controlador aplicacion/backend/app/api/v1/endpoints/auth.py. El usuario puede autenticarse mediante credencial federada de Google Workspace UPT utilizando el SDK oficial de Google Identity Services (GIS), o solicitando un código OTP numérico criptográficamente seguro de 6 dígitos con expiración de 300 segundos persistido en la tabla auth_challenges (app/models/auth.py) y despachado mediante el transporte SMTP Gmail institucional de auth_service.py (AuthService.request_otp). El código se valida en POST /api/v1/auth/otp/verify. El sistema verifica el estado del consentimiento informado bajo la Ley Nº 29733 en app/services/consent_service.py; si es nuevo, despliega ConsentModalView.tsx y formaliza la aceptación persistiendo IP, User-Agent y timestamp en consentimientos_legales (app/models/consent.py). Tras la validación, expide un token JWT criptográfico (HS256) con 8 horas de vigencia (ACCESS_TOKEN_EXPIRE_MINUTES = 480) y claims de roles institucionales, retornando el payload al frontend LoginOtpView.tsx para su almacenamiento seguro en localStorage. |
@@ -184,7 +184,7 @@ Escenario 4: Rechazo de ingreso por código temporal OTP expirado tras superar l
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-003 (Gestión y asignación administrativa de roles de usuario); RN-03 (Separación de privilegios y control de acceso RBAC institucional) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Administrador Institucional (`UserRole.administrador`), Director de Escuela EPIS |
 | **Interacción** | Fase de Construcción / Iteración Sprint 01 - Sprint 02 |
 | **Descripción** | Permite a las autoridades institucionales consultar la nómina universitaria de usuarios y administrar sus roles operativos (`UserRole.mentoreado`, `UserRole.mentor`, `UserRole.administrador`, `UserRole.coordinador`) a través del componente `AdminDashboardView.tsx` y el servicio `roleService.ts`. El backend expone los endpoints en `aplicacion/backend/app/api/v1/endpoints/roles.py`, verificando en cada solicitud los privilegios administrativos con `app/core/security.py` (`decode_access_token` comprobando claim `roles` conteniendo `administrador`). El servicio `role_service.py` ejecuta mutaciones transaccionales ACID en las tablas `roles` y `roles_usuarios` (`app/models/roles.py`), garantizando que ningún usuario quede huérfano de roles y que ningún administrador pueda revocar sus propios privilegios. Cada mutación genera una traza en la tabla de auditoría con el UUID del administrador ejecutor, IP de origen y marca de tiempo UTC. |
@@ -252,7 +252,7 @@ Escenario 4: Rechazo de ingreso por código temporal OTP expirado tras superar l
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-008 (Publicación y parametrización de ofertas de mentoría), RF-009 (Aprovisionamiento automatizado de infraestructura); RN-01 (Autenticación y pertenencia de cuenta institucional), RN-03 (Mérito académico y habilitación de mentor ciclo >= VII), RN-04 (Ventana de antelación mínima de 24 horas a T-24h), RN-05 (Aforo máximo estricto de 10 presencial y 20 virtual) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentor (`UserRole.mentor`), Administrador Institucional |
 | **Interacción** | Fase de Construcción / Iteración Sprint 02 - Sprint 03 |
 | **Descripción** | Permite a los estudiantes mentores formalizar la apertura de una sesión de mentoría a través del componente cliente `OfferPublishView.tsx` y el servicio `offerService.ts`, despachando una petición `POST /api/v1/offers` hacia el controlador `aplicacion/backend/app/api/v1/endpoints/offers.py`. El backend valida el token JWT institucional extrayendo criptográficamente el claim del llamante mediante `_extract_caller_and_admin_status`, verificando que coincida con el correo del mentor o cuente con rol de administrador (RN-01). En `app/services/offer_service.py` (`OfferService.publish_offer`), se ejecutan las validaciones de negocio institucionales: comprobación de mérito académico y habilitación de mentor en ciclo >= VII (`validate_mentor_eligibility`, RN-03), cálculo estricto de antelación superior a 24 horas respecto a la fecha y hora actual en UTC (`calculate_advance_hours > 24h`, RN-04), y conformidad de capacidad según la modalidad (exactamente 10 cupos en presencial y 20 en virtual, RN-05). Se instancia y persiste la entidad ORM `SesionMentoria` (`app/models/offer.py`) en estado `PUBLICADA`, se confirma la transacción en PostgreSQL, se emite una respuesta HTTP 201 Created con el esquema `PublishOfferResponse` y se sincroniza la cartelera institucional en cliente. |
@@ -313,7 +313,7 @@ Escenario 4: Rechazo de ingreso por código temporal OTP expirado tras superar l
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-009 (Aprovisionamiento automatizado de infraestructura), RF-010 (Procesamiento de cronogramas y horarios institucionales); RN-06 (Prevención de colisión horaria de espacios), RN-07 (Horario operativo institucional 08:00 - 20:00) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentor (`UserRole.mentor`), Administrador Institucional |
 | **Interacción** | Fase de Construcción / Iteración Sprint 02 - Sprint 03 |
 | **Descripción** | Permite a los mentores y administradores consultar en tiempo real la disponibilidad de aulas físicas, laboratorios y salas de estudio de la EPIS-UPT antes de programar una sesión presencial. El frontend `OfferPublishView.tsx` invoca a `offerService.ts` despachando una petición `GET /api/v1/offers/spaces/availability` con parámetros de fecha y rango horario. El backend `aplicacion/backend/app/api/v1/endpoints/offers.py` delega a `app/services/offer_service.py`, el cual valida que la franja horaria se sitúe estrictamente dentro del horario operativo de la universidad (08:00 a 20:00 horas conforme a RN-07) y consulta las sesiones activas en `sesiones_mentoria` junto con el cronograma académico institucional. Retorna un listado de espacios disponibles con aforo y equipamiento, o sugiere alternativas de modalidad virtual si los espacios físicos se encuentran saturados. |
@@ -368,7 +368,7 @@ Escenario 4: Rechazo de ingreso por código temporal OTP expirado tras superar l
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-004 (Configuración de perfil formativo y matriz horaria); RN-03 (Requisitos académicos de mentor: ciclo >= V y promedio), RN-04 (Antelación de planificación) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentor (`UserRole.mentor`), Coordinador de Carrera |
 | **Interacción** | Fase de Construcción / Iteración Sprint 02 - Sprint 03 |
 | **Descripción** | Permite a los mentores configurar su reseña académica, áreas de competencia disciplinar y su matriz semanal de disponibilidad horaria (lunes a sábado de 08:00 a 20:00) a través del componente cliente `ProfileAvailabilityView.tsx` y el servicio `profileService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/profiles.py` y `app/services/profile_service.py` procesan las peticiones `GET /api/v1/profiles/me` y `PUT /api/v1/profiles/me`, validando los datos con Pydantic (`ProfileUpdateRequest`), verificando que el usuario pertenezca al quinto ciclo académico o superior, y persistiendo de forma atómica en las entidades ORM `PerfilAcademico` y `DisponibilidadHoraria` (`app/models/profile.py`). Las franjas horarias registradas son utilizadas posteriormente por el motor de recomendaciones y el validador de ofertas para evitar traslapes. |
@@ -417,7 +417,7 @@ Escenario 4: Rechazo de ingreso por código temporal OTP expirado tras superar l
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-005 (Gestión del catálogo de asignaturas y temarios); RN-11 (Priorización y catálogo oficial de asignaturas filtro EPIS) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentoreado, Estudiante Mentor, Coordinador Curricular |
 | **Interacción** | Fase de Construcción / Iteración Sprint 02 - Sprint 03 |
 | **Descripción** | Permite a los estudiantes mentoreados y mentores navegar interactivamente por la malla curricular oficial de la EPIS-UPT a través del componente cliente `CurriculumCatalogView.tsx` y el servicio `curriculumService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/curriculum.py` y `app/services/curriculum_service.py` proporcionan consultas estructuradas por carrera (`Carrera`), ciclo académico (I al X), curso (`Curso`) y temas de aprendizaje silábico (`TemaCurricular`), destacando visualmente las asignaturas identificadas institucionalmente como "materias filtro" (`es_filtro = true`, tales como Algoritmos, Estructuras de Datos, Base de Datos y Programación Orientada a Objetos). Desde cada tema curricular, el mentoreado puede consultar directamente las ofertas de mentoría activas o solicitar la apertura de una sesión por demanda. |
@@ -467,7 +467,7 @@ Escenario 4: Rechazo de ingreso por código temporal OTP expirado tras superar l
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-006 (Inferencia de recomendaciones y ranking Top-k); RN-04 (Ventana de antelación mínima de 24 horas), RN-11 (Ponderación algorítmica de asignaturas filtro) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentoreado (`UserRole.mentoreado`) |
 | **Interacción** | Fase de Construcción / Iteración Sprint 03 - Sprint 04 |
 | **Descripción** | Permite a los estudiantes mentoreados visualizar una cartelera adaptativa de sesiones de mentoría clasificadas según su relevancia académica individual mediante el componente cliente `RecommendationFeedView.tsx` y el servicio `recommendationService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/recommendations.py` procesa la petición `GET /api/v1/recommendations/top-k?limit=6`, delegando al servicio `app/services/recommendation_service.py`. El motor analiza el vector de intereses y asignaturas matriculadas del estudiante extraído de `perfiles_academicos`, computa la similitud de cosenos respecto a las sesiones en estado `PUBLICADA` con antelación mayor a 24 horas (`fecha_inicio > now_utc + 24h`, RN-04), aplica bonificaciones para materias filtro (`es_filtro = true`, RN-11) y penaliza sesiones con aforo próximo a agotarse. Retorna una nómina ordenada de las mejores k recomendaciones serializadas en el modelo Pydantic `TopKRecommendationResponse`. |
@@ -518,7 +518,7 @@ Escenario 4: Rechazo de ingreso por código temporal OTP expirado tras superar l
 | **Tipo** | Obligatorio (   ) / Opcional ( X ) |
 | **Requisito ID (RF)** | RF-007 (Banco de solicitudes por demanda académica); RN-04 (Antelación de planificación institucional), RN-11 (Priorización curricular de materias formativas filtro); RNF04, RNF09 |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentoreado (`UserRole.mentoreado`, Primario); Estudiante Mentor (`UserRole.mentor`, Secundario) |
 | **Interacción** | Fase de Construcción / Iteración Sprint 03 - Sprint 04 (Actualización Post-Sprint 08 con Banco de Demanda) |
 | **Descripción** | Permite a los estudiantes mentoreados canalizar una necesidad formativa insatisfecha hacia el banco institucional de solicitudes por demanda cuando no existan ofertas vigentes que atiendan un tema silábico de interés o cuando el aforo de las sesiones publicadas se encuentre totalmente agotado. La interacción se inicia mediante el componente modal accesible MentoringDemandModalView.tsx, desplegable desde el panel de lista vacía en RecommendationFeedView.tsx o desde la alerta de sobrecupo en BookingModalView.tsx. El estudiante selecciona una asignatura curricular formativa y una unidad o tema silábico específico, ingresando opcionalmente una justificación u observación pedagógica. La petición se procesa en bookingService.ts y se despacha hacia el endpoint POST /api/v1/bookings/requests en el controlador aplicacion/backend/app/api/v1/endpoints/bookings.py. El servicio booking_service.py valida la integridad de los datos, descarta la existencia de solicitudes duplicadas activas para el mismo estudiante y tema, e inserta el registro en la tabla física solicitudes_demanda (app/models/booking.py) con estado 'PENDIENTE' y folio institucional correlativo #DEM-{id}. La solicitud queda disponible de forma inmediata en el panel de mentores (MentorSessionsView.tsx, pestaña "Banco de Solicitudes por Demanda") para formular sesiones de mentoría dirigida. |
@@ -646,7 +646,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-012 (Reserva de cupos con control de aforo y concurrencia; trazabilidad técnica hacia RF-002, RF-006, RF-013 y RF-014) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentoreado (`UserRole.mentoreado`), Administrador Institucional (`UserRole.administrador`) |
 | **Interacción** | Fase de Construcción / Iteración Sprint 04 - Sprint 05 |
 | **Descripción** | Permite formalizar una reserva provisional de cupo en estado `PENDIENTE_CONFIRMACION` mediante una petición `POST /api/v1/bookings/reserve` despachada desde el componente cliente `BookingModalView.tsx` hacia el controlador FastAPI `bookings.py`. El backend ejecuta validaciones de seguridad con `decode_access_token` en `app/core/security.py`, comprueba la vigencia del consentimiento legal con `ConsentService.get_consent_status`, adquiere el cerrojo en memoria `_booking_lock` y ejecuta una transacción en PostgreSQL bajo bloqueo pesimista de fila `SELECT ... FOR UPDATE OF sesiones_mentoria` con `SET LOCAL lock_timeout = '5.0s'`. Comprueba que `occupied_seats < sesion.aforo_maximo` (10 presencial / 20 virtual, RN-05) y la antelación mayor a 24 horas (`sesion.fecha_inicio > now_utc + 24h`, RN-04). Genera la entidad ORM `ReservaCupo` con código alfanuméricamente secuencial y hash criptográfico SHA-256 (`ticket_hash`), confirma la transacción con `db.commit()` y retorna el payload serializado `BookingResponse` (HTTP 201 Created). |
@@ -739,7 +739,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-013 (Confirmación anticipada de asistencia a mentoría); RN-04 (Ventana de ratificación previa entre T-48h y T-24h), RN-10 (Control de asistencia y quórum institucional) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentoreado (`UserRole.mentoreado`) |
 | **Interacción** | Fase de Construcción / Iteración Sprint 04 - Sprint 05 |
 | **Descripción** | Permite a los estudiantes mentoreados con reservas provisionales en estado `PENDIENTE_CONFIRMACION` confirmar obligatoriamente su asistencia definitiva dentro de la ventana de ratificación institucional comprendida entre las 48 horas y las 24 horas previas al inicio de la sesión (`sesion.fecha_inicio - 48h <= now_utc <= sesion.fecha_inicio - 24h`). El usuario accede a la vista `StudentBookingsView.tsx` y acciona el botón de confirmación enlazado a `bookingService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/bookings.py` y `app/services/booking_service.py` procesan la petición `POST /api/v1/bookings/{id}/confirm`, verifican la vigencia temporal de la ventana, conmutan el estado de la entidad `ReservaCupo` a `CONFIRMADA`, generan el identificador criptográfico del pase de lista y emiten una respuesta HTTP 200 OK, contribuyendo al cálculo del quórum mínimo (RN-05). |
@@ -782,7 +782,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-014 (Desistimiento voluntario y liberación anticipada de cupos); RN-04 (Antelación mínima de 24 horas para cancelaciones sin sanción institucional) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentoreado (`UserRole.mentoreado`) |
 | **Interacción** | Fase de Construcción / Iteración Sprint 04 - Sprint 05 |
 | **Descripción** | Permite a los estudiantes mentoreados anular voluntariamente una reserva activa en estado `PENDIENTE_CONFIRMACION` o `CONFIRMADA` sin incurrir en penalizaciones académicas, siempre que la solicitud se despache con una antelación mayor a 24 horas respecto al inicio de la sesión (`fecha_inicio > now_utc + 24h`, RN-04). El componente `StudentBookingsView.tsx` despacha `POST /api/v1/bookings/{id}/cancel` hacia `bookings.py` y `app/services/booking_service.py`. El backend adquiere el cerrojo pesimista de fila, actualiza el estado de la reserva a `CANCELADA_ESTUDIANTE`, decrementa el contador de cupos ocupados de la sesión y confirma la transacción ACID con `db.commit()`, notificando al motor de recomendaciones sobre la vacante liberada. |
@@ -818,7 +818,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-015 (Monitoreo desatendido, emisión de recordatorios y evaluación de quórum); RN-05 (Regla de quórum mínimo de 3 estudiantes confirmados), RN-10 (Automatización de eventos temporales a T-24h) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Proceso Demonio en Segundo Plano (`SchedulerWorker`), Administrador Institucional |
 | **Interacción** | Fase de Construcción / Iteración Sprint 06 |
 | **Descripción** | Permite evaluar de forma automatizada y desatendida el cumplimiento del umbral reglamentario de quórum institucional (mínimo 3 estudiantes con asistencia ratificada en presencial o 5 en virtual, RN-05) exactamente 24 horas antes del inicio programado de cada sesión de mentoría. Un proceso en segundo plano o endpoint administrativo `POST /api/v1/quorum/evaluate-all` en `aplicacion/backend/app/api/v1/endpoints/quorum.py` invoca al método `evaluate_all_active_quorums` en `app/services/booking_service.py`. El servicio adquiere un bloqueo pesimista `SELECT ... FOR UPDATE` sobre `sesiones_mentoria`, valida que `quorumevaluated_at` sea nulo para garantizar estricta idempotencia transaccional, cuantifica las reservas en estado `CONFIRMADA`, caduca las reservas no ratificadas a `CANCELADA_NO_CONFIRMADA`; si se alcanza o supera el quórum, promueve automáticamente la sesión a estado `CONFIRMADA`. Si no se alcanza el quórum reglamentario, transiciona la sesión a estado `QUORUM_INSUFICIENTE` y despacha alertas urgentes al mentor para la resolución de contingencia (CUS-007). |
@@ -855,7 +855,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-016 (Gestión resolutiva de sesiones ante quórum insuficiente); RN-04 (Antelación mínima de reprogramación), RN-10 (Resolución de contingencia ante quórum) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentor (`UserRole.mentor`), Administrador Institucional |
 | **Interacción** | Fase de Construcción / Iteración Sprint 06 |
 | **Descripción** | Permite al estudiante mentor tomar una decisión resolutiva cuando su sesión no alcanza el quórum reglamentario de 3 estudiantes a T-24h (estado `QUORUM_INSUFICIENTE`) a través del componente cliente `MentorSessionsView.tsx` y el servicio `offerService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/offers.py` y `app/services/offer_service.py` procesan la petición `POST /api/v1/offers/{id}/quorum-decision`. El mentor cuenta con tres alternativas reglamentarias: 1) Dictar la sesión de todas formas con los estudiantes confirmados (promoción forzada a `CONFIRMADA`), 2) Reprogramar la sesión para una nueva fecha con antelación mínima de 24 horas, o 3) Cancelar la sesión definitivamente liberando a los inscritos sin penalización alguna. La operación se ejecuta bajo una transacción ACID confirmada con `db.commit()`. |
@@ -903,7 +903,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-017 (Registro de bitácora pedagógica y control de asistencia); RN-05 (Aforo y presencia efectiva), RN-12 (Trazabilidad de asistencia y ventana temporal de check-in) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentor (`UserRole.mentor`), Estudiante Mentoreado (`UserRole.mentoreado`) |
 | **Interacción** | Fase de Construcción / Iteración Sprint 06 |
 | **Descripción** | Permite registrar la presencia efectiva de los estudiantes durante la ejecución de una sesión de mentoría a través del componente cliente `SessionAttendanceView.tsx` y el servicio `attendanceService.ts`. El mentor proyecta o comparte un código QR dinámico cifrado basado en TOTP que rota cada 30 segundos. El estudiante mentoreado escanea el código o digita el pase numérico de 6 dígitos despachando `POST /api/v1/sessions/{id}/attendance/check-in` hacia el backend en `aplicacion/backend/app/api/v1/endpoints/attendance.py`. El servicio `AttendanceService` valida que la solicitud se produzca dentro de la ventana de la sesión (desde 15 minutos antes del inicio hasta 30 minutos tras el fin), comprueba que el estudiante posea una reserva en estado `CONFIRMADA` y persiste el registro en la tabla `asistencias_sesion` (`app/models/attendance.py`) con timestamp UTC y geolocalización o IP institucional, transmitiendo el evento en tiempo real vía WebSockets al panel del mentor. |
@@ -952,7 +952,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-017 (Registro de bitácora pedagógica y control de asistencia); RN-12 (Plazo máximo de 48 horas post-sesión para registro de bitácora) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentor (`UserRole.mentor`), Coordinador Académico |
 | **Interacción** | Fase de Construcción / Iteración Sprint 06 |
 | **Descripción** | Permite al estudiante mentor consignar el reporte pedagógico de la sesión de mentoría recién concluida a través del formulario `BitacoraFormView.tsx` y el servicio `bitacoraService.ts`. El mentor detalla los temas específicos del sílabo abordados, el nivel de asimilación conceptual de los participantes, las dificultades pedagógicas observadas y las observaciones institucionales. La petición se despacha mediante `POST /api/v1/sessions/{id}/bitacora` hacia el backend en `aplicacion/backend/app/api/v1/endpoints/bitacora.py`. El servicio `BitacoraService` valida que la sesión se encuentre en estado `CONCLUIDA`, que el plazo transcurrido desde el fin de la sesión no exceda las 48 horas reglamentarias (RN-12) y que el texto pedagógico supere los 50 caracteres mínimos. Persiste la entidad `BitacoraPedagogica` (`app/models/bitacora.py`) vinculada a la sesión y actualiza el estado a `BITACORA_REGISTRADA` para su posterior visado administrativo. |
@@ -995,7 +995,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-019 (Consulta de historial cronológico individual de sesiones y asistencias) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentor, Estudiante Mentoreado, Administrador Institucional |
 | **Interacción** | Fase de Construcción / Iteración Sprint 05 - Sprint 06 |
 | **Descripción** | Permite a los usuarios consultar su trayectoria histórica dentro del programa de mentorías académicas a través del componente cliente `HistorySessionsView.tsx` y el servicio `historyService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/history.py` y `app/services/history_service.py` procesan las peticiones `GET /api/v1/history/sessions` y `GET /api/v1/history/bitacora/{session_id}`. Para los mentoreados, el sistema presenta la relación cronológica de sesiones a las que asistió con sus comprobantes y temas repasados. Para los mentores, despliega las sesiones impartidas, las bitácoras pedagógicas suscritas con su hash de firma digital y el estado de validación de horas ante la Dirección de Escuela. |
@@ -1037,7 +1037,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-022 (Parametrización institucional de umbrales y emisión de certificados), RF-023 (Descarga y verificación institucional de certificados); RN-14 (Umbral mínimo de 20 horas acreditadas con bitácoras visadas) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentor (`UserRole.mentor`), Administrador Institucional, Director de Escuela EPIS |
 | **Interacción** | Fase de Construcción / Iteración Sprint 06 - Sprint 07 |
 | **Descripción** | Permite a los estudiantes mentores solicitar y descargar una constancia institucional de horas de mentoría acreditadas una vez alcanzado el umbral reglamentario de 20 horas efectivas de dictado (RN-14) con bitácoras pedagógicas debidamente registradas y visadas por la administración. El componente `CertificateView.tsx` despacha la solicitud mediante `POST /api/v1/certificates/generate` hacia el backend en `aplicacion/backend/app/api/v1/endpoints/certificates.py`. El servicio `CertificateService` verifica en base de datos la suma de horas dictadas (`SUM(duracion_minutos)/60 >= 20`), genera un código de serie alfanumérico único, calcula el sello criptográfico SHA-256 del documento, genera un código QR de verificación institucional que apunta al validador público de la universidad, y compila el documento en formato PDF. Persiste la entidad `CertificadoHoras` (`app/models/certificate.py`) y retorna el identificador del archivo para su descarga segura. |
@@ -1074,7 +1074,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-021 (Cálculo dinámico de reputación y visualización de insignias); RN-13 (Gamificación: puntaje por calificaciones, asistencias y puntualidad) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentor, Estudiante Mentoreado |
 | **Interacción** | Fase de Construcción / Iteración Sprint 06 - Sprint 07 |
 | **Descripción** | Permite a la comunidad académica visualizar el progreso, insignias de honor alcanzadas y nivel de reputación formativa de los mentores mediante el componente cliente `GamificationView.tsx` y el servicio `gamificationService.ts`. El backend en `aplicacion/backend/app/api/v1/endpoints/gamification.py` y `app/services/reputation_service.py` expone las consultas de logros `GET /api/v1/gamification/badges` y el cuadro de honor `GET /api/v1/gamification/leaderboard`. El motor de reputación calcula periódicamente el puntaje global $R = 0.5 	imes ValoracionPromedio + 0.3 	imes HorasAcreditadas + 0.2 	imes TasaPuntualidad$ (RN-13), desbloqueando automáticamente insignias de nivel (tales como "Mentor Destacado", "Puntualidad Impecable" y "Especialista en Algoritmos") en la tabla física `insignias_usuarios` (`app/models/gamification.py`), fomentando la participación y el compromiso entre pares. |
@@ -1116,7 +1116,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-015 (Monitoreo desatendido, emisión de recordatorios y alertas); RN-04 (Antelación de 24 horas), RN-10 (Control de asistencia y quórum institucional) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Proceso Planificador (`SchedulerWorker`), Estudiante Mentor, Estudiante Mentoreado, Administrador Institucional |
 | **Interacción** | Fase de Construcción / Iteración Sprint 07 - Sprint 08 |
 | **Descripción** | Permite transmitir notificaciones asíncronas y alertas en tiempo real a los usuarios institucionales ante eventos críticos del ciclo de vida de las sesiones de mentoría (tales como recordatorios de ratificación de asistencia a T-24h, confirmación oficial de quórum, reprogramación o cancelación contingente). El frontend gestiona las alertas reactivas a través del componente `NotificationBell.tsx` y el servicio `notificationService.ts`, conectándose al canal de Server-Sent Events (SSE) `/api/v1/notifications/stream`. El backend `aplicacion/backend/app/api/v1/endpoints/notifications.py` y `app/services/notification_service.py` procesan eventos generados por tareas programadas de Celery/APScheduler, persisten la entidad `NotificacionEvento` (`app/models/notification.py`) en PostgreSQL y despachan simultáneamente correos electrónicos de respaldo vía SMTP universitario (`EmailService`), garantizando la notificación oportuna a mentores y estudiantes. |
@@ -1153,7 +1153,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-025 (Tablero analítico y métricas de rendimiento académico) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Administrador Institucional (`UserRole.administrador`), Director de Escuela EPIS, Comité de Calidad ICACIT |
 | **Interacción** | Fase de Construcción / Iteración Sprint 07 - Sprint 08 |
 | **Descripción** | Permite a las autoridades académicas y evaluadores de acreditación generar informes estadísticos agregados sobre la cobertura, demanda y efectividad del programa de mentorías entre pares mediante el componente cliente `AnalyticsDashboardView.tsx` y el servicio `analyticsService.ts`. El backend en `aplicacion/backend/app/api/v1/endpoints/analytics.py` y `app/services/analytics_service.py` procesa las peticiones `GET /api/v1/analytics/reports/kpis` y `GET /api/v1/analytics/export`. El servicio ejecuta consultas analíticas relacionales en PostgreSQL agrupando métricas por asignatura filtro, ciclo y modalidad (horas dictadas, porcentaje de asistencia efectiva, quórum promedio alcanzado y tasa de demanda no atendida). Permite descargar el consolidado en formato de hoja de cálculo estructurada (`.xlsx` o `.csv`) con metadatos de auditoría institucional. |
@@ -1190,7 +1190,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-025 (Tablero analítico y métricas de rendimiento académico); Criterios ICACIT de retención y graduación oportuna |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Administrador Institucional, Comisión de Acreditación ICACIT, Director de Escuela EPIS |
 | **Interacción** | Fase de Construcción / Iteración Sprint 07 - Sprint 08 |
 | **Descripción** | Permite a los comités de calidad educativa evaluar el impacto del programa de mentorías en la retención estudiantil y en la reducción del índice de reprobación en materias filtro a través del componente cliente `RetentionDashboardView.tsx` y el servicio `analyticsService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/analytics.py` procesa las peticiones `GET /api/v1/analytics/retention/cohorts` y `GET /api/v1/analytics/retention/impact`. El servicio analiza estadísticamente las cohortes estudiantiles, calculando la correlación entre la participación recurrente en mentorías (asistencia >= 3 sesiones) y la tasa de aprobación de las asignaturas críticas (Cálculo, Física, Algoritmos, Estructuras de Datos). Presenta comparativas entre grupos de control (estudiantes no asistentes) y grupos participantes para respaldar las auditorías ICACIT. |
@@ -1227,7 +1227,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-026 (Auditoría administrativa de bitácoras, accesos y seguridad); RN-02 (Registro inmutable de consentimiento legal digital Ley Nº 29733) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Oficial de Seguridad de la Información (`UserRole.administrador`), Delegado de Protección de Datos |
 | **Interacción** | Fase de Construcción / Iteración Sprint 07 - Sprint 08 |
 | **Descripción** | Permite a los oficiales de seguridad y autoridades universitarias inspeccionar las trazas de auditoría inmutables del sistema y verificar el estricto cumplimiento de la Ley Nº 29733 (Protección de Datos Personales del Perú) mediante el componente `AuditLogView.tsx` y el servicio `auditService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/audit.py` y `app/services/audit_service.py` exponen los endpoints `GET /api/v1/audit/logs`, `GET /api/v1/audit/consent-traces` y `POST /api/v1/audit/verify-chain`. El sistema verifica la integridad criptográfica de la cadena de bloques o hashes encadenados de auditoría (donde cada registro contiene el SHA-256 del registro anterior), garantizando la no alteración de eventos críticos (inicios de sesión 2FA, modificaciones de roles, aceptaciones y revocaciones de consentimiento legal con direcciones IP y marcas temporales UTC). |
@@ -1270,7 +1270,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-024 (Priorización institucional y realce algorítmico); RN-04 (Umbral temporal T-24h), RN-05 (Aforos máximos 10 y 20), RN-10 (Quórum mínimo de 3 estudiantes), RN-14 (Horas de acreditación) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Administrador Institucional (`UserRole.administrador`), Director de Escuela EPIS |
 | **Interacción** | Fase de Construcción / Iteración Sprint 07 - Sprint 08 |
 | **Descripción** | Permite a las autoridades de la EPIS-UPT parametrizar y calibrar las reglas de negocio globales y umbrales operacionales del sistema sin requerir modificaciones en el código fuente a través del componente cliente `SystemSettingsView.tsx` y el servicio `configService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/config.py` y `app/services/config_service.py` procesan las peticiones `GET /api/v1/config/parameters` y `PUT /api/v1/config/parameters`. El administrador puede ajustar los aforos máximos presenciales y virtuales (RN-05), la ventana de antelación obligatoria para reservas y cancelaciones (RN-04), el quórum mínimo para confirmación automática de sesiones (RN-10) y el umbral de horas acumuladas para emisión de constancias (RN-14). Los parámetros se persisten en la tabla `parametros_institucionales` (`app/models/config.py`), invalidan la caché global de la aplicación y registran una traza auditada de modificación. |
@@ -1313,7 +1313,7 @@ Escenario 4: Disponibilidad y visualización inmediata en el banco de solicitude
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-005 (Gestión del catálogo de asignaturas y temarios), RF-026 (Auditoría administrativa de bitácoras y materias); RN-11 (Asignaturas filtro prioritarias) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Administrador Institucional (`UserRole.administrador`), Director de Escuela EPIS |
 | **Interacción** | Fase de Construcción / Iteración Sprint 07 - Sprint 08 |
 | **Descripción** | Permite a la Dirección de Escuela y a los administradores actualizar la malla curricular de la EPIS-UPT, gestionar las asignaturas designadas como materias filtro (`es_filtro = true`) y dar de alta, modificar o desactivar temas silábicos de aprendizaje a través del componente cliente `AdminCurriculumView.tsx` y el servicio `curriculumService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/curriculum.py` y `app/services/curriculum_service.py` procesan las peticiones `POST /api/v1/curriculum/courses`, `PUT /api/v1/curriculum/courses/{id}`, `POST /api/v1/curriculum/courses/{id}/topics` y `DELETE /api/v1/curriculum/topics/{id}`. El servicio valida que los temas ingresados correspondan a las unidades didácticas del semestre lectivo vigente (semanas 1 a 17), previene duplicidades conceptuales mediante comprobaciones de unicidad en `temas_curriculares` (`app/models/curriculum.py`) y asegura la consistencia referencial con las ofertas de mentoría y solicitudes de demanda en curso. |

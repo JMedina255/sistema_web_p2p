@@ -75,7 +75,7 @@ def main():
         f.write("# NARRATIVAS DE CASOS DE USO CONSOLIDADAS - FASE DE DISEÑO\n\n")
         f.write("**Sistema Web P2P de Mentorías Universitarias - EPIS UPT**\n")
         f.write("**Versión:** 2.0 (Fase de Diseño / Arquitectura y Construcción)\n")
-        f.write("**Autores:** Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos\n\n---\n\n")
+        f.write("**Autores:** Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian\n\n---\n\n")
         f.write(content)
 
     # 3. Inject into docs/diseño/FD03-EPIS-Informe SRS de Proyecto.md

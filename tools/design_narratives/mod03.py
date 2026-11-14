@@ -16,7 +16,7 @@ def get_mod03():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-004 (Configuración de perfil formativo y matriz horaria); RN-03 (Requisitos académicos de mentor: ciclo >= V y promedio), RN-04 (Antelación de planificación) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentor (`UserRole.mentor`), Coordinador de Carrera |
 | **Interacción** | Fase de Construcción / Iteración Sprint 02 - Sprint 03 |
 | **Descripción** | Permite a los mentores configurar su reseña académica, áreas de competencia disciplinar y su matriz semanal de disponibilidad horaria (lunes a sábado de 08:00 a 20:00) a través del componente cliente `ProfileAvailabilityView.tsx` y el servicio `profileService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/profiles.py` y `app/services/profile_service.py` procesan las peticiones `GET /api/v1/profiles/me` y `PUT /api/v1/profiles/me`, validando los datos con Pydantic (`ProfileUpdateRequest`), verificando que el usuario pertenezca al quinto ciclo académico o superior, y persistiendo de forma atómica en las entidades ORM `PerfilAcademico` y `DisponibilidadHoraria` (`app/models/profile.py`). Las franjas horarias registradas son utilizadas posteriormente por el motor de recomendaciones y el validador de ofertas para evitar traslapes. |
@@ -65,7 +65,7 @@ def get_mod03():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-005 (Gestión del catálogo de asignaturas y temarios); RN-11 (Priorización y catálogo oficial de asignaturas filtro EPIS) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentoreado, Estudiante Mentor, Coordinador Curricular |
 | **Interacción** | Fase de Construcción / Iteración Sprint 02 - Sprint 03 |
 | **Descripción** | Permite a los estudiantes mentoreados y mentores navegar interactivamente por la malla curricular oficial de la EPIS-UPT a través del componente cliente `CurriculumCatalogView.tsx` y el servicio `curriculumService.ts`. El backend `aplicacion/backend/app/api/v1/endpoints/curriculum.py` y `app/services/curriculum_service.py` proporcionan consultas estructuradas por carrera (`Carrera`), ciclo académico (I al X), curso (`Curso`) y temas de aprendizaje silábico (`TemaCurricular`), destacando visualmente las asignaturas identificadas institucionalmente como "materias filtro" (`es_filtro = true`, tales como Algoritmos, Estructuras de Datos, Base de Datos y Programación Orientada a Objetos). Desde cada tema curricular, el mentoreado puede consultar directamente las ofertas de mentoría activas o solicitar la apertura de una sesión por demanda. |

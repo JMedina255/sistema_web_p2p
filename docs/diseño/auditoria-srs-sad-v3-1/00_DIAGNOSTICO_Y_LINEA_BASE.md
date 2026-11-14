@@ -8,8 +8,9 @@
 **Docente de Cátedra:** Dr. Ricardo Eduardo Valcárcel Alvarado<br>
 **Semestre Académico:** 2026-II<br>
 **Fecha de Emisión:** 14 de Noviembre de 2026<br>
-**Rama de Trabajo:** `docs/srs-sad-v3-1-homologacion`<br>
-**Commit Base de Auditoría:** `097f90d725e537f411ebadac740905e0c0448f61`
+**Rama de Trabajo Base:** `main` (integrada mediante PR #11)<br>
+**Commit Base Inicial de Auditoría:** `097f90d725e537f411ebadac740905e0c0448f61`<br>
+**Commit Base Integrado en Main:** `0542aa2af8d30ecb6afdfa9d4561d0f07a1801b0`
 
 ---
 
@@ -21,24 +22,25 @@ A continuación, se presenta el registro histórico de versiones del presente in
 
 | Versión | Responsable | Revisada por | Aprobada por | Fecha | Descripción del Cambio |
 | :---: | :--- | :--- | :--- | :---: | :--- |
-| **1.0** | Joan Medina / Renzo Antayhua | Dr. Ricardo Valcárcel | Dirección EPIS | 14/11/2026 | Emisión inicial del diagnóstico de línea base, auditoría crítica integral de las versiones v3.0 del SRS y SAD frente al código fuente en rama `main` y formulación del plan de homologación documental H00–H11. |
+| **1.0** | Joan Cristian Medina Quispe / Renzo Antonio Antayhua Mamani | Pendiente de revisión (Dr. Ricardo Valcárcel) | Pendiente de aprobación (Dirección EPIS) | 14/11/2026 | Emisión inicial del diagnóstico de línea base, auditoría crítica integral de las versiones v3.0 del SRS y SAD frente al código fuente en rama `main` y formulación del plan de homologación documental H00–H11. |
+| **1.1** | Joan Cristian Medina Quispe / Renzo Antonio Antayhua Mamani | Pendiente de revisión (Dr. Ricardo Valcárcel) | Pendiente de aprobación (Dirección EPIS) | 14/11/2026 | Rectificación H01-R: incorporación formal de HALL-11 (`dummyIdToken`), clarificación metodológica entre discrepancia diagnosticada, decisión aprobada y aplicación en documentos maestros, notas de validación en pruebas (682 históricas) y conversión a rutas relativas portables. |
 
 Fuente: Elaboración propia.
 
-El presente cuadro certifica el origen formal del informe H00 dentro del ciclo de auditoría documental, delimitando la responsabilidad de los autores y las instancias de revisión de la cátedra de Construcción de Software I.
+El presente cuadro certifica el registro formal del informe H00 dentro del ciclo de auditoría documental, delimitando la autoría técnica del equipo consultor y consignando formalmente el estado de revisión y aprobación académica ante la cátedra de Construcción de Software I y la Dirección de la EPIS.
 
 ---
 
 ## 1. Propósito y Alcance del Diagnóstico
 
-El objetivo del presente informe es establecer la **Línea Base Oficial de Auditoría** para la transición documental hacia la versión **v3.1** de la Especificación de Requerimientos de Software ([FD03-EPIS-Informe SRS de Proyecto.md](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/docs/diseño/FD03-EPIS-Informe%20SRS%20de%20Proyecto.md)) y el Documento de Arquitectura de Software ([FD04-EPIS-Informe SAD de Proyecto.md](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/docs/diseño/FD04-EPIS-Informe%20SAD%20de%20Proyecto.md)).
+El objetivo del presente informe es establecer la **Línea Base Oficial de Auditoría** para la transición documental hacia la versión **v3.1** de la Especificación de Requerimientos de Software ([FD03-EPIS-Informe SRS de Proyecto.md](../FD03-EPIS-Informe%20SRS%20de%20Proyecto.md)) y el Documento de Arquitectura de Software ([FD04-EPIS-Informe SAD de Proyecto.md](../FD04-EPIS-Informe%20SAD%20de%20Proyecto.md)).
 
 La auditoría evalúa exhaustivamente la consistencia, exactitud técnica, completitud y trazabilidad de los documentos de diseño respecto a la implementación real del código fuente en la rama principal (`main`), asegurando que ambos artefactos constituyan documentos de máxima rigurosidad académica para los procesos de acreditación universitaria y sustentación de cátedra.
 
 El alcance comprende:
 1. **Contraste de Especificaciones Funcionales:** Evaluación de la matriz de Requerimientos Funcionales (`RF01`–`RF26`), Reglas de Negocio (`RN-01`–`RN-14`) y los 24 Casos de Uso Canónicos (`CUS-001`–`CUS-024`).
 2. **Contraste Arquitectónico y Técnico:** Evaluación del modelo relacional físico en PostgreSQL/Supabase (16 tablas físicas), contratos de API REST (FastAPI), servicios en segundo plano, seguridad RBAC/RLS e infraestructura externa.
-3. **Control de Calidad Normativo:** Comprobación de las reglas de diseño [reglas_documentacion_diseño.md](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/reglas_documentacion_diseño.md) (Reglas D-1 a D-10) y la plantilla de narrativas [REGLAS_Y_PLANTILLA_NARRATIVAS_SRS.md](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/docs/diseño/REGLAS_Y_PLANTILLA_NARRATIVAS_SRS.md).
+3. **Control de Calidad Normativo:** Comprobación de las reglas de diseño [reglas_documentacion_diseño.md](../../reglas_documentacion_diseño.md) (Reglas D-1 a D-10) y la plantilla de narrativas [REGLAS_Y_PLANTILLA_NARRATIVAS_SRS.md](../REGLAS_Y_PLANTILLA_NARRATIVAS_SRS.md).
 
 ---
 
@@ -76,22 +78,23 @@ El análisis de las fuentes demuestra que existe un repositorio activo y altamen
 
 ## 3. Matriz de Hallazgos Críticos y Diagnóstico Estructurado
 
-A continuación, se exponen los diez (10) hallazgos de inconsistencia identificados durante la auditoría técnica documental:
+A continuación, se exponen los once (11) hallazgos de inconsistencia identificados durante la auditoría técnica documental:
 
 ### Cuadro 0.3: Matriz de Hallazgos Críticos de Auditoría Documental
 
-| ID | Categoría | Componentes Afectados | Severidad | Descripción del Hallazgo y Evidencia Técnica |
-| :---: | :--- | :--- | :---: | :--- |
-| **HALL-01** | Inconsistencia de Requisitos | SRS 5.3, 5.5 vs. SAD 4.1, 4.3 y Migración 005 | **ALTA** | **Divergencia semántica en RF20:** En el SRS v3.0, `RF20` figura como *"Gestión y descarga de recursos académicos"* (`SessionResourcesView.tsx`, `ResourceService.py`). En el SAD v3.0 y en el código real (Migración `005_closure_and_advanced_modules.py` línea 67, `survey_service.py`, `encuestas_calidad`), `RF20` corresponde a la *"Captura de encuestas de calidad post-mentoría 24h"*. |
-| **HALL-02** | Contradicción de Nomenclatura | Textos narrativos en SRS y SAD vs. Línea Base Canónica | **ALTA** | **Referencias cruzadas obsoletas de CUS-008 y CUS-011:** En la fase de análisis histórica, `CUS08` era *"Bitácora y Asistencia"* y `CUS11` era *"Asistencia QR"*. En la línea base canónica de diseño, `CUS-008` es *"Consultar disponibilidad de espacios y recursos"* (MOD-02) y `CUS-011` es *"Generar reportes e indicadores de analítica académica"* (MOD-08). Existen múltiples párrafos descriptivos en el SRS que aún aluden a `CUS08` como bitácora y a `CUS11` como asistencia QR. |
-| **HALL-03** | Desfase en Persistencia | SAD 10.1, 10.2 vs. Migración 005 y Modelos ORM | **MEDIA-ALTA** | **Diccionario físico incompleto:** El SAD v3.0 titula y describe la sección 10.2 como *"Diccionario DDL Físico de las 15 Tablas Relacionales"*. Sin embargo, la migración `005_closure_and_advanced_modules.py` y `app/models/__init__.py` implementan **16 entidades relacionales**, omitiendo en el diccionario formal la tabla `tokens_asistencia_activos` (soporte multi-worker para TOTP dinámico de asistencia). |
-| **HALL-04** | Discrepancia de Entorno | SAD 1.5, Control de Cambios vs. `.github/workflows/ci.yml` | **MEDIA** | **Versión de Python desalineada:** El SAD v3.0 (línea 32) declara *"FastAPI 0.115+ en Python 3.14"*. Python 3.14 no es una versión estable del lenguaje. El workflow de CI (`ci.yml` línea 68) y el entorno de ejecución ejecutan estrictamente **Python 3.13**, configurando una inconsistencia técnica formal. |
-| **HALL-05** | Rutas API Desactualizadas | SRS 5.3, 5.5 vs. Routers en `app/api/v1/endpoints/` | **ALTA** | **Contratos REST desincronizados en SRS:** Las matrices del SRS citan rutas no existentes en la implementación actual, tales como `GET /api/v1/spaces/availability` (la ruta real es `/api/v1/spaces/free-slots` y `/api/v1/spaces/classrooms`), `PUT /api/v1/mentorships/offers/{id}/reschedule` (el router es `/api/v1/offers`) y `GET /api/v1/analytics/dashboard` (actualmente simulado en testbench algorítmico). |
-| **HALL-06** | Omisión de Servicios Reales | SAD 2.5, 6.3 vs. Commits `3f6e31d`, `4ca157b` | **MEDIA-ALTA** | **Servicios externos de producción no documentados en SAD:** Tras subsanar los 14 hallazgos de auditoría crítica, se implementó transporte SMTP real para Gmail institucional, persistencia en Supabase Storage (buckets de constancias y guías), Google Identity Services (GIS SDK oficial) y scheduler de quórum, los cuales carecen de fichas formales de arquitectura en el SAD. |
-| **HALL-07** | Métricas de Prueba Desfasadas | SRS 7, SAD 1.5 vs. Historial de Commits | **MEDIA** | **Desfase en la cuantificación de pruebas automatizadas:** El SRS y SAD v3.0 reportan de forma rígida 627 pruebas automatizadas (280 backend, 347 frontend). Las verificaciones post-sprint 08 registraron 658 pruebas y la incorporación de servicios externos elevó la suite a 682 pruebas superadas con éxito. |
-| **HALL-08** | Profundidad Dispar en Narrativas | SRS 6.2.3 (24 CUS) vs. Estándar de Narrativas | **ALTA** | **Narrativas con enfoque excesivamente técnico/backend:** Las narrativas vigentes en el SRS v3.0 están orientadas casi exclusivamente a servicios ORM, transacciones y bloqueos pesimistas, careciendo del desglose funcional de interfaz visual exigido (componentes exactos, colores en lenguaje natural, botones entre comillas, subflujos, flujos alternativos detallados y escenarios Given-When-Then). |
-| **HALL-09** | Confusión Metodológica de Roles | SRS 5.3, 6.2.3 vs. SAD 6.2, 9.1 | **MEDIA-ALTA** | **Inversión de responsabilidades SRS vs. SAD:** El SRS incluye indebidamente nombres de scripts Python (`BitacoraService.py`), componentes TypeScript y sentencias SQL en las descripciones de requerimientos funcionales para el usuario, mientras que el SAD presenta descripciones someras de contratos de interfaz en los módulos más recientes. |
-| **HALL-10** | Incumplimiento Parcial D-2 | Secciones 6.3.1 y 6.3.2 del SRS | **MEDIA-BAJA** | **Tablas y figuras sin estructura quíntuple:** Se detectaron cuadros y bloques PlantUML que carecen de párrafo de análisis posterior o cuya fuente formal no está explícitamente declarada conforme a la regla D-2. |
+| ID | Categoría | Componentes Afectados | Severidad | Descripción del Hallazgo y Evidencia Técnica | Estado Metodológico en el Flujo Documental |
+| :---: | :--- | :--- | :---: | :--- | :--- |
+| **HALL-01** | Inconsistencia de Requisitos | SRS 5.3, 5.5 vs. SAD 4.1, 4.3 y Migración 005 | **ALTA** | **Divergencia semántica en RF20:** En el SRS v3.0, `RF20` figura como *"Gestión y descarga de recursos académicos"* (`SessionResourcesView.tsx`, `ResourceService.py`). En el SAD v3.0 y en el código real (Migración `005_closure_and_advanced_modules.py` línea 67, `survey_service.py`, `encuestas_calidad`), `RF20` corresponde a la *"Captura de encuestas de calidad post-mentoría 24h"*. | **Discrepancia diagnosticada; decisión adoptada.** Pendiente de aplicación en Sección 5 del SRS (programada para H02). |
+| **HALL-02** | Contradicción de Nomenclatura | Textos narrativos en SRS y SAD vs. Línea Base Canónica | **ALTA** | **Referencias cruzadas obsoletas de CUS-008 y CUS-011:** En la fase de análisis histórica, `CUS08` era *"Bitácora y Asistencia"* y `CUS11` era *"Asistencia QR"*. En la línea base canónica de diseño, `CUS-008` es *"Consultar disponibilidad de espacios y recursos"* (MOD-02) y `CUS-011` es *"Generar reportes e indicadores de analítica académica"* (MOD-08). Existen múltiples párrafos descriptivos en el SRS que aún aluden a `CUS08` como bitácora y a `CUS11` como asistencia QR. | **Discrepancia diagnosticada; decisión adoptada.** Pendiente de depuración textual integral en SRS y SAD (H02, H07). |
+| **HALL-03** | Desfase en Persistencia | SAD 10.1, 10.2 vs. Migración 005 y Modelos ORM | **MEDIA-ALTA** | **Diccionario físico incompleto:** El SAD v3.0 titula y describe la sección 10.2 como *"Diccionario DDL Físico de las 15 Tablas Relacionales"*. Sin embargo, la migración `005_closure_and_advanced_modules.py` y `app/models/__init__.py` implementan **16 entidades relacionales**, omitiendo en el diccionario formal la tabla `tokens_asistencia_activos` (soporte multi-worker para TOTP dinámico de asistencia). | **Discrepancia diagnosticada; decisión adoptada.** El SAD conserva 15 tablas físicamente hasta su actualización formal en H08. |
+| **HALL-04** | Discrepancia de Entorno | SAD 1.5, Control de Cambios vs. `.github/workflows/ci.yml` | **MEDIA** | **Versión de Python desalineada:** El SAD v3.0 (línea 32) declara *"FastAPI 0.115+ en Python 3.14"*. Python 3.14 no es una versión estable del lenguaje. El workflow de CI (`ci.yml` línea 68) y el entorno de ejecución ejecutan estrictamente **Python 3.13**, configurando una inconsistencia técnica formal. | **Discrepancia diagnosticada; decisión adoptada.** Pendiente de corrección formal en texto del SAD (H07). |
+| **HALL-05** | Rutas API Desactualizadas | SRS 5.3, 5.5 vs. Routers en `app/api/v1/endpoints/` | **ALTA** | **Contratos REST desincronizados en SRS:** Las matrices del SRS citan rutas no existentes en la implementación actual, tales como `GET /api/v1/spaces/availability` (la ruta real es `/api/v1/spaces/free-slots` y `/api/v1/spaces/classrooms`), `PUT /api/v1/mentorships/offers/{id}/reschedule` (el router es `/api/v1/offers`) y `GET /api/v1/analytics/dashboard` (actualmente simulado en testbench algorítmico). | **Discrepancia diagnosticada; decisión adoptada.** Pendiente de aplicación en Sección 5 del SRS (H02) y SAD (H08). |
+| **HALL-06** | Omisión de Servicios Reales | SAD 2.5, 6.3 vs. Commits `3f6e31d`, `4ca157b` | **MEDIA-ALTA** | **Servicios externos de producción no documentados en SAD:** Tras subsanar los 14 hallazgos de auditoría crítica, se implementó transporte SMTP real para Gmail institucional, persistencia en Supabase Storage (buckets de constancias y guías), Google Identity Services (GIS SDK oficial) y scheduler de quórum, los cuales carecen de fichas formales de arquitectura en el SAD. | **Discrepancia diagnosticada; decisión adoptada.** Pendiente de incorporación en vistas de implementación y despliegue del SAD (H07, H08). |
+| **HALL-07** | Métricas de Prueba Desfasadas | SRS 7, SAD 1.5 vs. Historial de Commits | **MEDIA** | **Desfase en la cuantificación de pruebas automatizadas:** El SRS y SAD v3.0 reportan de forma rígida 627 pruebas automatizadas (280 backend, 347 frontend). Las verificaciones post-sprint 08 registraron 658 pruebas y la incorporación de servicios externos elevó la suite a 682 pruebas (cifra histórica reportada en commit `3f6e31d`). Dicha cifra queda consignada como histórica y pendiente de nueva validación en CI debido a fallas de linteo registradas en ejecuciones recientes de `main`. | **Discrepancia diagnosticada; criterio adoptado.** Se registra como cifra histórica sujeta a revalidación formal tras subsanación de linteo. |
+| **HALL-08** | Profundidad Dispar en Narrativas | SRS 6.2.3 (24 CUS) vs. Estándar de Narrativas | **ALTA** | **Narrativas con enfoque excesivamente técnico/backend:** Las narrativas vigentes en el SRS v3.0 están orientadas casi exclusivamente a servicios ORM, transacciones y bloqueos pesimistas, careciendo del desglose funcional de interfaz visual exigido (componentes exactos, colores en lenguaje natural, botones entre comillas, subflujos, flujos alternativos detallados y escenarios Given-When-Then). | **Discrepancia diagnosticada; estándar definido en H01.** Casos piloto (`CUS-001`, `CUS-003`) aplicados; 22 CUS restantes programados para H04–H06. |
+| **HALL-09** | Confusión Metodológica de Roles | SRS 5.3, 6.2.3 vs. SAD 6.2, 9.1 | **MEDIA-ALTA** | **Inversión de responsabilidades SRS vs. SAD:** El SRS incluye indebidamente nombres de scripts Python (`BitacoraService.py`), componentes TypeScript y sentencias SQL en las descripciones de requerimientos funcionales para el usuario, mientras que el SAD presenta descripciones someras de contratos de interfaz en los módulos más recientes. | **Discrepancia diagnosticada; regla adoptada.** SRS responderá ¿QUÉ? (H02–H06) y SAD responderá ¿CÓMO? (H07–H09). |
+| **HALL-10** | Incumplimiento Parcial D-2 | Secciones 6.3.1 y 6.3.2 del SRS | **MEDIA-BAJA** | **Tablas y figuras sin estructura quíntuple:** Se detectaron cuadros y bloques PlantUML que carecen de párrafo de análisis posterior o cuya fuente formal no está explícitamente declarada conforme a la regla D-2. | **Discrepancia diagnosticada.** Corrección progresiva programada en H02 y H10. |
+| **HALL-11** | Ruta de Contingencia en Frontend | `LoginOtpView.tsx` (líneas 263–272) vs. Autenticación Real | **MEDIA** | **Generación de `dummyIdToken` en fallback federado:** En el componente de login, la función de contingencia ante ausencia de Google Identity Services genera un token simulado con payload en Base64 (`dummyIdToken = header.${mockPayload}.signature`) con usuario predeterminado (`ra2022073504@virtual.upt.pe`). Constituye un mecanismo de bypass para pruebas/desarrollo que requiere revisión técnica para entornos productivos. | **Hallazgo técnico registrado en H01-R.** Catalogado como deuda técnica de revisión pendiente; se mantiene intacto el código fuente en esta fase documental. |
 
 Fuente: Elaboración propia a partir de la auditoría técnica cruzada sobre el repositorio `sistema_web_p2p`.
 
@@ -142,7 +145,22 @@ El análisis del Cuadro 0.3 pone de manifiesto que, si bien el proyecto cuenta c
     with:
       python-version: "3.13"
   ```
-* **Decisión Técnica para v3.1:** Corregir formalmente la especificación tecnológica a **Python 3.13**, garantizando total veracidad con la configuración de integración continua y el entorno de ejecución.
+* **Decisión Técnica para v3.1:** Corregir formalmente la especificación tecnológica a **Python 3.13**, garantizando total veracidad con la configuración de integración continua y el entorno de ejecución. La corrección material en el documento SAD se encuentra programada para el hito H07.
+
+### 4.5. HALL-11: Ruta de Contingencia de Autenticación (`dummyIdToken`) en Frontend
+* **Evidencia Técnica:** En `aplicacion/frontend/src/components/LoginOtpView.tsx` (líneas 263–272), ante la eventualidad de fallos o indisponibilidad en la carga del script oficial de Google Identity Services (GIS), la función `handleGoogleFederatedFallback` construye un token simulado con estructura JWT ficticia:
+  ```typescript
+  const mockPayload = btoa(
+    JSON.stringify({
+      email: targetEmail,
+      given_name: 'Renzo Antonio',
+      family_name: 'Antayhua Mamani',
+    })
+  );
+  const dummyIdToken = `header.${mockPayload}.signature`;
+  const resp = await authService.loginWithGoogle(dummyIdToken);
+  ```
+* **Diagnóstico de Auditoría:** Si bien este mecanismo permite sortear bloqueos de red o pruebas locales desconectadas, constituye una vía de acceso de prueba que no debe considerarse mecanismo de producción. Se cataloga como un hallazgo de revisión técnica pendiente. No se efectúa modificación sobre el código funcional en el presente hito documental, dejándose constancia de su necesidad de revisión en la fase de endurecimiento de seguridad.
 
 ---
 
@@ -154,9 +172,10 @@ A continuación, se define la hoja de ruta metodológica estructurada para la ej
 
 | Hito | Denominación y Alcance Técnico | Entregable Principal | Estado |
 | :---: | :--- | :--- | :---: |
-| **H00** | **Preparación y Auditoría Inicial:** Creación de rama, inventario documental, detección de inconsistencias y diagnóstico de línea base. | `docs/diseño/auditoria-srs-sad-v3-1/00_DIAGNOSTICO_Y_LINEA_BASE.md` | **Culminado** ✅ |
-| **H01** | **Homologación y Patrón de Narrativas:** Matriz canónica de trazabilidad (MOD→RF→RN→CUS→Código), guía de narrativas detalladas y refinamiento de 2 casos piloto (`CUS-001`, `CUS-003`). | `01_MATRIZ_HOMOLOGACION.md`<br>`02_GUIA_NARRATIVAS_DETALLADAS.md`<br>Actualización SRS v3.0 (`CUS-001`, `CUS-003`) | **En Ejecución** ⏳ |
-| **H02** | **Refinamiento Funcional del SRS:** Revisión y actualización de capítulos 1 al 5 (Problema, Objetivos, Alcance, Actores, RF01–RF26, RNF01–RNF10, RN-01–RN-14). | Actualización de secciones 1 a 5 del SRS | Pendiente |
+| **H00** | **Preparación y Auditoría Inicial:** Creación de rama, inventario documental, detección de inconsistencias y diagnóstico de línea base. | `docs/diseño/auditoria-srs-sad-v3-1/00_DIAGNOSTICO_Y_LINEA_BASE.md` | **Culminado** ✅ (Integrado en `main`) |
+| **H01** | **Homologación y Patrón de Narrativas:** Matriz canónica de trazabilidad (MOD→RF→RN→CUS→Código), guía de narrativas detalladas y refinamiento de 2 casos piloto (`CUS-001`, `CUS-003`). | `01_MATRIZ_HOMOLOGACION.md`<br>`02_GUIA_NARRATIVAS_DETALLADAS.md`<br>Actualización SRS v3.0 (`CUS-001`, `CUS-003`) | **Culminado** ✅ (Integrado en `main`) |
+| **H01-R** | **Rectificación de Homologación y Evidencias:** Subsanación de inconsistencias de auditoría, diferenciación de estados metodológicos, documentación de `dummyIdToken`, notas de CI y rutas portables. | `03_RECTIFICACIONES_H01.md`<br>Actualización de entregables H00, H01 y scripts de diseño | **En Ejecución** ⏳ |
+| **H02** | **Refinamiento Funcional del SRS:** Revisión y actualización integral de capítulos 1 al 5 (Problema, Objetivos, Alcance, Actores, RF01–RF26, RNF01–RNF10, RN-01–RN-14). | Actualización de secciones 1 a 5 del SRS (`generate_part_a.py`) | Autorizado / En curso |
 | **H03** | **Calidad y Trazabilidad del SRS:** Matrices de trazabilidad bidireccional, especificación de interfaces externas WCAG 2.1 AA y criterios de aceptación. | Actualización de matrices y sección 5.6 del SRS | Pendiente |
 | **H04** | **Narrativas Exhaustivas MOD-01 al MOD-03:** Especificación detallada de casos de uso de seguridad, espacios y catálogo curricular (`CUS-001`, `CUS-010`, `CUS-006`, `CUS-008`, `CUS-005`, `CUS-021`). | Actualización de sección 6.2.3 (MOD 01-03) | Pendiente |
 | **H05** | **Narrativas Exhaustivas MOD-04 al MOD-06:** Especificación detallada de recomendador, quórum, asistencias y bitácoras (`CUS-002`, `CUS-003`, `CUS-004`, `CUS-024`, `CUS-017`, `CUS-023`, `CUS-007`, `CUS-012`, `CUS-013`, `CUS-014`). | Actualización de sección 6.2.3 (MOD 04-06) | Pendiente |
@@ -169,12 +188,12 @@ A continuación, se define la hoja de ruta metodológica estructurada para la ej
 
 Fuente: Elaboración propia.
 
-El plan presentado en el Cuadro 0.4 garantiza una ejecución disciplinada y modular. Conforme a la instrucción rectora recibida, la fase inmediata autorizada contempla exclusivamente los hitos **H00** y **H01**, quedando los hitos posteriores sujetos a la aprobación formal de los resultados preliminares.
+El plan presentado en el Cuadro 0.4 garantiza una ejecución disciplinada y modular. Conforme a la instrucción rectora recibida, la fase inmediata en desarrollo comprende los hitos **H01-R** y **H02**, manteniéndose congelada cualquier modificación sobre el SAD hasta los hitos H07–H09.
 
 ---
 
 ## 6. Conclusión de la Línea Base de Auditoría
 
-El presente informe H00 certifica la existencia de una discrepancia documentada entre las descripciones de requerimientos del SRS v3.0, la arquitectura formalizada en el SAD v3.0 y la implementación efectiva del sistema en la rama `main` al commit `097f90d`.
+El presente informe H00 certifica la existencia de una discrepancia documentada entre las descripciones de requerimientos del SRS v3.0, la arquitectura formalizada en el SAD v3.0 y la implementación efectiva del sistema en la rama `main` al commit `097f90d` y su integración en `0542aa2`.
 
-La resolución de los diez hallazgos críticos detectados permitirá elevar la calidad documental del proyecto a un estándar de excelencia académica, dotando a la Universidad Privada de Tacna y a la EPIS de un instrumento técnico fidedigno, auditable y directamente transferible a la práctica profesional de la ingeniería de software.
+La resolución de los once hallazgos críticos detectados permitirá elevar la calidad documental del proyecto a un estándar de excelencia académica, dotando a la Universidad Privada de Tacna y a la EPIS de un instrumento técnico fidedigno, auditable y directamente transferible a la práctica profesional de la ingeniería de software.

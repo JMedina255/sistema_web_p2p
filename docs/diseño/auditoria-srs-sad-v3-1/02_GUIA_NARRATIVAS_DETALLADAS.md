@@ -8,8 +8,9 @@
 **Docente de Cátedra:** Dr. Ricardo Eduardo Valcárcel Alvarado<br>
 **Semestre Académico:** 2026-II<br>
 **Fecha de Emisión:** 14 de Noviembre de 2026<br>
-**Rama de Trabajo:** `docs/srs-sad-v3-1-homologacion`<br>
-**Commit Base de Auditoría:** `097f90d725e537f411ebadac740905e0c0448f61`
+**Rama de Trabajo Base:** `main` (integrada mediante PR #11)<br>
+**Commit Base Inicial de Auditoría:** `097f90d725e537f411ebadac740905e0c0448f61`<br>
+**Commit Base Integrado en Main:** `0542aa2af8d30ecb6afdfa9d4561d0f07a1801b0`
 
 ---
 
@@ -21,11 +22,12 @@ A continuación, se formaliza el registro de control de versiones de la presente
 
 | Versión | Responsable | Revisada por | Aprobada por | Fecha | Descripción del Cambio |
 | :---: | :--- | :--- | :--- | :---: | :--- |
-| **1.0** | Joan Medina / Renzo Antayhua | Dr. Ricardo Valcárcel | Dirección EPIS | 14/11/2026 | Emisión de la guía estándar de especificación exhaustiva de casos de uso para el SRS v3.1, incorporando navegación real de interfaz, sintaxis cromática natural, criterios Given-When-Then y etiquetas de diferenciación técnica. |
+| **1.0** | Joan Cristian Medina Quispe / Renzo Antonio Antayhua Mamani | Pendiente de revisión (Dr. Ricardo Valcárcel) | Pendiente de aprobación (Dirección EPIS) | 14/11/2026 | Emisión de la guía estándar de especificación exhaustiva de casos de uso para el SRS v3.1, incorporando navegación real de interfaz, sintaxis cromática natural, criterios Given-When-Then y etiquetas de diferenciación técnica. |
+| **1.1** | Joan Cristian Medina Quispe / Renzo Antonio Antayhua Mamani | Pendiente de revisión (Dr. Ricardo Valcárcel) | Pendiente de aprobación (Dirección EPIS) | 14/11/2026 | Rectificación H01-R: actualización del nombre de autor a Joan Cristian Medina Quispe y formalización del estado de revisión académica ante la cátedra y dirección institucional. |
 
 Fuente: Elaboración propia.
 
-El presente cuadro certifica el establecimiento formal del estándar de ingeniería de requisitos que gobernará la redacción de los 24 casos de uso canónicos del Sistema Web P2P.
+El presente cuadro certifica el establecimiento formal del estándar de ingeniería de requisitos que gobernará la redacción de los 24 casos de uso canónicos del Sistema Web P2P, sometido a revisión y aprobación formal académica.
 
 ---
 

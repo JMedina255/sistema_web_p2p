@@ -16,7 +16,7 @@ def get_mod07():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-022 (Parametrización institucional de umbrales y emisión de certificados), RF-023 (Descarga y verificación institucional de certificados); RN-14 (Umbral mínimo de 20 horas acreditadas con bitácoras visadas) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentor (`UserRole.mentor`), Administrador Institucional, Director de Escuela EPIS |
 | **Interacción** | Fase de Construcción / Iteración Sprint 06 - Sprint 07 |
 | **Descripción** | Permite a los estudiantes mentores solicitar y descargar una constancia institucional de horas de mentoría acreditadas una vez alcanzado el umbral reglamentario de 20 horas efectivas de dictado (RN-14) con bitácoras pedagógicas debidamente registradas y visadas por la administración. El componente `CertificateView.tsx` despacha la solicitud mediante `POST /api/v1/certificates/generate` hacia el backend en `aplicacion/backend/app/api/v1/endpoints/certificates.py`. El servicio `CertificateService` verifica en base de datos la suma de horas dictadas (`SUM(duracion_minutos)/60 >= 20`), genera un código de serie alfanumérico único, calcula el sello criptográfico SHA-256 del documento, genera un código QR de verificación institucional que apunta al validador público de la universidad, y compila el documento en formato PDF. Persiste la entidad `CertificadoHoras` (`app/models/certificate.py`) y retorna el identificador del archivo para su descarga segura. |
@@ -53,7 +53,7 @@ def get_mod07():
 | **Tipo** | Obligatorio ( X ) / Opcional (   ) |
 | **Requisito ID (RF)** | RF-021 (Cálculo dinámico de reputación y visualización de insignias); RN-13 (Gamificación: puntaje por calificaciones, asistencias y puntualidad) |
 | **Versión** | 2.0 |
-| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos |
+| **Autor** | Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian |
 | **Actores** | Estudiante Mentor, Estudiante Mentoreado |
 | **Interacción** | Fase de Construcción / Iteración Sprint 06 - Sprint 07 |
 | **Descripción** | Permite a la comunidad académica visualizar el progreso, insignias de honor alcanzadas y nivel de reputación formativa de los mentores mediante el componente cliente `GamificationView.tsx` y el servicio `gamificationService.ts`. El backend en `aplicacion/backend/app/api/v1/endpoints/gamification.py` y `app/services/reputation_service.py` expone las consultas de logros `GET /api/v1/gamification/badges` y el cuadro de honor `GET /api/v1/gamification/leaderboard`. El motor de reputación calcula periódicamente el puntaje global $R = 0.5 \times ValoracionPromedio + 0.3 \times HorasAcreditadas + 0.2 \times TasaPuntualidad$ (RN-13), desbloqueando automáticamente insignias de nivel (tales como "Mentor Destacado", "Puntualidad Impecable" y "Especialista en Algoritmos") en la tabla física `insignias_usuarios` (`app/models/gamification.py`), fomentando la participación y el compromiso entre pares. |
