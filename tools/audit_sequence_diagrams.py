@@ -78,17 +78,24 @@ def audit_sequence_content(content, source_name="Memory", narratives_metadata=No
         if diag_num != idx:
             errors.append((cid, f"Numeración desalineada: esperado Diagrama 6.15.{idx}, encontrado 6.15.{diag_num}"))
 
-        # 2. PlantUML block check
-        if "```plantuml" not in block or "```" not in block:
-            errors.append((cid, "Falta bloque de código ```plantuml ... ```"))
-            continue
-
+        # 2. PlantUML block or rendered image check
         puml_match = re.search(r'```plantuml\s*\n(.*?)\n```', block, re.DOTALL)
         if not puml_match:
-            errors.append((cid, "No se pudo extraer el bloque PlantUML"))
-            continue
-
-        puml = puml_match.group(1)
+            img_match = re.search(r'!\[.*?\]\((?:diagramas/srs/img/)?(diag_\d+_[^)]+\.png)\)', block)
+            if img_match:
+                png_name = img_match.group(1)
+                puml_filename = png_name.replace(".png", ".puml")
+                puml_path = os.path.join("docs/diseño/diagramas/srs/puml", puml_filename)
+                if not os.path.exists(puml_path):
+                    errors.append((cid, f"Archivo fuente PUML no encontrado: {puml_path}"))
+                    continue
+                with open(puml_path, "r", encoding="utf-8") as pf:
+                    puml = pf.read()
+            else:
+                errors.append((cid, "Falta bloque de código ```plantuml ... ``` o imagen renderizada"))
+                continue
+        else:
+            puml = puml_match.group(1)
 
         # Check @startuml and @enduml
         if "@startuml" not in puml or "@enduml" not in puml:
