@@ -71,7 +71,7 @@ def main():
     # 2. Write standalone consolidated file
     standalone_path = "docs/diseño/NARRATIVAS_FASE_DISEÑO_CONSOLIDADAS.md"
     print(f"Escribiendo {standalone_path}...")
-    with open(standalone_path, "w", encoding="utf-8") as f:
+    with open(standalone_path, "w", encoding="utf-8", newline="\n") as f:
         f.write("# NARRATIVAS DE CASOS DE USO CONSOLIDADAS - FASE DE DISEÑO\n\n")
         f.write("**Sistema Web P2P de Mentorías Universitarias - EPIS UPT**\n")
         f.write("**Versión:** 2.0 (Fase de Diseño / Arquitectura y Construcción)\n")
@@ -95,7 +95,7 @@ def main():
     suffix = srs_text[m_next.start():]
     new_srs_text = prefix + content + "---\n\n" + suffix
 
-    with open(target_srs, "w", encoding="utf-8") as f:
+    with open(target_srs, "w", encoding="utf-8", newline="\n") as f:
         f.write(new_srs_text)
 
     print("Inyección completada.")

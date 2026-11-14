@@ -62,7 +62,7 @@ def main():
     
     target_path = "docs/diseño/FD03-EPIS-Informe SRS de Proyecto.md"
     print(f"Escribiendo documento completo en {target_path}...")
-    with open(target_path, "w", encoding="utf-8") as f:
+    with open(target_path, "w", encoding="utf-8", newline="\n") as f:
         f.write(full_doc)
         
     print(f"Documento guardado. Total caracteres: {len(full_doc)}, total líneas: {len(full_doc.splitlines())}")
