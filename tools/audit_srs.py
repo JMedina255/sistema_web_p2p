@@ -60,7 +60,8 @@ def audit_narratives(sec, filepath):
             all_errors.append((cid, "Ficha Técnica: Versión is not '2.0'"))
 
         # Check Autor
-        if 'Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos' not in block:
+        if ('Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Carlos' not in block and
+            'Antayhua Mamani, Renzo Antonio / Medina Quispe, Joan Cristian' not in block):
             all_errors.append((cid, "Ficha Técnica: Autor mismatch"))
 
         # Check Tipo format
