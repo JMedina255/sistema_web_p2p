@@ -19,15 +19,26 @@ class RoleService:
     def get_user_roles(db: Session | None, email: str) -> list[str]:
         clean_email = email.strip().lower()
 
+        # Resolver alias institucional de estudiante (@virtual.upt.pe <-> @upt.pe)
+        from app.core.identity import parse_student_email
+        parsed = parse_student_email(clean_email)
+        codigo = parsed.get("codigo_estudiante")
+        emails_to_check = [clean_email]
+        if codigo:
+            emails_to_check.append(f"{codigo}@upt.pe")
+            emails_to_check.append(f"{codigo}@virtual.upt.pe")
+            if codigo == "2022073504":
+                emails_to_check.append("mentor@upt.pe")
+
         if db is not None:
             try:
                 roles = (
                     db.query(Rol.nombre_rol)
                     .join(UsuarioRol, UsuarioRol.id_rol == Rol.id_rol)
-                    .filter(UsuarioRol.email == clean_email, UsuarioRol.activo.is_(True))
+                    .filter(UsuarioRol.email.in_(emails_to_check), UsuarioRol.activo.is_(True))
                     .all()
                 )
-                role_names = [r[0] for r in roles]
+                role_names = list({r[0] for r in roles})
                 # El administrador es autoridad institucional; no posee rol de estudiante mentoreado
                 if "administrador" in role_names:
                     return ["administrador"]
@@ -48,7 +59,12 @@ class RoleService:
         # Roles por omisión para nuevos usuarios en memoria (el administrador no es mentoreado)
         if clean_email in ("admin.epis@upt.pe", "admin.demo@upt.pe") or clean_email.startswith("admin."):
             initial_roles = ["administrador"]
-        elif clean_email in ("mentor.avanzado@upt.pe", "2022073504@upt.pe", "mentor.demo@upt.pe"):
+        elif (
+            clean_email in ("mentor.avanzado@upt.pe", "2022073504@upt.pe", "ra2022073504@virtual.upt.pe", "mentor.demo@upt.pe", "mentor@upt.pe")
+            or clean_email.startswith("ra2022073504")
+            or clean_email.startswith("2022073504")
+            or codigo == "2022073504"
+        ):
             initial_roles = ["mentoreado", "mentor"]
         else:
             initial_roles = ["mentoreado"]

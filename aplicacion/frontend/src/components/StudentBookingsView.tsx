@@ -40,11 +40,17 @@ export interface StudentBookingsViewProps {
   onLoginRedirect?: () => void;
 }
 
+function isUptEmail(email?: string | null): boolean {
+  if (!email) return false;
+  const clean = email.trim().toLowerCase();
+  return clean.endsWith('@upt.pe') || clean.endsWith('@virtual.upt.pe');
+}
+
 /**
  * Resuelve la identidad institucional activa a partir de props o decodificación de JWT.
  */
 function resolveEffectiveStudentEmail(propEmail?: string): string | null {
-  if (propEmail && propEmail.trim().endsWith('@upt.pe')) {
+  if (propEmail && isUptEmail(propEmail)) {
     return propEmail.trim().toLowerCase();
   }
   const token = authService.getToken();
@@ -54,11 +60,11 @@ function resolveEffectiveStudentEmail(propEmail?: string): string | null {
       if (parts.length === 3) {
         const payloadJson = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
         const payload = JSON.parse(payloadJson);
-        if (typeof payload.sub === 'string' && payload.sub.includes('@upt.pe')) {
-          return payload.sub.trim().toLowerCase();
-        }
-        if (typeof payload.email === 'string' && payload.email.includes('@upt.pe')) {
-          return payload.email.trim().toLowerCase();
+        const sub = typeof payload.sub === 'string' ? payload.sub.trim() : '';
+        const email = typeof payload.email === 'string' ? payload.email.trim() : '';
+        const candidate = sub || email;
+        if (isUptEmail(candidate)) {
+          return candidate.toLowerCase();
         }
       }
     } catch {
@@ -307,10 +313,14 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
       }
 
       const list = await bookingService.getMyReservations(undefined, effectiveEmail);
-      // Garantizar que solo se visualicen reservas del estudiante autenticado
-      const studentOnly = list.filter(
-        (b) => b.estudiante_email.trim().toLowerCase() === effectiveEmail.trim().toLowerCase()
-      );
+      // Garantizar que solo se visualicen reservas del estudiante autenticado (soporta alias institucional por código)
+      const effectiveCode = effectiveEmail.replace(/[^0-9]/g, '');
+      const studentOnly = list.filter((b) => {
+        const bEmail = b.estudiante_email.trim().toLowerCase();
+        if (bEmail === effectiveEmail.trim().toLowerCase()) return true;
+        const bCode = bEmail.replace(/[^0-9]/g, '');
+        return Boolean(effectiveCode && bCode && effectiveCode === bCode);
+      });
       setBookings(studentOnly);
     } catch (err: unknown) {
       if (err instanceof BookingException) {
@@ -544,7 +554,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
           </h2>
           <p style={{ color: '#4B5563', fontSize: '14px', maxWidth: '520px', margin: '0 auto 20px auto' }}>
             Para consultar tus cupos inscritos, ratificar asistencia o desistir de una reserva, debes iniciar sesión
-            con tu cuenta institucional de la <strong>Universidad Privada de Tacna (@upt.pe)</strong>.
+            con tu cuenta institucional de la <strong>Universidad Privada de Tacna (@upt.pe o @virtual.upt.pe)</strong>.
           </p>
           {onLoginRedirect && (
             <button

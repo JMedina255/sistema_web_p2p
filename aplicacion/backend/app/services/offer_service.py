@@ -404,7 +404,16 @@ class OfferService:
             try:
                 query = db.query(SesionMentoria)
                 if mentor_email:
-                    query = query.filter(SesionMentoria.mentor_email == mentor_email.strip().lower())
+                    clean_m = mentor_email.strip().lower()
+                    from app.core.identity import parse_student_email
+                    parsed = parse_student_email(clean_m)
+                    codigo = parsed.get("codigo_estudiante")
+                    mentor_aliases = [clean_m]
+                    if codigo == "2022073504" or clean_m in ("ra2022073504@virtual.upt.pe", "2022073504@upt.pe", "mentor@upt.pe"):
+                        mentor_aliases.extend(["ra2022073504@virtual.upt.pe", "2022073504@upt.pe", "mentor@upt.pe"])
+                    elif codigo:
+                        mentor_aliases.extend([f"{codigo}@upt.pe", f"{codigo}@virtual.upt.pe"])
+                    query = query.filter(SesionMentoria.mentor_email.in_(list(set(mentor_aliases))))
                 if id_asignatura:
                     query = query.filter(SesionMentoria.id_asignatura == id_asignatura)
                 if modalidad:

@@ -166,7 +166,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // En modo mock sin token, emitir token simulado con claims estándar institucional
         const cleanEmail = data.email.trim().toLowerCase();
         const isOfficialAdmin = cleanEmail === 'admin.epis@upt.pe' || cleanEmail.startsWith('admin.');
-        const isOfficialMentor = ['mentor.avanzado@upt.pe', '2022073504@upt.pe'].includes(cleanEmail);
+        const isOfficialMentor = [
+          'mentor.avanzado@upt.pe',
+          '2022073504@upt.pe',
+          'ra2022073504@virtual.upt.pe',
+          'mentor@upt.pe',
+        ].includes(cleanEmail);
         const mockRoles: UserRole[] = isOfficialAdmin
           ? ['administrador']
           : isOfficialMentor

@@ -254,7 +254,9 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
   const studentEmailClean = resolvedStudentEmail.trim().toLowerCase();
 
   // 0. Validación de autenticación obligatoria (Auditoría B.2)
-  const isUnauthenticated = !studentEmailClean || !studentEmailClean.includes('@upt.pe');
+  const isUnauthenticated =
+    !studentEmailClean ||
+    (!studentEmailClean.endsWith('@upt.pe') && !studentEmailClean.endsWith('@virtual.upt.pe'));
 
   // 1. Prohibición de autoreserva (RN-03 / MENTOR_CANNOT_BOOK)
   const isSelfBooking = mentorEmailClean !== '' && mentorEmailClean === studentEmailClean;
@@ -459,7 +461,7 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
                 marginBottom: '1rem',
               }}
             >
-              <strong>Acceso restringido:</strong> Debe iniciar sesión con su correo institucional @upt.pe para formalizar una reserva de mentoría.
+              <strong>Acceso restringido:</strong> Debe iniciar sesión con su correo institucional @upt.pe o @virtual.upt.pe para formalizar una reserva de mentoría.
             </div>
           )}
 

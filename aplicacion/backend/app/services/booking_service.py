@@ -606,10 +606,17 @@ class BookingService:
     ) -> list[BookingDetailResponse]:
         """Consulta la nómina de reservas del estudiante mentoreado."""
         clean_email = student_email.strip().lower()
+        from app.core.identity import parse_student_email
+        parsed = parse_student_email(clean_email)
+        codigo = parsed.get("codigo_estudiante")
+        student_aliases = [clean_email]
+        if codigo:
+            student_aliases.append(f"{codigo}@upt.pe")
+            student_aliases.append(f"{codigo}@virtual.upt.pe")
 
         if db is not None:
             try:
-                q = db.query(ReservaCupo).filter(ReservaCupo.estudiante_email == clean_email)
+                q = db.query(ReservaCupo).filter(ReservaCupo.estudiante_email.in_(list(set(student_aliases))))
                 if estado:
                     q = q.filter(ReservaCupo.estado == estado)
                 rows = q.order_by(ReservaCupo.fecha_reserva.desc()).all()

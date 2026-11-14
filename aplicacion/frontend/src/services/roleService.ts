@@ -41,6 +41,8 @@ class RoleService {
     'admin.epis@upt.pe': ['administrador'],
     'mentor.avanzado@upt.pe': ['mentor', 'mentoreado'],
     '2022073504@upt.pe': ['mentor', 'mentoreado'],
+    'ra2022073504@virtual.upt.pe': ['mentor', 'mentoreado'],
+    'mentor@upt.pe': ['mentor', 'mentoreado'],
     '2022074255@upt.pe': ['mentoreado'],
     '2023079999@upt.pe': ['mentoreado'],
   };
