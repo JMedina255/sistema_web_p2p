@@ -142,7 +142,7 @@ def _check_rate_limit(
                     db.add(record)
                 db.commit()
                 return
-            except IntegrityError:
+            except IntegrityError as exc:
                 # Manejo de condición de carrera si otra transacción insertó la clave simultáneamente
                 db.rollback()
                 record = db.query(AuthRateLimit).filter(AuthRateLimit.key == key).first()
@@ -157,7 +157,7 @@ def _check_rate_limit(
                                     "code": error_code,
                                     "message": f"{error_message} Debes esperar {remaining} segundos.",
                                 },
-                            )
+                            ) from exc
                         record.count += 1
                     else:
                         record.count = 1
@@ -172,7 +172,10 @@ def _check_rate_limit(
             if settings.STRICT_DATABASE_MODE:
                 raise HTTPException(
                     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                    detail={"code": "DATABASE_UNAVAILABLE", "message": "Error al verificar limitación de tasa en base de datos."},
+                    detail={
+                        "code": "DATABASE_UNAVAILABLE",
+                        "message": "Error al verificar limitación de tasa en base de datos.",
+                    },
                 ) from exc
 
     # 2. Estrategia en memoria (fallback protegido por Lock para concurrencia local/tests)
@@ -212,7 +215,9 @@ class AuthService:
             )
 
     @staticmethod
-    def _get_challenge(db: Session | None, challenge_id: str, lock_row: bool = False) -> AuthChallenge | dict | None:
+    def _get_challenge(
+        db: Session | None, challenge_id: str, lock_row: bool = False
+    ) -> AuthChallenge | dict | None:
         if db is not None:
             try:
                 query = db.query(AuthChallenge).filter(AuthChallenge.id_challenge == challenge_id)
@@ -229,7 +234,10 @@ class AuthService:
                 if settings.STRICT_DATABASE_MODE:
                     raise HTTPException(
                         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                        detail={"code": "DATABASE_UNAVAILABLE", "message": "Error al consultar el desafío en la base de datos."},
+                        detail={
+                            "code": "DATABASE_UNAVAILABLE",
+                            "message": "Error al consultar el desafío en la base de datos.",
+                        },
                     ) from exc
 
         if settings.STRICT_DATABASE_MODE:
@@ -260,7 +268,10 @@ class AuthService:
                 if settings.STRICT_DATABASE_MODE:
                     raise HTTPException(
                         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                        detail={"code": "DATABASE_UNAVAILABLE", "message": "Error al consultar desafíos activos en la base de datos."},
+                        detail={
+                            "code": "DATABASE_UNAVAILABLE",
+                            "message": "Error al consultar desafíos activos en la base de datos.",
+                        },
                     ) from exc
 
         if settings.STRICT_DATABASE_MODE:
@@ -414,12 +425,16 @@ class AuthService:
             delivery_status = "mocked"
             email_dispatched = False
             is_mock = True
-            message = "Código OTP generado en modo de desarrollo local (despacho simulado en consola del servidor)."
+            message = (
+                "Código OTP generado en modo de desarrollo local (despacho simulado en consola del servidor)."
+            )
         elif dispatch_success:
             delivery_status = "dispatched"
             email_dispatched = True
             is_mock = False
-            message = "Código de verificación institucional enviado satisfactoriamente a tu correo institucional."
+            message = (
+                "Código de verificación institucional enviado satisfactoriamente a tu correo institucional."
+            )
         else:
             # Fallo en el envío SMTP: invalidar el desafío recién confirmado para no dejar códigos huérfanos
             if db is not None and new_challenge:
@@ -450,7 +465,10 @@ class AuthService:
             )
 
         # 7. Exposición controlada de mockCodeHint (solo en pruebas unitarias explícitamente autorizadas y nunca en producción)
-        is_test_hint_enabled = bool(getattr(settings, "ENABLE_MOCK_OTP_HINTS", False) and getattr(settings, "APP_ENV", "") != "production")
+        is_test_hint_enabled = bool(
+            getattr(settings, "ENABLE_MOCK_OTP_HINTS", False)
+            and getattr(settings, "APP_ENV", "") != "production"
+        )
         mock_hint = code if is_test_hint_enabled else None
         if is_test_hint_enabled:
             logger.info("[AUTH TEST] >>> CÓDIGO OTP EMITIDO PARA %s: %s <<<", clean_email, code)
@@ -504,13 +522,9 @@ class AuthService:
 
         now = datetime.now(UTC)
         resend_at = _ensure_utc(
-            challenge.resend_available_at
-            if is_chal_obj
-            else challenge["resend_available_at"]
+            challenge.resend_available_at if is_chal_obj else challenge["resend_available_at"]
         )
-        expires_at = _ensure_utc(
-            challenge.expires_at if is_chal_obj else challenge["expires_at"]
-        )
+        expires_at = _ensure_utc(challenge.expires_at if is_chal_obj else challenge["expires_at"])
 
         if now < resend_at and now < expires_at:
             remaining = max(1, int((resend_at - now).total_seconds()))
@@ -549,7 +563,9 @@ class AuthService:
         return AuthService.request_otp(db, email, client_ip)
 
     @staticmethod
-    def verify_otp(db: Session | None, challenge_id: str, otp: str, client_ip: str = "127.0.0.1") -> VerifyOtpResponse:
+    def verify_otp(
+        db: Session | None, challenge_id: str, otp: str, client_ip: str = "127.0.0.1"
+    ) -> VerifyOtpResponse:
         AuthService._assert_db_strict_check(db)
 
         _check_rate_limit(
@@ -597,7 +613,10 @@ class AuthService:
         email = challenge.email if is_obj else challenge["email"]
 
         # Código de prueba rápida de expiración inmediata "000000" restringido exclusivamente a testing autorizado (nunca en producción)
-        is_test_hint_enabled = bool(getattr(settings, "ENABLE_MOCK_OTP_HINTS", False) and getattr(settings, "APP_ENV", "") != "production")
+        is_test_hint_enabled = bool(
+            getattr(settings, "ENABLE_MOCK_OTP_HINTS", False)
+            and getattr(settings, "APP_ENV", "") != "production"
+        )
         if (clean_otp == "000000" and is_test_hint_enabled) or now > expires_at:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -744,7 +763,10 @@ class AuthService:
         if not clean_token:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"code": "INVALID_TOKEN", "message": "El token de identidad de Google no puede estar vacío."},
+                detail={
+                    "code": "INVALID_TOKEN",
+                    "message": "El token de identidad de Google no puede estar vacío.",
+                },
             )
 
         payload: dict = {}
@@ -761,7 +783,9 @@ class AuthService:
                 audience=google_client_id if google_client_id else None,
             )
         except Exception as exc_local:
-            logger.warning("Fallo en verificación local de google-auth (%s). Probando tokeninfo oficial.", exc_local)
+            logger.warning(
+                "Fallo en verificación local de google-auth (%s). Probando tokeninfo oficial.", exc_local
+            )
             # 2. Respaldo contra endpoint oficial tokeninfo de Google si falla el transporte local
             try:
                 with httpx.Client(timeout=5.0) as client:
@@ -832,7 +856,10 @@ class AuthService:
         if not raw_email:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"code": "MISSING_EMAIL", "message": "El token de Google no contiene una dirección de correo válida."},
+                detail={
+                    "code": "MISSING_EMAIL",
+                    "message": "El token de Google no contiene una dirección de correo válida.",
+                },
             )
 
         # 8. Validación estricta del dominio institucional UPT (@virtual.upt.pe o @upt.pe)

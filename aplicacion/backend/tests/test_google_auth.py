@@ -38,7 +38,9 @@ def test_google_login_valid_virtual_upt_student():
 
 def test_google_login_rejects_invalid_signature():
     """Valida que tokens con firma inválida sean estrictamente rechazados con 401."""
-    with patch("google.oauth2.id_token.verify_oauth2_token", side_effect=ValueError("Invalid token signature")):
+    with patch(
+        "google.oauth2.id_token.verify_oauth2_token", side_effect=ValueError("Invalid token signature")
+    ):
         response = client.post("/api/v1/auth/google", json={"id_token": "tampered.jwt.signature"})
         assert response.status_code == 401
         assert response.json()["detail"]["code"] == "GOOGLE_AUTH_FAILED"

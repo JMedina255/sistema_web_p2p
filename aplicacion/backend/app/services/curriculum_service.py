@@ -1,5 +1,6 @@
 import threading
 from datetime import UTC, datetime
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, selectinload
 
@@ -330,9 +331,7 @@ class CurriculumService:
         return getattr(course, "temas", [])
 
     @classmethod
-    def create_course(
-        cls, db: Session | None, payload: CourseCreatePayload
-    ) -> Asignatura | dict:
+    def create_course(cls, db: Session | None, payload: CourseCreatePayload) -> Asignatura | dict:
         clean_code = payload.codigo_curso.strip().upper()
         clean_name = payload.nombre_curso.strip()
 
@@ -341,7 +340,7 @@ class CurriculumService:
             if existing:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail=f"DUPLICATE_COURSE_CODE: Ya existe una asignatura registrada con el código {clean_code}."
+                    detail=f"DUPLICATE_COURSE_CODE: Ya existe una asignatura registrada con el código {clean_code}.",
                 )
             course = Asignatura(
                 codigo_curso=clean_code,
@@ -363,7 +362,7 @@ class CurriculumService:
                 if c["codigo_curso"] == clean_code:
                     raise HTTPException(
                         status_code=status.HTTP_409_CONFLICT,
-                        detail=f"DUPLICATE_COURSE_CODE: Ya existe una asignatura registrada con el código {clean_code}."
+                        detail=f"DUPLICATE_COURSE_CODE: Ya existe una asignatura registrada con el código {clean_code}.",
                     )
             next_id = max((c["id_asignatura"] for c in DEFAULT_FILTER_COURSES), default=0) + 1
             new_c = {
@@ -390,17 +389,19 @@ class CurriculumService:
             if not course:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"NOT_FOUND: Asignatura con ID {id_asignatura} no encontrada."
+                    detail=f"NOT_FOUND: Asignatura con ID {id_asignatura} no encontrada.",
                 )
             if payload.codigo_curso is not None:
                 clean_code = payload.codigo_curso.strip().upper()
-                existing = db.query(Asignatura).filter(
-                    Asignatura.codigo_curso == clean_code, Asignatura.id_asignatura != id_asignatura
-                ).first()
+                existing = (
+                    db.query(Asignatura)
+                    .filter(Asignatura.codigo_curso == clean_code, Asignatura.id_asignatura != id_asignatura)
+                    .first()
+                )
                 if existing:
                     raise HTTPException(
                         status_code=status.HTTP_409_CONFLICT,
-                        detail=f"DUPLICATE_COURSE_CODE: El código {clean_code} ya está asignado a otra materia."
+                        detail=f"DUPLICATE_COURSE_CODE: El código {clean_code} ya está asignado a otra materia.",
                     )
                 course.codigo_curso = clean_code
             if payload.nombre_curso is not None:
@@ -425,14 +426,17 @@ class CurriculumService:
             if not target:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"NOT_FOUND: Asignatura con ID {id_asignatura} no encontrada."
+                    detail=f"NOT_FOUND: Asignatura con ID {id_asignatura} no encontrada.",
                 )
             if payload.codigo_curso is not None:
                 clean_code = payload.codigo_curso.strip().upper()
-                if any(c["codigo_curso"] == clean_code and c["id_asignatura"] != id_asignatura for c in DEFAULT_FILTER_COURSES):
+                if any(
+                    c["codigo_curso"] == clean_code and c["id_asignatura"] != id_asignatura
+                    for c in DEFAULT_FILTER_COURSES
+                ):
                     raise HTTPException(
                         status_code=status.HTTP_409_CONFLICT,
-                        detail=f"DUPLICATE_COURSE_CODE: El código {clean_code} ya está asignado a otra materia."
+                        detail=f"DUPLICATE_COURSE_CODE: El código {clean_code} ya está asignado a otra materia.",
                     )
                 target["codigo_curso"] = clean_code
             if payload.nombre_curso is not None:
@@ -456,21 +460,27 @@ class CurriculumService:
             if not course:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"NOT_FOUND: Asignatura con ID {id_asignatura} no encontrada."
+                    detail=f"NOT_FOUND: Asignatura con ID {id_asignatura} no encontrada.",
                 )
             course.estado_activo = False
             db.commit()
-            return {"mensaje": f"Asignatura {course.codigo_curso} desactivada correctamente.", "id_asignatura": id_asignatura}
+            return {
+                "mensaje": f"Asignatura {course.codigo_curso} desactivada correctamente.",
+                "id_asignatura": id_asignatura,
+            }
 
         with _curriculum_lock:
             target = next((c for c in DEFAULT_FILTER_COURSES if c["id_asignatura"] == id_asignatura), None)
             if not target:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"NOT_FOUND: Asignatura con ID {id_asignatura} no encontrada."
+                    detail=f"NOT_FOUND: Asignatura con ID {id_asignatura} no encontrada.",
                 )
             target["estado_activo"] = False
-            return {"mensaje": f"Asignatura {target['codigo_curso']} desactivada correctamente.", "id_asignatura": id_asignatura}
+            return {
+                "mensaje": f"Asignatura {target['codigo_curso']} desactivada correctamente.",
+                "id_asignatura": id_asignatura,
+            }
 
     @classmethod
     def create_topic(
@@ -482,7 +492,7 @@ class CurriculumService:
             if not course:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"NOT_FOUND: Asignatura con ID {id_asignatura} no encontrada."
+                    detail=f"NOT_FOUND: Asignatura con ID {id_asignatura} no encontrada.",
                 )
             topic = TemaConceptual(
                 id_asignatura=id_asignatura,
@@ -502,7 +512,7 @@ class CurriculumService:
             if not course:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"NOT_FOUND: Asignatura con ID {id_asignatura} no encontrada."
+                    detail=f"NOT_FOUND: Asignatura con ID {id_asignatura} no encontrada.",
                 )
             all_topics = [t for c in DEFAULT_FILTER_COURSES for t in c.get("temas", [])]
             next_t_id = max((t["id_tema"] for t in all_topics), default=0) + 1
@@ -510,7 +520,9 @@ class CurriculumService:
                 "id_tema": next_t_id,
                 "id_asignatura": id_asignatura,
                 "nombre_tema": clean_name,
-                "descripcion_silabo": payload.descripcion_silabo.strip() if payload.descripcion_silabo else None,
+                "descripcion_silabo": payload.descripcion_silabo.strip()
+                if payload.descripcion_silabo
+                else None,
                 "unidad_silabica": payload.unidad_silabica,
                 "estado_activo": payload.estado_activo,
             }
@@ -528,7 +540,7 @@ class CurriculumService:
             if not topic:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"NOT_FOUND: Tema conceptual con ID {id_tema} no encontrado."
+                    detail=f"NOT_FOUND: Tema conceptual con ID {id_tema} no encontrado.",
                 )
             if payload.nombre_tema is not None:
                 topic.nombre_tema = payload.nombre_tema.strip()
@@ -555,7 +567,7 @@ class CurriculumService:
             if not target_topic:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"NOT_FOUND: Tema conceptual con ID {id_tema} no encontrado."
+                    detail=f"NOT_FOUND: Tema conceptual con ID {id_tema} no encontrado.",
                 )
             if payload.nombre_tema is not None:
                 target_topic["nombre_tema"] = payload.nombre_tema.strip()
@@ -574,7 +586,7 @@ class CurriculumService:
             if not topic:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"NOT_FOUND: Tema conceptual con ID {id_tema} no encontrado."
+                    detail=f"NOT_FOUND: Tema conceptual con ID {id_tema} no encontrado.",
                 )
             topic.estado_activo = False
             db.commit()
@@ -585,8 +597,11 @@ class CurriculumService:
                 for t in c.get("temas", []):
                     if t["id_tema"] == id_tema:
                         t["estado_activo"] = False
-                        return {"mensaje": f"Tema '{t['nombre_tema']}' desactivado con éxito.", "id_tema": id_tema}
+                        return {
+                            "mensaje": f"Tema '{t['nombre_tema']}' desactivado con éxito.",
+                            "id_tema": id_tema,
+                        }
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"NOT_FOUND: Tema conceptual con ID {id_tema} no encontrado."
+                detail=f"NOT_FOUND: Tema conceptual con ID {id_tema} no encontrado.",
             )

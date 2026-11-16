@@ -43,7 +43,9 @@ class CourseBase(BaseModel):
 
 
 class CourseCreatePayload(BaseModel):
-    codigo_curso: str = Field(..., min_length=2, max_length=20, description="Código de asignatura (ej. CI-101)")
+    codigo_curso: str = Field(
+        ..., min_length=2, max_length=20, description="Código de asignatura (ej. CI-101)"
+    )
     nombre_curso: str = Field(..., min_length=3, max_length=150, description="Nombre de la asignatura")
     ciclo_plan: int = Field(..., ge=1, le=10, description="Ciclo formativo del plan de estudios (1 a 10)")
     creditos: int = Field(..., ge=1, le=10, description="Créditos académicos oficiales")

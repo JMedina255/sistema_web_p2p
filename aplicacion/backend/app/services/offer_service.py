@@ -313,6 +313,7 @@ class OfferService:
         # Resolución y aprovisionamiento de espacio físico o aula virtual (VirtualRoomService)
         if payload.modalidad == "virtual":
             from app.services.virtual_room_service import VirtualRoomService
+
             assigned_space = VirtualRoomService.resolve_virtual_room(payload.espacio_asignado, code)
         else:
             assigned_space = payload.espacio_asignado.strip() if payload.espacio_asignado else "Aula EPIS"
@@ -406,11 +407,18 @@ class OfferService:
                 if mentor_email:
                     clean_m = mentor_email.strip().lower()
                     from app.core.identity import parse_student_email
+
                     parsed = parse_student_email(clean_m)
                     codigo = parsed.get("codigo_estudiante")
                     mentor_aliases = [clean_m]
-                    if codigo == "2022073504" or clean_m in ("ra2022073504@virtual.upt.pe", "2022073504@upt.pe", "mentor@upt.pe"):
-                        mentor_aliases.extend(["ra2022073504@virtual.upt.pe", "2022073504@upt.pe", "mentor@upt.pe"])
+                    if codigo == "2022073504" or clean_m in (
+                        "ra2022073504@virtual.upt.pe",
+                        "2022073504@upt.pe",
+                        "mentor@upt.pe",
+                    ):
+                        mentor_aliases.extend(
+                            ["ra2022073504@virtual.upt.pe", "2022073504@upt.pe", "mentor@upt.pe"]
+                        )
                     elif codigo:
                         mentor_aliases.extend([f"{codigo}@upt.pe", f"{codigo}@virtual.upt.pe"])
                     query = query.filter(SesionMentoria.mentor_email.in_(list(set(mentor_aliases))))

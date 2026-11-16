@@ -196,6 +196,7 @@ def test_auth_rate_limit_postgresql_atomic_concurrency():
     en un schema aislado. Demuestra la ausencia de condiciones de carrera cuando la clave no existe.
     """
     import concurrent.futures
+
     from app.core.config import settings
 
     if not settings.sync_database_url or not settings.sync_database_url.startswith("postgresql"):
@@ -212,14 +213,16 @@ def test_auth_rate_limit_postgresql_atomic_concurrency():
 
     with engine.connect() as conn:
         conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema_name};"))
-        conn.execute(text(f"""
+        conn.execute(
+            text(f"""
             CREATE TABLE IF NOT EXISTS {schema_name}.auth_rate_limits (
                 key VARCHAR(128) PRIMARY KEY,
                 count INTEGER NOT NULL DEFAULT 1,
                 window_expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
                 updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
             );
-        """))
+        """)
+        )
         conn.commit()
 
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -258,6 +261,7 @@ def test_auth_rate_limit_postgresql_atomic_concurrency():
 def test_migration_006_definition():
     """Valida la definición, dependencias y consistencia de la migración 006_auth_rate_limits."""
     import importlib
+
     mig_006 = importlib.import_module("app.db.migrations.versions.006_auth_rate_limits")
 
     assert mig_006.revision == "20261116_006"

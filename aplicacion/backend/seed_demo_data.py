@@ -6,13 +6,13 @@ Puebla el entorno con cuentas oficiales e institucionales de Google Workspace (@
 y realiza el aprovisionamiento idempotente del ciclo de vida formativo completo.
 """
 
-from datetime import UTC, datetime, timedelta
 import hashlib
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
-from app.db.session import Base, get_engine, get_session
+from app.db.session import Base, get_engine
 from app.models.attendance import AsistenciaSesion
 from app.models.bitacora import BitacoraPedagogica
 from app.models.booking import ReservaCupo, SolicitudDemanda
@@ -29,7 +29,9 @@ def seed_lifecycle_data(db, now: datetime):
     Aprovisionamiento idempotente del ciclo de vida para tablas nucleares
     que registran 0 filas en Supabase / PostgreSQL.
     """
-    print("[DEMO_SEED] 5. Aprovisionando datos del ciclo de vida (reservas, demandas, asistencias, encuestas, certificados)...")
+    print(
+        "[DEMO_SEED] 5. Aprovisionando datos del ciclo de vida (reservas, demandas, asistencias, encuestas, certificados)..."
+    )
 
     # A. Solicitudes de demanda académica
     if db.query(SolicitudDemanda).count() == 0:
@@ -150,7 +152,7 @@ def seed_lifecycle_data(db, now: datetime):
             codigo_folio="CERT-2026-II-0001",
             periodo_academico="2026-II",
             horas_acreditadas=22.0,
-            hash_firma=hashlib.sha256("CERT-2026-II-0001-VERIFIED-UPT".encode()).hexdigest(),
+            hash_firma=hashlib.sha256(b"CERT-2026-II-0001-VERIFIED-UPT").hexdigest(),
             estado="EMITIDO",
             created_at=now - timedelta(days=1),
         )
@@ -161,7 +163,7 @@ def seed_lifecycle_data(db, now: datetime):
             codigo_folio="CERT-2026-II-0002",
             periodo_academico="2026-II",
             horas_acreditadas=22.0,
-            hash_firma=hashlib.sha256("CERT-2026-II-0002-VERIFIED-UPT".encode()).hexdigest(),
+            hash_firma=hashlib.sha256(b"CERT-2026-II-0002-VERIFIED-UPT").hexdigest(),
             estado="EMITIDO",
             created_at=now - timedelta(days=1),
         )
@@ -181,11 +183,7 @@ def seed_demo_environment():
     # Asegurar compatibilidad de esquema y restricciones en bases relacionales preexistentes (PostgreSQL/SQLite)
     with engine.begin() as conn:
         try:
-            conn.execute(
-                text(
-                    "ALTER TABLE sesiones_mentoria DROP CONSTRAINT IF EXISTS chk_sesion_estado;"
-                )
-            )
+            conn.execute(text("ALTER TABLE sesiones_mentoria DROP CONSTRAINT IF EXISTS chk_sesion_estado;"))
             conn.execute(
                 text(
                     "ALTER TABLE sesiones_mentoria ADD CONSTRAINT chk_sesion_estado "
@@ -343,10 +341,7 @@ def seed_demo_environment():
 
         # Disponibilidad horaria para mentores
         for mentor_e in ["jm2022074255@virtual.upt.pe", "mentor@upt.pe"]:
-            if (
-                db.query(DisponibilidadHoraria).filter(DisponibilidadHoraria.email == mentor_e).count()
-                == 0
-            ):
+            if db.query(DisponibilidadHoraria).filter(DisponibilidadHoraria.email == mentor_e).count() == 0:
                 slots = [
                     (1, "08:00", "09:00"),
                     (1, "09:00", "10:00"),
@@ -406,12 +401,12 @@ def seed_demo_environment():
 
         # Sincronización automática de secuencias para prevenir UniqueViolation en claves primarias
         find_seqs_sql = """
-        SELECT 
+        SELECT
             c.table_name,
             c.column_name,
             pg_get_serial_sequence(c.table_name, c.column_name) AS seq_name
         FROM information_schema.tables t
-        JOIN information_schema.columns c 
+        JOIN information_schema.columns c
             ON t.table_name = c.table_name AND t.table_schema = c.table_schema
         WHERE t.table_schema = 'public'
           AND t.table_type = 'BASE TABLE'

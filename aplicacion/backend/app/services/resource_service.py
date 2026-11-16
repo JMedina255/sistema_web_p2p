@@ -78,7 +78,7 @@ class ValidadorCargaRecurso:
             if len(content) > cls.MAX_FILE_SIZE_BYTES:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"El archivo ({len(content) / (1024*1024):.1f} MB) excede el tamaño máximo permitido de 25 MB.",
+                    detail=f"El archivo ({len(content) / (1024 * 1024):.1f} MB) excede el tamaño máximo permitido de 25 MB.",
                 )
             if len(content) == 0:
                 raise HTTPException(
@@ -121,7 +121,9 @@ class ResourceService:
         Asocia un material académico validado a la sesión correspondiente (CUS20-U02).
         """
         if id_sesion <= 0:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Identificador de sesión inválido.")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Identificador de sesión inválido."
+            )
 
         validation = ValidadorCargaRecurso.validar(nombre_recurso, content)
 
@@ -172,7 +174,9 @@ class ResourceService:
         Lanza HTTP 403 Forbidden si un tercero no participante intenta consultar los recursos.
         """
         clean_user = usuario_email.strip().lower()
-        participantes_autorizados = {mentor_email.strip().lower()} | {e.strip().lower() for e in correos_inscritos}
+        participantes_autorizados = {mentor_email.strip().lower()} | {
+            e.strip().lower() for e in correos_inscritos
+        }
 
         if clean_user not in participantes_autorizados:
             raise HTTPException(

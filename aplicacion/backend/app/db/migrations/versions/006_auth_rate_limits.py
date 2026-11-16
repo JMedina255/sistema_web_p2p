@@ -30,7 +30,9 @@ def upgrade() -> None:
             sa.Column("key", sa.String(length=128), nullable=False),
             sa.Column("count", sa.Integer(), server_default=sa.text("1"), nullable=False),
             sa.Column("window_expires_at", sa.DateTime(timezone=True), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False
+            ),
             sa.PrimaryKeyConstraint("key", name="pk_auth_rate_limits"),
         )
 

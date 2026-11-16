@@ -322,13 +322,10 @@ def test_virtual_room_service_query_params_and_safeguards():
 
     # URL con query parameters
     assert (
-        VirtualRoomService.is_valid_meeting_url(
-            "https://meet.google.com/abc-defg-hij?authuser=1&hs=179"
-        )
+        VirtualRoomService.is_valid_meeting_url("https://meet.google.com/abc-defg-hij?authuser=1&hs=179")
         is True
     )
 
     # Invocación con None no debe lanzar TypeError
     meet_url = VirtualRoomService.generate_google_meet_url(None)
     assert meet_url.startswith("https://meet.google.com/upt-epis-")
-

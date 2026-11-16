@@ -34,7 +34,9 @@ class ProfileService:
     def _default_profile(email: str) -> AcademicProfileResponse:
         clean_email = email.strip().lower()
         parsed = parse_student_email(clean_email)
-        codigo = parsed.get("codigo_estudiante") or (clean_email.split("@")[0] if "@" in clean_email else clean_email)
+        codigo = parsed.get("codigo_estudiante") or (
+            clean_email.split("@")[0] if "@" in clean_email else clean_email
+        )
         nombres = ""
         apellidos = ""
         ciclo = 3
@@ -101,13 +103,19 @@ class ProfileService:
                 if settings.STRICT_DATABASE_MODE:
                     raise HTTPException(
                         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                        detail={"code": "DATABASE_UNAVAILABLE", "message": "Error al consultar perfil en base de datos."},
+                        detail={
+                            "code": "DATABASE_UNAVAILABLE",
+                            "message": "Error al consultar perfil en base de datos.",
+                        },
                     ) from exc
 
         if settings.STRICT_DATABASE_MODE:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail={"code": "DATABASE_UNAVAILABLE", "message": "Base de datos no disponible para consulta de perfil en modo estricto."},
+                detail={
+                    "code": "DATABASE_UNAVAILABLE",
+                    "message": "Base de datos no disponible para consulta de perfil en modo estricto.",
+                },
             )
 
         if clean_email in _memory_profiles:
@@ -155,7 +163,11 @@ class ProfileService:
                 perfil = db.query(PerfilAcademico).filter(PerfilAcademico.email == clean_email).first()
                 if not perfil:
                     parsed_info = parse_student_email(clean_email)
-                    resolved_codigo = payload.codigo_estudiante or parsed_info.get("codigo_estudiante") or clean_email.split("@")[0]
+                    resolved_codigo = (
+                        payload.codigo_estudiante
+                        or parsed_info.get("codigo_estudiante")
+                        or clean_email.split("@")[0]
+                    )
                     perfil = PerfilAcademico(
                         email=clean_email,
                         codigo_estudiante=resolved_codigo,
@@ -207,13 +219,19 @@ class ProfileService:
                 if settings.STRICT_DATABASE_MODE:
                     raise HTTPException(
                         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                        detail={"code": "DATABASE_UNAVAILABLE", "message": "Error al actualizar perfil en base de datos."},
+                        detail={
+                            "code": "DATABASE_UNAVAILABLE",
+                            "message": "Error al actualizar perfil en base de datos.",
+                        },
                     ) from exc
 
         if settings.STRICT_DATABASE_MODE:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail={"code": "DATABASE_UNAVAILABLE", "message": "Base de datos no disponible para actualización de perfil en modo estricto."},
+                detail={
+                    "code": "DATABASE_UNAVAILABLE",
+                    "message": "Base de datos no disponible para actualización de perfil en modo estricto.",
+                },
             )
 
         # Fallback en memoria
@@ -273,13 +291,19 @@ class ProfileService:
                 if settings.STRICT_DATABASE_MODE:
                     raise HTTPException(
                         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                        detail={"code": "DATABASE_UNAVAILABLE", "message": "Error al consultar perfil en base de datos."},
+                        detail={
+                            "code": "DATABASE_UNAVAILABLE",
+                            "message": "Error al consultar perfil en base de datos.",
+                        },
                     ) from exc
 
         if settings.STRICT_DATABASE_MODE:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail={"code": "DATABASE_UNAVAILABLE", "message": "Base de datos no disponible para consulta de perfil en modo estricto."},
+                detail={
+                    "code": "DATABASE_UNAVAILABLE",
+                    "message": "Base de datos no disponible para consulta de perfil en modo estricto.",
+                },
             )
 
         if clean_email in _memory_availability:

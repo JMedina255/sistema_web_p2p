@@ -1,4 +1,5 @@
 import pytest
+
 from app.core.identity import parse_student_email, validate_upt_email
 
 
@@ -50,4 +51,4 @@ def test_parse_student_email_administrative_and_fallback():
     # Correo no institucional
     parsed_external = parse_student_email("persona@gmail.com")
     assert parsed_external["es_estudiante"] is False
-    assert parsed_external["codigo_estudiante"] == None
+    assert parsed_external["codigo_estudiante"] is None

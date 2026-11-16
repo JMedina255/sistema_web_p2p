@@ -44,7 +44,7 @@ async def import_academic_schedule(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Error al leer los datos del archivo transmitido: {str(exc)}",
-        )
+        ) from exc
 
     try:
         result = ScheduleParserService.procesar_cronograma_administrador(
@@ -60,7 +60,7 @@ async def import_academic_schedule(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Ocurrió un error inesperado al procesar el cronograma: {str(exc)}",
-        )
+        ) from exc
 
 
 @router.get(
@@ -71,7 +71,9 @@ async def import_academic_schedule(
 )
 def get_free_physical_slots(
     dia: str | None = Query(None, description="Filtrar por día de la semana (ej. 'Lunes', 'Martes')."),
-    aula: str | None = Query(None, description="Filtrar por nombre o código del aula/laboratorio (ej. 'Lab 01')."),
+    aula: str | None = Query(
+        None, description="Filtrar por nombre o código del aula/laboratorio (ej. 'Lab 01')."
+    ),
 ) -> list[FreeSlotItem]:
     slots = ScheduleParserService.get_active_slots(dia=dia, aula=aula)
     return [FreeSlotItem(**s) for s in slots]

@@ -72,9 +72,7 @@ class EmailService:
 
         # Fallback a consola si el servicio SMTP está desactivado o sin credenciales
         if not settings.SMTP_ENABLED or not (settings.SMTP_USER and settings.SMTP_USER.strip()):
-            log_line = (
-                f"[EMAIL DEV/MOCK] Destinatario: {clean_to} | Asunto: {subject} | Mensaje: {text_body}"
-            )
+            log_line = f"[EMAIL DEV/MOCK] Destinatario: {clean_to} | Asunto: {subject} | Mensaje: {text_body}"
             print(log_line)
             logger.info(log_line)
             return True
