@@ -25,6 +25,14 @@ class RequestOtpResponse(BaseModel):
     message: str
     isMock: bool = False
     mockCodeHint: str | None = None
+    deliveryStatus: str = Field(
+        default="dispatched",
+        description="Estado del despacho del código: 'dispatched' | 'mocked' | 'failed'",
+    )
+    emailDispatched: bool = Field(
+        default=True,
+        description="Indica si el mensaje fue aceptado por el servidor SMTP para entrega",
+    )
 
 
 class ResendOtpPayload(BaseModel):

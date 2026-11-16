@@ -122,6 +122,7 @@ def test_auth_service_production_mode_strict_security(monkeypatch):
     - El bypass '000000' no debe operar como código expirado artificial, sino validarse normalmente contra el hash.
     """
     monkeypatch.setattr(settings, "APP_ENV", "production")
+    monkeypatch.setattr(settings, "STRICT_DATABASE_MODE", False)
 
     # 1. Request OTP en producción
     resp = AuthService.request_otp(None, "estudiante.prod@upt.pe")
