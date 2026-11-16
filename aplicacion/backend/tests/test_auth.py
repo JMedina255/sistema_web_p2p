@@ -11,6 +11,7 @@ from app.services.auth_service import (
     _ip_verify_timestamps,
     _memory_challenges,
 )
+from app.services.email_service import EmailService
 
 client = TestClient(app)
 
@@ -27,7 +28,10 @@ def teardown_function():
     settings.ENABLE_MOCK_OTP_HINTS = False
 
 
-def test_request_otp_success():
+def test_request_otp_success(monkeypatch):
+    monkeypatch.setattr(settings, "SMTP_ENABLED", True)
+    monkeypatch.setattr(settings, "SMTP_USER", "smtp@upt.pe")
+    monkeypatch.setattr(EmailService, "send_otp_email", classmethod(lambda cls, to, code, exp: True))
     response = client.post("/api/v1/auth/otp/request", json={"email": "2022074255@upt.pe"})
     assert response.status_code == 200
     data = response.json()

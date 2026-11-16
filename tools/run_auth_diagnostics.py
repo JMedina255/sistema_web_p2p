@@ -1,6 +1,8 @@
+import argparse
 import sys
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from datetime import datetime, UTC, timedelta
+
 import jwt
 
 backend_path = Path("aplicacion/backend").resolve()
@@ -8,15 +10,62 @@ sys.path.insert(0, str(backend_path))
 
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
-from app.main import app
+
 from app.core.config import settings
+from app.db import session as db_session
+from app.main import app
 from app.services.auth_service import (
-    _memory_challenges,
-    _ip_request_timestamps,
     _email_request_timestamps,
+    _ip_request_timestamps,
+    _ip_verify_timestamps,
+    _memory_challenges,
     AuthService,
 )
 from app.services.email_service import EmailService
+
+# Parseo de argumentos de seguridad para blindar base de datos de producción/Supabase
+parser = argparse.ArgumentParser(description="Ejecución de diagnósticos de autenticación (QA-AUTH-02B)")
+parser.add_argument(
+    "--allow-remote-db",
+    action="store_true",
+    help="Permite explícitamente ejecutar diagnósticos sobre la base de datos remota configurada en .env",
+)
+args = parser.parse_args()
+
+# Aislamiento por defecto: usar SQLite en memoria para no tocar ni modificar Supabase remoto
+if not args.allow_remote_db:
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from sqlalchemy.pool import StaticPool
+
+    from app import models as app_models  # noqa: F401 - Asegura registro de todas las entidades ORM
+
+    db_session.close_engine()
+    isolated_engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+        echo=False,
+    )
+    db_session.Base.metadata.create_all(bind=isolated_engine)
+    IsolatedSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=isolated_engine)
+
+    def _get_isolated_session():
+        db = IsolatedSessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app.dependency_overrides[db_session.get_session] = _get_isolated_session
+    app.dependency_overrides[db_session.get_required_session] = _get_isolated_session
+    print("[AISLAMIENTO] Motor de persistencia aislado en memoria (SQLite con StaticPool). Base Supabase protegida contra modificaciones.")
+else:
+    print("[ADVERTENCIA] Ejecutando diagnósticos con conexión a la base de datos configurada (--allow-remote-db habilitado).")
+
+# Deshabilitar por defecto SMTP real para evitar envíos externos accidentales
+original_smtp_enabled = settings.SMTP_ENABLED
+settings.SMTP_ENABLED = False
 
 client = TestClient(app)
 
@@ -36,6 +85,20 @@ def reset_limits():
     _memory_challenges.clear()
     _ip_request_timestamps.clear()
     _email_request_timestamps.clear()
+    _ip_verify_timestamps.clear()
+    try:
+        from app.models.auth import AuthRateLimit
+        if not args.allow_remote_db:
+            with IsolatedSessionLocal() as db:
+                db.query(AuthRateLimit).delete()
+                db.commit()
+        else:
+            from app.db.session import get_session_context
+            with get_session_context() as db:
+                db.query(AuthRateLimit).delete()
+                db.commit()
+    except Exception:
+        pass
 
 print("Iniciando batería de pruebas diagnósticas QA-AUTH-01 (AUTH-01 a AUTH-16)...")
 
@@ -69,10 +132,16 @@ else:
 
 # AUTH-04: Error de conexión SMTP
 old_send = EmailService.send_otp_email
+old_smtp_4 = settings.SMTP_ENABLED
+old_user_4 = settings.SMTP_USER
+settings.SMTP_ENABLED = True
+settings.SMTP_USER = "test@upt.pe"
 EmailService.send_otp_email = classmethod(lambda cls, to, code, exp: False)
 reset_limits()
 res4 = client.post("/api/v1/auth/otp/request", json={"email": "smtp_fail@upt.pe"})
 EmailService.send_otp_email = old_send
+settings.SMTP_ENABLED = old_smtp_4
+settings.SMTP_USER = old_user_4
 if res4.status_code == 502 and "EMAIL_DISPATCH_FAILED" in res4.text:
     record("AUTH-04", "Error de conexión SMTP", "Fallo detectado y comunicado (HTTP 502 EMAIL_DISPATCH_FAILED)", f"HTTP 502: {res4.json()}", "PASS", "Fallo SMTP comunicado e invalidado correctamente")
 elif res4.status_code == 200:
@@ -82,13 +151,22 @@ else:
 
 # AUTH-05: OTP correcto vigente
 reset_limits()
+old_smtp_en = settings.SMTP_ENABLED
+old_smtp_user = settings.SMTP_USER
+old_hints = settings.ENABLE_MOCK_OTP_HINTS
+settings.SMTP_ENABLED = True
+settings.SMTP_USER = "test@upt.pe"
+settings.ENABLE_MOCK_OTP_HINTS = True
 EmailService.send_otp_email = classmethod(lambda cls, to, code, exp: True)
 res5_req = client.post("/api/v1/auth/otp/request", json={"email": "auth05@virtual.upt.pe"})
 c_id = res5_req.json()["challengeId"]
-code = _memory_challenges[c_id]["code_plain"]
+code = res5_req.json().get("mockCodeHint") or _memory_challenges[c_id]["code_plain"]
 res5_ver = client.post("/api/v1/auth/otp/verify", json={"challengeId": c_id, "otp": code})
+settings.SMTP_ENABLED = old_smtp_en
+settings.SMTP_USER = old_smtp_user
+settings.ENABLE_MOCK_OTP_HINTS = old_hints
 if res5_ver.status_code == 200 and res5_ver.json().get("token"):
-    record("AUTH-05", "OTP correcto vigente", "JWT emitido (HTTP 200)", f"HTTP 200, token={res5_ver.json().get('token')[:20]}...", "PASS", "Emisión correcta de token JWT institucional")
+    record("AUTH-05", "OTP correcto vigente", "JWT emitido (HTTP 200)", "HTTP 200, token=[PROTECTED_JWT]", "PASS", "Emisión correcta de token JWT institucional")
 else:
     record("AUTH-05", "OTP correcto vigente", "JWT emitido", f"HTTP {res5_ver.status_code}", "FAIL", "Fallo al verificar OTP válido")
 
@@ -109,13 +187,20 @@ c_id7 = res7_req.json()["challengeId"]
 if c_id7 in _memory_challenges:
     _memory_challenges[c_id7]["expires_at"] = datetime.now(UTC) - timedelta(minutes=1)
 try:
-    from app.db.session import get_session_context
     from app.models.auth import AuthChallenge
-    with get_session_context() as db_s:
-        db_chal = db_s.query(AuthChallenge).filter(AuthChallenge.id_challenge == c_id7).first()
-        if db_chal:
-            db_chal.expires_at = datetime.now(UTC) - timedelta(minutes=1)
-            db_s.commit()
+    if not args.allow_remote_db:
+        with IsolatedSessionLocal() as db_s:
+            db_chal = db_s.query(AuthChallenge).filter(AuthChallenge.id_challenge == c_id7).first()
+            if db_chal:
+                db_chal.expires_at = datetime.now(UTC) - timedelta(minutes=1)
+                db_s.commit()
+    else:
+        from app.db.session import get_session_context
+        with get_session_context() as db_s:
+            db_chal = db_s.query(AuthChallenge).filter(AuthChallenge.id_challenge == c_id7).first()
+            if db_chal:
+                db_chal.expires_at = datetime.now(UTC) - timedelta(minutes=1)
+                db_s.commit()
 except Exception:
     pass
 res7 = client.post("/api/v1/auth/otp/verify", json={"challengeId": c_id7, "otp": "123456"})
@@ -126,11 +211,14 @@ else:
 
 # AUTH-08: Reutilización del OTP
 reset_limits()
+old_hints_8 = settings.ENABLE_MOCK_OTP_HINTS
+settings.ENABLE_MOCK_OTP_HINTS = True
 res8_req = client.post("/api/v1/auth/otp/request", json={"email": "auth08@virtual.upt.pe"})
 c_id8 = res8_req.json()["challengeId"]
-code8 = _memory_challenges[c_id8]["code_plain"]
+code8 = res8_req.json().get("mockCodeHint") or _memory_challenges[c_id8]["code_plain"]
 res8_v1 = client.post("/api/v1/auth/otp/verify", json={"challengeId": c_id8, "otp": code8})
 res8_v2 = client.post("/api/v1/auth/otp/verify", json={"challengeId": c_id8, "otp": code8})
+settings.ENABLE_MOCK_OTP_HINTS = old_hints_8
 if res8_v2.status_code == 400 and res8_v2.json().get("detail", {}).get("code") == "OTP_ALREADY_USED":
     record("AUTH-08", "Reutilización del OTP", "Acceso rechazado (HTTP 400 OTP_ALREADY_USED)", f"HTTP 400: {res8_v2.json()}", "PASS", "OTP reutilizado rechazado")
 else:
@@ -150,13 +238,20 @@ else:
 if c_id9 in _memory_challenges:
     _memory_challenges[c_id9]["resend_available_at"] = datetime.now(UTC) - timedelta(seconds=10)
 try:
-    from app.db.session import get_session_context
     from app.models.auth import AuthChallenge
-    with get_session_context() as db_s:
-        db_chal = db_s.query(AuthChallenge).filter(AuthChallenge.id_challenge == c_id9).first()
-        if db_chal:
-            db_chal.resend_available_at = datetime.now(UTC) - timedelta(seconds=10)
-            db_s.commit()
+    if not args.allow_remote_db:
+        with IsolatedSessionLocal() as db_s:
+            db_chal = db_s.query(AuthChallenge).filter(AuthChallenge.id_challenge == c_id9).first()
+            if db_chal:
+                db_chal.resend_available_at = datetime.now(UTC) - timedelta(seconds=10)
+                db_s.commit()
+    else:
+        from app.db.session import get_session_context
+        with get_session_context() as db_s:
+            db_chal = db_s.query(AuthChallenge).filter(AuthChallenge.id_challenge == c_id9).first()
+            if db_chal:
+                db_chal.resend_available_at = datetime.now(UTC) - timedelta(seconds=10)
+                db_s.commit()
 except Exception:
     pass
 _ip_request_timestamps.clear()
@@ -177,6 +272,9 @@ app.dependency_overrides[db_session_module.get_required_session] = broken_sessio
 reset_limits()
 res11 = client.post("/api/v1/auth/otp/request", json={"email": "auth11@virtual.upt.pe"})
 app.dependency_overrides.clear()
+if not args.allow_remote_db:
+    app.dependency_overrides[db_session.get_session] = _get_isolated_session
+    app.dependency_overrides[db_session.get_required_session] = _get_isolated_session
 settings.STRICT_DATABASE_MODE = old_strict
 if res11.status_code == 503:
     record("AUTH-11", "Caída de base de datos en modo estricto", "HTTP 503, sin fallback silencioso", f"HTTP 503", "PASS", "Lanzó 503 al fallar BD en modo estricto")
@@ -193,7 +291,7 @@ res12 = client.post("/api/v1/auth/google", json={"id_token": fake_google_jwt})
 if res12.status_code == 401:
     record("AUTH-12", "Token Google con firma inválida", "HTTP 401, sin sesión", f"HTTP 401", "PASS", "Token con firma falsa rechazado")
 elif res12.status_code == 200:
-    record("AUTH-12", "Token Google con firma inválida", "HTTP 401, sin sesión", f"HTTP 200 (access_token={res12.json().get('access_token')[:20]}...)", "FAIL", "VULNERABILIDAD CRITICA: El endpoint decodifica con verify_signature: False cuando falla Google tokeninfo y emite sesión legítima.")
+    record("AUTH-12", "Token Google con firma inválida", "HTTP 401, sin sesión", "HTTP 200 (access_token=[PROTECTED_JWT])", "FAIL", "VULNERABILIDAD CRITICA: El endpoint decodifica con verify_signature: False cuando falla Google tokeninfo y emite sesión legítima.")
 else:
     record("AUTH-12", "Token Google con firma inválida", "HTTP 401", f"HTTP {res12.status_code}", "FAIL", f"Respuesta inesperada: {res12.status_code}")
 
@@ -253,8 +351,10 @@ if payload and payload.get("sub") == test_email and payload.get("role") == "ment
 else:
     record("AUTH-16", "Login/logout y persistencia de sesión", "Sesión coherente", "Fallo al validar JWT", "FAIL", "Fallo en validación de token JWT")
 
-# Restaurar mocks
+# Restaurar mocks y configuraciones
 EmailService.send_otp_email = old_send
+settings.SMTP_ENABLED = original_smtp_enabled
+app.dependency_overrides.clear()
 
 print("\n" + "="*80)
 print(f"{'ID':<9} | {'ESCENARIO':<32} | {'ESTADO':<6} | {'DETALLE'}")
