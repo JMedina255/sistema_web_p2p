@@ -8,9 +8,6 @@ import jwt
 backend_path = Path("aplicacion/backend").resolve()
 sys.path.insert(0, str(backend_path))
 
-from fastapi import HTTPException
-from fastapi.testclient import TestClient
-
 from app.core.config import settings
 from app.db import session as db_session
 from app.main import app
@@ -19,9 +16,10 @@ from app.services.auth_service import (
     _ip_request_timestamps,
     _ip_verify_timestamps,
     _memory_challenges,
-    AuthService,
 )
 from app.services.email_service import EmailService
+from fastapi import HTTPException
+from fastapi.testclient import TestClient
 
 # Parseo de argumentos de seguridad para blindar base de datos de producción/Supabase
 parser = argparse.ArgumentParser(description="Ejecución de diagnósticos de autenticación (QA-AUTH-02B)")
@@ -34,11 +32,10 @@ args = parser.parse_args()
 
 # Aislamiento por defecto: usar SQLite en memoria para no tocar ni modificar Supabase remoto
 if not args.allow_remote_db:
+    from app import models as app_models  # noqa: F401 - Asegura registro de todas las entidades ORM
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
     from sqlalchemy.pool import StaticPool
-
-    from app import models as app_models  # noqa: F401 - Asegura registro de todas las entidades ORM
 
     db_session.close_engine()
     isolated_engine = create_engine(
@@ -88,16 +85,34 @@ def reset_limits():
     _ip_verify_timestamps.clear()
     try:
         from app.models.auth import AuthRateLimit
+        from sqlalchemy import or_
         if not args.allow_remote_db:
             with IsolatedSessionLocal() as db:
                 db.query(AuthRateLimit).delete()
                 db.commit()
         else:
+            # En base remota (--allow-remote-db), NUNCA realizar borrado indiscriminado de auth_rate_limits.
+            # Se restringe la limpieza exclusivamente a identificadores de pruebas diagnósticas autorizadas.
             from app.db.session import get_session_context
             with get_session_context() as db:
-                db.query(AuthRateLimit).delete()
+                diagnostic_test_keys = [
+                    "ip:testclient",
+                    "resend:ip:testclient",
+                    "verify:ip:testclient",
+                ]
+                db.query(AuthRateLimit).filter(
+                    or_(
+                        AuthRateLimit.key.in_(diagnostic_test_keys),
+                        AuthRateLimit.key.like("email:auth%@virtual.upt.pe"),
+                        AuthRateLimit.key.like("email:smtp_%@upt.pe"),
+                        AuthRateLimit.key.like("email:brute%@virtual.upt.pe"),
+                        AuthRateLimit.key.like("email:ra2022073504%"),
+                        AuthRateLimit.key.like("test:%"),
+                        AuthRateLimit.key.like("diag:%"),
+                    )
+                ).delete(synchronize_session=False)
                 db.commit()
-    except Exception:
+    except Exception:  # noqa: BLE001, S110
         pass
 
 print("Iniciando batería de pruebas diagnósticas QA-AUTH-01 (AUTH-01 a AUTH-16)...")
@@ -145,7 +160,7 @@ settings.SMTP_USER = old_user_4
 if res4.status_code == 502 and "EMAIL_DISPATCH_FAILED" in res4.text:
     record("AUTH-04", "Error de conexión SMTP", "Fallo detectado y comunicado (HTTP 502 EMAIL_DISPATCH_FAILED)", f"HTTP 502: {res4.json()}", "PASS", "Fallo SMTP comunicado e invalidado correctamente")
 elif res4.status_code == 200:
-    record("AUTH-04", "Error de conexión SMTP", "Fallo detectado y comunicado", f"HTTP 200", "FAIL", "AuthService.request_otp ignora el fallo de despacho y responde HTTP 200.")
+    record("AUTH-04", "Error de conexión SMTP", "Fallo detectado y comunicado", "HTTP 200", "FAIL", "AuthService.request_otp ignora el fallo de despacho y responde HTTP 200.")
 else:
     record("AUTH-04", "Error de conexión SMTP", "Fallo detectado y comunicado", f"HTTP {res4.status_code}", "PASS", f"Fallo SMTP comunicado con HTTP {res4.status_code}")
 
@@ -201,7 +216,7 @@ try:
             if db_chal:
                 db_chal.expires_at = datetime.now(UTC) - timedelta(minutes=1)
                 db_s.commit()
-except Exception:
+except Exception:  # noqa: BLE001, S110
     pass
 res7 = client.post("/api/v1/auth/otp/verify", json={"challengeId": c_id7, "otp": "123456"})
 if res7.status_code == 400 and res7.json().get("detail", {}).get("code") == "OTP_EXPIRED":
@@ -252,7 +267,7 @@ try:
             if db_chal:
                 db_chal.resend_available_at = datetime.now(UTC) - timedelta(seconds=10)
                 db_s.commit()
-except Exception:
+except Exception:  # noqa: BLE001, S110
     pass
 _ip_request_timestamps.clear()
 _email_request_timestamps.clear()
@@ -266,6 +281,8 @@ else:
 old_strict = settings.STRICT_DATABASE_MODE
 settings.STRICT_DATABASE_MODE = True
 from app.db import session as db_session_module
+
+
 def broken_session():
     raise HTTPException(status_code=503, detail={"code": "DATABASE_UNAVAILABLE", "message": "Database is down"})
 app.dependency_overrides[db_session_module.get_required_session] = broken_session
@@ -277,7 +294,7 @@ if not args.allow_remote_db:
     app.dependency_overrides[db_session.get_required_session] = _get_isolated_session
 settings.STRICT_DATABASE_MODE = old_strict
 if res11.status_code == 503:
-    record("AUTH-11", "Caída de base de datos en modo estricto", "HTTP 503, sin fallback silencioso", f"HTTP 503", "PASS", "Lanzó 503 al fallar BD en modo estricto")
+    record("AUTH-11", "Caída de base de datos en modo estricto", "HTTP 503, sin fallback silencioso", "HTTP 503", "PASS", "Lanzó 503 al fallar BD en modo estricto")
 else:
     record("AUTH-11", "Caída de base de datos en modo estricto", "HTTP 503, sin fallback silencioso", f"HTTP {res11.status_code} (Respondió exitoso con desafío en RAM)", "FAIL", "endpoints/auth.py no bloqueó con 503.")
 
@@ -289,7 +306,7 @@ fake_google_jwt = jwt.encode(
 )
 res12 = client.post("/api/v1/auth/google", json={"id_token": fake_google_jwt})
 if res12.status_code == 401:
-    record("AUTH-12", "Token Google con firma inválida", "HTTP 401, sin sesión", f"HTTP 401", "PASS", "Token con firma falsa rechazado")
+    record("AUTH-12", "Token Google con firma inválida", "HTTP 401, sin sesión", "HTTP 401", "PASS", "Token con firma falsa rechazado")
 elif res12.status_code == 200:
     record("AUTH-12", "Token Google con firma inválida", "HTTP 401, sin sesión", "HTTP 200 (access_token=[PROTECTED_JWT])", "FAIL", "VULNERABILIDAD CRITICA: El endpoint decodifica con verify_signature: False cuando falla Google tokeninfo y emite sesión legítima.")
 else:
@@ -344,6 +361,7 @@ else:
 # AUTH-16: Login/logout y persistencia de sesión
 test_email = "ra2022073504@virtual.upt.pe"
 from app.core.security import create_access_token, decode_access_token
+
 token = create_access_token({"sub": test_email, "email": test_email, "roles": ["mentoreado"], "role": "mentoreado"})
 payload = decode_access_token(token)
 if payload and payload.get("sub") == test_email and payload.get("role") == "mentoreado":

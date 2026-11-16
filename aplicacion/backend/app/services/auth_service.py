@@ -7,6 +7,8 @@ from datetime import UTC, datetime, timedelta
 
 import httpx
 from fastapi import HTTPException, status
+from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -63,16 +65,40 @@ def _check_rate_limit(
     # 1. Estrategia compartida y persistente en base de datos si db está disponible
     if db is not None:
         try:
-            query = db.query(AuthRateLimit).filter(AuthRateLimit.key == key)
-            try:
-                record = query.with_for_update().first()
-            except Exception:
-                record = query.first()
+            bind = db.get_bind()
+            dialect_name = bind.dialect.name if bind else ""
 
-            if record:
-                expires_at = _ensure_utc(record.window_expires_at)
-                if now < expires_at:
-                    if record.count >= max_requests:
+            if dialect_name == "postgresql":
+                # Estrategia atómica nativa PostgreSQL: INSERT ... ON CONFLICT (key) DO UPDATE ... RETURNING
+                # Erradica al 100% la condición de carrera entre múltiples workers cuando la clave aún no existe.
+                upsert_sql = text("""
+                    INSERT INTO auth_rate_limits (key, count, window_expires_at, updated_at)
+                    VALUES (:key, 1, :new_window_expires_at, :now)
+                    ON CONFLICT (key) DO UPDATE
+                    SET count = CASE
+                            WHEN auth_rate_limits.window_expires_at > :now THEN auth_rate_limits.count + 1
+                            ELSE 1
+                        END,
+                        window_expires_at = CASE
+                            WHEN auth_rate_limits.window_expires_at > :now THEN auth_rate_limits.window_expires_at
+                            ELSE :new_window_expires_at
+                        END,
+                        updated_at = :now
+                    RETURNING count, window_expires_at;
+                """)
+                res = db.execute(
+                    upsert_sql,
+                    {
+                        "key": key,
+                        "new_window_expires_at": now + timedelta(seconds=window_seconds),
+                        "now": now,
+                    },
+                ).fetchone()
+                db.commit()
+
+                if res:
+                    count, expires_at = res[0], _ensure_utc(res[1])
+                    if count > max_requests:
                         remaining = max(1, int((expires_at - now).total_seconds()))
                         raise HTTPException(
                             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -81,19 +107,63 @@ def _check_rate_limit(
                                 "message": f"{error_message} Debes esperar {remaining} segundos.",
                             },
                         )
-                    record.count += 1
+                return
+
+            # Para otros motores (ej. SQLite en pruebas unitarias)
+            try:
+                query = db.query(AuthRateLimit).filter(AuthRateLimit.key == key)
+                try:
+                    record = query.with_for_update().first()
+                except Exception:
+                    record = query.first()
+
+                if record:
+                    expires_at = _ensure_utc(record.window_expires_at)
+                    if now < expires_at:
+                        if record.count >= max_requests:
+                            remaining = max(1, int((expires_at - now).total_seconds()))
+                            raise HTTPException(
+                                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                                detail={
+                                    "code": error_code,
+                                    "message": f"{error_message} Debes esperar {remaining} segundos.",
+                                },
+                            )
+                        record.count += 1
+                    else:
+                        record.count = 1
+                        record.window_expires_at = now + timedelta(seconds=window_seconds)
                 else:
-                    record.count = 1
-                    record.window_expires_at = now + timedelta(seconds=window_seconds)
-            else:
-                record = AuthRateLimit(
-                    key=key,
-                    count=1,
-                    window_expires_at=now + timedelta(seconds=window_seconds),
-                )
-                db.add(record)
-            db.commit()
-            return
+                    record = AuthRateLimit(
+                        key=key,
+                        count=1,
+                        window_expires_at=now + timedelta(seconds=window_seconds),
+                    )
+                    db.add(record)
+                db.commit()
+                return
+            except IntegrityError:
+                # Manejo de condición de carrera si otra transacción insertó la clave simultáneamente
+                db.rollback()
+                record = db.query(AuthRateLimit).filter(AuthRateLimit.key == key).first()
+                if record:
+                    expires_at = _ensure_utc(record.window_expires_at)
+                    if now < expires_at:
+                        if record.count >= max_requests:
+                            remaining = max(1, int((expires_at - now).total_seconds()))
+                            raise HTTPException(
+                                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                                detail={
+                                    "code": error_code,
+                                    "message": f"{error_message} Debes esperar {remaining} segundos.",
+                                },
+                            )
+                        record.count += 1
+                    else:
+                        record.count = 1
+                        record.window_expires_at = now + timedelta(seconds=window_seconds)
+                    db.commit()
+                    return
         except HTTPException:
             raise
         except Exception as exc:

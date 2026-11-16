@@ -163,6 +163,107 @@ def test_auth_rate_limit_resets_after_window(isolated_db):
     assert _ensure_utc(expired_record.window_expires_at) > datetime.now(UTC)
 
 
+def test_auth_rate_limit_concurrency_nonexistent_key(isolated_db):
+    """
+    Comprueba que solicitudes sucesivas sobre una clave que aún NO existe
+    inserten count=1 y posteriormente incrementen y limiten adecuadamente.
+    """
+    from app.services.auth_service import _check_rate_limit
+
+    key = "test:concurrency:init_key"
+    # 1. Primera solicitud: la clave no existe en BD -> inserta con count=1
+    _check_rate_limit(isolated_db, key=key, max_requests=3, window_seconds=60)
+    record = isolated_db.query(AuthRateLimit).filter(AuthRateLimit.key == key).first()
+    assert record is not None
+    assert record.count == 1
+
+    # 2. Segunda y tercera solicitudes: incrementan a 2 y 3
+    _check_rate_limit(isolated_db, key=key, max_requests=3, window_seconds=60)
+    _check_rate_limit(isolated_db, key=key, max_requests=3, window_seconds=60)
+    isolated_db.refresh(record)
+    assert record.count == 3
+
+    # 3. Cuarta solicitud: supera el límite de 3 -> lanza HTTP 429
+    with pytest.raises(HTTPException) as exc_info:
+        _check_rate_limit(isolated_db, key=key, max_requests=3, window_seconds=60)
+    assert exc_info.value.status_code == 429
+    assert "RATE_LIMIT_EXCEEDED" in exc_info.value.detail["code"]
+
+
+def test_auth_rate_limit_postgresql_atomic_concurrency():
+    """
+    Comprueba la concurrencia real multi-worker en PostgreSQL utilizando conexiones simultáneas
+    en un schema aislado. Demuestra la ausencia de condiciones de carrera cuando la clave no existe.
+    """
+    import concurrent.futures
+    from app.core.config import settings
+
+    if not settings.sync_database_url or not settings.sync_database_url.startswith("postgresql"):
+        pytest.skip("PostgreSQL no disponible en el entorno")
+
+    from sqlalchemy import text
+    from sqlalchemy.orm import sessionmaker
+
+    from app.db.session import get_engine
+    from app.services.auth_service import _check_rate_limit
+
+    engine = get_engine()
+    schema_name = "test_concurrency_qa_auth"
+
+    with engine.connect() as conn:
+        conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema_name};"))
+        conn.execute(text(f"""
+            CREATE TABLE IF NOT EXISTS {schema_name}.auth_rate_limits (
+                key VARCHAR(128) PRIMARY KEY,
+                count INTEGER NOT NULL DEFAULT 1,
+                window_expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+            );
+        """))
+        conn.commit()
+
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    results = []
+    errors = []
+
+    def worker_task(idx):
+        db = SessionLocal()
+        try:
+            db.execute(text(f"SET search_path TO {schema_name}, public;"))
+            _check_rate_limit(db, key="pg_atomic_key", max_requests=3, window_seconds=60)
+            results.append((idx, 200))
+        except HTTPException as e:
+            results.append((idx, e.status_code))
+        except Exception as e:
+            errors.append((idx, str(e)))
+        finally:
+            db.close()
+
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            futures = [executor.submit(worker_task, i) for i in range(5)]
+            concurrent.futures.wait(futures)
+
+        assert len(errors) == 0, f"Errores en PostgreSQL concurrente: {errors}"
+        successes = sum(1 for _, st in results if st == 200)
+        rate_limited = sum(1 for _, st in results if st == 429)
+        assert successes == 3
+        assert rate_limited == 2
+    finally:
+        with engine.connect() as conn:
+            conn.execute(text(f"DROP SCHEMA IF EXISTS {schema_name} CASCADE;"))
+            conn.commit()
+
+
+def test_migration_006_definition():
+    """Valida la definición, dependencias y consistencia de la migración 006_auth_rate_limits."""
+    import importlib
+    mig_006 = importlib.import_module("app.db.migrations.versions.006_auth_rate_limits")
+
+    assert mig_006.revision == "20261116_006"
+    assert mig_006.down_revision == "20261113_005"
+
+
 # -----------------------------------------------------------------------------
 # ACTIVIDAD 4: RECUPERACIÓN ANTE FALLOS SMTP (5 ESCENARIOS)
 # -----------------------------------------------------------------------------
