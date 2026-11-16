@@ -11,9 +11,9 @@ Trazabilidad directa con el Catálogo Oficial de Pruebas EPIS-UPT:
 
 import io
 import time
-import pytest
-from fastapi import HTTPException
+
 import openpyxl
+import pytest
 
 try:
     import fitz  # PyMuPDF
@@ -213,4 +213,6 @@ def test_cus11_a01_parser_accuracy_and_performance_benchmark_500_rows():
     # Validación estricta de criterios de aceptación
     assert res["total_aulas_libres_identificadas"] == esperadas_libres
     assert res["reservas_activas_preservadas"] == 10
-    assert t_delta < 3.0, f"El tiempo de procesamiento ({t_delta:.3f} s) superó el umbral reglamentario de 3.0 s."
+    assert t_delta < 3.0, (
+        f"El tiempo de procesamiento ({t_delta:.3f} s) superó el umbral reglamentario de 3.0 s."
+    )

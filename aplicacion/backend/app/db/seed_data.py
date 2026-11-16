@@ -5,6 +5,8 @@ Sembrado de roles para usuarios institucionales (admin, mentores, estudiantes) y
 
 from datetime import UTC, datetime
 
+from sqlalchemy import text
+
 from app.core.config import settings
 from app.db.session import get_engine, get_session
 from app.models.consent import ConsentimientoLegal
@@ -212,12 +214,12 @@ def seed_database():
 
         # Sincronización automática de secuencias para prevenir UniqueViolation en claves primarias
         find_seqs_sql = """
-        SELECT 
+        SELECT
             c.table_name,
             c.column_name,
             pg_get_serial_sequence(c.table_name, c.column_name) AS seq_name
         FROM information_schema.tables t
-        JOIN information_schema.columns c 
+        JOIN information_schema.columns c
             ON t.table_name = c.table_name AND t.table_schema = c.table_schema
         WHERE t.table_schema = 'public'
           AND t.table_type = 'BASE TABLE'

@@ -3,6 +3,7 @@ Pruebas automatizadas de la API REST de Espacios y Parser de Horarios (RF10 / CU
 """
 
 import io
+
 import openpyxl
 import pytest
 from fastapi.testclient import TestClient
@@ -43,7 +44,11 @@ def test_import_schedule_as_admin_success(sample_excel_file_bytes: bytes):
     """RF10 / CUS11: Administrador sube cronograma en Excel y recibe resumen estructurado."""
     headers = get_admin_headers()
     files = {
-        "file": ("cronograma_oficial_epis_2026.xlsx", sample_excel_file_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        "file": (
+            "cronograma_oficial_epis_2026.xlsx",
+            sample_excel_file_bytes,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
     }
     response = client.post("/api/v1/spaces/import-schedule", files=files, headers=headers)
     assert response.status_code == 200
@@ -61,7 +66,11 @@ def test_import_schedule_forbidden_for_non_admin(sample_excel_file_bytes: bytes)
     """RF10 / SEC: Usuario no administrador no puede procesar cronogramas (403 Forbidden)."""
     headers = get_student_headers()
     files = {
-        "file": ("cronograma.xlsx", sample_excel_file_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        "file": (
+            "cronograma.xlsx",
+            sample_excel_file_bytes,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
     }
     response = client.post("/api/v1/spaces/import-schedule", files=files, headers=headers)
     assert response.status_code == 403
@@ -70,7 +79,11 @@ def test_import_schedule_forbidden_for_non_admin(sample_excel_file_bytes: bytes)
 def test_import_schedule_unauthorized_without_token(sample_excel_file_bytes: bytes):
     """RF10 / SEC: Petición anónima es rechazada con 401 Unauthorized."""
     files = {
-        "file": ("cronograma.xlsx", sample_excel_file_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        "file": (
+            "cronograma.xlsx",
+            sample_excel_file_bytes,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
     }
     response = client.post("/api/v1/spaces/import-schedule", files=files)
     assert response.status_code == 401
@@ -81,7 +94,11 @@ def test_import_schedule_corrupt_file_returns_400():
     headers = get_admin_headers()
     corrupt_bytes = b"Esto no es un archivo excel ni pdf valido, solo texto basura."
     files = {
-        "file": ("corrupto.xlsx", corrupt_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        "file": (
+            "corrupto.xlsx",
+            corrupt_bytes,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
     }
     response = client.post("/api/v1/spaces/import-schedule", files=files, headers=headers)
     assert response.status_code == 400

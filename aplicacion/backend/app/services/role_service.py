@@ -22,6 +22,7 @@ class RoleService:
 
         # Resolver alias institucional de estudiante (@virtual.upt.pe <-> @upt.pe)
         from app.core.identity import parse_student_email
+
         parsed = parse_student_email(clean_email)
         codigo = parsed.get("codigo_estudiante")
         emails_to_check = [clean_email]
@@ -52,13 +53,19 @@ class RoleService:
                 if settings.STRICT_DATABASE_MODE:
                     raise HTTPException(
                         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                        detail={"code": "DATABASE_UNAVAILABLE", "message": "Error al consultar roles en base de datos."},
+                        detail={
+                            "code": "DATABASE_UNAVAILABLE",
+                            "message": "Error al consultar roles en base de datos.",
+                        },
                     ) from exc
 
         if settings.STRICT_DATABASE_MODE:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail={"code": "DATABASE_UNAVAILABLE", "message": "Base de datos no disponible para consulta de roles en modo estricto."},
+                detail={
+                    "code": "DATABASE_UNAVAILABLE",
+                    "message": "Base de datos no disponible para consulta de roles en modo estricto.",
+                },
             )
 
         if clean_email in _memory_user_roles:
@@ -73,7 +80,14 @@ class RoleService:
         if clean_email in ("admin.epis@upt.pe", "admin.demo@upt.pe") or clean_email.startswith("admin."):
             initial_roles = ["administrador"]
         elif (
-            clean_email in ("mentor.avanzado@upt.pe", "2022073504@upt.pe", "ra2022073504@virtual.upt.pe", "mentor.demo@upt.pe", "mentor@upt.pe")
+            clean_email
+            in (
+                "mentor.avanzado@upt.pe",
+                "2022073504@upt.pe",
+                "ra2022073504@virtual.upt.pe",
+                "mentor.demo@upt.pe",
+                "mentor@upt.pe",
+            )
             or clean_email.startswith("ra2022073504")
             or clean_email.startswith("2022073504")
             or codigo == "2022073504"

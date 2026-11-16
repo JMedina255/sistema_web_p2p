@@ -79,7 +79,10 @@ class SpacesService {
       if (import.meta.env.DEV && (err instanceof TypeError || String(err).includes('Failed to fetch'))) {
         const ext = file.name.split('.').pop()?.toLowerCase();
         if (ext !== 'xlsx' && ext !== 'xls' && ext !== 'pdf') {
-          throw new Error("Extensión no soportada. Solo se admiten archivos oficiales en Excel (.xlsx) y PDF (.pdf).");
+          throw new Error(
+            "Extensión no soportada. Solo se admiten archivos oficiales en Excel (.xlsx) y PDF (.pdf).",
+            { cause: err }
+          );
         }
 
         const simulatedSlots: FreeSlotItem[] = [

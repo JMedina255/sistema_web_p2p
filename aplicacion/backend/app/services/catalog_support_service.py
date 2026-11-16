@@ -11,19 +11,19 @@ por los Casos de Uso del Catálogo Oficial de Pruebas:
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
 import hashlib
 import math
 import re
 import time
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from fastapi import HTTPException, status
 
-
 # ==============================================================================
 # CUS03: GESTIÓN DE DEMANDA Y NOTIFICACIONES
 # ==============================================================================
+
 
 class ServicioNotificacion:
     """Servicio simulado de despacho y encolamiento de alertas pedagógicas (CUS03-U02)."""
@@ -101,7 +101,11 @@ class ServicioSolicitudDemanda:
 
         # Verificación de duplicados para el mismo estudiante y tema pendiente
         for s in cls._solicitudes:
-            if s["estudiante_email"] == clean_email and s["id_tema"] == id_tema and s["estado"] == "PENDIENTE":
+            if (
+                s["estudiante_email"] == clean_email
+                and s["id_tema"] == id_tema
+                and s["estado"] == "PENDIENTE"
+            ):
                 return {
                     "accion": "DUPLICADO_DETECTADO",
                     "mensaje": "Ya registras una solicitud activa pendiente para este tema temático.",
@@ -126,7 +130,9 @@ class ServicioSolicitudDemanda:
         # Disparar notificación a mentores afines
         notificados = []
         if mentores_disponibles:
-            notificados = ServicioNotificacion.notificar_mentores_por_tema(id_tema, nombre_tema, mentores_disponibles)
+            notificados = ServicioNotificacion.notificar_mentores_por_tema(
+                id_tema, nombre_tema, mentores_disponibles
+            )
 
         return {
             "accion": "SOLICITUD_CREADA",
@@ -140,10 +146,13 @@ class ServicioSolicitudDemanda:
 # CUS06: PUBLICACIÓN DE OFERTAS, APROVISIONAMIENTO Y RESERVA DE AULAS
 # ==============================================================================
 
+
 class ExcepcionAulaNoDisponible(HTTPException):
     """Excepción lanzada cuando un aula solicitada se encuentra ocupada según el cronograma."""
 
-    def __init__(self, detail: str = "El aula seleccionada no se encuentra disponible en el horario solicitado."):
+    def __init__(
+        self, detail: str = "El aula seleccionada no se encuentra disponible en el horario solicitado."
+    ):
         super().__init__(status_code=status.HTTP_409_CONFLICT, detail=detail)
 
 
@@ -282,6 +291,7 @@ ServicioAprovisionamientoDiscord.AsignarCanal = ServicioAprovisionamientoDiscord
 # CUS16: REPUTACIÓN E INSIGNIAS DE GAMIFICACIÓN
 # ==============================================================================
 
+
 class ServicioReputacion:
     """Cálculo y recalificación ponderada de reputación académica (CUS16-U01)."""
 
@@ -327,23 +337,27 @@ class ServicioReputacion:
         for e in encuestas_list:
             comentario = e.get("comentario") or e.get("observacion")
             if comentario and len(str(comentario).strip()) > 0:
-                feedback_anonimo.append({
-                    "valoracion": e.get("valoracion", 5),
-                    "comentario": str(comentario).strip(),
-                    "fecha": e.get("fecha", datetime.now(UTC).strftime("%Y-%m-%d")),
-                })
+                feedback_anonimo.append(
+                    {
+                        "valoracion": e.get("valoracion", 5),
+                        "comentario": str(comentario).strip(),
+                        "fecha": e.get("fecha", datetime.now(UTC).strftime("%Y-%m-%d")),
+                    }
+                )
 
         insignias_ids = ServicioInsignia.evaluar_desbloqueos(mentor_email, horas_dictadas, [])
         detalles_insignias = []
         for u in ServicioInsignia.UMBRALES:
             desbloqueada = u["id"] in insignias_ids
-            detalles_insignias.append({
-                "id": u["id"],
-                "nombre": u["nombre"],
-                "min_horas": u["min_horas"],
-                "icono": f"badge-{u['id'].lower()}",
-                "desbloqueada": desbloqueada,
-            })
+            detalles_insignias.append(
+                {
+                    "id": u["id"],
+                    "nombre": u["nombre"],
+                    "min_horas": u["min_horas"],
+                    "icono": f"badge-{u['id'].lower()}",
+                    "desbloqueada": desbloqueada,
+                }
+            )
 
         return {
             "mentor_email": mentor_email,
@@ -394,6 +408,7 @@ ServicioInsignia.EvaluarDesbloqueos = ServicioInsignia.evaluar_desbloqueos
 # CUS22: AUDITORÍA DE BITÁCORAS Y RESOLUCIÓN DE FRAUDE
 # ==============================================================================
 
+
 class ServicioAuditoria:
     """Filtrado e inspección de bitácoras marcadas por el Comité de Tutoría (CUS22-U01 / CUS22-F01)."""
 
@@ -404,7 +419,8 @@ class ServicioAuditoria:
         """
         estados_marcados = {"EN_REVISION", "OBSERVADA", "CON_RECLAMO", "DUDOSA"}
         return [
-            b for b in bitacoras
+            b
+            for b in bitacoras
             if b.get("estado") in estados_marcados or b.get("reclamo_abierto", False) is True
         ]
 
@@ -532,6 +548,7 @@ ServicioResolucionReclamo.Resolver = ServicioResolucionReclamo.resolver
 # ==============================================================================
 # CUS23: TAREAS PROGRAMADAS Y RECORDATORIOS DE QUÓRUM
 # ==============================================================================
+
 
 class ServicioRecordatorio:
     """Encolamiento de avisos preventivos a mentoreados próximos a T-24h (CUS23-U02)."""

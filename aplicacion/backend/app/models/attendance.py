@@ -46,7 +46,11 @@ class TokenAsistenciaActivo(Base):
 
     id_token: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_sesion: Mapped[int] = mapped_column(
-        Integer, ForeignKey("sesiones_mentoria.id_sesion", ondelete="CASCADE"), unique=True, nullable=False, index=True
+        Integer,
+        ForeignKey("sesiones_mentoria.id_sesion", ondelete="CASCADE"),
+        unique=True,
+        nullable=False,
+        index=True,
     )
     token: Mapped[str] = mapped_column(String(64), nullable=False)
     totp_code: Mapped[str] = mapped_column(String(6), nullable=False)

@@ -305,7 +305,9 @@ class CertificateService:
         c.drawString(330, y_spec, "Estado Oficial:")
         c.setFont("Helvetica-Bold", 9)
         c.setFillColor(colors.HexColor("#0284C7"))
-        display_pdf_estado = "EMITIDO_DEMO (Acreditado)" if settings.ENABLE_DEMO_WATERMARK else "EMITIDO (Acreditado Oficial)"
+        display_pdf_estado = (
+            "EMITIDO_DEMO (Acreditado)" if settings.ENABLE_DEMO_WATERMARK else "EMITIDO (Acreditado Oficial)"
+        )
         c.drawString(420, y_spec, display_pdf_estado)
 
         y_spec -= 18
@@ -621,7 +623,9 @@ class CertificateService:
                 if mc.get("id_certificado") == certificate_id:
                     folio = mc["codigo_folio"]
                     filename = f"Constancia_Mentoria_EPIS_2026_II_{folio}.pdf"
-                    stored_bytes = StorageService.get_file(settings.SUPABASE_BUCKET_CERTIFICATES, f"{folio}.pdf")
+                    stored_bytes = StorageService.get_file(
+                        settings.SUPABASE_BUCKET_CERTIFICATES, f"{folio}.pdf"
+                    )
                     if stored_bytes:
                         return stored_bytes, filename
                     if "pdf_bytes" in mc:
@@ -632,7 +636,9 @@ class CertificateService:
             c = db.query(CertificadoHoras).filter(CertificadoHoras.id_certificado == certificate_id).first()
             if c:
                 filename = f"Constancia_Mentoria_EPIS_2026_II_{c.codigo_folio}.pdf"
-                stored_bytes = StorageService.get_file(settings.SUPABASE_BUCKET_CERTIFICATES, f"{c.codigo_folio}.pdf")
+                stored_bytes = StorageService.get_file(
+                    settings.SUPABASE_BUCKET_CERTIFICATES, f"{c.codigo_folio}.pdf"
+                )
                 if stored_bytes:
                     return stored_bytes, filename
                 mentor_name = c.id_mentor

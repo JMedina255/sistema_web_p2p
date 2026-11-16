@@ -11,7 +11,9 @@ class BookingCreatePayload(BaseModel):
     """
 
     id_sesion: int = Field(..., ge=1, description="Identificador unívoco de la sesión de mentoría.")
-    estudiante_email: str = Field(..., description="Correo institucional (@virtual.upt.pe o @upt.pe) del estudiante mentoreado.")
+    estudiante_email: str = Field(
+        ..., description="Correo institucional (@virtual.upt.pe o @upt.pe) del estudiante mentoreado."
+    )
 
     @field_validator("estudiante_email")
     @classmethod

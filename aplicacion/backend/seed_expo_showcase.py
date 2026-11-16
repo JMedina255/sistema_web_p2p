@@ -11,16 +11,15 @@ Cubre todos los requerimientos funcionales (RF01 al RF26), respetando ventanas t
 
 import hashlib
 from datetime import UTC, datetime, timedelta
+
 from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
 from app.db.session import get_engine
-from app.models.auth import AuthChallenge
 from app.models.bitacora import BitacoraPedagogica
 from app.models.booking import ReservaCupo, SolicitudDemanda
 from app.models.certificate import CertificadoHoras
 from app.models.consent import ConsentimientoLegal
-from app.models.curriculum import Asignatura, TemaConceptual
 from app.models.offer import SesionMentoria
 from app.models.profile import DisponibilidadHoraria, PerfilAcademico
 from app.models.roles import Rol, UsuarioRol
@@ -76,9 +75,19 @@ def seed_expo_dataset():
         for email, roles_list in user_roles_map.items():
             for r_name in roles_list:
                 r_obj = db_roles[r_name]
-                ur = db.query(UsuarioRol).filter(UsuarioRol.email == email, UsuarioRol.id_rol == r_obj.id_rol).first()
+                ur = (
+                    db.query(UsuarioRol)
+                    .filter(UsuarioRol.email == email, UsuarioRol.id_rol == r_obj.id_rol)
+                    .first()
+                )
                 if not ur:
-                    ur = UsuarioRol(email=email, id_rol=r_obj.id_rol, activo=True, fecha_asignacion=now, asignado_por="expo_seed")
+                    ur = UsuarioRol(
+                        email=email,
+                        id_rol=r_obj.id_rol,
+                        activo=True,
+                        fecha_asignacion=now,
+                        asignado_por="expo_seed",
+                    )
                     db.add(ur)
                 else:
                     ur.activo = True
@@ -167,8 +176,15 @@ def seed_expo_dataset():
         for email in ["mentor.avanzado@upt.pe", "ra2022073504@virtual.upt.pe", "jm2022074255@virtual.upt.pe"]:
             db.query(DisponibilidadHoraria).filter(DisponibilidadHoraria.email == email).delete()
             for dia in range(1, 6):  # Lun a Vie
-                for h_ini, h_fin in [("08:00", "10:00"), ("10:00", "12:00"), ("14:00", "16:00"), ("16:00", "18:00")]:
-                    db.add(DisponibilidadHoraria(email=email, dia_semana=dia, hora_inicio=h_ini, hora_fin=h_fin))
+                for h_ini, h_fin in [
+                    ("08:00", "10:00"),
+                    ("10:00", "12:00"),
+                    ("14:00", "16:00"),
+                    ("16:00", "18:00"),
+                ]:
+                    db.add(
+                        DisponibilidadHoraria(email=email, dia_semana=dia, hora_inicio=h_ini, hora_fin=h_fin)
+                    )
 
         db.commit()
 
@@ -178,12 +194,14 @@ def seed_expo_dataset():
         print("\n[3/7] Aprovisionando Banco de Solicitudes por Demanda (RF07)...")
         # Limpiar solicitudes demo previas para ambos mentoreados
         db.query(SolicitudDemanda).filter(
-            SolicitudDemanda.estudiante_email.in_(["ra2022073504@virtual.upt.pe", "jm2022074255@virtual.upt.pe"])
+            SolicitudDemanda.estudiante_email.in_(
+                ["ra2022073504@virtual.upt.pe", "jm2022074255@virtual.upt.pe"]
+            )
         ).delete()
         solicitud_demo = SolicitudDemanda(
             estudiante_email="ra2022073504@virtual.upt.pe",
             id_asignatura=3,  # Algoritmos y Estructuras de Datos
-            id_tema=10,       # Recursividad y Relaciones de Recurrencia
+            id_tema=10,  # Recursividad y Relaciones de Recurrencia
             observaciones="Requiero asesoría pedagógica urgente para la resolución de árboles de recursión y el teorema maestro.",
             estado="PENDIENTE",
             created_at=now - timedelta(hours=5),
@@ -191,7 +209,7 @@ def seed_expo_dataset():
         solicitud_joan = SolicitudDemanda(
             estudiante_email="jm2022074255@virtual.upt.pe",
             id_asignatura=3,  # Algoritmos y Estructuras de Datos
-            id_tema=10,       # Recursividad y Relaciones de Recurrencia
+            id_tema=10,  # Recursividad y Relaciones de Recurrencia
             observaciones="Solicito sesión práctica de árboles de recursión, método inductivo y análisis de complejidad para el examen parcial.",
             estado="PENDIENTE",
             created_at=now - timedelta(hours=3),
@@ -213,7 +231,7 @@ def seed_expo_dataset():
                 codigo_sesion="SES-EXPO-01-RECOM",
                 mentor_email="mentor.avanzado@upt.pe",
                 id_asignatura=1,  # Cálculo I
-                id_tema=1,        # Límites y Continuidad
+                id_tema=1,  # Límites y Continuidad
                 fecha_inicio=now + timedelta(days=4, hours=2),
                 duracion_minutos=60,
                 modalidad="virtual",
@@ -228,13 +246,15 @@ def seed_expo_dataset():
 
         # B) Sesión en Alerta de Quórum Insuficiente para Demostrar Decisión del Mentor (RF15 / RF16)
         # Inicio dentro de 18 horas (< 24h), confirmados < 50%
-        s_quorum = db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-02-QUORUM").first()
+        s_quorum = (
+            db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-02-QUORUM").first()
+        )
         if not s_quorum:
             s_quorum = SesionMentoria(
                 codigo_sesion="SES-EXPO-02-QUORUM",
                 mentor_email="mentor.avanzado@upt.pe",
                 id_asignatura=3,  # Algoritmos
-                id_tema=9,        # Notación Big-O
+                id_tema=9,  # Notación Big-O
                 fecha_inicio=now + timedelta(hours=18),
                 duracion_minutos=60,
                 modalidad="presencial",
@@ -255,7 +275,12 @@ def seed_expo_dataset():
                 estado="CONFIRMADA",
                 fecha_reserva=now - timedelta(days=2),
                 fecha_ratificacion=now - timedelta(days=1),
-                ticket_hash=generate_ticket_hash("RES-EXPO-Q01", s_quorum.id_sesion, "mentoreado@upt.pe", (now - timedelta(days=1)).isoformat()),
+                ticket_hash=generate_ticket_hash(
+                    "RES-EXPO-Q01",
+                    s_quorum.id_sesion,
+                    "mentoreado@upt.pe",
+                    (now - timedelta(days=1)).isoformat(),
+                ),
             )
             db.add(r_q1)
             db.commit()
@@ -268,7 +293,7 @@ def seed_expo_dataset():
                 codigo_sesion="SES-EXPO-03-LIVE",
                 mentor_email="mentor.avanzado@upt.pe",
                 id_asignatura=4,  # POO
-                id_tema=14,       # Clases y Objetos
+                id_tema=14,  # Clases y Objetos
                 fecha_inicio=now - timedelta(minutes=15),
                 duracion_minutos=60,
                 modalidad="presencial",
@@ -288,20 +313,27 @@ def seed_expo_dataset():
                 estado="CONFIRMADA",
                 fecha_reserva=now - timedelta(days=2),
                 fecha_ratificacion=now - timedelta(days=1),
-                ticket_hash=generate_ticket_hash("RES-EXPO-LIVE-RENZO", s_live.id_sesion, "ra2022073504@virtual.upt.pe", (now - timedelta(days=1)).isoformat()),
+                ticket_hash=generate_ticket_hash(
+                    "RES-EXPO-LIVE-RENZO",
+                    s_live.id_sesion,
+                    "ra2022073504@virtual.upt.pe",
+                    (now - timedelta(days=1)).isoformat(),
+                ),
             )
             db.add(r_live)
             db.commit()
 
         # D) Sesión Concluida Lista para Llenar Bitácora Pedagógica (RF17 / RN-12)
         # Culminó hace 1 hora (dentro de las 48 h reglamentarias de RN-12)
-        s_bitacora = db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-04-BITACORA").first()
+        s_bitacora = (
+            db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-04-BITACORA").first()
+        )
         if not s_bitacora:
             s_bitacora = SesionMentoria(
                 codigo_sesion="SES-EXPO-04-BITACORA",
                 mentor_email="mentor.avanzado@upt.pe",
                 id_asignatura=1,  # Cálculo I
-                id_tema=2,        # Derivadas
+                id_tema=2,  # Derivadas
                 fecha_inicio=now - timedelta(hours=2),
                 duracion_minutos=60,
                 modalidad="presencial",
@@ -320,20 +352,27 @@ def seed_expo_dataset():
                 estado="CONFIRMADA",
                 fecha_reserva=now - timedelta(days=2),
                 fecha_ratificacion=now - timedelta(days=1),
-                ticket_hash=generate_ticket_hash("RES-EXPO-BIT-RENZO", s_bitacora.id_sesion, "ra2022073504@virtual.upt.pe", (now - timedelta(days=1)).isoformat()),
+                ticket_hash=generate_ticket_hash(
+                    "RES-EXPO-BIT-RENZO",
+                    s_bitacora.id_sesion,
+                    "ra2022073504@virtual.upt.pe",
+                    (now - timedelta(days=1)).isoformat(),
+                ),
             )
             db.add(r_bit)
             db.commit()
 
         # E) Sesión Concluida para que el Mentoreado Realice Encuesta de Calidad (RF18)
         # Terminó hace 3 horas (dentro de las 24 h de RN-13), asistencia ASISTIDA, encuesta no respondida
-        s_survey = db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-05-SURVEY").first()
+        s_survey = (
+            db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-05-SURVEY").first()
+        )
         if not s_survey:
             s_survey = SesionMentoria(
                 codigo_sesion="SES-EXPO-05-SURVEY",
                 mentor_email="mentor.avanzado@upt.pe",
                 id_asignatura=3,  # Algoritmos
-                id_tema=10,       # Recursividad
+                id_tema=10,  # Recursividad
                 fecha_inicio=now - timedelta(hours=4),
                 duracion_minutos=60,
                 modalidad="virtual",
@@ -368,7 +407,12 @@ def seed_expo_dataset():
                 estado="ASISTIDA",
                 fecha_reserva=now - timedelta(days=2),
                 fecha_ratificacion=now - timedelta(days=1),
-                ticket_hash=generate_ticket_hash("RES-EXPO-SURV-RENZO", s_survey.id_sesion, "ra2022073504@virtual.upt.pe", (now - timedelta(days=1)).isoformat()),
+                ticket_hash=generate_ticket_hash(
+                    "RES-EXPO-SURV-RENZO",
+                    s_survey.id_sesion,
+                    "ra2022073504@virtual.upt.pe",
+                    (now - timedelta(days=1)).isoformat(),
+                ),
             )
             db.add(r_surv)
             db.commit()
@@ -380,7 +424,7 @@ def seed_expo_dataset():
                 codigo_sesion="SES-EXPO-06-AUDIT",
                 mentor_email="mentor.avanzado@upt.pe",
                 id_asignatura=2,  # Cálculo II
-                id_tema=5,        # Métodos de Integración
+                id_tema=5,  # Métodos de Integración
                 fecha_inicio=now - timedelta(days=1, hours=4),
                 duracion_minutos=60,
                 modalidad="presencial",
@@ -409,13 +453,15 @@ def seed_expo_dataset():
 
         # G) Reserva Futura Pendiente de Ratificación para el Mentoreado (RF13 / RF14)
         # Inicio en 3 días (ventana abierta > 24h para probar Confirmar o Desistir)
-        s_future = db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-07-FUTURE").first()
+        s_future = (
+            db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-07-FUTURE").first()
+        )
         if not s_future:
             s_future = SesionMentoria(
                 codigo_sesion="SES-EXPO-07-FUTURE",
                 mentor_email="mentor.avanzado@upt.pe",
                 id_asignatura=5,  # Base de Datos
-                id_tema=18,       # Modelo ER
+                id_tema=18,  # Modelo ER
                 fecha_inicio=now + timedelta(days=3, hours=4),
                 duracion_minutos=60,
                 modalidad="presencial",
@@ -450,13 +496,17 @@ def seed_expo_dataset():
                         estado="CONFIRMADA",
                         fecha_reserva=now - timedelta(days=2),
                         fecha_ratificacion=now - timedelta(days=1),
-                        ticket_hash=generate_ticket_hash(res_code, s_live.id_sesion, s_email, (now - timedelta(days=1)).isoformat()),
+                        ticket_hash=generate_ticket_hash(
+                            res_code, s_live.id_sesion, s_email, (now - timedelta(days=1)).isoformat()
+                        ),
                     )
                     db.add(r_obj)
             db.commit()
 
         # 2. Sesión para bitácora (SES-EXPO-04-BITACORA): CONFIRMADA
-        s_bitacora = db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-04-BITACORA").first()
+        s_bitacora = (
+            db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-04-BITACORA").first()
+        )
         if s_bitacora:
             for s_email, s_tag in students_expo:
                 res_code = f"RES-EXPO-BIT-{s_tag}"
@@ -469,13 +519,17 @@ def seed_expo_dataset():
                         estado="CONFIRMADA",
                         fecha_reserva=now - timedelta(days=2),
                         fecha_ratificacion=now - timedelta(days=1),
-                        ticket_hash=generate_ticket_hash(res_code, s_bitacora.id_sesion, s_email, (now - timedelta(days=1)).isoformat()),
+                        ticket_hash=generate_ticket_hash(
+                            res_code, s_bitacora.id_sesion, s_email, (now - timedelta(days=1)).isoformat()
+                        ),
                     )
                     db.add(r_obj)
             db.commit()
 
         # 3. Sesión para encuesta (SES-EXPO-05-SURVEY): ASISTIDA para probar calificación de 5 estrellas
-        s_survey = db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-05-SURVEY").first()
+        s_survey = (
+            db.query(SesionMentoria).filter(SesionMentoria.codigo_sesion == "SES-EXPO-05-SURVEY").first()
+        )
         if s_survey:
             for s_email, s_tag in students_expo:
                 res_code = f"RES-EXPO-SURV-{s_tag}"
@@ -488,7 +542,9 @@ def seed_expo_dataset():
                         estado="ASISTIDA",
                         fecha_reserva=now - timedelta(days=2),
                         fecha_ratificacion=now - timedelta(days=1),
-                        ticket_hash=generate_ticket_hash(res_code, s_survey.id_sesion, s_email, (now - timedelta(days=1)).isoformat()),
+                        ticket_hash=generate_ticket_hash(
+                            res_code, s_survey.id_sesion, s_email, (now - timedelta(days=1)).isoformat()
+                        ),
                     )
                     db.add(r_obj)
             db.commit()
@@ -505,7 +561,9 @@ def seed_expo_dataset():
                         estudiante_email=s_email,
                         estado="PENDIENTE_CONFIRMACION",
                         fecha_reserva=now - timedelta(hours=3),
-                        ticket_hash=generate_ticket_hash(res_code, s_future.id_sesion, s_email, (now - timedelta(hours=3)).isoformat()),
+                        ticket_hash=generate_ticket_hash(
+                            res_code, s_future.id_sesion, s_email, (now - timedelta(hours=3)).isoformat()
+                        ),
                     )
                     db.add(r_obj)
             db.commit()
@@ -513,7 +571,9 @@ def seed_expo_dataset():
         # ------------------------------------------------------------------
         # 5. Acumulación Histórica de 22 Horas para Certificación Oficial (RF22 / RF23)
         # ------------------------------------------------------------------
-        print("\n[5/7] Generando histórico de 22 sesiones visadas para certificar a mentor.avanzado@upt.pe (>= 20h)...")
+        print(
+            "\n[5/7] Generando histórico de 22 sesiones visadas para certificar a mentor.avanzado@upt.pe (>= 20h)..."
+        )
         # Generar 22 sesiones en el pasado con bitácoras visadas (duración 60 min = 1.0 h c/u)
         for i in range(1, 23):
             s_code = f"SES-EXPO-HIST-{i:02d}"
@@ -538,7 +598,9 @@ def seed_expo_dataset():
                 db.refresh(s_hist)
 
             # Bitácora visada por el administrador
-            b_hist = db.query(BitacoraPedagogica).filter(BitacoraPedagogica.id_sesion == s_hist.id_sesion).first()
+            b_hist = (
+                db.query(BitacoraPedagogica).filter(BitacoraPedagogica.id_sesion == s_hist.id_sesion).first()
+            )
             if not b_hist:
                 b_hist = BitacoraPedagogica(
                     id_sesion=s_hist.id_sesion,
@@ -554,7 +616,9 @@ def seed_expo_dataset():
                 db.add(b_hist)
 
             # Reserva de asistencia
-            r_hist = db.query(ReservaCupo).filter(ReservaCupo.codigo_reserva == f"RES-EXPO-HIST-{i:02d}").first()
+            r_hist = (
+                db.query(ReservaCupo).filter(ReservaCupo.codigo_reserva == f"RES-EXPO-HIST-{i:02d}").first()
+            )
             if not r_hist:
                 r_hist = ReservaCupo(
                     codigo_reserva=f"RES-EXPO-HIST-{i:02d}",
@@ -563,7 +627,12 @@ def seed_expo_dataset():
                     estado="ASISTIDA",
                     fecha_reserva=p_date - timedelta(days=2),
                     fecha_ratificacion=p_date - timedelta(days=1),
-                    ticket_hash=generate_ticket_hash(f"RES-EXPO-HIST-{i:02d}", s_hist.id_sesion, "ra2022073504@virtual.upt.pe", p_date.isoformat()),
+                    ticket_hash=generate_ticket_hash(
+                        f"RES-EXPO-HIST-{i:02d}",
+                        s_hist.id_sesion,
+                        "ra2022073504@virtual.upt.pe",
+                        p_date.isoformat(),
+                    ),
                 )
                 db.add(r_hist)
 
@@ -588,13 +657,17 @@ def seed_expo_dataset():
         # 6. Certificado Oficial Emitido para Descarga en PDF (RF22 / RF23)
         # ------------------------------------------------------------------
         print("\n[6/7] Aprovisionando certificado oficial en PDF para mentor.avanzado@upt.pe...")
-        cert_exist = db.query(CertificadoHoras).filter(
-            CertificadoHoras.id_mentor == "mentor.avanzado@upt.pe",
-            CertificadoHoras.periodo_academico == "2026-II"
-        ).first()
+        cert_exist = (
+            db.query(CertificadoHoras)
+            .filter(
+                CertificadoHoras.id_mentor == "mentor.avanzado@upt.pe",
+                CertificadoHoras.periodo_academico == "2026-II",
+            )
+            .first()
+        )
 
         if not cert_exist:
-            cert_hash = hashlib.sha256("CERT-UPT-EXPO-MA01:mentor.avanzado@upt.pe:22.0:2026-II".encode("utf-8")).hexdigest()
+            cert_hash = hashlib.sha256(b"CERT-UPT-EXPO-MA01:mentor.avanzado@upt.pe:22.0:2026-II").hexdigest()
             cert_obj = CertificadoHoras(
                 id_mentor="mentor.avanzado@upt.pe",
                 codigo_folio="UPT-EPIS-2026-II-0012",
@@ -612,12 +685,12 @@ def seed_expo_dataset():
         # ------------------------------------------------------------------
         print("\n[7/7] Sincronizando secuencias de PostgreSQL a sus valores máximos...")
         find_seqs_sql = """
-        SELECT 
+        SELECT
             c.table_name,
             c.column_name,
             pg_get_serial_sequence(c.table_name, c.column_name) AS seq_name
         FROM information_schema.tables t
-        JOIN information_schema.columns c 
+        JOIN information_schema.columns c
             ON t.table_name = c.table_name AND t.table_schema = c.table_schema
         WHERE t.table_schema = 'public'
           AND t.table_type = 'BASE TABLE'
@@ -633,9 +706,15 @@ def seed_expo_dataset():
         print("  ¡APROVISIONAMIENTO DE DATOS PARA LA EXPO COMPLETADO CON ÉXITO! ")
         print("==================================================================")
         print("Cuentas preparadas para demostración interactiva:")
-        print("  1. Mentor:     mentor.avanzado@upt.pe       (22h visadas, cert oficial, sesiones en vivo y quórum)")
-        print("  2. Mentoreado: ra2022073504@virtual.upt.pe  (Top-k match, reservas activas, encuesta pendiente)")
-        print("  3. Admin:      admin.epis@upt.pe            (Auditoría de bitácoras, roles, horarios y certificados)")
+        print(
+            "  1. Mentor:     mentor.avanzado@upt.pe       (22h visadas, cert oficial, sesiones en vivo y quórum)"
+        )
+        print(
+            "  2. Mentoreado: ra2022073504@virtual.upt.pe  (Top-k match, reservas activas, encuesta pendiente)"
+        )
+        print(
+            "  3. Admin:      admin.epis@upt.pe            (Auditoría de bitácoras, roles, horarios y certificados)"
+        )
 
     except Exception as exc:
         db.rollback()

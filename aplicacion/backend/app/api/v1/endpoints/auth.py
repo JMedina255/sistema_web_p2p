@@ -60,7 +60,9 @@ def verify_otp(
     db: Session | None = Depends(get_required_session),
 ):
     client_ip = request.client.host if request.client else "127.0.0.1"
-    return AuthService.verify_otp(db=db, challenge_id=payload.challengeId, otp=payload.otp, client_ip=client_ip)
+    return AuthService.verify_otp(
+        db=db, challenge_id=payload.challengeId, otp=payload.otp, client_ip=client_ip
+    )
 
 
 @router.post(

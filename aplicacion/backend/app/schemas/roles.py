@@ -1,5 +1,3 @@
-import re
-
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.identity import validate_upt_email

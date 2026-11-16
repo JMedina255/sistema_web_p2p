@@ -6,8 +6,9 @@ Suite Complementaria para Casos del Catálogo Oficial de Pruebas EPIS-UPT:
 - CUS23: Tareas Programadas y Recordatorios de Quórum T-24h (CUS23-U01, CUS23-U02, CUS23-U03, CUS23-I01, CUS23-A01)
 """
 
-from datetime import UTC, datetime, timedelta
 import time
+from datetime import UTC, datetime, timedelta
+
 import pytest
 from fastapi import HTTPException
 
@@ -37,6 +38,7 @@ def clean_support_services():
 # ==============================================================================
 # CUS03: GESTIÓN DE DEMANDA TEMÁTICA
 # ==============================================================================
+
 
 def test_cus03_u02_notify_mentors_matching_requested_topic():
     """
@@ -121,6 +123,7 @@ def test_cus03_a01_demand_cycle_effectiveness_deduplication_and_performance():
 # CUS16: REPUTACIÓN E INSIGNIAS DE GAMIFICACIÓN
 # ==============================================================================
 
+
 def test_cus16_u01_recalculate_reputation_weighted_formula():
     """
     CUS16-U01: Verifica el recálculo ponderado de reputación tras encuestas y horas dictadas.
@@ -201,6 +204,7 @@ def test_cus16_f01_mentor_profile_gamification_view():
 # ==============================================================================
 # CUS22: AUDITORÍA DE BITÁCORAS Y RESOLUCIÓN DE FRAUDE
 # ==============================================================================
+
 
 def test_cus22_u01_filter_marked_or_disputed_bitacoras():
     """
@@ -303,13 +307,15 @@ def test_cus22_a01_quality_governance_prior_to_certificates_batch_acceptance():
     """
     reclamos = []
     for i in range(1, 11):
-        es_fraude = (i % 3 == 0)  # Reclamos 3, 6, 9 con fraude
-        reclamos.append({
-            "id_bitacora": 900 + i,
-            "dictamen": "FRAUDE_COMPROBADO" if es_fraude else "FUNDADO",
-            "motivo": f"Dictamen formal de auditoría para el caso de reclamo {i:02d} del semestre.",
-            "horas_mentor": 20.0,
-        })
+        es_fraude = i % 3 == 0  # Reclamos 3, 6, 9 con fraude
+        reclamos.append(
+            {
+                "id_bitacora": 900 + i,
+                "dictamen": "FRAUDE_COMPROBADO" if es_fraude else "FUNDADO",
+                "motivo": f"Dictamen formal de auditoría para el caso de reclamo {i:02d} del semestre.",
+                "horas_mentor": 20.0,
+            }
+        )
 
     t0 = time.perf_counter()
     res_lote = ServicioResolucionReclamo.auditar_lote_reclamos_cierre_semestre(
@@ -330,6 +336,7 @@ def test_cus22_a01_quality_governance_prior_to_certificates_batch_acceptance():
 # CUS23: TAREAS PROGRAMADAS Y RECORDATORIOS DE QUÓRUM
 # ==============================================================================
 
+
 def test_cus23_u01_identify_sessions_at_exact_24h_cut():
     """
     CUS23-U01: Verifica que TareaProgramadaQuorum.obtener_sesiones_en_corte()
@@ -339,12 +346,17 @@ def test_cus23_u01_identify_sessions_at_exact_24h_cut():
 
     sesiones = [
         {"id_sesion": 1, "fecha_inicio": (now + timedelta(hours=24)).isoformat()},  # Exactamente 24h
-        {"id_sesion": 2, "fecha_inicio": (now + timedelta(hours=24, minutes=10)).isoformat()},  # En tolerancia
+        {
+            "id_sesion": 2,
+            "fecha_inicio": (now + timedelta(hours=24, minutes=10)).isoformat(),
+        },  # En tolerancia
         {"id_sesion": 3, "fecha_inicio": (now + timedelta(hours=48)).isoformat()},  # Lejos
         {"id_sesion": 4, "fecha_inicio": (now + timedelta(hours=2)).isoformat()},  # Muy cerca
     ]
 
-    en_corte = TareaProgramadaQuorum.obtener_sesiones_en_corte(sesiones, reference_now=now, tolerancia_minutos=15)
+    en_corte = TareaProgramadaQuorum.obtener_sesiones_en_corte(
+        sesiones, reference_now=now, tolerancia_minutos=15
+    )
     ids_en_corte = [s["id_sesion"] for s in en_corte]
     assert 1 in ids_en_corte
     assert 2 in ids_en_corte
@@ -479,13 +491,15 @@ def test_cus23_a01_batch_cron_performance_and_delivery_acceptance():
 
     for i in range(100):
         s_id = i + 2000
-        sesiones.append({
-            "id_sesion": s_id,
-            "capacidad_maxima": 10,
-            "mentor_email": f"mentor_{i}@upt.pe",
-            "tema": f"Tema_Mentoría_{i}",
-            "fecha_inicio": (now + timedelta(hours=24)).isoformat(),
-        })
+        sesiones.append(
+            {
+                "id_sesion": s_id,
+                "capacidad_maxima": 10,
+                "mentor_email": f"mentor_{i}@upt.pe",
+                "tema": f"Tema_Mentoría_{i}",
+                "fecha_inicio": (now + timedelta(hours=24)).isoformat(),
+            }
+        )
         if i % 2 == 0:
             inscritos_map[s_id] = [
                 {"estudiante_email": f"mentee_{s_id}_1@upt.pe", "estado": "CONFIRMADA"},

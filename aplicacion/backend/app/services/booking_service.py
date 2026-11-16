@@ -607,6 +607,7 @@ class BookingService:
         """Consulta la nómina de reservas del estudiante mentoreado."""
         clean_email = student_email.strip().lower()
         from app.core.identity import parse_student_email
+
         parsed = parse_student_email(clean_email)
         codigo = parsed.get("codigo_estudiante")
         student_aliases = [clean_email]
@@ -781,7 +782,11 @@ class BookingService:
                         t_title = (
                             ses.tema.nombre_tema
                             if ses and ses.tema
-                            else (ses.asignatura.nombre_curso if ses and ses.asignatura else "Mentoría Académica")
+                            else (
+                                ses.asignatura.nombre_curso
+                                if ses and ses.asignatura
+                                else "Mentoría Académica"
+                            )
                         )
                         r_link = ses.espacio_asignado if ses and ses.espacio_asignado else "Por definir"
                         s_date = ses.fecha_inicio.isoformat() if ses and ses.fecha_inicio else None
@@ -912,12 +917,16 @@ class BookingService:
                 EmailService.send_session_confirmation_email(
                     to_email=target_booking["estudiante_email"],
                     session_code=target_booking.get("codigo_sesion", f"SES-{target_booking['id_sesion']}"),
-                    topic_title=target_booking.get("nombre_tema") or target_booking.get("nombre_asignatura") or "Mentoría Académica",
+                    topic_title=target_booking.get("nombre_tema")
+                    or target_booking.get("nombre_asignatura")
+                    or "Mentoría Académica",
                     room_or_link=target_booking.get("espacio_asignado", "Por definir"),
                     session_date=str(target_booking.get("fecha_inicio", "")),
                 )
             except Exception as email_err:
-                logger.warning("Fallo al enviar correo de confirmación de asistencia en memoria: %s", email_err)
+                logger.warning(
+                    "Fallo al enviar correo de confirmación de asistencia en memoria: %s", email_err
+                )
 
             return BookingDetailResponse(**target_booking)
         finally:
@@ -1763,7 +1772,9 @@ class BookingService:
                             topic_title=target.get("nombre_tema") or target.get("nombre_asignatura"),
                         )
                     except Exception as email_err:
-                        logger.warning("Fallo al enviar alerta de quórum por correo en memoria: %s", email_err)
+                        logger.warning(
+                            "Fallo al enviar alerta de quórum por correo en memoria: %s", email_err
+                        )
 
             msg = (
                 f"Quórum alcanzado: {pct}% ({confirmed}/{aforo} confirmados). Sesión confirmada."

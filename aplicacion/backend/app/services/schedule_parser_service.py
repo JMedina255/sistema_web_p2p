@@ -12,8 +12,8 @@ import os
 import re
 from typing import Any
 
-from fastapi import HTTPException, status
 import openpyxl
+from fastapi import HTTPException, status
 
 try:
     import fitz  # PyMuPDF
@@ -38,12 +38,30 @@ class ScheduleParserService:
 
     _active_free_slots: list[dict[str, Any]] = [
         {"aula": "Lab 01", "dia": "Lunes", "hora_inicio": "08:00", "hora_fin": "10:00", "estado": "LIBRE"},
-        {"aula": "Lab 01", "dia": "Miércoles", "hora_inicio": "14:00", "hora_fin": "16:00", "estado": "LIBRE"},
+        {
+            "aula": "Lab 01",
+            "dia": "Miércoles",
+            "hora_inicio": "14:00",
+            "hora_fin": "16:00",
+            "estado": "LIBRE",
+        },
         {"aula": "Lab 02", "dia": "Martes", "hora_inicio": "10:00", "hora_fin": "12:00", "estado": "LIBRE"},
         {"aula": "Lab 02", "dia": "Jueves", "hora_inicio": "16:00", "hora_fin": "18:00", "estado": "LIBRE"},
         {"aula": "Aula 101", "dia": "Lunes", "hora_inicio": "10:00", "hora_fin": "12:00", "estado": "LIBRE"},
-        {"aula": "Aula 202", "dia": "Miércoles", "hora_inicio": "08:00", "hora_fin": "10:00", "estado": "LIBRE"},
-        {"aula": "Aula 302", "dia": "Viernes", "hora_inicio": "14:00", "hora_fin": "16:00", "estado": "LIBRE"},
+        {
+            "aula": "Aula 202",
+            "dia": "Miércoles",
+            "hora_inicio": "08:00",
+            "hora_fin": "10:00",
+            "estado": "LIBRE",
+        },
+        {
+            "aula": "Aula 302",
+            "dia": "Viernes",
+            "hora_inicio": "14:00",
+            "hora_fin": "16:00",
+            "estado": "LIBRE",
+        },
     ]
     _last_imported_filename: str | None = "cronograma_oficial_base_2026.xlsx"
 
@@ -93,9 +111,13 @@ class ScheduleParserService:
 
         # Validación de cabecera / magic bytes
         if ext == ".xlsx" and not content.startswith(b"PK\x03\x04"):
-            raise ExcepcionFormatoHorarioInvalido("El archivo .xlsx no posee una firma ZIP válida (posiblemente corrupto).")
+            raise ExcepcionFormatoHorarioInvalido(
+                "El archivo .xlsx no posee una firma ZIP válida (posiblemente corrupto)."
+            )
         elif ext == ".pdf" and not content.startswith(b"%PDF"):
-            raise ExcepcionFormatoHorarioInvalido("El archivo .pdf no posee una cabecera PDF válida (posiblemente corrupto).")
+            raise ExcepcionFormatoHorarioInvalido(
+                "El archivo .pdf no posee una cabecera PDF válida (posiblemente corrupto)."
+            )
 
         return ext
 
@@ -110,7 +132,9 @@ class ScheduleParserService:
             else:
                 wb = openpyxl.load_workbook(content_or_path, data_only=True)
         except Exception as e:
-            raise ExcepcionFormatoHorarioInvalido(f"Error al decodificar la estructura del libro Excel: {str(e)}")
+            raise ExcepcionFormatoHorarioInvalido(
+                f"Error al decodificar la estructura del libro Excel: {str(e)}"
+            ) from e
 
         free_slots: list[dict[str, Any]] = []
         ws = wb.active
@@ -143,14 +167,16 @@ class ScheduleParserService:
             is_free = ocup_str in ("", "LIBRE", "DISPONIBLE", "VACANTE", "NONE")
 
             if is_free:
-                free_slots.append({
-                    "aula": aula_str,
-                    "dia": dia_str,
-                    "hora_inicio": h_ini_str or "08:00",
-                    "hora_fin": h_fin_str or "10:00",
-                    "estado": "LIBRE",
-                    "fila_origen": row_idx,
-                })
+                free_slots.append(
+                    {
+                        "aula": aula_str,
+                        "dia": dia_str,
+                        "hora_inicio": h_ini_str or "08:00",
+                        "hora_fin": h_fin_str or "10:00",
+                        "estado": "LIBRE",
+                        "fila_origen": row_idx,
+                    }
+                )
 
         return free_slots
 
@@ -171,10 +197,13 @@ class ScheduleParserService:
             else:
                 doc = fitz.open(content_or_path)
         except Exception as e:
-            raise ExcepcionFormatoHorarioInvalido(f"Error al abrir el documento PDF: {str(e)}")
+            raise ExcepcionFormatoHorarioInvalido(f"Error al abrir el documento PDF: {str(e)}") from e
 
         free_slots: list[dict[str, Any]] = []
-        pattern = re.compile(r"(Lab\s*\d+|Aula\s*\d+)\s+([A-Za-záéíóúÁÉÍÓÚ]+)\s+(\d{2}:\d{2})\s+(\d{2}:\d{2})\s*(LIBRE|OCUPADO)?", re.IGNORECASE)
+        pattern = re.compile(
+            r"(Lab\s*\d+|Aula\s*\d+)\s+([A-Za-záéíóúÁÉÍÓÚ]+)\s+(\d{2}:\d{2})\s+(\d{2}:\d{2})\s*(LIBRE|OCUPADO)?",
+            re.IGNORECASE,
+        )
 
         for page_idx in range(len(doc)):
             page = doc[page_idx]
@@ -187,14 +216,16 @@ class ScheduleParserService:
                     aula, dia, h_ini, h_fin, estado = m.groups()
                     estado_str = (estado or "LIBRE").strip().upper()
                     if estado_str == "LIBRE":
-                        free_slots.append({
-                            "aula": aula.strip(),
-                            "dia": dia.strip().capitalize(),
-                            "hora_inicio": h_ini,
-                            "hora_fin": h_fin,
-                            "estado": "LIBRE",
-                            "pagina": page_idx + 1,
-                        })
+                        free_slots.append(
+                            {
+                                "aula": aula.strip(),
+                                "dia": dia.strip().capitalize(),
+                                "hora_inicio": h_ini,
+                                "hora_fin": h_fin,
+                                "estado": "LIBRE",
+                                "pagina": page_idx + 1,
+                            }
+                        )
 
         doc.close()
         return free_slots

@@ -28,12 +28,8 @@ class VirtualRoomService:
         "teams": re.compile(
             r"^https?://([a-zA-Z0-9\-]+\.)?teams\.(microsoft|live)\.com/[^\s]+$", re.IGNORECASE
         ),
-        "zoom": re.compile(
-            r"^https?://([a-zA-Z0-9\-]+\.)?zoom\.us/(j|my|w)/[^\s]+$", re.IGNORECASE
-        ),
-        "discord": re.compile(
-            r"^https?://(discord\.(gg|com/invite|com/channels))/[^\s]+$", re.IGNORECASE
-        ),
+        "zoom": re.compile(r"^https?://([a-zA-Z0-9\-]+\.)?zoom\.us/(j|my|w)/[^\s]+$", re.IGNORECASE),
+        "discord": re.compile(r"^https?://(discord\.(gg|com/invite|com/channels))/[^\s]+$", re.IGNORECASE),
     }
 
     GENERIC_URL_PATTERN = re.compile(r"^https?://[^\s]+$", re.IGNORECASE)
@@ -93,7 +89,9 @@ class VirtualRoomService:
         clean = provided_link.strip()
         if clean.lower() in cls.AUTO_TRIGGERS:
             room = cls.generate_google_meet_url(session_code)
-            logger.info("Generada sala virtual automática (trigger '%s'): %s para %s", clean, room, session_code)
+            logger.info(
+                "Generada sala virtual automática (trigger '%s'): %s para %s", clean, room, session_code
+            )
             return room
 
         if cls.is_valid_meeting_url(clean):

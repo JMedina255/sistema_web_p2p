@@ -351,9 +351,9 @@ def test_auth_endpoints_strict_db_mode_down_returns_503(monkeypatch):
     # Simular fallo total de conexión a BD devolviendo None
     def mock_get_required_session():
         from fastapi import HTTPException
+
         raise HTTPException(
-            status_code=503,
-            detail={"code": "DATABASE_UNAVAILABLE", "message": "Database is down"}
+            status_code=503, detail={"code": "DATABASE_UNAVAILABLE", "message": "Database is down"}
         )
 
     app.dependency_overrides[db_session.get_required_session] = mock_get_required_session
@@ -368,4 +368,3 @@ def test_auth_endpoints_strict_db_mode_down_returns_503(monkeypatch):
     finally:
         app.dependency_overrides.clear()
         settings.STRICT_DATABASE_MODE = old_strict
-

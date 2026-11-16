@@ -11,9 +11,9 @@ Trazabilidad directa con el Catálogo Oficial de Pruebas EPIS-UPT:
 
 import io
 import time
-import pytest
-from fastapi import HTTPException
+
 import openpyxl
+import pytest
 
 from app.services.catalog_support_service import (
     ExcepcionAulaNoDisponible,
@@ -22,7 +22,6 @@ from app.services.catalog_support_service import (
     ServicioReservaAula,
 )
 from app.services.schedule_parser_service import (
-    ScheduleParserService,
     ServicioAnalizadorHorarios,
 )
 
@@ -173,8 +172,7 @@ def test_cus06_f01_publish_presencial_offer_with_automatic_classroom_reservation
 
     # Validar que un aula ocupada ("Aula 204" a las 16:00) NO figura en las sugerencias
     ocupadas_presentes = [
-        s for s in aulas_disponibles
-        if s["aula"] == "Aula 204" and s["hora_inicio"] == "16:00"
+        s for s in aulas_disponibles if s["aula"] == "Aula 204" and s["hora_inicio"] == "16:00"
     ]
     assert len(ocupadas_presentes) == 0, "El parser filtró incorrectamente un aula ocupada."
 

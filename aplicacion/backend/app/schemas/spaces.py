@@ -10,7 +10,9 @@ from pydantic import BaseModel, Field
 class FreeSlotItem(BaseModel):
     """Representa una franja horaria libre identificada en un aula física o laboratorio."""
 
-    aula: str = Field(..., description="Identificador o nombre del aula/laboratorio (ej. 'Lab 01', 'Aula 101').")
+    aula: str = Field(
+        ..., description="Identificador o nombre del aula/laboratorio (ej. 'Lab 01', 'Aula 101')."
+    )
     dia: str = Field(..., description="Día de la semana de la franja disponible (ej. 'Lunes', 'Martes').")
     hora_inicio: str = Field(..., description="Hora de inicio en formato HH:mm (ej. '08:00').")
     hora_fin: str = Field(..., description="Hora de fin en formato HH:mm (ej. '10:00').")
@@ -24,9 +26,13 @@ class ScheduleImportResponse(BaseModel):
 
     status: str = Field(..., description="Estado de la operación (ej. 'PROCESADO_EXITOSAMENTE').")
     archivo: str = Field(..., description="Nombre del archivo oficial cargado y procesado.")
-    total_aulas_libres_identificadas: int = Field(..., description="Cantidad total de bloques libres detectados.")
+    total_aulas_libres_identificadas: int = Field(
+        ..., description="Cantidad total de bloques libres detectados."
+    )
     reservas_activas_preservadas: int = Field(0, description="Cantidad de reservas de mentoría preservadas.")
-    aulas_libres: list[FreeSlotItem] = Field(..., description="Detalle de franjas horarias y recintos disponibles.")
+    aulas_libres: list[FreeSlotItem] = Field(
+        ..., description="Detalle de franjas horarias y recintos disponibles."
+    )
 
 
 class ClassroomListResponse(BaseModel):
