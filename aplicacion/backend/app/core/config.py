@@ -40,6 +40,18 @@ class Settings(BaseSettings):
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 horas continuas según RNF01
     OTP_EXPIRE_MINUTES: int = 5  # Ventana de 5 minutos según RNF01
     OTP_COOLDOWN_SECONDS: int = 60  # Cooldown de 60 segundos según CUS01
+    MAX_OTP_ATTEMPTS: int = Field(
+        default=5,
+        description="Número máximo de intentos fallidos permitidos antes del bloqueo definitivo del desafío OTP",
+    )
+    OTP_RATE_LIMIT_PER_MINUTE: int = Field(
+        default=5,
+        description="Límite normativo de solicitudes de emisión OTP por minuto por destinatario e IP",
+    )
+    ENABLE_MOCK_OTP_HINTS: bool = Field(
+        default=False,
+        description="Expone mockCodeHint exclusivamente en entornos de pruebas automatizadas aisladas",
+    )
 
     # Variables de entorno para Reservas, Concurrencia y Quórum (Sprint 4 / Cuadro 4.9 / Regla D-9)
     BOOKING_TIMEOUT_SECONDS: int = Field(
@@ -136,8 +148,8 @@ class Settings(BaseSettings):
     )
 
     # Autenticación Federada Google Identity
-    GOOGLE_CLIENT_ID: str | None = Field(
-        default=None,
+    GOOGLE_CLIENT_ID: str = Field(
+        default="542248584798-ev9m68d5ial7g4bghqiatd1r3b5rduls.apps.googleusercontent.com",
         description="Google OAuth Client ID para autenticación institucional con @virtual.upt.pe",
     )
 
