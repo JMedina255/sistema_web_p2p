@@ -117,7 +117,15 @@ export const LoginOtpView: React.FC<LoginOtpViewProps> = ({ onLoginSuccess, show
       setChallenge(resp);
       setStep('otp');
       setOtp('');
-      setInfoMessage(`Código de verificación enviado. Revisa tu buzón institucional.`);
+      if (resp.deliveryStatus === 'mocked' || resp.isMock) {
+        setInfoMessage(
+          'Modo de desarrollo: Código generado localmente (consulte la consola del servidor o use las herramientas de prueba).'
+        );
+      } else {
+        setInfoMessage(
+          `Código de verificación enviado. Revisa tu buzón institucional (@${cleanEmail.split('@')[1] || 'virtual.upt.pe'}).`
+        );
+      }
     } catch (err: unknown) {
       if (err instanceof AuthException) {
         setErrorMessage(err.message);
@@ -251,39 +259,10 @@ export const LoginOtpView: React.FC<LoginOtpViewProps> = ({ onLoginSuccess, show
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      const clean = email.trim().toLowerCase();
-      const targetEmail =
-        clean && (clean.endsWith('@virtual.upt.pe') || clean.endsWith('@upt.pe'))
-          ? clean
-          : 'ra2022073504@virtual.upt.pe';
-
-      const mockPayload = btoa(
-        JSON.stringify({
-          email: targetEmail,
-          given_name: 'Renzo Antonio',
-          family_name: 'Antayhua Mamani',
-        })
-      );
-      const dummyIdToken = `header.${mockPayload}.signature`;
-
-      const resp = await authService.loginWithGoogle(dummyIdToken);
-      setVerifyResult(resp);
-      setStep('success');
-      if (onLoginSuccess) {
-        onLoginSuccess(resp);
-      }
-    } catch (err: unknown) {
-      if (err instanceof AuthException) {
-        setErrorMessage(err.message);
-      } else {
-        setErrorMessage('Error durante la autenticación con Google Workspace.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    // Si Google Identity Services no ha cargado, informar al usuario sin construir tokens ficticios
+    setErrorMessage(
+      'El servicio de Google Identity Services no se encuentra disponible en este momento. Por favor, utiliza el acceso mediante código OTP institucional.'
+    );
   };
 
   // Reenvío de código OTP
@@ -298,7 +277,11 @@ export const LoginOtpView: React.FC<LoginOtpViewProps> = ({ onLoginSuccess, show
       const resp = await authService.resendOtp({ challengeId: challenge.challengeId });
       setChallenge(resp);
       setOtp('');
-      setInfoMessage('Se ha generado y enviado un nuevo código OTP. El anterior ha sido invalidado.');
+      if (resp.deliveryStatus === 'mocked' || resp.isMock) {
+        setInfoMessage('Se ha generado y enviado un nuevo código OTP de prueba. El anterior ha sido invalidado.');
+      } else {
+        setInfoMessage('Se ha generado y enviado un nuevo código OTP a tu buzón institucional. El anterior ha sido invalidado.');
+      }
     } catch (err: unknown) {
       if (err instanceof AuthException) {
         setErrorMessage(err.message);
