@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.identity import parse_student_email
 from app.models.profile import DisponibilidadHoraria, PerfilAcademico
 from app.schemas.profile import (
@@ -94,8 +95,20 @@ class ProfileService:
                         modalidad_preferida=perfil.modalidad_preferida,
                         updated_at=perfil.updated_at.isoformat() if perfil.updated_at else None,
                     )
-            except Exception:
-                pass
+            except HTTPException:
+                raise
+            except Exception as exc:
+                if settings.STRICT_DATABASE_MODE:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail={"code": "DATABASE_UNAVAILABLE", "message": "Error al consultar perfil en base de datos."},
+                    ) from exc
+
+        if settings.STRICT_DATABASE_MODE:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={"code": "DATABASE_UNAVAILABLE", "message": "Base de datos no disponible para consulta de perfil en modo estricto."},
+            )
 
         if clean_email in _memory_profiles:
             p = _memory_profiles[clean_email]
@@ -189,8 +202,19 @@ class ProfileService:
                 )
             except HTTPException:
                 raise
-            except Exception:
+            except Exception as exc:
                 db.rollback()
+                if settings.STRICT_DATABASE_MODE:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail={"code": "DATABASE_UNAVAILABLE", "message": "Error al actualizar perfil en base de datos."},
+                    ) from exc
+
+        if settings.STRICT_DATABASE_MODE:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={"code": "DATABASE_UNAVAILABLE", "message": "Base de datos no disponible para actualización de perfil en modo estricto."},
+            )
 
         # Fallback en memoria
         prof_data = {
@@ -243,8 +267,20 @@ class ProfileService:
                         )
                         for r in rows
                     ]
-            except Exception:
-                pass
+            except HTTPException:
+                raise
+            except Exception as exc:
+                if settings.STRICT_DATABASE_MODE:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail={"code": "DATABASE_UNAVAILABLE", "message": "Error al consultar perfil en base de datos."},
+                    ) from exc
+
+        if settings.STRICT_DATABASE_MODE:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={"code": "DATABASE_UNAVAILABLE", "message": "Base de datos no disponible para consulta de perfil en modo estricto."},
+            )
 
         if clean_email in _memory_availability:
             return [

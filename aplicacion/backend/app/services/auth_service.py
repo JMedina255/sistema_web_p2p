@@ -1,5 +1,6 @@
 import logging
 import secrets
+import threading
 import time
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -17,7 +18,7 @@ from app.core.security import (
     hash_otp_code,
     verify_otp_hash,
 )
-from app.models.auth import AuthChallenge
+from app.models.auth import AuthChallenge, AuthRateLimit
 from app.models.profile import PerfilAcademico
 from app.schemas.auth import RequestOtpResponse, VerifyOtpResponse
 from app.schemas.google_auth import GoogleLoginResponse
@@ -25,10 +26,13 @@ from app.services.email_service import EmailService
 
 logger = logging.getLogger("app.auth")
 
+# Cerrojo para concurrencia multihilo en memoria
+_rate_limit_lock = threading.Lock()
+
 # Almacén en memoria de respaldo exclusivo para desarrollo y pruebas unitarias aisladas
 _memory_challenges: dict[str, dict] = {}
 
-# Cubos de control de tasa (Rate Limiting) en memoria por ventana temporal
+# Cubos de control de tasa (Rate Limiting) en memoria por ventana temporal (fallback)
 _ip_request_timestamps: dict[str, list[float]] = {}
 _email_request_timestamps: dict[str, list[float]] = {}
 _ip_verify_timestamps: dict[str, list[float]] = {}
@@ -42,23 +46,83 @@ def _ensure_utc(dt: datetime) -> datetime:
 
 
 def _check_rate_limit(
-    bucket: dict[str, list[float]],
+    db: Session | None,
     key: str,
     max_requests: int,
-    window_seconds: int,
-    error_code: str,
-    error_message: str,
+    window_seconds: int = 60,
+    error_code: str = "RATE_LIMIT_EXCEEDED",
+    error_message: str = "Demasiadas solicitudes. Por favor espera un momento.",
+    fallback_bucket: dict[str, list[float]] | None = None,
 ) -> None:
-    """Valida la frecuencia de solicitudes para mitigar ataques de denegación de servicio y fuerza bruta."""
-    now = time.time()
-    valid_window = [t for t in bucket.get(key, []) if now - t < window_seconds]
-    if len(valid_window) >= max_requests:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail={"code": error_code, "message": error_message},
-        )
-    valid_window.append(now)
-    bucket[key] = valid_window
+    """
+    Valida la frecuencia de solicitudes para mitigar ataques de denegación de servicio y fuerza bruta.
+    Estrategia híbrida: persistente y atómica en PostgreSQL/Supabase (H-08), o en memoria con cerrojo para tests.
+    """
+    now = datetime.now(UTC)
+
+    # 1. Estrategia compartida y persistente en base de datos si db está disponible
+    if db is not None:
+        try:
+            query = db.query(AuthRateLimit).filter(AuthRateLimit.key == key)
+            try:
+                record = query.with_for_update().first()
+            except Exception:
+                record = query.first()
+
+            if record:
+                expires_at = _ensure_utc(record.window_expires_at)
+                if now < expires_at:
+                    if record.count >= max_requests:
+                        remaining = max(1, int((expires_at - now).total_seconds()))
+                        raise HTTPException(
+                            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                            detail={
+                                "code": error_code,
+                                "message": f"{error_message} Debes esperar {remaining} segundos.",
+                            },
+                        )
+                    record.count += 1
+                else:
+                    record.count = 1
+                    record.window_expires_at = now + timedelta(seconds=window_seconds)
+            else:
+                record = AuthRateLimit(
+                    key=key,
+                    count=1,
+                    window_expires_at=now + timedelta(seconds=window_seconds),
+                )
+                db.add(record)
+            db.commit()
+            return
+        except HTTPException:
+            raise
+        except Exception as exc:
+            db.rollback()
+            logger.warning("Fallo en rate limit persistente en BD: %s.", exc)
+            if settings.STRICT_DATABASE_MODE:
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail={"code": "DATABASE_UNAVAILABLE", "message": "Error al verificar limitación de tasa en base de datos."},
+                ) from exc
+
+    # 2. Estrategia en memoria (fallback protegido por Lock para concurrencia local/tests)
+    if fallback_bucket is not None:
+        with _rate_limit_lock:
+            now_ts = time.time()
+            timestamps = fallback_bucket.get(key, [])
+            valid_window = [t for t in timestamps if now_ts - t < window_seconds]
+            if len(valid_window) >= max_requests:
+                oldest = valid_window[0]
+                remaining = max(1, int(oldest + window_seconds - now_ts))
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail={
+                        "code": error_code,
+                        "message": f"{error_message} Debes esperar {remaining} segundos.",
+                    },
+                )
+            valid_window.append(now_ts)
+            fallback_bucket[key] = valid_window
 
 
 class AuthService:
@@ -88,8 +152,18 @@ class AuthService:
                     except Exception:
                         return query.first()
                 return query.first()
-            except Exception:
-                pass
+            except HTTPException:
+                raise
+            except Exception as exc:
+                logger.error("Error al consultar desafío en base de datos: %s", exc)
+                if settings.STRICT_DATABASE_MODE:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail={"code": "DATABASE_UNAVAILABLE", "message": "Error al consultar el desafío en la base de datos."},
+                    ) from exc
+
+        if settings.STRICT_DATABASE_MODE:
+            return None
         return _memory_challenges.get(challenge_id)
 
     @staticmethod
@@ -108,10 +182,21 @@ class AuthService:
                 )
                 if challenge and _ensure_utc(challenge.expires_at) > now:
                     return challenge
-            except Exception:
-                pass
+                return None
+            except HTTPException:
+                raise
+            except Exception as exc:
+                logger.error("Error al consultar desafíos activos en base de datos: %s", exc)
+                if settings.STRICT_DATABASE_MODE:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail={"code": "DATABASE_UNAVAILABLE", "message": "Error al consultar desafíos activos en la base de datos."},
+                    ) from exc
 
-        # Búsqueda en memoria
+        if settings.STRICT_DATABASE_MODE:
+            return None
+
+        # Búsqueda en memoria exclusiva para modo no estricto
         for c in _memory_challenges.values():
             if c["email"] == email and not c["consumed"] and _ensure_utc(c["expires_at"]) > now:
                 return c
@@ -134,20 +219,22 @@ class AuthService:
 
         # 2. Control de tasa de peticiones (Rate Limiting) por IP y por correo
         _check_rate_limit(
-            _ip_request_timestamps,
-            client_ip,
+            db,
+            f"ip:{client_ip}",
             max_requests=settings.OTP_RATE_LIMIT_PER_MINUTE,
             window_seconds=60,
             error_code="IP_RATE_LIMIT_EXCEEDED",
             error_message="Demasiadas solicitudes de código desde esta dirección IP. Por favor espera un momento.",
+            fallback_bucket=_ip_request_timestamps,
         )
         _check_rate_limit(
-            _email_request_timestamps,
-            clean_email,
+            db,
+            f"email:{clean_email}",
             max_requests=settings.OTP_RATE_LIMIT_PER_MINUTE,
             window_seconds=60,
             error_code="EMAIL_RATE_LIMIT_EXCEEDED",
             error_message="Demasiadas solicitudes de código para este correo institucional. Por favor espera un momento.",
+            fallback_bucket=_email_request_timestamps,
         )
 
         # 3. Comprobación de cooldown de 60 segundos (CUS01)
@@ -176,8 +263,17 @@ class AuthService:
                     AuthChallenge.consumed.is_(False),
                 ).update({"consumed": True})
                 db.flush()
-            except Exception:
+            except Exception as exc:
                 db.rollback()
+                logger.error("Error al invalidar desafíos previos en BD: %s", exc)
+                if settings.STRICT_DATABASE_MODE:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail={
+                            "code": "DATABASE_UNAVAILABLE",
+                            "message": "Error al invalidar desafíos previos en base de datos.",
+                        },
+                    ) from exc
 
         for c in _memory_challenges.values():
             if c["email"] == clean_email and not c["consumed"]:
@@ -210,6 +306,14 @@ class AuthService:
             except Exception as exc:
                 db.rollback()
                 logger.error("Error al persistir desafío en base de datos: %s", exc)
+                if settings.STRICT_DATABASE_MODE:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail={
+                            "code": "DATABASE_UNAVAILABLE",
+                            "message": "Error al registrar el desafío de autenticación en la base de datos.",
+                        },
+                    ) from exc
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail={
@@ -252,8 +356,17 @@ class AuthService:
                 try:
                     new_challenge.consumed = True
                     db.commit()
-                except Exception:
+                except Exception as exc:
                     db.rollback()
+                    logger.error("Error al revocar desafío tras fallo SMTP en base de datos: %s", exc)
+                    if settings.STRICT_DATABASE_MODE:
+                        raise HTTPException(
+                            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail={
+                                "code": "DATABASE_UNAVAILABLE",
+                                "message": "Error en la base de datos al intentar revocar el desafío tras fallo SMTP.",
+                            },
+                        ) from exc
             if challenge_id in _memory_challenges:
                 _memory_challenges[challenge_id]["consumed"] = True
 
@@ -289,12 +402,13 @@ class AuthService:
         AuthService._assert_db_strict_check(db)
 
         _check_rate_limit(
-            _ip_request_timestamps,
-            client_ip,
+            db,
+            f"resend:ip:{client_ip}",
             max_requests=settings.OTP_RATE_LIMIT_PER_MINUTE,
             window_seconds=60,
             error_code="IP_RATE_LIMIT_EXCEEDED",
             error_message="Demasiadas solicitudes de reenvío desde esta dirección IP.",
+            fallback_bucket=_ip_request_timestamps,
         )
 
         challenge = AuthService._get_challenge(db, challenge_id)
@@ -307,14 +421,25 @@ class AuthService:
                 },
             )
 
+        is_chal_obj = isinstance(challenge, AuthChallenge)
+        consumed = challenge.consumed if is_chal_obj else challenge.get("consumed", False)
+        if consumed:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "code": "CHALLENGE_ALREADY_USED",
+                    "message": "El desafío ya fue utilizado o invalidado. Por favor, solicita un nuevo código.",
+                },
+            )
+
         now = datetime.now(UTC)
         resend_at = _ensure_utc(
             challenge.resend_available_at
-            if isinstance(challenge, AuthChallenge)
+            if is_chal_obj
             else challenge["resend_available_at"]
         )
         expires_at = _ensure_utc(
-            challenge.expires_at if isinstance(challenge, AuthChallenge) else challenge["expires_at"]
+            challenge.expires_at if is_chal_obj else challenge["expires_at"]
         )
 
         if now < resend_at and now < expires_at:
@@ -328,14 +453,23 @@ class AuthService:
             )
 
         # Invalida el anterior marcándolo como consumido
-        email = challenge.email if isinstance(challenge, AuthChallenge) else challenge["email"]
-        if isinstance(challenge, AuthChallenge):
+        email = challenge.email if is_chal_obj else challenge["email"]
+        if is_chal_obj:
             challenge.consumed = True
             if db is not None:
                 try:
                     db.commit()
-                except Exception:
+                except Exception as exc:
                     db.rollback()
+                    logger.error("Error al invalidar desafío anterior en BD durante reenvío: %s", exc)
+                    if settings.STRICT_DATABASE_MODE:
+                        raise HTTPException(
+                            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail={
+                                "code": "DATABASE_UNAVAILABLE",
+                                "message": "Error al invalidar el desafío anterior en la base de datos.",
+                            },
+                        ) from exc
         else:
             challenge["consumed"] = True
 
@@ -349,12 +483,13 @@ class AuthService:
         AuthService._assert_db_strict_check(db)
 
         _check_rate_limit(
-            _ip_verify_timestamps,
-            client_ip,
+            db,
+            f"verify:ip:{client_ip}",
             max_requests=30,
             window_seconds=60,
             error_code="IP_RATE_LIMIT_EXCEEDED",
             error_message="Demasiados intentos de verificación desde esta dirección IP. Espera un momento.",
+            fallback_bucket=_ip_verify_timestamps,
         )
 
         clean_otp = otp.strip()
@@ -421,8 +556,17 @@ class AuthService:
                 if db is not None:
                     try:
                         db.commit()
-                    except Exception:
+                    except Exception as exc:
                         db.rollback()
+                        logger.error("Error al actualizar intentos en BD: %s", exc)
+                        if settings.STRICT_DATABASE_MODE:
+                            raise HTTPException(
+                                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                                detail={
+                                    "code": "DATABASE_UNAVAILABLE",
+                                    "message": "Error al actualizar intentos de verificación en la base de datos.",
+                                },
+                            ) from exc
             else:
                 challenge["attempts"] = new_attempts
                 if new_attempts >= settings.MAX_OTP_ATTEMPTS:
@@ -463,8 +607,17 @@ class AuthService:
             if db is not None:
                 try:
                     db.commit()
-                except Exception:
+                except Exception as exc:
                     db.rollback()
+                    logger.error("Error al confirmar consumo del desafío en BD: %s", exc)
+                    if settings.STRICT_DATABASE_MODE:
+                        raise HTTPException(
+                            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail={
+                                "code": "DATABASE_UNAVAILABLE",
+                                "message": "Error al confirmar el uso del código en la base de datos.",
+                            },
+                        ) from exc
         else:
             challenge["consumed"] = True
 
@@ -651,8 +804,17 @@ class AuthService:
                     if not perfil.codigo_estudiante and codigo_estudiante:
                         perfil.codigo_estudiante = codigo_estudiante
                 db.commit()
-            except Exception:
+            except Exception as exc:
                 db.rollback()
+                logger.error("Error al persistir perfil académico en BD: %s", exc)
+                if settings.STRICT_DATABASE_MODE:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail={
+                            "code": "DATABASE_UNAVAILABLE",
+                            "message": "Error al guardar el perfil institucional en la base de datos.",
+                        },
+                    ) from exc
 
         # En memoria (para desarrollo y testing)
         from app.services.profile_service import get_profile_in_memory, set_profile_in_memory
