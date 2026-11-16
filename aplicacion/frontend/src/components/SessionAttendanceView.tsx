@@ -209,7 +209,7 @@ export const SessionAttendanceView: React.FC<SessionAttendanceViewProps> = ({
       // Si el navegador soporta BarcodeDetector nativo (Chromium / Edge / Chrome)
       if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
         try {
-          const detector = new (window as any).BarcodeDetector({ formats: ['qr_code'] });
+          const detector = new (window as unknown as { BarcodeDetector: new (options?: { formats: string[] }) => { detect: (source: HTMLVideoElement) => Promise<Array<{ rawValue: string }>> } }).BarcodeDetector({ formats: ['qr_code'] });
           scanIntervalRef.current = window.setInterval(async () => {
             if (videoRef.current && videoRef.current.readyState >= 2) {
               try {

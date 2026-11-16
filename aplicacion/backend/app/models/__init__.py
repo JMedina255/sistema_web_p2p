@@ -1,5 +1,5 @@
 from app.models.attendance import AsistenciaSesion, TokenAsistenciaActivo
-from app.models.auth import AuthChallenge
+from app.models.auth import AuthChallenge, AuthRateLimit
 from app.models.bitacora import BitacoraPedagogica
 from app.models.booking import ReservaCupo, SolicitudDemanda
 from app.models.certificate import CertificadoHoras
@@ -14,6 +14,7 @@ __all__ = [
     "Asignatura",
     "TemaConceptual",
     "AuthChallenge",
+    "AuthRateLimit",
     "ConsentimientoLegal",
     "Rol",
     "UsuarioRol",

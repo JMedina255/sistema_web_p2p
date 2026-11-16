@@ -163,7 +163,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         authService.saveToken(data.token);
         setToken(data.token);
       } else {
-        // En modo mock sin token, emitir token simulado con claims estándar institucional
+        // En modo API, una respuesta sin token es inválida y no debe generar sesión bajo ninguna circunstancia
+        if (authService.getMode() === 'api' || data.mode === 'api') {
+          throw new Error('Error de autenticación: No se recibió un token de sesión válido desde el servidor API.');
+        }
+
+        // Exclusivo para modo mock en pruebas aisladas
         const cleanEmail = data.email.trim().toLowerCase();
         const isOfficialAdmin = cleanEmail === 'admin.epis@upt.pe' || cleanEmail.startsWith('admin.');
         const isOfficialMentor = [

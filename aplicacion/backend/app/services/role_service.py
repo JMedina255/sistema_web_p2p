@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.models.roles import Rol, UsuarioRol
 from app.schemas.roles import RoleOperationResponse
 
@@ -45,8 +46,20 @@ class RoleService:
                 if "mentoreado" not in role_names:
                     role_names.insert(0, "mentoreado")
                 return role_names
-            except Exception:
-                pass
+            except HTTPException:
+                raise
+            except Exception as exc:
+                if settings.STRICT_DATABASE_MODE:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail={"code": "DATABASE_UNAVAILABLE", "message": "Error al consultar roles en base de datos."},
+                    ) from exc
+
+        if settings.STRICT_DATABASE_MODE:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={"code": "DATABASE_UNAVAILABLE", "message": "Base de datos no disponible para consulta de roles en modo estricto."},
+            )
 
         if clean_email in _memory_user_roles:
             active_roles = list(_memory_user_roles[clean_email])

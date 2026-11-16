@@ -2,18 +2,36 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
 
+from app.core.config import settings
 from app.core.security import decode_access_token
 from app.main import app
-from app.services.auth_service import _memory_challenges
+from app.services.auth_service import (
+    _email_request_timestamps,
+    _ip_request_timestamps,
+    _ip_verify_timestamps,
+    _memory_challenges,
+)
+from app.services.email_service import EmailService
 
 client = TestClient(app)
 
 
 def setup_function():
     _memory_challenges.clear()
+    _ip_request_timestamps.clear()
+    _email_request_timestamps.clear()
+    _ip_verify_timestamps.clear()
+    settings.ENABLE_MOCK_OTP_HINTS = True
 
 
-def test_request_otp_success():
+def teardown_function():
+    settings.ENABLE_MOCK_OTP_HINTS = False
+
+
+def test_request_otp_success(monkeypatch):
+    monkeypatch.setattr(settings, "SMTP_ENABLED", True)
+    monkeypatch.setattr(settings, "SMTP_USER", "smtp@upt.pe")
+    monkeypatch.setattr(EmailService, "send_otp_email", classmethod(lambda cls, to, code, exp: True))
     response = client.post("/api/v1/auth/otp/request", json={"email": "2022074255@upt.pe"})
     assert response.status_code == 200
     data = response.json()
@@ -263,3 +281,91 @@ def test_auth_service_with_real_db_session():
 
     db.close()
     engine.dispose()
+
+
+def test_verify_otp_lockout_after_max_attempts():
+    """Valida que tras MAX_OTP_ATTEMPTS intentos fallidos consecutivos, el código se bloquee (HTTP 403)."""
+    res1 = client.post("/api/v1/auth/otp/request", json={"email": "bruteforce@upt.pe"})
+    assert res1.status_code == 200
+    challenge_id = res1.json()["challengeId"]
+
+    # Intentos 1 a 4 fallidos (HTTP 400 OTP_INVALID)
+    for i in range(1, settings.MAX_OTP_ATTEMPTS):
+        r = client.post("/api/v1/auth/otp/verify", json={"challengeId": challenge_id, "otp": f"{i:06d}"})
+        assert r.status_code == 400
+        assert r.json()["detail"]["code"] == "OTP_INVALID"
+
+    # Intento 5 (alcanza MAX_OTP_ATTEMPTS -> HTTP 403 CHALLENGE_LOCKED)
+    r5 = client.post("/api/v1/auth/otp/verify", json={"challengeId": challenge_id, "otp": "999999"})
+    assert r5.status_code == 403
+    assert r5.json()["detail"]["code"] == "CHALLENGE_LOCKED"
+
+    # Intento 6 (desafío ya bloqueado -> HTTP 403 CHALLENGE_LOCKED)
+    r6 = client.post("/api/v1/auth/otp/verify", json={"challengeId": challenge_id, "otp": "123456"})
+    assert r6.status_code == 403
+    assert r6.json()["detail"]["code"] == "CHALLENGE_LOCKED"
+
+
+def test_request_otp_smtp_disabled_reports_mocked():
+    """Valida que con SMTP deshabilitado se informe transparentemente deliveryStatus='mocked' y isMock=True."""
+    old_enabled = settings.SMTP_ENABLED
+    settings.SMTP_ENABLED = False
+    try:
+        res = client.post("/api/v1/auth/otp/request", json={"email": "mocked_smtp@upt.pe"})
+        assert res.status_code == 200
+        data = res.json()
+        assert data["isMock"] is True
+        assert data["deliveryStatus"] == "mocked"
+        assert data["emailDispatched"] is False
+        assert "desarrollo" in data["message"].lower() or "consola" in data["message"].lower()
+    finally:
+        settings.SMTP_ENABLED = old_enabled
+
+
+def test_request_otp_smtp_failure_returns_502_and_invalidates_challenge(monkeypatch):
+    """Valida que si SMTP falla, se retorne HTTP 502 y el desafío no quede activo ni utilizable."""
+    from app.services.email_service import EmailService
+
+    monkeypatch.setattr(EmailService, "send_otp_email", lambda to, code, exp: False)
+    old_enabled = settings.SMTP_ENABLED
+    old_user = settings.SMTP_USER
+    settings.SMTP_ENABLED = True
+    settings.SMTP_USER = "test@gmail.com"
+
+    try:
+        res = client.post("/api/v1/auth/otp/request", json={"email": "failed_smtp@upt.pe"})
+        assert res.status_code == 502
+        assert res.json()["detail"]["code"] == "EMAIL_DISPATCH_FAILED"
+    finally:
+        settings.SMTP_ENABLED = old_enabled
+        settings.SMTP_USER = old_user
+
+
+def test_auth_endpoints_strict_db_mode_down_returns_503(monkeypatch):
+    """Valida que ante caída de BD en modo estricto, no haya degradación silenciosa y se retorne HTTP 503."""
+    from app.db import session as db_session
+
+    old_strict = settings.STRICT_DATABASE_MODE
+    settings.STRICT_DATABASE_MODE = True
+
+    # Simular fallo total de conexión a BD devolviendo None
+    def mock_get_required_session():
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "DATABASE_UNAVAILABLE", "message": "Database is down"}
+        )
+
+    app.dependency_overrides[db_session.get_required_session] = mock_get_required_session
+
+    try:
+        res1 = client.post("/api/v1/auth/otp/request", json={"email": "strict_db@upt.pe"})
+        assert res1.status_code == 503
+        assert res1.json()["detail"]["code"] == "DATABASE_UNAVAILABLE"
+
+        res2 = client.post("/api/v1/auth/google", json={"id_token": "any.token"})
+        assert res2.status_code == 503
+    finally:
+        app.dependency_overrides.clear()
+        settings.STRICT_DATABASE_MODE = old_strict
+

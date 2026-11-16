@@ -66,6 +66,34 @@ describe('ApiAuthAdapter & Real API Integration (T-03 / RNF01 / RNF02)', () => {
         expect.objectContaining({ code: 'NETWORK_ERROR' })
       );
     });
+
+    it('mapea respuesta HTTP 502 de fallo SMTP a excepción EMAIL_DISPATCH_FAILED', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: false,
+        status: 502,
+        json: async () => ({
+          detail: { code: 'EMAIL_DISPATCH_FAILED', message: 'Fallo al despachar correo SMTP' },
+        }),
+      } as Response);
+
+      await expect(adapter.requestOtp('2022074255@upt.pe')).rejects.toThrowError(
+        expect.objectContaining({ code: 'EMAIL_DISPATCH_FAILED' })
+      );
+    });
+
+    it('mapea respuesta HTTP 503 de base de datos a excepción DATABASE_UNAVAILABLE', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: async () => ({
+          detail: { code: 'DATABASE_UNAVAILABLE', message: 'Servicio de base de datos no disponible' },
+        }),
+      } as Response);
+
+      await expect(adapter.requestOtp('2022074255@upt.pe')).rejects.toThrowError(
+        expect.objectContaining({ code: 'DATABASE_UNAVAILABLE' })
+      );
+    });
   });
 
   describe('2. Verificación de OTP y Gestión de Tokens JWT', () => {
@@ -119,6 +147,20 @@ describe('ApiAuthAdapter & Real API Integration (T-03 / RNF01 / RNF02)', () => {
 
       await expect(adapter.verifyOtp('CHAL-123', '000000')).rejects.toThrowError(
         expect.objectContaining({ code: 'OTP_EXPIRED' })
+      );
+    });
+
+    it('mapea respuesta HTTP 403 por intentos excesivos a CHALLENGE_LOCKED', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: false,
+        status: 403,
+        json: async () => ({
+          detail: { code: 'CHALLENGE_LOCKED', message: 'Desafío bloqueado por superar límite de intentos' },
+        }),
+      } as Response);
+
+      await expect(adapter.verifyOtp('CHAL-123', '123456')).rejects.toThrowError(
+        expect.objectContaining({ code: 'CHALLENGE_LOCKED' })
       );
     });
   });

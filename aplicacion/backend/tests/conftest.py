@@ -2,22 +2,60 @@ import pytest
 
 from app.core.config import settings
 from app.db import session as db_session
+from app.services.auth_service import (
+    _email_request_timestamps,
+    _ip_request_timestamps,
+    _ip_verify_timestamps,
+    _memory_challenges,
+)
+
+
+class BlockedSMTPConnectionError(RuntimeError):
+    """Excepción lanzada cuando una prueba intenta realizar conexiones SMTP salientes no autorizadas."""
+
+
+class GuardedSMTP:
+    def __init__(self, *args, **kwargs):
+        raise BlockedSMTPConnectionError(
+            "Conexión SMTP real bloqueada por el entorno de aislamiento de pruebas (QA-AUTH-02B Actividad 1)."
+        )
 
 
 @pytest.fixture(autouse=True)
 def isolate_test_environment(monkeypatch):
     """
-    Aísla la carga del .env local durante las pruebas automatizadas.
-    Garantiza que la suite se ejecute sin credenciales reales ni llamadas externas a Supabase.
+    Aísla la carga del entorno local durante las pruebas automatizadas.
+    Garantiza que la suite se ejecute sin credenciales reales, sin despacho SMTP saliente
+    y sin llamadas externas o modificaciones a la base Supabase remota del proyecto.
     """
-    # Liberar cualquier conexión activa previa
+    # 1. Liberar cualquier conexión activa previa a la base de datos
     db_session.close_engine()
 
-    # Forzar entorno de desarrollo controlado y DATABASE_URL vacía por defecto
+    # 2. Forzar entorno de desarrollo controlado, sin acceso a Supabase ni SMTP real
     monkeypatch.setattr(settings, "APP_ENV", "development")
     monkeypatch.setattr(settings, "DATABASE_URL", None)
+    monkeypatch.setattr(settings, "STRICT_DATABASE_MODE", False)
+    monkeypatch.setattr(settings, "SMTP_ENABLED", False)
+    monkeypatch.setattr(settings, "SMTP_USER", "")
+    monkeypatch.setattr(settings, "SMTP_PASSWORD", "")
+    monkeypatch.setattr(settings, "SMTP_FROM_EMAIL", "test-auth-noreply@upt.pe")
+    monkeypatch.setattr(settings, "ENABLE_MOCK_OTP_HINTS", False)
+
+    # 3. Bloqueo estricto a nivel de socket/biblioteca smtplib para impedir envíos externos
+    monkeypatch.setattr("smtplib.SMTP", GuardedSMTP)
+    monkeypatch.setattr("smtplib.SMTP_SSL", GuardedSMTP)
+
+    # 4. Limpiar estructuras en memoria antes de la ejecución de cada prueba
+    _memory_challenges.clear()
+    _ip_request_timestamps.clear()
+    _email_request_timestamps.clear()
+    _ip_verify_timestamps.clear()
 
     yield
 
-    # Liberar recursos y cerrar motores creados durante las pruebas
+    # 5. Limpieza posterior a cada prueba
+    _memory_challenges.clear()
+    _ip_request_timestamps.clear()
+    _email_request_timestamps.clear()
+    _ip_verify_timestamps.clear()
     db_session.close_engine()

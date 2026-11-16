@@ -25,3 +25,19 @@ class AuthChallenge(Base):
     resend_available_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     consumed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+
+class AuthRateLimit(Base):
+    """
+    Entidad de Control de Frecuencia (Rate Limiting) compartido y persistente (H-08).
+    Permite controlar límites de tasa atómicos a través de múltiples workers de Uvicorn/PostgreSQL.
+    """
+
+    __tablename__ = "auth_rate_limits"
+
+    key: Mapped[str] = mapped_column(String(128), primary_key=True)
+    count: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    window_expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False
+    )

@@ -12,10 +12,19 @@ export type AuthErrorCode =
   | 'INVALID_EMAIL'
   | 'NON_UPT_DOMAIN'
   | 'CHALLENGE_NOT_FOUND'
+  | 'CHALLENGE_LOCKED'
   | 'OTP_EXPIRED'
   | 'OTP_INVALID'
   | 'OTP_ALREADY_USED'
   | 'COOLDOWN_ACTIVE'
+  | 'EMAIL_DISPATCH_FAILED'
+  | 'RATE_LIMIT_EXCEEDED'
+  | 'IP_RATE_LIMIT_EXCEEDED'
+  | 'DATABASE_UNAVAILABLE'
+  | 'GOOGLE_AUTH_FAILED'
+  | 'INVALID_AUDIENCE'
+  | 'INVALID_ISSUER'
+  | 'UNVERIFIED_EMAIL'
   | 'NETWORK_ERROR'
   | 'MOCK_DISABLED';
 
@@ -41,6 +50,8 @@ export interface RequestOtpResponse {
   message: string;
   isMock: boolean;
   mockCodeHint?: string; // Código de prueba visible solo en desarrollo
+  deliveryStatus?: 'dispatched' | 'mocked' | 'failed';
+  emailDispatched?: boolean;
 }
 
 export interface VerifyOtpPayload {
@@ -145,9 +156,11 @@ class MockAuthAdapter {
       email: trimmedEmail,
       expiresAt: new Date(expiresAt).toISOString(),
       cooldownSeconds: 60,
-      message: 'Código de acceso de prueba generado satisfactoriamente.',
+      message: 'Código de acceso de prueba generado satisfactoriamente (modo mock en memoria).',
       isMock: true,
       mockCodeHint: mockCode,
+      deliveryStatus: 'mocked',
+      emailDispatched: false,
     };
   }
 
@@ -199,6 +212,8 @@ class MockAuthAdapter {
       message: 'Se ha reenviado un nuevo código OTP de prueba. El anterior ha sido invalidado.',
       isMock: true,
       mockCodeHint: newMockCode,
+      deliveryStatus: 'mocked',
+      emailDispatched: false,
     };
   }
 
@@ -323,6 +338,10 @@ export class ApiAuthAdapter {
           code = 'COOLDOWN_ACTIVE';
         } else if (response.status === 422) {
           code = 'INVALID_EMAIL';
+        } else if (response.status === 502) {
+          code = 'EMAIL_DISPATCH_FAILED';
+        } else if (response.status === 503) {
+          code = 'DATABASE_UNAVAILABLE';
         }
 
         if (data && typeof data.detail === 'object') {
@@ -364,6 +383,10 @@ export class ApiAuthAdapter {
 
         if (response.status === 429) {
           code = 'COOLDOWN_ACTIVE';
+        } else if (response.status === 502) {
+          code = 'EMAIL_DISPATCH_FAILED';
+        } else if (response.status === 503) {
+          code = 'DATABASE_UNAVAILABLE';
         }
 
         if (data && typeof data.detail === 'object') {
@@ -410,6 +433,10 @@ export class ApiAuthAdapter {
 
         if (response.status === 404) {
           code = 'CHALLENGE_NOT_FOUND';
+        } else if (response.status === 403) {
+          code = 'CHALLENGE_LOCKED';
+        } else if (response.status === 503) {
+          code = 'DATABASE_UNAVAILABLE';
         }
 
         if (data && typeof data.detail === 'object') {

@@ -27,7 +27,7 @@ def test_email_service_mime_message_construction():
         text_body="Hola Alumno",
     )
     assert msg["To"] == "test.student@upt.pe"
-    assert (settings.SMTP_USER or "noreply.mentoria.upt@gmail.com") in msg["From"]
+    assert (settings.SMTP_FROM_EMAIL or settings.SMTP_USER or "noreply.mentoria.upt@gmail.com") in msg["From"]
     assert msg["Subject"] == "Asunto de Prueba Institucional"
     assert msg.is_multipart()
     parts = msg.get_payload()
@@ -122,6 +122,10 @@ def test_auth_service_production_mode_strict_security(monkeypatch):
     - El bypass '000000' no debe operar como código expirado artificial, sino validarse normalmente contra el hash.
     """
     monkeypatch.setattr(settings, "APP_ENV", "production")
+    monkeypatch.setattr(settings, "STRICT_DATABASE_MODE", False)
+    monkeypatch.setattr(settings, "SMTP_ENABLED", True)
+    monkeypatch.setattr(settings, "SMTP_USER", "mentorias.upt@gmail.com")
+    monkeypatch.setattr(EmailService, "send_otp_email", classmethod(lambda cls, to, code, exp: True))
 
     # 1. Request OTP en producción
     resp = AuthService.request_otp(None, "estudiante.prod@upt.pe")

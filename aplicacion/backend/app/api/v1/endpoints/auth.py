@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.orm import Session
 
-from app.db.session import get_optional_session
+from app.db.session import get_required_session
 from app.schemas.auth import (
     RequestOtpPayload,
     RequestOtpResponse,
@@ -24,9 +24,11 @@ router = APIRouter()
 )
 def request_otp(
     payload: RequestOtpPayload,
-    db: Session | None = Depends(get_optional_session),
+    request: Request,
+    db: Session | None = Depends(get_required_session),
 ):
-    return AuthService.request_otp(db=db, email=payload.email)
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    return AuthService.request_otp(db=db, email=payload.email, client_ip=client_ip)
 
 
 @router.post(
@@ -38,9 +40,11 @@ def request_otp(
 )
 def resend_otp(
     payload: ResendOtpPayload,
-    db: Session | None = Depends(get_optional_session),
+    request: Request,
+    db: Session | None = Depends(get_required_session),
 ):
-    return AuthService.resend_otp(db=db, challenge_id=payload.challengeId)
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    return AuthService.resend_otp(db=db, challenge_id=payload.challengeId, client_ip=client_ip)
 
 
 @router.post(
@@ -52,9 +56,11 @@ def resend_otp(
 )
 def verify_otp(
     payload: VerifyOtpPayload,
-    db: Session | None = Depends(get_optional_session),
+    request: Request,
+    db: Session | None = Depends(get_required_session),
 ):
-    return AuthService.verify_otp(db=db, challenge_id=payload.challengeId, otp=payload.otp)
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    return AuthService.verify_otp(db=db, challenge_id=payload.challengeId, otp=payload.otp, client_ip=client_ip)
 
 
 @router.post(
@@ -66,6 +72,6 @@ def verify_otp(
 )
 def login_with_google(
     payload: GoogleLoginPayload,
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ):
     return AuthService.verify_google_token(db=db, id_token=payload.id_token)
