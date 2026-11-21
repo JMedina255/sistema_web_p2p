@@ -674,7 +674,7 @@ describe('bookingService (T-23 / Sprint 05 Fase 1 - RF12 / RF13 / RF14 / RN-08 /
         estudiante_email: '2022074255@upt.pe',
         estado: 'CANCELADA_USUARIO',
         fecha_reserva: '2026-11-01T10:00:00Z',
-        fecha_inicio: '2026-11-20T10:00:00Z',
+        fecha_inicio: new Date(mockAdapter.getCurrentTime() + 72 * 3600 * 1000).toISOString(),
         motivo_cancelacion: 'Cancelación previa',
       });
 
@@ -694,7 +694,7 @@ describe('bookingService (T-23 / Sprint 05 Fase 1 - RF12 / RF13 / RF14 / RN-08 /
         estudiante_email: '2022074255@upt.pe',
         estado: 'PENDIENTE_CONFIRMACION',
         fecha_reserva: '2026-11-01T10:00:00Z',
-        fecha_inicio: '2026-11-25T10:00:00Z',
+        fecha_inicio: new Date(mockAdapter.getCurrentTime() + 72 * 3600 * 1000).toISOString(),
       });
 
       // Intento de ratificar reserva ajena
@@ -848,15 +848,17 @@ describe('bookingService (T-23 / Sprint 05 Fase 1 - RF12 / RF13 / RF14 / RN-08 /
       );
       expect(confirmed.estado).toBe('CONFIRMADA');
 
-      // Semillar una nueva para probar cancelReservation
+      // Semillar una nueva para probar cancelReservation con sesión válida (> 24h)
+      const mockNow = bookingService.getMockAdapter().getCurrentTime();
+      const futureSession = new Date(mockNow + 72 * 3600 * 1000).toISOString();
       bookingService.seedBooking({
         id_reserva: 888,
         codigo_reserva: 'RES-2026-0888',
         id_sesion: 302,
         estudiante_email: '2022074255@upt.pe',
         estado: 'PENDIENTE_CONFIRMACION',
-        fecha_reserva: '2026-11-01T10:00:00Z',
-        fecha_inicio: '2026-11-20T10:00:00Z',
+        fecha_reserva: new Date(mockNow).toISOString(),
+        fecha_inicio: futureSession,
       });
 
       const cancelled = await bookingService.cancelReservation(
