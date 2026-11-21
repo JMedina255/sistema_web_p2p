@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 from pydantic import Field, field_validator, model_validator
@@ -28,6 +29,11 @@ class Settings(BaseSettings):
     # Cadena de conexión privada a PostgreSQL / Supabase
     # repr=False previene que el valor sea expuesto en logs o representaciones de texto
     DATABASE_URL: str | None = Field(default=None, repr=False)
+    QA_DATABASE_URL: str | None = Field(
+        default=None,
+        repr=False,
+        description="Cadena de conexión privada exclusiva para pruebas de QA e integración (independiente de producción)",
+    )
     DB_CONNECT_TIMEOUT: int = Field(default=5, description="Timeout en segundos para conexión con la BD")
 
     # Configuración de Seguridad y JWT (T-03 / RNF01 / RNF02)
@@ -192,6 +198,22 @@ class Settings(BaseSettings):
         if not self.DATABASE_URL:
             return None
         url = self.DATABASE_URL.strip()
+        if url.startswith("postgres://"):
+            return url.replace("postgres://", "postgresql+psycopg://", 1)
+        elif url.startswith("postgresql://") and not url.startswith("postgresql+"):
+            return url.replace("postgresql://", "postgresql+psycopg://", 1)
+        return url
+
+    @property
+    def sync_qa_database_url(self) -> str | None:
+        """
+        Retorna la URL de QA formateada para el dialecto psycopg 3 (postgresql+psycopg://).
+        Si no se define QA_DATABASE_URL, retorna None.
+        """
+        raw_url = self.QA_DATABASE_URL or os.environ.get("QA_DATABASE_URL")
+        if not raw_url:
+            return None
+        url = raw_url.strip()
         if url.startswith("postgres://"):
             return url.replace("postgres://", "postgresql+psycopg://", 1)
         elif url.startswith("postgresql://") and not url.startswith("postgresql+"):

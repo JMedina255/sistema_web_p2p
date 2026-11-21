@@ -22,13 +22,17 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Configurar path
-base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "aplicacion", "backend"))
-if base_dir not in sys.path:
-    sys.path.insert(0, base_dir)
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+base_dir = os.path.join(root_dir, "aplicacion", "backend")
+tools_dir = os.path.abspath(os.path.dirname(__file__))
+
+for p in (base_dir, tools_dir):
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 import app.models  # noqa: F401
 from app.core.config import settings
@@ -41,8 +45,16 @@ from app.models.profile import PerfilAcademico
 from app.models.roles import Rol, UsuarioRol
 from app.schemas.booking import BookingCancelPayload, BookingCreatePayload
 from app.services.booking_service import BookingService
-
-SCHEMA_NAME = "test_qa_p2p_03_tx"
+from qa_db_hardening import (
+    DatabaseSecurityError,
+    build_isolated_db_url,
+    create_isolated_schema,
+    generate_unique_test_schema,
+    resolve_qa_database_url,
+    safe_teardown_schema,
+    validate_test_environment,
+    verify_connection_search_path,
+)
 
 tx_results = []
 
@@ -61,33 +73,34 @@ def record_tx(scenario: str, name: str, passed: bool, detail: str = ""):
 
 
 def setup_isolated_schema():
-    print(f"[SETUP] Inicializando esquema sandbox aislado '{SCHEMA_NAME}' en PostgreSQL...")
-    engine = create_engine(settings.sync_database_url, pool_pre_ping=True)
-    with engine.connect() as conn:
-        conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {SCHEMA_NAME};"))
-        conn.commit()
+    validate_test_environment(getattr(settings, "APP_ENV", ""))
+    qa_db_url = resolve_qa_database_url()
+    schema_name = generate_unique_test_schema("test_qa_p2p_04_tx")
+    print(f"[SETUP] Inicializando esquema sandbox aislado '{schema_name}' en PostgreSQL QA...")
 
-    # Motor vinculado al esquema aislado de forma estricta mediante search_path
-    schema_engine = create_engine(
-        settings.sync_database_url,
-        pool_pre_ping=True,
-        connect_args={"options": f"-c search_path={SCHEMA_NAME}"},
-    )
+    admin_engine = create_engine(qa_db_url, pool_pre_ping=True)
+    create_isolated_schema(admin_engine, schema_name)
+
+    # Motor vinculado al esquema aislado de forma estricta mediante URL con search_path
+    isolated_url = build_isolated_db_url(qa_db_url, schema_name)
+    schema_engine = create_engine(isolated_url, pool_pre_ping=True)
 
     with schema_engine.connect() as conn:
+        verify_connection_search_path(conn, schema_name)
         Base.metadata.create_all(bind=conn)
         conn.commit()
 
     SessionMaker = sessionmaker(autocommit=False, autoflush=False, bind=schema_engine)
-    return schema_engine, SessionMaker
+    return admin_engine, schema_engine, SessionMaker, schema_name
 
 
-def teardown_isolated_schema(engine):
-    print(f"[TEARDOWN] Eliminando esquema sandbox '{SCHEMA_NAME}' en PostgreSQL...")
-    with engine.connect() as conn:
-        conn.execute(text(f"DROP SCHEMA IF EXISTS {SCHEMA_NAME} CASCADE;"))
-        conn.commit()
-    print("[TEARDOWN] Esquema sandbox eliminado limpiamente.")
+def teardown_isolated_schema(admin_engine, schema_engine, schema_name):
+    print(f"[TEARDOWN] Eliminando esquema sandbox '{schema_name}' en PostgreSQL...")
+    try:
+        schema_engine.dispose()
+    except Exception:
+        pass
+    safe_teardown_schema(admin_engine, schema_name)
 
 
 def seed_base_catalog(db):
@@ -146,11 +159,15 @@ def seed_base_catalog(db):
 
 def run_all_postgresql_transactions():
     print("=" * 75)
+    try:
+        admin_engine, schema_engine, SessionMaker, schema_name = setup_isolated_schema()
+    except DatabaseSecurityError as e:
+        print("[BLOCKED] Pruebas transaccionales en PostgreSQL detenidas por política de seguridad:")
+        print(f"          {e}")
+        sys.exit(2)
     print("INICIANDO PRUEBAS TRANSACCIONALES CONTROLADAS EN POSTGRESQL AISLADO (FASE 3)")
-    print("Motor: PostgreSQL (Supabase) | Esquema: test_qa_p2p_03_tx")
+    print(f"Motor: PostgreSQL (Supabase) | Esquema sandbox verificado: {schema_name}")
     print("=" * 75)
-
-    engine, SessionMaker = setup_isolated_schema()
 
     try:
         with SessionMaker() as db:
@@ -699,7 +716,7 @@ def run_all_postgresql_transactions():
         print("=" * 75)
 
     finally:
-        teardown_isolated_schema(engine)
+        teardown_isolated_schema(admin_engine, schema_engine, schema_name)
 
 
 if __name__ == "__main__":

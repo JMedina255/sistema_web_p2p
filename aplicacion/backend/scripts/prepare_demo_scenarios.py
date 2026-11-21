@@ -152,6 +152,18 @@ def prepare_demo_fixtures(db: Session) -> dict:
                 biografia="Coordinación del programa de mentorías académicas P2P.",
                 modalidad_preferida="presencial",
             ),
+            PerfilAcademico(
+                email=emails["peer_student"],
+                codigo_estudiante="2022010003",
+                nombres="Compañero",
+                apellidos="Demostrativo Elegible",
+                ciclo_actual=7,  # Cumple RN-03 (>= VII ciclo para promoción a mentor)
+                rol_postulacion="mentoreado",
+                materias_interes=[1, 2],
+                temas_seleccionados=[1],
+                biografia="Estudiante de séptimo ciclo con mérito académico para promoción a mentor.",
+                modalidad_preferida="presencial",
+            ),
         ]
     )
 
