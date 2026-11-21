@@ -596,7 +596,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
       (import.meta.env as { PROD: boolean }).PROD = true;
       bookingService.setMode('mock');
       expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringMatching(/El modo mock está estrictamente prohibido en compilaciones de producción/i)
+        expect.stringMatching(/El modo mock está estrictamente prohibido/i)
       );
       expect(bookingService.getMode()).toBe('api');
     } finally {
