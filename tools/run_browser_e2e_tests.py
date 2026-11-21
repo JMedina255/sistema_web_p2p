@@ -54,9 +54,11 @@ from app.models.booking import ReservaCupo
 from app.models.offer import SesionMentoria
 from app.models.roles import UsuarioRol
 from qa_db_hardening import (
+    DatabaseSecurityError,
     build_isolated_db_url,
     create_isolated_schema,
     generate_unique_test_schema,
+    resolve_qa_database_url,
     safe_teardown_schema,
     validate_test_environment,
     verify_connection_search_path,
@@ -88,13 +90,14 @@ def record_result(category: str, test_id: str, name: str, status: str, detail: s
 
 def setup_isolated_db():
     validate_test_environment(getattr(settings, "APP_ENV", ""))
+    qa_db_url = resolve_qa_database_url()
     schema_name = generate_unique_test_schema("test_qa_p2p_04_e2e")
-    print(f"\n[SETUP BD] Configurando esquema sandbox blindado: '{schema_name}'...")
+    print(f"\n[SETUP BD] Configurando esquema sandbox blindado: '{schema_name}' en PostgreSQL QA...")
 
-    admin_engine = create_engine(settings.sync_database_url, pool_pre_ping=True)
+    admin_engine = create_engine(qa_db_url, pool_pre_ping=True)
     create_isolated_schema(admin_engine, schema_name)
 
-    isolated_url = build_isolated_db_url(settings.sync_database_url, schema_name)
+    isolated_url = build_isolated_db_url(qa_db_url, schema_name)
     schema_engine = create_engine(isolated_url, pool_pre_ping=True)
 
     with schema_engine.connect() as conn:
@@ -116,7 +119,7 @@ def setup_isolated_db():
     finally:
         db.close()
 
-    return admin_engine, schema_engine, SessionMaker, schema_name
+    return admin_engine, schema_engine, SessionMaker, schema_name, isolated_url
 
 
 def teardown_isolated_db(admin_engine, schema_engine, schema_name):
@@ -162,14 +165,27 @@ def kill_process_tree(proc):
 
 
 def run_e2e_suite():
-    admin_engine, schema_engine, SessionMaker, schema_name = setup_isolated_db()
+    try:
+        admin_engine, schema_engine, SessionMaker, schema_name, isolated_url = setup_isolated_db()
+    except DatabaseSecurityError as e:
+        print(f"\n[BLOCKED] Pruebas E2E detenidas por política de seguridad de base de datos:")
+        print(f"          {e}")
+        record_result(
+            "Seguridad",
+            "E2E-SEC-PRE",
+            "Aprovisionamiento de Base de Datos de Pruebas Segura",
+            "BLOCKED",
+            f"Falta base de datos de QA identificada e independiente: {e}",
+            "",
+        )
+        sys.exit(2)
 
     backend_proc = None
     frontend_proc = None
 
     # Configuración de variables de entorno para FastAPI con URL segura
     backend_env = os.environ.copy()
-    backend_env["DATABASE_URL"] = build_isolated_db_url(settings.sync_database_url, schema_name)
+    backend_env["DATABASE_URL"] = isolated_url
     backend_env["ENABLE_MOCK_OTP_HINTS"] = "true"
     backend_env["APP_ENV"] = "test"
     backend_env["SMTP_ENABLED"] = "false"
@@ -277,7 +293,7 @@ def run_e2e_suite():
 
             ss_path = os.path.join(evidencias_dir, "02_estudiante_perfil.png")
             page.screenshot(path=ss_path)
-            record_result("Estudiante", "E2E-EST-02", "Consulta y Actualización de Perfil", "PASS", "Ficha académica del estudiante y matriz semanal de disponibilidad verificadas", "02_estudiante_perfil.png")
+            record_result("Estudiante", "E2E-EST-02", "Consulta y Visualización de Perfil y Disponibilidad", "PASS", "Ficha académica del estudiante y matriz semanal de disponibilidad consultadas e inspeccionadas visualmente en UI", "02_estudiante_perfil.png")
 
             # E2E-EST-03: Catálogo Curricular
             page.locator("#nav-tab-curriculum").click()

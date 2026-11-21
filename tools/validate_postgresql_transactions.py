@@ -46,9 +46,11 @@ from app.models.roles import Rol, UsuarioRol
 from app.schemas.booking import BookingCancelPayload, BookingCreatePayload
 from app.services.booking_service import BookingService
 from qa_db_hardening import (
+    DatabaseSecurityError,
     build_isolated_db_url,
     create_isolated_schema,
     generate_unique_test_schema,
+    resolve_qa_database_url,
     safe_teardown_schema,
     validate_test_environment,
     verify_connection_search_path,
@@ -72,14 +74,15 @@ def record_tx(scenario: str, name: str, passed: bool, detail: str = ""):
 
 def setup_isolated_schema():
     validate_test_environment(getattr(settings, "APP_ENV", ""))
+    qa_db_url = resolve_qa_database_url()
     schema_name = generate_unique_test_schema("test_qa_p2p_04_tx")
-    print(f"[SETUP] Inicializando esquema sandbox aislado '{schema_name}' en PostgreSQL...")
+    print(f"[SETUP] Inicializando esquema sandbox aislado '{schema_name}' en PostgreSQL QA...")
 
-    admin_engine = create_engine(settings.sync_database_url, pool_pre_ping=True)
+    admin_engine = create_engine(qa_db_url, pool_pre_ping=True)
     create_isolated_schema(admin_engine, schema_name)
 
     # Motor vinculado al esquema aislado de forma estricta mediante URL con search_path
-    isolated_url = build_isolated_db_url(settings.sync_database_url, schema_name)
+    isolated_url = build_isolated_db_url(qa_db_url, schema_name)
     schema_engine = create_engine(isolated_url, pool_pre_ping=True)
 
     with schema_engine.connect() as conn:
@@ -156,7 +159,12 @@ def seed_base_catalog(db):
 
 def run_all_postgresql_transactions():
     print("=" * 75)
-    admin_engine, schema_engine, SessionMaker, schema_name = setup_isolated_schema()
+    try:
+        admin_engine, schema_engine, SessionMaker, schema_name = setup_isolated_schema()
+    except DatabaseSecurityError as e:
+        print("[BLOCKED] Pruebas transaccionales en PostgreSQL detenidas por política de seguridad:")
+        print(f"          {e}")
+        sys.exit(2)
     print("INICIANDO PRUEBAS TRANSACCIONALES CONTROLADAS EN POSTGRESQL AISLADO (FASE 3)")
     print(f"Motor: PostgreSQL (Supabase) | Esquema sandbox verificado: {schema_name}")
     print("=" * 75)
