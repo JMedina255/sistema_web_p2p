@@ -326,6 +326,7 @@ const AppShell: React.FC = () => {
 
         {activeTab === 'auth' && (
           <LoginOtpView
+            showDevControls={import.meta.env.DEV}
             onLoginSuccess={(tokenData) => {
               login(tokenData);
               let targetRole: UserRole = 'mentoreado';

@@ -42,6 +42,7 @@ describe('AdminScheduleUploadView Component (RF10 / CUS11 / RN-06)', () => {
   });
 
   it('3. Procesa el cronograma exitosamente y despliega banner de confirmación con slots actualizados', async () => {
+    vi.spyOn(spacesService, 'getFreeSlots').mockResolvedValue([]);
     const mockResponse: ScheduleImportResponse = {
       status: 'PROCESADO_EXITOSAMENTE',
       archivo: 'cronograma_oficial_epis.xlsx',
@@ -72,9 +73,9 @@ describe('AdminScheduleUploadView Component (RF10 / CUS11 / RN-06)', () => {
     await waitFor(() => {
       expect(uploadSpy).toHaveBeenCalledWith(mockFile);
       expect(screen.getByText(/¡Cronograma oficial procesado exitosamente por el Parser de Horarios!/i)).toBeInTheDocument();
-      expect(screen.getByText('Lab Redes 202')).toBeInTheDocument();
-      expect(screen.getByText('Lab BD 104')).toBeInTheDocument();
-      expect(screen.getByText('Aula Magna 301')).toBeInTheDocument();
+      expect(screen.getAllByText('Lab Redes 202').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Lab BD 104').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Aula Magna 301').length).toBeGreaterThan(0);
     });
 
     expect(onUpdated).toHaveBeenCalledWith(3);

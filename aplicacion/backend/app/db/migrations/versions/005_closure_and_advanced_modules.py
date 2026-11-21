@@ -54,9 +54,18 @@ def upgrade() -> None:
             "bitacoras_pedagogicas",
             sa.Column("id_bitacora", sa.Integer(), autoincrement=True, nullable=False),
             sa.Column("id_sesion", sa.Integer(), nullable=False),
-            sa.Column("mentor_email", sa.String(length=255), nullable=False),
-            sa.Column("resumen_temas", sa.Text(), nullable=False),
-            sa.Column("logros_alcanzados", sa.Text(), nullable=False),
+            sa.Column("id_mentor", sa.String(length=255), nullable=True),
+            sa.Column("mentor_email", sa.String(length=255), nullable=True),
+            sa.Column("temas_cubiertos", sa.JSON(), nullable=True),
+            sa.Column("observaciones", sa.Text(), nullable=True),
+            sa.Column(
+                "nivel_dificultad", sa.String(length=20), server_default=sa.text("'Medio'"), nullable=True
+            ),
+            sa.Column("hash_firma", sa.String(length=64), nullable=True),
+            sa.Column("horas_declaradas", sa.Float(), server_default=sa.text("0.0"), nullable=True),
+            sa.Column("visado_administrador", sa.Boolean(), server_default=sa.text("false"), nullable=True),
+            sa.Column("resumen_temas", sa.Text(), nullable=True),
+            sa.Column("logros_alcanzados", sa.Text(), nullable=True),
             sa.Column("dificultades_detectadas", sa.Text(), nullable=True),
             sa.Column("observaciones_generales", sa.Text(), nullable=True),
             sa.Column(
@@ -82,6 +91,42 @@ def upgrade() -> None:
         op.create_index(
             "ix_bitacoras_pedagogicas_mentor_email", "bitacoras_pedagogicas", ["mentor_email"], unique=False
         )
+    else:
+        b_cols = [c["name"] for c in inspector.get_columns("bitacoras_pedagogicas")]
+        if "id_mentor" not in b_cols:
+            op.add_column(
+                "bitacoras_pedagogicas", sa.Column("id_mentor", sa.String(length=255), nullable=True)
+            )
+        if "temas_cubiertos" not in b_cols:
+            op.add_column("bitacoras_pedagogicas", sa.Column("temas_cubiertos", sa.JSON(), nullable=True))
+        if "observaciones" not in b_cols:
+            op.add_column("bitacoras_pedagogicas", sa.Column("observaciones", sa.Text(), nullable=True))
+        if "nivel_dificultad" not in b_cols:
+            op.add_column(
+                "bitacoras_pedagogicas",
+                sa.Column(
+                    "nivel_dificultad", sa.String(length=20), server_default=sa.text("'Medio'"), nullable=True
+                ),
+            )
+        if "hash_firma" not in b_cols:
+            op.add_column(
+                "bitacoras_pedagogicas", sa.Column("hash_firma", sa.String(length=64), nullable=True)
+            )
+        if "horas_declaradas" not in b_cols:
+            op.add_column(
+                "bitacoras_pedagogicas",
+                sa.Column("horas_declaradas", sa.Float(), server_default=sa.text("0.0"), nullable=True),
+            )
+        if "visado_administrador" not in b_cols:
+            op.add_column(
+                "bitacoras_pedagogicas",
+                sa.Column(
+                    "visado_administrador", sa.Boolean(), server_default=sa.text("false"), nullable=True
+                ),
+            )
+        op.alter_column("bitacoras_pedagogicas", "mentor_email", nullable=True)
+        op.alter_column("bitacoras_pedagogicas", "resumen_temas", nullable=True)
+        op.alter_column("bitacoras_pedagogicas", "logros_alcanzados", nullable=True)
 
     # 3. Tabla encuestas_calidad (T-37 / T-39 / CUS18 / RF20 / RNF07)
     if "encuestas_calidad" not in existing_tables:
@@ -90,10 +135,13 @@ def upgrade() -> None:
             sa.Column("id_encuesta", sa.Integer(), autoincrement=True, nullable=False),
             sa.Column("id_sesion", sa.Integer(), nullable=False),
             sa.Column("estudiante_email", sa.String(length=255), nullable=False),
-            sa.Column("puntuacion_general", sa.Integer(), nullable=False),
+            sa.Column("calificacion_general", sa.Integer(), nullable=True),
+            sa.Column("puntuacion_general", sa.Integer(), nullable=True),
             sa.Column("claridad_explicacion", sa.Integer(), nullable=False),
             sa.Column("dominio_tema", sa.Integer(), nullable=False),
-            sa.Column("puntualidad_compromiso", sa.Integer(), nullable=False),
+            sa.Column("puntualidad", sa.Integer(), nullable=True),
+            sa.Column("puntualidad_compromiso", sa.Integer(), nullable=True),
+            sa.Column("comentarios", sa.Text(), nullable=True),
             sa.Column("comentario", sa.Text(), nullable=True),
             sa.Column(
                 "fecha_registro", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False
@@ -104,33 +152,40 @@ def upgrade() -> None:
             sa.ForeignKeyConstraint(["id_sesion"], ["sesiones_mentoria.id_sesion"], ondelete="CASCADE"),
             sa.PrimaryKeyConstraint("id_encuesta"),
             sa.UniqueConstraint("id_sesion", "estudiante_email", name="uq_encuesta_sesion_estudiante"),
-            sa.CheckConstraint(
-                "puntuacion_general >= 1 AND puntuacion_general <= 5", name="chk_encuesta_puntuacion_general"
-            ),
-            sa.CheckConstraint(
-                "claridad_explicacion >= 1 AND claridad_explicacion <= 5", name="chk_encuesta_claridad"
-            ),
-            sa.CheckConstraint("dominio_tema >= 1 AND dominio_tema <= 5", name="chk_encuesta_dominio"),
-            sa.CheckConstraint(
-                "puntualidad_compromiso >= 1 AND puntualidad_compromiso <= 5", name="chk_encuesta_puntualidad"
-            ),
         )
         op.create_index("ix_encuestas_calidad_id_sesion", "encuestas_calidad", ["id_sesion"], unique=False)
         op.create_index(
             "ix_encuestas_calidad_estudiante_email", "encuestas_calidad", ["estudiante_email"], unique=False
         )
+    else:
+        e_cols = [c["name"] for c in inspector.get_columns("encuestas_calidad")]
+        if "calificacion_general" not in e_cols:
+            op.add_column("encuestas_calidad", sa.Column("calificacion_general", sa.Integer(), nullable=True))
+        if "puntualidad" not in e_cols:
+            op.add_column("encuestas_calidad", sa.Column("puntualidad", sa.Integer(), nullable=True))
+        if "comentarios" not in e_cols:
+            op.add_column("encuestas_calidad", sa.Column("comentarios", sa.Text(), nullable=True))
+        op.alter_column("encuestas_calidad", "puntualidad_compromiso", nullable=True)
+        op.alter_column("encuestas_calidad", "puntuacion_general", nullable=True)
 
     # 4. Tabla certificados_horas (T-41 / T-43 / CUS21 / RF21 / RNF08)
     if "certificados_horas" not in existing_tables:
         op.create_table(
             "certificados_horas",
             sa.Column("id_certificado", sa.Integer(), autoincrement=True, nullable=False),
-            sa.Column("codigo_certificado", sa.String(length=30), nullable=False),
-            sa.Column("mentor_email", sa.String(length=255), nullable=False),
-            sa.Column("total_horas", sa.Integer(), nullable=False),
-            sa.Column("sesiones_concluidas", sa.Integer(), nullable=False),
-            sa.Column("promedio_calidad", sa.Float(), nullable=False),
-            sa.Column("hash_seguridad", sa.String(length=64), nullable=False),
+            sa.Column("id_mentor", sa.String(length=255), nullable=True),
+            sa.Column("mentor_email", sa.String(length=255), nullable=True),
+            sa.Column("codigo_folio", sa.String(length=50), nullable=True),
+            sa.Column("codigo_certificado", sa.String(length=30), nullable=True),
+            sa.Column(
+                "periodo_academico", sa.String(length=20), server_default=sa.text("'2026-II'"), nullable=True
+            ),
+            sa.Column("horas_acreditadas", sa.Float(), nullable=True),
+            sa.Column("total_horas", sa.Integer(), server_default=sa.text("0"), nullable=True),
+            sa.Column("sesiones_concluidas", sa.Integer(), server_default=sa.text("0"), nullable=True),
+            sa.Column("promedio_calidad", sa.Float(), server_default=sa.text("5.0"), nullable=True),
+            sa.Column("hash_firma", sa.String(length=64), nullable=True),
+            sa.Column("hash_seguridad", sa.String(length=64), nullable=True),
             sa.Column("url_descarga_pdf", sa.String(length=500), nullable=True),
             sa.Column(
                 "emitido_por",
@@ -146,18 +201,32 @@ def upgrade() -> None:
                 "created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False
             ),
             sa.PrimaryKeyConstraint("id_certificado"),
-            sa.UniqueConstraint("codigo_certificado"),
-            sa.CheckConstraint("total_horas >= 0", name="chk_certificado_horas_positivas"),
-            sa.CheckConstraint(
-                "estado IN ('EMITIDO', 'EMITIDO_DEMO', 'REVOCADO')", name="chk_certificado_estado"
-            ),
-        )
-        op.create_index(
-            "ix_certificados_horas_codigo", "certificados_horas", ["codigo_certificado"], unique=True
         )
         op.create_index(
             "ix_certificados_horas_mentor_email", "certificados_horas", ["mentor_email"], unique=False
         )
+    else:
+        c_cols = [c["name"] for c in inspector.get_columns("certificados_horas")]
+        if "id_mentor" not in c_cols:
+            op.add_column("certificados_horas", sa.Column("id_mentor", sa.String(length=255), nullable=True))
+        if "codigo_folio" not in c_cols:
+            op.add_column(
+                "certificados_horas", sa.Column("codigo_folio", sa.String(length=50), nullable=True)
+            )
+        if "periodo_academico" not in c_cols:
+            op.add_column(
+                "certificados_horas",
+                sa.Column(
+                    "periodo_academico",
+                    sa.String(length=20),
+                    server_default=sa.text("'2026-II'"),
+                    nullable=True,
+                ),
+            )
+        if "horas_acreditadas" not in c_cols:
+            op.add_column("certificados_horas", sa.Column("horas_acreditadas", sa.Float(), nullable=True))
+        if "hash_firma" not in c_cols:
+            op.add_column("certificados_horas", sa.Column("hash_firma", sa.String(length=64), nullable=True))
 
     # 5. Tabla tokens_asistencia_activos (Soporte persistente multi-worker para códigos TOTP dinámicos)
     if "tokens_asistencia_activos" not in existing_tables:

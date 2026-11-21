@@ -97,6 +97,8 @@ class ProfileService:
                         modalidad_preferida=perfil.modalidad_preferida,
                         updated_at=perfil.updated_at.isoformat() if perfil.updated_at else None,
                     )
+                # Si el perfil no existe aún en la base de datos, retornar perfil predeterminado
+                return ProfileService._default_profile(clean_email)
             except HTTPException:
                 raise
             except Exception as exc:
@@ -276,15 +278,14 @@ class ProfileService:
                     .order_by(DisponibilidadHoraria.dia_semana, DisponibilidadHoraria.hora_inicio)
                     .all()
                 )
-                if rows:
-                    return [
-                        AvailabilitySlotSchema(
-                            dia_semana=r.dia_semana,
-                            hora_inicio=r.hora_inicio,
-                            hora_fin=r.hora_fin,
-                        )
-                        for r in rows
-                    ]
+                return [
+                    AvailabilitySlotSchema(
+                        dia_semana=r.dia_semana,
+                        hora_inicio=r.hora_inicio,
+                        hora_fin=r.hora_fin,
+                    )
+                    for r in rows
+                ]
             except HTTPException:
                 raise
             except Exception as exc:
