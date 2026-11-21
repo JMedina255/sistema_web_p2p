@@ -1,3 +1,5 @@
+import { assertAllowedMode, resolveInitialServiceMode } from './serviceMode';
+
 /**
  * Servicio de Consentimiento Informado Digital — Ley N° 29733 (T-04 / T-05)
  * Gobierna el registro de conformidad para tratamiento de datos personales y algoritmos de emparejamiento.
@@ -30,23 +32,6 @@ export interface ConsentResponse {
 const STORAGE_KEY_PREFIX = 'p2p_consent_';
 const CURRENT_TERMS_VERSION = '2026-II-v1.0';
 
-function resolveInitialServiceMode(): 'mock' | 'api' {
-  if (import.meta.env.PROD) {
-    return 'api';
-  }
-  const envMode = import.meta.env.VITE_SERVICE_MODE;
-  if (envMode === 'mock') {
-    return 'mock';
-  }
-  if (envMode === 'api') {
-    return 'api';
-  }
-  if (import.meta.env.MODE === 'test') {
-    return 'mock';
-  }
-  return 'api';
-}
-
 class ConsentService {
   private mode: 'mock' | 'api' = resolveInitialServiceMode();
 
@@ -59,7 +44,7 @@ class ConsentService {
   }
 
   public setMode(mode: 'mock' | 'api'): void {
-    this.mode = mode;
+    this.mode = assertAllowedMode(mode);
   }
 
   public getTermsVersion(): string {

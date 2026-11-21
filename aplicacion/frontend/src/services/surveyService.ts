@@ -3,6 +3,7 @@
  */
 
 import { authService } from './authService';
+import { assertAllowedMode, resolveInitialServiceMode } from './serviceMode';
 
 export interface SurveyPayload {
   calificacion_general: number;
@@ -154,15 +155,7 @@ class MockSurveyAdapter {
 const apiAdapter = new ApiSurveyAdapter();
 const mockAdapter = new MockSurveyAdapter();
 
-function resolveServiceMode(): 'mock' | 'api' {
-  if (import.meta.env.PROD) return 'api';
-  if (import.meta.env.VITE_SERVICE_MODE === 'mock' || import.meta.env.MODE === 'test') {
-    return 'mock';
-  }
-  return 'api';
-}
-
-let currentMode: 'mock' | 'api' = resolveServiceMode();
+let currentMode: 'mock' | 'api' = resolveInitialServiceMode();
 
 export const surveyService = {
   getMode(): 'mock' | 'api' {
@@ -170,12 +163,7 @@ export const surveyService = {
   },
 
   setMode(mode: 'mock' | 'api'): void {
-    if (import.meta.env.PROD && mode === 'mock') {
-      console.warn('Violación de seguridad: El modo mock está desactivado en producción.');
-      currentMode = 'api';
-      return;
-    }
-    currentMode = mode;
+    currentMode = assertAllowedMode(mode);
   },
 
   async submitSurvey(

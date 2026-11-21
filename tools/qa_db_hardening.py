@@ -16,11 +16,11 @@ o alteración de esquemas de producción:
    protegidos o preexistentes.
 """
 
-from contextlib import contextmanager
 import os
 import re
 import urllib.parse
 import uuid
+from contextlib import contextmanager
 
 from sqlalchemy import Engine, text
 
@@ -52,11 +52,12 @@ FORBIDDEN_PROTECTED_SCHEMAS = {
 TEST_SCHEMA_PATTERN = re.compile(r"^test_(qa_p2p_\d{2}|sandbox)_[a-z0-9_]+$")
 
 # Hosts y proyectos reconocidos explícitamente como destinos autorizados de prueba / QA
+# NOTA: Solo entornos locales/loopback están autorizados por defecto. Cualquier host remoto
+# (incluyendo proyectos dedicados de staging/QA de Supabase) debe autorizarse explícitamente vía ALLOWED_QA_HOSTS.
 DEFAULT_ALLOWED_QA_HOSTS = {
     "localhost",
     "127.0.0.1",
     "::1",
-    "db.ieaxmtxpcrldbvmqwbyt.supabase.co",  # Proyecto Supabase dedicado para QA/Dev EPIS-UPT
 }
 
 
@@ -68,7 +69,7 @@ def validate_test_environment(settings_env: str = "") -> None:
     """
     Verifica que ninguna variable de entorno declare producción y que existan marcadores
     explícitos de autorización para ejecución de pruebas.
-    
+
     Regla estricta:
     1. Todas las variables (APP_ENV, ENVIRONMENT, NODE_ENV, STAGE) y settings_env son
        comprobadas de forma estrictamente independiente. Si CUALQUIERA declara producción,
@@ -104,11 +105,38 @@ def validate_test_environment(settings_env: str = "") -> None:
 
     # 2. Comprobación independiente de coherencia de variables definidas
     valid_test_values = {
-        "APP_ENV": {"test", "testing", "development", "dev", "local", "staging-qa", "qa", "staging"},
-        "ENVIRONMENT": {"test", "testing", "development", "dev", "local", "staging-qa", "qa", "staging"},
+        "APP_ENV": {
+            "test",
+            "testing",
+            "development",
+            "dev",
+            "local",
+            "staging-qa",
+            "qa",
+            "staging",
+        },
+        "ENVIRONMENT": {
+            "test",
+            "testing",
+            "development",
+            "dev",
+            "local",
+            "staging-qa",
+            "qa",
+            "staging",
+        },
         "NODE_ENV": {"test", "testing", "development", "dev"},
         "STAGE": {"test", "testing", "dev", "qa", "staging-qa", "staging"},
-        "SETTINGS_ENV": {"test", "testing", "development", "dev", "local", "staging-qa", "qa", "staging"},
+        "SETTINGS_ENV": {
+            "test",
+            "testing",
+            "development",
+            "dev",
+            "local",
+            "staging-qa",
+            "qa",
+            "staging",
+        },
     }
 
     for var_name, var_val in env_vars.items():
@@ -121,13 +149,20 @@ def validate_test_environment(settings_env: str = "") -> None:
 
     # 3. Marcador de autorización requerido
     allow_flag = os.environ.get("ALLOW_TEST_SCHEMA_CREATION", "").strip().lower()
-    has_test_marker = (
-        allow_flag in ("true", "1", "yes")
-        or any(
-            val.lower() in ("test", "testing", "development", "dev", "local", "qa", "staging-qa", "staging")
-            for val in env_vars.values()
-            if val
+    has_test_marker = allow_flag in ("true", "1", "yes") or any(
+        val.lower()
+        in (
+            "test",
+            "testing",
+            "development",
+            "dev",
+            "local",
+            "qa",
+            "staging-qa",
+            "staging",
         )
+        for val in env_vars.values()
+        if val
     )
 
     if not has_test_marker:
@@ -144,13 +179,17 @@ def validate_qa_target_url(raw_url: str) -> None:
     Elimina excepciones heurísticas basadas únicamente en contener las palabras 'qa' o 'test'.
     """
     if not raw_url or not isinstance(raw_url, str):
-        raise DatabaseSecurityError("La URL de base de datos de QA proporcionada es nula o inválida.")
+        raise DatabaseSecurityError(
+            "La URL de base de datos de QA proporcionada es nula o inválida."
+        )
 
     parsed = urllib.parse.urlsplit(raw_url)
     host = (parsed.hostname or "").strip().lower()
 
     if not host:
-        raise DatabaseSecurityError("No se pudo determinar el nombre de host de la URL de base de datos.")
+        raise DatabaseSecurityError(
+            "No se pudo determinar el nombre de host de la URL de base de datos."
+        )
 
     # Marcadores prohibitivos en el host o path
     if any(p in host for p in ("prod", "production", "live", "main-cluster")):
@@ -176,12 +215,53 @@ def validate_qa_target_url(raw_url: str) -> None:
         )
 
 
+def extract_supabase_project_ref(url: str) -> str | None:
+    """
+    Extrae el identificador de referencia de proyecto (project ref) de Supabase
+    a partir de una URL de conexión PostgreSQL, contemplando tanto conexiones directas
+    (db.<project_ref>.supabase.co o <project_ref>.supabase.co) como conexiones mediante
+    connection pooler (usuario: postgres.<project_ref> o rol.<project_ref> en host
+    aws-0-<region>.pooler.supabase.com).
+    """
+    if not url:
+        return None
+    try:
+        parsed = urllib.parse.urlsplit(url)
+        host = (parsed.hostname or "").lower().strip()
+        user = (parsed.username or "").lower().strip()
+
+        # 1. Detección por hostname directo: db.<ref>.supabase.co o <ref>.supabase.co
+        if host.endswith(".supabase.co"):
+            parts = host.split(".")
+            if len(parts) >= 3:
+                if parts[0] == "db":
+                    return parts[1]
+                return parts[0]
+
+        # 2. Detección por usuario en connection pooler: <role>.<project_ref>@pooler.supabase.com
+        if "pooler.supabase.com" in host and "." in user:
+            user_parts = user.split(".")
+            return user_parts[-1]
+
+        # 3. Caso general: si el usuario contiene un punto con 20 caracteres alfanuméricos de Supabase
+        if "." in user:
+            user_parts = user.split(".")
+            cand = user_parts[-1]
+            if re.match(r"^[a-z0-9]{20}$", cand):
+                return cand
+    except Exception:
+        pass
+    return None
+
+
 def validate_qa_not_same_as_production(qa_url: str, prod_url: str = "") -> None:
     """
     Verifica que QA_DATABASE_URL no resuelva al mismo destino (host, puerto y base de datos)
-    que la DATABASE_URL principal o de producción.
-    
+    ni al mismo proyecto de Supabase que la DATABASE_URL principal o de producción.
+
     Exige proyecto o instancia de PostgreSQL independiente para evitar alteraciones accidentales.
+    Detecta colisiones incluso cuando una URL utiliza conexión directa (db.<ref>.supabase.co)
+    y la otra utiliza connection pooler (postgres.<ref>@pooler.supabase.com).
     """
     if not qa_url:
         return
@@ -199,6 +279,18 @@ def validate_qa_not_same_as_production(qa_url: str, prod_url: str = "") -> None:
     if not prod_url:
         return
 
+    # 1. Comprobación de identidad de proyecto Supabase
+    qa_ref = extract_supabase_project_ref(qa_url)
+    prod_ref = extract_supabase_project_ref(prod_url)
+
+    if qa_ref and prod_ref and qa_ref == prod_ref:
+        raise DatabaseSecurityError(
+            f"¡COLISIÓN DE PROYECTO SUPABASE DETECTADA! QA_DATABASE_URL y DATABASE_URL hacen referencia "
+            f"al mismo proyecto de Supabase (project_ref='{qa_ref}'), a pesar de diferir en formato o modo de conexión "
+            f"(directa vs pooler). Se exige un proyecto Supabase independiente y aislado para QA/Staging."
+        )
+
+    # 2. Comprobación estándar de host, puerto y base de datos
     qa_parsed = urllib.parse.urlsplit(qa_url)
     prod_parsed = urllib.parse.urlsplit(prod_url)
 
@@ -209,7 +301,13 @@ def validate_qa_not_same_as_production(qa_url: str, prod_url: str = "") -> None:
     qa_path = (qa_parsed.path or "").strip("/")
     prod_path = (prod_parsed.path or "").strip("/")
 
-    if qa_host and prod_host and qa_host == prod_host and qa_port == prod_port and qa_path == prod_path:
+    if (
+        qa_host
+        and prod_host
+        and qa_host == prod_host
+        and qa_port == prod_port
+        and qa_path == prod_path
+    ):
         raise DatabaseSecurityError(
             f"¡COLISIÓN DE DESTINOS DETECTADA! QA_DATABASE_URL apunta al mismo host y base de datos "
             f"('{qa_host}:{qa_port}/{qa_path}') que DATABASE_URL. "
@@ -224,7 +322,7 @@ def resolve_qa_database_url(check_distinct_destination: bool = True) -> str:
     Prioridad:
     1. Variable de entorno QA_DATABASE_URL
     2. settings.sync_qa_database_url (cargada desde aplicacion/backend/.env)
-    
+
     Si no está configurada o no apunta a un destino de QA verificado, arroja DatabaseSecurityError.
     Comprueba además que no colisione con el destino principal cuando check_distinct_destination=True.
     """
@@ -257,10 +355,15 @@ def resolve_qa_database_url(check_distinct_destination: bool = True) -> str:
     return raw_url
 
 
-def verify_database_identity_and_role(engine: Engine) -> dict[str, str | bool]:
+def verify_database_identity_and_role(
+    engine: Engine,
+    require_least_privilege: bool = True,
+) -> dict[str, str | bool]:
     """
     Verifica la identidad de la base de datos y el rol de conexión en PostgreSQL
     antes de permitir cualquier operación DDL de creación de esquemas.
+    Rechaza roles con privilegios administrativos excesivos (rolsuper=True o rolcreaterole=True)
+    exigiendo roles con privilegios mínimos dedicados (least privilege).
     """
     with engine.connect() as conn:
         row = conn.execute(
@@ -272,7 +375,9 @@ def verify_database_identity_and_role(engine: Engine) -> dict[str, str | bool]:
         ).fetchone()
 
         if not row:
-            raise DatabaseSecurityError("No fue posible consultar la identidad de la base de datos en PostgreSQL.")
+            raise DatabaseSecurityError(
+                "No fue posible consultar la identidad de la base de datos en PostgreSQL."
+            )
 
         curr_db = str(row[0]).strip().lower()
         curr_user = str(row[1]).strip().lower()
@@ -283,6 +388,23 @@ def verify_database_identity_and_role(engine: Engine) -> dict[str, str | bool]:
         if any(p in curr_db for p in ("prod", "production", "live")):
             raise DatabaseSecurityError(
                 f"¡DESTINO PROHIBIDO! current_database()='{curr_db}' posee identificadores productivos."
+            )
+
+        allow_super = os.environ.get("ALLOW_SUPERUSER_QA_ROLE", "").strip().lower() in (
+            "true",
+            "1",
+        )
+        if (
+            require_least_privilege
+            and not allow_super
+            and (is_super or can_create_role)
+        ):
+            raise DatabaseSecurityError(
+                f"¡PRIVILEGIOS EXCESIVOS RECHAZADOS! El rol de conexión '{curr_user}' posee privilegios "
+                f"administrativos (rolsuper={is_super}, rolcreaterole={can_create_role}). "
+                "Para proteger la integridad del entorno y prevenir escalamiento o daños estructurales, "
+                "se exige un rol dedicado de privilegios mínimos (least privilege, ej. 'qa_runner') "
+                "sin facultades de superusuario ni creación de roles para la ejecución de pruebas."
             )
 
         return {
@@ -302,7 +424,9 @@ def generate_unique_test_schema(prefix: str = "test_qa_p2p_04") -> str:
     token = uuid.uuid4().hex[:8]
     schema_name = f"{prefix}_{token}"
     if not TEST_SCHEMA_PATTERN.match(schema_name):
-        raise ValueError(f"El nombre de esquema generado '{schema_name}' no cumple con el patrón permitido.")
+        raise ValueError(
+            f"El nombre de esquema generado '{schema_name}' no cumple con el patrón permitido."
+        )
     return schema_name
 
 
@@ -314,10 +438,14 @@ def build_isolated_db_url(base_url: str, schema_name: str) -> str:
     inseguras de cadenas.
     """
     if not schema_name or schema_name in FORBIDDEN_PROTECTED_SCHEMAS:
-        raise DatabaseSecurityError(f"No se permite construir URL hacia el esquema '{schema_name}'.")
+        raise DatabaseSecurityError(
+            f"No se permite construir URL hacia el esquema '{schema_name}'."
+        )
 
     if not TEST_SCHEMA_PATTERN.match(schema_name):
-        raise DatabaseSecurityError(f"El esquema '{schema_name}' no cumple con el patrón de pruebas permitido.")
+        raise DatabaseSecurityError(
+            f"El esquema '{schema_name}' no cumple con el patrón de pruebas permitido."
+        )
 
     parsed = urllib.parse.urlsplit(base_url)
     query_params = dict(urllib.parse.parse_qsl(parsed.query, keep_blank_values=True))
@@ -337,20 +465,22 @@ def build_isolated_db_url(base_url: str, schema_name: str) -> str:
         quote_via=_quote_with_equals,
     )
 
-    return urllib.parse.urlunsplit((
-        parsed.scheme,
-        parsed.netloc,
-        parsed.path,
-        new_query,
-        parsed.fragment,
-    ))
+    return urllib.parse.urlunsplit(
+        (
+            parsed.scheme,
+            parsed.netloc,
+            parsed.path,
+            new_query,
+            parsed.fragment,
+        )
+    )
 
 
 def verify_connection_search_path(conn, expected_schema: str) -> None:
     """
     Verifica que la conexión activa esté efectivamente aislada en expected_schema
     y que current_schema() coincida EXACTAMENTE con el esquema generado para la ejecución.
-    
+
     No acepta como válido que el esquema esperado simplemente aparezca dentro de SHOW search_path.
     """
     curr = conn.execute(text("SELECT current_schema();")).scalar()
@@ -374,15 +504,19 @@ def create_isolated_schema(engine: Engine, schema_name: str) -> str:
     """
     Crea un nuevo esquema temporal vacío en la base de datos y lo registra
     en la lista de esquemas administrados por esta ejecución.
-    
+
     Verifica además que el esquema no exista previamente en PostgreSQL para
     evitar sobreescrituras accidentales de datos preexistentes.
     """
     if schema_name in FORBIDDEN_PROTECTED_SCHEMAS:
-        raise DatabaseSecurityError(f"Prohibida la creación del esquema protegido '{schema_name}'.")
+        raise DatabaseSecurityError(
+            f"Prohibida la creación del esquema protegido '{schema_name}'."
+        )
 
     if not TEST_SCHEMA_PATTERN.match(schema_name):
-        raise DatabaseSecurityError(f"El esquema '{schema_name}' no cumple el patrón de pruebas permitido.")
+        raise DatabaseSecurityError(
+            f"El esquema '{schema_name}' no cumple el patrón de pruebas permitido."
+        )
 
     # 1. Verificar identidad del servidor
     verify_database_identity_and_role(engine)
@@ -404,7 +538,9 @@ def create_isolated_schema(engine: Engine, schema_name: str) -> str:
         conn.commit()
 
     _CREATED_SCHEMAS_IN_THIS_RUN.add(schema_name)
-    print(f"[SECURITY GUARD] Esquema sandbox único '{schema_name}' creado y registrado con éxito.")
+    print(
+        f"[SECURITY GUARD] Esquema sandbox único '{schema_name}' creado y registrado con éxito."
+    )
     return schema_name
 
 
@@ -415,7 +551,9 @@ def safe_teardown_schema(engine: Engine, schema_name: str) -> None:
     Comprueba en el catálogo de PostgreSQL la existencia y propiedad del esquema.
     """
     if schema_name in FORBIDDEN_PROTECTED_SCHEMAS:
-        raise DatabaseSecurityError(f"¡INTENTO DE ELIMINACIÓN DE ESQUEMA PROTEGIDO '{schema_name}' RECHAZADO!")
+        raise DatabaseSecurityError(
+            f"¡INTENTO DE ELIMINACIÓN DE ESQUEMA PROTEGIDO '{schema_name}' RECHAZADO!"
+        )
 
     if schema_name not in _CREATED_SCHEMAS_IN_THIS_RUN:
         raise DatabaseSecurityError(
@@ -440,7 +578,9 @@ def safe_teardown_schema(engine: Engine, schema_name: str) -> None:
             conn.commit()
 
     _CREATED_SCHEMAS_IN_THIS_RUN.discard(schema_name)
-    print(f"[SECURITY GUARD] Esquema sandbox verificado '{schema_name}' eliminado limpiamente.")
+    print(
+        f"[SECURITY GUARD] Esquema sandbox verificado '{schema_name}' eliminado limpiamente."
+    )
 
 
 @contextmanager
@@ -470,4 +610,9 @@ def isolated_test_schema(
             try:
                 safe_teardown_schema(engine, schema_name)
             except Exception as e:
-                print(f"[SECURITY GUARD ERROR] Fallo durante el teardown seguro de '{schema_name}': {e}")
+                print(
+                    f"[SECURITY GUARD ERROR] Fallo durante el teardown seguro de '{schema_name}': {e}"
+                )
+                raise DatabaseSecurityError(
+                    f"FALLO CRÍTICO DE TEARDOWN: No fue posible eliminar limpiamente el esquema sandbox '{schema_name}': {e}"
+                ) from e

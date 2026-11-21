@@ -167,12 +167,64 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def adjust_production_defaults(self):
-        # En producción, forzar persistencia estricta para erradicar degradación a RAM
-        if self.APP_ENV == "production":
+        # En producción o staging, forzar persistencia estricta para erradicar degradación a RAM
+        if self.APP_ENV in ("production", "staging"):
             if "STRICT_DATABASE_MODE" not in self.model_fields_set:
                 self.STRICT_DATABASE_MODE = True
-            if "ENABLE_DEMO_WATERMARK" not in self.model_fields_set:
+            elif not self.STRICT_DATABASE_MODE:
+                raise ValueError(
+                    f"STRICT_DATABASE_MODE debe ser True en entorno '{self.APP_ENV}' "
+                    "para impedir la degradación silenciosa a almacenamiento volátil en RAM."
+                )
+
+            if self.ENABLE_MOCK_OTP_HINTS:
+                raise ValueError(
+                    f"ENABLE_MOCK_OTP_HINTS está terminantemente prohibido en entorno '{self.APP_ENV}' "
+                    "(RNF01 / RNF02). Los desafíos OTP no deben exponer pistas de código fuera de pruebas unitarias aisladas."
+                )
+
+            # Validación de clave JWT en entornos controlados
+            known_insecure_keys = {
+                "dev-jwt-secret-key-epis-upt-2026-mentorias-change-in-production",
+                "staging-jwt-secret-key-epis-upt-2026-mentorias-staging-env-only",
+            }
+            if (
+                self.JWT_SECRET_KEY in known_insecure_keys
+                or "<GENERATE_" in self.JWT_SECRET_KEY
+                or "change-in-production" in self.JWT_SECRET_KEY.lower()
+                or len(self.JWT_SECRET_KEY) < 32
+            ):
+                raise ValueError(
+                    f"JWT_SECRET_KEY insegura o con valor de plantilla detectada en entorno '{self.APP_ENV}'. "
+                    "Debe configurarse una clave criptográfica de alta entropía de al menos 32 caracteres."
+                )
+
+            # Validación de marcadores de plantilla en DATABASE_URL
+            if self.DATABASE_URL:
+                db_str = str(self.DATABASE_URL)
+                if "<GENERATE_" in db_str or "STAGING_PROJECT_REF" in db_str:
+                    raise ValueError(
+                        f"DATABASE_URL contiene marcadores de plantilla no sustituidos en entorno '{self.APP_ENV}'. "
+                        "Configure la cadena de conexión real de la instancia dedicada."
+                    )
+
+            # Validación de credenciales SMTP si el servicio está habilitado
+            if self.SMTP_ENABLED:
+                if (
+                    not self.SMTP_USER
+                    or not self.SMTP_PASSWORD
+                    or "<GENERATE_" in (self.SMTP_PASSWORD or "")
+                    or "STAGING_APP_PASSWORD" in (self.SMTP_PASSWORD or "")
+                ):
+                    raise ValueError(
+                        f"SMTP_ENABLED=True en entorno '{self.APP_ENV}', pero no se han configurado "
+                        "credenciales válidas de correo (SMTP_USER / SMTP_PASSWORD). "
+                        "Mantenga SMTP_ENABLED=False mientras no existan buzones ni credenciales de prueba autorizadas."
+                    )
+
+            if self.APP_ENV == "production" and "ENABLE_DEMO_WATERMARK" not in self.model_fields_set:
                 self.ENABLE_DEMO_WATERMARK = False
+
         return self
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")

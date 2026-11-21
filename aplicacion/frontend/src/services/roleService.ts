@@ -4,6 +4,7 @@
  */
 
 import { authService } from './authService';
+import { assertAllowedMode, resolveInitialServiceMode } from './serviceMode';
 
 export interface UserRolesResponse {
   email: string;
@@ -16,23 +17,6 @@ export interface RoleOperationResponse {
   success: boolean;
   message: string;
   roles: string[];
-}
-
-function resolveInitialServiceMode(): 'mock' | 'api' {
-  if (import.meta.env.PROD) {
-    return 'api';
-  }
-  const envMode = import.meta.env.VITE_SERVICE_MODE;
-  if (envMode === 'mock') {
-    return 'mock';
-  }
-  if (envMode === 'api') {
-    return 'api';
-  }
-  if (import.meta.env.MODE === 'test') {
-    return 'mock';
-  }
-  return 'api';
 }
 
 class RoleService {
@@ -48,7 +32,7 @@ class RoleService {
   };
 
   public setMode(mode: 'mock' | 'api') {
-    this.mode = mode;
+    this.mode = assertAllowedMode(mode);
   }
 
   public getMode(): 'mock' | 'api' {

@@ -17,6 +17,7 @@
  */
 
 import { authService } from './authService';
+import { assertAllowedMode, resolveInitialServiceMode } from './serviceMode';
 
 export type SessionModality = 'presencial' | 'virtual';
 export type SessionDuration = 60 | 90;
@@ -398,23 +399,6 @@ class ApiOfferAdapter {
 const mockAdapter = new MockOfferAdapter();
 const apiAdapter = new ApiOfferAdapter();
 
-function resolveInitialServiceMode(): 'mock' | 'api' {
-  if (import.meta.env.PROD) {
-    return 'api';
-  }
-  const envMode = import.meta.env.VITE_SERVICE_MODE;
-  if (envMode === 'mock') {
-    return 'mock';
-  }
-  if (envMode === 'api') {
-    return 'api';
-  }
-  if (import.meta.env.MODE === 'test') {
-    return 'mock';
-  }
-  return 'api';
-}
-
 let currentServiceMode: 'mock' | 'api' = resolveInitialServiceMode();
 
 // ============================================================================
@@ -427,7 +411,7 @@ export const offerService = {
   },
 
   setMode(mode: 'mock' | 'api'): void {
-    currentServiceMode = mode;
+    currentServiceMode = assertAllowedMode(mode);
   },
 
   /**
