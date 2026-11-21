@@ -16,9 +16,12 @@ import openpyxl
 from fastapi import HTTPException, status
 
 try:
-    import fitz  # PyMuPDF
+    import pymupdf as fitz  # PyMuPDF moderno (evita advertencia de deprecación de import fitz)
 except ImportError:
-    fitz = None  # type: ignore
+    try:
+        import fitz  # Fallback a namespace tradicional
+    except ImportError:
+        fitz = None  # type: ignore
 
 
 class ExcepcionFormatoHorarioInvalido(HTTPException):

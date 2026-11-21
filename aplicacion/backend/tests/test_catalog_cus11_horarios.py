@@ -16,9 +16,12 @@ import openpyxl
 import pytest
 
 try:
-    import fitz  # PyMuPDF
+    import pymupdf as fitz  # PyMuPDF moderno
 except ImportError:
-    fitz = None
+    try:
+        import fitz
+    except ImportError:
+        fitz = None
 
 from app.services.schedule_parser_service import (
     ExcepcionFormatoHorarioInvalido,
