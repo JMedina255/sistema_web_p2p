@@ -15,7 +15,7 @@
 El presente ciclo de aseguramiento de calidad, **QA-P2P-04**, tuvo como objetivo primordial subsanar las deficiencias metodológicas y los riesgos de regresión detectados en el arnés de pruebas automatizadas previo (QA-P2P-03). En particular, se erradicaron las aserciones complacientes o autocomplacientes ("auto-PASS" ante ausencia de componentes), se implementó un módulo centralizado de protección estricta para PostgreSQL (`qa_db_hardening.py`), se forzó la verificación de persistencia transaccional directa en base de datos para todas las operaciones críticas de negocio, se corrigieron las aserciones de red y elementos de interfaz, y se capturaron evidencias visuales 100% auténticas y diferenciadas.
 
 ### Hitos de Calidad Certificados
-1. **Blindaje de Base de Datos PostgreSQL:** Ninguna prueba puede ejecutarse contra entornos de producción (`APP_ENV=production` o `ENVIRONMENT=production`). Se construyen esquemas sandbox temporales con identificadores únicos (`test_qa_p2p_04_<tipo>_<uuid>`), garantizando aislamiento total del esquema `public`, control de `search_path` y destrucción segura que prohíbe `DROP SCHEMA CASCADE` en esquemas no creados por la propia sesión de prueba.
+1. **Blindaje de Base de Datos PostgreSQL y Defensa en Profundidad:** Ninguna prueba puede ejecutarse contra entornos de producción (`APP_ENV=production`, `ENVIRONMENT=production`, `NODE_ENV=production`, `STAGE=production`). Se exige una URL de conexión exclusiva para pruebas (`QA_DATABASE_URL`) sobre un proyecto o instancia de pruebas explícitamente autorizado. Como capa complementaria de contención, se construyen esquemas sandbox temporales con identificadores únicos (`test_qa_p2p_04_<tipo>_<uuid>`), exigiendo coincidencia exacta en `current_schema()` y destrucción segura estrictamente restringida a los esquemas aprovisionados en la propia sesión. Se aclara formalmente que la separación por esquemas es una defensa en profundidad y que la protección efectiva contra alteraciones productivas reside en la segregación de la instancia/base de datos dedicada y credenciales de privilegios mínimos.
 2. **Suite E2E Playwright en Navegador Real (Edge Headless):** Ejecución íntegra de 22 casos de prueba cubriendo los tres roles institucionales (Estudiante mentoreado, Mentor académico, Administrador institucional) y vectores de seguridad y autenticación.
 3. **Verificación de Persistencia y Conmutación de Estados:**
    - Creación de reserva confirmada en PostgreSQL en estado `PENDIENTE_CONFIRMACION`.
@@ -81,27 +81,44 @@ flowchart LR
 
 ## 4. Blindaje y Aislamiento de Base de Datos PostgreSQL
 
-Para satisfacer el requerimiento de seguridad de la Fase 2, se implementó el módulo reutilizable [tools/qa_db_hardening.py](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/tools/qa_db_hardening.py).
+Para satisfacer los requerimientos de seguridad y protección de entornos de QA-P2P-04 y QA-P2P-04R, se implementó el módulo centralizado [tools/qa_db_hardening.py](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/tools/qa_db_hardening.py).
+
+> [!IMPORTANT]
+> **Alcance del Aislamiento de Base de Datos:**  
+> La separación lógica mediante esquemas efímeros en PostgreSQL (`search_path`) es una capa complementaria y de defensa en profundidad, pero **no constituye por sí sola una garantía de aislamiento absoluto**. La protección efectiva contra alteraciones accidentales o no deseadas sobre entornos productivos depende mandatoriamente de:
+> 1. Disponer de una instancia/proyecto PostgreSQL dedicado exclusivamente a pruebas, independiente del clúster de producción.
+> 2. Utilizar una variable `QA_DATABASE_URL` obligatoria que resuelva exclusivamente hacia dicho proyecto de pruebas.
+> 3. Identificar de manera determinista la base de datos (`current_database()`) y el rol de conexión (`current_user`) antes de ejecutar operaciones DDL.
+> 4. Operar con credenciales de privilegios mínimos en entornos no productivos.
 
 ### Arquitectura de Seguridad del Módulo
 
-1. **Protección Anti-Producción (`validate_test_environment`):**
-   Inspecciona las variables del sistema (`APP_ENV`, `ENVIRONMENT`, `NODE_ENV`, `STAGE`) e interrumpe la ejecución arrojando `DatabaseSecurityError` si detecta cadenas como `production` o `prod`.
-2. **Esquemas Sandbox Temporales con Nombres Únicos (`generate_unique_test_schema`):**
+1. **Protección Multivariable Anti-Producción (`validate_test_environment`):**
+   Inspecciona exhaustivamente `APP_ENV`, `ENVIRONMENT`, `NODE_ENV` y `STAGE`. Si **cualquiera** de ellas declara `production` o `prod`, la ejecución se aborta inmediatamente arrojando `DatabaseSecurityError`. Ninguna variable local de desarrollo (por ejemplo `ENVIRONMENT=development` o flags locales) puede anular una bandera prohibitiva de producción.
+2. **Resolución Exclusiva de URL de QA (`resolve_qa_database_url`):**
+   Exige que la conexión de pruebas se defina mediante `QA_DATABASE_URL` (en el entorno del sistema o en `aplicacion/backend/.env`). Si no está definida, las pruebas se detienen como `BLOCKED`.
+3. **Lista Blanca de Destinos de Base de Datos (`validate_qa_target_url`):**
+   Valida el host de destino contra una lista blanca explícita (`DEFAULT_ALLOWED_QA_HOSTS` y `ALLOWED_QA_HOSTS`). Rechaza por defecto cualquier host desconocido o que contenga identificadores productivos (`prod`, `production`, `live`, etc.).
+4. **Verificación de Identidad de Base de Datos y Rol (`verify_database_identity_and_role`):**
+   Antes de permitir cualquier sentencia DDL, ejecuta `SELECT current_database(), current_user, session_user;` en PostgreSQL para constatar que el catálogo no pertenezca a instancias operativas.
+5. **Esquemas Sandbox Temporales con Nombres Únicos (`generate_unique_test_schema`):**
    Genera identificadores con el formato:
    `test_qa_p2p_04_<tipo>_<hex8>` (ejemplo: `test_qa_p2p_04_e2e_e77acc1a`).
-   Cumple con la expresión regular `^test_(qa_p2p_\d{2}|sandbox)_[a-z0-9_]+$`.
-3. **Construcción Inmutable de URLs de Conexión (`build_isolated_db_url`):**
-   Utiliza `urllib.parse` para descomponer y recomponer de manera segura la cadena de conexión a PostgreSQL, inyectando de forma limpia el parámetro `options=-c search_path={schema_name}` sin concatenaciones manuales susceptibles a inyecciones.
-4. **Verificación de `search_path` en Conexiones Activas (`verify_connection_search_path`):**
-   Ejecuta `SELECT current_schema();` y `SHOW search_path;`. Si el esquema actual es `public` o no coincide con el esquema sandbox esperado, la conexión es abortada inmediatamente.
-5. **Destrucción Segura y Blindada (`safe_teardown_schema`):**
+   Cumple estrictamente con la expresión regular `^test_(qa_p2p_\d{2}|sandbox)_[a-z0-9_]+$`.
+6. **Construcción Segura de URLs de Conexión (`build_isolated_db_url`):**
+   Utiliza `urllib.parse` para descomponer y recomponer de manera segura la cadena de conexión a PostgreSQL, inyectando de forma limpia el parámetro `options=-c search_path={schema_name}` y preservando parámetros preexistentes (como `sslmode=require`). Prohíbe URLs que apunten a esquemas protegidos del sistema.
+7. **Verificación Estricta de `search_path` (`verify_connection_search_path`):**
+   Ejecuta `SELECT current_schema();` y exige que coincida **exactamente** con el esquema efímero generado para la corrida. Rechaza si `current_schema()` es `public` o difiere del esquema esperado, incluso si el esquema aparece como subcadena en `SHOW search_path;`.
+8. **Prevención de Sobreescritura de Esquemas Preexistentes (`create_isolated_schema`):**
+   Consulta `information_schema.schemata` antes de crear el esquema. Si ya existe, rechaza su adopción o reutilización para garantizar aislamiento estricto. Registra el nuevo esquema en el conjunto en memoria `_CREATED_SCHEMAS_IN_THIS_RUN`.
+9. **Destrucción Segura y Restringida (`safe_teardown_schema`):**
    - Prohíbe expresamente ejecutar `DROP SCHEMA` sobre esquemas protegidos (`public`, `auth`, `storage`, `graphql`, `vault`, etc.).
    - Verifica que el esquema a eliminar pertenezca al registro en memoria `_CREATED_SCHEMAS_IN_THIS_RUN`.
-   - Consulta `pg_namespace` para constatar que el esquema existe y fue creado por el usuario de prueba.
-   - Aplica `DROP SCHEMA {schema_name} CASCADE` única y exclusivamente sobre el esquema temporal verificado.
+   - Consulta `information_schema.schemata` para verificar existencia antes de ejecutar `DROP SCHEMA ... CASCADE;`.
+10. **Context Manager con Garantía de Limpieza (`isolated_test_schema`):**
+    Aprovisiona y garantiza el teardown del esquema sandbox en su bloque `finally:`, protegiendo la base de datos ante interrupciones o fallos no controlados.
 
-Ambos ejecutables de prueba ([tools/run_browser_e2e_tests.py](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/tools/run_browser_e2e_tests.py) y [tools/validate_postgresql_transactions.py](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/tools/validate_postgresql_transactions.py)) fueron migrados a esta infraestructura de blindaje.
+Ambos ejecutables de prueba ([tools/run_browser_e2e_tests.py](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/tools/run_browser_e2e_tests.py) y [tools/validate_postgresql_transactions.py](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/tools/validate_postgresql_transactions.py)) operan bajo esta arquitectura blindada.
 
 ---
 
@@ -114,7 +131,7 @@ La ejecución de [tools/run_browser_e2e_tests.py](file:///c:/Users/Admin/Desktop
 | ID Caso | Recorrido / Rol | Nombre de la Prueba | Estado | Verificación Funcional y Persistencia Directa | Evidencia Visual |
 |---|---|---|:---:|---|---|
 | **E2E-EST-01** | Estudiante | Acceso Institucional OTP | **PASS** | Solicitud y verificación de desafío OTP de 6 dígitos. Emisión de JWT y almacenamiento en `sessionStorage` (`p2p_epis_jwt_token`). Despliegue de cabecera institucional. | [01_estudiante_login.png](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/docs/qa/evidencias/01_estudiante_login.png) |
-| **E2E-EST-02** | Estudiante | Consulta y Actualización de Perfil | **PASS** | Carga de ficha académica y navegación a la pestaña de disponibilidad semanal (`Agenda Semanal de Disponibilidad`). | [02_estudiante_perfil.png](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/docs/qa/evidencias/02_estudiante_perfil.png) |
+| **E2E-EST-02** | Estudiante | Consulta y Visualización de Perfil y Disponibilidad | **PASS** | Carga de ficha académica y navegación a la pestaña de disponibilidad semanal (`Agenda Semanal de Disponibilidad`). Inspección visual en UI sin mutación de estado. | [02_estudiante_perfil.png](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/docs/qa/evidencias/02_estudiante_perfil.png) |
 | **E2E-EST-03** | Estudiante | Exploración de Catálogo Curricular | **PASS** | Consulta a `/curriculum/courses`. Renderizado de asignaturas formativas oficiales (Cálculo I, Física I, etc.) y contenidos silábicos. | [03_estudiante_cursos.png](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/docs/qa/evidencias/03_estudiante_cursos.png) |
 | **E2E-EST-04** | Estudiante | Visualización de Recomendaciones y XAI | **PASS** | Consulta a `/recommendations/feed`. Despliegue de tarjetas de oferta ordenadas según afinidad y apertura del panel explicable XAI (pesos de coincidencia horaria, curricular e historial). | [04_estudiante_recomendaciones.png](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/docs/qa/evidencias/04_estudiante_recomendaciones.png) |
 | **E2E-EST-05** | Estudiante | Apertura de Diálogo Modal de Reserva | **PASS** | Apertura de modal accesible de confirmación de reserva con proyección de asignatura, mentor, espacio asignado y aforo vacante. | [05_estudiante_reserva_modal.png](file:///c:/Users/Admin/Desktop/Proyectos/Proyecto_Sistema_Web_P2P_/docs/qa/evidencias/05_estudiante_reserva_modal.png) |
