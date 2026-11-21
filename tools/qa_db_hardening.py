@@ -69,43 +69,68 @@ def validate_test_environment(settings_env: str = "") -> None:
     Verifica que ninguna variable de entorno declare producción y que existan marcadores
     explícitos de autorización para ejecución de pruebas.
     
-    Regla estricta: Si CUALQUIERA de APP_ENV, ENVIRONMENT, NODE_ENV o STAGE declara 'production',
-    la ejecución se aborta de forma inmediata. Ninguna variable local de desarrollo puede
-    anular una bandera de producción.
+    Regla estricta:
+    1. Todas las variables (APP_ENV, ENVIRONMENT, NODE_ENV, STAGE) y settings_env son
+       comprobadas de forma estrictamente independiente. Si CUALQUIERA declara producción,
+       se aborta de inmediato. Ninguna variable de desarrollo local puede anular una bandera productiva.
+    2. Cada variable que se encuentre definida debe ser comprobada independientemente para constatar
+       que pertenece a un conjunto permitido de valores no productivos.
     """
     env_vars = {
-        "APP_ENV": os.environ.get("APP_ENV", ""),
-        "ENVIRONMENT": settings_env or os.environ.get("ENVIRONMENT", ""),
-        "NODE_ENV": os.environ.get("NODE_ENV", ""),
-        "STAGE": os.environ.get("STAGE", ""),
+        "APP_ENV": os.environ.get("APP_ENV", "").strip(),
+        "ENVIRONMENT": os.environ.get("ENVIRONMENT", "").strip(),
+        "NODE_ENV": os.environ.get("NODE_ENV", "").strip(),
+        "STAGE": os.environ.get("STAGE", "").strip(),
     }
+    if settings_env and settings_env.strip():
+        env_vars["SETTINGS_ENV"] = settings_env.strip()
 
-    # 1. Comprobación de banderas de producción
+    # 1. Comprobación independiente de banderas de producción en cada variable
     for var_name, var_val in env_vars.items():
-        val = str(var_val).strip().lower()
-        if val in ("production", "prod") or val.startswith("prod"):
+        val = var_val.lower()
+        if not val:
+            continue
+        if (
+            val in ("production", "prod", "live")
+            or val.startswith("prod")
+            or val.startswith("live")
+            or "production" in val
+        ):
             raise DatabaseSecurityError(
                 f"¡BLOQUEO DE SEGURIDAD! Variable de entorno prohibitiva detectada: {var_name}='{var_val}'. "
                 "Las pruebas no pueden ejecutarse contra entornos de producción, "
                 "incluso si otra variable declara un entorno local o de desarrollo."
             )
 
-    # 2. Marcadores de autorización requeridos
-    allow_flag = os.environ.get("ALLOW_TEST_SCHEMA_CREATION", "").lower()
-    app_env = env_vars["APP_ENV"].lower()
-    env_name = env_vars["ENVIRONMENT"].lower()
-    stage = env_vars["STAGE"].lower()
-    node_env = env_vars["NODE_ENV"].lower()
+    # 2. Comprobación independiente de coherencia de variables definidas
+    valid_test_values = {
+        "APP_ENV": {"test", "testing", "development", "dev", "local", "staging-qa", "qa", "staging"},
+        "ENVIRONMENT": {"test", "testing", "development", "dev", "local", "staging-qa", "qa", "staging"},
+        "NODE_ENV": {"test", "testing", "development", "dev"},
+        "STAGE": {"test", "testing", "dev", "qa", "staging-qa", "staging"},
+        "SETTINGS_ENV": {"test", "testing", "development", "dev", "local", "staging-qa", "qa", "staging"},
+    }
 
-    is_authorized = (
+    for var_name, var_val in env_vars.items():
+        val = var_val.lower()
+        if val and val not in valid_test_values.get(var_name, set()):
+            raise DatabaseSecurityError(
+                f"¡VALOR NO AUTORIZADO! La variable {var_name}='{var_val}' no está permitida en ejecución de pruebas. "
+                f"Valores admitidos para {var_name}: {sorted(valid_test_values[var_name])}"
+            )
+
+    # 3. Marcador de autorización requerido
+    allow_flag = os.environ.get("ALLOW_TEST_SCHEMA_CREATION", "").strip().lower()
+    has_test_marker = (
         allow_flag in ("true", "1", "yes")
-        or app_env in ("test", "testing", "development")
-        or env_name in ("test", "testing", "development", "local")
-        or stage in ("test", "testing", "dev", "qa", "staging-qa")
-        or node_env in ("test", "development")
+        or any(
+            val.lower() in ("test", "testing", "development", "dev", "local", "qa", "staging-qa", "staging")
+            for val in env_vars.values()
+            if val
+        )
     )
 
-    if not is_authorized:
+    if not has_test_marker:
         raise DatabaseSecurityError(
             "¡ACCESO DENEGADO! No se detectó autorización explícita para crear esquemas de prueba. "
             "Configure ALLOW_TEST_SCHEMA_CREATION=true o APP_ENV=test."
@@ -116,6 +141,7 @@ def validate_qa_target_url(raw_url: str) -> None:
     """
     Verifica que la URL de destino esté explícitamente reconocida como entorno de pruebas o QA.
     Rechaza por defecto cualquier destino desconocido o que contenga marcadores de producción.
+    Elimina excepciones heurísticas basadas únicamente en contener las palabras 'qa' o 'test'.
     """
     if not raw_url or not isinstance(raw_url, str):
         raise DatabaseSecurityError("La URL de base de datos de QA proporcionada es nula o inválida.")
@@ -132,7 +158,7 @@ def validate_qa_target_url(raw_url: str) -> None:
             f"¡BLOQUEO DE SEGURIDAD! El host '{host}' contiene identificadores de producción. Acceso denegado."
         )
 
-    # Lista blanca configurable mediante ALLOWED_QA_HOSTS
+    # Lista blanca estricta (solo hosts autorizados explícitamente)
     extra_hosts = {
         h.strip().lower()
         for h in os.environ.get("ALLOWED_QA_HOSTS", "").split(",")
@@ -140,14 +166,8 @@ def validate_qa_target_url(raw_url: str) -> None:
     }
     allowed_hosts = DEFAULT_ALLOWED_QA_HOSTS | extra_hosts
 
-    is_allowed = (
-        host in allowed_hosts
-        or host.endswith(".local")
-        or host.startswith("test-")
-        or host.startswith("qa-")
-        or "qa" in host
-        or "test" in host
-    )
+    # Verificación estricta: solo se aceptan coincidencias exactas en lista blanca autorizada
+    is_allowed = host in allowed_hosts
 
     if not is_allowed:
         raise DatabaseSecurityError(
@@ -156,7 +176,49 @@ def validate_qa_target_url(raw_url: str) -> None:
         )
 
 
-def resolve_qa_database_url() -> str:
+def validate_qa_not_same_as_production(qa_url: str, prod_url: str = "") -> None:
+    """
+    Verifica que QA_DATABASE_URL no resuelva al mismo destino (host, puerto y base de datos)
+    que la DATABASE_URL principal o de producción.
+    
+    Exige proyecto o instancia de PostgreSQL independiente para evitar alteraciones accidentales.
+    """
+    if not qa_url:
+        return
+
+    if not prod_url:
+        prod_url = os.environ.get("DATABASE_URL", "")
+        if not prod_url:
+            try:
+                from app.core.config import settings
+
+                prod_url = settings.DATABASE_URL or ""
+            except Exception:
+                pass
+
+    if not prod_url:
+        return
+
+    qa_parsed = urllib.parse.urlsplit(qa_url)
+    prod_parsed = urllib.parse.urlsplit(prod_url)
+
+    qa_host = (qa_parsed.hostname or "").lower()
+    prod_host = (prod_parsed.hostname or "").lower()
+    qa_port = qa_parsed.port or 5432
+    prod_port = prod_parsed.port or 5432
+    qa_path = (qa_parsed.path or "").strip("/")
+    prod_path = (prod_parsed.path or "").strip("/")
+
+    if qa_host and prod_host and qa_host == prod_host and qa_port == prod_port and qa_path == prod_path:
+        raise DatabaseSecurityError(
+            f"¡COLISIÓN DE DESTINOS DETECTADA! QA_DATABASE_URL apunta al mismo host y base de datos "
+            f"('{qa_host}:{qa_port}/{qa_path}') que DATABASE_URL. "
+            "Se exige un proyecto o instancia de PostgreSQL dedicado exclusivamente a QA/Staging "
+            "para garantizar la separación física de entornos y proteger los datos principales."
+        )
+
+
+def resolve_qa_database_url(check_distinct_destination: bool = True) -> str:
     """
     Resuelve la URL de conexión exclusiva para pruebas de QA.
     Prioridad:
@@ -164,6 +226,7 @@ def resolve_qa_database_url() -> str:
     2. settings.sync_qa_database_url (cargada desde aplicacion/backend/.env)
     
     Si no está configurada o no apunta a un destino de QA verificado, arroja DatabaseSecurityError.
+    Comprueba además que no colisione con el destino principal cuando check_distinct_destination=True.
     """
     raw_url = os.environ.get("QA_DATABASE_URL", "").strip()
 
@@ -189,17 +252,23 @@ def resolve_qa_database_url() -> str:
         raw_url = raw_url.replace("postgresql://", "postgresql+psycopg://", 1)
 
     validate_qa_target_url(raw_url)
+    if check_distinct_destination:
+        validate_qa_not_same_as_production(raw_url)
     return raw_url
 
 
-def verify_database_identity_and_role(engine: Engine) -> dict[str, str]:
+def verify_database_identity_and_role(engine: Engine) -> dict[str, str | bool]:
     """
     Verifica la identidad de la base de datos y el rol de conexión en PostgreSQL
     antes de permitir cualquier operación DDL de creación de esquemas.
     """
     with engine.connect() as conn:
         row = conn.execute(
-            text("SELECT current_database(), current_user, session_user;")
+            text(
+                "SELECT current_database(), current_user, session_user, "
+                "(SELECT rolsuper FROM pg_roles WHERE rolname = current_user), "
+                "(SELECT rolcreaterole FROM pg_roles WHERE rolname = current_user);"
+            )
         ).fetchone()
 
         if not row:
@@ -208,6 +277,8 @@ def verify_database_identity_and_role(engine: Engine) -> dict[str, str]:
         curr_db = str(row[0]).strip().lower()
         curr_user = str(row[1]).strip().lower()
         sess_user = str(row[2]).strip().lower()
+        is_super = bool(row[3]) if row[3] is not None else False
+        can_create_role = bool(row[4]) if row[4] is not None else False
 
         if any(p in curr_db for p in ("prod", "production", "live")):
             raise DatabaseSecurityError(
@@ -218,6 +289,8 @@ def verify_database_identity_and_role(engine: Engine) -> dict[str, str]:
             "database": curr_db,
             "current_user": curr_user,
             "session_user": sess_user,
+            "is_superuser": is_super,
+            "can_create_role": can_create_role,
         }
 
 
@@ -371,14 +444,30 @@ def safe_teardown_schema(engine: Engine, schema_name: str) -> None:
 
 
 @contextmanager
-def isolated_test_schema(engine: Engine, prefix: str = "test_qa_p2p_04"):
+def isolated_test_schema(
+    engine: Engine,
+    prefix: str = "test_qa_p2p_04",
+    provision_fn=None,
+):
     """
     Context manager para aprovisionar y limpiar de forma garantizada un esquema sandbox
-    incluso ante fallos o excepciones no controladas.
+    incluso cuando falle el aprovisionamiento inicial (tablas, fixtures, DDL) o
+    ante excepciones no controladas durante las pruebas.
     """
     schema_name = generate_unique_test_schema(prefix)
-    create_isolated_schema(engine, schema_name)
+    schema_created = False
     try:
+        create_isolated_schema(engine, schema_name)
+        schema_created = True
+
+        if provision_fn is not None:
+            isolated_url = build_isolated_db_url(str(engine.url), schema_name)
+            provision_fn(schema_name, isolated_url)
+
         yield schema_name
     finally:
-        safe_teardown_schema(engine, schema_name)
+        if schema_created or schema_name in _CREATED_SCHEMAS_IN_THIS_RUN:
+            try:
+                safe_teardown_schema(engine, schema_name)
+            except Exception as e:
+                print(f"[SECURITY GUARD ERROR] Fallo durante el teardown seguro de '{schema_name}': {e}")

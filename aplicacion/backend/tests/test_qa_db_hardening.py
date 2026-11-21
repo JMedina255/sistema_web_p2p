@@ -1,15 +1,16 @@
 """
-Pruebas de Seguridad y Hardening de Base de Datos (QA-P2P-04R)
+Pruebas de Seguridad y Hardening de Base de Datos (QA-P2P-04R & REL-P2P-01)
 Sistema Web P2P de Mentorías Académicas — EPIS UPT (2026)
 
 Valida exhaustivamente los mecanismos de protección activa:
-1. Prohibición estricta ante variables de producción (APP_ENV, ENVIRONMENT, NODE_ENV, STAGE).
+1. Comprobación estrictamente independiente de variables (APP_ENV, ENVIRONMENT, NODE_ENV, STAGE, settings_env).
 2. Rechazo de anulación por variables locales cuando se detecta producción.
-3. Validación de URLs permitidas y denegadas para QA_DATABASE_URL.
-4. Exigencia de coincidencia exacta de current_schema() en verify_connection_search_path().
-5. Bloqueo de adopción de esquemas preexistentes en create_isolated_schema().
-6. Restricción estricta de safe_teardown_schema() a esquemas registrados en la corrida.
-7. Manejo seguro de ciclo de vida con isolated_test_schema().
+3. Validación de URLs: solo hosts autorizados explícitamente (sin excepciones por substrings 'qa' o 'test').
+4. Prevención de colisión de destinos: rechazo si QA_DATABASE_URL apunta a la misma BD que DATABASE_URL.
+5. Exigencia de coincidencia exacta de current_schema() en verify_connection_search_path().
+6. Bloqueo de adopción de esquemas preexistentes en create_isolated_schema().
+7. Restricción estricta de safe_teardown_schema() a esquemas registrados en la corrida.
+8. Limpieza garantizada y recuperación ante fallos en provision_fn con isolated_test_schema().
 """
 
 import os
@@ -34,6 +35,7 @@ from qa_db_hardening import (  # noqa: E402
     isolated_test_schema,
     resolve_qa_database_url,
     safe_teardown_schema,
+    validate_qa_not_same_as_production,
     validate_qa_target_url,
     validate_test_environment,
     verify_connection_search_path,
@@ -42,16 +44,47 @@ from qa_db_hardening import (  # noqa: E402
 
 
 class TestEnvironmentProtection:
-    """Verifica el blindaje estricto ante banderas de entorno de producción."""
+    """Verifica el blindaje estricto e independiente ante banderas de entorno."""
 
     @pytest.mark.parametrize("var_name", ["APP_ENV", "ENVIRONMENT", "NODE_ENV", "STAGE"])
-    @pytest.mark.parametrize("prod_val", ["production", "prod", "Production", "PROD", "prod-cluster"])
+    @pytest.mark.parametrize("prod_val", ["production", "prod", "Production", "PROD", "prod-cluster", "live"])
     def test_production_environment_variables_strictly_aborts(self, var_name, prod_val, monkeypatch):
         monkeypatch.setenv(var_name, prod_val)
         with pytest.raises(DatabaseSecurityError) as exc_info:
             validate_test_environment()
         assert "BLOQUEO DE SEGURIDAD" in str(exc_info.value)
         assert var_name in str(exc_info.value)
+
+    def test_each_variable_checked_independently_no_shadowing(self, monkeypatch):
+        """Verifica que ENVIRONMENT en os.environ no sea silenciado si settings_env se provee."""
+        # Caso 1: os.environ[ENVIRONMENT] es prod, settings_env es development -> RECHAZADO
+        monkeypatch.setenv("ENVIRONMENT", "production")
+        monkeypatch.delenv("APP_ENV", raising=False)
+        monkeypatch.delenv("NODE_ENV", raising=False)
+        monkeypatch.delenv("STAGE", raising=False)
+        with pytest.raises(DatabaseSecurityError) as exc_info:
+            validate_test_environment("development")
+        assert "ENVIRONMENT='production'" in str(exc_info.value)
+
+        # Caso 2: os.environ[ENVIRONMENT] es test, settings_env es production -> RECHAZADO
+        monkeypatch.setenv("ENVIRONMENT", "test")
+        with pytest.raises(DatabaseSecurityError) as exc_info:
+            validate_test_environment("production")
+        assert "SETTINGS_ENV='production'" in str(exc_info.value)
+
+        # Caso 3: NODE_ENV es production, APP_ENV es test -> RECHAZADO
+        monkeypatch.setenv("APP_ENV", "test")
+        monkeypatch.setenv("NODE_ENV", "production")
+        with pytest.raises(DatabaseSecurityError) as exc_info:
+            validate_test_environment()
+        assert "NODE_ENV='production'" in str(exc_info.value)
+
+        # Caso 4: STAGE es production, APP_ENV es test -> RECHAZADO
+        monkeypatch.setenv("NODE_ENV", "test")
+        monkeypatch.setenv("STAGE", "production")
+        with pytest.raises(DatabaseSecurityError) as exc_info:
+            validate_test_environment()
+        assert "STAGE='production'" in str(exc_info.value)
 
     def test_local_dev_cannot_override_production(self, monkeypatch):
         """Una variable local de desarrollo o flag de prueba NO debe anular la presencia de producción."""
@@ -64,17 +97,16 @@ class TestEnvironmentProtection:
             validate_test_environment("development")
         assert "BLOQUEO DE SEGURIDAD" in str(exc_info.value)
 
-    def test_unauthorized_environment_aborts(self, monkeypatch):
-        """Si no hay marcadores explícitos de test/dev, el acceso es denegado por defecto."""
-        monkeypatch.setenv("APP_ENV", "random_untrusted")
-        monkeypatch.setenv("ENVIRONMENT", "unknown")
-        monkeypatch.setenv("NODE_ENV", "")
-        monkeypatch.setenv("STAGE", "")
-        monkeypatch.delenv("ALLOW_TEST_SCHEMA_CREATION", raising=False)
+    def test_unauthorized_environment_value_rejected(self, monkeypatch):
+        """Valores no reconocidos para variables de prueba son rechazados de forma independiente."""
+        monkeypatch.delenv("APP_ENV", raising=False)
+        monkeypatch.delenv("NODE_ENV", raising=False)
+        monkeypatch.delenv("STAGE", raising=False)
+        monkeypatch.setenv("ENVIRONMENT", "unauthorized_custom_env")
 
         with pytest.raises(DatabaseSecurityError) as exc_info:
             validate_test_environment()
-        assert "ACCESO DENEGADO" in str(exc_info.value)
+        assert "VALOR NO AUTORIZADO" in str(exc_info.value)
 
     @pytest.mark.parametrize(
         "flag,val",
@@ -96,7 +128,7 @@ class TestEnvironmentProtection:
 
 
 class TestTargetUrlValidation:
-    """Verifica que solo se permitan hosts de pruebas explícitamente autorizados."""
+    """Verifica que solo se permitan hosts de pruebas explícitamente autorizados (sin excepciones heurísticas)."""
 
     def test_invalid_or_empty_urls_rejected(self):
         with pytest.raises(DatabaseSecurityError):
@@ -128,14 +160,29 @@ class TestTargetUrlValidation:
         assert "DESTINO NO AUTORIZADO" in str(exc_info.value)
 
     @pytest.mark.parametrize(
+        "heuristic_host",
+        [
+            "qa-postgres.otherdomain.com",
+            "test-database.corp.net",
+            "my-database-qa.internal",
+            "local-server.local",
+            "staging-qa-box.org",
+        ],
+    )
+    def test_heuristic_substring_hosts_strictly_rejected_without_explicit_whitelist(self, heuristic_host):
+        """Elimina excepciones basadas únicamente en contener 'qa' o 'test'."""
+        url = f"postgresql+psycopg://user:pass@{heuristic_host}:5432/postgres"
+        with pytest.raises(DatabaseSecurityError) as exc_info:
+            validate_qa_target_url(url)
+        assert "DESTINO NO AUTORIZADO" in str(exc_info.value)
+
+    @pytest.mark.parametrize(
         "good_host",
         [
             "localhost",
             "127.0.0.1",
             "::1",
             "db.ieaxmtxpcrldbvmqwbyt.supabase.co",
-            "my-test-db.local",
-            "qa-postgres-instance",
         ],
     )
     def test_allowed_qa_hosts_accepted(self, good_host):
@@ -147,6 +194,23 @@ class TestTargetUrlValidation:
         monkeypatch.setenv("ALLOWED_QA_HOSTS", "custom-qa.internal,staging-db.test")
         url = "postgresql+psycopg://user:pass@custom-qa.internal:5432/postgres"
         validate_qa_target_url(url)
+
+
+class TestDestinationCollisionProtection:
+    """Verifica que QA_DATABASE_URL no resuelva al mismo destino que DATABASE_URL."""
+
+    def test_qa_same_destination_as_production_rejected(self, monkeypatch):
+        same_url = "postgresql+psycopg://postgres:secret@db.ieaxmtxpcrldbvmqwbyt.supabase.co:5432/postgres"
+        monkeypatch.setenv("DATABASE_URL", same_url)
+        with pytest.raises(DatabaseSecurityError) as exc_info:
+            validate_qa_not_same_as_production(same_url, same_url)
+        assert "COLISIÓN DE DESTINOS DETECTADA" in str(exc_info.value)
+
+    def test_qa_different_destination_accepted(self, monkeypatch):
+        prod_url = "postgresql+psycopg://postgres:secret@db.ieaxmtxpcrldbvmqwbyt.supabase.co:5432/postgres"
+        qa_url = "postgresql+psycopg://qa_user:secret@127.0.0.1:5432/qa_postgres"
+        monkeypatch.setenv("DATABASE_URL", prod_url)
+        validate_qa_not_same_as_production(qa_url, prod_url)
 
 
 class TestResolveQaDatabaseUrl:
@@ -162,8 +226,11 @@ class TestResolveQaDatabaseUrl:
 
     def test_valid_qa_database_url_resolved_and_normalized(self, monkeypatch):
         monkeypatch.setenv("QA_DATABASE_URL", "postgres://qa_user:pass@127.0.0.1:5432/qa_db")
-        url = resolve_qa_database_url()
-        assert url.startswith("postgresql+psycopg://qa_user:pass@127.0.0.1:5432/qa_db")
+        monkeypatch.delenv("DATABASE_URL", raising=False)
+        with patch("app.core.config.settings") as mock_settings:
+            mock_settings.DATABASE_URL = None
+            url = resolve_qa_database_url(check_distinct_destination=False)
+            assert url.startswith("postgresql+psycopg://qa_user:pass@127.0.0.1:5432/qa_db")
 
 
 class TestSearchPathAndIdentityVerification:
@@ -194,20 +261,33 @@ class TestSearchPathAndIdentityVerification:
         mock_engine.connect.return_value.__enter__.return_value = mock_conn
 
         # current_database() con nombre prod -> RECHAZADO
-        mock_conn.execute.return_value.fetchone.return_value = ("prod_epis_upt", "qa_user", "qa_user")
+        mock_conn.execute.return_value.fetchone.return_value = (
+            "prod_epis_upt",
+            "qa_user",
+            "qa_user",
+            False,
+            False,
+        )
         with pytest.raises(DatabaseSecurityError) as exc_info:
             verify_database_identity_and_role(mock_engine)
         assert "DESTINO PROHIBIDO" in str(exc_info.value)
 
         # current_database() legítimo -> PERMITIDO
-        mock_conn.execute.return_value.fetchone.return_value = ("postgres", "qa_role", "qa_role")
+        mock_conn.execute.return_value.fetchone.return_value = (
+            "postgres",
+            "qa_role",
+            "qa_role",
+            False,
+            False,
+        )
         ident = verify_database_identity_and_role(mock_engine)
         assert ident["database"] == "postgres"
         assert ident["current_user"] == "qa_role"
+        assert ident["is_superuser"] is False
 
 
 class TestSchemaLifecycleAndGuards:
-    """Verifica la generación, creación, aislamiento y teardown seguro de esquemas."""
+    """Verifica la generación, creación, aislamiento, teardown y recuperación de esquemas."""
 
     def setup_method(self):
         _CREATED_SCHEMAS_IN_THIS_RUN.clear()
@@ -237,11 +317,14 @@ class TestSchemaLifecycleAndGuards:
         mock_conn = MagicMock()
         mock_engine.connect.return_value.__enter__.return_value = mock_conn
 
-        # Simular identidad segura
-        mock_conn.execute.return_value.fetchone.return_value = ("postgres", "qa_user", "qa_user")
-
-        # Simular que el esquema ya existe en information_schema.schemata
-        mock_conn.execute.return_value.scalar.return_value = 1
+        mock_conn.execute.return_value.fetchone.return_value = (
+            "postgres",
+            "qa_user",
+            "qa_user",
+            False,
+            False,
+        )
+        mock_conn.execute.return_value.scalar.return_value = 1  # Ya existe
 
         with pytest.raises(DatabaseSecurityError) as exc_info:
             create_isolated_schema(mock_engine, "test_qa_p2p_04_exists")
@@ -252,7 +335,13 @@ class TestSchemaLifecycleAndGuards:
         mock_conn = MagicMock()
         mock_engine.connect.return_value.__enter__.return_value = mock_conn
 
-        mock_conn.execute.return_value.fetchone.return_value = ("postgres", "qa_user", "qa_user")
+        mock_conn.execute.return_value.fetchone.return_value = (
+            "postgres",
+            "qa_user",
+            "qa_user",
+            False,
+            False,
+        )
         mock_conn.execute.return_value.scalar.return_value = None  # No existe
 
         schema_name = "test_qa_p2p_04_new_1234"
@@ -284,21 +373,55 @@ class TestSchemaLifecycleAndGuards:
         safe_teardown_schema(mock_engine, schema_name)
         assert schema_name not in _CREATED_SCHEMAS_IN_THIS_RUN
 
-    def test_isolated_test_schema_context_manager_cleans_up_on_failure(self):
+    def test_isolated_test_schema_cleans_up_on_failure_during_provisioning(self):
+        """Verifica que si provision_fn falla, el esquema se destruye de forma garantizada."""
         mock_engine = MagicMock()
+        mock_engine.url = "postgresql+psycopg://user:pass@127.0.0.1:5432/qa_postgres"
         mock_conn = MagicMock()
         mock_engine.connect.return_value.__enter__.return_value = mock_conn
 
-        mock_conn.execute.return_value.fetchone.return_value = ("postgres", "qa_user", "qa_user")
-        mock_conn.execute.return_value.scalar.return_value = None  # Para create: no existe
+        mock_conn.execute.return_value.fetchone.return_value = (
+            "postgres",
+            "qa_user",
+            "qa_user",
+            False,
+            False,
+        )
+        mock_conn.execute.return_value.scalar.return_value = None  # No existe al crear, 1 al teardown
+
+        def failing_provision(schema_name, isolated_url):
+            raise RuntimeError("Fallo deliberado al crear tablas / fixtures DDL")
+
+        yielded = False
+        with pytest.raises(RuntimeError) as exc_info:
+            with isolated_test_schema(mock_engine, provision_fn=failing_provision):
+                yielded = True
+
+        assert not yielded, "El bloque no debió ejecutarse si provision_fn falló"
+        assert "Fallo deliberado al crear tablas" in str(exc_info.value)
+        # Debe haberse limpiado el registro en memoria
+        assert len(_CREATED_SCHEMAS_IN_THIS_RUN) == 0
+
+    def test_isolated_test_schema_context_manager_cleans_up_on_test_failure(self):
+        mock_engine = MagicMock()
+        mock_engine.url = "postgresql+psycopg://user:pass@127.0.0.1:5432/qa_postgres"
+        mock_conn = MagicMock()
+        mock_engine.connect.return_value.__enter__.return_value = mock_conn
+
+        mock_conn.execute.return_value.fetchone.return_value = (
+            "postgres",
+            "qa_user",
+            "qa_user",
+            False,
+            False,
+        )
+        mock_conn.execute.return_value.scalar.return_value = None
 
         yielded_schema = None
         with pytest.raises(ZeroDivisionError):
             with isolated_test_schema(mock_engine) as s:
                 yielded_schema = s
                 assert yielded_schema in _CREATED_SCHEMAS_IN_THIS_RUN
-                # Provocar excepción deliberada en bloque
                 _ = 1 / 0
 
-        # Al salir por la excepción, el teardown debe haber desregistrado el esquema
         assert yielded_schema not in _CREATED_SCHEMAS_IN_THIS_RUN
