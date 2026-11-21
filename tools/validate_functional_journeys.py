@@ -1,16 +1,25 @@
 """
-Script de Validación Funcional y Recorridos de Integración E2E (QA-P2P-02)
+Script de Validación de Integración de API en Entorno Controlado (Línea Base QA-P2P-02 / QA-P2P-03)
 Sistema Web P2P de Mentorías Académicas — EPIS UPT (2026)
 
-Ejecuta los 9 recorridos funcionales principales a través de la API REST real de FastAPI:
-1. Autenticación (OTP, UPT domain, JWT, Consentimiento Ley 29733)
-2. Perfiles y Disponibilidad (Perfil académico, Grilla semanal)
+Entorno de ejecución:
+- Cliente HTTP: FastAPI TestClient (Starlette / HTTPX)
+- Base de datos: SQLite en memoria aislada con StaticPool y PRAGMA foreign_keys=ON
+- Propósito: 30 comprobaciones de integración de endpoints RESTful, serialización,
+  validación Pydantic, RBAC y persistencia ORM para la suite de integración de CI.
+- Nota de alcance: Este script valida contratos de API y lógica de negocio en entorno
+  controlado. La validación E2E real en navegador y con PostgreSQL de pruebas se ejecuta
+  de forma complementaria en los escenarios de Fase 2 y Fase 3 de QA-P2P-03.
+
+Ejecuta 30 comprobaciones distribuidas en 9 módulos de API:
+1. Autenticación (Solicitud OTP, validación de dominio @upt.pe, JWT HS256, Consentimiento Ley 29733)
+2. Perfiles y Disponibilidad (Perfil académico formativo, Grilla semanal 6x11)
 3. Catálogo Curricular (Asignaturas formativas, Temarios silábicos)
-4. Ofertas de Mentoría (Validación RN-04, aforo RN-05, estados)
+4. Ofertas de Mentoría (Validación RN-04 > 24h, aforo normativo RN-05, estados)
 5. Motor de Recomendación EdRecSys (Top-k ofertas y mentores, filtros)
 6. Reservas de Cupos (Creación transaccional, confirmación T-24h, desistimiento, liberación de cupos)
 7. Sesiones y Quórum (Evaluación a T-24h, contingencias normativas)
-8. Control de Asistencia y Bitácora (TOTP dinámico, check-in, bitácora pedagógica, SHA-256)
+8. Control de Asistencia y Bitácora (TOTP dinámico rotatorio, check-in, bitácora pedagógica, SHA-256)
 9. Administración y Certificación (RBAC, visado de bitácoras, resumen de horas, verificación pública)
 """
 
@@ -144,7 +153,8 @@ def seed_initial_catalog(db):
 
 def run_all_journeys():
     print("=" * 70)
-    print("INICIANDO VALIDACIÓN FUNCIONAL E INTEGRACIÓN REAL (QA-P2P-02)")
+    print("INICIANDO PRUEBAS DE INTEGRACIÓN DE API EN ENTORNO CONTROLADO")
+    print("Arquitectura: FastAPI TestClient + SQLite en memoria (StaticPool)")
     print("=" * 70)
 
     with TestSessionLocal() as db:
@@ -189,7 +199,10 @@ def run_all_journeys():
     from app.services.auth_service import _memory_challenges
 
     chal_obj = _memory_challenges.get(chal_id)
-    otp_valid = chal_obj.get("code_plain") if chal_obj else "123456"
+    assert (
+        chal_obj is not None and "code_plain" in chal_obj
+    ), "Fallo de preparación: el desafío OTP no fue registrado en el almacén de autenticación"
+    otp_valid = chal_obj["code_plain"]
 
     resp = client.post(
         "/api/v1/auth/otp/verify", json={"challengeId": chal_id, "otp": otp_valid}
@@ -239,7 +252,10 @@ def run_all_journeys():
     )
     chal_m = resp_m.json()["challengeId"]
     chal_obj_m = _memory_challenges.get(chal_m)
-    otp_m = chal_obj_m.get("code_plain") if chal_obj_m else "123456"
+    assert (
+        chal_obj_m is not None and "code_plain" in chal_obj_m
+    ), "Fallo de preparación: el desafío OTP de mentor no fue registrado"
+    otp_m = chal_obj_m["code_plain"]
     resp_v_m = client.post(
         "/api/v1/auth/otp/verify", json={"challengeId": chal_m, "otp": otp_m}
     )
@@ -553,7 +569,7 @@ def run_all_journeys():
         journey_8,
         "Generación de token QR TOTP dinámico",
         resp.status_code == 200,
-        f"TOTP: {resp.json().get('totp_code')}",
+        "Token TOTP dinámico de 30s generado exitosamente",
     )
     totp_active = resp.json().get("totp_code")
     token_str = resp.json().get("token")
@@ -600,7 +616,7 @@ def run_all_journeys():
         journey_8,
         "Registro formal de bitácora y generación SHA-256",
         resp.status_code == 201,
-        f"Hash: {resp.json().get('hash_firma')[:16]}...",
+        "Bitácora pedagógica registrada y sellada con hash SHA-256",
     )
     created_bitacora_id = resp.json().get("id_bitacora")
 
@@ -622,7 +638,10 @@ def run_all_journeys():
     )
     chal_a = resp_adm.json()["challengeId"]
     chal_obj_a = _memory_challenges.get(chal_a)
-    otp_a = chal_obj_a.get("code_plain") if chal_obj_a else "123456"
+    assert (
+        chal_obj_a is not None and "code_plain" in chal_obj_a
+    ), "Fallo de preparación: el desafío OTP de administrador no fue registrado"
+    otp_a = chal_obj_a["code_plain"]
     resp_v_a = client.post(
         "/api/v1/auth/otp/verify", json={"challengeId": chal_a, "otp": otp_a}
     )
@@ -680,10 +699,11 @@ def run_all_journeys():
     )
 
     print("=" * 70)
-    print("TODOS LOS RECORRIDOS FUNCIONALES (1 AL 9) FUERON VERIFICADOS CON ÉXITO")
+    print("30 COMPROBACIONES DE INTEGRACIÓN DE API VERIFICADAS CON ÉXITO")
     print(
         f"Total pruebas ejecutadas: {len(results_summary)} | APROBADAS: {sum(1 for r in results_summary if r['status'] == 'PASS')}"
     )
+    print("Clasificación: Pruebas de integración de endpoints FastAPI con SQLite en memoria")
     print("=" * 70)
 
 
