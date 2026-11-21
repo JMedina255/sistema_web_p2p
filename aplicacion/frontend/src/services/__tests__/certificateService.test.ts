@@ -105,8 +105,12 @@ describe('certificateService (T-42 / T-43 / T-44 / RF22 / RF23 / RN-14)', () => 
       const originalProd = import.meta.env.PROD;
       try {
         (import.meta.env as unknown as { PROD: boolean }).PROD = true;
-        expect(() => certificateService.setMode('mock')).toThrow(
-          /El modo mock no está permitido en producción/
+        // REL-P2P-02: el contrato actual rechaza mock redirigiendo a API, sin lanzar excepción.
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        certificateService.setMode('mock');
+        expect(certificateService.getMode()).toBe('api');
+        expect(errorSpy).toHaveBeenCalledWith(
+          expect.stringMatching(/El modo mock está estrictamente prohibido/i)
         );
       } finally {
         (import.meta.env as unknown as { PROD: boolean }).PROD = originalProd;
