@@ -31,6 +31,7 @@ from qa_db_hardening import (  # noqa: E402
     DatabaseSecurityError,
     build_isolated_db_url,
     create_isolated_schema,
+    extract_supabase_project_ref,
     generate_unique_test_schema,
     isolated_test_schema,
     resolve_qa_database_url,
@@ -182,7 +183,6 @@ class TestTargetUrlValidation:
             "localhost",
             "127.0.0.1",
             "::1",
-            "db.ieaxmtxpcrldbvmqwbyt.supabase.co",
         ],
     )
     def test_allowed_qa_hosts_accepted(self, good_host):
@@ -190,21 +190,59 @@ class TestTargetUrlValidation:
         url = f"postgresql+psycopg://user:pass@{host_repr}:5432/postgres"
         validate_qa_target_url(url)
 
+    def test_primary_supabase_host_rejected_by_default(self, monkeypatch):
+        # El host principal de Supabase ya no está en la lista blanca por defecto
+        monkeypatch.delenv("ALLOWED_QA_HOSTS", raising=False)
+        url = "postgresql+psycopg://user:pass@db.ieaxmtxpcrldbvmqwbyt.supabase.co:5432/postgres"
+        with pytest.raises(DatabaseSecurityError) as exc_info:
+            validate_qa_target_url(url)
+        assert "DESTINO NO AUTORIZADO" in str(exc_info.value)
+
     def test_custom_allowed_qa_hosts_via_env(self, monkeypatch):
-        monkeypatch.setenv("ALLOWED_QA_HOSTS", "custom-qa.internal,staging-db.test")
+        monkeypatch.setenv(
+            "ALLOWED_QA_HOSTS", "custom-qa.internal,staging-db.test,db.ieaxmtxpcrldbvmqwbyt.supabase.co"
+        )
         url = "postgresql+psycopg://user:pass@custom-qa.internal:5432/postgres"
         validate_qa_target_url(url)
+        # Con la variable de entorno, ahora sí es aceptado
+        supabase_url = "postgresql+psycopg://user:pass@db.ieaxmtxpcrldbvmqwbyt.supabase.co:5432/postgres"
+        validate_qa_target_url(supabase_url)
 
 
 class TestDestinationCollisionProtection:
     """Verifica que QA_DATABASE_URL no resuelva al mismo destino que DATABASE_URL."""
 
+    def test_extract_supabase_project_ref_direct_and_pooler(self):
+        direct_url = "postgresql+psycopg://postgres:secret@db.ieaxmtxpcrldbvmqwbyt.supabase.co:5432/postgres"
+        assert extract_supabase_project_ref(direct_url) == "ieaxmtxpcrldbvmqwbyt"
+
+        pooler_url = "postgresql+psycopg://postgres.ieaxmtxpcrldbvmqwbyt:secret@aws-0-us-east-1.pooler.supabase.com:5432/postgres"
+        assert extract_supabase_project_ref(pooler_url) == "ieaxmtxpcrldbvmqwbyt"
+
+        non_supabase = "postgresql+psycopg://user:pass@127.0.0.1:5432/qa_postgres"
+        assert extract_supabase_project_ref(non_supabase) is None
+
     def test_qa_same_destination_as_production_rejected(self, monkeypatch):
-        same_url = "postgresql+psycopg://postgres:secret@db.ieaxmtxpcrldbvmqwbyt.supabase.co:5432/postgres"
+        same_url = "postgresql+psycopg://postgres:secret@127.0.0.1:5432/postgres"
         monkeypatch.setenv("DATABASE_URL", same_url)
         with pytest.raises(DatabaseSecurityError) as exc_info:
             validate_qa_not_same_as_production(same_url, same_url)
         assert "COLISIÓN DE DESTINOS DETECTADA" in str(exc_info.value)
+
+    def test_qa_supabase_project_collision_across_direct_and_pooler_rejected(self, monkeypatch):
+        prod_direct = "postgresql+psycopg://postgres:secret@db.ieaxmtxpcrldbvmqwbyt.supabase.co:5432/postgres"
+        qa_pooler = "postgresql+psycopg://postgres.ieaxmtxpcrldbvmqwbyt:secret@aws-0-us-east-1.pooler.supabase.com:5432/postgres"
+        monkeypatch.setenv("DATABASE_URL", prod_direct)
+
+        with pytest.raises(DatabaseSecurityError) as exc_info:
+            validate_qa_not_same_as_production(qa_pooler, prod_direct)
+        assert "COLISIÓN DE PROYECTO SUPABASE DETECTADA" in str(exc_info.value)
+
+    def test_qa_distinct_supabase_projects_accepted(self, monkeypatch):
+        prod_url = "postgresql+psycopg://postgres:secret@db.ieaxmtxpcrldbvmqwbyt.supabase.co:5432/postgres"
+        staging_url = "postgresql+psycopg://postgres.stgprojectref1234567:secret@aws-0-us-east-1.pooler.supabase.com:5432/postgres"
+        monkeypatch.setenv("DATABASE_URL", prod_url)
+        validate_qa_not_same_as_production(staging_url, prod_url)
 
     def test_qa_different_destination_accepted(self, monkeypatch):
         prod_url = "postgresql+psycopg://postgres:secret@db.ieaxmtxpcrldbvmqwbyt.supabase.co:5432/postgres"
@@ -272,7 +310,7 @@ class TestSearchPathAndIdentityVerification:
             verify_database_identity_and_role(mock_engine)
         assert "DESTINO PROHIBIDO" in str(exc_info.value)
 
-        # current_database() legítimo -> PERMITIDO
+        # current_database() legítimo con rol de mínimos privilegios -> PERMITIDO
         mock_conn.execute.return_value.fetchone.return_value = (
             "postgres",
             "qa_role",
@@ -284,6 +322,62 @@ class TestSearchPathAndIdentityVerification:
         assert ident["database"] == "postgres"
         assert ident["current_user"] == "qa_role"
         assert ident["is_superuser"] is False
+        assert ident["can_create_role"] is False
+
+    def test_database_identity_rejects_superuser_role(self, monkeypatch):
+        monkeypatch.delenv("ALLOW_SUPERUSER_QA_ROLE", raising=False)
+        mock_engine = MagicMock()
+        mock_conn = MagicMock()
+        mock_engine.connect.return_value.__enter__.return_value = mock_conn
+
+        # Rol con rolsuper=True -> RECHAZADO por no cumplir least-privilege
+        mock_conn.execute.return_value.fetchone.return_value = (
+            "postgres",
+            "postgres_admin",
+            "postgres_admin",
+            True,
+            False,
+        )
+        with pytest.raises(DatabaseSecurityError) as exc_info:
+            verify_database_identity_and_role(mock_engine)
+        assert "PRIVILEGIOS EXCESIVOS RECHAZADOS" in str(exc_info.value)
+        assert "rolsuper=True" in str(exc_info.value)
+
+    def test_database_identity_rejects_createrole_privilege(self, monkeypatch):
+        monkeypatch.delenv("ALLOW_SUPERUSER_QA_ROLE", raising=False)
+        mock_engine = MagicMock()
+        mock_conn = MagicMock()
+        mock_engine.connect.return_value.__enter__.return_value = mock_conn
+
+        # Rol con rolcreaterole=True -> RECHAZADO
+        mock_conn.execute.return_value.fetchone.return_value = (
+            "postgres",
+            "qa_elevated_role",
+            "qa_elevated_role",
+            False,
+            True,
+        )
+        with pytest.raises(DatabaseSecurityError) as exc_info:
+            verify_database_identity_and_role(mock_engine)
+        assert "PRIVILEGIOS EXCESIVOS RECHAZADOS" in str(exc_info.value)
+        assert "rolcreaterole=True" in str(exc_info.value)
+
+    def test_database_identity_allows_superuser_when_explicitly_authorized(self, monkeypatch):
+        monkeypatch.setenv("ALLOW_SUPERUSER_QA_ROLE", "true")
+        mock_engine = MagicMock()
+        mock_conn = MagicMock()
+        mock_engine.connect.return_value.__enter__.return_value = mock_conn
+
+        mock_conn.execute.return_value.fetchone.return_value = (
+            "postgres",
+            "postgres",
+            "postgres",
+            True,
+            True,
+        )
+        ident = verify_database_identity_and_role(mock_engine)
+        assert ident["current_user"] == "postgres"
+        assert ident["is_superuser"] is True
 
 
 class TestSchemaLifecycleAndGuards:
@@ -425,3 +519,28 @@ class TestSchemaLifecycleAndGuards:
                 _ = 1 / 0
 
         assert yielded_schema not in _CREATED_SCHEMAS_IN_THIS_RUN
+
+    def test_isolated_test_schema_raises_when_teardown_fails(self):
+        mock_engine = MagicMock()
+        mock_engine.url = "postgresql+psycopg://user:pass@127.0.0.1:5432/qa_postgres"
+        mock_conn = MagicMock()
+        mock_engine.connect.return_value.__enter__.return_value = mock_conn
+
+        mock_conn.execute.return_value.fetchone.return_value = (
+            "postgres",
+            "qa_user",
+            "qa_user",
+            False,
+            False,
+        )
+        # Permite creación (scalar -> None)
+        mock_conn.execute.return_value.scalar.return_value = None
+
+        with patch("qa_db_hardening.safe_teardown_schema") as mock_teardown:
+            mock_teardown.side_effect = RuntimeError("Error forzado en DROP SCHEMA")
+
+            with pytest.raises(DatabaseSecurityError) as exc_info:
+                with isolated_test_schema(mock_engine) as s:
+                    assert s in _CREATED_SCHEMAS_IN_THIS_RUN
+
+            assert "FALLO CRÍTICO DE TEARDOWN" in str(exc_info.value)

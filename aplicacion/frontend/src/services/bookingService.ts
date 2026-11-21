@@ -6,6 +6,7 @@
 
 import { getApiBaseUrl } from './apiClient';
 import { authService } from './authService';
+import { assertAllowedMode, resolveInitialServiceMode } from './serviceMode';
 
 /**
  * Estados canónicos del ciclo de vida de una reserva de mentoría (CUS04 / MOD-05 / SAD).
@@ -1033,41 +1034,13 @@ export class MockBookingAdapter {
 // Fachada Principal del Servicio de Reservas
 // ============================================================================
 
-/**
- * Determina el modo inicial del servicio garantizando seguridad en producción.
- * En producción (import.meta.env.PROD), NUNCA se permite operar en modo mock.
- */
-function resolveInitialServiceMode(): 'mock' | 'api' {
-  if (import.meta.env.PROD) {
-    return 'api';
-  }
-  const envMode = import.meta.env.VITE_SERVICE_MODE;
-  if (envMode === 'mock') {
-    return 'mock';
-  }
-  if (envMode === 'api') {
-    return 'api';
-  }
-  if (import.meta.env.MODE === 'test') {
-    return 'mock';
-  }
-  return 'api';
-}
-
 const apiAdapterInstance = new ApiBookingAdapter();
 const mockAdapterInstance = new MockBookingAdapter();
 let currentServiceMode: 'mock' | 'api' = resolveInitialServiceMode();
 
 export const bookingService = {
   setMode(mode: 'mock' | 'api'): void {
-    if (import.meta.env.PROD && mode === 'mock') {
-      console.error(
-        'Violación de seguridad: El modo mock está estrictamente prohibido en compilaciones de producción.'
-      );
-      currentServiceMode = 'api';
-      return;
-    }
-    currentServiceMode = mode;
+    currentServiceMode = assertAllowedMode(mode);
   },
 
   getMode(): 'mock' | 'api' {

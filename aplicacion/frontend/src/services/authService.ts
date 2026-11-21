@@ -1,3 +1,5 @@
+import { assertAllowedMode, resolveInitialServiceMode } from './serviceMode';
+
 /**
  * Servicio de Autenticación y Desafío OTP (T-02 / CUS01 / RF01 / RNF01)
  *
@@ -459,23 +461,6 @@ export class ApiAuthAdapter {
 
 const apiAdapter = new ApiAuthAdapter();
 
-function resolveInitialServiceMode(): 'mock' | 'api' {
-  if (import.meta.env.PROD) {
-    return 'api';
-  }
-  const envMode = import.meta.env.VITE_SERVICE_MODE;
-  if (envMode === 'mock') {
-    return 'mock';
-  }
-  if (envMode === 'api') {
-    return 'api';
-  }
-  if (import.meta.env.MODE === 'test') {
-    return 'mock';
-  }
-  return 'api';
-}
-
 // Modo activo del servicio ('api' por defecto en ejecución real, 'mock' en entorno de pruebas Vitest)
 let currentMode: 'mock' | 'api' = resolveInitialServiceMode();
 const SESSION_TOKEN_KEY = 'p2p_epis_jwt_token';
@@ -498,7 +483,7 @@ export const authService = {
   },
 
   setMode(mode: 'mock' | 'api'): void {
-    currentMode = mode;
+    currentMode = assertAllowedMode(mode);
   },
 
   async requestOtp(payload: RequestOtpPayload): Promise<RequestOtpResponse> {

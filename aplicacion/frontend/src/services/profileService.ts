@@ -24,26 +24,10 @@ export interface AcademicProfile {
 }
 
 import { authService } from './authService';
+import { assertAllowedMode, resolveInitialServiceMode } from './serviceMode';
 
 const STORAGE_PROFILE_KEY = 'p2p_profile_';
 const STORAGE_AVAILABILITY_KEY = 'p2p_availability_';
-
-function resolveInitialServiceMode(): 'mock' | 'api' {
-  if (import.meta.env.PROD) {
-    return 'api';
-  }
-  const envMode = import.meta.env.VITE_SERVICE_MODE;
-  if (envMode === 'mock') {
-    return 'mock';
-  }
-  if (envMode === 'api') {
-    return 'api';
-  }
-  if (import.meta.env.MODE === 'test') {
-    return 'mock';
-  }
-  return 'api';
-}
 
 class ProfileService {
   private mode: 'mock' | 'api' = resolveInitialServiceMode();
@@ -65,7 +49,7 @@ class ProfileService {
   }
 
   public setMode(mode: 'mock' | 'api'): void {
-    this.mode = mode;
+    this.mode = assertAllowedMode(mode);
   }
 
   /**

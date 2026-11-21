@@ -19,6 +19,7 @@
 
 import { getApiBaseUrl } from './apiClient';
 import { authService } from './authService';
+import { assertAllowedMode, resolveInitialServiceMode } from './serviceMode';
 
 // ============================================================================
 // Tipos e Interfaces de Datos del Algoritmo EdRecSys (Esquemas Pydantic v2)
@@ -645,23 +646,6 @@ export class MockRecommendationAdapter {
 // Instancias y Fachada del Servicio (recommendationService)
 // ============================================================================
 
-function resolveInitialServiceMode(): 'mock' | 'api' {
-  if (import.meta.env.PROD) {
-    return 'api';
-  }
-  const envMode = import.meta.env.VITE_SERVICE_MODE;
-  if (envMode === 'mock') {
-    return 'mock';
-  }
-  if (envMode === 'api') {
-    return 'api';
-  }
-  if (import.meta.env.MODE === 'test') {
-    return 'mock';
-  }
-  return 'api';
-}
-
 const apiAdapterInstance = new ApiRecommendationAdapter();
 const mockAdapterInstance = new MockRecommendationAdapter();
 
@@ -674,7 +658,7 @@ export const recommendationService = {
   },
 
   setMode(mode: 'api' | 'mock'): void {
-    currentServiceMode = mode;
+    currentServiceMode = assertAllowedMode(mode);
   },
 
   setBaseUrl(url: string): void {

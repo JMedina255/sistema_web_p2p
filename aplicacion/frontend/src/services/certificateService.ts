@@ -5,6 +5,7 @@
  */
 
 import { authService } from './authService';
+import { assertAllowedMode, resolveInitialServiceMode } from './serviceMode';
 
 export interface CertificateMetaResponse {
   id_certificado: number;
@@ -332,20 +333,11 @@ class MockCertificateAdapter {
 const apiAdapter = new ApiCertificateAdapter();
 const mockAdapter = new MockCertificateAdapter();
 
-function resolveServiceMode(): 'mock' | 'api' {
-  if (import.meta.env.PROD) return 'api';
-  if (import.meta.env.VITE_SERVICE_MODE === 'api') return 'api';
-  return 'mock';
-}
-
-let activeMode = resolveServiceMode();
+let activeMode: 'mock' | 'api' = resolveInitialServiceMode();
 
 export const certificateService = {
   setMode(mode: 'mock' | 'api') {
-    if (import.meta.env.PROD && mode === 'mock') {
-      throw new Error('El modo mock no está permitido en producción.');
-    }
-    activeMode = mode;
+    activeMode = assertAllowedMode(mode);
   },
 
   getMode(): 'mock' | 'api' {
