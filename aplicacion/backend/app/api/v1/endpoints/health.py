@@ -25,18 +25,20 @@ async def check_health() -> dict[str, Any]:
     }
 
 
-@router.get("/health/db", summary="Verificación de conectividad a PostgreSQL / Supabase (Solo en desarrollo)")
+@router.get(
+    "/health/db", summary="Verificación de conectividad a PostgreSQL / Supabase (Desarrollo y pruebas)"
+)
 async def check_db_health():
     """
     Comprobación técnica de conexión a la base de datos PostgreSQL (Supabase) mediante SELECT 1.
-    Disponible únicamente en entorno de desarrollo ('development').
+    Disponible únicamente en entornos de desarrollo ('development') y pruebas ('test').
     Devuelve HTTP 200 si la conexión es exitosa, o HTTP 503 con detalle sanitizado
     si falla o no está configurada.
     """
-    if settings.APP_ENV != "development":
+    if settings.APP_ENV not in ("development", "test"):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Endpoint de diagnóstico de base de datos no disponible fuera del entorno de desarrollo.",
+            detail="Endpoint de diagnóstico de base de datos no disponible fuera del entorno de desarrollo o pruebas.",
         )
 
     is_ok, detail, latency_ms = test_db_connection()
