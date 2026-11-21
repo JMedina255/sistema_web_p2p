@@ -9,7 +9,7 @@ Create Date: 2026-11-13 09:00:00.000000
 from collections.abc import Sequence
 
 import sqlalchemy as sa
-from alembic import op
+from alembic import context, op
 
 # revision identifiers, used by Alembic.
 revision: str = "20261113_005"
@@ -20,8 +20,11 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     bind = op.get_bind()
-    inspector = sa.inspect(bind)
-    existing_tables = inspector.get_table_names()
+    if context.is_offline_mode():
+        existing_tables = []
+    else:
+        inspector = sa.inspect(bind)
+        existing_tables = inspector.get_table_names()
 
     # 1. Tabla asistencias_sesion (T-34 / T-36 / CUS12 / RF17 / RN-05 / RN-12)
     if "asistencias_sesion" not in existing_tables:
