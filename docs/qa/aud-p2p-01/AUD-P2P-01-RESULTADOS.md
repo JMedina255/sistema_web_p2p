@@ -58,6 +58,14 @@ En esta sesión se abordó de manera prioritaria la incidencia confirmada **P2P-
   - **Mensaje:** `fix(tests): desacoplar fixtures temporales en bookingService.test.ts para prevenir expiracion de cortes T-24h (P2P-BUG-001)`
   - **Hash Completo:** `8be2a28b57be28fec3da810ff408542b85d95856`
   - **Archivos Modificados:** `aplicacion/frontend/src/services/__tests__/bookingService.test.ts` (+7 / -5 líneas).
+* **Commit `f6bf53d`:**
+  - **Mensaje:** `docs(qa): incorporar documentacion integral de auditoria y remediacion AUD-P2P-01`
+  - **Hash Completo:** `f6bf53d2d9adfa914972e293a54d5b78b021d749`
+  - **Archivos Modificados:** 4 documentos en `docs/qa/aud-p2p-01/` (+385 líneas).
+* **Commit de Integración en `main` (Merge PR #19):**
+  - **Mensaje:** `Merge pull request #19 from JMedina255/fix/auditoria-integral-qa-20261121`
+  - **Hash Completo:** `432220960f4a4ec13c2382236689e363f766e57d`
+  - **Resultado en GitHub Actions CI:** Run #106 completado con veredicto **SUCCESS** (100% aprobado).
 
 ---
 
