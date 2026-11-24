@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { App } from '../App';
 import { authService } from '../services/authService';
+import * as apiClient from '../services/apiClient';
 
 describe('App Component (Navegación Institucional por Rol)', () => {
   beforeEach(() => {
@@ -36,6 +37,7 @@ describe('App Component (Navegación Institucional por Rol)', () => {
   });
 
   it('2. Navegación en rol mentor: muestra menú específico de mentoría', async () => {
+    vi.spyOn(apiClient, 'fetchCourses').mockResolvedValue([]);
     const mentorEmail = 'mentor.test@upt.pe';
     const testPayload = { sub: mentorEmail, roles: ['mentor', 'mentoreado'] };
     authService.saveToken(`h.${btoa(JSON.stringify(testPayload))}.s`);

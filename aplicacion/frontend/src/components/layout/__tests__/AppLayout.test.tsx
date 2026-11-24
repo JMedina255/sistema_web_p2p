@@ -35,6 +35,7 @@ describe('AppLayout Component (T-47 / T-49 / RNF05 / WCAG 2.1 AA)', () => {
     expect(screen.getByText(/3. 📜 Mis constancias/i)).toBeInTheDocument();
 
     const certBtn = screen.getByRole('button', { name: /3. 📜 Mis constancias/i });
+    expect(certBtn.parentElement).toHaveStyle({ flexWrap: 'wrap' });
     fireEvent.click(certBtn);
     expect(onSelectTab).toHaveBeenCalledWith('certificates');
   });

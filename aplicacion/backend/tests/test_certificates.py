@@ -500,3 +500,62 @@ def test_pdf_contains_embedded_qr_image_stream():
             assert obj.get("/ColorSpace") == "/DeviceRGB"
 
     assert image_found is True
+
+
+@pytest.mark.parametrize("issued_as_demo", [False, True])
+def test_download_regenerates_legacy_pdf_preserving_mode_at_issue(monkeypatch, issued_as_demo):
+    from types import SimpleNamespace
+    from unittest.mock import MagicMock
+
+    from app.core.config import settings
+    from app.services.storage_service import StorageService
+
+    monkeypatch.setattr(settings, "ENABLE_DEMO_WATERMARK", not issued_as_demo)
+    legacy_file = b"%PDF-1.4 legacy file with clipped text"
+    get_file = MagicMock(
+        side_effect=lambda bucket, name: legacy_file if name == "CERT-2026-II-9050.pdf" else None
+    )
+    monkeypatch.setattr(StorageService, "get_file", get_file)
+    cert = SimpleNamespace(
+        codigo_folio="CERT-2026-II-9050",
+        id_mentor="mentor@upt.pe",
+        periodo_academico="2026-II",
+        horas_acreditadas=20,
+        hash_firma="a" * 64,
+        created_at=datetime.now(UTC),
+        estado="EMITIDO_DEMO" if issued_as_demo else "EMITIDO",
+    )
+    db = MagicMock()
+    db.query.return_value.filter.return_value.first.side_effect = [cert, None]
+    data, _ = CertificateService.get_certificate_pdf(db, 9050)
+    content = PyPDF2.PdfReader(io.BytesIO(data)).pages[0].extract_text()
+    assert ("DEMO - FINES ACADÉMICOS" in content) == issued_as_demo
+    assert "CERT-2026-II-9050" in content
+    assert "a" * 64 in content
+    get_file.assert_called_once_with(settings.SUPABASE_BUCKET_CERTIFICATES, "CERT-2026-II-9050-layout-v2.pdf")
+
+
+def test_certificate_body_stays_inside_frame_with_long_identity():
+    import pymupdf
+
+    email = "mentor." + ("a" * 72) + "@upt.pe"
+    name = "María Alejandra del Carmen " * 4
+    pdf = CertificateService.compile_pdf(
+        mentor_name=name.strip(),
+        mentor_email=email,
+        codigo_folio="CERT-2026-II-0001",
+        periodo_academico="2026-II",
+        horas_acreditadas=21,
+        hash_firma="a" * 64,
+        fecha_emision=datetime(2026, 11, 24, tzinfo=UTC),
+        demo_watermark=False,
+    )
+    with pymupdf.open(stream=pdf, filetype="pdf") as document:
+        page = document[0]
+        content = page.get_text()
+        assert "La Dirección de la Escuela Profesional" in content
+        assert "documento que el/la estudiante mentor(a):" in " ".join(content.split())
+        assert email in "".join(content.split())
+        for left, top, right, bottom, *_ in page.get_text("words"):
+            assert 40 <= left < right <= page.rect.width - 40
+            assert 40 <= top < bottom <= page.rect.height - 40

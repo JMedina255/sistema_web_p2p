@@ -55,6 +55,8 @@ describe('SessionAttendanceView Component (T-34 / RF17 / CUS12 / RN-05 / RN-12)'
     });
     expect(getQrSpy).toHaveBeenCalledTimes(1);
 
+    const initialMatrix = screen.getByTestId("qr-code-display").innerHTML;
+
     // Avanzar reloj 30 segundos
     getQrSpy.mockResolvedValueOnce({
       session_id: sessionId,
@@ -70,6 +72,7 @@ describe('SessionAttendanceView Component (T-34 / RF17 / CUS12 / RN-05 / RN-12)'
     });
 
     expect(getQrSpy).toHaveBeenCalledTimes(2);
+    expect(screen.getByTestId("qr-code-display").innerHTML).not.toBe(initialMatrix);
   });
 
   // 3. Permite ingreso alternativo por código numérico de 6 dígitos

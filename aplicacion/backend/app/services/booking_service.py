@@ -5,13 +5,16 @@ import threading
 from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, status
-from sqlalchemy import text
+from sqlalchemy import func, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.models.attendance import AsistenciaSesion
 from app.models.booking import ReservaCupo, SolicitudDemanda
 from app.models.curriculum import Asignatura, TemaConceptual
 from app.models.offer import SesionMentoria
+from app.models.survey import EncuestaCalidad
 from app.schemas.booking import (
     BookingCancelPayload,
     BookingCreatePayload,
@@ -21,9 +24,10 @@ from app.schemas.booking import (
     MentoringDemandResponse,
     QuorumEvaluationResponse,
 )
+from app.schemas.offer import QuorumOverviewItem
 from app.services.consent_service import ConsentService
 from app.services.email_service import EmailService
-from app.services.offer_service import _memory_offers, seed_default_offers_in_memory
+from app.services.offer_service import OfferService, _memory_offers, seed_default_offers_in_memory
 
 logger = logging.getLogger("app.booking")
 
@@ -192,7 +196,7 @@ class BookingService:
     - Validación de corte de antelación T-24h (RN-04 / RN-08).
     - Regla de no-autoreserva del mentor titular.
     - Detección de reservas duplicadas (restricción uq_sesion_estudiante_activa).
-    - Evaluación formal de quórum del 50% institucional (RN-09 / CUS23).
+    - Evaluación formal de quórum del porcentaje configurado (RN-09 / CUS23).
     - Registro y consulta de solicitudes temáticas por demanda (CUS03 / RF07).
     """
 
@@ -617,15 +621,31 @@ class BookingService:
 
         if db is not None:
             try:
-                q = db.query(ReservaCupo).filter(ReservaCupo.estudiante_email.in_(list(set(student_aliases))))
+                q = (
+                    db.query(ReservaCupo, AsistenciaSesion.asistio, EncuestaCalidad.id_encuesta)
+                    .outerjoin(
+                        AsistenciaSesion,
+                        (AsistenciaSesion.id_sesion == ReservaCupo.id_sesion)
+                        & (AsistenciaSesion.estudiante_email == clean_email),
+                    )
+                    .outerjoin(
+                        EncuestaCalidad,
+                        (EncuestaCalidad.id_sesion == ReservaCupo.id_sesion)
+                        & (EncuestaCalidad.estudiante_email == clean_email),
+                    )
+                    .filter(ReservaCupo.estudiante_email.in_(student_aliases))
+                )
                 if estado:
                     q = q.filter(ReservaCupo.estado == estado)
                 rows = q.order_by(ReservaCupo.fecha_reserva.desc()).all()
                 results: list[BookingDetailResponse] = []
-                for r in rows:
+                for r, attended, survey_id in rows:
                     ses = r.sesion
                     results.append(
                         BookingDetailResponse(
+                            asistio=attended,
+                            survey_eligible=bool(attended and ses and not ses.estado.startswith("CANCELADA")),
+                            has_surveyed=survey_id is not None,
                             id_reserva=r.id_reserva,
                             codigo_reserva=r.codigo_reserva,
                             id_sesion=r.id_sesion,
@@ -648,19 +668,29 @@ class BookingService:
                         )
                     )
                 return results
-            except Exception:
-                pass
+            except SQLAlchemyError as exc:
+                raise HTTPException(503, "No se pudieron consultar las reservas.") from exc
 
         # Fallback en memoria
+        from app.services.survey_service import SurveyService
+
         with _booking_lock:
             seed_default_bookings_in_memory()
-            results = []
-            for b in _memory_bookings:
-                if b["estudiante_email"] == clean_email:
-                    if estado and b["estado"] != estado:
-                        continue
-                    results.append(BookingDetailResponse(**b))
-            return sorted(results, key=lambda x: x.fecha_reserva, reverse=True)
+            bookings = [
+                dict(b)
+                for b in _memory_bookings
+                if b["estudiante_email"] == clean_email and (not estado or b["estado"] == estado)
+            ]
+        known_sessions = {str(o.get("id_sesion")) for o in _memory_offers}
+        results = []
+        for b in bookings:
+            item = BookingDetailResponse(**b)
+            if str(b["id_sesion"]) in known_sessions:
+                survey = SurveyService.get_survey_status(None, b["id_sesion"], clean_email)
+                item.survey_eligible = survey.eligible
+                item.has_surveyed = survey.has_surveyed
+            results.append(item)
+        return sorted(results, key=lambda x: x.fecha_reserva, reverse=True)
 
     @classmethod
     def confirm_attendance(
@@ -1361,173 +1391,53 @@ class BookingService:
             return res
 
     @classmethod
+    def get_quorum_overview(cls, db: Session | None) -> list[QuorumOverviewItem]:
+        offers = OfferService.get_offers(
+            db,
+            estado=(
+                "PUBLICADA",
+                "PENDIENTE_CONFIRMACION",
+                "CONFIRMADA",
+                "QUORUM_INSUFICIENTE",
+                "EN_CURSO",
+            ),
+        )
+        active = ("PENDIENTE_CONFIRMACION", "CONFIRMADA", "ASISTIDA")
+        ratified = ("CONFIRMADA", "ASISTIDA")
+        counts = {}
+        if db is not None:
+            rows = (
+                db.query(
+                    ReservaCupo.id_sesion, func.count(), func.count().filter(ReservaCupo.estado.in_(ratified))
+                )
+                .filter(
+                    ReservaCupo.id_sesion.in_([int(o.id_oferta) for o in offers]),
+                    ReservaCupo.estado.in_(active),
+                )
+                .group_by(ReservaCupo.id_sesion)
+                .all()
+            )
+            counts = {sid: (total, confirmed) for sid, total, confirmed in rows}
+        else:
+            for booking in _memory_bookings:
+                if booking["estado"] in active:
+                    sid = booking["id_sesion"]
+                    total, confirmed = counts.get(sid, (0, 0))
+                    counts[sid] = (total + 1, confirmed + int(booking["estado"] in ratified))
+        result = []
+        for offer in offers:
+            enrolled, confirmed = counts.get(int(offer.id_oferta), (0, 0))
+            result.append(QuorumOverviewItem(**offer.model_dump(), inscritos=enrolled, ratificados=confirmed))
+        return result
+
+    @classmethod
     def evaluate_quorum(
         cls,
         db: Session | None,
         id_sesion: int,
     ) -> QuorumEvaluationResponse:
-        """
-        Evalúa el quórum normativo institucional (50% de aforo en T-24h) según RN-08 y RN-09.
-        Caduca a NO_CONFIRMADA las reservas provisionales no ratificadas al cumplirse T-24h.
-        """
-        now_utc = datetime.now(UTC)
-        cutoff_hours = float(settings.QUORUM_CUTOFF_HOURS)
-        min_quorum_pct = float(settings.QUORUM_MINIMUM_PERCENTAGE)
-
-        # 1. Recuperar sesión
-        if db is not None:
-            sesion = db.query(SesionMentoria).filter(SesionMentoria.id_sesion == id_sesion).first()
-            if not sesion:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="La sesión de mentoría no existe.",
-                )
-            s_start = sesion.fecha_inicio
-            if s_start.tzinfo is None:
-                s_start = s_start.replace(tzinfo=UTC)
-
-            hours_to_start = (s_start - now_utc).total_seconds() / 3600.0
-
-            # Si ya cruzó la ventana T-24h, transicionar reservas provisionales a NO_CONFIRMADA
-            if hours_to_start <= cutoff_hours:
-                unconfirmed = (
-                    db.query(ReservaCupo)
-                    .filter(
-                        ReservaCupo.id_sesion == id_sesion,
-                        ReservaCupo.estado == "PENDIENTE_CONFIRMACION",
-                    )
-                    .all()
-                )
-                for u in unconfirmed:
-                    u.estado = "NO_CONFIRMADA"
-                    u.motivo_cancelacion = (
-                        f"Expiración automática por no ratificación en T-{int(cutoff_hours)}h (RN-08)."
-                    )
-                if unconfirmed:
-                    db.commit()
-
-            # Contar confirmadas
-            confirmed_count = (
-                db.query(ReservaCupo)
-                .filter(ReservaCupo.id_sesion == id_sesion, ReservaCupo.estado == "CONFIRMADA")
-                .count()
-            )
-            total_active = (
-                db.query(ReservaCupo)
-                .filter(
-                    ReservaCupo.id_sesion == id_sesion,
-                    ReservaCupo.estado.in_(["PENDIENTE_CONFIRMACION", "CONFIRMADA"]),
-                )
-                .count()
-            )
-
-            aforo = sesion.aforo_maximo
-            pct = round((confirmed_count / aforo) * 100.0, 2)
-            cumple = pct >= min_quorum_pct
-
-            # Actualizar estado de sesión si corresponde
-            if hours_to_start <= cutoff_hours:
-                if cumple and sesion.estado == "PUBLICADA":
-                    sesion.estado = "CONFIRMADA"
-                    db.commit()
-                elif not cumple and sesion.estado == "PUBLICADA":
-                    sesion.estado = "PENDIENTE_CONFIRMACION"
-                    db.commit()
-
-            msg = (
-                f"Quórum alcanzado: {pct}% ({confirmed_count}/{aforo} confirmados). Sesión apta."
-                if cumple
-                else f"Quórum insuficiente: {pct}% ({confirmed_count}/{aforo} confirmados). Requiere mínimo {int(min_quorum_pct)}% según RN-09."
-            )
-
-            return QuorumEvaluationResponse(
-                id_sesion=sesion.id_sesion,
-                codigo_sesion=sesion.codigo_sesion,
-                aforo_maximo=aforo,
-                reservas_totales=total_active,
-                reservas_confirmadas=confirmed_count,
-                porcentaje_quorum=pct,
-                quorum_minimo_requerido=min_quorum_pct,
-                cumple_quorum=cumple,
-                estado_sesion=sesion.estado,
-                horas_antelacion=round(hours_to_start, 2),
-                mensaje=msg,
-            )
-
-        # Fallback en memoria
-        with _booking_lock:
-            target = None
-            for off in _memory_offers:
-                if off.get("id_sesion") == id_sesion or str(off.get("id_sesion")) == str(id_sesion):
-                    target = off
-                    break
-
-            if not target:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="La sesión de mentoría no existe.",
-                )
-
-            f_str = target.get("fecha_inicio", "")
-            try:
-                s_dt = datetime.fromisoformat(f_str.replace("Z", "+00:00"))
-                if s_dt.tzinfo is None:
-                    s_dt = s_dt.replace(tzinfo=UTC)
-            except Exception:
-                s_dt = now_utc + timedelta(hours=30)
-
-            hours = (s_dt - now_utc).total_seconds() / 3600.0
-            if hours <= cutoff_hours:
-                for b in _memory_bookings:
-                    if (b["id_sesion"] == id_sesion or str(b["id_sesion"]) == str(id_sesion)) and b[
-                        "estado"
-                    ] == "PENDIENTE_CONFIRMACION":
-                        b["estado"] = "NO_CONFIRMADA"
-                        b["motivo_cancelacion"] = (
-                            f"Expiración automática por no ratificación en T-{int(cutoff_hours)}h (RN-08)."
-                        )
-
-            confirmed = sum(
-                1
-                for b in _memory_bookings
-                if (b["id_sesion"] == id_sesion or str(b["id_sesion"]) == str(id_sesion))
-                and b["estado"] == "CONFIRMADA"
-            )
-            active = sum(
-                1
-                for b in _memory_bookings
-                if (b["id_sesion"] == id_sesion or str(b["id_sesion"]) == str(id_sesion))
-                and b["estado"] in ["PENDIENTE_CONFIRMACION", "CONFIRMADA"]
-            )
-            aforo = target.get("aforo_maximo", 10)
-            pct = round((confirmed / aforo) * 100.0, 2)
-            cumple = pct >= min_quorum_pct
-
-            if hours <= cutoff_hours:
-                if cumple and target.get("estado") == "PUBLICADA":
-                    target["estado"] = "CONFIRMADA"
-                elif not cumple and target.get("estado") == "PUBLICADA":
-                    target["estado"] = "PENDIENTE_CONFIRMACION"
-
-            msg = (
-                f"Quórum alcanzado: {pct}% ({confirmed}/{aforo} confirmados). Sesión apta."
-                if cumple
-                else f"Quórum insuficiente: {pct}% ({confirmed}/{aforo} confirmados). Requiere mínimo {int(min_quorum_pct)}% según RN-09."
-            )
-
-            return QuorumEvaluationResponse(
-                id_sesion=id_sesion,
-                codigo_sesion=target.get("codigo_sesion", f"SES-{id_sesion}"),
-                aforo_maximo=aforo,
-                reservas_totales=active,
-                reservas_confirmadas=confirmed,
-                porcentaje_quorum=pct,
-                quorum_minimo_requerido=min_quorum_pct,
-                cumple_quorum=cumple,
-                estado_sesion=target.get("estado", "PUBLICADA"),
-                horas_antelacion=round(hours, 2),
-                mensaje=msg,
-            )
+        """Compatibility entry point for the canonical, idempotent T-24h evaluation."""
+        return cls.evaluate_session_quorum(db, id_sesion)
 
     @classmethod
     def evaluate_session_quorum(
@@ -1549,16 +1459,13 @@ class BookingService:
 
         if db is not None:
             # Cerrojo pesimista de fila para control estricto de concurrencia e idempotencia (T-30)
-            try:
-                sesion = (
-                    db.query(SesionMentoria)
-                    .filter(SesionMentoria.id_sesion == id_sesion)
-                    .with_for_update(of=SesionMentoria)
-                    .first()
-                )
-            except Exception:
-                db.rollback()
-                sesion = db.query(SesionMentoria).filter(SesionMentoria.id_sesion == id_sesion).first()
+            sesion = (
+                db.query(SesionMentoria)
+                .filter(SesionMentoria.id_sesion == id_sesion)
+                .populate_existing()
+                .with_for_update(of=SesionMentoria)
+                .first()
+            )
 
             if not sesion:
                 raise HTTPException(
@@ -1575,7 +1482,7 @@ class BookingService:
                 )
                 aforo = sesion.aforo_maximo
                 pct = round((confirmed_count / aforo) * 100.0, 2)
-                cumple = sesion.estado == "CONFIRMADA"
+                cumple = confirmed_count >= settings.quorum_minimum_students(aforo)
                 return QuorumEvaluationResponse(
                     id_sesion=sesion.id_sesion,
                     codigo_sesion=sesion.codigo_sesion,
@@ -1596,10 +1503,6 @@ class BookingService:
 
             hours_to_start = (s_start - now_utc).total_seconds() / 3600.0
 
-            # Umbral normativo: Presencial >= 3 alumnos confirmados (o 50%); Virtual >= 5 (o 50%)
-            is_presencial = (sesion.modalidad or "presencial").lower() == "presencial"
-            min_students = 3 if is_presencial else 5
-
             confirmed_count = (
                 db.query(ReservaCupo)
                 .filter(ReservaCupo.id_sesion == id_sesion, ReservaCupo.estado == "CONFIRMADA")
@@ -1615,10 +1518,11 @@ class BookingService:
             )
             aforo = sesion.aforo_maximo
             pct = round((confirmed_count / aforo) * 100.0, 2)
-            cumple = confirmed_count >= min_students or pct >= min_quorum_pct
+            min_students = settings.quorum_minimum_students(aforo)
+            cumple = confirmed_count >= min_students
 
             # Transición perentoria en ventana T-24h
-            if hours_to_start <= cutoff_hours:
+            if hours_to_start <= cutoff_hours and sesion.estado in ("PUBLICADA", "PENDIENTE_CONFIRMACION"):
                 unconfirmed = (
                     db.query(ReservaCupo)
                     .filter(
@@ -1658,9 +1562,9 @@ class BookingService:
                         logger.warning("Fallo al enviar alerta de quórum por correo: %s", email_err)
 
             msg = (
-                f"Quórum alcanzado: {pct}% ({confirmed_count}/{aforo} confirmados). Sesión confirmada reglamentariamente."
+                f"Quórum alcanzado: {pct}% ({confirmed_count}/{aforo} confirmados)."
                 if cumple
-                else f"Quórum insuficiente: {pct}% ({confirmed_count}/{aforo} confirmados). Sesión mutada a QUORUM_INSUFICIENTE para resolución del mentor (RN-10)."
+                else f"Quórum insuficiente: {pct}% ({confirmed_count}/{aforo} confirmados)."
             )
 
             return QuorumEvaluationResponse(
@@ -1701,7 +1605,7 @@ class BookingService:
                 )
                 aforo = target.get("aforo_maximo", 10)
                 pct = round((confirmed / aforo) * 100.0, 2)
-                cumple = target.get("estado") == "CONFIRMADA"
+                cumple = confirmed >= settings.quorum_minimum_students(aforo)
                 return QuorumEvaluationResponse(
                     id_sesion=id_sesion,
                     codigo_sesion=target.get("codigo_sesion", f"SES-{id_sesion}"),
@@ -1725,18 +1629,6 @@ class BookingService:
                 s_dt = now_utc + timedelta(hours=30)
 
             hours = (s_dt - now_utc).total_seconds() / 3600.0
-            is_presencial = (target.get("modalidad") or "presencial").lower() == "presencial"
-            min_students = 3 if is_presencial else 5
-
-            if hours <= cutoff_hours:
-                for b in _memory_bookings:
-                    if (b["id_sesion"] == id_sesion or str(b["id_sesion"]) == str(id_sesion)) and b[
-                        "estado"
-                    ] == "PENDIENTE_CONFIRMACION":
-                        b["estado"] = "CANCELADA_NO_CONFIRMADA"
-                        b["motivo_cancelacion"] = (
-                            f"Expiración automática por falta de ratificación en T-{int(cutoff_hours)}h (RN-08/RN-09)."
-                        )
 
             confirmed = sum(
                 1
@@ -1752,9 +1644,18 @@ class BookingService:
             )
             aforo = target.get("aforo_maximo", 10)
             pct = round((confirmed / aforo) * 100.0, 2)
-            cumple = confirmed >= min_students or pct >= min_quorum_pct
+            min_students = settings.quorum_minimum_students(aforo)
+            cumple = confirmed >= min_students
 
-            if hours <= cutoff_hours:
+            if hours <= cutoff_hours and target.get("estado") in ("PUBLICADA", "PENDIENTE_CONFIRMACION"):
+                for b in _memory_bookings:
+                    if (b["id_sesion"] == id_sesion or str(b["id_sesion"]) == str(id_sesion)) and b[
+                        "estado"
+                    ] == "PENDIENTE_CONFIRMACION":
+                        b["estado"] = "CANCELADA_NO_CONFIRMADA"
+                        b["motivo_cancelacion"] = (
+                            f"Expiración automática por falta de ratificación en T-{int(cutoff_hours)}h (RN-08/RN-09)."
+                        )
                 if cumple:
                     target["estado"] = "CONFIRMADA"
                 else:
@@ -1777,9 +1678,9 @@ class BookingService:
                         )
 
             msg = (
-                f"Quórum alcanzado: {pct}% ({confirmed}/{aforo} confirmados). Sesión confirmada."
+                f"Quórum alcanzado: {pct}% ({confirmed}/{aforo} confirmados)."
                 if cumple
-                else f"Quórum insuficiente: {pct}% ({confirmed}/{aforo} confirmados). Sesión en QUORUM_INSUFICIENTE."
+                else f"Quórum insuficiente: {pct}% ({confirmed}/{aforo} confirmados)."
             )
 
             return QuorumEvaluationResponse(
@@ -1815,7 +1716,7 @@ class BookingService:
             sessions = (
                 db.query(SesionMentoria)
                 .filter(
-                    SesionMentoria.estado == "PUBLICADA",
+                    SesionMentoria.estado.in_(("PUBLICADA", "PENDIENTE_CONFIRMACION")),
                     SesionMentoria.quorumevaluated_at.is_(None),
                     SesionMentoria.fecha_inicio <= max_start,
                 )
@@ -1833,7 +1734,10 @@ class BookingService:
         with _booking_lock:
             eligible_ids: list[int] = []
             for off in _memory_offers:
-                if off.get("estado") == "PUBLICADA" and off.get("quorumevaluated_at") is None:
+                if (
+                    off.get("estado") in ("PUBLICADA", "PENDIENTE_CONFIRMACION")
+                    and off.get("quorumevaluated_at") is None
+                ):
                     f_str = off.get("fecha_inicio", "")
                     try:
                         s_dt = datetime.fromisoformat(f_str.replace("Z", "+00:00"))

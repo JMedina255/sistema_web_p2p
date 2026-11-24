@@ -409,33 +409,50 @@ class AttendanceService:
 
     @classmethod
     def get_roster(cls, db: Session | None, session_id: int) -> list[AttendanceItemResponse]:
+        states = ("CONFIRMADA", "ASISTIDA", "INASISTENCIA")
         if db is not None:
-            records = (
-                db.query(AsistenciaSesion)
-                .filter(AsistenciaSesion.id_sesion == session_id)
-                .order_by(AsistenciaSesion.estudiante_email.asc())
+            rows = (
+                db.query(ReservaCupo, AsistenciaSesion)
+                .outerjoin(
+                    AsistenciaSesion,
+                    (AsistenciaSesion.id_sesion == ReservaCupo.id_sesion)
+                    & (AsistenciaSesion.estudiante_email == ReservaCupo.estudiante_email),
+                )
+                .filter(ReservaCupo.id_sesion == session_id, ReservaCupo.estado.in_(states))
+                .order_by(ReservaCupo.estudiante_email)
                 .all()
             )
             return [
                 AttendanceItemResponse(
-                    id_asistencia=r.id_asistencia,
-                    id_sesion=r.id_sesion,
-                    estudiante_email=r.estudiante_email,
-                    asistio=r.asistio,
-                    fecha_checkin=r.fecha_checkin.isoformat() if r.fecha_checkin else None,
+                    id_asistencia=a.id_asistencia if a else None,
+                    id_sesion=session_id,
+                    estudiante_email=b.estudiante_email,
+                    asistio=bool(a and a.asistio),
+                    pendiente=a is None and b.estado != "INASISTENCIA",
+                    fecha_checkin=a.fecha_checkin.isoformat() if a and a.fecha_checkin else None,
                 )
-                for r in records
+                for b, a in rows
             ]
 
+        with _booking_lock:
+            enrolled = {
+                b["estudiante_email"]: b["estado"]
+                for b in _memory_bookings
+                if b["id_sesion"] == session_id and b["estado"] in states
+            }
         with _attendance_lock:
-            items = [a for a in _memory_attendances if a["id_sesion"] == session_id]
-            return [
-                AttendanceItemResponse(
-                    id_asistencia=a["id_asistencia"],
-                    id_sesion=a["id_sesion"],
-                    estudiante_email=a["estudiante_email"],
-                    asistio=a["asistio"],
-                    fecha_checkin=a.get("fecha_checkin"),
+            records = {a["estudiante_email"]: a for a in _memory_attendances if a["id_sesion"] == session_id}
+            result = []
+            for email, state in sorted(enrolled.items()):
+                record = records.get(email, {})
+                result.append(
+                    AttendanceItemResponse(
+                        id_asistencia=record.get("id_asistencia"),
+                        id_sesion=session_id,
+                        estudiante_email=email,
+                        asistio=bool(record.get("asistio")),
+                        pendiente=not record and state != "INASISTENCIA",
+                        fecha_checkin=record.get("fecha_checkin"),
+                    )
                 )
-                for a in items
-            ]
+            return result

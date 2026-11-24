@@ -77,22 +77,34 @@ def test_quorum_t29_presencial_below_3_mutates_to_insuficiente_in_memory():
     assert unconf["estado"] == "CANCELADA_NO_CONFIRMADA"
 
 
-def test_quorum_t29_presencial_at_least_3_confirms_session_in_memory():
-    """T-29: Quórum presencial con 3 o más confirmados transiciona a CONFIRMADA."""
+@pytest.mark.parametrize(
+    "aforo,count,percentage,expected",
+    [
+        (10, 3, 50, False),
+        (10, 5, 50, True),
+        (20, 5, 50, False),
+        (20, 10, 50, True),
+        (10, 4, 40, True),
+    ],
+)
+def test_quorum_uses_configured_percentage(monkeypatch, aforo, count, percentage, expected):
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "QUORUM_MINIMUM_PERCENTAGE", percentage)
     now = datetime.now(UTC)
     _memory_offers.append(
         {
             "id_sesion": 502,
             "codigo_sesion": "SES-Q-502",
             "mentor_email": "mentor.q@upt.pe",
-            "modalidad": "presencial",
-            "aforo_maximo": 10,
+            "modalidad": "presencial" if aforo == 10 else "virtual",
+            "aforo_maximo": aforo,
             "estado": "PUBLICADA",
             "fecha_inicio": (now + timedelta(hours=20)).isoformat(),
             "quorumevaluated_at": None,
         }
     )
-    for i in range(3):
+    for i in range(count):
         _memory_bookings.append(
             {
                 "id_reserva": 10 + i,
@@ -105,9 +117,9 @@ def test_quorum_t29_presencial_at_least_3_confirms_session_in_memory():
     res = client.post("/api/v1/quorum/evaluate?mode=sprint6", json={"id_sesion": 502}, headers=AUTH_HEADERS)
     assert res.status_code == 200
     data = res.json()
-    assert data["cumple_quorum"] is True
-    assert data["estado_sesion"] == "CONFIRMADA"
-    assert data["reservas_confirmadas"] == 3
+    assert data["cumple_quorum"] is expected
+    assert data["estado_sesion"] == ("CONFIRMADA" if expected else "QUORUM_INSUFICIENTE")
+    assert data["reservas_confirmadas"] == count
 
 
 def test_quorum_t30_idempotency_prevents_duplicate_evaluation_in_memory():
@@ -125,7 +137,7 @@ def test_quorum_t30_idempotency_prevents_duplicate_evaluation_in_memory():
             "quorumevaluated_at": None,
         }
     )
-    for i in range(3):
+    for i in range(5):
         _memory_bookings.append(
             {
                 "id_reserva": 20 + i,
@@ -167,7 +179,7 @@ def test_quorum_t29_evaluate_all_active_quorums():
             "quorumevaluated_at": None,
         }
     )
-    for i in range(4):
+    for i in range(5):
         _memory_bookings.append(
             {
                 "id_reserva": 30 + i,
@@ -260,3 +272,16 @@ def test_quorum_t29_and_t30_in_real_db_with_row_locking():
     finally:
         db.close()
         engine.dispose()
+
+
+def test_admin_overview_counts_active_and_ratified_reservations():
+    _memory_offers[0]["estado"] = "QUORUM_INSUFICIENTE"
+    sid = _memory_offers[0]["id_sesion"]
+    _memory_bookings.extend(
+        {"id_sesion": sid, "estado": estado}
+        for estado in ("PENDIENTE_CONFIRMACION", "CONFIRMADA", "CANCELADA_USUARIO")
+    )
+    res = client.get("/api/v1/quorum/overview", headers=AUTH_HEADERS)
+    assert res.status_code == 200
+    row = next(r for r in res.json() if int(r["id_oferta"]) == sid)
+    assert (row["estado"], row["inscritos"], row["ratificados"]) == ("QUORUM_INSUFICIENTE", 2, 1)

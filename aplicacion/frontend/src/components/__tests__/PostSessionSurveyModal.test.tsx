@@ -8,6 +8,11 @@ describe('PostSessionSurveyModal Component (T-38 / PB-020 / RF18 / RN-12 / RN-13
   const sessionTitle = 'Estructuras de Datos y Algoritmos en C++';
   const mentorName = 'mentor.sistemas@upt.pe';
 
+  it('sitúa el foco dentro del diálogo al abrirlo', () => {
+    render(<PostSessionSurveyModal isOpen onClose={() => {}} sessionId={7} />);
+    expect(screen.getByRole('dialog')).toContainElement(document.activeElement as HTMLElement);
+  });
+
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -159,6 +164,18 @@ describe('PostSessionSurveyModal Component (T-38 / PB-020 / RF18 / RN-12 / RN-13
       expect(screen.getByText(/¡Gracias por tu Evaluación!/i)).toBeInTheDocument();
       expect(onSurveySubmittedMock).toHaveBeenCalled();
     });
+  });
+
+  it('reconoce una encuesta registrada desde otra pestaña', async () => {
+    const alreadySubmitted = vi.fn();
+    vi.spyOn(surveyService, 'submitSurvey').mockRejectedValue(new Error('DUPLICATE_SURVEY_SUBMISSION'));
+    render(<PostSessionSurveyModal isOpen onClose={vi.fn()} sessionId={sessionId} sessionTitle={sessionTitle}
+      mentorName={mentorName} asistenciaConfirmada onAlreadySubmitted={alreadySubmitted} />);
+    screen.getAllByRole('button', { name: /Calificar con 4 estrellas/i }).forEach(button => fireEvent.click(button));
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'El mentor resolvió las preguntas del grupo.' } });
+    fireEvent.click(screen.getByRole('button', { name: /Enviar Evaluación/i }));
+    await waitFor(() => expect(alreadySubmitted).toHaveBeenCalledTimes(1));
+    expect(screen.getByText(/¡Gracias por tu Evaluación!/i)).toBeInTheDocument();
   });
 
   it('5. Accesibilidad WAI-ARIA (RNF05): cierra el diálogo modal al presionar la tecla Escape', () => {

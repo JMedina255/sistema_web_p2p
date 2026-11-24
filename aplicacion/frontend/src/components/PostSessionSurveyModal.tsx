@@ -2,7 +2,8 @@
  * Modal de Encuesta de Calidad y Satisfacción Post-Mentoría (T-38 / PB-020 / RF18 / CUS05 / RN-12 / RN-13 / RNF05)
  */
 
-import React, { useState, useId, useEffect } from 'react';
+import React, { useState, useId, useEffect, useRef } from 'react';
+import './PostSessionSurveyModal.css';
 import { surveyService, type SurveyPayload, type SurveyResponse } from '../services/surveyService';
 
 export interface PostSessionSurveyModalProps {
@@ -14,6 +15,7 @@ export interface PostSessionSurveyModalProps {
   sessionEndDate?: string | Date;
   asistenciaConfirmada?: boolean;
   currentTime?: number;
+  onAlreadySubmitted?: () => void;
   onSurveySubmitted?: (survey: SurveyResponse) => void;
 }
 
@@ -56,9 +58,20 @@ export const PostSessionSurveyModal: React.FC<PostSessionSurveyModalProps> = ({
   asistenciaConfirmada = true,
   currentTime,
   onSurveySubmitted,
+  onAlreadySubmitted,
 }) => {
   const titleId = useId();
   const descId = useId();
+
+  const dialog = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isOpen || !asistenciaConfirmada || !dialog.current) return;
+    const trigger = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    dialog.current.focus();
+    return () => { document.body.style.overflow = overflow; trigger?.focus(); };
+  }, [isOpen, asistenciaConfirmada]);
 
   // Escalas Likert (1 a 5)
   const [ratings, setRatings] = useState<{
@@ -161,6 +174,11 @@ export const PostSessionSurveyModal: React.FC<PostSessionSurveyModalProps> = ({
         onSurveySubmitted(response);
       }
     } catch (err) {
+      if (err instanceof Error && err.message.includes('DUPLICATE_SURVEY_SUBMISSION')) {
+        onAlreadySubmitted?.();
+        setSuccessSubmitted(true);
+        return;
+      }
       setErrorMessage(
         err instanceof Error
           ? err.message
@@ -178,53 +196,66 @@ export const PostSessionSurveyModal: React.FC<PostSessionSurveyModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+      className="survey-overlay"
+      ref={dialog}
+      tabIndex={-1}
+      onKeyDown={event => {
+        if (event.key !== 'Tab') return;
+        const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
+          'button:not(:disabled), textarea:not(:disabled)'
+        ));
+        const target = event.shiftKey ? controls[controls.length - 1] : controls[0];
+        if (event.shiftKey ? (document.activeElement === controls[0] || document.activeElement === dialog.current)
+            : document.activeElement === controls[controls.length - 1]) {
+          event.preventDefault();
+          target?.focus();
+        }
+      }}
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
       aria-describedby={descId}
-    >
-      <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
+  >
+      <div className="survey-panel">
         {/* Cabecera */}
-        <div className="px-6 py-5 bg-gradient-to-r from-blue-700 via-indigo-700 to-indigo-800 text-white flex items-center justify-between">
+        <div className="survey-heading">
           <div>
-            <span className="text-xs font-semibold tracking-wider uppercase text-blue-200">
+            <span>
               Evaluación Formativa Post-Mentoría (RF18)
             </span>
-            <h2 id={titleId} className="text-xl font-bold mt-0.5">
+            <h2 id={titleId}>
               Encuesta de Calidad Docente
             </h2>
-            <p id={descId} className="text-xs text-blue-100 mt-1">
+            <p id={descId}>
               {sessionTitle} — Mentor: {mentorName}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-blue-200 hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
             aria-label="Cerrar modal de evaluación"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        >
+            <svg  fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Contenido / Cuerpo */}
-        <div className="p-6 overflow-y-auto space-y-6">
+        <div className="survey-content">
           {/* Alerta de Ventana de 24 horas Expirada (RN-13) */}
           {isExpired && (
             <div
-              className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-sm flex items-start gap-3"
+              className="survey-notice"
               role="alert"
-            >
-              <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          >
+              <svg  fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <div>
-                <p className="font-semibold text-amber-800 dark:text-amber-300">
+                <p>
                   Encuesta Cerrada (Plazo de 24h Vencido)
                 </p>
-                <p className="mt-1 text-xs text-amber-700 dark:text-amber-300/90 leading-relaxed">
+                <p>
                   Conforme a la regla <strong>RN-13</strong>, las encuestas deben emitirse dentro de las 24 horas posteriores al cierre formal de la mentoría. Esta sesión ha superado la ventana reglamentaria.
                 </p>
               </div>
@@ -234,37 +265,37 @@ export const PostSessionSurveyModal: React.FC<PostSessionSurveyModalProps> = ({
           {/* Banner de Éxito Tras el Envío */}
           {successSubmitted ? (
             <div
-              className="p-6 text-center space-y-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl"
+              className="survey-success"
               aria-live="polite"
-            >
-              <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-900/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          >
+              <div>
+                <svg  fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-emerald-900 dark:text-emerald-200">
+              <h3>
                 ¡Gracias por tu Evaluación!
               </h3>
-              <p className="text-sm text-emerald-700 dark:text-emerald-300 max-w-md mx-auto">
+              <p>
                 Tu retroalimentación cualitativa y psicométrica ha sido registrada exitosamente. Tus aportes son fundamentales para la acreditación académica y mejora formativa en la EPIS-UPT.
               </p>
               <button
                 type="button"
                 onClick={onClose}
-                className="mt-4 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm transition-colors focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-              >
+                className="survey-primary"
+            >
                 Cerrar Ventana
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6" aria-busy={submitting}>
+            <form onSubmit={handleSubmit}  aria-busy={submitting}>
               {/* Alerta de Error */}
               {errorMessage && (
                 <div
-                  className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-sm flex items-start gap-2.5"
+                  className="survey-notice"
                   role="alert"
-                >
-                  <svg className="w-5 h-5 text-rose-600 dark:text-rose-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              >
+                  <svg  fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span>{errorMessage}</span>
@@ -272,29 +303,29 @@ export const PostSessionSurveyModal: React.FC<PostSessionSurveyModalProps> = ({
               )}
 
               {/* Escalas Likert por Dimensión */}
-              <div className="space-y-4">
+              <div>
                 {DIMENSIONS.map((dim) => {
                   const currentValue = ratings[dim.id];
                   return (
                     <div
                       key={dim.id}
-                      className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 space-y-2"
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                      className="survey-dimension"
+                  >
+                      <div>
                         <div>
-                          <label className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                          <label>
                             {dim.label}
                           </label>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                          <p>
                             {dim.description}
                           </p>
                         </div>
                         {/* Selector de 1 a 5 Estrellas */}
                         <div
-                          className="flex items-center gap-1.5 pt-1 sm:pt-0"
+                          className="survey-stars"
                           role="group"
                           aria-label={`Calificación para ${dim.label}`}
-                        >
+                      >
                           {[1, 2, 3, 4, 5].map((star) => {
                             const isSelected = star <= currentValue;
                             return (
@@ -305,23 +336,19 @@ export const PostSessionSurveyModal: React.FC<PostSessionSurveyModalProps> = ({
                                 onClick={() => handleRatingChange(dim.id, star)}
                                 onKeyDown={(e) => handleRatingKeyDown(e, dim.id, star)}
                                 aria-label={`Calificar con ${star} estrellas`}
-                                title={`${star} estrella${star > 1 ? 's' : ''}`}
-                                className={`p-1.5 rounded-lg transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500 active:scale-95 ${
-                                  isSelected
-                                    ? 'text-amber-400 hover:text-amber-500'
-                                    : 'text-slate-300 dark:text-slate-600 hover:text-slate-400'
-                                }`}
-                              >
+                                title={`${star} estrella${star> 1 ? 's' : ''}`}
+                                aria-pressed={star === currentValue}
+                                data-filled={isSelected}
+                            >
                                 <svg
-                                  className="w-6 h-6 fill-current"
                                   viewBox="0 0 20 20"
-                                >
+                              >
                                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                 </svg>
                               </button>
                             );
                           })}
-                          <span className="text-xs font-semibold ml-1.5 min-w-[32px] text-slate-700 dark:text-slate-300">
+                          <span>
                             {currentValue > 0 ? `${currentValue}/5` : '—'}
                           </span>
                         </div>
@@ -332,25 +359,10 @@ export const PostSessionSurveyModal: React.FC<PostSessionSurveyModalProps> = ({
               </div>
 
               {/* Área de Texto de Retroalimentación Cualitativa (>= 20 caracteres) */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label
-                    htmlFor="feedback-qualitative-input"
-                    className="text-sm font-semibold text-slate-800 dark:text-slate-100"
-                  >
-                    Retroalimentación y Observaciones Constructivas
-                  </label>
-                  <span
-                    className={`text-xs font-medium ${
-                      cleanComentarios.length >= 20
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : cleanComentarios.length > 0
-                        ? 'text-amber-600 dark:text-amber-400'
-                        : 'text-slate-400 dark:text-slate-500'
-                    }`}
-                  >
-                    {cleanComentarios.length}/20 caracteres mínimos
-                  </span>
+              <div>
+                <div className="survey-feedback-label">
+                  <label htmlFor="feedback-qualitative-input">Retroalimentación y observaciones constructivas</label>
+                  <span>{cleanComentarios.length}/20 caracteres mínimos</span>
                 </div>
                 <textarea
                   id="feedback-qualitative-input"
@@ -359,35 +371,33 @@ export const PostSessionSurveyModal: React.FC<PostSessionSurveyModalProps> = ({
                   value={comentarios}
                   onChange={(e) => setComentarios(e.target.value)}
                   placeholder="Detalla aspectos pedagógicos relevantes de la sesión: dominio del tema, ejemplos resueltos, claridad y recomendaciones (mínimo 20 caracteres)..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-colors"
                 />
                 {cleanComentarios.length > 0 && cleanComentarios.length < 20 && (
-                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                  <p>
                     Ingresa al menos {20 - cleanComentarios.length} caracteres más para habilitar el envío.
                   </p>
                 )}
               </div>
 
               {/* Botones de Acción */}
-              <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="survey-actions">
                 <button
                   type="button"
                   disabled={submitting}
                   onClick={onClose}
-                  className="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
-                >
+              >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={!canSubmit}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-indigo-600/20 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
+                  className="survey-primary"
+              >
                   {submitting ? (
                     <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                      <svg  fill="none" viewBox="0 0 24 24">
+                        <circle  cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path  fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                       </svg>
                       <span>Enviando...</span>
                     </>

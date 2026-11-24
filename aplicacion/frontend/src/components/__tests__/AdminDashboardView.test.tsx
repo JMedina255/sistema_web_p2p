@@ -72,7 +72,14 @@ describe('AdminDashboardView Component (RF03 / CUS10 / RN-03 / RN-09 / T-40 / T-
   });
 
   it('4. Permite alternar a la pestaña de monitoreo de quórum', async () => {
-    vi.spyOn(offerService, 'getOffers').mockResolvedValue([]);
+    vi.spyOn(offerService, 'getQuorumOverview').mockResolvedValue([{
+      id_oferta: '12', codigo_sesion: 'SES-QA', estado: 'QUORUM_INSUFICIENTE',
+      inscritos: 4, ratificados: 2, quorum_minimo_porcentaje: 40, aforo: 10,
+      mensaje: '', fecha_publicacion: '', espacio_asignado: 'Lab 01', modo: 'api',
+      offer: { id_asignatura: 1, codigo_asignatura: 'QA', nombre_asignatura: 'Cálculo',
+        id_tema: 1, nombre_tema: 'Límites', fecha_inicio: '', duracion_minutos: 60,
+        modalidad: 'presencial', aforo_maximo: 10, espacio_asignado: 'Lab 01', mentor_email: 'mentor@upt.pe' },
+    }]);
 
     render(<AdminDashboardView adminEmail={adminEmail} />);
 
@@ -80,7 +87,8 @@ describe('AdminDashboardView Component (RF03 / CUS10 / RN-03 / RN-09 / T-40 / T-
     fireEvent.click(quorumTab);
 
     await waitFor(() => {
-      expect(screen.getByText(/Supervisión de Quórum y Sesiones EPIS/i)).toBeInTheDocument();
+      expect(screen.getByText(/Quórum insuficiente/i)).toBeInTheDocument();
+      expect(screen.getByText('Inscritos 4 · Ratificados 2 · Mínimo 4 de 10 (40%)')).toBeInTheDocument();
     });
   });
 

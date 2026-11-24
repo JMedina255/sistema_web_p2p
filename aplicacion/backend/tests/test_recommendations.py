@@ -901,3 +901,74 @@ def test_ord_01_d_permutation_invariance_stability():
             expected_order = order
         else:
             assert order == expected_order, f"Orden no determinista detectado: {order} != {expected_order}"
+
+
+def test_directed_offer_from_active_mentor_is_recommended_even_without_schedule_match():
+    from sqlalchemy.orm import Session
+
+    from app.models.booking import SolicitudDemanda
+    from app.models.roles import Rol, UsuarioRol
+    from app.schemas.offer import PublishOfferPayload
+    from app.services.offer_service import OfferService
+
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    mentor, student = "mentor.regresion@upt.pe", "estudiante.regresion@upt.pe"
+    try:
+        with Session(engine) as db:
+            role = Rol(nombre_rol="mentor", descripcion="Mentor autorizado")
+            db.add_all(
+                [
+                    role,
+                    PerfilAcademico(email=mentor, ciclo_actual=4),
+                    PerfilAcademico(
+                        email=student, ciclo_actual=5, materias_interes=[1], modalidad_preferida="hibrida"
+                    ),
+                    Asignatura(
+                        id_asignatura=1,
+                        codigo_curso="CALC-101",
+                        nombre_curso="Calculo I",
+                        ciclo_plan=1,
+                        creditos=4,
+                    ),
+                    TemaConceptual(id_tema=2, id_asignatura=1, nombre_tema="Derivadas"),
+                    SolicitudDemanda(id_demanda=8, estudiante_email=student, id_asignatura=1, id_tema=2),
+                ]
+            )
+            db.flush()
+            membership = UsuarioRol(email=mentor, id_rol=role.id_rol, activo=True)
+            db.add(membership)
+            db.add(DisponibilidadHoraria(email=student, dia_semana=1, hora_inicio="08:00", hora_fin="12:00"))
+            db.commit()
+            future = (datetime.now(UTC) + timedelta(days=3)).replace(
+                hour=2, minute=0, second=0, microsecond=0
+            )
+            offer = OfferService.publish_offer(
+                db,
+                PublishOfferPayload(
+                    id_demanda=8,
+                    id_asignatura=1,
+                    codigo_asignatura="CALC-101",
+                    nombre_asignatura="Calculo I",
+                    id_tema=2,
+                    nombre_tema="Derivadas",
+                    fecha_inicio=future.isoformat(),
+                    modalidad="virtual",
+                    aforo_maximo=20,
+                    mentor_email=mentor,
+                ),
+            )
+
+            result = RecommendationService.recommend_offers(student, db=db)
+            (item,) = result.items
+            assert item.codigo_sesion == offer.codigo_sesion
+            assert item.mentor_ciclo == 4
+            assert item.breakdown.schedule_compatibility == 0
+            assert item.breakdown.institutional_merit_eligible
+            assert db.get(SolicitudDemanda, 8).estado == "ATENDIDA"
+
+            membership.activo = False
+            db.commit()
+            assert RecommendationService.recommend_offers(student, db=db).items == []
+    finally:
+        engine.dispose()

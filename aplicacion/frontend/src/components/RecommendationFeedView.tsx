@@ -13,6 +13,7 @@
  * - Requerimiento No Funcional: RNF05 (Accesibilidad WAI-ARIA y diseño responsive)
  */
 
+import { formatMentoringTime } from '../services/mentoringTime';
 import React, { useState, useEffect, useCallback, useId } from 'react';
 import {
   recommendationService,
@@ -291,7 +292,7 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
                     fontWeight: 600,
                   }}
                 >
-                  ✓ Mérito Académico Acreditado (Ciclo VII-X)
+                  ✓ Mentor habilitado
                 </span>
               )}
 
@@ -409,7 +410,7 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
                 <div>
                   <div style={{ color: '#64748B', fontSize: '0.75rem' }}>Fecha y Duración</div>
                   <div style={{ fontWeight: 600, color: '#1E293B', marginTop: '0.1rem' }}>
-                    {offer.fecha_inicio.replace('T', ' ').substring(0, 16)} UTC ({offer.duracion_minutos} min)
+                    {formatMentoringTime(offer.fecha_inicio)} ({offer.duracion_minutos} min)
                   </div>
                 </div>
 
@@ -667,8 +668,9 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
         </h3>
 
         <p style={{ margin: '0 0 1.25rem 0', color: '#64748B', fontSize: '0.92rem', lineHeight: '1.5' }}>
-          No existen ofertas activas ni mentores disponibles que coincidan con la asignatura o franjas horarias
-          de tu agenda semanal. Recuerda que las sesiones requieren antelación mayor a 24 horas y cupos disponibles.
+          {activeTab === 'offers'
+            ? 'No hay sesiones publicadas con cupos y más de 24 horas de antelación para el filtro actual.'
+            : 'No hay mentores disponibles para el filtro actual.'}
         </p>
 
         {/* Orientación Pedagógica conforme a CUS03 / RF07 */}
@@ -861,7 +863,7 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
           }}
         >
           {activeTab === 'offers' && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', maxWidth: '100%', minWidth: 0 }}>
               <label
                 htmlFor={`filter-course-${componentId}`}
                 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569' }}
@@ -876,6 +878,7 @@ export const RecommendationFeedView: React.FC<RecommendationFeedViewProps> = ({
                   setSelectedCourseId(val === '' ? undefined : Number(val));
                 }}
                 style={{
+                  minWidth: 0, maxWidth: '100%',
                   padding: '0.4rem 0.65rem',
                   borderRadius: '6px',
                   border: '1px solid #CBD5E1',

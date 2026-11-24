@@ -3,13 +3,17 @@ import io
 import threading
 from datetime import UTC, datetime
 from typing import Any
+from xml.sax.saxutils import escape
 
 import qrcode
 from fastapi import HTTPException, status
 from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
+from reportlab.platypus import Paragraph
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -112,6 +116,7 @@ class CertificateService:
                     CertificadoHoras.id_mentor.ilike(clean_mentor),
                     CertificadoHoras.periodo_academico == periodo_academico,
                 )
+                .order_by(CertificadoHoras.id_certificado.desc())
                 .first()
             )
             if c_db:
@@ -148,6 +153,11 @@ class CertificateService:
             certificado_emitido=cert_emitido,
         )
 
+    @staticmethod
+    def _pdf_storage_key(folio: str) -> str:
+        # A new key keeps the archived original and prevents old PDFs from masking layout corrections.
+        return f"{folio}-layout-v2.pdf"
+
     @classmethod
     def compile_pdf(
         cls,
@@ -158,6 +168,7 @@ class CertificateService:
         horas_acreditadas: float,
         hash_firma: str,
         fecha_emision: datetime,
+        demo_watermark: bool | None = None,
     ) -> bytes:
         """
         Compila el documento oficial en formato PDF vectorial incorporando:
@@ -167,17 +178,18 @@ class CertificateService:
         - Código QR vectorial de validación institucional.
         - Huella criptográfica SHA-256 al pie.
         """
+        if demo_watermark is None:
+            demo_watermark = settings.ENABLE_DEMO_WATERMARK
         buf = io.BytesIO()
         c = canvas.Canvas(buf, pagesize=letter)
         page_width, page_height = letter
 
         # ---------------------------------------------------------------------
         # 1. Marca de agua diagonal "DEMO - FINES ACADÉMICOS" (Capa de fondo)
-        # Evaluada reactivamente mediante settings.ENABLE_DEMO_WATERMARK
         # ---------------------------------------------------------------------
-        if settings.ENABLE_DEMO_WATERMARK:
+        if demo_watermark:
             c.saveState()
-            c.setFont("Helvetica-Bold", 42)
+            c.setFont("Helvetica-Bold", 32)
             c.setFillColor(colors.Color(0.82, 0.82, 0.82, alpha=0.35))
             c.translate(page_width / 2.0, page_height / 2.0)
             c.rotate(45)
@@ -240,61 +252,82 @@ class CertificateService:
         # ---------------------------------------------------------------------
         # 5. Cuerpo de certificación pedagógica
         # ---------------------------------------------------------------------
-        c.setFont("Helvetica", 11)
-        c.setFillColor(colors.HexColor("#1E293B"))
+        def centered_paragraph(
+            text: str,
+            top: float,
+            width: float,
+            font: str = "Helvetica",
+            size: int = 11,
+            color: str = "#1E293B",
+        ) -> float:
+            style = ParagraphStyle(
+                "CertificateBody",
+                fontName=font,
+                fontSize=size,
+                leading=size + 4,
+                alignment=TA_CENTER,
+                textColor=colors.HexColor(color),
+            )
+            paragraph = Paragraph(escape(text), style)
+            _, height = paragraph.wrap(width, top)
+            bottom = top - height
+            paragraph.drawOn(c, (page_width - width) / 2, bottom)
+            return bottom
 
-        p1 = (
+        body_width = page_width - 120
+        y = centered_paragraph(
             "La Dirección de la Escuela Profesional de Ingeniería de Sistemas de la Universidad Privada de "
-            "Tacna hace constar mediante el presente documento que el/la estudiante mentor(a):"
+            "Tacna hace constar mediante el presente documento que el/la estudiante mentor(a):",
+            page_height - 219,
+            body_width,
         )
-        c.drawCentredString(page_width / 2.0, page_height - 230, p1)
-
-        # Destacar al mentor titular
-        c.setFont("Helvetica-Bold", 15)
-        c.setFillColor(colors.HexColor("#1C2A59"))
-        display_mentor = mentor_name if mentor_name and mentor_name != mentor_email else mentor_email
-        c.drawCentredString(page_width / 2.0, page_height - 260, display_mentor.upper())
-
-        c.setFont("Helvetica", 10)
-        c.setFillColor(colors.HexColor("#475569"))
-        c.drawCentredString(
-            page_width / 2.0, page_height - 276, f"Identificador Institucional: {mentor_email}"
+        y = centered_paragraph(
+            (mentor_name or mentor_email).upper(),
+            y - 12,
+            body_width,
+            font="Helvetica-Bold",
+            size=15,
+            color="#1C2A59",
         )
-
-        c.setFont("Helvetica", 11)
-        c.setFillColor(colors.HexColor("#1E293B"))
-        c.drawCentredString(
-            page_width / 2.0,
-            page_height - 310,
-            "Ha cumplido con excelencia académica y compromiso formativo la labor de acompañamiento pedagógico,",
+        y = centered_paragraph(
+            f"Identificador Institucional: {mentor_email}",
+            y - 3,
+            body_width,
+            size=10,
+            color="#475569",
         )
-        c.drawCentredString(
-            page_width / 2.0,
-            page_height - 326,
-            "acumulando un volumen total de horas presenciales y virtuales visadas por la Escuela de:",
+        y = centered_paragraph(
+            "Ha cumplido la labor de acompañamiento pedagógico con excelencia académica y compromiso formativo. "
+            "La Escuela ha visado las siguientes horas presenciales y virtuales.",
+            y - 16,
+            body_width,
         )
 
         # Cuadro destacado con el total de horas
+        hours_top = min(page_height - 343, y - 14)
         c.setFillColor(colors.HexColor("#F1F5F9"))
         c.setStrokeColor(colors.HexColor("#CBD5E1"))
-        c.roundRect((page_width / 2.0) - 160, page_height - 395, 320, 52, 6, fill=1, stroke=1)
-
-        c.setFont("Helvetica-Bold", 20)
-        c.setFillColor(colors.HexColor("#1C2A59"))
-        c.drawCentredString(page_width / 2.0, page_height - 370, f"{horas_acreditadas:.1f} HORAS FORMATIVAS")
-
-        c.setFont("Helvetica", 9)
-        c.setFillColor(colors.HexColor("#64748B"))
-        c.drawCentredString(
-            page_width / 2.0,
-            page_height - 387,
-            "Horas debidamente auditadas con visado de Dirección de Escuela (Regla RN-14)",
+        c.roundRect(page_width / 2 - 160, hours_top - 52, 320, 52, 6, fill=1, stroke=1)
+        centered_paragraph(
+            f"{horas_acreditadas:.1f} HORAS FORMATIVAS",
+            hours_top - 7,
+            300,
+            font="Helvetica-Bold",
+            size=20,
+            color="#1C2A59",
+        )
+        centered_paragraph(
+            "Horas visadas por la Dirección de Escuela (RN-14)",
+            hours_top - 32,
+            300,
+            size=9,
+            color="#64748B",
         )
 
         # ---------------------------------------------------------------------
         # 6. Tabla resumida de especificaciones
         # ---------------------------------------------------------------------
-        y_spec = page_height - 435
+        y_spec = hours_top - 88
         c.setFont("Helvetica-Bold", 9)
         c.setFillColor(colors.HexColor("#334155"))
         c.drawString(70, y_spec, "Período Lectivo:")
@@ -305,9 +338,7 @@ class CertificateService:
         c.drawString(330, y_spec, "Estado Oficial:")
         c.setFont("Helvetica-Bold", 9)
         c.setFillColor(colors.HexColor("#0284C7"))
-        display_pdf_estado = (
-            "EMITIDO_DEMO (Acreditado)" if settings.ENABLE_DEMO_WATERMARK else "EMITIDO (Acreditado Oficial)"
-        )
+        display_pdf_estado = "EMITIDO_DEMO (Acreditado)" if demo_watermark else "EMITIDO (Acreditado Oficial)"
         c.drawString(420, y_spec, display_pdf_estado)
 
         y_spec -= 18
@@ -335,13 +366,13 @@ class CertificateService:
         qr_img.save(qr_buf, format="PNG")
         qr_buf.seek(0)
 
-        c.drawImage(ImageReader(qr_buf), 65, 75, width=90, height=90)
+        c.drawImage(ImageReader(qr_buf), 65, 89, width=90, height=90)
         c.setFont("Helvetica-Bold", 7.5)
         c.setFillColor(colors.HexColor("#1C2A59"))
-        c.drawString(65, 65, "Escanear para verificar autenticidad")
+        c.drawString(65, 79, "Escanear para verificar autenticidad")
         c.setFont("Helvetica", 6.5)
         c.setFillColor(colors.HexColor("#64748B"))
-        c.drawString(65, 55, "epis.upt.edu.pe/p2p/certificados")
+        c.drawString(65, 69, "epis.upt.edu.pe/p2p/certificados")
 
         # ---------------------------------------------------------------------
         # 8. Firmas de Cátedra y Dirección de Escuela (Esquina Inferior Derecha)
@@ -364,13 +395,13 @@ class CertificateService:
         # ---------------------------------------------------------------------
         c.setStrokeColor(colors.HexColor("#E2E8F0"))
         c.setLineWidth(0.5)
-        c.line(60, 48, page_width - 60, 48)
+        c.line(60, 59, page_width - 60, 59)
 
         c.setFont("Courier-Bold", 6.5)
         c.setFillColor(colors.HexColor("#64748B"))
         c.drawCentredString(
             page_width / 2.0,
-            41,
+            47,
             f"FIRMA CRIPTOGRÁFICA SHA-256: {hash_firma}",
         )
 
@@ -509,6 +540,7 @@ class CertificateService:
                 except Exception:
                     pass
 
+            demo_watermark = settings.ENABLE_DEMO_WATERMARK
             # 7. Compilar PDF oficial
             pdf_bytes = cls.compile_pdf(
                 mentor_name=mentor_display_name,
@@ -518,13 +550,14 @@ class CertificateService:
                 horas_acreditadas=summary.horas_visadas,
                 hash_firma=hash_firma,
                 fecha_emision=now_utc,
+                demo_watermark=demo_watermark,
             )
 
             # 8. Persistencia relacional en base de datos y almacenamiento físico
-            final_estado = "EMITIDO_DEMO" if settings.ENABLE_DEMO_WATERMARK else "EMITIDO"
+            final_estado = "EMITIDO_DEMO" if demo_watermark else "EMITIDO"
             storage_path = StorageService.save_file(
                 bucket=settings.SUPABASE_BUCKET_CERTIFICATES,
-                filename=f"{codigo_folio}.pdf",
+                filename=cls._pdf_storage_key(codigo_folio),
                 content=pdf_bytes,
                 content_type="application/pdf",
             )
@@ -615,7 +648,7 @@ class CertificateService:
     @classmethod
     def get_certificate_pdf(cls, db: Session | None, certificate_id: int) -> tuple[bytes, str]:
         """
-        Recupera o recompila el binario PDF de la constancia garantizando coincidencia estricta de hash.
+        Recupera el PDF del diseño vigente o lo recompila conservando el folio y la huella registrados.
         """
         # 1. Buscar en memoria o StorageService primero
         with _certificate_lock:
@@ -624,7 +657,7 @@ class CertificateService:
                     folio = mc["codigo_folio"]
                     filename = f"Constancia_Mentoria_EPIS_2026_II_{folio}.pdf"
                     stored_bytes = StorageService.get_file(
-                        settings.SUPABASE_BUCKET_CERTIFICATES, f"{folio}.pdf"
+                        settings.SUPABASE_BUCKET_CERTIFICATES, cls._pdf_storage_key(folio)
                     )
                     if stored_bytes:
                         return stored_bytes, filename
@@ -637,7 +670,7 @@ class CertificateService:
             if c:
                 filename = f"Constancia_Mentoria_EPIS_2026_II_{c.codigo_folio}.pdf"
                 stored_bytes = StorageService.get_file(
-                    settings.SUPABASE_BUCKET_CERTIFICATES, f"{c.codigo_folio}.pdf"
+                    settings.SUPABASE_BUCKET_CERTIFICATES, cls._pdf_storage_key(c.codigo_folio)
                 )
                 if stored_bytes:
                     return stored_bytes, filename
@@ -657,8 +690,8 @@ class CertificateService:
                     horas_acreditadas=c.horas_acreditadas,
                     hash_firma=c.hash_firma,
                     fecha_emision=c.created_at,
+                    demo_watermark=c.estado == "EMITIDO_DEMO",
                 )
-                filename = f"Constancia_Mentoria_EPIS_2026_II_{c.codigo_folio}.pdf"
                 return pdf_bytes, filename
 
         raise HTTPException(

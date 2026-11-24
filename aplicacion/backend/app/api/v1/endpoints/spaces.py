@@ -4,10 +4,15 @@ Endpoints REST para el subsistema de Espacios Físicos, Cronogramas y Parser de 
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from sqlalchemy.orm import Session
 
 from app.core.dependencies import AuthenticatedUser, require_role
+from app.db.session import get_required_session
 from app.schemas.spaces import ClassroomListResponse, FreeSlotItem, ScheduleImportResponse
+from app.services.offer_service import OfferService
 from app.services.schedule_parser_service import (
     ExcepcionFormatoHorarioInvalido,
     ScheduleParserService,
@@ -22,14 +27,15 @@ router = APIRouter()
     status_code=status.HTTP_200_OK,
     summary="Cargar y procesar cronograma oficial de aulas y laboratorios (RF10 / CUS11)",
     description=(
-        "Permite al Administrador subir un archivo estructurado en Excel (.xlsx) o PDF (.pdf) "
+        "Permite al Administrador subir un archivo estructurado en Excel (.xls, .xlsx) o PDF (.pdf) "
         "con la distribución horaria oficial de la facultad. El componente interno de backend "
         "(Parser de horarios) extrae automáticamente los recintos y franjas libres, actualizando "
         "el catálogo de infraestructura física disponible para prevenir solapamientos presenciales (RN-06)."
     ),
 )
 async def import_academic_schedule(
-    file: UploadFile = File(..., description="Archivo oficial en formato Excel (.xlsx) o PDF (.pdf)."),
+    file: UploadFile = File(..., description="Archivo oficial en formato Excel (.xls, .xlsx) o PDF (.pdf)."),
+    db: Session | None = Depends(get_required_session),
     current_user: AuthenticatedUser = Depends(require_role("administrador")),
 ) -> ScheduleImportResponse:
     if not file.filename:
@@ -50,6 +56,7 @@ async def import_academic_schedule(
         result = ScheduleParserService.procesar_cronograma_administrador(
             filename=file.filename,
             content=content,
+            db=db,
         )
         return ScheduleImportResponse(**result)
     except ExcepcionFormatoHorarioInvalido as exc:
@@ -70,12 +77,13 @@ async def import_academic_schedule(
     description="Retorna las franjas horarias libres extraídas del cronograma oficial procesado, con filtros opcionales.",
 )
 def get_free_physical_slots(
+    db: Session | None = Depends(get_required_session),
     dia: str | None = Query(None, description="Filtrar por día de la semana (ej. 'Lunes', 'Martes')."),
     aula: str | None = Query(
         None, description="Filtrar por nombre o código del aula/laboratorio (ej. 'Lab 01')."
     ),
 ) -> list[FreeSlotItem]:
-    slots = ScheduleParserService.get_active_slots(dia=dia, aula=aula)
+    slots = ScheduleParserService.get_active_slots(dia=dia, aula=aula, db=db)
     return [FreeSlotItem(**s) for s in slots]
 
 
@@ -85,6 +93,16 @@ def get_free_physical_slots(
     summary="Listar recintos físicos disponibles en la facultad (RN-06)",
     description="Retorna la lista de aulas y laboratorios validados a partir del cronograma oficial activo.",
 )
-def get_available_classrooms() -> ClassroomListResponse:
-    classrooms = ScheduleParserService.get_classrooms()
+def get_available_classrooms(
+    fecha_inicio: datetime | None = None,
+    duracion_minutos: int = Query(60, ge=60, le=90),
+    db: Session | None = Depends(get_required_session),
+) -> ClassroomListResponse:
+    if duracion_minutos not in (60, 90):
+        raise HTTPException(422, "La duración debe ser de 60 o 90 minutos.")
+    classrooms = (
+        ScheduleParserService.get_classrooms(db=db)
+        if fecha_inicio is None
+        else OfferService.available_classrooms(db, fecha_inicio, duracion_minutos)
+    )
     return ClassroomListResponse(aulas=classrooms, total=len(classrooms))

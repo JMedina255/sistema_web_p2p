@@ -16,6 +16,8 @@ export type BookingStatus =
   | 'CONFIRMADA'
   | 'CANCELADA_USUARIO'
   | 'NO_CONFIRMADA'
+  | 'CANCELADA_NO_CONFIRMADA'
+  | 'CANCELADA_SISTEMA_QUORUM'
   | 'CANCELADA_SISTEMA'
   | 'ASISTIDA'
   | 'INASISTENCIA';
@@ -99,6 +101,8 @@ export interface BookingDetailResponse {
   modalidad?: string | null;
   espacio_asignado?: string | null;
   mentor_email?: string | null;
+  survey_eligible?: boolean;
+  has_surveyed?: boolean;
   asistio?: boolean | null;
   asistencia_confirmada?: boolean | null;
 }
@@ -1015,6 +1019,16 @@ export class MockBookingAdapter {
     return newDemand;
   }
 
+  public fulfillDemand(id: number, course: number, topic: number): void {
+    const demand = this.demandRequests.find(r =>
+      r.id_demanda === id && r.estado === 'PENDIENTE' && r.id_asignatura === course && r.id_tema === topic
+    );
+    if (!demand) {
+      throw new Error('La solicitud ya no está pendiente o no corresponde a la asignatura y al tema seleccionados.');
+    }
+    demand.estado = 'ATENDIDA';
+  }
+
   /**
    * Consulta el banco de solicitudes por demanda (Mock).
    */
@@ -1022,7 +1036,7 @@ export class MockBookingAdapter {
     id_asignatura?: number;
     ciclo?: number;
   }): Promise<DemandRequestResponse[]> {
-    let result = [...this.demandRequests];
+    let result = this.demandRequests.filter(r => r.estado === 'PENDIENTE');
     if (filters?.id_asignatura) {
       result = result.filter((r) => r.id_asignatura === filters.id_asignatura);
     }
@@ -1041,6 +1055,10 @@ let currentServiceMode: 'mock' | 'api' = resolveInitialServiceMode();
 export const bookingService = {
   setMode(mode: 'mock' | 'api'): void {
     currentServiceMode = assertAllowedMode(mode);
+  },
+
+  fulfillMockDemand(id: number, course: number, topic: number): void {
+    mockAdapterInstance.fulfillDemand(id, course, topic);
   },
 
   getMode(): 'mock' | 'api' {

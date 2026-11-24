@@ -17,12 +17,14 @@
  */
 
 import { authService } from './authService';
+import { bookingService } from './bookingService';
 import { assertAllowedMode, resolveInitialServiceMode } from './serviceMode';
 
 export type SessionModality = 'presencial' | 'virtual';
 export type SessionDuration = 60 | 90;
 
 export interface PublishOfferPayload {
+  id_demanda?: number | null;
   id_asignatura: number;
   codigo_asignatura: string;
   nombre_asignatura: string;
@@ -54,6 +56,7 @@ export interface QuorumDecisionResponse {
 }
 
 export interface PublishOfferResponse {
+  quorum_minimo_porcentaje?: number;
   id_oferta: string;
   codigo_sesion: string;
   estado: string;
@@ -63,6 +66,12 @@ export interface PublishOfferResponse {
   espacio_asignado: string;
   modo: 'mock' | 'api';
   offer: PublishOfferPayload;
+}
+
+export interface QuorumOverviewItem extends PublishOfferResponse {
+  inscritos: number;
+  ratificados: number;
+  quorum_minimo_porcentaje: number;
 }
 
 export interface OfferValidationResult {
@@ -231,6 +240,12 @@ class MockOfferAdapter {
       espacio_asignado: resolvedSpace,
     };
 
+    if (sanitizedPayload.id_demanda != null) {
+      bookingService.fulfillMockDemand(
+        sanitizedPayload.id_demanda, sanitizedPayload.id_asignatura, sanitizedPayload.id_tema
+      );
+    }
+
     const code = `SES-${this.sessionCounter++}`;
     const id = `offer-mock-${Date.now()}`;
     const publishedAt = new Date().toISOString();
@@ -368,6 +383,12 @@ class ApiOfferAdapter {
     }
   }
 
+  public async getQuorumOverview(): Promise<QuorumOverviewItem[]> {
+    const response = await fetch(`${this.getBaseUrl()}/api/v1/quorum/overview`, { headers: this.getAuthHeaders() });
+    if (!response.ok) throw new Error(`Error al consultar el quórum (HTTP ${response.status})`);
+    return response.json();
+  }
+
   public async getOffers(mentorEmail?: string): Promise<PublishOfferResponse[]> {
     const query = mentorEmail ? `?mentor_email=${encodeURIComponent(mentorEmail)}` : '';
     const url = `${this.getBaseUrl()}/api/v1/offers${query}`;
@@ -406,6 +427,8 @@ let currentServiceMode: 'mock' | 'api' = resolveInitialServiceMode();
 // ============================================================================
 
 export const offerService = {
+  getQuorumOverview: () => apiAdapter.getQuorumOverview(),
+
   getMode(): 'mock' | 'api' {
     return currentServiceMode;
   },

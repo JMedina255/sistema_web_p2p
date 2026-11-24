@@ -44,13 +44,15 @@ def upgrade() -> None:
             # Habilitar Row Level Security (RLS) para evitar exposición pública directa vía PostgREST
             op.execute("ALTER TABLE auth_rate_limits ENABLE ROW LEVEL SECURITY;")
 
-            # Revocar permisos de lectura/escritura a roles públicos o clientes anónimos
-            op.execute("REVOKE ALL ON auth_rate_limits FROM anon, authenticated;")
-
-            # Garantizar acceso exclusivo para el backend institucional y roles administrativos autorizados
             op.execute("""
                 DO $$
                 BEGIN
+                    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+                        REVOKE ALL ON auth_rate_limits FROM anon;
+                    END IF;
+                    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+                        REVOKE ALL ON auth_rate_limits FROM authenticated;
+                    END IF;
                     IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
                         GRANT ALL ON auth_rate_limits TO service_role;
                     END IF;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { spacesService } from '../services/spacesService';
 import { fetchCourses, fetchCourseDetail } from '../services/apiClient';
 import type { Course, Topic } from '../services/apiClient';
 import type { DemandRequestResponse } from '../services/bookingService';
@@ -7,7 +8,6 @@ import {
   validateOfferPayload,
   calculateAdvanceHours,
   STANDARD_CAPACITY,
-  SUGGESTED_CLASSROOMS,
   type SessionModality,
   type SessionDuration,
   type PublishOfferPayload,
@@ -66,7 +66,28 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
   const [modality, setModality] = useState<SessionModality>('presencial');
   const [duration, setDuration] = useState<SessionDuration>(60);
   const [startDateTime, setStartDateTime] = useState<string>(getDefaultStartDateTime);
-  const [assignedSpace, setAssignedSpace] = useState<string>(SUGGESTED_CLASSROOMS[0]);
+  const [assignedSpace, setAssignedSpace] = useState('');
+  const [rooms, setRooms] = useState<string[]>([]);
+  const [roomError, setRoomError] = useState('');
+  const [availabilityRevision, setAvailabilityRevision] = useState(0);
+  useEffect(() => {
+    if (modality !== 'presencial') return;
+    let active = true;
+    setRooms([]);
+    setAssignedSpace('');
+    setRoomError('');
+    const date = new Date(startDateTime);
+    if (Number.isNaN(date.getTime())) return;
+    spacesService.getClassrooms(date.toISOString(), duration).then(available => {
+      if (active) {
+        setRooms(available);
+        setAssignedSpace(available[0] ?? '');
+      }
+    }).catch(() => {
+      if (active) setRoomError('No se pudo consultar la disponibilidad de aulas.');
+    });
+    return () => { active = false; };
+  }, [modality, startDateTime, duration, availabilityRevision]);
   const [additionalNotes, setAdditionalNotes] = useState<string>('');
 
   // Estados de control
@@ -190,7 +211,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
   const handleModalityChange = (newModality: SessionModality) => {
     setModality(newModality);
     if (newModality === 'presencial') {
-      setAssignedSpace(SUGGESTED_CLASSROOMS[0]);
+      setAssignedSpace('');
     } else {
       const link = offerService.generateVirtualLink(currentCourse ? currentCourse.codigo_curso : 'epis');
       setAssignedSpace(link);
@@ -208,8 +229,13 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
       aforo_maximo: currentCapacity,
       espacio_asignado: assignedSpace,
     };
-    return validateOfferPayload(payload);
-  }, [selectedCourseId, selectedTopicId, modality, duration, startDateTime, currentCapacity, assignedSpace]);
+    const result = validateOfferPayload(payload);
+    if (directedDemand && (selectedCourseId !== directedDemand.id_asignatura || selectedTopicId !== directedDemand.id_tema)) {
+      result.isValid = false;
+      result.errors.id_demanda = "El tema de la solicitud debe estar disponible en el catálogo. Puedes desvincular la solicitud para publicar una oferta general.";
+    }
+    return result;
+  }, [selectedCourseId, selectedTopicId, modality, duration, startDateTime, currentCapacity, assignedSpace, directedDemand]);
 
   const hoursAdvance = useMemo(() => {
     return calculateAdvanceHours(startDateTime);
@@ -233,6 +259,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
     setSubmissionError(null);
 
     const payload: PublishOfferPayload = {
+      id_demanda: directedDemand?.id_demanda,
       id_asignatura: selectedCourseId,
       codigo_asignatura: currentCourse.codigo_curso,
       nombre_asignatura: currentCourse.nombre_curso,
@@ -256,6 +283,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
         onOfferPublished(response);
       }
     } catch (err: unknown) {
+      if (modality === 'presencial') setAvailabilityRevision(v => v + 1);
       setSubmissionError(err instanceof Error ? err.message : 'Error al publicar la oferta de mentoría.');
     } finally {
       setIsSubmitting(false);
@@ -638,7 +666,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
                 aria-label="Asignatura formativa"
                 value={selectedCourseId}
                 onChange={(e) => setSelectedCourseId(Number(e.target.value))}
-                disabled={isLoadingCourses || isSubmitting}
+                disabled={isLoadingCourses || isSubmitting || Boolean(directedDemand)}
                 style={{
                   width: '100%',
                   padding: '0.65rem 0.85rem',
@@ -673,7 +701,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
                 aria-label="Unidad temática silábica"
                 value={selectedTopicId}
                 onChange={(e) => setSelectedTopicId(Number(e.target.value))}
-                disabled={isSubmitting || topics.length === 0}
+                disabled={isSubmitting || topics.length === 0 || Boolean(directedDemand)}
                 style={{
                   width: '100%',
                   padding: '0.65rem 0.85rem',
@@ -989,14 +1017,15 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
                     color: '#1E293B',
                   }}
                 >
-                  {SUGGESTED_CLASSROOMS.map((room) => (
+                  {rooms.length === 0 && <option value="">{roomError || 'Sin aulas disponibles para esta franja'}</option>}
+                  {rooms.map((room) => (
                     <option key={room} value={room}>
                       {room}
                     </option>
                   ))}
                 </select>
                 <span style={{ fontSize: '0.73rem', color: '#64748B', display: 'block', marginTop: '0.35rem' }}>
-                  Recinto sugerido por el parser de cronogramas EPIS sin cruces con la carga lectiva regular.
+                  Aulas del cronograma con disponibilidad para toda la duración seleccionada.
                 </span>
               </div>
             ) : (
@@ -1093,7 +1122,7 @@ export const OfferPublishView: React.FC<OfferPublishViewProps> = ({
             <div style={{ fontSize: '0.78rem', color: '#64748B' }}>
               {!validation.isValid && (
                 <span style={{ color: '#DC2626', fontWeight: 600 }}>
-                  ⚠️ Corrija los campos señalados antes de publicar.
+                  ⚠️ {validation.errors.id_demanda || 'Corrija los campos señalados antes de publicar.'}
                 </span>
               )}
             </div>

@@ -84,6 +84,16 @@ def test_time_controlled_temporal_milestones_t31():
         ]
     )
 
+    for extra_id in (5, 6):
+        _memory_bookings.append(
+            {
+                "id_reserva": extra_id,
+                "id_sesion": 1301,
+                "estudiante_email": f"est{extra_id}@upt.pe",
+                "estado": "CONFIRMADA",
+            }
+        )
+
     # =========================================================================
     # Hito 1: T - 48h (Dos días antes del inicio)
     # =========================================================================

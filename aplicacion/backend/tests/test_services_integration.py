@@ -75,7 +75,12 @@ def test_certificate_official_emission_without_watermark_when_watermark_disabled
     folio = cert_dict["codigo_folio"]
 
     # 2. Persistencia en StorageService
-    assert StorageService.file_exists(settings.SUPABASE_BUCKET_CERTIFICATES, f"{folio}.pdf") is True
+    assert (
+        StorageService.file_exists(
+            settings.SUPABASE_BUCKET_CERTIFICATES, CertificateService._pdf_storage_key(folio)
+        )
+        is True
+    )
     retrieved_bytes, filename = CertificateService.get_certificate_pdf(None, cert_dict["id_certificado"])
     assert retrieved_bytes == pdf_bytes
     assert folio in filename
@@ -88,7 +93,9 @@ def test_certificate_official_emission_without_watermark_when_watermark_disabled
     assert "EMITIDO" in full_text
 
     # Limpiar archivo temporal
-    StorageService.delete_file(settings.SUPABASE_BUCKET_CERTIFICATES, f"{folio}.pdf")
+    StorageService.delete_file(
+        settings.SUPABASE_BUCKET_CERTIFICATES, CertificateService._pdf_storage_key(folio)
+    )
 
 
 def test_certificate_demo_emission_with_watermark_when_watermark_enabled(monkeypatch):
@@ -127,7 +134,9 @@ def test_certificate_demo_emission_with_watermark_when_watermark_enabled(monkeyp
     full_text = "".join(page.extract_text() or "" for page in reader.pages)
     assert "DEMO - FINES ACADÉMICOS" in full_text
 
-    StorageService.delete_file(settings.SUPABASE_BUCKET_CERTIFICATES, f"{folio}.pdf")
+    StorageService.delete_file(
+        settings.SUPABASE_BUCKET_CERTIFICATES, CertificateService._pdf_storage_key(folio)
+    )
 
 
 def test_resource_service_physical_storage_persistence(monkeypatch):

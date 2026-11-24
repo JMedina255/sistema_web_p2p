@@ -1,0 +1,25 @@
+.survey-overlay { position: fixed; inset: 0; z-index: 1100; display: grid; place-items: center; padding: 12px; background: rgb(15 23 42 / 65%); }
+.survey-panel { width: min(100%, 40rem); max-height: min(92dvh, 54rem); min-width: 0; display: flex; flex-direction: column; overflow: hidden; border-radius: 12px; background: white; color: #1e293b; box-shadow: 0 15px 50px #0f172a55; }
+.survey-heading, .survey-actions, .survey-stars { display: flex; align-items: center; gap: .5rem; }
+.survey-heading { justify-content: space-between; background: #1c2a59; color: white; padding: .9rem 1.2rem; }
+.survey-heading h2 { font-size: 1.25rem; margin: .25rem 0; }
+.survey-panel p { margin: .3rem 0; font-size: .86rem; }
+.survey-content { padding: 1rem; overflow-y: auto; overscroll-behavior: contain; }
+.survey-panel button { padding: .45rem .7rem; cursor: pointer; border: 1px solid #b9c5d3; border-radius: 6px; color: inherit; background: white; }
+.survey-panel button:focus-visible, .survey-panel textarea:focus-visible { outline: 3px solid #5884ed; outline-offset: 2px; }
+.survey-panel button:disabled { opacity: .55; cursor: default; }
+.survey-heading button { background: transparent; display: grid; }
+.survey-dimension, .survey-success, .survey-notice { padding: .65rem .85rem; margin-bottom: .65rem; background: #f8fafc; border: 1px solid #dbe3ec; border-radius: 8px; }
+.survey-dimension label { font-weight: 650; }
+.survey-stars { margin-top: .3rem; }
+.survey-stars button { padding: .3rem; display: grid; color: #63748a; }
+.survey-stars button[data-filled="true"] { color: #975800; background: #fff2c5; }
+.survey-panel svg { width: 1.25rem; height: 1.25rem; flex: none; }
+.survey-stars svg { fill: currentColor; }
+.survey-panel textarea { display: block; box-sizing: border-box; width: 100%; padding: .55rem; margin-top: .3rem; font: inherit; border: 1px solid #94a3b8; border-radius: 6px; }
+.survey-actions { margin-top: .75rem; justify-content: flex-end; flex-wrap: wrap; }
+.survey-panel .survey-primary { background: #304675; color: white; }
+.survey-notice { display: flex; gap: .5rem; background: #fff2e6; color: #732e13; }
+.survey-success { background: #eef9f3; }
+.survey-feedback-label { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .25rem .75rem; }
+.survey-feedback-label span { color: #475569; font-size: .8rem; }

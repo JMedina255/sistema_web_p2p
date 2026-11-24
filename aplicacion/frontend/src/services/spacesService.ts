@@ -3,6 +3,7 @@
  */
 
 import { authService } from './authService';
+import { resolveInitialServiceMode } from './serviceMode';
 
 export interface FreeSlotItem {
   aula: string;
@@ -27,6 +28,8 @@ export interface ClassroomListResponse {
   total: number;
 }
 
+const useMock = resolveInitialServiceMode() === 'mock';
+
 const DEFAULT_MOCK_SLOTS: FreeSlotItem[] = [
   { aula: 'Lab 01', dia: 'Lunes', hora_inicio: '08:00', hora_fin: '10:00', estado: 'LIBRE' },
   { aula: 'Lab 01', dia: 'Miércoles', hora_inicio: '14:00', hora_fin: '16:00', estado: 'LIBRE' },
@@ -46,7 +49,7 @@ class SpacesService {
   }
 
   /**
-   * Sube un archivo Excel (.xlsx) o PDF (.pdf) oficial para parseo automático por el backend (RF10 / CUS11).
+   * Sube un archivo Excel (.xls, .xlsx) o PDF (.pdf) oficial para parseo automático por el backend (RF10 / CUS11).
    */
   public async uploadSchedule(file: File): Promise<ScheduleImportResponse> {
     const formData = new FormData();
@@ -76,13 +79,10 @@ class SpacesService {
       return data;
     } catch (err: unknown) {
       // Fallback en desarrollo / modo mock
-      if (import.meta.env.DEV && (err instanceof TypeError || String(err).includes('Failed to fetch'))) {
+      if (useMock && (err instanceof TypeError || String(err).includes('Failed to fetch'))) {
         const ext = file.name.split('.').pop()?.toLowerCase();
         if (ext !== 'xlsx' && ext !== 'xls' && ext !== 'pdf') {
-          throw new Error(
-            "Extensión no soportada. Solo se admiten archivos oficiales en Excel (.xlsx) y PDF (.pdf).",
-            { cause: err }
-          );
+          throw new Error("Extensión no soportada. Solo se admiten archivos oficiales en Excel (.xls, .xlsx) y PDF (.pdf).", { cause: err });
         }
 
         const simulatedSlots: FreeSlotItem[] = [
@@ -123,7 +123,8 @@ class SpacesService {
         throw new Error('Error al consultar franjas libres de infraestructura.');
       }
       return await response.json();
-    } catch {
+    } catch (err) {
+      if (!useMock) throw err;
       let filtered = [...mockSlotsMemory];
       if (dia) {
         filtered = filtered.filter((s) => s.dia.toLowerCase() === dia.toLowerCase());
@@ -138,15 +139,17 @@ class SpacesService {
   /**
    * Obtiene la lista de aulas y laboratorios validados (RN-06).
    */
-  public async getClassrooms(): Promise<string[]> {
+  public async getClassrooms(start?: string, duration = 60): Promise<string[]> {
     try {
-      const response = await fetch(`${this.getBaseUrl()}/api/v1/spaces/classrooms`);
+      const query = start ? '?' + new URLSearchParams({ fecha_inicio: start, duracion_minutos: String(duration) }) : '';
+      const response = await fetch(`${this.getBaseUrl()}/api/v1/spaces/classrooms${query}`);
       if (response.ok) {
         const data: ClassroomListResponse = await response.json();
         return data.aulas;
       }
-    } catch {
-      // Ignorar fallo de red
+      if (!useMock) throw new Error('No se pudieron consultar las aulas del cronograma.');
+    } catch (err) {
+      if (!useMock) throw err;
     }
     return Array.from(new Set(mockSlotsMemory.map((s) => s.aula))).sort();
   }

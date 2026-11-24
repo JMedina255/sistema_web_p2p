@@ -34,9 +34,7 @@ def test_session_closure_end_to_end_lifecycle_t37():
     try:
         now = datetime.now(UTC)
         mentor_email = "mentor.e2e@upt.pe"
-        student_a = "alumno.a@upt.pe"
-        student_b = "alumno.b@upt.pe"
-        student_c = "alumno.c@upt.pe"
+        students = [f"alumno.{i}@upt.pe" for i in range(1, 6)]
 
         # ---------------------------------------------------------------------
         # Paso 1: Publicación de la Sesión
@@ -78,7 +76,7 @@ def test_session_closure_end_to_end_lifecycle_t37():
         # ---------------------------------------------------------------------
         # Paso 2 & 3: Reservas y Ratificación de Asistencia
         # ---------------------------------------------------------------------
-        for i, email in enumerate([student_a, student_b, student_c]):
+        for i, email in enumerate(students):
             b = ReservaCupo(
                 id_sesion=1401,
                 codigo_reserva=f"RES-E2E-{i + 1}",
@@ -111,8 +109,8 @@ def test_session_closure_end_to_end_lifecycle_t37():
         )
         assert token_info.token is not None
 
-        # Check-in de los 3 estudiantes dentro de los 30s del token
-        for email in [student_a, student_b, student_c]:
+        # Check-in de los estudiantes ratificados dentro de los 30s del token
+        for email in students:
             att_res = AttendanceService.record_checkin(
                 db=db,
                 session_id=1401,
@@ -124,7 +122,7 @@ def test_session_closure_end_to_end_lifecycle_t37():
             assert att_res.asistio is True
 
         roster = AttendanceService.get_roster(db=db, session_id=1401)
-        assert len(roster) == 3
+        assert len(roster) == len(students)
         assert all(r.asistio is True for r in roster)
 
         # ---------------------------------------------------------------------

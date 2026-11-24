@@ -128,11 +128,13 @@ def test_demo_02_mentor_publish_and_query_future_offer():
         "nombre_asignatura": "Cálculo I",
         "id_tema": 1,
         "nombre_tema": "Límites Notables y Asíntotas",
-        "fecha_inicio": (now + timedelta(days=2)).isoformat(),
+        "fecha_inicio": (now + timedelta(days=14 - now.weekday()))
+        .replace(hour=15, minute=0, second=0, microsecond=0)
+        .isoformat(),
         "duracion_minutos": 60,
         "modalidad": "presencial",
         "aforo_maximo": 10,
-        "espacio_asignado": "Aula 302 - Pabellón EPIS",
+        "espacio_asignado": "Aula 101",
         "notas_adicionales": "Revisión de ejercicios de límites notables.",
     }
     res_pub = client.post("/api/v1/offers", json=payload, headers=headers)

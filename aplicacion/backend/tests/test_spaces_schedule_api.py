@@ -128,3 +128,43 @@ def test_get_available_classrooms():
     assert "aulas" in data
     assert data["total"] > 0
     assert isinstance(data["aulas"], list)
+
+
+def test_import_survives_new_session_and_service_restart(tmp_path, sample_excel_file_bytes, monkeypatch):
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import Session
+
+    from app.db.session import Base
+    from app.services.schedule_parser_service import ScheduleParserService as parser
+
+    engine = create_engine(f"sqlite:///{tmp_path / 'schedule.db'}")
+    Base.metadata.create_all(engine)
+    with Session(engine) as db:
+        result = parser.procesar_cronograma_administrador("nuevo.xlsx", sample_excel_file_bytes, db=db)
+    monkeypatch.setattr(parser, "_active_free_slots", [])
+    with Session(engine) as db:
+        assert parser.get_active_slots(db=db) == result["aulas_libres"]
+        assert parser.get_classrooms(db=db) == ["Aula 204", "Lab 01", "Lab 03"]
+        from app.models.schedule import VersionCronograma
+
+        parser.procesar_cronograma_administrador("segundo.xlsx", sample_excel_file_bytes, db=db)
+        assert [v.archivo for v in db.query(VersionCronograma).order_by(VersionCronograma.id)] == [
+            "nuevo.xlsx",
+            "segundo.xlsx",
+        ]
+        assert parser.schedule_row(db).version.archivo == "segundo.xlsx"
+    engine.dispose()
+
+
+def test_import_genuine_biff8():
+    from pathlib import Path
+
+    data = (Path(__file__).parent / "fixtures/horario-biff8.xls").read_bytes()
+    response = client.post(
+        "/api/v1/spaces/import-schedule",
+        headers=get_admin_headers(),
+        files={"file": ("horario.xls", data, "application/vnd.ms-excel")},
+    )
+    assert response.status_code == 200
+    (slot,) = response.json()["aulas_libres"]
+    assert (slot["aula"], slot["hora_inicio"], slot["hora_fin"]) == ("Aula 101", "08:00", "10:00")

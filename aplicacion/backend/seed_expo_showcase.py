@@ -16,6 +16,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
 from app.db.session import get_engine
+from app.models.attendance import AsistenciaSesion
 from app.models.bitacora import BitacoraPedagogica
 from app.models.booking import ReservaCupo, SolicitudDemanda
 from app.models.certificate import CertificadoHoras
@@ -654,6 +655,34 @@ def seed_expo_dataset():
         db.commit()
 
         # ------------------------------------------------------------------
+        # Completa también instalaciones sembradas previamente, respetando la asistencia ya registrada.
+        attended_bookings = (
+            db.query(ReservaCupo)
+            .join(SesionMentoria)
+            .filter(
+                SesionMentoria.codigo_sesion.like("SES-EXPO-%"),
+                ReservaCupo.codigo_reserva.like("RES-EXPO-%"),
+                ReservaCupo.estado == "ASISTIDA",
+            )
+            .all()
+        )
+        for booking in attended_bookings:
+            attendance = (
+                db.query(AsistenciaSesion)
+                .filter_by(id_sesion=booking.id_sesion, estudiante_email=booking.estudiante_email)
+                .first()
+            )
+            if attendance is None:
+                db.add(
+                    AsistenciaSesion(
+                        id_sesion=booking.id_sesion,
+                        estudiante_email=booking.estudiante_email,
+                        asistio=True,
+                        fecha_checkin=booking.sesion.fecha_inicio,
+                    )
+                )
+        db.commit()
+
         # 6. Certificado Oficial Emitido para Descarga en PDF (RF22 / RF23)
         # ------------------------------------------------------------------
         print("\n[6/7] Aprovisionando certificado oficial en PDF para mentor.avanzado@upt.pe...")

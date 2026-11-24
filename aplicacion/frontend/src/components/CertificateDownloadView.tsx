@@ -469,7 +469,7 @@ export const CertificateDownloadView: React.FC<CertificateDownloadViewProps> = (
             margin: '0 0 1rem 0',
           }}
         >
-          Emisión de Constancia Digital Oficial (DEMO)
+          Emisión de Constancia Digital Oficial
         </h2>
 
         {certEmitido ? (
@@ -581,7 +581,7 @@ export const CertificateDownloadView: React.FC<CertificateDownloadViewProps> = (
               }}
             >
               <div style={{ marginBottom: '0.35rem' }}>
-                <strong>Marca de Agua:</strong> &quot;DEMO - FINES ACADÉMICOS&quot; (Diagonal de seguridad 45°)
+                <strong>Marca de Agua:</strong> {certEmitido.estado === 'EMITIDO_DEMO' ? 'DEMO - FINES ACADÉMICOS' : 'Sin marca de agua de demostración'}
               </div>
               <div style={{ marginBottom: '0.35rem' }}>
                 <strong>Fecha de Expedición:</strong> {new Date(certEmitido.created_at).toLocaleString('es-PE')}
@@ -597,7 +597,7 @@ export const CertificateDownloadView: React.FC<CertificateDownloadViewProps> = (
             <p style={{ color: '#475569', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
               La constancia institucional certifica formalmente tu cumplimiento de las horas formativas como estudiante
               mentor ante la cátedra de Construcción de Software I y la Escuela Profesional de Ingeniería de Sistemas. El
-              documento emitido incorpora marca de agua diagonal de seguridad, sello criptográfico SHA-256 y código QR
+              documento emitido incorpora sello criptográfico SHA-256 y código QR
               conducente a la auditoría oficial.
             </p>
 

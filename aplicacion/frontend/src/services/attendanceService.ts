@@ -29,7 +29,8 @@ export interface AttendanceCheckinResponse {
 }
 
 export interface AttendanceItem {
-  id_asistencia: number;
+  id_asistencia: number | null;
+  pendiente?: boolean;
   id_sesion: number;
   estudiante_email: string;
   asistio: boolean;

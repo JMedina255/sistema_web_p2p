@@ -9,7 +9,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { roleService } from '../services/roleService';
-import { offerService, type PublishOfferResponse } from '../services/offerService';
+import { offerService, type QuorumOverviewItem } from '../services/offerService';
 import { bitacoraService, type BitacoraItem } from '../services/bitacoraService';
 import { HealthStatus } from './HealthStatus';
 import { CurriculumCatalogView } from './CurriculumCatalogView';
@@ -37,7 +37,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
   const [roleMessage, setRoleMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   // Estado para monitoreo de quórum
-  const [offers, setOffers] = useState<PublishOfferResponse[]>([]);
+  const [offers, setOffers] = useState<QuorumOverviewItem[]>([]);
   const [offersLoading, setOffersLoading] = useState(false);
   const [offersError, setOffersError] = useState<string | null>(null);
 
@@ -57,7 +57,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
     setOffersLoading(true);
     setOffersError(null);
     try {
-      const data = await offerService.getOffers();
+      const data = await offerService.getQuorumOverview();
       setOffers(data);
     } catch (err) {
       setOffersError(err instanceof Error ? err.message : 'Error al cargar ofertas');
@@ -620,8 +620,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                   Supervisión de Quórum y Sesiones EPIS
                 </h3>
                 <p style={{ margin: '0.25rem 0 0', color: '#64748B', fontSize: '0.82rem' }}>
-                  Una sesión alcanza quórum viable cuando sus reservas ratificadas son iguales o mayores al 50% de la
-                  demanda mínima requerida.
+                  El quórum se calcula con las reservas ratificadas y el porcentaje de aforo configurado.
                 </p>
               </div>
               <button
@@ -668,17 +667,15 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {offers.map((offer) => {
-                  const details = offer.offer || (offer as unknown as Record<string, unknown>);
-                  const modalidad = details.modalidad || (offer as unknown as { modalidad?: string }).modalidad || 'presencial';
-                  const maxCap = offer.aforo || details.aforo_maximo || (modalidad === 'presencial' ? 10 : 20);
-                  const enrolled = (offer as unknown as { cupos_ocupados?: number }).cupos_ocupados ?? 0;
-                  const ratio = Math.round((enrolled / maxCap) * 100);
-                  const meetsQuorum = ratio >= 50;
-                  const materia = details.nombre_asignatura || (offer as unknown as { materia?: string }).materia || 'Asignatura';
-                  const tema = details.nombre_tema || (offer as unknown as { tema?: string }).tema || 'Tema';
-                  const mentor = details.mentor_email || (offer as unknown as { mentor_email?: string }).mentor_email || 'mentor@upt.pe';
-                  const horario = details.fecha_inicio || (offer as unknown as { fecha_sesion?: string }).fecha_sesion || '';
-                  const lugar = offer.espacio_asignado || details.espacio_asignado || (offer as unknown as { lugar_o_enlace?: string }).lugar_o_enlace || 'EPIS';
+                  const { modalidad, nombre_asignatura: materia, nombre_tema: tema,
+                    mentor_email: mentor, fecha_inicio: horario } = offer.offer;
+                  const lugar = offer.espacio_asignado;
+                  const minimum = Math.ceil(offer.aforo * offer.quorum_minimo_porcentaje / 100);
+                  const meetsQuorum = offer.ratificados >= minimum;
+                  const labels: Record<string, string> = {
+                    QUORUM_INSUFICIENTE: 'Quórum insuficiente', CONFIRMADA: 'Confirmada', EN_CURSO: 'En curso',
+                  };
+                  const label = labels[offer.estado] ?? (meetsQuorum ? 'Quórum viable' : 'En convocatoria');
 
                   return (
                     <div
@@ -697,7 +694,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                     >
                       <div style={{ flex: '1 1 300px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <strong style={{ color: '#1C2A59', fontSize: '0.95rem' }}>{materia}</strong>
+                          <strong style={{ color: '#1C2A59', fontSize: '0.95rem' }}>{materia} · {offer.codigo_sesion}</strong>
                           <span
                             style={{
                               fontSize: '0.7rem',
@@ -732,11 +729,11 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                               color: meetsQuorum ? '#03543F' : '#92400E',
                             }}
                           >
-                            {meetsQuorum ? '✅ Quórum Viable (≥50%)' : '⏳ En Convocatoria'}
+                            {label}
                           </span>
                         </div>
                         <div style={{ fontSize: '0.8rem', color: '#334155' }}>
-                          Aforo: <strong>{enrolled}</strong> / {maxCap} inscritos ({ratio}%)
+                          Inscritos {offer.inscritos} · Ratificados {offer.ratificados} · Mínimo {minimum} de {offer.aforo} ({offer.quorum_minimo_porcentaje}%)
                         </div>
                       </div>
                     </div>

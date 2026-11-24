@@ -1,5 +1,6 @@
 import json
 import os
+from math import ceil
 from pathlib import Path
 
 from pydantic import Field, field_validator, model_validator
@@ -66,6 +67,8 @@ class Settings(BaseSettings):
     )
     QUORUM_MINIMUM_PERCENTAGE: int = Field(
         default=50,
+        ge=0,
+        le=100,
         description="Porcentaje mínimo normativo de alumnos confirmados respecto al aforo para declarar sesión confirmada (RN-09).",
     )
     QUORUM_CUTOFF_HOURS: int = Field(
@@ -164,6 +167,9 @@ class Settings(BaseSettings):
         default=False,
         description="En modo estricto, rechaza transacciones con HTTP 503 si PostgreSQL no está disponible",
     )
+
+    def quorum_minimum_students(self, capacity: int) -> int:
+        return ceil(capacity * self.QUORUM_MINIMUM_PERCENTAGE / 100)
 
     @model_validator(mode="after")
     def adjust_production_defaults(self):

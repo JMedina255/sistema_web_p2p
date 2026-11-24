@@ -8,6 +8,7 @@ from app.services.auth_service import (
     _ip_verify_timestamps,
     _memory_challenges,
 )
+from app.services.schedule_parser_service import ScheduleParserService
 
 
 class BlockedSMTPConnectionError(RuntimeError):
@@ -40,6 +41,10 @@ def isolate_test_environment(monkeypatch):
     monkeypatch.setattr(settings, "SMTP_PASSWORD", "")
     monkeypatch.setattr(settings, "SMTP_FROM_EMAIL", "test-auth-noreply@upt.pe")
     monkeypatch.setattr(settings, "ENABLE_MOCK_OTP_HINTS", False)
+    monkeypatch.setattr(
+        ScheduleParserService, "_active_free_slots", list(ScheduleParserService._default_slots)
+    )
+    monkeypatch.setattr(ScheduleParserService, "_last_imported_filename", "cronograma_oficial_base_2026.xlsx")
 
     # 3. Bloqueo estricto a nivel de socket/biblioteca smtplib para impedir envíos externos
     monkeypatch.setattr("smtplib.SMTP", GuardedSMTP)

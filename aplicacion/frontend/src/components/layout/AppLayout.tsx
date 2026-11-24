@@ -81,7 +81,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               gap: '0.5rem',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', minWidth: 0, gap: '0.5rem', fontSize: '0.8rem' }}>
               <span style={{ color: '#B99451', fontWeight: 700 }}>
                 Flujo Guiado{' '}
                 {activeRole === 'mentoreado'
@@ -92,7 +92,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 :
               </span>
               {activeRole === 'mentoreado' && (
-                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                   <button
                     type="button"
                     onClick={() => onSelectTab('recommendations')}
@@ -146,7 +146,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 </div>
               )}
               {activeRole === 'mentor' && (
-                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                   <button
                     type="button"
                     onClick={() => onSelectTab('sessions')}
@@ -217,7 +217,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 </div>
               )}
               {activeRole === 'administrador' && (
-                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                   <button
                     type="button"
                     onClick={() => onSelectTab('admin')}

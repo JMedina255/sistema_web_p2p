@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Header, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.v1.endpoints.profiles import _extract_caller_and_admin_status
-from app.db.session import get_optional_session, get_required_session
+from app.db.session import get_required_session
 from app.schemas.offer import (
     PublishOfferPayload,
     PublishOfferResponse,
@@ -56,7 +56,7 @@ def list_offers(
     id_asignatura: int | None = Query(None, ge=1, description="Filtrar por asignatura crítica"),
     modalidad: Literal["presencial", "virtual"] | None = Query(None, description="Filtrar por modalidad"),
     estado: str | None = Query(None, description="Filtrar por estado de la sesión"),
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> list[PublishOfferResponse]:
     """
     Retorna el listado de ofertas de mentoría disponibles para consulta y recomendación.
@@ -80,7 +80,7 @@ def resolve_quorum_contingency(
     id_sesion: int,
     payload: QuorumDecisionPayload,
     authorization: str | None = Header(None),
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> QuorumDecisionResponse:
     """
     Permite al estudiante mentor adoptar una resolución reglamentaria ante quórum insuficiente a T-24h:

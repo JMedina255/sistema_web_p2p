@@ -1,6 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -550,7 +551,39 @@ def test_bitacora_t41_visado_and_observacion_persistence_real_database():
         )
         db.add(sesion)
         db.add(b_entity)
+        # Its session PK is the requested bitácora PK, and its smaller bitácora PK
+        # makes the old OR predicate select the wrong document.
+        decoy_session = SesionMentoria(
+            id_sesion=90,
+            codigo_sesion="SES-DECOY",
+            mentor_email="otro@upt.pe",
+            id_asignatura=1,
+            id_tema=1,
+            fecha_inicio=now,
+            duracion_minutos=60,
+            modalidad="virtual",
+            aforo_maximo=20,
+            espacio_asignado="virtual",
+            estado="FINALIZADA",
+        )
+        decoy = BitacoraPedagogica(
+            id_bitacora=1,
+            id_sesion=90,
+            id_mentor="otro@upt.pe",
+            temas_cubiertos=[],
+            observaciones="Documento histórico",
+            nivel_dificultad="Medio",
+            hash_firma="anterior",
+            horas_declaradas=1,
+            visado_administrador=True,
+        )
+        db.add_all([decoy_session, decoy])
         db.commit()
+
+        # This endpoint accepts only a bitácora primary key, even if a session ID exists.
+        with pytest.raises(HTTPException) as error:
+            BitacoraService.visar_bitacora(db=db, bitacora_id=990, caller_email=admin_email, is_admin=True)
+        assert error.value.status_code == 404
 
         # 1. Visar bitácora
         visado_resp = BitacoraService.visar_bitacora(
@@ -576,6 +609,8 @@ def test_bitacora_t41_visado_and_observacion_persistence_real_database():
         assert obs_resp.estado_sesion == "OBSERVADA"
         assert b_entity.visado_administrador is False
         assert sesion.estado == "OBSERVADA"
+        assert decoy.visado_administrador is True
+        assert decoy_session.estado == "FINALIZADA"
 
     finally:
         db.close()

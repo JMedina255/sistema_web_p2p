@@ -338,7 +338,7 @@ describe('StudentBookingsView Component (T-25 / RF13 / CUS24 / RN-08 / RN-09 / R
       expect(dialog).toHaveAttribute('aria-modal', 'true');
       expect(screen.getByText(/Ratificar Asistencia a Mentoría/i)).toBeInTheDocument();
       expect(screen.getByText(/Compromiso de Asistencia y Quórum/i)).toBeInTheDocument();
-      expect(screen.getByText(/quórum mínimo del 50%/i)).toBeInTheDocument();
+      expect(screen.getByText(/quórum mínimo configurado/i)).toBeInTheDocument();
       expect(screen.getByText(/desistir voluntariamente hasta 24 horas/i)).toBeInTheDocument();
     });
 

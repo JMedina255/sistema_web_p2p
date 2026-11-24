@@ -265,3 +265,25 @@ def test_quorum_decision_in_real_database():
     finally:
         db.close()
         engine.dispose()
+
+
+@pytest.mark.parametrize(
+    ("state", "hours"), [("FINALIZADA", -2), ("QUORUM_INSUFICIENTE", -1), ("PUBLICADA", 12)]
+)
+def test_only_future_sessions_with_insufficient_quorum_can_change(state, hours):
+    email = "mentor@upt.pe"
+    _memory_offers.append(
+        {
+            "id_sesion": 919,
+            "estado": state,
+            "mentor_email": email,
+            "fecha_inicio": (datetime.now(UTC) + timedelta(hours=hours)).isoformat(),
+        }
+    )
+    response = client.post(
+        "/api/v1/offers/919/quorum-decision",
+        json={"decision": "PROCEED"},
+        headers={"Authorization": "Bearer " + create_access_token({"sub": email, "roles": ["mentor"]})},
+    )
+    assert response.status_code == 400
+    assert _memory_offers[-1]["estado"] == state

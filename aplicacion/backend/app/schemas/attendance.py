@@ -41,7 +41,8 @@ class AttendanceItemResponse(BaseModel):
     Item individual en la nómina de asistencia de una sesión.
     """
 
-    id_asistencia: int
+    id_asistencia: int | None
+    pendiente: bool = False
     id_sesion: int
     estudiante_email: str
     asistio: bool

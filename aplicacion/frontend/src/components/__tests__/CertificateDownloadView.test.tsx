@@ -90,6 +90,19 @@ describe('CertificateDownloadView Component (T-43 / RF22 / RF23 / RN-14 / WCAG 2
     });
   });
 
+  it('describe la constancia oficial sin prometer la marca demo', async () => {
+    const email = 'mentor.oficial@upt.pe';
+    certificateService.setMockHours(email, 20, 0);
+    await certificateService.generateCertificate({ mentorEmail: email });
+    const summary = await certificateService.getHoursSummary({ mentorEmail: email });
+    vi.spyOn(certificateService, 'getHoursSummary').mockResolvedValue({
+      ...summary, certificado_emitido: { ...summary.certificado_emitido!, estado: 'EMITIDO' }
+    });
+    render(<CertificateDownloadView mentorEmail={email} />);
+    expect(await screen.findByText('Sin marca de agua de demostración')).toBeInTheDocument();
+    expect(screen.queryByText(/DEMO - FINES ACADÉMICOS/)).toBeNull();
+  });
+
   it('5. Abre el diálogo de verificación QR y responde a la tecla Escape (WCAG 2.1 AA)', async () => {
     certificateService.setMockHours('mentor.test5@upt.pe', 20.0, 0.0);
     await certificateService.generateCertificate({ mentorEmail: 'mentor.test5@upt.pe' });

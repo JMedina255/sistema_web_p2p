@@ -36,8 +36,8 @@ export const AdminScheduleUploadView: React.FC<AdminScheduleUploadViewProps> = (
     try {
       const data = await spacesService.getFreeSlots();
       setSlots(data);
-    } catch {
-      // Ignorar fallo secundario
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'No se pudo consultar el cronograma vigente.');
     } finally {
       setIsLoadingSlots(false);
     }
@@ -77,7 +77,7 @@ export const AdminScheduleUploadView: React.FC<AdminScheduleUploadViewProps> = (
 
   const handleProcessSchedule = async () => {
     if (!selectedFile) {
-      setErrorMessage('Debe seleccionar un archivo oficial en formato Excel (.xlsx) o PDF (.pdf).');
+      setErrorMessage('Debe seleccionar un archivo oficial en formato Excel (.xls, .xlsx) o PDF (.pdf).');
       return;
     }
 
@@ -173,7 +173,7 @@ export const AdminScheduleUploadView: React.FC<AdminScheduleUploadViewProps> = (
         </div>
         <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.88rem', color: '#64748B', lineHeight: 1.5 }}>
           Carga y análisis de los archivos oficiales de programación académica de aulas y laboratorios de la EPIS-UPT.
-          El motor interno procesa los documentos en <strong>Excel (.xlsx)</strong> o <strong>PDF</strong>, extrae las franjas horarias y
+          El motor interno procesa los documentos en <strong>Excel (.xls, .xlsx)</strong> o <strong>PDF</strong>, extrae las franjas horarias y
           recintos libres respecto de las clases de cátedra, y actualiza el banco de infraestructura física disponible para prevenir
           solapamientos en sesiones presenciales (<strong>RN-06</strong>).
         </p>
