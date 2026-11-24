@@ -100,7 +100,7 @@ def get_optional_session():
 def get_required_session():
     """
     Generador de sesión estricto que arroja HTTP 503 si la base de datos está caída o inaccesible
-    cuando STRICT_DATABASE_MODE=True o en producción (APP_ENV=production),
+    cuando existe una conexión configurada o STRICT_DATABASE_MODE=True,
     previniendo la degradación silenciosa a memoria RAM volátil.
     """
     db = None
@@ -112,7 +112,7 @@ def get_required_session():
         db = None
 
     if db is None:
-        if settings.STRICT_DATABASE_MODE:
+        if settings.STRICT_DATABASE_MODE or settings.DATABASE_URL:
             from fastapi import HTTPException, status
 
             raise HTTPException(

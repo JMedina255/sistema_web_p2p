@@ -107,6 +107,10 @@ def upgrade() -> None:
         op.execute(sa.text("ALTER TABLE reservas_cupo ENABLE ROW LEVEL SECURITY;"))
         op.execute(sa.text("ALTER TABLE solicitudes_demanda ENABLE ROW LEVEL SECURITY;"))
 
+        # Plain PostgreSQL has no Supabase identity functions. RLS stays enabled.
+        if not op.get_bind().scalar(sa.text("SELECT to_regprocedure('auth.jwt()') IS NOT NULL")):
+            return
+
         # Políticas RLS para reservas_cupo
         op.execute(
             sa.text(

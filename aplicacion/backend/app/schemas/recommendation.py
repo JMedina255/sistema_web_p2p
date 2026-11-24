@@ -87,7 +87,7 @@ class OfferRecommendationItem(BaseModel):
     espacio_asignado: str
     mentor_email: str
     mentor_nombre: str | None = None
-    mentor_ciclo: int = Field(..., ge=7, le=10)
+    mentor_ciclo: int = Field(..., ge=1, le=10)
     score_total: float
     breakdown: ScoreBreakdown
 

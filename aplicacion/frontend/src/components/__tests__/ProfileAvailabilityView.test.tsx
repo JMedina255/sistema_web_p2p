@@ -89,7 +89,7 @@ describe('ProfileAvailabilityView Component (T-11 / RF04 / CUS15)', () => {
     const clearButton = screen.getByRole('button', { name: /Limpiar/i });
     fireEvent.click(clearButton);
 
-    expect(screen.getByText(/0 bloques de 1 hora/i)).toBeInTheDocument();
+    expect(screen.getByText(/0 h semanales/i)).toBeInTheDocument();
   });
 
   it('5. Guarda exitosamente el perfil y muestra notificación de confirmación', async () => {

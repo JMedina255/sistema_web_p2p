@@ -240,7 +240,7 @@ describe('StudentBookingsIntegration (Sprint 05 Fase 4 - T-25 / T-27 / RF13 / RF
       expect(
         screen.getByRole('heading', { name: /Ratificar Asistencia a Mentoría/i })
       ).toBeInTheDocument();
-      expect(screen.getByText(/quórum mínimo del 50%/i)).toBeInTheDocument();
+      expect(screen.getByText(/quórum mínimo configurado/i)).toBeInTheDocument();
       expect(screen.getByText(/Compromiso de Asistencia y Quórum/i)).toBeInTheDocument();
     });
   });

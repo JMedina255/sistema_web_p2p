@@ -464,7 +464,7 @@ describe('Batería T-19: Ordenamiento Determinista y Empates Top-k (ORD-01 a ORD
           screen.getByText(/No se encontraron recomendaciones en este momento/i)
         ).toBeInTheDocument();
         expect(
-          screen.getByText(/No existen ofertas activas ni mentores disponibles/i)
+          screen.getByText(/No hay sesiones publicadas con cupos/i)
         ).toBeInTheDocument();
       });
 

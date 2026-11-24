@@ -16,6 +16,7 @@
  * - Requerimiento No Funcional: RNF09 (Mantenibilidad y cobertura de pruebas automatizadas)
  */
 
+import { formatMentoringTime } from '../services/mentoringTime';
 import React, { useState, useEffect, useCallback, useId, useRef } from 'react';
 import {
   bookingService,
@@ -78,24 +79,6 @@ function resolveEffectiveStudentEmail(propEmail?: string): string | null {
 /**
  * Formatea una fecha ISO 8601 a un formato comprensible en español peruano (es-PE).
  */
-function formatDateTime(isoString?: string | null): string {
-  if (!isoString) return 'Por coordinar';
-  try {
-    const date = new Date(isoString);
-    if (isNaN(date.getTime())) return isoString;
-    return new Intl.DateTimeFormat('es-PE', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    }).format(date);
-  } catch {
-    return isoString;
-  }
-}
 
 /**
  * Evalúa preventivamente en cliente las reglas de negocio temporales RN-08 y RN-10 (corte a T-24h).
@@ -199,6 +182,7 @@ function getStatusConfig(status: BookingStatus | string): StatusConfig {
         description:
           'Has ratificado tu asistencia. Tu cupo está asegurado en la evaluación del quórum institucional.',
       };
+    case 'CANCELADA_NO_CONFIRMADA':
     case 'NO_CONFIRMADA':
       return {
         label: 'No Confirmada (Expirada)',
@@ -216,6 +200,7 @@ function getStatusConfig(status: BookingStatus | string): StatusConfig {
         badgeBorder: '#9CA3AF',
         description: 'Cancelada voluntariamente por el estudiante conforme a la política de desistimiento.',
       };
+    case 'CANCELADA_SISTEMA_QUORUM':
     case 'CANCELADA_SISTEMA':
       return {
         label: 'Cancelada por el Sistema',
@@ -223,7 +208,7 @@ function getStatusConfig(status: BookingStatus | string): StatusConfig {
         badgeText: '#7F1D1D',
         badgeBorder: '#DC2626',
         description:
-          'Sesión suspendida por el sistema al no alcanzar el quórum del 50% reglamentario.',
+          'Sesión suspendida por el sistema al no alcanzar el quórum reglamentario.',
       };
     case 'ASISTIDA':
       return {
@@ -294,6 +279,8 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
   // Estado para Check-in de Asistencia Digital en Vivo (RF17)
   const [checkinBooking, setCheckinBooking] = useState<BookingDetailResponse | null>(null);
   const [checkinCode, setCheckinCode] = useState<string>('');
+  const numericCheckin = /^\d{6}$/.test(checkinCode);
+  const validCheckin = numericCheckin || /^[a-f0-9]{64}$/.test(checkinCode);
   const [isSubmittingCheckin, setIsSubmittingCheckin] = useState<boolean>(false);
   const [checkinError, setCheckinError] = useState<string | null>(null);
   const [checkinSuccess, setCheckinSuccess] = useState<string | null>(null);
@@ -490,8 +477,8 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
   const handleSubmitCheckin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkinBooking) return;
-    if (checkinCode.trim().length !== 6) {
-      setCheckinError('El código numérico TOTP debe tener exactamente 6 dígitos.');
+    if (!validCheckin) {
+      setCheckinError('Ingresa el TOTP de seis dígitos o el contenido del QR.');
       return;
     }
 
@@ -502,7 +489,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
     try {
       const userEmail = effectiveEmail || authService.getCurrentUser()?.email;
       const resp = await attendanceService.checkIn(checkinBooking.id_sesion, {
-        numeric_code: checkinCode.trim(),
+        ...(numericCheckin ? { numeric_code: checkinCode } : { qr_token: checkinCode }),
         estudiante_email: userEmail,
       });
 
@@ -515,7 +502,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
       setBookings((prev) =>
         prev.map((b) =>
           b.id_reserva === checkinBooking.id_reserva
-            ? { ...b, estado: 'ASISTIDA' as BookingStatus, asistio: true, asistencia_confirmada: true }
+            ? { ...b, estado: 'ASISTIDA' as BookingStatus, asistio: true, survey_eligible: true, asistencia_confirmada: true }
             : b
         )
       );
@@ -583,6 +570,8 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
         b.estado === 'CANCELADA_USUARIO' ||
         b.estado === 'CANCELADA_SISTEMA' ||
         b.estado === 'NO_CONFIRMADA' ||
+        b.estado === 'CANCELADA_NO_CONFIRMADA' ||
+        b.estado === 'CANCELADA_SISTEMA_QUORUM' ||
         b.estado === 'ASISTIDA' ||
         b.estado === 'INASISTENCIA'
       );
@@ -1052,7 +1041,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                     <span style={{ color: '#64748B', display: 'block', fontSize: '11px' }}>
                       Fecha y Hora de Sesión:
                     </span>
-                    <strong style={{ color: '#0F172A' }}>{formatDateTime(booking.fecha_inicio)}</strong>
+                    <strong style={{ color: '#0F172A' }}>{formatMentoringTime(booking.fecha_inicio)}</strong>
                   </div>
                   <div>
                     <span style={{ color: '#64748B', display: 'block', fontSize: '11px' }}>
@@ -1073,7 +1062,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                     <span style={{ color: '#64748B', display: 'block', fontSize: '11px' }}>
                       Fecha de Reserva:
                     </span>
-                    <span style={{ color: '#334155' }}>{formatDateTime(booking.fecha_reserva)}</span>
+                    <span style={{ color: '#334155' }}>{formatMentoringTime(booking.fecha_reserva)}</span>
                   </div>
                 </div>
 
@@ -1094,7 +1083,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                       <strong>Plazo de confirmación:</strong> {timeCheck.message}
                       {timeCheck.cutoffIso && (
                         <div style={{ marginTop: '2px', fontSize: '11px' }}>
-                          Corte definitivo: <strong>{formatDateTime(timeCheck.cutoffIso)}</strong>
+                          Corte definitivo: <strong>{formatMentoringTime(timeCheck.cutoffIso)}</strong>
                         </div>
                       )}
                     </div>
@@ -1110,7 +1099,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                         marginTop: '4px',
                       }}
                     >
-                      ✓ Ratificación registrada el: <strong>{formatDateTime(booking.fecha_ratificacion)}</strong>
+                      ✓ Ratificación registrada el: <strong>{formatMentoringTime(booking.fecha_ratificacion)}</strong>
                     </div>
                   )}
                   {booking.motivo_cancelacion && (
@@ -1234,13 +1223,9 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                     const elapsedHours = endMs > 0 ? (nowMs - endMs) / (1000 * 60 * 60) : 0;
                     const isSurveyWindowExpired = elapsedHours > 24;
 
-                    const hasEffectiveAttendance =
-                      booking.asistio === true ||
-                      booking.asistencia_confirmada === true ||
-                      booking.estado === 'ASISTIDA';
-                    const isMarkedAbsent =
-                      booking.asistio === false || booking.estado === 'INASISTENCIA';
-                    const isEvaluated = evaluatedBookings.has(booking.id_reserva);
+                    const hasEffectiveAttendance = booking.survey_eligible ?? (booking.asistio === true);
+                    const isMarkedAbsent = booking.asistio === false || booking.estado === 'INASISTENCIA';
+                    const isEvaluated = booking.has_surveyed || evaluatedBookings.has(booking.id_reserva);
 
                     if (isEvaluated) {
                       return (
@@ -1487,7 +1472,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                   Tema: <strong>{confirmingBooking.nombre_tema || 'Contenido curricular'}</strong>
                 </div>
                 <div style={{ color: '#0F172A', fontSize: '12px' }}>
-                  📅 Horario: <strong>{formatDateTime(confirmingBooking.fecha_inicio)}</strong>
+                  📅 Horario: <strong>{formatMentoringTime(confirmingBooking.fecha_inicio)}</strong>
                 </div>
                 <div style={{ color: '#0F172A', fontSize: '12px' }}>
                   Modalidad: <strong>{confirmingBooking.modalidad === 'virtual' ? '🌐 Virtual' : '🏛️ Presencial'}</strong>
@@ -1512,7 +1497,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                 <ul style={{ margin: 0, paddingLeft: '18px', lineHeight: 1.4 }}>
                   <li>
                     Al ratificar, tu cupo pasa a estado <strong>CONFIRMADA</strong> y se contabiliza en el quórum
-                    mínimo del 50% requerido para habilitar el dictado de la clase.
+                    mínimo configurado para habilitar el dictado de la clase.
                   </li>
                   <li>
                     Si surge algún imprevisto, puedes desistir voluntariamente hasta 24 horas antes del inicio sin penalización académica.
@@ -1712,7 +1697,7 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                   Tema: <strong>{cancellingBooking.nombre_tema || 'Contenido curricular'}</strong>
                 </div>
                 <div style={{ color: '#0F172A', fontSize: '12px' }}>
-                  📅 Horario: <strong>{formatDateTime(cancellingBooking.fecha_inicio)}</strong>
+                  📅 Horario: <strong>{formatMentoringTime(cancellingBooking.fecha_inicio)}</strong>
                 </div>
                 <div style={{ color: '#0F172A', fontSize: '12px' }}>
                   Modalidad: <strong>{cancellingBooking.modalidad === 'virtual' ? '🌐 Virtual' : '🏛️ Presencial'}</strong>
@@ -1943,15 +1928,15 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
 
               <div style={{ marginBottom: '16px' }}>
                 <label htmlFor="totp-code-input" style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#1E293B', marginBottom: '6px' }}>
-                  Código TOTP (6 dígitos):
+                  Código TOTP (6 dígitos) o contenido del QR:
                 </label>
                 <input
                   id="totp-code-input"
                   type="text"
-                  maxLength={6}
+                  maxLength={64}
                   placeholder="Ej. 492817"
                   value={checkinCode}
-                  onChange={(e) => setCheckinCode(e.target.value.replace(/\D/g, ''))}
+                  onChange={(e) => setCheckinCode(e.target.value.trim())}
                   disabled={isSubmittingCheckin}
                   autoFocus
                   style={{
@@ -1988,16 +1973,16 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmittingCheckin || checkinCode.length !== 6}
+                  disabled={isSubmittingCheckin || !validCheckin}
                   style={{
-                    backgroundColor: isSubmittingCheckin || checkinCode.length !== 6 ? '#94A3B8' : '#0284C7',
+                    backgroundColor: isSubmittingCheckin || !validCheckin ? '#94A3B8' : '#0284C7',
                     border: 'none',
                     borderRadius: '6px',
                     padding: '8px 18px',
                     fontSize: '13px',
                     fontWeight: 700,
                     color: '#FFFFFF',
-                    cursor: isSubmittingCheckin || checkinCode.length !== 6 ? 'not-allowed' : 'pointer',
+                    cursor: isSubmittingCheckin || !validCheckin ? 'not-allowed' : 'pointer',
                   }}
                 >
                   {isSubmittingCheckin ? 'Validando...' : '✓ Validar Asistencia'}
@@ -2021,13 +2006,8 @@ export const StudentBookingsView: React.FC<StudentBookingsViewProps> = ({
               ? new Date(new Date(activeSurveyBooking.fecha_inicio).getTime() + (activeSurveyBooking.duracion_minutos || 60) * 60000)
               : undefined
           }
-          asistenciaConfirmada={
-            activeSurveyBooking.asistio !== false &&
-            activeSurveyBooking.estado !== 'INASISTENCIA' &&
-            (activeSurveyBooking.asistio === true ||
-              activeSurveyBooking.asistencia_confirmada === true ||
-              activeSurveyBooking.estado === 'ASISTIDA')
-          }
+          asistenciaConfirmada={activeSurveyBooking.survey_eligible ?? (activeSurveyBooking.asistio === true)}
+          onAlreadySubmitted={() => setEvaluatedBookings(prev => new Set(prev).add(activeSurveyBooking.id_reserva))}
           currentTime={currentTime}
           onSurveySubmitted={() => {
             if (activeSurveyBooking) {

@@ -42,7 +42,7 @@ def test_full_mentoring_cycle_and_certificate_issuance_t48():
         now = datetime.now(UTC)
         mentor_email = "mentor.integral@upt.pe"
         admin_email = "admin.epis@upt.pe"
-        students = ["alumno.1@upt.pe", "alumno.2@upt.pe", "alumno.3@upt.pe"]
+        students = [f"alumno.{i}@upt.pe" for i in range(1, 6)]
 
         # ---------------------------------------------------------------------
         # 1. Configurar roles institucionales

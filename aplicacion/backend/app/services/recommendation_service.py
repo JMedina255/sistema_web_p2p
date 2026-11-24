@@ -188,6 +188,7 @@ class RecommendationService:
         candidate_cycle: int,
         offer_time: datetime | None = None,
         offer_duration_minutes: int = 60,
+        candidate_authorized: bool = False,
     ) -> tuple[float, ScoreBreakdown]:
         """
         Calcula el puntaje multifactorial y genera el desglose explicable.
@@ -204,7 +205,7 @@ class RecommendationService:
         c_modality = candidate_modality or "presencial"
 
         # 1. Validación de mérito institucional RN-03
-        is_eligible = candidate_cycle >= 7
+        is_eligible = candidate_cycle >= 7 or candidate_authorized
         if not is_eligible:
             breakdown = ScoreBreakdown(
                 curricular_affinity=0.0,
@@ -297,7 +298,9 @@ class RecommendationService:
 
         # 7. Generación de Explicabilidad Cualitativa
         explanation_parts = [
-            f"Mentor ciclo {candidate_cycle} (RN-03 aprobado).",
+            f"Mentor ciclo {candidate_cycle} (RN-03 aprobado)."
+            if candidate_cycle >= 7
+            else f"Mentor ciclo {candidate_cycle} con rol activo habilitado para publicar.",
         ]
         if applied_course_code:
             explanation_parts.append(
@@ -563,8 +566,12 @@ class RecommendationService:
             mentor_profile = ProfileService.get_profile(db, o_data.mentor_email)
             mentor_cycle = mentor_profile.ciclo_actual
             if mentor_cycle < 7:
-                # Regla RN-03
-                continue
+                try:
+                    OfferService.validate_mentor_eligibility(db, o_data.mentor_email)
+                except HTTPException as exc:
+                    if exc.status_code != status.HTTP_403_FORBIDDEN:
+                        raise
+                    continue
 
             c_courses = {o_data.id_asignatura}
             c_topics = {o_data.id_tema}
@@ -582,6 +589,7 @@ class RecommendationService:
                 candidate_cycle=mentor_cycle,
                 offer_time=f_inicio,
                 offer_duration_minutes=o_data.duracion_minutos,
+                candidate_authorized=mentor_cycle < 7,
             )
 
             rec_item = OfferRecommendationItem(

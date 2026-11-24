@@ -836,6 +836,7 @@ describe('bookingService (T-23 / Sprint 05 Fase 1 - RF12 / RF13 / RF14 / RN-08 /
 
     it('ejecuta confirmAttendance y cancelReservation mediante la fachada en modo mock', async () => {
       bookingService.setMode('mock');
+      bookingService.setCurrentTime(Date.parse('2026-11-18T10:00:00Z'));
 
       const b = await bookingService.reserveSeat({
         id_sesion: 301,

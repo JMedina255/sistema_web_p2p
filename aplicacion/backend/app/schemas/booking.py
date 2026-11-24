@@ -46,6 +46,8 @@ class BookingResponse(BaseModel):
         "CONFIRMADA",
         "CANCELADA_USUARIO",
         "NO_CONFIRMADA",
+        "CANCELADA_NO_CONFIRMADA",
+        "CANCELADA_SISTEMA_QUORUM",
         "CANCELADA_SISTEMA",
         "ASISTIDA",
         "INASISTENCIA",
@@ -64,6 +66,9 @@ class BookingDetailResponse(BaseModel):
     id_reserva: int
     codigo_reserva: str
     id_sesion: int
+    asistio: bool | None = None
+    survey_eligible: bool = False
+    has_surveyed: bool = False
     codigo_sesion: str | None = None
     estudiante_email: str
     estado: str

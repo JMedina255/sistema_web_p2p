@@ -4,6 +4,35 @@ import { LoginOtpView } from '../LoginOtpView';
 import { authService } from '../../services/authService';
 
 describe('LoginOtpView Component', () => {
+  it('mantiene el acceso OTP sin ofrecer un cliente Google no configurado', () => {
+    vi.stubEnv('VITE_GOOGLE_CLIENT_ID', '');
+    try {
+      render(<LoginOtpView />);
+      expect(screen.queryByRole('button', { name: /Google/i })).toBeNull();
+      expect(screen.getByRole('button', { name: /Continuar con Código OTP/i })).toBeInTheDocument();
+    } finally { vi.unstubAllEnvs(); }
+  });
+
+  it('inicializa el botón oficial con el ID público configurado', () => {
+    const initialize = vi.fn();
+    const renderButton = vi.fn();
+    vi.stubEnv('VITE_GOOGLE_CLIENT_ID', 'cliente-de-prueba.apps.googleusercontent.com');
+    vi.stubGlobal('google', { accounts: { id: { initialize, renderButton } } });
+    try {
+      const { rerender } = render(<LoginOtpView />);
+      rerender(<LoginOtpView onLoginSuccess={vi.fn()} />);
+      expect(initialize).toHaveBeenCalledTimes(1);
+      expect(initialize).toHaveBeenCalledWith(expect.objectContaining({
+        client_id: 'cliente-de-prueba.apps.googleusercontent.com', callback: expect.any(Function)
+      }));
+      expect(renderButton).toHaveBeenCalledWith(document.querySelector('#googleSignInBtnContainer'),
+        expect.objectContaining({ locale: 'es' }));
+    } finally {
+      vi.unstubAllGlobals();
+      vi.unstubAllEnvs();
+    }
+  });
+
   beforeEach(() => {
     vi.useFakeTimers();
     authService.cancelChallenge();

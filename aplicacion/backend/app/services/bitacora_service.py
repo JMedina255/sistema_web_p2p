@@ -389,14 +389,7 @@ class BitacoraService:
 
         # 1. Base de datos
         if db is not None:
-            b = (
-                db.query(BitacoraPedagogica)
-                .filter(
-                    (BitacoraPedagogica.id_bitacora == bitacora_id)
-                    | (BitacoraPedagogica.id_sesion == bitacora_id)
-                )
-                .first()
-            )
+            b = db.get(BitacoraPedagogica, bitacora_id)
             if not b:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -441,8 +434,6 @@ class BitacoraService:
                     for b in _memory_bitacoras
                     if b["id_bitacora"] == bitacora_id
                     or str(b["id_bitacora"]) == str(bitacora_id)
-                    or b["id_sesion"] == bitacora_id
-                    or str(b["id_sesion"]) == str(bitacora_id)
                 ),
                 None,
             )
@@ -542,14 +533,7 @@ class BitacoraService:
 
         # 1. Base de datos
         if db is not None:
-            b = (
-                db.query(BitacoraPedagogica)
-                .filter(
-                    (BitacoraPedagogica.id_bitacora == bitacora_id)
-                    | (BitacoraPedagogica.id_sesion == bitacora_id)
-                )
-                .first()
-            )
+            b = db.get(BitacoraPedagogica, bitacora_id)
             if not b:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -593,8 +577,6 @@ class BitacoraService:
                     for b in _memory_bitacoras
                     if b["id_bitacora"] == bitacora_id
                     or str(b["id_bitacora"]) == str(bitacora_id)
-                    or b["id_sesion"] == bitacora_id
-                    or str(b["id_sesion"]) == str(bitacora_id)
                 ),
                 None,
             )

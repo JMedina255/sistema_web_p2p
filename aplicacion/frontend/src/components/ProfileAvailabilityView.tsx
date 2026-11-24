@@ -1,3 +1,4 @@
+import { hoursAvailable, overlapsHour, toggleHour } from '../services/availabilityIntervals';
 import React, { useState, useEffect } from 'react';
 import { profileService } from '../services/profileService';
 import type { AcademicProfile, AvailabilitySlot } from '../services/profileService';
@@ -122,15 +123,7 @@ export const ProfileAvailabilityView: React.FC<ProfileAvailabilityViewProps> = (
 
   // Alternar una celda en la grilla semanal
   const handleToggleSlot = (dia_semana: number, hora_inicio: string, hora_fin: string) => {
-    const isSlotSelected = slots.some(
-      (s) => s.dia_semana === dia_semana && s.hora_inicio === hora_inicio
-    );
-
-    if (isSlotSelected) {
-      setSlots(slots.filter((s) => !(s.dia_semana === dia_semana && s.hora_inicio === hora_inicio)));
-    } else {
-      setSlots([...slots, { dia_semana, hora_inicio, hora_fin }]);
-    }
+    setSlots(current => toggleHour(current, dia_semana, hora_inicio, hora_fin));
   };
 
   // Atajos rápidos para marcar horarios comunes
@@ -185,7 +178,7 @@ export const ProfileAvailabilityView: React.FC<ProfileAvailabilityViewProps> = (
       ]);
 
       setNotification({
-        text: `Perfil formativo y agenda semanal (${slots.length} horas) guardados exitosamente.`,
+        text: `Perfil formativo y agenda semanal (${hoursAvailable(slots)} horas) guardados exitosamente.`,
         type: 'success',
       });
 
@@ -307,7 +300,7 @@ export const ProfileAvailabilityView: React.FC<ProfileAvailabilityViewProps> = (
             boxShadow: activeSection === 'schedule' ? '0 4px 12px rgba(28, 42, 89, 0.08)' : 'none',
           }}
         >
-          📅 2. Matriz Semanal de Disponibilidad ({slots.length} horas)
+          📅 2. Matriz Semanal de Disponibilidad ({hoursAvailable(slots)} horas)
         </button>
       </div>
 
@@ -653,9 +646,7 @@ export const ProfileAvailabilityView: React.FC<ProfileAvailabilityViewProps> = (
                       {ts.label}
                     </td>
                     {DAYS_OF_WEEK.map((day) => {
-                      const isSelected = slots.some(
-                        (s) => s.dia_semana === day.id && s.hora_inicio === ts.start
-                      );
+                      const isSelected = overlapsHour(slots, day.id, ts.start, ts.end);
                       return (
                         <td
                           key={day.id}
@@ -682,7 +673,7 @@ export const ProfileAvailabilityView: React.FC<ProfileAvailabilityViewProps> = (
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', color: '#64748B' }}>
             <span>
-              Total comprometido: <strong style={{ color: '#1C2A59' }}>{slots.length} bloques de 1 hora</strong> ({slots.length} h semanales).
+              Total comprometido: <strong style={{ color: '#1C2A59' }}>{hoursAvailable(slots)} h semanales</strong>.
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ width: '12px', height: '12px', backgroundColor: '#10B981', display: 'inline-block', borderRadius: '2px' }}></span>

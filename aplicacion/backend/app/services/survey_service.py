@@ -87,6 +87,7 @@ class SurveyService:
                     AsistenciaSesion.id_sesion == session_id,
                     AsistenciaSesion.estudiante_email == clean_caller,
                 )
+                .with_for_update(of=AsistenciaSesion)
                 .first()
             )
             if not asistencia or not asistencia.asistio:

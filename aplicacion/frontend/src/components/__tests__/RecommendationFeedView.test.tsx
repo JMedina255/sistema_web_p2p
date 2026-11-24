@@ -266,7 +266,7 @@ describe('RecommendationFeedView Component (T-20 / RF06 / CUS02 / RN-11)', () =>
       expect(screen.getByText(/Índice de Dice:/i)).toBeInTheDocument();
       expect(screen.getByText(/91\.9%/i)).toBeInTheDocument();
       expect(screen.getByText(/Multiplicador Prioritario: 1.3x \(AED-201\)/i)).toBeInTheDocument();
-      expect(screen.getByText(/Mérito Académico Acreditado \(Ciclo VII-X\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/Mentor habilitado/i)).toBeInTheDocument();
 
       // Franjas horarias
       expect(screen.getByText('Lun 10:00-11:00')).toBeInTheDocument();
@@ -420,6 +420,7 @@ describe('RecommendationFeedView Component (T-20 / RF06 / CUS02 / RN-11)', () =>
       });
 
       const courseSelect = screen.getByLabelText(/Asignatura:/i);
+      expect(courseSelect).toHaveStyle({ minWidth: '0', maxWidth: '100%' });
       fireEvent.change(courseSelect, { target: { value: '3' } });
 
       await waitFor(() => {

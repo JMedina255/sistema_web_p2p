@@ -102,7 +102,7 @@ export const NAVIGATION_ITEMS: Record<NavTab, NavigationItem> = {
     icon: '📜',
     allowedRoles: ['mentor'],
     requiresAuth: true,
-    description: 'Acreditación de horas de mentoría y descarga de constancias oficiales DEMO.',
+    description: 'Acreditación de horas de mentoría y descarga de constancias oficiales.',
   },
   admin: {
     tab: 'admin',

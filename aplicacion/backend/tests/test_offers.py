@@ -27,8 +27,10 @@ def test_publish_offer_presencial_success():
     mentor_email = "2022073504@upt.pe"  # Renzo (Ciclo 7 / Mentor)
     token = create_access_token({"sub": mentor_email, "roles": ["mentor"]})
 
-    # Antelación válida > 24 horas (48 horas en el futuro)
-    future_date = (datetime.now(UTC) + timedelta(hours=48)).isoformat()
+    # Lunes a las 10:00 en Lima, en la franja oficial.
+    future = datetime.now(UTC) + timedelta(days=14)
+    future_date = (future + timedelta(days=-future.weekday())).replace(
+        hour=15, minute=0, second=0, microsecond=0).isoformat()
 
     payload = {
         "id_asignatura": 1,
@@ -40,7 +42,7 @@ def test_publish_offer_presencial_success():
         "duracion_minutos": 60,
         "modalidad": "presencial",
         "aforo_maximo": 10,
-        "espacio_asignado": "Laboratorio de Cómputo 101 - Pabellón G (EPIS)",
+        "espacio_asignado": "Aula 101",
         "mentor_email": mentor_email,
         "mentor_nombre": "Renzo Antonio Antayhua Mamani",
         "notas_adicionales": "Traer guía de límites",
@@ -313,9 +315,9 @@ def test_offer_service_with_real_db_session():
             nombre_tema="Límites",
             fecha_inicio=future_date,
             duracion_minutos=60,
-            modalidad="presencial",
-            aforo_maximo=10,
-            espacio_asignado="Lab 101",
+            modalidad="virtual",
+            aforo_maximo=20,
+            espacio_asignado="https://meet.google.com/qa-mentor",
             mentor_email="2022073504@upt.pe",
         )
 
@@ -325,7 +327,11 @@ def test_offer_service_with_real_db_session():
 
         # Verificar consulta en BD
         offers_db = OfferService.get_offers(db=db, id_asignatura=1)
-        assert len(offers_db) >= 1
+        assert len(offers_db) == 1
+        clear_offers_in_memory()  # A new worker has no process-local state.
+        second = OfferService.publish_offer(db=db, payload=payload)
+        assert second.codigo_sesion != resp.codigo_sesion
+        assert {o.id_oferta for o in OfferService.get_offers(db=db)} == {resp.id_oferta, second.id_oferta}
     finally:
         db.close()
         engine.dispose()
@@ -399,8 +405,8 @@ def test_publish_offer_exact_24_hours_boundary():
         "nombre_tema": "Límites",
         "fecha_inicio": exact_24h,
         "duracion_minutos": 60,
-        "modalidad": "presencial",
-        "aforo_maximo": 10,
+        "modalidad": "virtual",
+        "aforo_maximo": 20,
         "espacio_asignado": "Laboratorio 101",
         "mentor_email": mentor_email,
     }
@@ -447,3 +453,99 @@ def test_publish_offer_rejects_invalid_date_format():
     )
     assert res.status_code == 400
     assert "inválido" in res.json()["detail"].lower()
+
+
+def test_physical_room_requires_official_full_slot_without_overlap():
+    from app.schemas.offer import PublishOfferPayload
+    from app.services.offer_service import OfferService
+    from fastapi import HTTPException
+
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    with sessionmaker(bind=engine)() as db:
+        future = datetime.now(UTC) + timedelta(days=14)
+        monday = (future - timedelta(days=future.weekday())).replace(hour=15, minute=0, second=0, microsecond=0)
+        payload = PublishOfferPayload(id_asignatura=1, codigo_asignatura="QA", nombre_asignatura="QA",
+            id_tema=1, nombre_tema="Tema", fecha_inicio=monday.isoformat(), duracion_minutos=60,
+            modalidad="presencial", aforo_maximo=10, espacio_asignado="Aula 101", mentor_email="2022073504@upt.pe")
+        for changes in ({"espacio_asignado": "Fuera del catálogo"}, {"fecha_inicio": (monday - timedelta(days=1)).isoformat()},
+                        {"fecha_inicio": (monday + timedelta(hours=1)).isoformat(), "duracion_minutos": 90}):
+            with pytest.raises(HTTPException) as rejected:
+                OfferService.publish_offer(db, payload.model_copy(update=changes))
+            assert rejected.value.status_code == 409
+            db.rollback()
+        OfferService.publish_offer(db, payload)
+        with pytest.raises(HTTPException) as overlap:
+            OfferService.publish_offer(db, payload.model_copy(update={"fecha_inicio": (monday + timedelta(minutes=30)).isoformat()}))
+        assert overlap.value.status_code == 409
+        db.rollback()
+        OfferService.publish_offer(db, payload.model_copy(update={"fecha_inicio": (monday + timedelta(hours=1)).isoformat()}))
+    engine.dispose()
+
+
+def test_directed_offer_consumes_only_its_pending_request(monkeypatch):
+    from sqlalchemy.pool import StaticPool
+
+    from app.db import session as db_session
+    from app.models.booking import SolicitudDemanda
+    from app.models.offer import SesionMentoria
+
+    engine = create_engine("sqlite://", poolclass=StaticPool, connect_args={"check_same_thread": False})
+    Base.metadata.create_all(engine)
+    factory = sessionmaker(bind=engine)
+    mentor = "2022073504@upt.pe"
+    headers = {"Authorization": "Bearer " + create_access_token({"sub": mentor, "roles": ["mentor"]})}
+
+    def get_db():
+        with factory() as db:
+            yield db
+
+    monkeypatch.setitem(app.dependency_overrides, db_session.get_required_session, get_db)
+    monkeypatch.setitem(app.dependency_overrides, db_session.get_optional_session, get_db)
+    try:
+        with factory() as db:
+            db.add_all([
+                Asignatura(id_asignatura=1, codigo_curso="CALC-101", nombre_curso="Cálculo", ciclo_plan=1, creditos=4),
+                TemaConceptual(id_tema=1, id_asignatura=1, nombre_tema="Límites"),
+                TemaConceptual(id_tema=2, id_asignatura=1, nombre_tema="Derivadas"),
+                PerfilAcademico(email=mentor, ciclo_actual=7, rol_postulacion="mentor"),
+                SolicitudDemanda(id_demanda=81, estudiante_email="ana@upt.pe", id_asignatura=1, id_tema=1),
+                SolicitudDemanda(id_demanda=82, estudiante_email="joan@upt.pe", id_asignatura=1, id_tema=1),
+            ])
+            db.commit()
+
+        offer = {
+            "id_asignatura": 1, "codigo_asignatura": "CALC-101", "nombre_asignatura": "Cálculo",
+            "id_tema": 1, "nombre_tema": "Límites", "modalidad": "virtual", "aforo_maximo": 20,
+            "mentor_email": mentor, "fecha_inicio": (datetime.now(UTC) + timedelta(days=3)).isoformat(),
+        }
+        endpoint = "/api/v1/offers"
+        requests_endpoint = "/api/v1/bookings/requests"
+
+        assert client.post(endpoint, headers=headers, json=offer).status_code == 201
+        assert {d["id_demanda"] for d in client.get(requests_endpoint).json()} == {81, 82}
+        directed = {**offer, "id_demanda": 81}
+        mismatch = client.post(endpoint, headers=headers, json={**directed, "id_tema": 2})
+        assert mismatch.status_code == 409
+        assert {d["id_demanda"] for d in client.get(requests_endpoint).json()} == {81, 82}
+
+        from sqlalchemy.exc import SQLAlchemyError
+        from app.services.virtual_room_service import VirtualRoomService
+
+        def fail_before_commit(*args):
+            raise SQLAlchemyError("simulated publication failure")
+
+        with monkeypatch.context() as failure:
+            failure.setattr(VirtualRoomService, "resolve_virtual_room", fail_before_commit)
+            assert client.post(endpoint, headers=headers, json=directed).status_code == 503
+        assert {d["id_demanda"] for d in client.get(requests_endpoint).json()} == {81, 82}
+
+        published = client.post(endpoint, headers=headers, json=directed)
+        assert published.status_code == 201
+        assert {d["id_demanda"] for d in client.get(requests_endpoint).json()} == {82}
+        assert client.post(endpoint, headers=headers, json=directed).status_code == 409
+        with factory() as db:
+            assert db.get(SolicitudDemanda, 81).estado == "ATENDIDA"
+            assert db.query(SesionMentoria).count() == 2
+    finally:
+        engine.dispose()

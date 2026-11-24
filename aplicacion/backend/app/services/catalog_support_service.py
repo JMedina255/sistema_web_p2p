@@ -13,12 +13,13 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 import hashlib
-import math
 import re
 import time
 from typing import Any
 
 from fastapi import HTTPException, status
+
+from app.core.config import settings
 
 
 # ==============================================================================
@@ -608,7 +609,7 @@ class TareaProgramadaQuorum:
         Si no se alcanza el quórum, genera automáticamente la alerta para el mentor.
         """
         aforo = sesion.get("capacidad_maxima", 10)
-        quorum_minimo = math.ceil(aforo * 0.5)
+        quorum_minimo = settings.quorum_minimum_students(aforo)
 
         confirmados = sum(1 for i in inscritos if i.get("estado") == "CONFIRMADA")
 

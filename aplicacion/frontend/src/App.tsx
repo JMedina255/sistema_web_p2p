@@ -71,7 +71,7 @@ const TAB_HEADERS: Record<NavTab, { title: string; subtitle: string }> = {
   },
   certificates: {
     title: 'Acreditación y Constancias de Mentoría',
-    subtitle: 'Consulta tu progreso hacia el umbral de 20 horas visadas y descarga tu constancia oficial DEMO.',
+    subtitle: 'Consulta tu progreso hacia el umbral de 20 horas visadas y descarga tu constancia oficial.',
   },
   admin: {
     title: 'Panel de Administración Institucional',

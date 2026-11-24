@@ -1,10 +1,14 @@
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, time, timedelta
 from typing import Literal
+from uuid import uuid4
+from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, status
+from sqlalchemy import update
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.models.booking import ReservaCupo
+from app.models.booking import ReservaCupo, SolicitudDemanda
 from app.models.offer import SesionMentoria
 from app.models.profile import PerfilAcademico
 from app.models.roles import Rol, UsuarioRol
@@ -14,10 +18,13 @@ from app.schemas.offer import (
     QuorumDecisionPayload,
     QuorumDecisionResponse,
 )
+from app.services.schedule_parser_service import ScheduleParserService
+from app.services.virtual_room_service import VirtualRoomService
 
 # Almacén en memoria de respaldo para ofertas
 _memory_offers: list[dict] = []
 _session_counter = 1001
+_DEMAND_UNAVAILABLE = "La solicitud ya no está pendiente o no corresponde a la asignatura y al tema seleccionados."
 
 
 def get_offers_in_memory() -> list[dict]:
@@ -262,6 +269,61 @@ class OfferService:
         )
 
     @classmethod
+    def available_classrooms(cls, db: Session | None, start: datetime, duration: int,
+                            lock: bool = False, exclude_session: int | None = None) -> list[str]:
+        start = (start if start.tzinfo else start.replace(tzinfo=UTC)).astimezone(UTC)
+        end = start + timedelta(minutes=duration)
+        lima = ZoneInfo("America/Lima")
+        local_start, local_end = start.astimezone(lima), end.astimezone(lima)
+        if local_start.date() != local_end.date():
+            return []
+        weekday = ("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")[local_start.weekday()]
+        slots = ScheduleParserService.get_active_slots(dia=weekday, db=db, lock=lock)
+        intervals = {}
+        for slot in slots:
+            try:
+                begin, finish = time.fromisoformat(slot["hora_inicio"]), time.fromisoformat(slot["hora_fin"])
+            except ValueError:
+                continue
+            intervals.setdefault(slot["aula"], []).append((begin, finish))
+
+        rooms = set()
+        for room, spans in intervals.items():
+            covered = local_start.time()
+            for begin, finish in sorted(spans):
+                if begin <= covered < finish:
+                    covered = finish
+            if covered >= local_end.time():
+                rooms.add(room)
+
+        occupied_states = ("PUBLICADA", "PENDIENTE_CONFIRMACION", "QUORUM_INSUFICIENTE", "CONFIRMADA", "EN_CURSO")
+        if db is not None:
+            # Sessions last at most 90 minutes. Touching endpoints do not overlap.
+            query = db.query(SesionMentoria.espacio_asignado, SesionMentoria.fecha_inicio,
+                             SesionMentoria.duracion_minutos).filter(
+                SesionMentoria.modalidad == "presencial", SesionMentoria.estado.in_(occupied_states),
+                SesionMentoria.fecha_inicio > start - timedelta(minutes=90), SesionMentoria.fecha_inicio < end)
+            if exclude_session is not None:
+                query = query.filter(SesionMentoria.id_sesion != exclude_session)
+            existing = query.all()
+        else:
+            existing = [(s["espacio_asignado"], datetime.fromisoformat(s["fecha_inicio"]), s["duracion_minutos"])
+                        for s in _memory_offers if s.get("modalidad") == "presencial"
+                        and s.get("estado") in occupied_states and s.get("id_sesion") != exclude_session]
+        busy = set()
+        for room, when, length in existing:
+            when = when if when.tzinfo else when.replace(tzinfo=UTC)
+            if when < end and when + timedelta(minutes=length) > start:
+                busy.add(room.strip().casefold())
+        return sorted(room for room in rooms if room.casefold() not in busy)
+
+    @classmethod
+    def require_available_room(cls, db: Session | None, room: str, start: datetime, duration: int,
+                               exclude_session: int | None = None) -> None:
+        if room not in cls.available_classrooms(db, start, duration, lock=True, exclude_session=exclude_session):
+            raise HTTPException(409, "El aula no está disponible durante toda la sesión en el cronograma vigente.")
+
+    @classmethod
     def publish_offer(
         cls,
         db: Session | None,
@@ -307,71 +369,101 @@ class OfferService:
 
         # 5. Persistencia en Base de Datos o Almacén en Memoria
         now = datetime.now(UTC)
-        code = f"SES-{_session_counter}"
-        _session_counter += 1
-
-        # Resolución y aprovisionamiento de espacio físico o aula virtual (VirtualRoomService)
-        if payload.modalidad == "virtual":
-            from app.services.virtual_room_service import VirtualRoomService
-            assigned_space = VirtualRoomService.resolve_virtual_room(payload.espacio_asignado, code)
-        else:
-            assigned_space = payload.espacio_asignado.strip() if payload.espacio_asignado else "Aula EPIS"
-        payload.espacio_asignado = assigned_space
-
+        assigned_space = (payload.espacio_asignado or "Aula EPIS").strip()
         iso_str = payload.fecha_inicio.replace("Z", "+00:00")
         start_dt = datetime.fromisoformat(iso_str)
         if start_dt.tzinfo is None:
             start_dt = start_dt.replace(tzinfo=UTC)
 
-        id_oferta_str = code
+        start_dt = start_dt.astimezone(UTC)
+        if payload.modalidad == "presencial":
+            cls.require_available_room(db, assigned_space, start_dt, payload.duracion_minutos)
 
         if db is not None:
+            sesion_db = SesionMentoria(
+                # The temporary value is never committed. The primary key supplies the public folio.
+                codigo_sesion=uuid4().hex[:20],
+                mentor_email=effective_email,
+                id_asignatura=payload.id_asignatura,
+                id_tema=payload.id_tema,
+                fecha_inicio=start_dt,
+                duracion_minutos=payload.duracion_minutos,
+                modalidad=payload.modalidad,
+                aforo_maximo=expected_capacity,
+                espacio_asignado=assigned_space,
+                notas_adicionales=payload.notas_adicionales,
+                estado="PUBLICADA",
+            )
             try:
-                sesion_db = SesionMentoria(
-                    codigo_sesion=code,
-                    mentor_email=effective_email,
-                    id_asignatura=payload.id_asignatura,
-                    id_tema=payload.id_tema,
-                    fecha_inicio=start_dt,
-                    duracion_minutos=payload.duracion_minutos,
-                    modalidad=payload.modalidad,
-                    aforo_maximo=expected_capacity,
-                    espacio_asignado=assigned_space,
-                    notas_adicionales=payload.notas_adicionales,
-                    estado="PUBLICADA",
-                )
+                if payload.id_demanda is not None:
+                    claimed = db.execute(
+                        update(SolicitudDemanda)
+                        .where(
+                            SolicitudDemanda.id_demanda == payload.id_demanda,
+                            SolicitudDemanda.id_asignatura == payload.id_asignatura,
+                            SolicitudDemanda.id_tema == payload.id_tema,
+                            SolicitudDemanda.estado == "PENDIENTE",
+                        )
+                        .values(estado="ATENDIDA")
+                        .returning(SolicitudDemanda.id_demanda)
+                    ).scalar_one_or_none()
+                    if claimed is None:
+                        raise HTTPException(409, _DEMAND_UNAVAILABLE)
                 db.add(sesion_db)
-                db.commit()
-                db.refresh(sesion_db)
+                db.flush()
                 id_oferta_str = str(sesion_db.id_sesion)
-                code = sesion_db.codigo_sesion
-            except Exception:
+                code = f"SES-P{id_oferta_str}"
+                sesion_db.codigo_sesion = code
+                if payload.modalidad == "virtual":
+                    assigned_space = VirtualRoomService.resolve_virtual_room(payload.espacio_asignado, code)
+                    sesion_db.espacio_asignado = assigned_space
+                db.commit()
+            except HTTPException:
                 db.rollback()
-                # Continuar con fallback en memoria si la persistencia DB falla
-                pass
+                raise
+            except SQLAlchemyError as exc:
+                db.rollback()
+                raise HTTPException(503, "No se pudo guardar la oferta de mentoría.") from exc
+        else:
+            from app.services.booking_service import _booking_lock, _memory_demands
 
-        # Registro en almacén de memoria
-        offer_dict = {
-            "id_sesion": _session_counter - 1,
-            "codigo_sesion": code,
-            "mentor_email": effective_email,
-            "id_asignatura": payload.id_asignatura,
-            "codigo_asignatura": payload.codigo_asignatura,
-            "nombre_asignatura": payload.nombre_asignatura,
-            "id_tema": payload.id_tema,
-            "nombre_tema": payload.nombre_tema,
-            "fecha_inicio": payload.fecha_inicio,
-            "duracion_minutos": payload.duracion_minutos,
-            "modalidad": payload.modalidad,
-            "aforo_maximo": expected_capacity,
-            "espacio_asignado": assigned_space,
-            "mentor_nombre": payload.mentor_nombre,
-            "notas_adicionales": payload.notas_adicionales,
-            "estado": "PUBLICADA",
-            "created_at": now.isoformat(),
-        }
-        _memory_offers.append(offer_dict)
+            with _booking_lock:
+                demand = None
+                if payload.id_demanda is not None:
+                    demand = next((d for d in _memory_demands if d["id_demanda"] == payload.id_demanda
+                                   and d["estado"] == "PENDIENTE"
+                                   and d["id_asignatura"] == payload.id_asignatura
+                                   and d["id_tema"] == payload.id_tema), None)
+                    if demand is None:
+                        raise HTTPException(409, _DEMAND_UNAVAILABLE)
+                code = id_oferta_str = f"SES-{_session_counter}"
+                _session_counter += 1
+                if payload.modalidad == "virtual":
+                    assigned_space = VirtualRoomService.resolve_virtual_room(payload.espacio_asignado, code)
+                offer_dict = {
+                    "id_sesion": _session_counter - 1,
+                    "codigo_sesion": code,
+                    "mentor_email": effective_email,
+                    "id_asignatura": payload.id_asignatura,
+                    "codigo_asignatura": payload.codigo_asignatura,
+                    "nombre_asignatura": payload.nombre_asignatura,
+                    "id_tema": payload.id_tema,
+                    "nombre_tema": payload.nombre_tema,
+                    "fecha_inicio": payload.fecha_inicio,
+                    "duracion_minutos": payload.duracion_minutos,
+                    "modalidad": payload.modalidad,
+                    "aforo_maximo": expected_capacity,
+                    "espacio_asignado": assigned_space,
+                    "mentor_nombre": payload.mentor_nombre,
+                    "notas_adicionales": payload.notas_adicionales,
+                    "estado": "PUBLICADA",
+                    "created_at": now.isoformat(),
+                }
+                _memory_offers.append(offer_dict)
+                if demand is not None:
+                    demand["estado"] = "ATENDIDA"
 
+        payload.espacio_asignado = assigned_space
         return PublishOfferResponse(
             id_oferta=id_oferta_str,
             codigo_sesion=code,
@@ -391,7 +483,7 @@ class OfferService:
         mentor_email: str | None = None,
         id_asignatura: int | None = None,
         modalidad: Literal["presencial", "virtual"] | None = None,
-        estado: str | None = None,
+        estado: str | tuple[str, ...] | None = None,
     ) -> list[PublishOfferResponse]:
         """
         Consulta las ofertas de mentoría activas filtradas por mentor, asignatura, modalidad o estado.
@@ -419,7 +511,7 @@ class OfferService:
                 if modalidad:
                     query = query.filter(SesionMentoria.modalidad == modalidad)
                 if estado:
-                    query = query.filter(SesionMentoria.estado == estado)
+                    query = query.filter(SesionMentoria.estado.in_((estado,) if isinstance(estado, str) else estado))
                 elif not mentor_email:
                     query = query.filter(SesionMentoria.estado == "PUBLICADA")
 
@@ -457,8 +549,9 @@ class OfferService:
                         )
                     )
                 return results
-            except Exception:
-                pass
+            except SQLAlchemyError as exc:
+                db.rollback()
+                raise HTTPException(503, "No se pudieron consultar las ofertas.") from exc
 
         # 2. Consulta en almacén en memoria
         filtered = _memory_offers
@@ -470,7 +563,8 @@ class OfferService:
         if modalidad:
             filtered = [o for o in filtered if o["modalidad"] == modalidad]
         if estado:
-            filtered = [o for o in filtered if o["estado"] == estado]
+            states = (estado,) if isinstance(estado, str) else estado
+            filtered = [o for o in filtered if o["estado"] in states]
         elif not mentor_email:
             filtered = [o for o in filtered if o["estado"] == "PUBLICADA"]
 
@@ -504,6 +598,11 @@ class OfferService:
             )
 
         return results
+
+    @classmethod
+    def _require_open_contingency(cls, state: str, start: str, now: datetime) -> None:
+        if state != "QUORUM_INSUFICIENTE" or cls.calculate_advance_hours(start, now) <= 0:
+            raise HTTPException(status_code=400, detail=f"INVALID_SESSION_STATE: No hay contingencia abierta para la sesión ({state}).")
 
     @classmethod
     def resolve_quorum_decision(
@@ -565,11 +664,7 @@ class OfferService:
                         detail="FORBIDDEN: Solo el mentor titular o un administrador pueden resolver la contingencia de quórum.",
                     )
 
-            if sesion.estado not in ("QUORUM_INSUFICIENTE", "PUBLICADA", "PENDIENTE_CONFIRMACION"):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"INVALID_SESSION_STATE: La sesión se encuentra en estado '{sesion.estado}' y no admite resolución de contingencia.",
-                )
+            cls._require_open_contingency(sesion.estado, sesion.fecha_inicio.isoformat(), now_utc)
 
             if payload.decision == "PROCEED":
                 sesion.estado = "CONFIRMADA"
@@ -604,7 +699,9 @@ class OfferService:
                         detail="INSUFFICIENT_RESCHEDULE_ADVANCE: La nueva fecha de la sesión debe programarse con al menos 24 horas de antelación respecto al momento actual (RN-04).",
                     )
 
-                sesion.fecha_inicio = raw_dt
+                if sesion.modalidad == "presencial":
+                    cls.require_available_room(db, sesion.espacio_asignado, raw_dt, sesion.duracion_minutos, id_sesion)
+                sesion.fecha_inicio = raw_dt.astimezone(UTC)
                 sesion.estado = "PUBLICADA"
                 sesion.quorumevaluated_at = None
                 db.commit()
@@ -681,6 +778,8 @@ class OfferService:
                 detail="FORBIDDEN: Solo el mentor titular o un administrador pueden resolver la contingencia de quórum.",
             )
 
+        cls._require_open_contingency(target["estado"], target["fecha_inicio"], now_utc)
+
         if payload.decision == "PROCEED":
             target["estado"] = "CONFIRMADA"
             return QuorumDecisionResponse(
@@ -713,6 +812,8 @@ class OfferService:
                     detail="INSUFFICIENT_RESCHEDULE_ADVANCE: La nueva fecha de la sesión debe programarse con al menos 24 horas de antelación respecto al momento actual (RN-04).",
                 )
 
+            if target.get("modalidad") == "presencial":
+                cls.require_available_room(None, target["espacio_asignado"], raw_dt, target["duracion_minutos"], id_sesion)
             target["fecha_inicio"] = raw_dt.isoformat()
             target["estado"] = "PUBLICADA"
             target["quorumevaluated_at"] = None

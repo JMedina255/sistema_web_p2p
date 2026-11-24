@@ -167,18 +167,17 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
 
   const computeQuorumInfo = (session: PublishOfferResponse, enrolledList?: EnrolledStudent[]) => {
     const aforo = session.aforo || (session.offer.modalidad === 'presencial' ? 10 : 20);
-    const quorumTarget = Math.ceil(aforo * 0.5); // RN-09: 50%
-    const confirmedCount = (enrolledList || []).filter((e) => e.estado === 'CONFIRMADA').length;
+    const quorumTarget = Math.ceil(aforo * (session.quorum_minimo_porcentaje ?? 50) / 100);
+    const confirmedCount = (enrolledList || []).filter((e) => ['CONFIRMADA', 'ASISTIDA'].includes(e.estado)).length;
     const totalEnrolled = (enrolledList || []).filter(
-      (e) => e.estado !== 'CANCELADA_USUARIO' && e.estado !== 'CANCELADA_SISTEMA'
+      (e) => ['PENDIENTE_CONFIRMACION', 'CONFIRMADA', 'ASISTIDA'].includes(e.estado)
     ).length;
 
     const startDate = new Date(session.offer.fecha_inicio.replace('Z', '+00:00'));
     const hoursRemaining = (startDate.getTime() - now) / (3600 * 1000);
 
-    const isQuorumReached = confirmedCount >= (session.offer.modalidad === 'presencial' ? 3 : 5) || confirmedCount >= quorumTarget;
-    const isPastDeadline = hoursRemaining <= 24;
-    const isInsufficient = session.estado === 'QUORUM_INSUFICIENTE' || (isPastDeadline && !isQuorumReached);
+    const isQuorumReached = confirmedCount >= quorumTarget;
+    const isInsufficient = session.estado === 'QUORUM_INSUFICIENTE' && hoursRemaining > 0;
 
     return {
       aforo,
@@ -187,7 +186,6 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
       totalEnrolled,
       hoursRemaining,
       isQuorumReached,
-      isPastDeadline,
       isInsufficient,
     };
   };
@@ -567,7 +565,9 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
 
                   {/* Insignia de Quórum Reactivo */}
                   <div style={{ textAlign: 'right' }}>
-                    {session.estado === 'CONFIRMADA' || qInfo.isQuorumReached ? (
+                    {!['PUBLICADA', 'PENDIENTE_CONFIRMACION', 'CONFIRMADA'].includes(session.estado) && !qInfo.isInsufficient ? (
+                      <strong>{session.estado.charAt(0) + session.estado.slice(1).toLowerCase().replace(/_/g, ' ')}</strong>
+                    ) : session.estado === 'CONFIRMADA' || qInfo.isQuorumReached ? (
                       <span
                         style={{
                           backgroundColor: '#DEF7EC',
@@ -581,7 +581,7 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
                           gap: '0.35rem',
                         }}
                       >
-                        ✅ Quórum Alcanzado (≥ 50%)
+                        ✅ {session.estado === 'CONFIRMADA' ? 'Sesión confirmada' : `Quórum Alcanzado (≥ ${session.quorum_minimo_porcentaje ?? 50}%)`}
                       </span>
                     ) : qInfo.isInsufficient ? (
                       <span
@@ -597,7 +597,7 @@ export const MentorSessionsView: React.FC<MentorSessionsViewProps> = ({
                           gap: '0.35rem',
                         }}
                       >
-                        ⚠️ Quórum Insuficiente (&lt; 3 alumnos confirmados)
+                        ⚠️ Quórum Insuficiente (&lt; {qInfo.quorumTarget} alumnos confirmados)
                       </span>
                     ) : (
                       <span

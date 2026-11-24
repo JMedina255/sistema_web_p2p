@@ -30,6 +30,13 @@ describe('MentorSessionsView Component (T-32 / RF16 / CUS07 / RN-04 / RN-10 / WC
     },
   };
 
+  it('muestra una sesión finalizada sin acción para resolver el quórum', async () => {
+    vi.spyOn(offerService, 'getOffers').mockResolvedValue([{ ...mockSessionInsufficient, estado: 'FINALIZADA' }]);
+    render(<MentorSessionsView mentorEmail={mentorEmail} />);
+    expect(await screen.findByText('Finalizada')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Resolver Contingencia/i })).toBeNull();
+  });
+
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -56,13 +63,13 @@ describe('MentorSessionsView Component (T-32 / RF16 / CUS07 / RN-04 / RN-10 / WC
   });
 
   // 2. Despliega distintivo ámbar en sesión con quórum insuficiente
-  it('2. Despliega distintivo ámbar en sesión con quórum insuficiente (< 3 alumnos confirmados)', async () => {
-    vi.spyOn(offerService, 'getOffers').mockResolvedValue([mockSessionInsufficient]);
+  it('2. Despliega distintivo ámbar en sesión con quórum insuficiente (mínimo según el porcentaje configurado)', async () => {
+    vi.spyOn(offerService, 'getOffers').mockResolvedValue([{ ...mockSessionInsufficient, quorum_minimo_porcentaje: 40 }]);
 
     render(<MentorSessionsView mentorEmail={mentorEmail} />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Quórum Insuficiente/i)).toBeInTheDocument();
+      expect(screen.getByText(/Quórum Insuficiente.*4 alumnos/i)).toBeInTheDocument();
       expect(screen.getByText('Cálculo I')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /⚡ Resolver Contingencia/i })).toBeInTheDocument();
     });

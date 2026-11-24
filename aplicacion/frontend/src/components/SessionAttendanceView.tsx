@@ -14,6 +14,7 @@ import {
   type DynamicQrTokenResponse,
   type AttendanceItem,
 } from '../services/attendanceService';
+import { QRCodeSVG } from 'qrcode.react';
 import { authService } from '../services/authService';
 
 export interface SessionAttendanceViewProps {
@@ -50,20 +51,6 @@ export const SessionAttendanceView: React.FC<SessionAttendanceViewProps> = ({
   const streamRef = useRef<MediaStream | null>(null);
   const scanIntervalRef = useRef<number | null>(null);
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Carga del token dinámico TOTP (rota cada 30 segundos)
-  const fetchNewToken = useCallback(async () => {
-    try {
-      setQrError(null);
-      const data = await attendanceService.getDynamicQrToken(sessionId);
-      setTokenData(data);
-      setSecondsLeft(data.expires_in || 30);
-    } catch (err: unknown) {
-      setQrError(err instanceof Error ? err.message : 'Error al obtener código QR dinámico.');
-    }
-  }, [sessionId]);
-
   // Carga de la nómina de asistencia
   const fetchRoster = useCallback(async () => {
     try {
@@ -74,32 +61,41 @@ export const SessionAttendanceView: React.FC<SessionAttendanceViewProps> = ({
     }
   }, [sessionId]);
 
-  // Inicialización
   useEffect(() => {
-    setIsLoading(true);
-    Promise.all([fetchNewToken(), fetchRoster()]).finally(() => {
-      setIsLoading(false);
-    });
-  }, [fetchNewToken, fetchRoster]);
-
-  // Temporizador regresivo de 30 segundos
-  useEffect(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-
-    timerRef.current = setInterval(() => {
-      setSecondsLeft((prev) => {
-        if (prev <= 1) {
-          fetchNewToken();
-          return 30;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+    let active = true;
+    let renewal: number;
+    let expiresAt = Date.now();
+    const refreshToken = async () => {
+      if (!active) return;
+      try {
+        const data = await attendanceService.getDynamicQrToken(sessionId);
+        if (!active) return;
+        expiresAt = new Date(data.expires_at).getTime();
+        setQrError(null);
+        setTokenData(data);
+        setSecondsLeft(Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000)));
+      } catch (err) {
+        if (!active) return;
+        setQrError(err instanceof Error ? err.message : 'Error al obtener el QR.');
+        expiresAt = Date.now() + 3000;
+      }
+      renewal = window.setTimeout(refreshToken, Math.max(1, expiresAt - Date.now()));
     };
-  }, [fetchNewToken]);
+    setIsLoading(true);
+    Promise.resolve().then(async () => {
+      if (!active) return;
+      await Promise.all([refreshToken(), fetchRoster()]);
+      if (active) setIsLoading(false);
+    });
+    const clock = window.setInterval(() => {
+      setSecondsLeft(Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000)));
+    }, 1000);
+    return () => {
+      active = false;
+      window.clearTimeout(renewal);
+      window.clearInterval(clock);
+    };
+  }, [sessionId, fetchRoster]);
 
   // Enviar check-in manual con código numérico de 6 dígitos
   const handleCheckinSubmit = async (e: React.FormEvent) => {
@@ -369,36 +365,9 @@ export const SessionAttendanceView: React.FC<SessionAttendanceViewProps> = ({
                     marginBottom: '1rem',
                   }}
                 >
-                  <svg
-                    viewBox="0 0 100 100"
-                    style={{ width: '100%', height: '100%' }}
-                    fill="#1C2A59"
-                  >
-                    {/* Patrón de localizadores QR institucional */}
-                    <rect x="5" y="5" width="28" height="28" fill="#1C2A59" rx="3" />
-                    <rect x="9" y="9" width="20" height="20" fill="#FFFFFF" rx="2" />
-                    <rect x="13" y="13" width="12" height="12" fill="#1C2A59" rx="1" />
-
-                    <rect x="67" y="5" width="28" height="28" fill="#1C2A59" rx="3" />
-                    <rect x="71" y="9" width="20" height="20" fill="#FFFFFF" rx="2" />
-                    <rect x="75" y="13" width="12" height="12" fill="#1C2A59" rx="1" />
-
-                    <rect x="5" y="67" width="28" height="28" fill="#1C2A59" rx="3" />
-                    <rect x="9" y="71" width="20" height="20" fill="#FFFFFF" rx="2" />
-                    <rect x="13" y="75" width="12" height="12" fill="#1C2A59" rx="1" />
-
-                    {/* Matriz pseudo-dinámica sincronizada con totp_code */}
-                    <rect x="42" y="10" width="8" height="8" fill="#B99451" />
-                    <rect x="52" y="18" width="8" height="8" fill="#1C2A59" />
-                    <rect x="38" y="28" width="6" height="6" fill="#1C2A59" />
-                    <rect x="48" y="38" width="10" height="10" fill="#B99451" rx="2" />
-                    <rect x="65" y="42" width="8" height="8" fill="#1C2A59" />
-                    <rect x="78" y="52" width="10" height="6" fill="#B99451" />
-                    <rect x="42" y="68" width="8" height="8" fill="#1C2A59" />
-                    <rect x="54" y="78" width="8" height="8" fill="#B99451" />
-                    <rect x="72" y="72" width="12" height="12" fill="#1C2A59" />
-                    <circle cx="50" cy="50" r="4" fill="#B99451" />
-                  </svg>
+                  {tokenData && (
+                    <QRCodeSVG value={tokenData.token} size={194} marginSize={4} />
+                  )}
                 </div>
 
                 {/* Temporizador Regresivo Circular / Barra */}
@@ -704,7 +673,7 @@ export const SessionAttendanceView: React.FC<SessionAttendanceViewProps> = ({
                                 fontWeight: 700,
                               }}
                             >
-                              {item.asistio ? 'Presente' : 'Ausente'}
+                              {item.asistio ? 'Presente' : item.pendiente ? 'Por registrar' : 'Ausente'}
                             </span>
                           </td>
                           <td style={{ padding: '0.5rem', color: '#64748B', fontSize: '0.78rem' }}>

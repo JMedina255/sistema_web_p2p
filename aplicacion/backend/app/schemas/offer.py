@@ -2,10 +2,12 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
+from app.core.config import settings
 from app.core.identity import validate_upt_email
 
 
 class PublishOfferPayload(BaseModel):
+    id_demanda: int | None = Field(None, gt=0, description="Solicitud por demanda que atiende la oferta.")
     id_asignatura: int = Field(..., gt=0, description="Identificador de la asignatura curricular crítica.")
     codigo_asignatura: str = Field(
         ..., min_length=2, max_length=20, description="Código de curso (ej. CALC-101)."
@@ -53,6 +55,7 @@ class PublishOfferPayload(BaseModel):
 
 
 class PublishOfferResponse(BaseModel):
+    quorum_minimo_porcentaje: int = Field(default_factory=lambda: settings.QUORUM_MINIMUM_PERCENTAGE)
     id_oferta: str
     codigo_sesion: str
     estado: str = "PUBLICADA"
@@ -96,3 +99,8 @@ class QuorumDecisionResponse(BaseModel):
     estado_nuevo: str
     mensaje: str
     nueva_fecha_inicio: str | None = None
+
+
+class QuorumOverviewItem(PublishOfferResponse):
+    inscritos: int
+    ratificados: int

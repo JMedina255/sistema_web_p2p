@@ -1,3 +1,4 @@
+import { formatMentoringTime } from '../services/mentoringTime';
 import React, { useState, useEffect, useRef, useCallback, useId } from 'react';
 import { authService } from '../services/authService';
 import type { OfferRecommendationItem } from '../services/recommendationService';
@@ -71,25 +72,6 @@ function resolveCurrentUserEmail(explicitEmail?: string): string {
 /**
  * Formatea una fecha ISO 8601 a un formato comprensible en español peruano.
  */
-function formatSessionDateTime(isoString: string): string {
-  try {
-    const date = new Date(isoString);
-    if (isNaN(date.getTime())) {
-      return isoString;
-    }
-    return new Intl.DateTimeFormat('es-PE', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    }).format(date);
-  } catch {
-    return isoString;
-  }
-}
 
 /**
  * Componente modal de confirmación de reserva de mentoría (T-21 / CUS04 / RF12).
@@ -555,7 +537,7 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
                   <div>
                     <strong>Fecha Límite para Ratificar:</strong>{' '}
                     <span style={{ color: '#DC2626', fontWeight: 600 }}>
-                      {formatSessionDateTime(successData.fecha_limite_confirmacion)}
+                      {formatMentoringTime(successData.fecha_limite_confirmacion)}
                     </span>
                   </div>
                 )}
@@ -717,7 +699,7 @@ export const BookingModalView: React.FC<BookingModalViewProps> = ({
                       FECHA Y HORARIO
                     </div>
                     <div style={{ color: '#0F172A', fontWeight: 600, marginTop: '0.15rem' }}>
-                      📅 {formatSessionDateTime(offer.fecha_inicio)}
+                      📅 {formatMentoringTime(offer.fecha_inicio)}
                     </div>
                     <div style={{ color: '#64748B', fontSize: '0.78rem' }}>
                       ⏱️ Duración: {offer.duracion_minutos} minutos

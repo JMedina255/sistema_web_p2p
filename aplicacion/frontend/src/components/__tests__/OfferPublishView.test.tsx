@@ -2,7 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { OfferPublishView } from '../OfferPublishView';
 import * as apiClient from '../../services/apiClient';
+import { spacesService } from '../../services/spacesService';
 import { offerService } from '../../services/offerService';
+import { bookingService } from '../../services/bookingService';
 
 describe('OfferPublishView Component (T-14 / RF08 / CUS06)', () => {
   const mentorEmail = '2022074255@upt.pe';
@@ -69,6 +71,7 @@ describe('OfferPublishView Component (T-14 / RF08 / CUS06)', () => {
 
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.spyOn(spacesService, 'getClassrooms').mockResolvedValue(['Aula 101']);
     offerService.setMode('mock');
     offerService.clearMockOffers();
 
@@ -77,6 +80,30 @@ describe('OfferPublishView Component (T-14 / RF08 / CUS06)', () => {
       if (id === 2) return mockDetailCourse2;
       return mockDetailCourse1;
     });
+  });
+
+  it('publica desde una solicitud concreta y la retira del banco al volver a consultarlo', async () => {
+    bookingService.setMode('mock');
+    const demand = await bookingService.createDemandRequest({
+      id_asignatura: 1, id_tema: 102, estudiante_email: 'estudiante@upt.pe',
+    });
+    const publish = vi.spyOn(offerService, 'publishOffer');
+    render(<OfferPublishView mentorEmail={mentorEmail} directedDemand={demand}
+      initialCourseId={demand.id_asignatura} initialTopicId={demand.id_tema} />);
+    const submit = await screen.findByRole('button', { name: /Publicar Oferta de Mentoría/i });
+    await waitFor(() => expect(submit).toBeEnabled());
+    fireEvent.click(submit);
+    await screen.findByText(/¡Oferta de mentoría publicada exitosamente!/i);
+
+    expect(publish).toHaveBeenCalledWith(expect.objectContaining({ id_demanda: demand.id_demanda, id_tema: 102 }));
+    expect((await bookingService.getDemandRequests()).map(item => item.id_demanda)).not.toContain(demand.id_demanda);
+  });
+
+  it('bloquea la publicación cuando el cronograma no contiene una franja completa', async () => {
+    vi.mocked(spacesService.getClassrooms).mockResolvedValue([]);
+    render(<OfferPublishView mentorEmail={mentorEmail} />);
+    await screen.findByText('Sin aulas disponibles para esta franja');
+    expect(screen.getByRole('button', { name: /Publicar Oferta de Mentoría/i })).toBeDisabled();
   });
 
   it('1. Renderiza el formulario con banner de modo de prueba local y datos del mentor', async () => {
@@ -214,7 +241,7 @@ describe('OfferPublishView Component (T-14 / RF08 / CUS06)', () => {
 
       // Enviar formulario
       const submitBtn = screen.getByRole('button', { name: /Publicar Oferta de Mentoría/i });
-      expect(submitBtn).not.toBeDisabled();
+      await waitFor(() => expect(submitBtn).not.toBeDisabled());
       fireEvent.click(submitBtn);
 
       // Verificar pantalla de confirmación exitosa

@@ -1,28 +1,37 @@
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.core.dependencies import get_current_user
-from app.db.session import get_optional_session
+from app.core.dependencies import AuthenticatedUser, get_current_user, require_role
+from app.db.session import get_required_session
 from app.schemas.booking import (
     QuorumEvaluationPayload,
     QuorumEvaluationResponse,
 )
+from app.schemas.offer import QuorumOverviewItem
 from app.services.booking_service import BookingService
 
 router = APIRouter()
+
+
+@router.get("/overview", response_model=list[QuorumOverviewItem])
+def quorum_overview(
+    user: AuthenticatedUser = Depends(require_role("administrador")),
+    db: Session | None = Depends(get_required_session),
+) -> list[QuorumOverviewItem]:
+    return BookingService.get_quorum_overview(db)
 
 
 @router.post(
     "/evaluate",
     response_model=QuorumEvaluationResponse,
     status_code=status.HTTP_200_OK,
-    summary="Evaluar quórum normativo institucional del 50% a T-24h (RN-08 / RN-09 / CUS23)",
+    summary="Evaluar quórum según el porcentaje configurado a T-24h (RN-08 / RN-09 / CUS23)",
 )
 def evaluate_session_quorum(
     payload: QuorumEvaluationPayload,
     authorization: str | None = Header(None),
     mode: str | None = Query(None, description="Modo de evaluación ('sprint6' o estándar)"),
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> QuorumEvaluationResponse:
     """
     Evalúa la ratificación de vacantes de una sesión al cumplirse la ventana de corte T-24h.
@@ -48,11 +57,11 @@ def evaluate_session_quorum(
 )
 def evaluate_all_active_quorums(
     authorization: str | None = Header(None),
-    db: Session | None = Depends(get_optional_session),
+    db: Session | None = Depends(get_required_session),
 ) -> list[QuorumEvaluationResponse]:
     """
     Motor desatendido de evaluación de quórum a T-24h con control de idempotencia y cerrojo pesimista.
-    Identifica sesiones en estado PUBLICADA en la ventana de corte, evalúa cumplimiento de quórum (3 presencial / 5 virtual),
+    Identifica sesiones en estado PUBLICADA en la ventana de corte, evalúa cumplimiento de quórum (porcentaje configurado del aforo),
     transiciona a CONFIRMADA o QUORUM_INSUFICIENTE e inhabilita reevaluaciones redundantes.
     """
     user = get_current_user(authorization)

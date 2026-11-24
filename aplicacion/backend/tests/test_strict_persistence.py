@@ -1,6 +1,8 @@
 from unittest.mock import patch
+
 import pytest
 from fastapi import HTTPException
+
 from app.core.config import settings
 from app.db.session import get_required_session
 
@@ -23,3 +25,11 @@ def test_get_required_session_yields_none_in_tolerant_dev_mode():
             gen = get_required_session()
             val = next(gen)
             assert val is None
+
+def test_configured_database_must_not_fall_back_to_memory(monkeypatch):
+    monkeypatch.setattr(settings, "DATABASE_URL", "postgresql://localhost/test")
+    monkeypatch.setattr(settings, "STRICT_DATABASE_MODE", False)
+    with patch("app.db.session.get_engine", return_value=None):
+        with pytest.raises(HTTPException) as error:
+            next(get_required_session())
+    assert error.value.status_code == 503

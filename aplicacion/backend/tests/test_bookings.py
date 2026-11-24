@@ -446,7 +446,7 @@ def test_quorum_evaluation_t24h_transitions_unconfirmed_to_no_confirmada():
 
     # Verificar que mutó a NO_CONFIRMADA
     b_mutada = next(b for b in _memory_bookings if b["id_reserva"] == 901)
-    assert b_mutada["estado"] == "NO_CONFIRMADA"
+    assert b_mutada["estado"] == "CANCELADA_NO_CONFIRMADA"
     assert "RN-08" in b_mutada["motivo_cancelacion"]
 
 
@@ -841,7 +841,7 @@ def test_db_backed_quorum_evaluation():
         # Verificar que las provisionales caducaron a NO_CONFIRMADA
         caducadas = (
             db.query(ReservaCupo)
-            .filter(ReservaCupo.id_sesion == 1, ReservaCupo.estado == "NO_CONFIRMADA")
+            .filter(ReservaCupo.id_sesion == 1, ReservaCupo.estado == "CANCELADA_NO_CONFIRMADA")
             .count()
         )
         assert caducadas == 2
@@ -1107,18 +1107,18 @@ def test_quorum_evaluation_below_50_percent_in_real_db():
         q_res = BookingService.evaluate_quorum(db, 200)
         assert q_res.cumple_quorum is False
         assert q_res.porcentaje_quorum == 20.0
-        assert q_res.estado_sesion == "PENDIENTE_CONFIRMACION"
+        assert q_res.estado_sesion == "QUORUM_INSUFICIENTE"
 
-        # Verificar en base de datos que la sesión mutó a PENDIENTE_CONFIRMACION
+        # Verificar en base de datos que la sesión mutó a QUORUM_INSUFICIENTE
         sesion_db = db.query(SesionMentoria).filter(SesionMentoria.id_sesion == 200).first()
-        assert sesion_db.estado == "PENDIENTE_CONFIRMACION"
+        assert sesion_db.estado == "QUORUM_INSUFICIENTE"
     finally:
         db.close()
         engine.dispose()
 
 
 def test_quorum_evaluation_in_memory_state_transitions():
-    """Valida las transiciones de estado de sesión (CONFIRMADA / PENDIENTE_CONFIRMACION) en memoria."""
+    """Valida las transiciones de estado de sesión (CONFIRMADA / QUORUM_INSUFICIENTE) en memoria."""
     now = datetime.now(UTC)
     clear_offers_in_memory()
     clear_bookings_in_memory()
@@ -1142,7 +1142,7 @@ def test_quorum_evaluation_in_memory_state_transitions():
         }
     )
 
-    # 1. Con 2 confirmadas (20%) -> Quórum insuficiente, pasa a PENDIENTE_CONFIRMACION
+    # 1. Con 2 confirmadas (20%) -> Quórum insuficiente, pasa a QUORUM_INSUFICIENTE
     for i in range(2):
         _memory_bookings.append(
             {
@@ -1155,11 +1155,12 @@ def test_quorum_evaluation_in_memory_state_transitions():
         )
     q_low = BookingService.evaluate_quorum(None, 300)
     assert q_low.cumple_quorum is False
-    assert q_low.estado_sesion == "PENDIENTE_CONFIRMACION"
+    assert q_low.estado_sesion == "QUORUM_INSUFICIENTE"
 
     # 2. Añadir 3 más confirmadas (5/10 = 50%) -> Quórum alcanzado
     target_off = next(o for o in _memory_offers if o["id_sesion"] == 300)
     target_off["estado"] = "PUBLICADA"
+    target_off["quorumevaluated_at"] = None
     for i in range(2, 5):
         _memory_bookings.append(
             {

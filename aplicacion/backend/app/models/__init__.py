@@ -8,9 +8,12 @@ from app.models.curriculum import Asignatura, TemaConceptual
 from app.models.offer import SesionMentoria
 from app.models.profile import DisponibilidadHoraria, PerfilAcademico
 from app.models.roles import Rol, UsuarioRol
+from app.models.schedule import CronogramaActivo, VersionCronograma
 from app.models.survey import EncuestaCalidad
 
 __all__ = [
+    "CronogramaActivo",
+    "VersionCronograma",
     "Asignatura",
     "TemaConceptual",
     "AuthChallenge",
