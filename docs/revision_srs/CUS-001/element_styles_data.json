@@ -1,0 +1,314 @@
+{
+  "ESC-01": {
+    "screenshot": "01_pantalla_inicio_visitante.png",
+    "header_brand": {
+      "text": "SISTEMA WEB P2P DE MENTORÍAS ACADÉMICAS",
+      "tagName": "H1",
+      "color": "rgb(255, 255, 255)",
+      "backgroundColor": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgb(255, 255, 255)",
+      "borderRadius": "0px",
+      "fontSize": "18.4px",
+      "fontWeight": "700",
+      "boxShadow": "none",
+      "width": 418,
+      "height": 25
+    },
+    "header_session": {
+      "error": "Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': 'header div:has-text('Sin sesión')' is not a valid selector.\n    at eval (eval at evaluate (:370:30), <anonymous>:2:33)\n    at UtilityScript.evaluate (<anonymous>:377:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+    },
+    "nav_tab_auth": {
+      "text": "🔐\nIniciar sesión",
+      "tagName": "BUTTON",
+      "color": "rgb(255, 255, 255)",
+      "backgroundColor": "rgb(28, 42, 89)",
+      "borderColor": "rgb(255, 255, 255)",
+      "borderRadius": "6px",
+      "fontSize": "13.12px",
+      "fontWeight": "600",
+      "boxShadow": "none",
+      "width": 140,
+      "height": 33
+    },
+    "nav_tab_curriculum": {
+      "text": "📚\nCursos",
+      "tagName": "BUTTON",
+      "color": "rgb(71, 85, 105)",
+      "backgroundColor": "rgb(241, 245, 249)",
+      "borderColor": "rgb(71, 85, 105)",
+      "borderRadius": "6px",
+      "fontSize": "13.12px",
+      "fontWeight": "600",
+      "boxShadow": "none",
+      "width": 102,
+      "height": 33
+    },
+    "form_title": {
+      "error": "Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': 'h2:has-text('Iniciar Sesión Institucional')' is not a valid selector.\n    at eval (eval at evaluate (:370:30), <anonymous>:2:33)\n    at UtilityScript.evaluate (<anonymous>:377:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+    },
+    "btn_google": null,
+    "email_input": {
+      "text": "",
+      "tagName": "INPUT",
+      "color": "rgb(0, 0, 0)",
+      "backgroundColor": "rgb(255, 255, 255)",
+      "borderColor": "rgb(203, 213, 225)",
+      "borderRadius": "8px",
+      "fontSize": "14.4px",
+      "fontWeight": "400",
+      "boxShadow": "none",
+      "width": 454,
+      "height": 42
+    },
+    "btn_submit_otp": {
+      "text": "Continuar con Código OTP →",
+      "tagName": "BUTTON",
+      "color": "rgb(255, 255, 255)",
+      "backgroundColor": "rgb(28, 42, 89)",
+      "borderColor": "rgb(255, 255, 255)",
+      "borderRadius": "8px",
+      "fontSize": "14.72px",
+      "fontWeight": "600",
+      "boxShadow": "none",
+      "width": 454,
+      "height": 42
+    }
+  },
+  "ESC-02": {
+    "screenshot": "02_interfaz_autenticacion.png"
+  },
+  "ESC-03": {
+    "screenshot": "03_ingreso_correo_institucional.png",
+    "email_value": "jm2022074255@virtual.upt.pe",
+    "btn_submit": {
+      "text": "Continuar con Código OTP →",
+      "tagName": "BUTTON",
+      "color": "rgb(255, 255, 255)",
+      "backgroundColor": "rgb(28, 42, 89)",
+      "borderColor": "rgb(255, 255, 255)",
+      "borderRadius": "8px",
+      "fontSize": "14.72px",
+      "fontWeight": "600",
+      "boxShadow": "none",
+      "width": 454,
+      "height": 42
+    }
+  },
+  "ESC-04": {
+    "screenshot": "04_error_correo_no_institucional.png",
+    "alert": {
+      "text": "⚠️\nAcceso restringido: Solo se permiten correos institucionales con dominio @virtual.upt.pe o @upt.pe.",
+      "tagName": "DIV",
+      "color": "rgb(153, 27, 27)",
+      "backgroundColor": "rgb(254, 242, 242)",
+      "borderColor": "rgb(254, 202, 202)",
+      "borderRadius": "8px",
+      "fontSize": "13.12px",
+      "fontWeight": "400",
+      "boxShadow": "none",
+      "width": 454,
+      "height": 63
+    }
+  },
+  "ESC-06": {
+    "screenshot": "05_verificacion_codigo_otp.png",
+    "info_banner": {
+      "text": "ℹ️\nCódigo de verificación enviado. Revisa tu buzón institucional (@virtual.upt.pe).",
+      "tagName": "DIV",
+      "color": "rgb(30, 64, 175)",
+      "backgroundColor": "rgb(239, 246, 255)",
+      "borderColor": "rgb(191, 219, 254)",
+      "borderRadius": "8px",
+      "fontSize": "13.12px",
+      "fontWeight": "400",
+      "boxShadow": "none",
+      "width": 454,
+      "height": 63
+    },
+    "otp_input": {
+      "text": "",
+      "tagName": "INPUT",
+      "color": "rgb(0, 0, 0)",
+      "backgroundColor": "rgb(255, 255, 255)",
+      "borderColor": "rgb(203, 213, 225)",
+      "borderRadius": "8px",
+      "fontSize": "22.4px",
+      "fontWeight": "400",
+      "boxShadow": "none",
+      "width": 454,
+      "height": 56
+    },
+    "btn_verify": {
+      "text": "Verificar y Acceder",
+      "tagName": "BUTTON",
+      "color": "rgb(255, 255, 255)",
+      "backgroundColor": "rgb(28, 42, 89)",
+      "borderColor": "rgb(255, 255, 255)",
+      "borderRadius": "8px",
+      "fontSize": "14.72px",
+      "fontWeight": "600",
+      "boxShadow": "none",
+      "width": 454,
+      "height": 42
+    },
+    "countdown_expire": "Expira en: 04:53",
+    "countdown_resend": "Reenviar código en 53s"
+  },
+  "ESC-07": {
+    "screenshot": "06_codigo_incorrecto.png",
+    "alert_error": {
+      "text": "⚠️\nCódigo OTP incorrecto. Te quedan 4 intentos antes del bloqueo del código.",
+      "tagName": "DIV",
+      "color": "rgb(153, 27, 27)",
+      "backgroundColor": "rgb(254, 242, 242)",
+      "borderColor": "rgb(254, 202, 202)",
+      "borderRadius": "8px",
+      "fontSize": "13.12px",
+      "fontWeight": "400",
+      "boxShadow": "none",
+      "width": 454,
+      "height": 63
+    }
+  },
+  "ESC-09": {
+    "screenshot": "07_codigo_expirado.png",
+    "alert": {
+      "text": "⚠️\nCódigo OTP incorrecto. Te quedan 4 intentos antes del bloqueo del código.",
+      "tagName": "DIV",
+      "color": "rgb(153, 27, 27)",
+      "backgroundColor": "rgb(254, 242, 242)",
+      "borderColor": "rgb(254, 202, 202)",
+      "borderRadius": "8px",
+      "fontSize": "13.12px",
+      "fontWeight": "400",
+      "boxShadow": "none",
+      "width": 454,
+      "height": 63
+    }
+  },
+  "ESC-10": {
+    "screenshot": "08_reenvio_codigo_otp.png",
+    "btn_resend": {
+      "error": "Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': 'button:has-text('Reenviar código OTP')' is not a valid selector.\n    at eval (eval at evaluate (:370:30), <anonymous>:2:33)\n    at UtilityScript.evaluate (<anonymous>:377:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+    }
+  },
+  "ESC-11": {
+    "screenshot": "09_cambio_correo.png",
+    "email_input": {
+      "text": "jm2022074255@virtual.upt.pe",
+      "tagName": "INPUT",
+      "color": "rgb(0, 0, 0)",
+      "backgroundColor": "rgb(255, 255, 255)",
+      "borderColor": "rgb(203, 213, 225)",
+      "borderRadius": "8px",
+      "fontSize": "14.4px",
+      "fontWeight": "400",
+      "boxShadow": "none",
+      "width": 454,
+      "height": 42
+    }
+  },
+  "ESC-15": {
+    "screenshot": "10_autenticacion_google.png",
+    "google_container": {
+      "text": "Continuar con Google",
+      "tagName": "DIV",
+      "color": "rgb(30, 41, 59)",
+      "backgroundColor": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgb(30, 41, 59)",
+      "borderRadius": "0px",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "boxShadow": "none",
+      "width": 454,
+      "height": 44
+    },
+    "is_official_rendered": true
+  },
+  "ESC-12": {
+    "screenshot": "11_consentimiento_informado.png",
+    "title": {
+      "error": "Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': 'h2:has-text('Consentimiento')' is not a valid selector.\n    at eval (eval at evaluate (:370:30), <anonymous>:2:33)\n    at UtilityScript.evaluate (<anonymous>:377:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+    },
+    "checkbox": {
+      "text": "on",
+      "tagName": "INPUT",
+      "color": "rgb(0, 0, 0)",
+      "backgroundColor": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgb(0, 0, 0)",
+      "borderRadius": "0px",
+      "fontSize": "13.3333px",
+      "fontWeight": "400",
+      "boxShadow": "none",
+      "width": 13,
+      "height": 18
+    },
+    "btn_accept": null,
+    "btn_reject": null
+  },
+  "ESC-14-Mentoreado": {
+    "screenshot": "13_panel_mentoreado.png",
+    "header_user": {
+      "error": "Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': 'header div:has-text('Usuario Institucional')' is not a valid selector.\n    at eval (eval at evaluate (:370:30), <anonymous>:2:33)\n    at UtilityScript.evaluate (<anonymous>:377:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+    },
+    "guided_flow": {
+      "error": "Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': 'div:has-text('Flujo Guiado Mentoreado')' is not a valid selector.\n    at eval (eval at evaluate (:370:30), <anonymous>:2:33)\n    at UtilityScript.evaluate (<anonymous>:377:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+    },
+    "view_title": {
+      "error": "Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': 'h2:has-text('Mentorías Recomendadas')' is not a valid selector.\n    at eval (eval at evaluate (:370:30), <anonymous>:2:33)\n    at UtilityScript.evaluate (<anonymous>:377:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+    }
+  },
+  "ESC-16-Mentor": {
+    "screenshot": "14_panel_mentor.png",
+    "header_user": {
+      "error": "Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': 'header div:has-text('Usuario Institucional')' is not a valid selector.\n    at eval (eval at evaluate (:370:30), <anonymous>:2:33)\n    at UtilityScript.evaluate (<anonymous>:377:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+    },
+    "guided_flow": {
+      "error": "Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': 'div:has-text('Flujo Guiado Mentor')' is not a valid selector.\n    at eval (eval at evaluate (:370:30), <anonymous>:2:33)\n    at UtilityScript.evaluate (<anonymous>:377:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+    },
+    "view_title": {
+      "error": "Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': 'h2:has-text('Panel del Mentor')' is not a valid selector.\n    at eval (eval at evaluate (:370:30), <anonymous>:2:33)\n    at UtilityScript.evaluate (<anonymous>:377:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+    }
+  },
+  "ESC-16-Admin": {
+    "screenshot": "15_panel_administrador.png",
+    "header_user": {
+      "error": "Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': 'header div:has-text('Usuario Institucional')' is not a valid selector.\n    at eval (eval at evaluate (:370:30), <anonymous>:2:33)\n    at UtilityScript.evaluate (<anonymous>:377:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+    },
+    "view_title": {
+      "error": "Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': 'h2:has-text('Panel de Administración')' is not a valid selector.\n    at eval (eval at evaluate (:370:30), <anonymous>:2:33)\n    at UtilityScript.evaluate (<anonymous>:377:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+    }
+  },
+  "ESC-17": {
+    "screenshot": "16_cuenta_suspendida.png",
+    "alert": {
+      "text": "⚠️\nACCOUNT_SUSPENDED: Su cuenta institucional registra suspensión administrativa. Por favor, comuníquese con la Dirección de Escuela EPIS-UPT.",
+      "tagName": "DIV",
+      "color": "rgb(153, 27, 27)",
+      "backgroundColor": "rgb(254, 242, 242)",
+      "borderColor": "rgb(254, 202, 202)",
+      "borderRadius": "8px",
+      "fontSize": "13.12px",
+      "fontWeight": "400",
+      "boxShadow": "none",
+      "width": 454,
+      "height": 77
+    }
+  },
+  "ESC-18": {
+    "screenshot": "17_limite_intentos_bloqueo.png",
+    "alert": {
+      "text": "⚠️\nRATE_LIMIT_EXCEEDED: Demasiadas solicitudes de código de acceso. Ha superado el límite de intentos permitidos. Por favor, espere 60 segundos antes de reintentar.",
+      "tagName": "DIV",
+      "color": "rgb(153, 27, 27)",
+      "backgroundColor": "rgb(254, 242, 242)",
+      "borderColor": "rgb(254, 202, 202)",
+      "borderRadius": "8px",
+      "fontSize": "13.12px",
+      "fontWeight": "400",
+      "boxShadow": "none",
+      "width": 454,
+      "height": 77
+    }
+  }
+}
