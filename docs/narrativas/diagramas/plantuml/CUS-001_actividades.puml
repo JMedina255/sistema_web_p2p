@@ -1,0 +1,125 @@
+/'
+  Diagrama: Diagrama de Actividades — CUS-001: Iniciar sesión institucional con 2FA
+  Proyecto: Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT
+  Estándar: UML 2.5
+'/
+@startuml
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam fontSize 11
+skinparam defaultTextAlignment center
+
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #1C2A59
+  BorderThickness 1.2
+  FontColor #1C2A59
+  ArrowColor #1C2A59
+  ArrowFontColor #1C2A59
+  ArrowFontSize 10
+}
+
+skinparam activityDiamond {
+  BackgroundColor #FEF9C3
+  BorderColor #B99451
+  FontColor #1C2A59
+  FontSize 10
+}
+
+skinparam swimlane {
+  BorderColor #1C2A59
+  BorderThickness 1.5
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+  TitleFontSize 12
+}
+
+|Usuario|
+start
+:Accede a la dirección web del sistema;
+
+|Sistema Web P2P|
+:Muestra pantalla de inicio de sesión\ncon opciones de acceso institucional;
+
+|Usuario|
+if (¿Método de acceso seleccionado?) then (Google Workspace)
+  |Sistema Web P2P|
+  :Presenta ventana federada de Google;\n[A001: Validación manual pendiente]
+  :Comprueba dominio @virtual.upt.pe o @upt.pe;
+else (Código de verificación OTP)
+  |Usuario|
+  :Ingresa correo institucional y presiona\n«Continuar con Código OTP →»;
+  |Sistema Web P2P|
+  :Comprueba formato de correo y estado de cuenta;
+  if (¿Correo pertenece al dominio institucional?) then (No)
+    :Muestra alerta de acceso restringido;\n[E001: Correo no institucional]
+    stop
+  else (Sí)
+    if (¿Cuenta activa sin suspensión?) then (No)
+      :Muestra alerta de cuenta suspendida;\n[E002: Cuenta suspendida]
+      stop
+    else (Sí)
+      :Genera código numérico temporal de 6 dígitos;\n(Vigencia de 5 min / Reenvío en 60s);
+      :Despacha código al buzón institucional;
+      :Muestra pantalla de verificación con contador 05:00;
+    endif
+  endif
+
+  |Usuario|
+  if (¿Desea cambiar de correo institucional?) then (Sí)
+    :Presiona enlace «Cambiar correo»;\n[A004: Cambio de correo]
+    |Sistema Web P2P|
+    :Anula desafío temporal y vuelve al inicio;
+    stop
+  else (No)
+    if (¿No recibió código y pasaron 60 segundos?) then (Sí)
+      :Presiona enlace «Reenviar código OTP»;\n[A002: Reenvío de código]
+      |Sistema Web P2P|
+      :Invalida código anterior y emite uno nuevo;
+    else (No)
+    endif
+    |Usuario|
+    :Introduce código de 6 dígitos y presiona\n«Verificar y Acceder»;
+    |Sistema Web P2P|
+    :Comprueba validez del código ingresado;
+    if (¿Código ingresado es correcto?) then (No)
+      if (¿Superó límite de 5 intentos fallidos?) then (Sí)
+        :Muestra bloqueo temporal por 60 segundos;\n[E005: Límite de intentos alcanzado]
+        stop
+      else (No)
+        :Muestra alerta de código inválido o incorrecto;\n[E003: Código incorrecto]
+        stop
+      endif
+    else (Sí)
+      if (¿Código dentro del plazo de 5 minutos?) then (No)
+        :Muestra alerta de expiración del código;\n[E004: Código vencido]
+        stop
+      else (Sí)
+      endif
+    endif
+  endif
+endif
+
+|Sistema Web P2P|
+if (¿Consentimiento informado registrado previamente?) then (Sí [A003])
+else (No)
+  :Presenta ventana de consentimiento informado\nde privacidad bajo la Ley N° 29733;
+  |Usuario|
+  if (¿Acepta términos de privacidad?) then (No)
+    :Presiona botón «🚫 Rechazar y Salir»;\n[E006: Rechazo del consentimiento]
+    |Sistema Web P2P|
+    :Revoca sesión provisional y retorna al inicio;
+    stop
+  else (Sí)
+    :Marca casilla obligatoria y presiona\n«✓ Aceptar y Continuar»;
+    |Sistema Web P2P|
+    :Registra formalización con constancia de fecha y hora;
+  endif
+endif
+
+|Sistema Web P2P|
+:Inicia sesión institucional con vigencia de 8 horas;
+:Muestra panel principal según el rol asignado\n(Mentoreado, Mentor o Administrador);
+stop
+@enduml
