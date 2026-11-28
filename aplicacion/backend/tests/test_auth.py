@@ -405,5 +405,5 @@ def test_request_otp_console_visibility(
     assert result.emailDispatched is smtp_enabled
     assert smtp.called is smtp_enabled
     assert result.mockCodeHint == (code if show_code else None)
-    assert code not in capsys.readouterr().out
+    assert (code in capsys.readouterr().out) is show_code
     assert code not in caplog.text
