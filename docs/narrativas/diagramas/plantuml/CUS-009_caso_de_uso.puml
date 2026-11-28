@@ -1,0 +1,37 @@
+@startuml
+' CUS-009 — Consultar analítica institucional de mentorías
+' Estado: Implementación parcial: monitoreo de quórum; analítica integral pendiente
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-009 — Consultar analítica institucional de mentorías\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Administrador\ninstitucional" as A0
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-009 — Consultar analítica\ninstitucional de mentorías" as UC
+  usecase "Consultar indicadores de\nquórum" as U1
+  usecase "Actualizar indicadores" as U2
+  usecase "Consultar analítica agregada\n(propuesta)" as U3
+}
+A0 -- UC
+UC ..> U1 : <<include>>
+U2 ..> UC : <<extend>>\n[Consulta manual]
+U3 ..> UC : <<extend>>\n[Indicadores definidos]
+legend right
+  Implementación parcial: monitoreo de
+  quórum; analítica integral pendiente
+endlegend
+@enduml

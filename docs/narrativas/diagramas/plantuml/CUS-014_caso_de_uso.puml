@@ -1,0 +1,39 @@
+@startuml
+' CUS-014 — Emitir constancia de horas de mentoría
+' Estado: Implementación identificada; constancia DEMO y validación real pendiente
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-014 — Emitir constancia de horas de mentoría\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Estudiante Mentor" as A0
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-014 — Emitir constancia de\nhoras de mentoría" as UC
+  usecase "Consultar horas acreditadas" as U1
+  usecase "Comprobar elegibilidad" as U2
+  usecase "Emitir constancia DEMO" as U3
+  usecase "Consultar horas pendientes" as U4
+  usecase "Descargar constancia PDF" as U5
+  usecase "Verificar folio y QR" as U6
+}
+A0 -- UC
+UC ..> U1 : <<include>>
+UC ..> U2 : <<include>>
+UC ..> U3 : <<include>>
+U4 ..> UC : <<extend>>\n[Umbral no alcanzado]
+U5 ..> UC : <<extend>>\n[Documento existente]
+U6 ..> UC : <<extend>>\n[Documento existente]
+@enduml

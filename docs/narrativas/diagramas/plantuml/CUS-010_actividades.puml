@@ -1,0 +1,86 @@
+@startuml
+' CUS-010 — Gestionar asignación de roles de usuario
+' Estado: Aprobado en conversación; consolidado
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-010 — Gestionar asignación de roles de usuario
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Administrador institucional|
+start
+|Sistema Web P2P|
+if (¿Acceso autorizado?) then (No)
+  :Restringir acceso;
+  stop
+endif
+|Administrador institucional|
+:Abrir Administración y Gestión de Roles;
+|Sistema Web P2P|
+:Mostrar campo de correo y Buscar\nEstudiante;
+(R)
+|Administrador institucional|
+  :Ingresar correo y buscar;
+|Sistema Web P2P|
+  if (¿Correo admitido? [E002]) then (Sí)
+    :Mostrar Consultando... y recuperar roles;
+    if (¿Consulta correcta? [E004]) then (Sí)
+      :Mostrar expediente y distintivos;
+|Administrador institucional|
+      if (¿Modificar roles? [A002]) then (Sí)
+|Sistema Web P2P|
+        if (¿Tiene rol Mentor?) then (Sí)
+|Administrador institucional|
+          :Presionar Revocar Rol de Mentor [A001];
+|Sistema Web P2P|
+          :Comprobar autorización y procesar\nrevocación;
+          else (No)
+|Administrador institucional|
+          :Presionar Promover a Mentor;
+|Sistema Web P2P|
+          if (¿Ciclo VII o superior y\nautorización? [E001/E003]) then (Sí)
+            :Procesar promoción;
+            else (No)
+            :Rechazar promoción y conservar roles;
+            stop
+          endif
+        endif
+        if (¿Operación correcta? [E004]) then (Sí)
+          :Actualizar distintivos y mostrar\nresultado;
+          else (No)
+          :Mostrar error y conservar información\nanterior;
+        endif
+        else (No)
+        :Mantener roles sin cambios;
+      endif
+      else (No)
+      :Mostrar error de consulta;
+    endif
+    else (No)
+    :Mostrar alerta de correo no admitido;
+  endif
+|Administrador institucional|
+if (¿Consultar otro correo o corregir?\n[A003]) then (Sí)
+  (R)
+  detach
+else (No)
+endif
+stop
+legend bottom
+  Los círculos con la misma letra enlazan tramos del flujo.
+endlegend
+@enduml

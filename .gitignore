@@ -59,4 +59,15 @@ aplicacion/backend/uploads/
 # Documentation build tools
 tools/*.jar
 
+# Paquetes documentales temporales y respaldos locales
+/DOC-H03_P2P_Diagramas_PlantUML/
+/DOC-H03_P2P_Diagramas_PlantUML*.zip
+/DOC-H04-R_P2P*.zip
+/DOC-H05_P2P*.zip
+/DOC-H05-R_P2P*.zip
+/docs/_temporal/
+/docs/_respaldos_locales/
+/*.md.bak
+/docs/**/*.md.bak
+
 

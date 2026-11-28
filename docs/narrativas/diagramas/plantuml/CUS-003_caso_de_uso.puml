@@ -1,0 +1,37 @@
+@startuml
+' CUS-003 — Reservar cupo para sesión de mentoría
+' Estado: Implementación identificada; revisión estática
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-003 — Reservar cupo para sesión de mentoría
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Estudiante Mentoreado" as A0
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-003 — Reservar cupo para\nsesión de mentoría" as UC
+  usecase "Consultar oferta seleccionada" as U1
+  usecase "Comprobar elegibilidad, plazo\ny cupos" as U2
+  usecase "Registrar reserva provisional" as U3
+  usecase "Consultar Mis reservas" as U4
+  usecase "CUS-008 Registrar demanda" as U5
+}
+A0 -- UC
+UC ..> U1 : <<include>>
+UC ..> U2 : <<include>>
+UC ..> U3 : <<include>>
+U4 ..> UC : <<extend>>\n[Registro exitoso]
+U5 ..> UC : <<extend>>\n[Aforo agotado]
+@enduml

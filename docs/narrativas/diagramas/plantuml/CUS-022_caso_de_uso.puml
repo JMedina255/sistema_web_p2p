@@ -1,0 +1,39 @@
+@startuml
+' CUS-022 — Configurar parámetros de corte y penalización
+' Estado: Pendiente: edición administrativa no identificada
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-022 — Configurar parámetros de corte y penalización\nPropuesta funcional — implementación pendiente
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Administrador\ninstitucional" as A0
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-022 — Configurar\nparámetros de corte y\npenalización" as UC
+  usecase "Consultar valores vigentes" as U1
+  usecase "Validar y aplicar parámetros\nautorizados" as U2
+  usecase "Consultar sin modificar" as U3
+  usecase "Cancelar edición" as U4
+}
+A0 -- UC
+UC ..> U1 : <<include>>
+UC ..> U2 : <<include>>
+U3 ..> UC : <<extend>>\n[Solo lectura]
+U4 ..> UC : <<extend>>\n[Antes de confirmar]
+legend right
+  Pendiente: edición administrativa no
+  identificada
+endlegend
+@enduml

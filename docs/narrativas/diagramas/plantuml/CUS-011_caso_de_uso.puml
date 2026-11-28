@@ -1,0 +1,39 @@
+@startuml
+' CUS-011 — Exportar reportes ejecutivos consolidados
+' Estado: Pendiente: no se identificó exportación ejecutiva
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-011 — Exportar reportes ejecutivos consolidados\nPropuesta funcional — implementación pendiente
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Administrador\ninstitucional" as A0
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-011 — Exportar reportes\nejecutivos consolidados" as UC
+  usecase "Seleccionar periodo e\nindicadores" as U1
+  usecase "Validar formato y datos" as U2
+  usecase "Generar y descargar reporte" as U3
+  usecase "Cambiar filtros" as U4
+}
+A0 -- UC
+UC ..> U1 : <<include>>
+UC ..> U2 : <<include>>
+UC ..> U3 : <<include>>
+U4 ..> UC : <<extend>>\n[Nueva consulta]
+legend right
+  Pendiente: no se identificó exportación
+  ejecutiva
+endlegend
+@enduml

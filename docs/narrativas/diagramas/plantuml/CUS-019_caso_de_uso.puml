@@ -1,0 +1,43 @@
+@startuml
+' CUS-019 — Consultar bitácoras de mentoría por tutor
+' Estado: Implementación parcial: auditoría por Administrador; tutor no identificado
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-019 — Consultar bitácoras de mentoría por tutor\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Administrador\ninstitucional" as A0
+actor "Tutor académico\n(previsto)" as A1
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-019 — Consultar bitácoras\nde mentoría por tutor" as UC
+  usecase "Consultar y filtrar bitácoras" as U1
+  usecase "Consultar detalle pedagógico" as U2
+  usecase "Visar horas" as U3
+  usecase "Observar bitácora" as U4
+  usecase "Registrar motivo" as U5
+}
+A0 -- UC
+A1 -- U1
+UC ..> U1 : <<include>>
+UC ..> U2 : <<include>>
+U3 ..> UC : <<extend>>\n[Administrador autorizado]
+U4 ..> UC : <<extend>>\n[Discrepancia]
+U4 ..> U5 : <<include>>
+legend right
+  Implementación parcial: auditoría por
+  Administrador; tutor no identificado
+endlegend
+@enduml

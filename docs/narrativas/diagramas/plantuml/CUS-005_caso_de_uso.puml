@@ -1,0 +1,43 @@
+@startuml
+' CUS-005 — Postular al rol de estudiante mentor
+' Estado: Implementación parcial: postulación en perfil
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-005 — Postular al rol de estudiante mentor\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Estudiante Mentoreado" as A0
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-005 — Postular al rol de\nestudiante mentor" as UC
+  usecase "Configurar perfil académico" as U1
+  usecase "Registrar preferencia de\nparticipación" as U2
+  usecase "Guardar disponibilidad semanal" as U3
+  usecase "Seleccionar franjas\nrápidamente" as U4
+  usecase "Mantener perfil Mentoreado" as U5
+  usecase "Comprobar ciclo para\npostulación" as U6
+}
+A0 -- UC
+UC ..> U1 : <<include>>
+UC ..> U2 : <<include>>
+UC ..> U3 : <<include>>
+U4 ..> UC : <<extend>>\n[Opcional]
+U5 ..> UC : <<extend>>\n[Decisión del usuario]
+U2 ..> U6 : <<include>>
+legend right
+  Implementación parcial: postulación en
+  perfil
+endlegend
+@enduml

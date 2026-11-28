@@ -1,0 +1,99 @@
+@startuml
+' CUS-020 — Gestionar catálogo curricular y asignaturas
+' Estado: Implementación identificada; revisión estática
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+' Las ramas de entrada representan interacciones independientes; no requieren simultaneidad.
+title CUS-020 — Gestionar catálogo curricular y asignaturas
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Sistema Web P2P|
+start
+if (¿Gestión administrativa?) then (Sí)
+|Administrador institucional|
+  :Abrir Catálogo Curricular (RF05);
+|Sistema Web P2P|
+  if (¿Privilegios válidos? [E002]) then (Sí)
+    (R)
+      :Mostrar buscador, ciclo, asignaturas y\ntemario;
+|Administrador institucional|
+      :Seleccionar asignatura y acción;
+      if (¿Registrar o editar? [A002]) then (Sí)
+|Sistema Web P2P|
+        :Mostrar formulario de asignatura o tema;
+|Administrador institucional|
+        :Completar campos curriculares;
+        if (¿Confirmar guardado? [A004]) then (Sí)
+|Sistema Web P2P|
+          if (¿Datos válidos y guardado correcto?\n[E001/E003]) then (Sí)
+            :Actualizar listado y temario;
+            else (No)
+            :Mostrar error y conservar datos;
+          endif
+          else (No)
+          :Cerrar sin guardar;
+        endif
+        else (No)
+|Administrador institucional|
+        (D)
+        detach
+      endif
+|Administrador institucional|
+    (G)
+    if (¿Continuar gestionando catálogo?) then (Sí)
+      (R)
+      detach
+    else (No)
+    endif
+    else (No)
+|Sistema Web P2P|
+    :Restringir acciones administrativas;
+  endif
+  stop
+else (No)
+|Sistema Web P2P|
+  (C)
+  detach
+endif
+
+|Usuario de consulta|
+(C)
+  :Abrir Cursos, buscar y seleccionar ciclo\n[A001];
+|Sistema Web P2P|
+  :Mostrar asignaturas y temario o ausencia\nde coincidencias [E003];
+stop
+
+|Administrador institucional|
+(D)
+if (¿Desactivar registro? [A003]) then (Sí)
+|Sistema Web P2P|
+  if (¿Desactivación permitida? [E004]) then (Sí)
+    :Actualizar estado y catálogo;
+    else (No)
+    :Mostrar restricción;
+  endif
+  else (No)
+  :Mantener consulta sin modificación\n[A001];
+endif
+|Administrador institucional|
+(G)
+detach
+legend bottom
+  Los círculos con la misma letra enlazan tramos del flujo.
+endlegend
+@enduml

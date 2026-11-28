@@ -1,0 +1,41 @@
+@startuml
+' CUS-016 — Gestionar auditoría de eventos de seguridad
+' Estado: Pendiente: bandeja integral de seguridad no identificada
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-016 — Gestionar auditoría de eventos de seguridad\nPropuesta funcional — implementación pendiente
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Administrador\ninstitucional" as A0
+actor "Responsable de seguridad\n(previsto)" as A1
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-016 — Gestionar auditoría\nde eventos de seguridad" as UC
+  usecase "Consultar eventos autorizados" as U1
+  usecase "Consultar detalle sin\nmodificar registros" as U2
+  usecase "Filtrar por periodo y\ncategoría" as U3
+  usecase "Consultar consentimiento" as U4
+}
+A0 -- UC
+A1 -- UC
+UC ..> U1 : <<include>>
+UC ..> U2 : <<include>>
+U3 ..> UC : <<extend>>\n[Consulta específica]
+U4 ..> UC : <<extend>>\n[Categoría seleccionada]
+legend right
+  Pendiente: bandeja integral de seguridad
+  no identificada
+endlegend
+@enduml

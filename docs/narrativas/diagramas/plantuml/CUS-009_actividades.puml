@@ -1,0 +1,65 @@
+@startuml
+' CUS-009 — Consultar analítica institucional de mentorías
+' Estado: Implementación parcial: monitoreo de quórum; analítica integral pendiente
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-009 — Consultar analítica institucional de mentorías\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Administrador institucional|
+start
+:Abrir Administración y Monitoreo de\nQuórum;
+|Sistema Web P2P|
+if (¿Acceso permitido? [E002]) then (Sí)
+  (R)
+    :Consultar sesiones activas;
+    if (¿Consulta correcta? [E001]) then (Sí)
+      if (¿Existen sesiones? [A001]) then (Sí)
+        :Mostrar inscritos, ratificados, mínimo y\nporcentaje;
+|Administrador institucional|
+        :Comparar sesiones o consultar una\nespecífica [A002];
+        else (No)
+|Sistema Web P2P|
+        :Informar ausencia de sesiones;
+      endif
+      else (No)
+      :Mostrar error de consulta;
+    endif
+|Administrador institucional|
+  if (¿Actualizar indicadores?) then (Sí)
+    (R)
+    detach
+  else (No)
+  endif
+  if (¿Consultar analítica consolidada\n(propuesta)?) then (Sí)
+    :Seleccionar periodo e indicadores;
+|Sistema Web P2P|
+    if (¿Indicadores definidos? [E003]) then (Sí)
+      :Deberá mostrar métricas agregadas\ncontextualizadas;
+      else (No)
+      :Deberá informar indicador no definido;
+    endif
+  endif
+  else (No)
+  :Restringir acceso;
+endif
+stop
+legend bottom
+  Los círculos con la misma letra enlazan tramos del flujo.
+endlegend
+@enduml

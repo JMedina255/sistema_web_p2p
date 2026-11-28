@@ -1,0 +1,41 @@
+@startuml
+' CUS-002 — Consultar catálogo de mentorías con recomendación
+' Estado: Implementación identificada; revisión estática
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-002 — Consultar catálogo de mentorías con recomendación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Estudiante Mentoreado" as A0
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-002 — Consultar catálogo\nde mentorías con recomendación" as UC
+  usecase "Consultar recomendaciones" as U1
+  usecase "Presentar afinidad y\ndisponibilidad" as U2
+  usecase "Filtrar por asignatura y\nlímite" as U3
+  usecase "Explorar mentores" as U4
+  usecase "Actualizar resultados" as U5
+  usecase "CUS-003 Reservar cupo" as U6
+  usecase "CUS-008 Registrar demanda" as U7
+}
+A0 -- UC
+UC ..> U1 : <<include>>
+UC ..> U2 : <<include>>
+U3 ..> UC : <<extend>>\n[Preferencia]
+U4 ..> UC : <<extend>>\n[Pestaña de mentores]
+U5 ..> UC : <<extend>>\n[Solicitud del usuario]
+U6 ..> UC : <<extend>>\n[Oferta disponible]
+U7 ..> UC : <<extend>>\n[Sin recomendaciones]
+@enduml

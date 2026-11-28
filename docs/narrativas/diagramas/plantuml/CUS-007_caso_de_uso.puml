@@ -1,0 +1,48 @@
+@startuml
+' CUS-007 — Registrar asistencia y bitácora pedagógica
+' Estado: Implementación identificada; revisión estática
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-007 — Registrar asistencia y bitácora pedagógica
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Estudiante Mentor" as A0
+actor "Estudiante Mentoreado" as A1
+caption Límite del sistema: Sistema Web P2P — EPIS-UPT
+rectangle " " {
+  usecase "Registrar asistencia" as U1
+  usecase "Validar código y elegibilidad" as U2
+  usecase "Ingresar código numérico" as U3
+  usecase "Consultar nómina" as U4
+  usecase "Proyectar código de asistencia" as U5
+  usecase "Registrar bitácora" as U6
+  usecase "Validar plazo y datos" as U7
+  usecase "Agregar tema adicional" as U8
+  usecase "Sellar registro y declarar\nhoras" as U9
+}
+A0 -- U5
+A1 -- U1
+A0 -- U6
+U1 ..> U2 : <<include>>
+U3 ..> U1 : <<extend>>\n[Alternativa al QR]
+U4 ..> U5 : <<extend>>\n[Consulta del mentor]
+U6 ..> U7 : <<include>>
+U8 ..> U6 : <<extend>>\n[Tema específico]
+U6 ..> U9 : <<include>>
+legend bottom
+  CUS-007 agrupa objetivos independientes.
+endlegend
+@enduml
