@@ -59,8 +59,6 @@ class EmailService:
         subject: str,
         html_body: str,
         text_body: str,
-        *,
-        sensitive: bool = False,
     ) -> bool:
         """
         Envía un correo de manera síncrona mediante smtplib.
@@ -74,9 +72,7 @@ class EmailService:
 
         # Fallback a consola si el servicio SMTP está desactivado o sin credenciales
         if not settings.SMTP_ENABLED or not (settings.SMTP_USER and settings.SMTP_USER.strip()):
-            log_line = f"[EMAIL DEV/MOCK] Destinatario: {clean_to}"
-            if not sensitive:
-                log_line += f" | Asunto: {subject} | Mensaje: {text_body}"
+            log_line = f"[EMAIL DEV/MOCK] Destinatario: {clean_to} | Asunto: {subject} | Mensaje: {text_body}"
             print(log_line)
             logger.info(log_line)
             return True
@@ -101,18 +97,14 @@ class EmailService:
                     server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
                 server.send_message(msg)
 
-            logger.info(
-                "Correo enviado exitosamente vía SMTP a %s (Asunto: %s)",
-                clean_to,
-                "OTP" if sensitive else subject,
-            )
+            logger.info("Correo enviado exitosamente vía SMTP a %s (Asunto: %s)", clean_to, subject)
             return True
         except Exception as exc:
             logger.error(
                 "Error al enviar correo SMTP a %s (%s: %s). Se registra en log de contingencia.",
                 clean_to,
                 exc.__class__.__name__,
-                "detalle omitido" if sensitive else exc,
+                exc,
             )
             return False
 
@@ -241,7 +233,7 @@ class EmailService:
 </body>
 </html>"""
 
-        return cls._send_smtp_sync(to_email, subject, html_body, text_body, sensitive=True)
+        return cls._send_smtp_sync(to_email, subject, html_body, text_body)
 
     @classmethod
     def send_quorum_alert_email(
