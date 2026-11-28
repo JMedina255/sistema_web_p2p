@@ -48,7 +48,7 @@ def test_email_service_mock_dev_fallback_when_smtp_disabled(monkeypatch, capsys)
     captured = capsys.readouterr().out
     assert "[EMAIL DEV/MOCK]" in captured
     assert "alumno.test@upt.pe" in captured
-    assert "654321" in captured
+    assert "654321" not in captured
 
     ok_quorum = EmailService.send_quorum_alert_email(
         to_email="mentor.test@upt.pe",

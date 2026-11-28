@@ -1,5 +1,7 @@
 from datetime import UTC, datetime, timedelta
+from unittest.mock import MagicMock
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.core.config import settings
@@ -39,7 +41,7 @@ def test_request_otp_success(monkeypatch):
     assert data["email"] == "2022074255@upt.pe"
     assert data["cooldownSeconds"] == 60
     assert data["isMock"] is False
-    assert data["mockCodeHint"] is not None
+    assert data["mockCodeHint"] is None
 
 
 def test_request_otp_rejects_non_upt_domain():
@@ -368,3 +370,40 @@ def test_auth_endpoints_strict_db_mode_down_returns_503(monkeypatch):
     finally:
         app.dependency_overrides.clear()
         settings.STRICT_DATABASE_MODE = old_strict
+
+
+@pytest.mark.parametrize(
+    ("environment", "smtp_enabled", "hints_enabled", "show_code"),
+    [
+        ("development", False, True, True),
+        ("test", False, True, True),
+        ("development", False, False, False),
+        ("development", True, True, False),
+        ("development", True, False, False),
+        ("staging", False, True, False),
+        ("production", False, True, False),
+    ],
+)
+def test_request_otp_console_visibility(
+    monkeypatch, capsys, caplog, environment, smtp_enabled, hints_enabled, show_code
+):
+    from app.services.auth_service import AuthService
+
+    code = "374952"
+    monkeypatch.setattr("app.services.auth_service.generate_otp_code", lambda length: code)
+    monkeypatch.setattr(settings, "APP_ENV", environment)
+    monkeypatch.setattr(settings, "SMTP_ENABLED", smtp_enabled)
+    monkeypatch.setattr(settings, "SMTP_USER", "smtp@upt.pe")
+    monkeypatch.setattr(settings, "SMTP_PORT", 587)
+    monkeypatch.setattr(settings, "SMTP_USE_TLS", True)
+    monkeypatch.setattr(settings, "ENABLE_MOCK_OTP_HINTS", hints_enabled)
+    smtp = MagicMock()
+    monkeypatch.setattr("smtplib.SMTP", smtp)
+    caplog.set_level("INFO")
+
+    result = AuthService.request_otp(None, "mentor.test@upt.pe")
+    assert result.emailDispatched is smtp_enabled
+    assert smtp.called is smtp_enabled
+    assert result.mockCodeHint == (code if show_code else None)
+    assert (code in capsys.readouterr().out) is show_code
+    assert code not in caplog.text

@@ -464,14 +464,14 @@ class AuthService:
                 },
             )
 
-        # 7. Exposición controlada de mockCodeHint (solo en pruebas unitarias explícitamente autorizadas y nunca en producción)
-        is_test_hint_enabled = bool(
-            getattr(settings, "ENABLE_MOCK_OTP_HINTS", False)
-            and getattr(settings, "APP_ENV", "") not in ("production", "staging")
+        is_test_hint_enabled = (
+            settings.ENABLE_MOCK_OTP_HINTS
+            and settings.APP_ENV in ("development", "test")
+            and not settings.SMTP_ENABLED
         )
         mock_hint = code if is_test_hint_enabled else None
         if is_test_hint_enabled:
-            logger.info("[AUTH TEST] >>> CÓDIGO OTP EMITIDO PARA %s: %s <<<", clean_email, code)
+            print(f"[AUTH TEST] OTP simulado para {clean_email}: {code}", flush=True)
 
         return RequestOtpResponse(
             challengeId=challenge_id,
