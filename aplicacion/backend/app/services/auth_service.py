@@ -464,7 +464,14 @@ class AuthService:
                 },
             )
 
-        # 7. Exposición controlada de mockCodeHint (solo en pruebas unitarias explícitamente autorizadas y nunca en producción)
+        # 7. Traza de OTP en consola exclusivamente en desarrollo local (nunca en staging/producción)
+        # y exposición controlada de mockCodeHint solo en pruebas unitarias explícitamente autorizadas.
+        if getattr(settings, "APP_ENV", "") == "development":
+            print(
+                f"[AUTH DEV] >>> CÓDIGO OTP EMITIDO PARA {clean_email}: {code} <<<",
+                flush=True,
+            )
+
         is_test_hint_enabled = bool(
             getattr(settings, "ENABLE_MOCK_OTP_HINTS", False)
             and getattr(settings, "APP_ENV", "") not in ("production", "staging")

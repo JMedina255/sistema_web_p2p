@@ -1,3 +1,4 @@
+import re
 from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
@@ -368,3 +369,38 @@ def test_auth_endpoints_strict_db_mode_down_returns_503(monkeypatch):
     finally:
         app.dependency_overrides.clear()
         settings.STRICT_DATABASE_MODE = old_strict
+
+
+def test_request_otp_prints_console_only_in_development(monkeypatch, capsys):
+    """
+    Verifica que el código OTP se imprima en consola únicamente cuando APP_ENV == 'development'
+    (incluso con SMTP_ENABLED=True y ENABLE_MOCK_OTP_HINTS=False), y nunca en staging/production.
+    """
+    from app.services.auth_service import AuthService
+
+    monkeypatch.setattr(settings, "SMTP_ENABLED", True)
+    monkeypatch.setattr(settings, "SMTP_USER", "smtp@upt.pe")
+    monkeypatch.setattr(settings, "ENABLE_MOCK_OTP_HINTS", False)
+    monkeypatch.setattr(settings, "STRICT_DATABASE_MODE", False)
+    monkeypatch.setattr(EmailService, "send_otp_email", classmethod(lambda cls, to, code, exp: True))
+
+    # 1. En desarrollo sí imprime en stdout sin exponer mockCodeHint
+    monkeypatch.setattr(settings, "APP_ENV", "development")
+    capsys.readouterr()
+    res_dev = client.post("/api/v1/auth/otp/request", json={"email": "mentor.avanzado@upt.pe"})
+    assert res_dev.status_code == 200
+    assert res_dev.json()["mockCodeHint"] is None
+    out_dev = capsys.readouterr().out
+    assert re.search(r"\[AUTH DEV\] >>> CÓDIGO OTP EMITIDO PARA mentor\.avanzado@upt\.pe: \d{6} <<<", out_dev)
+
+    # 2. En production y staging nunca debe imprimir el código OTP en stdout
+    for env_name in ("production", "staging"):
+        _memory_challenges.clear()
+        _ip_request_timestamps.clear()
+        _email_request_timestamps.clear()
+        monkeypatch.setattr(settings, "APP_ENV", env_name)
+        capsys.readouterr()
+        res_non_dev = AuthService.request_otp(None, f"admin.{env_name}@upt.pe")
+        assert res_non_dev.mockCodeHint is None
+        out_non_dev = capsys.readouterr().out
+        assert "[AUTH DEV]" not in out_non_dev
