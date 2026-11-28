@@ -467,7 +467,7 @@ class AuthService:
         # 7. Exposición controlada de mockCodeHint (solo en pruebas unitarias explícitamente autorizadas y nunca en producción)
         is_test_hint_enabled = bool(
             getattr(settings, "ENABLE_MOCK_OTP_HINTS", False)
-            and getattr(settings, "APP_ENV", "") != "production"
+            and getattr(settings, "APP_ENV", "") not in ("production", "staging")
         )
         mock_hint = code if is_test_hint_enabled else None
         if is_test_hint_enabled:
