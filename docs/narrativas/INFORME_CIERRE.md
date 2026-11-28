@@ -1,5 +1,7 @@
 # Informe Final de Cierre — Hito DOC-SRS-02
 
+> **Actualización administrativa (2026-11-28):** Los entregables de este hito fueron incorporados a `main` mediante el PR #27. La fusión confirma su integración en Git, pero no equivale a aprobación funcional. La revisión H01 posterior corrigió la narrativa y ambos diagramas de CUS-001; por ello, las métricas visuales y el dictamen de este informe deben leerse como registro histórico del hito DOC-SRS-02. El estado vigente es **versión revisable, pendiente de aprobación**, con hallazgos en `docs/revision_srs/CUS-001/MATRIZ_REVISION_H01.md`.
+
 **Proyecto:** Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT.
 **Código del Hito:** DOC-SRS-02
 **Nombre del Hito:** Creación del catálogo independiente de narrativas y diagramas de casos de uso
