@@ -1,0 +1,41 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Diagrama 2.1. Escenarios arquitectónicos nucleares
+left to right direction
+actor "Usuario institucional" as u
+rectangle "Sistema Web P2P — EPIS-UPT" {
+package "MOD-01: Seguridad, Autenticación y\nGobernanza" as m01 {
+usecase "CUS-001 Iniciar sesión institucional con\n2FA" as c1
+}
+package "MOD-03: Recomendaciones, Reservas y\nQuórum" as m03 {
+usecase "CUS-002 Consultar catálogo de mentorías con\nrecomendación" as c2
+usecase "CUS-003 Reservar cupo para sesión de\nmentoría" as c3
+usecase "CUS-023 Evaluar quórum y ejecutar corte\nautomático (T-24h)" as c23
+}
+package "MOD-04: Ejecución y Seguimiento\nAcadémico" as m04 {
+usecase "CUS-007 Registrar asistencia y bitácora\npedagógica" as c7
+usecase "CUS-014 Emitir constancia de horas de\nmentoría" as c14
+}
+m01 -[hidden]right-> m03
+m03 -[hidden]right-> m04
+}
+u --> c1
+u --> c2
+u --> c3
+u --> c7
+u --> c14
+u --> c23
+legend bottom
+Los casos propuestos conservan requisitos institucionales.
+Su presencia no acredita implementación. RF21 y avisos: transversales.
+endlegend
+@enduml

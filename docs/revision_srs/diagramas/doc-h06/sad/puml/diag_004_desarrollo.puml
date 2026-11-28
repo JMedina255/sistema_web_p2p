@@ -1,0 +1,33 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Diagrama 2.4. Paquetes presentes
+package "aplicacion/frontend/src" {
+folder components
+folder services
+}
+package "aplicacion/backend/app" {
+folder "api/v1/endpoints" as endpoints
+folder schemas
+folder "services" as backend_services
+folder models
+folder "db/migrations" as migrations
+}
+components --> services
+services ..> endpoints : contratos HTTP
+endpoints --> schemas
+endpoints --> backend_services
+backend_services --> models
+migrations ..> models : evolución de persistencia
+note bottom of migrations
+No se carga configuración ni se ejecutan migraciones en DOC-H06.
+end note
+@enduml

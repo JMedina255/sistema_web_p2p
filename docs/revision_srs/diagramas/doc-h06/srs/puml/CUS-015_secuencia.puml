@@ -1,0 +1,32 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 86. Diagrama 6.15.20: Secuencia — CUS-015: Configurar parámetros del\nalgoritmo de recomendación
+actor "Administrador" as actor
+boundary "Interfaz de CUS-015" as ui
+control "Servicio previsto" as svc
+actor -> ui : Configurar parámetros del algoritmo de recomendación
+ui -> svc : Edición y simulación de parámetros del motor
+activate svc
+note right of svc
+Diseño propuesto; no se atribuye
+endpoint ni persistencia actuales.
+end note
+svc --> ui : Resultado previsto sujeto a implementación
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+ESPECIFICADO / PROPUESTO
+Propuesto: pesos en código no equivalen a interfaz administrativa configurable.
+endlegend
+
+@enduml

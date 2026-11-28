@@ -1,0 +1,22 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 41. Diagrama de Actividades con objetos: vista general
+start
+:Autenticar y comprobar consentimiento;
+:Consultar oferta o configurar perfil;
+:Reservar y ratificar;
+:Evaluar corte según habilitación;
+:Registrar asistencia y bitácora;
+:Consultar resultados por rol;
+:Validar brechas antes de uso institucional;
+stop
+@enduml

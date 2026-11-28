@@ -1,0 +1,23 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 112. Diagrama 6.16.21: Clases del dominio — CUS-016: Gestionar auditoría\nde eventos de seguridad
+class "Objeto de diseño previsto" as previsto <<propuesto>>
+note right of previsto
+Sin entidad ORM identificada.
+No se añade una tabla ficticia.
+end note
+legend bottom
+ESPECIFICADO / PROPUESTO
+Propuesto: consentimiento y logs parciales no sustituyen auditoría integral.
+endlegend
+
+@enduml

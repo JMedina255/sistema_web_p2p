@@ -1,0 +1,28 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 8. MOD-01: Seguridad, Autenticación y Gobernanza
+left to right direction
+actor "Usuario institucional" as u
+actor "Administrador / actor previsto según caso" as a
+rectangle "Sistema Web P2P — EPIS-UPT" {
+package "MOD-01: Seguridad, Autenticación y\nGobernanza" as m01 {
+usecase "CUS-001 Iniciar sesión institucional con\n2FA" as c1
+usecase "CUS-010 Gestionar asignación de roles de\nusuario" as c10
+}
+}
+u --> c1
+a --> c10
+legend bottom
+Los casos propuestos conservan requisitos institucionales.
+Su presencia no acredita implementación. RF21 y avisos: transversales.
+endlegend
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Diagrama 8.1. Contenedores de software de referencia
+top to bottom direction
+actor "Usuario institucional" as u
+rectangle "Sistema Web P2P" {
+component "SPA React 19 / TypeScript\nNavegador del usuario" as spa
+component "API FastAPI / Python >=3.13\nServicios y ranking en proceso" as api
+database "PostgreSQL\n19 tablas ORM declaradas" as db
+}
+cloud "Google Identity" as google
+cloud "Correo SMTP" as smtp
+u --> spa
+spa --> api : HTTP / JSON
+api --> db : SQLAlchemy / psycopg
+api ..> google : acceso federado condicional
+api ..> smtp : despacho según configuración
+note bottom of db
+Contenedores de software de referencia.
+No certifica despliegue, RLS ni versión del servidor.
+end note
+@enduml

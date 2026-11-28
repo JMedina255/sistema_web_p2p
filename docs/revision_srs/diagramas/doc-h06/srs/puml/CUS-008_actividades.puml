@@ -1,0 +1,132 @@
+@startuml
+' CUS-008 — Gestionar demanda insatisfecha de mentoría
+' Estado: Propuesta previamente presentada; pendiente de aprobación explícita
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+' Las ramas de entrada representan interacciones independientes; no requieren simultaneidad.
+title CUS-008 — Gestionar demanda insatisfecha de mentoría\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Sistema Web P2P|
+start
+if (¿Acceso autorizado?) then (No)
+  :Restringir acceso;
+  stop
+endif
+if (¿Interacción de registro del\nmentoreado?) then (Sí)
+|Estudiante Mentoreado|
+  :Explorar mentorías o detectar aforo\nagotado [A001];
+|Sistema Web P2P|
+  :Mostrar Registrar Solicitud por Demanda\ncuando procede;
+|Estudiante Mentoreado|
+  :Abrir formulario;
+  (R)
+|Sistema Web P2P|
+    :Cargar asignaturas y temas [E002/E003];
+|Estudiante Mentoreado|
+    :Elegir asignatura y tema y\nobservaciones opcionales;
+    if (¿Cancelar antes de enviar? [A002]) then (Sí)
+|Sistema Web P2P|
+      :Cerrar sin registrar;
+      stop
+    endif
+    if (¿Campos completos? [E004]) then (Sí)
+|Estudiante Mentoreado|
+      :Presionar Enviar Solicitud;
+|Sistema Web P2P|
+      :Mostrar Registrando... y comprobar\nidentidad y datos;
+      if (¿Registro válido y completado?\n[E001/E005/E006/E007]) then (Sí)
+        :Crear folio DEM y estado PENDIENTE;
+        :Mostrar confirmación, solicitante y\nfecha;
+|Estudiante Mentoreado|
+        :Presionar Entendido;
+|Sistema Web P2P|
+        :Cerrar formulario y solicitud\ndisponible en banco;
+        stop
+        else (No)
+        :Mostrar error sin confirmar éxito;
+      endif
+      else (No)
+      :Mantener envío deshabilitado;
+    endif
+|Estudiante Mentoreado|
+  if (¿Corregir o reintentar?) then (Sí)
+    (R)
+    detach
+  else (No)
+  endif
+  stop
+else (No)
+|Sistema Web P2P|
+  (B)
+  detach
+endif
+
+|Estudiante Mentor|
+(B)
+  :Abrir Mis sesiones y Banco de\nSolicitudes por Demanda;
+  (S)
+|Sistema Web P2P|
+    :Consultar solicitudes pendientes;
+    if (¿Consulta correcta? [E008]) then (Sí)
+|Estudiante Mentor|
+      :Filtrar por asignatura o actualizar\n[A003];
+|Sistema Web P2P|
+      if (¿Hay resultados? [A004]) then (Sí)
+        :Mostrar tarjetas con tema, solicitante,\nfecha y estado;
+|Estudiante Mentor|
+        if (¿Proponer Mentoría Dirigida?) then (Sí)
+|Sistema Web P2P|
+          :Abrir CUS-006 con solicitud vinculada;
+|Estudiante Mentor|
+          if (¿Mantener vínculo y publicar? [A005]) then (Sí)
+|Sistema Web P2P|
+            if (¿Solicitud pendiente y publicación\nexitosa? [E009]) then (Sí)
+              :Confirmar oferta PUBLICADA y solicitud\nATENDIDA;
+              :Excluir solicitud del banco al\nactualizar;
+              else (No)
+              :Mostrar rechazo o error de publicación;
+            endif
+            else (No)
+            :No marcar solicitud como atendida;
+          endif
+        endif
+        else (No)
+        :Mostrar banco sin resultados;
+      endif
+      else (No)
+      :Mostrar error de consulta;
+    endif
+|Estudiante Mentor|
+  if (¿Continuar consultando o actualizar?) then (Sí)
+    (S)
+    detach
+  else (No)
+  endif
+stop
+legend bottom
+  Los círculos con la misma letra enlazan tramos del flujo.
+endlegend
+
+legend bottom
+PARCIAL
+Objetos: solicitudes_demanda
+Parcial: duplicados, matrícula, autorización y exposición de correos requieren remediación o
+validación.
+endlegend
+@enduml

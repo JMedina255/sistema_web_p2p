@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 40. Diagrama 6.13.24: ECB — CUS-022: Configurar parámetros de corte y\npenalización
+left to right direction
+actor "Administrador" as actor
+boundary "Interfaz de CUS-022" as ui
+control "Control previsto" as control
+actor --> ui
+ui --> control : Edición de corte y penalizaciones
+note right of control
+Sin componente operativo identificado.
+No representa una pantalla implementada.
+end note
+
+legend bottom
+ESPECIFICADO / PROPUESTO
+Propuesto: configuración de despliegue no equivale a edición administrativa; sanciones pendientes.
+endlegend
+
+@enduml

@@ -1,0 +1,36 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 83. Diagrama 6.15.17: Secuencia — CUS-019: Consultar bitácoras de\nmentoría por tutor
+actor "Administrador / Tutor previsto" as actor
+boundary "Interfaz de CUS-019" as ui
+control "bitacora_service" as svc
+actor -> ui : Consultar bitácoras de mentoría por tutor
+ui -> svc : Consulta, visado y observación administrativa
+activate svc
+alt Reglas y autorización aplicables satisfechas
+database "Persistencia o respaldo de desarrollo" as db
+svc -> db : Consultar bitácoras; visar u observar según acción
+db --> svc : Datos / resultado
+svc --> ui : Consulta, visado y observación administrativa
+else Incumplimiento o fallo
+svc --> ui : Rechazo / error visible; no declarar éxito
+end
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+PARCIAL
+Parcial: Tutor no identificado como rol operativo; visado administrativo no constituye firma
+certificada.
+endlegend
+
+@enduml

@@ -1,0 +1,66 @@
+@startuml
+' CUS-021 — Evaluar postulaciones a mentor por comité
+' Estado: Pendiente: sin flujo de comité identificado
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-021 — Evaluar postulaciones a mentor por comité\nPropuesta funcional — implementación pendiente
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Sistema Web P2P|
+start
+:Postulación previa disponible\n(escenario propuesto);
+|Comité evaluador (previsto)|
+:Acceder a la bandeja de postulaciones;
+|Sistema Web P2P|
+if (¿Evaluador autorizado? [E001]) then (No)
+  :Deberá restringir acceso;
+  stop
+endif
+:Deberá presentar expedientes pendientes;
+|Comité evaluador (previsto)|
+:Seleccionar expediente y revisar ciclo y mérito;
+|Sistema Web P2P|
+if (¿Evidencia completa y expediente válido? [A001/E002]) then (No)
+  :Deberá solicitar subsanación o rechazar datos inválidos;
+  stop
+endif
+|Comité evaluador (previsto)|
+:Registrar decisión motivada\n(aprobación o rechazo [A002]);
+|Sistema Web P2P|
+:Deberá conservar decisión, evaluador y fecha;
+if (¿Decisión registrada correctamente? [E003]) then (No)
+  :Deberá informar el fallo sin declarar resolución;
+  stop
+endif
+:Deberá mostrar estado y fecha de decisión;
+if (¿Decisión registrada aprobatoria?) then (No)
+  :Conservar el rechazo motivado;
+  stop
+else (Sí)
+|Administrador institucional|
+  :Realizar la asignación del rol Mentor\nmediante la operación autorizada de CUS-010;
+  stop
+endif
+
+legend bottom
+ESPECIFICADO / PROPUESTO
+Objetos: expediente o configuración previstos; sin tabla identificada
+Propuesto: sin bandeja, expediente, votación ni resolución; asignación efectiva corresponde a
+CUS-010.
+endlegend
+@enduml

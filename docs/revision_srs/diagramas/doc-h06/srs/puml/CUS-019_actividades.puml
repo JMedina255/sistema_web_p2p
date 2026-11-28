@@ -1,0 +1,80 @@
+@startuml
+' CUS-019 — Consultar bitácoras de mentoría por tutor
+' Estado: Implementación parcial: auditoría por Administrador; tutor no identificado
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-019 — Consultar bitácoras de mentoría por tutor\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Sistema Web P2P|
+start
+if (¿Consulta administrativa?) then (Sí)
+|Administrador institucional|
+  :Abrir Auditoría de Bitácoras;
+  else (No)
+|Tutor académico (previsto)|
+  :Solicitar consulta de su ámbito\n(propuesta);
+endif
+|Sistema Web P2P|
+if (¿Acceso y alcance permitidos? [E002]) then (Sí)
+  :Consultar bitácoras y mostrar filtros;
+  if (¿Consulta correcta? [E001]) then (Sí)
+    if (¿Hay registros? [A001]) then (Sí)
+      :Mostrar detalle, temas, observaciones y\nhoras;
+|Administrador institucional|
+      if (¿Administrador decide visar u\nobservar? [A003]) then (Sí)
+        if (¿Bitácora conforme?) then (Sí)
+          :Aprobar y Visar Horas;
+|Sistema Web P2P|
+          :Procesar visado y actualizar horas\nacreditadas;
+          else (No)
+|Administrador institucional|
+          :Seleccionar Observar Bitácora y redactar\nmotivo [A002];
+|Sistema Web P2P|
+          if (¿Motivo válido? [E003]) then (Sí)
+            :Registrar observación;
+            else (No)
+            :Solicitar motivo;
+          endif
+        endif
+        if (¿Operación correcta? [E001]) then (Sí)
+          :Actualizar tabla y estado;
+          else (No)
+          :Mostrar error;
+        endif
+        else (No)
+        :Mantener consulta sin modificación y\ntutor sin visado acreditado;
+      endif
+      else (No)
+      :Mostrar tabla sin resultados;
+    endif
+    else (No)
+    :Mostrar fallo de consulta;
+  endif
+  else (No)
+  :Restringir acceso;
+endif
+stop
+
+legend bottom
+PARCIAL
+Objetos: bitacoras_pedagogicas, sesiones_mentoria
+Parcial: Tutor no identificado como rol operativo; visado administrativo no constituye firma
+certificada.
+endlegend
+@enduml

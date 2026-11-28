@@ -1,5 +1,5 @@
 # Siguiente microincremento autorizado
 
-DOC-H05-R concluyó con la depuración y la verificación de la rama documental. La publicación manual corresponde al responsable.
+DOC-H06-R termina con commit local en `docs/doc-h06-homologacion-srs-sad`, sobre `ed6c1cc`, y entrega del hash. No realizar push ni merge a main.
 
-La homologación definitiva, DOC-H06 y cualquier eliminación adicional requieren autorización expresa. Consultar el informe de depuración y la matriz de homologación antes de retomar el trabajo.
+Detenerse y esperar instrucciones. Consultar `docs/revision_srs/DOC-H06-CIERRE.md` antes de reanudar. No implementar brechas, ampliar la auditoría ni publicar automáticamente.

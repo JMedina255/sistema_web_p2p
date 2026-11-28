@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 25. Diagrama 6.13.9: ECB — CUS-004: Ratificar asistencia a sesión de\nmentoría (T-24h)
+left to right direction
+actor "Estudiante mentoreado" as actor
+boundary "Interfaz de CUS-004" as ui
+control "booking_service" as control
+actor --> ui
+ui --> control : Ratificación antes del corte T-24h
+entity "reservas_cupo" as e0
+control --> e0
+entity "sesiones_mentoria" as e1
+control --> e1
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+El servicio rechaza cuando faltan 24 horas o menos; no equivale a asistencia efectiva.
+endlegend
+
+@enduml

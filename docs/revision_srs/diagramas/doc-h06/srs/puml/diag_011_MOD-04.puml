@@ -1,0 +1,36 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 11. MOD-04: Ejecución y Seguimiento Académico
+left to right direction
+actor "Usuario institucional" as u
+actor "Administrador / actor previsto según caso" as a
+rectangle "Sistema Web P2P — EPIS-UPT" {
+package "MOD-04: Ejecución y Seguimiento\nAcadémico" as m04 {
+usecase "CUS-007 Registrar asistencia y bitácora\npedagógica" as c7
+usecase "CUS-012 Registrar calificación y feedback\nbidireccional" as c12
+usecase "CUS-013 Consultar historial académico de\nmentorías" as c13
+usecase "CUS-014 Emitir constancia de horas de\nmentoría" as c14
+usecase "CUS-018 Gestionar justificación de\ninasistencia a sesión" as c18 <<propuesto>>
+usecase "CUS-019 Consultar bitácoras de mentoría por\ntutor" as c19
+}
+}
+u --> c7
+u --> c12
+u --> c13
+u --> c14
+u --> c18
+a --> c19
+legend bottom
+Los casos propuestos conservan requisitos institucionales.
+Su presencia no acredita implementación. RF21 y avisos: transversales.
+endlegend
+@enduml

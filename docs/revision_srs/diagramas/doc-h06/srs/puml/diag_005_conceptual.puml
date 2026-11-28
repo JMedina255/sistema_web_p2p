@@ -1,0 +1,36 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 5. Modelo conceptual del dominio
+class Perfil
+class Disponibilidad
+class Asignatura
+class Tema
+class Sesion
+class Reserva
+class Asistencia
+class Bitacora
+class Encuesta
+class Constancia
+Perfil "1" -- "0..*" Disponibilidad
+Asignatura "1" -- "0..*" Tema
+Sesion --> Asignatura
+Sesion --> Tema
+Reserva --> Sesion
+Asistencia --> Sesion
+Bitacora --> Sesion
+Encuesta --> Sesion
+Constancia ..> Bitacora : horas visadas
+note bottom
+Relaciones de dominio; las FK físicas se limitan a las declaradas en el ORM.
+La constancia DEMO no acredita certificación institucional.
+end note
+@enduml

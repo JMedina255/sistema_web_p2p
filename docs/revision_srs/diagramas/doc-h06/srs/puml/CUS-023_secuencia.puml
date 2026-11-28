@@ -1,0 +1,36 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 76. Diagrama 6.15.10: Secuencia — CUS-023: Evaluar quórum y ejecutar\ncorte automático (T-24h)
+actor "Planificador / Mentor" as actor
+boundary "Interfaz de CUS-023" as ui
+control "booking_service / offer_service" as svc
+actor -> ui : Evaluar quórum y ejecutar corte automático (T-24h)
+ui -> svc : Evaluación idempotente y decisión del mentor
+activate svc
+alt Reglas y autorización aplicables satisfechas
+database "Persistencia o respaldo de desarrollo" as db
+svc -> db : Contar confirmados; invalidar pendientes y evaluar\nsesión
+db --> svc : Datos / resultado
+svc --> ui : Evaluación idempotente y decisión del mentor
+else Incumplimiento o fallo
+svc --> ui : Rechazo / error visible; no declarar éxito
+end
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+Planificador implementado en lifespan y condicionado a habilitación; operación periódica y correo
+externos no validados.
+endlegend
+
+@enduml

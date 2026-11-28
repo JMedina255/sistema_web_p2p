@@ -1,0 +1,37 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Diagrama 2.2. Vista lógica y responsabilidades
+top to bottom direction
+actor "Usuario institucional" as u
+package "Presentación" {
+component "React 19 / TypeScript" as spa
+component "Servicios de cliente" as client
+}
+package "Backend FastAPI" {
+component "Routers y dependencias de autorización" as api
+component "Servicios de dominio" as svc
+component "Ranking Jaccard multifactorial" as rank
+}
+database "19 tablas ORM declaradas" as db
+cloud "SMTP / Google externos" as external
+u --> spa
+spa --> client
+client --> api : HTTP / JSON
+api --> svc
+svc --> rank
+svc --> db : SQLAlchemy / psycopg
+svc ..> external : validación externa pendiente
+legend bottom
+Respaldo en memoria según servicio y entorno.
+La agrupación de cinco módulos no implica cinco procesos.
+endlegend
+@enduml

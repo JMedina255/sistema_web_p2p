@@ -1,0 +1,65 @@
+@startuml
+' CUS-004 — Ratificar asistencia a sesión de mentoría (T-24h)
+' Estado: Implementación identificada; revisión estática
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-004 — Ratificar asistencia a sesión de mentoría (T-24h)
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Estudiante Mentoreado|
+start
+:Abrir Mis reservas y filtrar pendientes;
+|Sistema Web P2P|
+if (¿Acceso y consulta correctos?\n[E001/E004]) then (Sí)
+  :Mostrar estado, horario y corte\ndefinitivo;
+  if (¿Reserva ya ratificada? [A002]) then (Sí)
+    :Mostrar fecha de ratificación sin\nrepetir;
+    stop
+  endif
+  if (¿Pendiente y antes del corte?\n[E002/E003]) then (Sí)
+|Estudiante Mentoreado|
+    :Presionar Confirmar Asistencia;
+|Sistema Web P2P|
+    :Mostrar compromiso y diálogo de\nratificación;
+|Estudiante Mentoreado|
+    if (¿Confirmar ratificación? [A001]) then (Sí)
+|Sistema Web P2P|
+      :Mostrar Ratificando asistencia... y\nrevalidar titularidad, estado y plazo;
+      if (¿Registro correcto?\n[E001/E002/E003/E004]) then (Sí)
+        :Actualizar a CONFIRMADA y registrar\nfecha;
+        :Mostrar resultado y  sesión depende del\nquórum;
+        else (No)
+        :Mostrar error y permitir actualizar\nreserva;
+      endif
+      else (No)
+      :Cerrar sin cambiar estado;
+    endif
+    else (No)
+    :Informar plazo vencido o estado\nincompatible;
+  endif
+  else (No)
+  :Mostrar error o acceso restringido;
+endif
+stop
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+Objetos: reservas_cupo, sesiones_mentoria
+El servicio rechaza cuando faltan 24 horas o menos; no equivale a asistencia efectiva.
+endlegend
+@enduml

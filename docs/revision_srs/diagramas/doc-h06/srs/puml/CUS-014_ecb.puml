@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 31. Diagrama 6.13.15: ECB — CUS-014: Emitir constancia de horas de\nmentoría
+left to right direction
+actor "Mentor / Administrador" as actor
+boundary "Interfaz de CUS-014" as ui
+control "certificate_service" as control
+actor --> ui
+ui --> control : Constancia PDF DEMO y verificación por\nfolio
+entity "certificados_horas" as e0
+control --> e0
+entity "bitacoras_pedagogicas" as e1
+control --> e1
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+La ruta de emisión existe; no acredita autorización, firma ni validez institucional.
+endlegend
+
+@enduml

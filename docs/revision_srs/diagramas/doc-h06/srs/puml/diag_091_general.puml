@@ -1,0 +1,113 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 91. Diagrama de Clases del Modelo Lógico: vista general
+entity "asistencias_sesion" as asistencias_sesion {
+  id_asistencia : Integer <<PK>>
+  id_sesion : Integer
+  estudiante_email : String(255)
+}
+entity "tokens_asistencia_activos" as tokens_asistencia_activos {
+  id_token : Integer <<PK>>
+  id_sesion : Integer
+}
+entity "auth_challenges" as auth_challenges {
+  id_challenge : String(64) <<PK>>
+  email : String(255)
+}
+entity "auth_rate_limits" as auth_rate_limits {
+  key : String(128) <<PK>>
+}
+entity "bitacoras_pedagogicas" as bitacoras_pedagogicas {
+  id_bitacora : Integer <<PK>>
+  id_sesion : Integer
+  id_mentor : String(255)
+  horas_declaradas : Float
+  visado_administrador : Boolean
+}
+entity "reservas_cupo" as reservas_cupo {
+  id_reserva : Integer <<PK>>
+  id_sesion : Integer
+  estudiante_email : String(255)
+  estado : String(30)
+}
+entity "solicitudes_demanda" as solicitudes_demanda {
+  id_demanda : Integer <<PK>>
+  estudiante_email : String(255)
+  id_asignatura : Integer
+  id_tema : Integer
+  estado : String(20)
+}
+entity "certificados_horas" as certificados_horas {
+  id_certificado : Integer <<PK>>
+  id_mentor : String(255)
+  estado : String(30)
+}
+entity "consentimientos_legales" as consentimientos_legales {
+  id_consentimiento : Integer <<PK>>
+  email : String(255)
+}
+entity "asignaturas" as asignaturas {
+  id_asignatura : Integer <<PK>>
+}
+entity "temas_conceptuales" as temas_conceptuales {
+  id_tema : Integer <<PK>>
+  id_asignatura : Integer
+}
+entity "sesiones_mentoria" as sesiones_mentoria {
+  id_sesion : Integer <<PK>>
+  mentor_email : String(255)
+  id_asignatura : Integer
+  id_tema : Integer
+  fecha_inicio : DateTime(UTC)
+  estado : String(30)
+}
+entity "perfiles_academicos" as perfiles_academicos {
+  id_perfil : Integer <<PK>>
+  email : String(255)
+}
+entity "disponibilidades_horarias" as disponibilidades_horarias {
+  id_disponibilidad : Integer <<PK>>
+  email : String(255)
+}
+entity "roles" as roles {
+  id_rol : Integer <<PK>>
+}
+entity "usuario_roles" as usuario_roles {
+  id_usuario_rol : Integer <<PK>>
+  email : String(255)
+  id_rol : Integer
+}
+entity "versiones_cronograma" as versiones_cronograma {
+  id : Integer <<PK>>
+}
+entity "cronograma_activo" as cronograma_activo {
+  id : Integer <<PK>>
+  id_version : Integer
+}
+entity "encuestas_calidad" as encuestas_calidad {
+  id_encuesta : Integer <<PK>>
+  id_sesion : Integer
+  estudiante_email : String(255)
+}
+sesiones_mentoria ||--o{ asistencias_sesion : id_sesion
+sesiones_mentoria ||--o| tokens_asistencia_activos : id_sesion
+sesiones_mentoria ||--o| bitacoras_pedagogicas : id_sesion
+sesiones_mentoria ||--o{ reservas_cupo : id_sesion
+asignaturas ||--o{ solicitudes_demanda : id_asignatura
+temas_conceptuales ||--o{ solicitudes_demanda : id_tema
+asignaturas ||--o{ temas_conceptuales : id_asignatura
+asignaturas ||--o{ sesiones_mentoria : id_asignatura
+temas_conceptuales ||--o{ sesiones_mentoria : id_tema
+roles ||--o{ usuario_roles : id_rol
+versiones_cronograma |o--o{ cronograma_activo : id_version
+sesiones_mentoria ||--o{ encuestas_calidad : id_sesion
+@enduml

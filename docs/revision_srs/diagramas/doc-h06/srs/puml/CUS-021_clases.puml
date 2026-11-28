@@ -1,0 +1,24 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 97. Diagrama 6.16.6: Clases del dominio — CUS-021: Evaluar postulaciones\na mentor por comité
+class "Objeto de diseño previsto" as previsto <<propuesto>>
+note right of previsto
+Sin entidad ORM identificada.
+No se añade una tabla ficticia.
+end note
+legend bottom
+ESPECIFICADO / PROPUESTO
+Propuesto: sin bandeja, expediente, votación ni resolución; asignación efectiva corresponde a
+CUS-010.
+endlegend
+
+@enduml

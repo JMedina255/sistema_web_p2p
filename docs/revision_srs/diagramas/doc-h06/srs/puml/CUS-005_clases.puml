@@ -1,0 +1,27 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 96. Diagrama 6.16.5: Clases del dominio — CUS-005: Postular al rol de\nestudiante mentor
+entity "perfiles_academicos" as perfiles_academicos {
+  id_perfil : Integer <<PK>>
+  email : String(255)
+}
+entity "disponibilidades_horarias" as disponibilidades_horarias {
+  id_disponibilidad : Integer <<PK>>
+  email : String(255)
+}
+legend bottom
+PARCIAL
+Parcial: sin expediente, certificación de nota 14 ni envío a comité; preferencia no concede
+privilegios.
+endlegend
+
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 18. Diagrama 6.13.2: ECB — CUS-010: Gestionar asignación de roles de\nusuario
+left to right direction
+actor "Administrador" as actor
+boundary "Interfaz de CUS-010" as ui
+control "role_service" as control
+actor --> ui
+ui --> control : Promoción y revocación de Mentor
+entity "roles" as e0
+control --> e0
+entity "usuario_roles" as e1
+control --> e1
+
+legend bottom
+PARCIAL
+Parcial: sin acreditación de nota 14 ni administración general de todos los roles; buscador
+institucional limitado.
+endlegend
+
+@enduml

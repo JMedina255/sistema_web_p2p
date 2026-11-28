@@ -1,0 +1,83 @@
+@startuml
+' CUS-002 — Consultar catálogo de mentorías con recomendación
+' Estado: Implementación identificada; revisión estática
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-002 — Consultar catálogo de mentorías con recomendación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Estudiante Mentoreado|
+start
+:Abrir Explorar mentorías;
+|Sistema Web P2P|
+if (¿Acceso permitido? [E001]) then (Sí)
+  :Mostrar cartelera, pestañas y filtros;
+  (R)
+|Estudiante Mentoreado|
+    :Elegir Sesiones Recomendadas o Mentores\nAcadémicos [A002];
+    :Elegir asignatura si procede y Top 3, 4\no 5;
+|Sistema Web P2P|
+    :Calcular y consultar recomendaciones;
+    if (¿Consulta correcta? [E002]) then (Sí)
+      if (¿Hay recomendaciones? [A001]) then (Sí)
+        :Mostrar tarjetas ordenadas y afinidad;
+|Estudiante Mentoreado|
+        if (¿Explorar sesión con cupos?) then (Sí)
+|Sistema Web P2P|
+          :Mostrar detalles y explicación de\nafinidad;
+          if (¿Oferta con vacantes? [E003]) then (Sí)
+|Estudiante Mentoreado|
+            :Presionar Reservar Cupo;
+|Sistema Web P2P|
+            :Abrir CUS-003 sin asignar cupo;
+            stop
+            else (No)
+            :Mostrar Aforo Agotado y bloquear reserva;
+          endif
+          else (No)
+|Estudiante Mentoreado|
+          :Revisar mentores o continuar exploración;
+        endif
+        else (No)
+|Sistema Web P2P|
+        :Mostrar orientación de demanda y acceso\nCUS-008;
+      endif
+      else (No)
+      :Mostrar error y Reintentar;
+    endif
+|Estudiante Mentoreado|
+  if (¿Actualizar o cambiar filtros?\n[A003]) then (Sí)
+    (R)
+    detach
+  else (No)
+  endif
+  else (No)
+|Sistema Web P2P|
+  :Restringir acceso;
+endif
+stop
+legend bottom
+  Los círculos con la misma letra enlazan tramos del flujo.
+endlegend
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+Objetos: perfiles_academicos, disponibilidades_horarias, sesiones_mentoria
+Sin medición nueva de precisión ni rendimiento; contacto no acredita mensajería.
+endlegend
+@enduml

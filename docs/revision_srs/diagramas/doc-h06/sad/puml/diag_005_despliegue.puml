@@ -1,0 +1,32 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Diagrama 2.5. Despliegue de referencia
+node "Equipo del usuario" {
+component "Navegador / SPA" as spa
+}
+node "Servicio de aplicación de referencia" {
+component "FastAPI / Uvicorn" as api
+component "Planificador condicional en proceso" as sched
+}
+database "PostgreSQL / destino configurado" as db
+cloud "SMTP" as smtp
+cloud "Google Identity" as google
+spa --> api : HTTP / JSON; TLS requerido para despliegue
+api --> db : psycopg / SQLAlchemy
+sched --> api : evaluación de quórum
+api ..> smtp
+api ..> google
+note bottom of db
+Topología de referencia: no certifica host, versión,
+RLS activo, disponibilidad ni uso de producción.
+end note
+@enduml

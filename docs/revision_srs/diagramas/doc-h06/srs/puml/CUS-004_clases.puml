@@ -1,0 +1,33 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 100. Diagrama 6.16.9: Clases del dominio — CUS-004: Ratificar asistencia\na sesión de mentoría (T-24h)
+entity "reservas_cupo" as reservas_cupo {
+  id_reserva : Integer <<PK>>
+  id_sesion : Integer
+  estudiante_email : String(255)
+  estado : String(30)
+}
+entity "sesiones_mentoria" as sesiones_mentoria {
+  id_sesion : Integer <<PK>>
+  mentor_email : String(255)
+  id_asignatura : Integer
+  id_tema : Integer
+  fecha_inicio : DateTime(UTC)
+  estado : String(30)
+}
+sesiones_mentoria ||--o{ reservas_cupo : id_sesion
+legend bottom
+IMPLEMENTADO; validación según alcance
+El servicio rechaza cuando faltan 24 horas o menos; no equivale a asistencia efectiva.
+endlegend
+
+@enduml

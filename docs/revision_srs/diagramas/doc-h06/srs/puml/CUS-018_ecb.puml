@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 32. Diagrama 6.13.16: ECB — CUS-018: Gestionar justificación de\ninasistencia a sesión
+left to right direction
+actor "Estudiante / Responsable previsto" as actor
+boundary "Interfaz de CUS-018" as ui
+control "Control previsto" as control
+actor --> ui
+ui --> control : Trámite posterior de justificación
+note right of control
+Sin componente operativo identificado.
+No representa una pantalla implementada.
+end note
+
+legend bottom
+ESPECIFICADO / PROPUESTO
+Propuesto: falta RF específico, plazo, evidencia, responsable y resolución; no es cancelación
+previa.
+endlegend
+
+@enduml

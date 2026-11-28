@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 37. Diagrama 6.13.21: ECB — CUS-016: Gestionar auditoría de eventos de\nseguridad
+left to right direction
+actor "Administrador" as actor
+boundary "Interfaz de CUS-016" as ui
+control "Control previsto" as control
+actor --> ui
+ui --> control : Bandeja integral de eventos de seguridad
+note right of control
+Sin componente operativo identificado.
+No representa una pantalla implementada.
+end note
+
+legend bottom
+ESPECIFICADO / PROPUESTO
+Propuesto: consentimiento y logs parciales no sustituyen auditoría integral.
+endlegend
+
+@enduml

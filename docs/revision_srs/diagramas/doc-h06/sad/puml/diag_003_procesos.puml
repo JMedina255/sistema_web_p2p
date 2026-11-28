@@ -1,0 +1,31 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Diagrama 2.3. Concurrencia y corte condicional
+actor Estudiante
+participant "API / BookingService" as svc
+database PostgreSQL as db
+participant "Planificador en lifespan" as scheduler
+Estudiante -> svc : Reservar
+svc -> db : Bloquear fila / comprobar cupo y duplicado
+db --> svc : Registro / rechazo
+svc --> Estudiante : Reserva provisional / error
+opt ENABLE_BACKGROUND_SCHEDULER habilitado
+scheduler -> svc : Evaluar periódicamente sesiones activas
+svc -> db : Corte idempotente / actualizar pendientes y sesión
+db --> svc : Resultado confirmado
+end
+note over scheduler,db
+No es un cron externo ni una cola durable.
+Activación y operación multiworker requieren validación.
+Notificar no sustituye la transacción ni acredita entrega.
+end note
+@enduml

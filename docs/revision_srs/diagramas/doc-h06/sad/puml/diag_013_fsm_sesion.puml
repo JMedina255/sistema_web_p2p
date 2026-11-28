@@ -1,0 +1,40 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Diagrama 11.4. Sesión: estados admitidos y transiciones principales
+[*] --> PUBLICADA
+PUBLICADA --> CONFIRMADA : corte con quórum
+PUBLICADA --> QUORUM_INSUFICIENTE : corte sin quórum
+PENDIENTE_CONFIRMACION --> CONFIRMADA : corte con quórum
+PENDIENTE_CONFIRMACION --> QUORUM_INSUFICIENTE : corte sin quórum
+QUORUM_INSUFICIENTE --> CONFIRMADA : mentor decide continuar
+QUORUM_INSUFICIENTE --> PUBLICADA : reprogramar / reiniciar evaluación
+QUORUM_INSUFICIENTE --> CANCELADA_QUORUM : cancelar con motivo
+EN_CURSO --> BITACORA_REGISTRADA : registro válido
+CONFIRMADA --> BITACORA_REGISTRADA : registro válido tras sesión
+BITACORA_REGISTRADA --> HORAS_VISADAS : visado administrativo
+BITACORA_REGISTRADA --> OBSERVADA : observación administrativa
+HORAS_VISADAS --> OBSERVADA : observación administrativa
+OBSERVADA --> HORAS_VISADAS : visado administrativo
+CONCLUIDA --> BITACORA_REGISTRADA : registro de bitácora
+CONCLUIDA --> HORAS_VISADAS : visado admisible
+note bottom of PUBLICADA
+Estados del CHECK: PUBLICADA, PENDIENTE_CONFIRMACION,
+QUORUM_INSUFICIENTE, CONFIRMADA, EN_CURSO, CONCLUIDA,
+BITACORA_REGISTRADA, HORAS_VISADAS, OBSERVADA,
+CANCELADA_SISTEMA, CANCELADA_MENTOR, CANCELADA_QUORUM,
+FINALIZADA. No todos tienen transición automática acreditada.
+end note
+note right of HORAS_VISADAS
+No implica firma institucional ni emisión automática.
+Las guardas exactas dependen del servicio invocado.
+end note
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 39. Diagrama 6.13.23: ECB — CUS-020: Gestionar catálogo curricular y\nasignaturas
+left to right direction
+actor "Usuario / Administrador" as actor
+boundary "Interfaz de CUS-020" as ui
+control "curriculum_service" as control
+actor --> ui
+ui --> control : Consulta y mantenimiento curricular
+entity "asignaturas" as e0
+control --> e0
+entity "temas_conceptuales" as e1
+control --> e1
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+Discrepancia pendiente entre consulta I-IV y formulario 1-10; prioridad curricular no garantiza
+pesos dinámicos.
+endlegend
+
+@enduml

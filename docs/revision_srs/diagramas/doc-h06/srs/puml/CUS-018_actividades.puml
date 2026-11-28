@@ -1,0 +1,78 @@
+@startuml
+' CUS-018 — Gestionar justificación de inasistencia a sesión
+' Estado: Pendiente: no se identificó trámite específico
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+' Las ramas de entrada representan interacciones independientes; no requieren simultaneidad.
+title CUS-018 — Gestionar justificación de inasistencia a sesión\nPropuesta funcional — implementación pendiente
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Estudiante Mentoreado|
+start
+|Sistema Web P2P|
+if (¿Acceso autorizado?) then (No)
+  :Restringir acceso;
+  stop
+endif
+|Estudiante Mentoreado|
+:Consultar histórico en Mis reservas;
+|Sistema Web P2P|
+:Mostrar estado INASISTENCIA si\ncorresponde;
+|Estudiante Mentoreado|
+:Solicitar justificación (propuesta);
+|Sistema Web P2P|
+if (¿Reserva propia y elegible? [E001]) then (Sí)
+  :Deberá mostrar sesión, motivo y\ncondiciones definidas;
+|Estudiante Mentoreado|
+  :Describir motivo y enviar;
+|Sistema Web P2P|
+  if (¿Completa y no duplicada? [E002]) then (Sí)
+    :Deberá registrar solicitud sin cambiar\nasistencia;
+|Responsable académico (previsto)|
+    :Revisar motivo y antecedentes\n(propuesta);
+    if (¿Falta información? [A001]) then (Sí)
+|Sistema Web P2P|
+      :Deberá solicitar información adicional;
+      else (No)
+|Responsable académico (previsto)|
+      :Registrar decisión motivada, aprobar o\nrechazar [A002];
+|Sistema Web P2P|
+      if (¿Registro correcto? [E003]) then (Sí)
+        :Deberá conservar estado, fecha y\nresponsable;
+|Estudiante Mentoreado|
+        :Consultar resolución;
+        else (No)
+|Sistema Web P2P|
+        :Deberá informar fallo sin declarar éxito;
+      endif
+    endif
+    else (No)
+    :Deberá rechazar datos incompletos o\nduplicados;
+  endif
+  else (No)
+  :Deberá informar reserva no elegible;
+endif
+stop
+
+legend bottom
+ESPECIFICADO / PROPUESTO
+Objetos: expediente o configuración previstos; sin tabla identificada
+Propuesto: falta RF específico, plazo, evidencia, responsable y resolución; no es cancelación
+previa.
+endlegend
+@enduml

@@ -1,0 +1,88 @@
+@startuml
+' CUS-012 — Registrar calificación y feedback bidireccional
+' Estado: Implementación parcial: encuesta del asistente y bitácora del mentor
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+' Las ramas de entrada representan interacciones independientes; no requieren simultaneidad.
+title CUS-012 — Registrar calificación y feedback bidireccional\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Sistema Web P2P|
+start
+if (¿Evaluación del asistente?) then (Sí)
+|Estudiante Mentoreado|
+  :Abrir Mis reservas y Evaluar Mentoría;
+|Sistema Web P2P|
+  if (¿Asistencia elegible y dentro de 24\nh? [E001/E002]) then (Sí)
+    :Mostrar Encuesta de Calidad Docente;
+    (R)
+|Estudiante Mentoreado|
+      :Calificar cuatro dimensiones de 1 a 5\nestrellas [A002];
+      :Redactar retroalimentación de al menos\n20 caracteres;
+      if (¿Cancelar? [A001]) then (Sí)
+|Sistema Web P2P|
+        :Cerrar sin registrar;
+        stop
+      endif
+      if (¿Encuesta completa? [E003]) then (Sí)
+|Estudiante Mentoreado|
+        :Enviar evaluación;
+|Sistema Web P2P|
+        if (¿Registro permitido y correcto?\n[E004/E005]) then (Sí)
+          :Mostrar Gracias por tu Evaluación y\nCerrar Ventana;
+          stop
+          else (No)
+          :Mostrar error o evaluación previa;
+        endif
+        else (No)
+        :Mantener envío inactivo;
+      endif
+|Estudiante Mentoreado|
+    if (¿Corregir o reintentar?) then (Sí)
+      (R)
+      detach
+    else (No)
+    endif
+    else (No)
+|Sistema Web P2P|
+    :Informar falta de elegibilidad o plazo\nvencido;
+  endif
+  stop
+else (No)
+|Sistema Web P2P|
+  (B)
+  detach
+endif
+
+|Estudiante Mentor|
+(B)
+  :Abrir Bitácora de sesión conforme a\nCUS-007;
+  :Registrar dificultad grupal y\nrecomendaciones;
+|Sistema Web P2P|
+  :Conservar retroalimentación de sesión y\nno calificación individual;
+stop
+legend bottom
+  Los círculos con la misma letra enlazan tramos del flujo.
+endlegend
+
+legend bottom
+PARCIAL
+Objetos: encuestas_calidad, bitacoras_pedagogicas
+Parcial: no existe evidencia de evaluación individual mentor a estudiante.
+endlegend
+@enduml

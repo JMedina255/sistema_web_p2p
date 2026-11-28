@@ -1,0 +1,73 @@
+@startuml
+' CUS-011 — Exportar reportes ejecutivos consolidados
+' Estado: Pendiente: no se identificó exportación ejecutiva
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-011 — Exportar reportes ejecutivos consolidados\nPropuesta funcional — implementación pendiente
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Administrador institucional|
+start
+:Acceder a reportes institucionales\n(propuesta);
+|Sistema Web P2P|
+if (¿Acceso permitido? [E001]) then (Sí)
+  (R)
+|Administrador institucional|
+    :Seleccionar periodo y métricas;
+|Sistema Web P2P|
+    :Deberá mostrar filtros, totales y vista\nprevia;
+    if (¿Hay datos? [A002]) then (Sí)
+|Administrador institucional|
+      :Elegir formato aprobado;
+|Sistema Web P2P|
+      if (¿Formato definido? [E003]) then (Sí)
+|Administrador institucional|
+        :Confirmar generación y descarga;
+|Sistema Web P2P|
+        if (¿Generación correcta? [E002]) then (Sí)
+          :Deberá entregar archivo con periodo y\ncriterios;
+          else (No)
+          :Deberá informar fallo de generación;
+        endif
+        else (No)
+        :Deberá informar formato no disponible;
+      endif
+      else (No)
+      :Deberá informar ausencia de datos;
+    endif
+|Administrador institucional|
+  if (¿Cambiar filtros y generar de nuevo?\n[A001]) then (Sí)
+    (R)
+    detach
+  else (No)
+  endif
+  else (No)
+|Sistema Web P2P|
+  :Deberá restringir acceso;
+endif
+stop
+legend bottom
+  Los círculos con la misma letra enlazan tramos del flujo.
+endlegend
+
+legend bottom
+ESPECIFICADO / PROPUESTO
+Objetos: expediente o configuración previstos; sin tabla identificada
+Propuesto: no se identificó exportación ejecutiva consolidada.
+endlegend
+@enduml

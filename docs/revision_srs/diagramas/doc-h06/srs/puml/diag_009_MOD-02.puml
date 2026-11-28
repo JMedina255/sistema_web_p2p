@@ -1,0 +1,32 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 9. MOD-02: Ofertas de Mentoría y Gestión de Recursos
+left to right direction
+actor "Usuario institucional" as u
+actor "Administrador / actor previsto según caso" as a
+rectangle "Sistema Web P2P — EPIS-UPT" {
+package "MOD-02: Ofertas de Mentoría y\nGestión de Recursos" as m02 {
+usecase "CUS-006 Registrar oferta de mentoría\nacadémica" as c6
+usecase "CUS-008 Gestionar demanda insatisfecha de\nmentoría" as c8
+usecase "CUS-005 Postular al rol de estudiante\nmentor" as c5
+usecase "CUS-021 Evaluar postulaciones a mentor por\ncomité" as c21 <<propuesto>>
+}
+}
+u --> c6
+u --> c8
+u --> c5
+a --> c21
+legend bottom
+Los casos propuestos conservan requisitos institucionales.
+Su presencia no acredita implementación. RF21 y avisos: transversales.
+endlegend
+@enduml

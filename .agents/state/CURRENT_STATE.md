@@ -1,18 +1,16 @@
 # Estado actual
 
-- **Fecha de corte** · 2026-11-28
-- **Rama** · `docs/p2p-srs-diagramacion-integral`
-- **Base de DOC-H05-R** · `6f7dcdb` (DOC-H05).
-- **Hito** · DOC-H05-R completado y rama preparada para publicación manual del responsable.
-
-## Documentación
-
-- `SRS_V4.0_CONSOLIDADO.md` y `docs/revision_srs/MATRIZ_HOMOLOGACION_SRS_V4.md` conservan el carácter provisional.
-- Se conservan 24 narrativas, las figuras 6.2.3-1 a 6.2.3-48 y sus fuentes, los anexos A–C y las 119 figuras de diseño. Los modelos y requisitos heredados conservan su numeración.
-- `docs/revision_srs/INFORME_DEPURACION_DOC_H05_R.md` registra los 20 duplicados exactos retirados y sus destinos, las exclusiones locales y los candidatos de homologación.
-- El paquete DOC-H03 fue movido al directorio hermano `DOC-H03_P2P_Diagramas_PlantUML` y se verificaron los 51 archivos por SHA-256.
+- **Fecha de corte** · 2026-11-28.
+- **Rama recuperada** · `docs/doc-h06-homologacion-srs-sad`.
+- **Base final DOC-H06-R** · `ed6c1cc06f0794c661636e1893723e025c206b68`; base inicial DOC-H06 `1f6e806`.
+- **Recuperación** · Respaldo externo de 270 archivos y parches, verificado por SHA-256 antes de cambiar de rama. Fast-forward de la rama documental; commits ajenos c67d877, a05b80c y ed6c1cc conservados. Sin conflictos.
+- **Respaldo** · `C:\Users\HP\Desktop\Proyectos\DOC-H06-R-respaldo-20261128-150554`, con manifest.json.
+- **Hito** · DOC-H06-R cierra documentalmente SRS/SAD; dictamen APTO para revisión y sustentación del alcance y brechas descritos, sin aprobación institucional ni certificación operativa.
+- **Conservación** · 131 pares PlantUML/PNG y 48 figuras narrativas coincidentes por hash; bloque de 24 narrativas idéntico. No se regeneran diagramas.
+- **Revalidación acotada** · Condiciones de trazas/pistas OTP y respaldo de correo, pruebas modificadas inspeccionadas estáticamente, referencias añadidas y diff. Sin suites funcionales ni acceso a configuración, BD o secretos.
+- **Entrega** · Commit local identificado por el historial y la respuesta del chat. La autorización DOC-H06-R prohíbe push y merge a main.
+- **Detalle** · `docs/revision_srs/DOC-H06-CIERRE.md`.
 
 ## Pendientes
 
-- La publicación corresponde al responsable.
-- La aprobación institucional del SRS v4.0 y de la matriz sigue pendiente. La homologación definitiva y DOC-H06 esperan autorización expresa.
+Revisión del responsable, aprobación institucional y brechas del cierre. Detenerse al finalizar DOC-H06-R; publicar o fusionar requiere una instrucción posterior expresa.

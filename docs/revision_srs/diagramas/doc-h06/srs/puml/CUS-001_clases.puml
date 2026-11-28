@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 92. Diagrama 6.16.1: Clases del dominio — CUS-001: Iniciar sesión\ninstitucional con 2FA
+entity "auth_challenges" as auth_challenges {
+  id_challenge : String(64) <<PK>>
+  email : String(255)
+}
+entity "auth_rate_limits" as auth_rate_limits {
+  key : String(128) <<PK>>
+}
+entity "consentimientos_legales" as consentimientos_legales {
+  id_consentimiento : Integer <<PK>>
+  email : String(255)
+}
+legend bottom
+IMPLEMENTADO; validación según alcance
+SMTP y Google externos requieren validación; OTP por correo o SSO no acreditan dos factores
+independientes.
+endlegend
+
+@enduml

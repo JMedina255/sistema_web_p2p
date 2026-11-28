@@ -1,0 +1,32 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 17. Diagrama 6.13.1: ECB — CUS-001: Iniciar sesión institucional con 2FA
+left to right direction
+actor "Usuario institucional" as actor
+boundary "Interfaz de CUS-001" as ui
+control "auth_service" as control
+actor --> ui
+ui --> control : OTP y acceso federado; consentimiento
+entity "auth_challenges" as e0
+control --> e0
+entity "auth_rate_limits" as e1
+control --> e1
+entity "consentimientos_legales" as e2
+control --> e2
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+SMTP y Google externos requieren validación; OTP por correo o SSO no acreditan dos factores
+independientes.
+endlegend
+
+@enduml

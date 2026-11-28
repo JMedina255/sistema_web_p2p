@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 13. Roles operativos y actores previstos
+actor Mentoreado
+actor Mentor
+actor Administrador
+actor "Comité previsto" as com
+actor "Tutor previsto" as tut
+rectangle "Funciones operativas" as actual
+rectangle "Funciones propuestas" as futuro
+Mentoreado --> actual
+Mentor --> actual
+Administrador --> actual
+com ..> futuro
+tut ..> futuro
+note bottom of futuro
+La evaluación por comité y el rol Tutor
+no se declaran implementados.
+end note
+@enduml

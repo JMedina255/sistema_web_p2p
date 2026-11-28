@@ -1,0 +1,91 @@
+@startuml
+' CUS-007 — Registrar asistencia y bitácora pedagógica
+' Estado: Implementación identificada; revisión estática
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+' Las ramas de entrada representan interacciones independientes; no requieren simultaneidad.
+title CUS-007 — Registrar asistencia y bitácora pedagógica
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Sistema Web P2P|
+start
+if (¿Acceso autorizado?) then (No)
+  :Restringir acceso;
+  stop
+endif
+if (¿Interacción de asistencia?) then (Sí)
+|Estudiante Mentor|
+  :Abrir Asistencia en Mis sesiones;
+|Sistema Web P2P|
+  if (¿Control disponible? [E001]) then (Sí)
+    :Mostrar QR dinámico y código numérico;
+|Estudiante Mentor|
+    if (¿Consultar nómina? [A003]) then (Sí)
+|Sistema Web P2P|
+      :Mostrar inscritos y estado de asistencia;
+    endif
+|Estudiante Mentoreado|
+    :Abrir Registrar Asistencia en Mis\nreservas;
+    :Escanear QR o ingresar código numérico\n[A001];
+|Sistema Web P2P|
+    if (¿Código vigente y estudiante\nelegible? [E002/E003]) then (Sí)
+      :Registrar asistencia y actualizar nómina;
+      else (No)
+      :Mostrar rechazo de código o elegibilidad;
+    endif
+    else (No)
+    :Informar control no disponible;
+  endif
+  stop
+else (No)
+|Sistema Web P2P|
+  (B)
+  detach
+endif
+
+|Estudiante Mentor|
+(B)
+  :Abrir Bitácora de sesión concluida;
+|Sistema Web P2P|
+  if (¿Dentro de 48 h? [E004]) then (Sí)
+    :Mostrar temas, dificultad, observaciones\ny declaración;
+|Estudiante Mentor|
+    :Marcar temas o agregar tema adicional\n[A002];
+    :Elegir dificultad y  redactar al menos\n50 caracteres;
+    :Aceptar declaración y firmar registro;
+|Sistema Web P2P|
+    if (¿Datos completos y registro\ncorrecto? [E005/E006]) then (Sí)
+      :Mostrar bitácora sellada, código y horas\npendientes de visado;
+      else (No)
+      :Mostrar error y  permitir revisión del\nformulario;
+    endif
+    else (No)
+    :Bloquear registro por plazo vencido;
+  endif
+stop
+legend bottom
+  Los círculos con la misma letra enlazan tramos del flujo.
+endlegend
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+Objetos: asistencias_sesion, tokens_asistencia_activos, bitacoras_pedagogicas, sesiones_mentoria
+Cámara real pendiente; token aleatorio de 30 s, no TOTP RFC 6238; SHA-256 no equivale a firma
+certificada.
+endlegend
+@enduml

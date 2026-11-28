@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 117. Estados: Reserva de cupo
+[*] --> PENDIENTE_CONFIRMACION
+PENDIENTE_CONFIRMACION --> CONFIRMADA : ratificar antes de T-24h
+PENDIENTE_CONFIRMACION --> CANCELADA_USUARIO : desistir antes de T-24h
+CONFIRMADA --> CANCELADA_USUARIO : desistir antes de T-24h
+PENDIENTE_CONFIRMACION --> CANCELADA_NO_CONFIRMADA : corte T-24h
+CONFIRMADA --> ASISTIDA : marcación válida
+PENDIENTE_CONFIRMACION --> CANCELADA_SISTEMA_QUORUM : cancelación de sesión
+CONFIRMADA --> CANCELADA_SISTEMA_QUORUM : cancelación de sesión
+note bottom of PENDIENTE_CONFIRMACION
+CHECK admite nueve valores: PENDIENTE_CONFIRMACION,
+CONFIRMADA, CANCELADA_USUARIO, NO_CONFIRMADA,
+CANCELADA_NO_CONFIRMADA, CANCELADA_SISTEMA,
+CANCELADA_SISTEMA_QUORUM, ASISTIDA, INASISTENCIA.
+NO_CONFIRMADA y CANCELADA_SISTEMA son variantes de
+compatibilidad; no fusionar ni inventar equivalencias físicas.
+end note
+@enduml

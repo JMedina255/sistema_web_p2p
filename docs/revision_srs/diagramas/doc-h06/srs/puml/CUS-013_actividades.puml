@@ -1,0 +1,58 @@
+@startuml
+' CUS-013 — Consultar historial académico de mentorías
+' Estado: Implementación parcial: historial de reservas y sesiones
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+' Las ramas de entrada representan interacciones independientes; no requieren simultaneidad.
+title CUS-013 — Consultar historial académico de mentorías\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Sistema Web P2P|
+start
+if (¿Consulta del mentoreado?) then (Sí)
+|Estudiante Mentoreado|
+  :Abrir Mis reservas y seleccionar\nhistórico;
+  else (No)
+|Estudiante Mentor|
+  :Abrir Mis sesiones;
+endif
+|Sistema Web P2P|
+if (¿Acceso permitido? [E002]) then (Sí)
+  repeat
+    :Consultar registros correspondientes al\nusuario;
+    if (¿Consulta correcta? [E001]) then (Sí)
+      if (¿Hay registros? [A001]) then (Sí)
+        :Mostrar tarjetas, estado, horario, tema\ny acciones aplicables;
+        else (No)
+        :Mostrar historial sin resultados;
+      endif
+      else (No)
+      :Mostrar error de consulta;
+    endif
+  repeat while (¿Usuario solicita actualizar o\ncambiar filtro? [A002]) is (Sí) not (No)
+  else (No)
+  :Restringir acceso;
+endif
+stop
+
+legend bottom
+PARCIAL
+Objetos: reservas_cupo, sesiones_mentoria
+Parcial: historial unificado, recursos y consulta de bitácoras por mentoreado pendientes.
+endlegend
+@enduml

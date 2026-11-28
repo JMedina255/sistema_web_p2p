@@ -1,0 +1,35 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 88. Diagrama 6.15.22: Secuencia — CUS-017: Configurar ambientes físicos y\nvirtuales
+actor "Administrador / Mentor" as actor
+boundary "Interfaz de CUS-017" as ui
+control "schedule_parser_service / catalog_support_service" as svc
+actor -> ui : Configurar ambientes físicos y virtuales
+ui -> svc : Importación y consulta de cronogramas
+activate svc
+alt Reglas y autorización aplicables satisfechas
+database "Persistencia o respaldo de desarrollo" as db
+svc -> db : Guardar versión de cronograma; seleccionar versión\nactiva
+db --> svc : Datos / resultado
+svc --> ui : Importación y consulta de cronogramas
+else Incumplimiento o fallo
+svc --> ui : Rechazo / error visible; no declarar éxito
+end
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+PARCIAL
+Parcial: generación de URL no provisiona una sala externa; no existe tabla espacios_fisicos.
+endlegend
+
+@enduml

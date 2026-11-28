@@ -1,0 +1,26 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 16. Análisis de Objetos (Modelo ECB): vista general
+left to right direction
+actor Usuario
+boundary "SPA React" as ui
+control "Routers FastAPI" as api
+control "Servicios de dominio" as svc
+entity "19 tablas declaradas" as db
+Usuario --> ui
+ui --> api
+api --> svc
+svc --> db
+note bottom of db
+No prueba despliegue ni políticas RLS activas.
+end note
+@enduml

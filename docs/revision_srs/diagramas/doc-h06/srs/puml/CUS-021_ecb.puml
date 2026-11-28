@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 22. Diagrama 6.13.6: ECB — CUS-021: Evaluar postulaciones a mentor por\ncomité
+left to right direction
+actor "Comité previsto" as actor
+boundary "Interfaz de CUS-021" as ui
+control "Control previsto" as control
+actor --> ui
+ui --> control : Evaluación motivada de postulaciones
+note right of control
+Sin componente operativo identificado.
+No representa una pantalla implementada.
+end note
+
+legend bottom
+ESPECIFICADO / PROPUESTO
+Propuesto: sin bandeja, expediente, votación ni resolución; asignación efectiva corresponde a
+CUS-010.
+endlegend
+
+@enduml

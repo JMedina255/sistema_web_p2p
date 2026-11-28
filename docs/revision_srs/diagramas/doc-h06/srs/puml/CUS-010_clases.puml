@@ -1,0 +1,28 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 93. Diagrama 6.16.2: Clases del dominio — CUS-010: Gestionar asignación\nde roles de usuario
+entity "roles" as roles {
+  id_rol : Integer <<PK>>
+}
+entity "usuario_roles" as usuario_roles {
+  id_usuario_rol : Integer <<PK>>
+  email : String(255)
+  id_rol : Integer
+}
+roles ||--o{ usuario_roles : id_rol
+legend bottom
+PARCIAL
+Parcial: sin acreditación de nota 14 ni administración general de todos los roles; buscador
+institucional limitado.
+endlegend
+
+@enduml

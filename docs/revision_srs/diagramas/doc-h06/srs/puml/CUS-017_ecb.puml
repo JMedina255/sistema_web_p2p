@@ -1,0 +1,31 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 38. Diagrama 6.13.22: ECB — CUS-017: Configurar ambientes físicos y\nvirtuales
+left to right direction
+actor "Administrador / Mentor" as actor
+boundary "Interfaz de CUS-017" as ui
+control "schedule_parser_service / catalog_support_service" as control
+actor --> ui
+ui --> control : Importación y consulta de cronogramas
+entity "versiones_cronograma" as e0
+control --> e0
+entity "cronograma_activo" as e1
+control --> e1
+entity "sesiones_mentoria" as e2
+control --> e2
+
+legend bottom
+PARCIAL
+Parcial: generación de URL no provisiona una sala externa; no existe tabla espacios_fisicos.
+endlegend
+
+@enduml

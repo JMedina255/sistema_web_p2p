@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 34. Diagrama 6.13.18: ECB — CUS-009: Consultar analítica institucional de\nmentorías
+left to right direction
+actor "Administrador" as actor
+boundary "Interfaz de CUS-009" as ui
+control "booking_service" as control
+actor --> ui
+ui --> control : Monitoreo de quórum
+entity "sesiones_mentoria" as e0
+control --> e0
+entity "reservas_cupo" as e1
+control --> e1
+
+legend bottom
+PARCIAL
+Parcial: no acredita analítica integral de retención ni indicadores institucionales.
+endlegend
+
+@enduml

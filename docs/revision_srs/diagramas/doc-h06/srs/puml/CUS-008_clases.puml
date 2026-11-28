@@ -1,0 +1,26 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 95. Diagrama 6.16.4: Clases del dominio — CUS-008: Gestionar demanda\ninsatisfecha de mentoría
+entity "solicitudes_demanda" as solicitudes_demanda {
+  id_demanda : Integer <<PK>>
+  estudiante_email : String(255)
+  id_asignatura : Integer
+  id_tema : Integer
+  estado : String(20)
+}
+legend bottom
+PARCIAL
+Parcial: duplicados, matrícula, autorización y exposición de correos requieren remediación o
+validación.
+endlegend
+
+@enduml

@@ -1,0 +1,70 @@
+@startuml
+' CUS-015 — Configurar parámetros del algoritmo de recomendación
+' Estado: Pendiente: interfaz de parametrización no identificada
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-015 — Configurar parámetros del algoritmo de recomendación\nPropuesta funcional — implementación pendiente
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Administrador institucional|
+start
+:Acceder a configuración de recomendación\n(propuesta);
+|Sistema Web P2P|
+if (¿Permiso suficiente? [E002]) then (Sí)
+  :Deberá mostrar factores y valores\nvigentes;
+|Administrador institucional|
+  :Modificar valores permitidos o restaurar\naprobados [A002];
+  if (¿Cancelar edición? [A001]) then (Sí)
+|Administrador institucional|
+    (C)
+    detach
+  else (No)
+|Sistema Web P2P|
+  if (¿Rangos y coherencia válidos? [E001]) then (Sí)
+|Administrador institucional|
+    :Solicitar comprobación previa y\nconfirmar;
+|Sistema Web P2P|
+    if (¿Aplicación correcta? [E003]) then (Sí)
+      :Deberá registrar valores anteriores,\nnuevos, responsable y fecha;
+      :Deberá mostrar configuración vigente;
+      else (No)
+      :Deberá conservar valores previos e\ninformar fallo;
+    endif
+    else (No)
+    :Deberá rechazar valores incompatibles;
+  endif
+  endif
+  else (No)
+  :Deberá restringir acceso;
+endif
+stop
+
+|Sistema Web P2P|
+(C)
+:Deberá conservar configuración vigente;
+stop
+legend bottom
+  Los círculos con la misma letra enlazan tramos del flujo.
+endlegend
+
+legend bottom
+ESPECIFICADO / PROPUESTO
+Objetos: expediente o configuración previstos; sin tabla identificada
+Propuesto: pesos en código no equivalen a interfaz administrativa configurable.
+endlegend
+@enduml

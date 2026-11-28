@@ -1,0 +1,36 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 78. Diagrama 6.15.12: Secuencia — CUS-007: Registrar asistencia y\nbitácora pedagógica
+actor "Mentor / Estudiante" as actor
+boundary "Interfaz de CUS-007" as ui
+control "attendance_service / bitacora_service" as svc
+actor -> ui : Registrar asistencia y bitácora pedagógica
+ui -> svc : Pase efímero, asistencia y registro de bitácora
+activate svc
+alt Reglas y autorización aplicables satisfechas
+database "Persistencia o respaldo de desarrollo" as db
+svc -> db : Registrar pase/asistencia o bitácora según recorrido
+db --> svc : Datos / resultado
+svc --> ui : Pase efímero, asistencia y registro de bitácora
+else Incumplimiento o fallo
+svc --> ui : Rechazo / error visible; no declarar éxito
+end
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+Cámara real pendiente; token aleatorio de 30 s, no TOTP RFC 6238; SHA-256 no equivale a firma
+certificada.
+endlegend
+
+@enduml

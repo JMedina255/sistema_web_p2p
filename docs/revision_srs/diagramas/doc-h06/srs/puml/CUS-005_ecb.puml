@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 21. Diagrama 6.13.5: ECB — CUS-005: Postular al rol de estudiante mentor
+left to right direction
+actor "Estudiante postulante" as actor
+boundary "Interfaz de CUS-005" as ui
+control "profile_service" as control
+actor --> ui
+ui --> control : Perfil, preferencia de rol y\ndisponibilidad
+entity "perfiles_academicos" as e0
+control --> e0
+entity "disponibilidades_horarias" as e1
+control --> e1
+
+legend bottom
+PARCIAL
+Parcial: sin expediente, certificación de nota 14 ni envío a comité; preferencia no concede
+privilegios.
+endlegend
+
+@enduml

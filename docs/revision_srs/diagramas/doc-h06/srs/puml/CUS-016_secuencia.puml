@@ -1,0 +1,32 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 87. Diagrama 6.15.21: Secuencia — CUS-016: Gestionar auditoría de eventos\nde seguridad
+actor "Administrador" as actor
+boundary "Interfaz de CUS-016" as ui
+control "Servicio previsto" as svc
+actor -> ui : Gestionar auditoría de eventos de seguridad
+ui -> svc : Bandeja integral de eventos de seguridad
+activate svc
+note right of svc
+Diseño propuesto; no se atribuye
+endpoint ni persistencia actuales.
+end note
+svc --> ui : Resultado previsto sujeto a implementación
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+ESPECIFICADO / PROPUESTO
+Propuesto: consentimiento y logs parciales no sustituyen auditoría integral.
+endlegend
+
+@enduml

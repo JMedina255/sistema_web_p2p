@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 104. Diagrama 6.16.13: Clases del dominio — CUS-012: Registrar\ncalificación y feedback bidireccional
+entity "encuestas_calidad" as encuestas_calidad {
+  id_encuesta : Integer <<PK>>
+  id_sesion : Integer
+  estudiante_email : String(255)
+}
+entity "bitacoras_pedagogicas" as bitacoras_pedagogicas {
+  id_bitacora : Integer <<PK>>
+  id_sesion : Integer
+  id_mentor : String(255)
+  horas_declaradas : Float
+  visado_administrador : Boolean
+}
+legend bottom
+PARCIAL
+Parcial: no existe evidencia de evaluación individual mentor a estudiante.
+endlegend
+
+@enduml

@@ -1,0 +1,32 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 19. Diagrama 6.13.3: ECB — CUS-006: Registrar oferta de mentoría\nacadémica
+left to right direction
+actor "Estudiante mentor" as actor
+boundary "Interfaz de CUS-006" as ui
+control "offer_service" as control
+actor --> ui
+ui --> control : Publicación y consulta de ofertas
+entity "sesiones_mentoria" as e0
+control --> e0
+entity "asignaturas" as e1
+control --> e1
+entity "temas_conceptuales" as e2
+control --> e2
+
+legend bottom
+PARCIAL
+Parcial: ciclo >= VII o rol habilitado; nota 14 no comprobada, un tema, sin anexos separados ni
+garantía de reunión real.
+endlegend
+
+@enduml

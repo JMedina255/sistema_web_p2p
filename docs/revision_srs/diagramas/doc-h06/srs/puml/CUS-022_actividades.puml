@@ -1,0 +1,63 @@
+@startuml
+' CUS-022 — Configurar parámetros de corte y penalización
+' Estado: Pendiente: edición administrativa no identificada
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-022 — Configurar parámetros de corte y penalización\nPropuesta funcional — implementación pendiente
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Administrador institucional|
+start
+:Acceder a configuración de corte y\npenalización (propuesta);
+|Sistema Web P2P|
+if (¿Permiso válido? [E002]) then (Sí)
+  :Deberá mostrar reglas y valores\nvigentes: T-24 h y 50 % de referencia;
+|Administrador institucional|
+  if (¿Modificar parámetros autorizados?\n[A002]) then (Sí)
+    :Proponer valores y alcance temporal;
+|Sistema Web P2P|
+    if (¿Valores compatibles con reglamento?\n[E001]) then (Sí)
+|Administrador institucional|
+      if (¿Confirmar cambio? [A001]) then (Sí)
+|Sistema Web P2P|
+        if (¿Aplicación correcta? [E003]) then (Sí)
+          :Deberá registrar responsable, fecha y\nvalores;
+          :Deberá mostrar vigencia sin modificar\nreservas retroactivamente;
+          else (No)
+          :Deberá conservar valores previos e\ninformar fallo;
+        endif
+        else (No)
+        :Deberá descartar edición;
+      endif
+      else (No)
+      :Deberá rechazar valores incompatibles;
+    endif
+    else (No)
+    :Deberá mantener parámetros vigentes;
+  endif
+  else (No)
+  :Deberá restringir acceso;
+endif
+stop
+
+legend bottom
+ESPECIFICADO / PROPUESTO
+Objetos: expediente o configuración previstos; sin tabla identificada
+Propuesto: configuración de despliegue no equivale a edición administrativa; sanciones pendientes.
+endlegend
+@enduml

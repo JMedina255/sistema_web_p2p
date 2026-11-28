@@ -1,0 +1,36 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 69. Diagrama 6.15.3: Secuencia — CUS-006: Registrar oferta de mentoría\nacadémica
+actor "Estudiante mentor" as actor
+boundary "Interfaz de CUS-006" as ui
+control "offer_service" as svc
+actor -> ui : Registrar oferta de mentoría académica
+ui -> svc : Publicación y consulta de ofertas
+activate svc
+alt Reglas y autorización aplicables satisfechas
+database "Persistencia o respaldo de desarrollo" as db
+svc -> db : Comprobar aula y antelación; registrar oferta
+db --> svc : Datos / resultado
+svc --> ui : Publicación y consulta de ofertas
+else Incumplimiento o fallo
+svc --> ui : Rechazo / error visible; no declarar éxito
+end
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+PARCIAL
+Parcial: ciclo >= VII o rol habilitado; nota 14 no comprobada, un tema, sin anexos separados ni
+garantía de reunión real.
+endlegend
+
+@enduml

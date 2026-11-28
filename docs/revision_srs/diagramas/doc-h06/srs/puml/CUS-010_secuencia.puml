@@ -1,0 +1,36 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 68. Diagrama 6.15.2: Secuencia — CUS-010: Gestionar asignación de roles\nde usuario
+actor "Administrador" as actor
+boundary "Interfaz de CUS-010" as ui
+control "role_service" as svc
+actor -> ui : Gestionar asignación de roles de usuario
+ui -> svc : Promoción y revocación de Mentor
+activate svc
+alt Reglas y autorización aplicables satisfechas
+database "Persistencia o respaldo de desarrollo" as db
+svc -> db : Asignar o desactivar rol Mentor
+db --> svc : Datos / resultado
+svc --> ui : Promoción y revocación de Mentor
+else Incumplimiento o fallo
+svc --> ui : Rechazo / error visible; no declarar éxito
+end
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+PARCIAL
+Parcial: sin acreditación de nota 14 ni administración general de todos los roles; buscador
+institucional limitado.
+endlegend
+
+@enduml

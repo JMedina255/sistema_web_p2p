@@ -31,15 +31,18 @@ A continuación, se presenta el registro histórico de versiones del presente do
 | **3.1 (H02)** | Joan Cristian Medina Quispe / Renzo Antonio Antayhua Mamani | Pendiente de revisión (Dr. Ricardo Valcárcel) | Pendiente de aprobación (Dirección EPIS) | 14/11/2026 | Refinamiento funcional integral del SRS (H02): profundización exhaustiva de Secciones 1 a 5, especificación de fichas funcionales para los 26 RF sin filtración técnica, consolidación de RF20 como encuestas de calidad post-mentoría 24h, actualización de los 10 RNF (ISO 25010), 14 Reglas de Negocio, procesos As-Is y To-Be con regla D-2 y rutas relativas. |
 | **3.1 (H03)** | Joan Cristian Medina Quispe / Renzo Antonio Antayhua Mamani | Pendiente de revisión (Dr. Ricardo Valcárcel) | Pendiente de aprobación (Dirección EPIS) | 14/11/2026 | Auditoría de calidad, criterios de aceptación y trazabilidad integral del SRS (H03): contrastación exhaustiva de 62 contratos REST de FastAPI en backend, homologación de endpoints en Cuadro 5.3 y en las 26 fichas técnicas, estandarización de criterios de aceptación Given-When-Then con clasificación de estado ([REQUISITO], [IMPLEMENTADO], [VERIFICADO], [PENDIENTE], [PROPUESTO]), conciliación metodológica de 500h de ingeniería (CAPEX) vs. 91h presenciales de sprint, y clasificación tipológica de todas las métricas del sistema. |
 | **4.0 provisional (DOC-H05)** | Equipo del proyecto | Pendiente | Pendiente | 28/11/2026 | Integración de 24 narrativas y 48 figuras en 6.2.3. Homologación de identificadores y aprobación institucional pendientes. |
+| **4.0 (DOC-H06)** | Asistencia documental a solicitud del equipo | Pendiente | Pendiente | 28/11/2026 | Homologación documental de cinco módulos y 24 CUS; actualización de requisitos, diseño y persistencia por evidencia estática. No constituye aprobación institucional ni validación operativa integral. |
+| **4.0 (DOC-H06-R)** | Asistencia documental a solicitud del equipo | Pendiente | Pendiente | 28/11/2026 | Recuperación segura sobre ed6c1cc, conservación del paquete y contraste acotado de cambios OTP/correo. Cierre mediante commit local; sin push ni merge a main. |
+
 
 Fuente: Elaboración propia.
 
-El presente cuadro certifica la trazabilidad documental y cronológica del proyecto, delimitando las iteraciones académicas y estableciendo el estado de revisión y aprobación formal ante las autoridades académicas de la Escuela Profesional de Ingeniería de Sistemas.
+El cuadro conserva las declaraciones de cada edición como antecedentes. Los nombres de revisores y aprobadores de versiones históricas se reproducen sin acreditar su aprobación; la edición DOC-H06 permanece pendiente de revisión y aprobación institucional.
 
 # Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT
 
 **Documento de Especificación de Requerimientos de Software**\
-**Versión 4.0 provisional — Consolidación documental DOC-H05. Pendiente de aprobación institucional.**
+**Versión 4.0 — Revisión documental DOC-H06. Pendiente de aprobación institucional.**
 
 ---
 
@@ -88,7 +91,7 @@ El presente cuadro certifica la trazabilidad documental y cronológica del proye
    6.1. Perfiles de Usuario y Modelo de Control de Acceso (RBAC)\
    6.2. Modelo Conceptual\
        6.2.1. Diagrama de Clases Conceptuales y Paquetes Arquitecturales\
-       6.2.2. Diagramas de Casos de Uso (Consolidado y Modulares MOD-01 al MOD-08)\
+       6.2.2. Diagramas de Casos de Uso (Consolidado y Modulares MOD-01 al MOD-05)\
        6.2.3. Escenarios de Casos de Uso (24 narrativas y 48 figuras del catálogo)\
    6.3. Modelo Lógico\
        6.3.1. Análisis de Objetos (Modelo ECB - CUS-001 al CUS-024)\
@@ -122,19 +125,11 @@ Conforme a la metodología disciplinada del proyecto, este SRS delimita exhausti
 
 ## 1.2. Alcance del Sistema
 
-El software comprende una plataforma web adaptativa y distribuida de tipo entre pares (*Peer-to-Peer - P2P*) concebida para transformar el modelo tradicional y centralizado de tutoría universitaria en una red horizontal de aprendizaje colaborativo entre estudiantes de la EPIS-UPT.
+El sistema facilita mentorías entre estudiantes de la EPIS-UPT mediante acceso institucional, perfil e intereses, oferta y demanda, recomendaciones, reservas y seguimiento académico. El catálogo vigente organiza 24 casos en cinco módulos; su estado se detalla en el capítulo 5 y en el Anexo A.
 
-El sistema asume las siguientes capacidades principales:
-- **Verificación de Identidad y Gobernanza de Acceso:** Autenticación institucional dual (código de un solo uso OTP de 6 dígitos remitido al buzón institucional y autenticación federada con Google Workspace institucional), formalización obligatoria de consentimiento informado digital bajo la Ley N° 29733 y control de acceso basado en roles (RBAC).
-- **Catálogo Curricular Silábico y Búsqueda Temática:** Exploración profunda de las asignaturas formativas críticas de I a IV ciclo, estructuradas por unidades de aprendizaje y temas conceptuales oficiales.
-- **Emparejamiento Inteligente y Banco de Demanda:** Motor algorítmico de recomendación híbrido (*EdRecSys*) que computa afinidad temática por similitud coseno ajustada por reputación histórica y balanceo de carga, complementado con un banco institucional de solicitudes por demanda para necesidades formativas no cubiertas.
-- **Planificación de Sesiones y Aprovisionamiento de Espacios:** Publicación de ofertas con aforos estandarizados (10 participantes en modalidad presencial y 20 en modalidad virtual), validación automática de aulas libres de la escuela frente a cronogramas de clase regulares y configuración de salas virtuales institucionales.
-- **Gestión Concurrente de Inscripciones y Control de Quórum:** Reserva de cupos con garantía de no sobrecupo (0.0%), ventana perentoria de ratificación obligatoria hasta $T-24\text{ h}$, demonio cron desatendido de evaluación de quórum mínimo (50% de aforo) y flujo de contingencia del mentor ante quórum insuficiente.
-- **Ejecución de Sesiones y Marcación de Asistencia Dinámica:** Check-in presencial y virtual mediante pase QR dinámico con algoritmo TOTP de refresco cada 30 segundos, eliminando fraudes por captura estática de pantalla.
-- **Trazabilidad Pedagógica y Cierre Docente:** Registro obligatorio de bitácora pedagógica estructurada en un plazo improrrogable de 48 horas post-sesión, respaldada con resumen de logros, observaciones e inmutabilidad garantizada por firma criptográfica SHA-256.
-- **Evaluación de Calidad y Retroalimentación:** Formulario perentorio de encuestas de calidad docente (CSAT) habilitado exclusivamente para estudiantes asistentes durante una ventana estricta de 24 horas.
-- **Gamificación y Certificación Oficial:** Sistema de reputación por puntaje de encuestas, catálogo de insignias por mérito docente y emisión de certificados digitales oficiales en formato PDF con código correlativo institucional, firma digital con hash SHA-256 y código QR de verificación pública en línea para convalidación de créditos extracurriculares ($\ge 20\text{ h}$).
-- **Supervisión Directiva y Analítica de Retención:** Tableros agregados para la Dirección de Escuela y Coordinación de Tutoría con métricas de asignaturas críticas, ausentismo, efectividad de mentorías e indicadores de impacto para acreditación ICACIT.
+La revisión distingue funcionalidades identificadas en código, alcance parcial, requisitos especificados y propuestas. La presencia de un diagrama no acredita una pantalla o integración operativa. La evaluación por comité, justificación posterior de inasistencias, exportación ejecutiva, auditoría integral y parametrización administrativa permanecen como brechas. RF21 conserva el requisito de reputación e insignias; los avisos se tratan transversalmente.
+
+El nombre histórico de CUS-001 conserva «2FA» para mantener la identidad del catálogo. El acceso implementado ofrece código por correo **o** Google Workspace: no se acredita una combinación de dos factores independientes. Asimismo, el pase de asistencia es efímero y aleatorio; el sello SHA-256 de la bitácora acredita integridad técnica; las constancias identificadas son DEMO. No se declara firma certificada ni aprobación institucional.
 
 ## 1.3. Personal Involucrado
 
@@ -147,7 +142,7 @@ A continuación, se detalla el personal docente, directivo, estudiantil y el equ
 | **Dr. Ricardo Eduardo Valcárcel Alvarado** | Docente Titular de Cátedra | EPIS - UPT (Cátedra Construcción de Software I) | Dirección académica y metodológica de la cátedra; definición de estándares de ingeniería de software; evaluación crítica de artefactos documentales; fiscalización de trazabilidad y aprobación de fases de ciclo de vida. |
 | **Ing. Haydee Raquel Sisa Yataco** | Directora (e) de Escuela | EPIS - UPT (Dirección de Escuela) | Patrocinio institucional del proyecto; homologación de políticas de certificación; definición del umbral mínimo de 20 horas auditadas para la postulación a créditos extracurriculares de graduación. |
 | **Ing. Liliana Mercedes Vega Bernal** | Coordinadora de Tutoría | EPIS - UPT (Comité de Tutoría) | Definición de asignaturas formativas filtro prioritarias; establecimiento de políticas de quórum (50%); fiscalización de bitácoras docentes; validación pedagógica del flujo As-Is y To-Be. |
-| **Joan Cristian Medina Quispe** | Desarrollador / Consultor TI | Grupo 03 / C-SharkTeam (Estudiante EPIS-UPT) | Liderazgo del subsistema de Frontend, Arquitectura de Componentes Web SPA (React, TypeScript), diseño de interfaz visual accesible (WCAG 2.1 AA / Tailwind), experiencia de usuario (UI/UX) y aseguramiento de calidad con pruebas automatizadas en cliente. |
+| **Joan Cristian Medina Quispe** | Desarrollador / Consultor TI | Grupo 03 / C-SharkTeam (Estudiante EPIS-UPT) | Liderazgo del subsistema de Frontend, Arquitectura de Componentes Web SPA (React, TypeScript), diseño de interfaz visual accesible (WCAG 2.1 AA como objetivo), experiencia de usuario (UI/UX) y aseguramiento de calidad con pruebas automatizadas en cliente. |
 | **Renzo Antonio Antayhua Mamani** | Desarrollador / Consultor TI | Grupo 03 / C-SharkTeam (Estudiante EPIS-UPT) | Liderazgo del subsistema de Backend, Servicios RESTful (FastAPI), calibración del motor de recomendación híbrido (*EdRecSys*), modelado relacional de datos (PostgreSQL/Supabase), seguridad criptográfica, cerrojos transaccionales pesimistas y pruebas de backend. |
 | **Estudiantes Mentoreados** | Usuarios Finales (Primarios) | EPIS - UPT (Ciclos I al IV) | Destinatarios del servicio de acompañamiento académico; participación en encuestas y entrevistas; registro de necesidades y evaluación de sesiones de mentoría. |
 | **Estudiantes Mentores** | Usuarios Finales (Primarios) | EPIS - UPT (Ciclos VII al X) | Facilitadores de las sesiones académicas; acreditación de mérito en cursos aprobados; ejecución pedagógica, marcación de asistencia y formulación de bitácoras. |
@@ -163,13 +158,13 @@ El análisis del Cuadro 1.1 delimita con precisión la distinción metodológica
 
 A continuación, se define el glosario terminológico oficial para la comprensión inequívoca de los términos empleados en el documento:
 
-- **2FA (Two-Factor Authentication):** Autenticación de doble factor que exige la posesión de una cuenta de correo institucional verificada mediante el ingreso de un código de un solo uso (OTP).
+- **2FA:** Dos factores de autenticación independientes. El nombre de CUS-001 es histórico; OTP por correo o Google SSO, por separado, no acreditan 2FA.
 - **Aforo Reglamentario:** Capacidad máxima permitida de participantes en una sesión de mentoría, fijada por política institucional en 10 estudiantes para modalidad presencial y 20 para modalidad virtual (RN-05).
 - **Asignatura Filtro:** Materia del plan de estudios de los primeros cuatro ciclos de Ingeniería de Sistemas caracterizada por una alta tasa histórica de reprobación (ej. Cálculo I, Algoritmos y Estructuras de Datos, Programación Orientada a Objetos, Base de Datos).
 - **Bitácora Pedagógica:** Instrumento documental digital formal donde el mentor registra los temas tratados, incidencias didácticas y el resumen cualitativo de la sesión en un plazo máximo de 48 horas, avalado con un sello hash SHA-256 (RN-12).
 - **CSAT (Customer Satisfaction Score):** Métrica cuantitativa de satisfacción estudiantil recopilada mediante encuestas de calidad post-mentoría sobre cuatro dimensiones formativas (claridad, dominio, empatía y puntualidad).
 - **CUS (Caso de Uso del Sistema):** Especificación secuencial y exhaustiva de la interacción entre un actor humano o técnico y el sistema para alcanzar un objetivo de negocio verificable.
-- **EdRecSys (Educational Recommendation System):** Motor de recomendación adaptativo que combina similitud coseno sobre vectores de temarios silábicos con filtrado colaborativo ponderado por reputación docente y balance de carga horaria.
+- **EdRecSys:** Ranking multifactorial explicable basado en Jaccard, compatibilidad horaria, modalidad, afinidad curricular y peso de asignaturas críticas.
 - **EPIS-UPT:** Escuela Profesional de Ingeniería de Sistemas de la Universidad Privada de Tacna.
 - **FSM (Finite State Machine):** Modelo matemático de estados finitos que define las transiciones válidas y restricciones deterministas en el ciclo de vida de sesiones, reservas y bitácoras.
 - **GIS (Google Identity Services):** SDK oficial de autenticación provisto por Google para la verificación federada de cuentas institucionales `@virtual.upt.pe` y `@upt.pe`.
@@ -182,11 +177,11 @@ A continuación, se define el glosario terminológico oficial para la comprensi�
 - **RF (Requerimiento Funcional):** Capacidad o servicio específico que el sistema debe prestar al usuario en respuesta a estímulos de entrada.
 - **RN (Regla de Negocio):** Directriz, política o restricción institucional inmutable de la EPIS-UPT que gobierna la lógica de negocio y las decisiones operativas del software.
 - **RNF (Requerimiento No Funcional):** Atributo de calidad o restricción arquitectónica (rendimiento, seguridad, usabilidad, fiabilidad) evaluado bajo el estándar ISO/IEC 25010.
-- **RLS (Row Level Security):** Política de seguridad a nivel de base de datos que garantiza que cada usuario consulte y modifique únicamente sus propios registros académicos.
+- **RLS:** Seguridad por fila en el motor relacional; su activación efectiva requiere comprobación por instalación, separada de la autorización en la aplicación.
 - **SPA (Single Page Application):** Aplicación web de página única que carga un único documento HTML y actualiza la vista reactivamente mediante manipulación dinámica del DOM sin recargar la página.
 - **SUS (System Usability Scale):** Cuestionario psicométrico estandarizado de diez preguntas para evaluar la facilidad de uso y ergonomía de la plataforma (umbral mínimo aceptable > 75 puntos).
 - **Temario Silábico:** Desglose analítico de unidades de aprendizaje, temas y subtemas contenidos en el sílabo oficial de cada asignatura crítica de la EPIS.
-- **TOTP (Time-based One-Time Password):** Algoritmo de pase efímero basado en tiempo sincronizado (RFC 6238) utilizado para emitir códigos QR dinámicos de asistencia válidos por 30 segundos.
+- **TOTP / pase de asistencia:** La interfaz conserva el rótulo TOTP, pero el servicio genera un token y un código aleatorio con vigencia de 30 segundos. No se acredita el algoritmo de secreto compartido de RFC 6238.
 - **UWE (UML-Based Web Engineering):** Metodología de ingeniería de software orientada a la especificación, diseño sistemático y construcción de aplicaciones web adaptativas.
 - **WCAG 2.1 AA:** Pautas de Accesibilidad para el Contenido Web del W3C en su nivel de conformidad intermedio (AA), exigiendo contraste cromático mínimo de 4.5:1 y navegación completa por teclado.
 
@@ -244,53 +239,18 @@ La organización interna de C-SharkTeam se rige por un esquema de alta cohesión
 
 ### Diagrama 2.1: Organigrama Funcional del Equipo Consultor C-SharkTeam
 
-**Figura 1. Organigrama Funcional del Equipo Consultor C-SharkTeam**
+**Figura 1. Organigrama y responsabilidades del equipo**
 
-![Figura 1. Organigrama Funcional del Equipo Consultor C-SharkTeam](docs/diseño/diagramas/srs/img/diag_001_sec24_organigrama_consultor.png)
+![Figura 1. Organigrama y responsabilidades del equipo](docs/revision_srs/diagramas/doc-h06/srs/img/diag_001_organigrama.png)
 
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 2.1: Organigrama Funcional del Equipo Consultor C-SharkTeam
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-top to bottom direction
-skinparam rectangle {
-  BackgroundColor white
-  BorderColor #444444
-}
-
-rectangle "C-SharkTeam\nDirección General del Proyecto" as DIR
-
-rectangle "Ingeniería de Backend, Algoritmos\ny Persistencia Relacional\n\nRenzo Antonio Antayhua Mamani\n• Servicios RESTful en FastAPI\n• Motor de Recomendación EdRecSys\n• Persistencia Relacional PostgreSQL / RLS\n• Transaccionalidad Pesimista y Quórum\n• Batería de Pruebas Backend (Pytest)" as BACK
-
-rectangle "Ingeniería de Frontend, UI/UX\ny Accesibilidad Universal\n\nJoan Cristian Medina Quispe\n• Aplicación Web Responsiva (React SPA)\n• Design System Institucional (Tailwind)\n• Accesibilidad Web WCAG 2.1 Nivel AA\n• Gestión de Estado y Clientes HTTP\n• Batería de Pruebas Frontend (Vitest)" as FRONT
-
-rectangle "Interacción con Cliente Institucional\nEPIS-UPT\n\n• Dirección de Escuela (Convalidación)\n• Coordinación de Tutoría (Cursos Filtro)\n• Estudiantes Mentores y Mentoreados" as INSTITUCION
-
-DIR --> BACK
-DIR --> FRONT
-BACK --> INSTITUCION
-FRONT --> INSTITUCION
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
-A continuación, se detalla la matriz formal de responsabilidades asignadas a los integrantes del equipo:
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_001_organigrama.puml).
 
 ### Cuadro 2.1: Estructura de Responsabilidades Técnicas del Equipo Consultor C-SharkTeam
 
 | Integrante / Consultor | Área de Especialización | Funciones Principales | Entregables y Artefactos Bajo su Custodia |
 | :--- | :--- | :--- | :--- |
-| **Joan Cristian Medina Quispe** | Frontend, Arquitectura UI/UX y Accesibilidad | • Arquitectura de cliente web SPA bajo React 18, TypeScript y Vite.<br>• Construcción de componentes interactivos y Design System Tailwind CSS.<br>• Implementación estricta de accesibilidad WCAG 2.1 AA (contraste $\ge 4.5:1$, foco visible y soporte ARIA).<br>• Integración de clientes HTTP tipados y adaptadores de comunicación con el backend.<br>• Construcción de vistas de escaneo QR, modales de consentimiento y tableros analíticos.<br>• Autoría y ejecución de la suite de pruebas unitarias y de componentes en Vitest. | • Código fuente en `aplicacion/frontend/src/`.<br>• Vistas de interfaz de usuario (23 componentes reactivos).<br>• Pruebas automatizadas de cliente en `aplicacion/frontend/src/**/*.test.tsx`. |
-| **Renzo Antonio Antayhua Mamani** | Backend, Algoritmos y Persistencia | • Arquitectura de microservicios RESTful en Python con FastAPI.<br>• Diseño y calibración del motor de recomendación híbrido *EdRecSys*.<br>• Modelado relacional DDL físico en PostgreSQL con SQLAlchemy y Alembic.<br>• Políticas de seguridad a nivel de fila (*Row Level Security - RLS*) y control RBAC.<br>• Orquestación de concurrencia mediante cerrojos pesimistas (`SELECT ... FOR UPDATE`).<br>• Demonio cron desatendido de corte de quórum a $T-24\text{ h}$ y servicios de correo SMTP.<br>• Autoría y ejecución de la suite de pruebas unitarias e integración en Pytest. | • Código fuente en `aplicacion/backend/app/`.<br>• Modelos ORM, controladores REST y servicios de negocio.<br>• Migraciones DDL en `aplicacion/backend/app/db/migrations/`.<br>• Pruebas automatizadas de backend en `aplicacion/backend/tests/`. |
+| **Joan Cristian Medina Quispe** | Frontend, Arquitectura UI/UX y Accesibilidad | • Arquitectura de cliente web SPA bajo React 19, TypeScript y Vite.<br>• Construcción de componentes interactivos y diseño visual institucional.<br>• Implementación estricta de accesibilidad WCAG 2.1 AA (contraste $\ge 4.5:1$, foco visible y soporte ARIA).<br>• Integración de clientes HTTP tipados y adaptadores de comunicación con el backend.<br>• Construcción de vistas de escaneo QR, modales de consentimiento y tableros analíticos.<br>• Autoría y ejecución de la suite de pruebas unitarias y de componentes en Vitest. | • Código fuente en `aplicacion/frontend/src/`.<br>• Vistas de interfaz de usuario (23 componentes reactivos).<br>• Pruebas automatizadas de cliente en `aplicacion/frontend/src/**/*.test.tsx`. |
+| **Renzo Antonio Antayhua Mamani** | Backend, Algoritmos y Persistencia | • Arquitectura de servicio REST en Python con FastAPI.<br>• Diseño y calibración del motor de recomendación híbrido *EdRecSys*.<br>• Modelado relacional DDL físico en PostgreSQL con SQLAlchemy y Alembic.<br>• Políticas de seguridad a nivel de fila (*Row Level Security - RLS*) y control RBAC.<br>• Orquestación de concurrencia mediante cerrojos pesimistas (`SELECT ... FOR UPDATE`).<br>• Planificador condicional en proceso de corte de quórum a $T-24\text{ h}$ y servicios de correo SMTP.<br>• Autoría y ejecución de la suite de pruebas unitarias e integración en Pytest. | • Código fuente en `aplicacion/backend/app/`.<br>• Modelos ORM, controladores REST y servicios de negocio.<br>• Migraciones DDL en `aplicacion/backend/app/db/migrations/`.<br>• Pruebas automatizadas de backend en `aplicacion/backend/tests/`. |
 
 Fuente: Elaboración propia.
 
@@ -356,43 +316,29 @@ A continuación, se definen los objetivos estratégicos y técnicos que gobierna
 - **Suministrar Analítica Predictiva para la Gestión de Escuela:** Proveer tableros analíticos en tiempo real sobre demanda académica insatisfecha para retroalimentar la planificación de horarios y el rediseño silábico.
 
 ### Objetivos de Diseño e Ingeniería de Requisitos
-- **Inferencia Algorítmica con Alta Precisión:** Implementar un motor híbrido (*EdRecSys*) que procese similitud coseno sobre vectores de debilidades silábicas y competencias docentes, garantizando métricas empíricas de calidad: $\text{Precision@3} \ge 80\%$, $\text{Precision@5} \ge 75\%$, ranking $\text{NDCG} \ge 0.80$ y tiempo de respuesta algorítmica $\le 500\text{ ms}$.
+- **Inferencia Algorítmica con Alta Precisión:** Implementar un motor híbrido (*EdRecSys*) que procese coincidencia temática y compatibilidad de horario/modalidad con afinidad curricular ponderada, con objetivos de evaluación aún pendientes: $\text{Precision@3} \ge 80\%$, $\text{Precision@5} \ge 75\%$, ranking $\text{NDCG} \ge 0.80$ y tiempo de respuesta algorítmica $\le 500\text{ ms}$.
 - **Accesibilidad Universal y Ergonomía Web:** Construir una interfaz web responsiva (React SPA) bajo directrices **WCAG 2.1 Nivel AA**, asegurando navegación por teclado, soporte para lectores de pantalla, contraste $\ge 4.5:1$ y una puntuación estandarizada superior a 75 puntos en la escala System Usability Scale (SUS).
 - **Seguridad Rigurosa y Cumplimiento Normativo:** Proveer autenticación institucional dual (Email OTP / Google Workspace), control de acceso por roles (RBAC) con tokens JWT (HS256) de 8 horas, aislamiento granular de datos personales (RLS) y formalización vinculante del consentimiento bajo la Ley N° 29733.
 - **Garantía Transaccional y Concurrencia Confiable:** Asegurar transacciones ACID con cerrojos pesimistas a nivel de fila (`SELECT ... FOR UPDATE`), garantizando estrictamente una tasa de sobrecupo de **0.0%** bajo condiciones de alta concurrencia en la reserva de vacantes.
-- **Inmutabilidad Documental:** Respaldar las bitácoras pedagógicas con sellos hash SHA-256 e incorporar códigos QR en certificados PDF para verificación criptográfica descentralizada.
+- **Integridad Documental:** Registrar huellas técnicas de campos seleccionados de las bitácoras y folios/QR de consulta; la firma certificada y la validez institucional siguen pendientes.
 
 ## 3.4. Alcance y Exclusiones del Proyecto
 
-### Inclusiones Funcionales (Módulos Construidos)
-1. Plataforma web adaptativa accesible desde cualquier navegador estándar de escritorio y móvil.
-2. Módulo de identidad y gobernanza de privacidad con 2FA y consentimiento informado digital.
-3. Catálogo curricular interactivo de asignaturas filtro y árbol de temas silábicos.
-4. Motor híbrido de recomendación (*EdRecSys*) con similitud coseno y ranking adaptativo Top-k.
-5. Banco de solicitudes por demanda para registrar requerimientos no cubiertos por ofertas existentes.
-6. Aprovisionamiento validado de aulas físicas de la EPIS y configuración de salas virtuales institucionales.
-7. Orquestación concurrente de reservas con cerrojo pesimista y ratificación obligatoria hasta $T-24\text{ h}$.
-8. Demonio desatendido de evaluación de quórum (50%) a $T-24\text{ h}$ con resolución de contingencia por el mentor.
-9. Marcación de asistencia presencial y virtual mediante pase QR dinámico (TOTP de 30 segundos).
-10. Registro formal de bitácora docente en 48 horas con resumen pedagógico y hash SHA-256.
-11. Captura de encuestas de satisfacción CSAT en ventana perentoria de 24 horas.
-12. Reputación dinámica de mentores y catálogo de insignias gamificadas.
-13. Panel administrativo para visado de horas acumuladas y emisión de certificados oficiales PDF con QR.
-14. Tableros analíticos para supervisión directiva con métricas de retención ICACIT.
+### Inclusiones Funcionales
 
-### Exclusiones del Alcance (Límites Formales de la Versión)
-- **No se desarrollan aplicaciones móviles nativas compiladas para Android (APK) ni iOS (IPA):** La plataforma opera como una Single Page Application (SPA) responsiva multiplataforma accesible desde navegadores web móviles.
-- **No se implementan transacciones financieras ni pasarelas de pago:** El sistema es estrictamente gratuito y de servicio social universitario formativo.
-- **No se realiza sincronización síncrona en tiempo real con el ERP central de matrícula de la UPT:** La información académica y los cronogramas se cargan y sincronizan mediante interfaces estructuradas de administración (parser de cronogramas).
-- **No se exige firma digital con token físico criptográfico PKI de entidades certificadoras comerciales:** La validez institucional y la inmutabilidad de certificados y bitácoras se garantiza internamente mediante folio correlativo, hash SHA-256 y código QR de verificación en línea.
+Se incluyen las capacidades de los cinco módulos de 5.1 con su estado observado. El acceso, oferta, recomendación y reserva cuentan con implementación identificada; postulación, ambientes, feedback, historial, constancias y seguimiento tienen límites explícitos. No se excluyen los requisitos institucionales aún pendientes.
+
+### Exclusiones del Alcance
+
+DOC-H06 modifica documentación y figuras. No cambia la aplicación, los datos, las credenciales ni la configuración operativa. No valida integraciones reales, métricas de producción ni aprobación institucional. Los requisitos futuros se conservan como brechas en lugar de eliminarlos.
 
 ## 3.5. Viabilidad Multidimensional del Sistema
 
 ### 3.5.1. Viabilidad Técnica
-El proyecto se sustenta en componentes maduros y estables de la industria del software, respaldados por métricas empíricas y atributos de calidad normalizados:
-- **Frontend:** React 18, TypeScript, Vite y Tailwind CSS, asegurando tiempos de carga inicial ($FCP < 1.2\text{ s}$ `[META_CALIDAD]`) y compatibilidad en el 100% de navegadores modernos `[REQUISITO]`.
-- **Backend:** Python 3.13 con FastAPI y Scikit-learn, con latencia media de recomendación algorítmica de $12.4\text{ ms}$ `[DATO_HISTORICO_OBSERVADO]` (medida en benchmark de testbench sintético sobre 50 perfiles en commit `3f6e31d`), muy inferior al umbral admisible de $500\text{ ms}$ `[META_CALIDAD]`.
-- **Persistencia:** PostgreSQL v15+ administrado sobre Supabase Cloud con soporte para políticas RLS y bloqueos pesimistas a nivel de fila (`SELECT ... FOR UPDATE`), demostrando 0.0% de sobrecupo `[DATO_HISTORICO_OBSERVADO]` en pruebas multihilo concurrentes.
+
+El repositorio declara React 19, TypeScript y Vite para presentación, Python >=3.13 y FastAPI para el servicio, y SQLAlchemy/Alembic con PostgreSQL como persistencia. Las versiones de manifiestos y restricciones se detallan en SAD 8.2; no se afirma una versión desplegada del servidor ni uso de Scikit-learn o Tailwind como dependencia instalada.
+
+La viabilidad técnica no acredita calidad medida: los objetivos RNF y los resultados históricos se separan en 5.2 y 5.5. Las integraciones SMTP/Google, la operación desatendida y el aislamiento efectivo requieren evidencia específica del entorno autorizado.
 
 ### 3.5.2. Viabilidad Económica
 El análisis financiero se modeló para un horizonte de evaluación a 5 años (2026–2030) con una tasa de costo de oportunidad de capital (COK) del 12.00%:
@@ -412,7 +358,7 @@ A continuación, se presentan los indicadores financieros del proyecto:
 
 Fuente: Elaboración propia a partir del estudio económico del proyecto.
 
-El análisis del Cuadro 3.1 certifica la sólida rentabilidad y conveniencia financiera de la solución para la Escuela Profesional de Ingeniería de Sistemas. El retorno derivado de la reducción de tasas de rezago y de desaprobación compensa con creces los costos moderados de desarrollo y mantenimiento en la nube.
+El Cuadro 3.1 conserva un escenario financiero proyectado. No constituye retorno observado ni acredita reducción real de rezago o desaprobación; sus supuestos deben validarse institucionalmente.
 
 A continuación, se presenta en el Cuadro 3.2 la conciliación metodológica entre las horas presenciales de cátedra y las horas de ingeniería de software:
 
@@ -432,11 +378,11 @@ El análisis del Cuadro 3.2 clarifica la diferencia fundamental de alcance entre
 
 ### 3.5.3. Viabilidad Operativa
 - **Facilidad de Adopción:** La interfaz intuitiva y responsiva no exige instalaciones locales ni configuraciones especiales por parte del estudiante.
-- **Alineamiento de Incentivos:** La emisión de certificados convalidables y la gamificación resuelven el histórico desinterés de los mentores, asegurando una oferta continua de acompañamiento.
+- **Alineamiento de Incentivos:** La certificación institucional y la gamificación son incentivos previstos; el PDF DEMO y los distintivos visibles no acreditan ese resultado ni una oferta continua.
 - **Automatización de Procesos:** La reducción de la intermediación manual del Comité de Tutoría permite canalizar los esfuerzos directivos hacia la fiscalización y la toma de decisiones estratégicas.
 
 ### 3.5.4. Viabilidad Legal
-- **Cumplimiento de la Ley N° 29733 (Protección de Datos Personales):** Se garantiza mediante un flujo vinculante de consentimiento informado digital, almacenamiento disociado de datos académicos y registro inmutable de trazas de auditoría (IP, User-Agent, fecha UTC).
+- **Protección de datos personales:** El consentimiento y la autorización son controles identificados; su existencia no acredita cumplimiento jurídico integral, almacenamiento disociado ni auditoría inmutable de todos los eventos.
 - **Alineamiento con la Ley N° 30220 (Ley Universitaria):** Materializa de forma moderna y descentralizada el mandato de tutoría permanente consignado en su Artículo 40.
 - **Licenciamiento y Propiedad Intelectual:** Componentes basados en librerías de código abierto (MIT / Apache 2.0) y registro formal de derechos patrimoniales a favor de la Universidad Privada de Tacna.
 
@@ -464,7 +410,7 @@ Durante la etapa de levantamiento de requisitos, el equipo consultor ejecutó en
    - Instruyó el apego estricto a las cláusulas de consentimiento previo y auditabilidad exigidas por la Ley N° 29733.
 
 4. **Ing. Haydee Raquel Sisa Yataco (Directora [e] EPIS-UPT):**
-   - Aprobó el estándar de emisión de certificados digitales en formato PDF con folio correlativo único, hash SHA-256 y código QR de verificación pública.
+   - El levantamiento histórico consignó un estándar propuesto de emisión de certificados digitales en formato PDF con folio correlativo único, hash SHA-256 y código QR de verificación pública.
    - Ratificó que la postulación formal a convalidación de créditos extracurriculares exige la acumulación de al menos 20 horas efectivas de mentoría auditadas con bitácoras visadas.
 
 ---
@@ -547,1045 +493,841 @@ El análisis del Diagrama 4.1 expone con claridad los cuellos de botella y riesg
 
 ## 4.2. Diagrama del Proceso Propuesto (To-Be)
 
-El proceso propuesto reestructura y automatiza integralmente el ciclo de vida de las mentorías académicas P2P bajo un modelo gobernado y auditable.
+### Diagrama 4.2: Proceso de mentoría con brechas explícitas
 
-El flujo se articula a través de las siguientes doce (12) etapas secuenciales:
-1. **Autenticación Institucional Segura:** Acceso exclusivo con credenciales universitarias (`@virtual.upt.pe` o `@upt.pe`) validado mediante código OTP temporal (5 min) o credencial federada con Google Workspace institucional.
-2. **Formalización del Consentimiento Legal (Ley N° 29733):** Despliegue de diálogo modal en el primer acceso que exige la aceptación informada de políticas de privacidad para habilitar el uso de datos académicos.
-3. **Publicación y Planificación de Ofertas:** Los mentores calificados (ciclos VII-X con nota $\ge 14.0$) configuran ofertas de mentoría indicando materia crítica, tema silábico, fecha (con antelación $\ge 24\text{ h}$), modalidad y aforo estándar (10 presencial / 20 virtual).
-4. **Inferencia Algorítmica Adaptativa (EdRecSys):** El motor calcula la afinidad temática mediante similitud coseno sobre el catálogo silábico y filtra por disponibilidad y reputación, presentando al estudiante un ranking adaptativo Top-k.
-5. **Canalización de Demandas Insatisfechas:** En ausencia de ofertas coincidentes, el mentoreado registra su requerimiento en el banco institucional de solicitudes por demanda para su atención prioritaria.
-6. **Inscripción Concurrente con Control de Cupos:** Reserva atómica de vacantes con cerrojo pesimista que elimina el riesgo de sobrecupo bajo concurrencia.
-7. **Ratificación Obligatoria Anticipada:** El estudiante debe ratificar su compromiso de asistencia hasta $T-24\text{ h}$; las reservas no confirmadas se revocan automáticamente liberando vacantes para otros interesados.
-8. **Monitoreo Automatizado de Quórum:** A $T-24\text{ h}$, un servicio cron desatendido verifica el cumplimiento del 50% de aforo reglamentario. Si no se alcanza, se transiciona a estado de contingencia donde el mentor decide si dicta la clase de forma extraordinaria o cancela ordenadamente con aviso inmediato a los inscritos.
-9. **Marcación de Asistencia Dinámica (Pase QR TOTP):** En el inicio de sesión, el estudiante escanea con su dispositivo el pase QR dinámico de 30 segundos generado por el mentor o este registra la asistencia en lista.
-10. **Registro Obligatorio de Bitácora Pedagógica:** Dentro de las 48 horas post-sesión, el mentor completa la bitácora con los temas abordados, el cumplimiento de objetivos y su firma con hash SHA-256.
-11. **Captura de Encuestas de Calidad (Ventana 24h):** Los estudiantes asistentes disponen de 24 horas para evaluar la calidad didáctica en cuatro dimensiones, recalculando dinámicamente el puntaje de reputación e insignias del mentor.
-12. **Supervisión Directiva y Certificación Oficial:** La Dirección de Escuela y Coordinación de Tutoría supervisan el tablero analítico de retención, visan las bitácoras docentes y autorizan la emisión de certificados oficiales PDF foliados con código QR institucional al alcanzar las 20 horas acumuladas.
+**Figura 3. Proceso propuesto y alcance actual**
 
-A continuación, se presenta la representación del flujo gobernado:
+![Figura 3. Proceso propuesto y alcance actual](docs/revision_srs/diagramas/doc-h06/srs/img/diag_003_proceso_to_be.png)
 
-### Diagrama 4.2: Diagrama de Actividades del Proceso Propuesto de Mentorías P2P (To-Be)
-
-**Figura 3. Diagrama de Actividades del Proceso Propuesto de Mentorías P2P (To-Be)**
-
-![Figura 3. Diagrama de Actividades del Proceso Propuesto de Mentorías P2P (To-Be)](docs/diseño/diagramas/srs/img/diag_003_sec42_actividades_proceso_to_be.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 4.2: Diagrama de Actividades del Proceso Propuesto de Mentorías P2P (To-Be)
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Proceso Propuesto de Mentorías Académicas P2P (To-Be) - EPIS-UPT
-skinparam activity {
-  BackgroundColor white
-  BorderColor #333333
-  ArrowColor #222222
-}
-
-|Estudiante Mentoreado|
-start
-:Inicia sesión con correo UPT y código OTP / Google;
-if (¿Primer acceso?) then (Sí)
-  :Formaliza consentimiento informado digital (Ley 29733);
-endif
-
-|Estudiante Mentor (VII-X)|
-:Publica oferta de mentoría (Materia, Temario, Modalidad);
-
-|Sistema Web P2P (Backend / EdRecSys)|
-:Valida aula física libre o enlace virtual institucional;
-:Ejecuta motor EdRecSys (Similitud Coseno + Reputación);
-:Despliega ranking adaptativo Top-k al estudiante;
-
-|Estudiante Mentoreado|
-:Explora cartelera o registra solicitud en banco de demanda;
-:Reserva cupo (Cerrojo pesimista FOR UPDATE);
-:Ratifica asistencia obligatoria antes de T-24h;
-
-|Sistema Web P2P (Backend / Servicio Cron)|
-:Ejecuta corte automatizado a T-24h y libera no ratificados;
-if (¿Quórum confirmados >= 50% de aforo?) then (Sí)
-  :Confirma sesión y notifica a participantes;
-else (No)
-  :Transiciona a QUORUM_INSUFICIENTE;
-  |Estudiante Mentor (VII-X)|
-  if (¿Mentor decide continuar sesión extraordinaria?) then (Sí)
-    :Ratifica realización de la sesión;
-  else (No)
-    |Sistema Web P2P (Backend / Servicio Cron)|
-    :Cancela sesión, libera ambiente y notifica a inscritos;
-    stop
-  endif
-endif
-
-|Mentor y Estudiantes|
-:Desarrollan la sesión de mentoría presencial o virtual;
-:Estudiantes marcan asistencia con pase QR dinámico TOTP (30s);
-
-|Estudiante Mentor (VII-X)|
-:Registra bitácora pedagógica antes de 48h (Firma SHA-256);
-
-|Estudiante Mentoreado|
-:Responde encuesta de satisfacción CSAT (Ventana 24h);
-
-|Sistema Web P2P (Backend / EdRecSys)|
-:Actualiza reputación e insignias de mérito del mentor;
-:Acumula horas académicas auditables en su expediente;
-
-|Comité de Tutoría / Dirección EPIS|
-:Supervisa tablero analítico de retención e indicadores ICACIT;
-:Visa bitácoras docentes y audita horas efectivas;
-if (¿Horas acumuladas del mentor >= Umbral 20 horas?) then (Sí)
-  :Emite certificado digital oficial PDF foliado con código QR;
-endif
-stop
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de procesos de C-SharkTeam.
-
-El análisis del Diagrama 4.2 demuestra que el nuevo proceso erradica la informalidad y garantiza la trazabilidad pedagógica, la seguridad jurídica y el reconocimiento institucional del esfuerzo docente de los estudiantes mentores.
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_003_proceso_to_be.puml).
 
 # 5. Especificación de Requerimientos de Software
 
 ## 5.1. Identificación de Módulos y Capacidades Funcionales
 
-> Este capítulo conserva los módulos, requisitos, reglas y estados de madurez de SRS v3.1. Las afirmaciones de implementación y verificación de esa línea base conservan su procedencia histórica. El alcance documental actualizado de cada escenario se consulta en 6.2.3 y en el Anexo A.
+Se adoptan los cinco módulos del catálogo para esta edición documental. La adopción no implica aprobación institucional ni convierte propuestas en funcionalidades. Los ocho módulos anteriores se conservan como agrupación histórica, con la correspondencia siguiente.
 
-Para articular la solución de software con alta cohesión y bajo acoplamiento, el Sistema Web P2P se organiza en **ocho módulos canónicos especializados**. Esta descomposición modular delimita las responsabilidades de los actores en correspondencia estricta con los **veinticuatro casos de uso oficiales (CUS-001 al CUS-024)**.
+| Módulo vigente | Denominación | Casos |
+| --- | --- | --- |
+| MOD-01 | Seguridad, Autenticación y Gobernanza | CUS-001, CUS-010 |
+| MOD-02 | Ofertas de Mentoría y Gestión de Recursos | CUS-006, CUS-008, CUS-005, CUS-021 |
+| MOD-03 | Recomendaciones, Reservas y Quórum | CUS-002, CUS-003, CUS-004, CUS-023, CUS-024 |
+| MOD-04 | Ejecución y Seguimiento Académico | CUS-007, CUS-012, CUS-013, CUS-014, CUS-018, CUS-019 |
+| MOD-05 | Administración y Analítica Institucional | CUS-009, CUS-011, CUS-015, CUS-016, CUS-017, CUS-020, CUS-022 |
 
-A continuación, se detalla la arquitectura funcional del sistema:
+| Módulo histórico (v3.x) | Destino documental v4.0 | Criterio de homologación |
+| --- | --- | --- |
+| MOD-01 | MOD-01 y MOD-02 | Acceso y roles; postulación y comité en MOD-02 |
+| MOD-02 | MOD-02 y MOD-05 | Oferta en MOD-02; ambientes y cronogramas en MOD-05 |
+| MOD-03 | MOD-02 y MOD-05 | Perfil/postulación y currículo |
+| MOD-04 | MOD-02, MOD-03 y MOD-05 | Demanda, recomendación y parametrización |
+| MOD-05 | MOD-03 y MOD-05 | Operación de reserva/corte y configuración propuesta |
+| MOD-06 | MOD-04 | Asistencia, bitácora, feedback e historial |
+| MOD-07 | MOD-04 | Constancias; RF21 transversal preservado |
+| MOD-08 | MOD-04 y MOD-05 | Visado, analítica, seguridad y configuración; avisos transversales |
 
-### Cuadro 5.1: Descomposición Modular y Capacidades Funcionales del Sistema Web P2P
-
-| Código | Módulo / Subsistema | Propósito Institucional | Capacidades Funcionales Principales | Actores / Sistemas Involucrados | CUS Canónicos Vinculados |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| **MOD-01** | Seguridad, Autenticación y Gobernanza | Garantizar el acceso exclusivo de la comunidad universitaria, proteger la privacidad bajo la Ley N° 29733 y gobernar privilegios RBAC. | • Autenticación dual (Código OTP institucional de 6 dígitos y Google Workspace).<br>• Formalización vinculante de consentimiento informado digital (Ley N° 29733).<br>• Asignación, revocación y auditoría jerárquica de roles (Mentoreado, Mentor, Admin, Coordinador). | Usuario Institucional, Administrador, Proveedor Google Workspace, Servicio SMTP UPT | CUS-001, CUS-010 |
-| **MOD-02** | Planificación, Ofertas y Gestión de Espacios | Planificar la cartelera de mentorías, gestionar infraestructura física de la EPIS y coordinar salas virtuales. | • Publicación de ofertas en materias autorizadas con antelación $\ge 24\text{ h}$.<br>• Validación de aulas libres de la EPIS contra horarios regulares y salas virtuales.<br>• Procesamiento de cronogramas oficiales semestrales de distribución de aulas.<br>• Gestión de imprevistos, reprogramación y cancelación justificada con liberación de recursos. | Estudiante Mentor, Administrador, Infraestructura EPIS, Plataforma Virtual | CUS-006, CUS-008 |
-| **MOD-03** | Perfiles Académicos y Catálogo Curricular | Administrar agendas de disponibilidad horaria y el árbol curricular oficial de asignaturas filtro y temas silábicos. | • Configuración de perfil académico y matriz semanal interactiva 6×11 (08:00 a 20:00).<br>• Exploración temática profunda del catálogo de asignaturas formativas filtro.<br>• Mantenimiento administrativo del árbol silábico oficial por unidades lectivas. | Estudiante Mentoreado, Estudiante Mentor, Administrador Curricular | CUS-005, CUS-021 |
-| **MOD-04** | Demanda y Recomendaciones Personalizadas | Emparejar adaptativamente debilidades de estudiantes con fortalezas docentes de mentores mediante inteligencia artificial. | • Inferencia algorítmica híbrida Top-k (similitud coseno + reputación + balance de carga).<br>• Registro y visualización del banco institucional de solicitudes por demanda académica insatisfecha.<br>• Formulación de sesiones dirigidas por mentores a partir del banco de demandas. | Estudiante Mentoreado, Estudiante Mentor, Motor Algorítmico EdRecSys | CUS-002, CUS-003 |
-| **MOD-05** | Quórum, Reservas y Concurrencia | Controlar la inscripción concurrente, ratificación obligatoria y evaluación automatizada de quórum a $T-24\text{ h}$. | • Reserva concurrente de vacantes con control de aforos reglamentarios (10 presencial / 20 virtual).<br>• Ratificación perentoria de asistencia hasta el corte de 24 horas previas ($T-24\text{ h}$).<br>• Desistimiento voluntario de reservas con restitución instantánea de vacantes.<br>• Demonio cron de corte en $T-24\text{ h}$, revocación de no confirmados y evaluación de quórum (50%).<br>• Interfaz resolutiva del mentor ante quórum deficiente (continuar excepcional vs cancelar ordenado). | Estudiante Mentoreado, Estudiante Mentor, Demonio Cron Backend | CUS-004, CUS-024, CUS-017, CUS-023, CUS-007 |
-| **MOD-06** | Asistencia, Bitácoras y Calidad | Respaldar la ejecución pedagógica, control estricto de asistencia y evaluación objetiva de calidad docente. | • Check-in presencial y virtual mediante pase QR dinámico con algoritmo TOTP de 30 segundos.<br>• Formulación obligatoria de bitácora docente en 48 horas sellada con hash SHA-256.<br>• Consulta de historial académico cronológico de sesiones, bitácoras y recursos didácticos.<br>• Captura de encuestas de calidad formativa (CSAT) en ventana perentoria de 24 horas. | Estudiante Mentoreado, Estudiante Mentor, Coordinador de Tutoría | CUS-012, CUS-013, CUS-014 |
-| **MOD-07** | Gamificación y Certificación Digital | Incentivar el compromiso docente de mentores mediante reconocimientos gamificados y certificación auditable. | • Cálculo dinámico de índice de reputación docente (1.0 a 5.0 estrellas) y catálogo de insignias.<br>• Parametrización de umbrales semestrales y autorización de certificados ($\ge 20\text{ h}$ auditadas).<br>• Emisión programática de certificados oficiales PDF con folio único, hash SHA-256 y código QR de verificación en línea. | Estudiante Mentor, Administrador, Dirección de Escuela | CUS-018, CUS-019 |
-| **MOD-08** | Analítica, Notificaciones y Supervisión | Proveer a las autoridades de herramientas de decisión estratégica, motor de alertas y fiscalización docente. | • Despacho de notificaciones y recordatorios temporales de eventos críticos.<br>• Tablero directivo de indicadores agregados de demanda insatisfecha, ausentismo y retención ICACIT.<br>• Fiscalización y visado docente de bitácoras académicas y auditoría legal bajo Ley N° 29733.<br>• Consola de parametrización institucional de aforos, umbrales y asignaturas prioritarias. | Director de Escuela, Coordinador de Tutoría, Auditor Institucional, Demonio Cron | CUS-009, CUS-011, CUS-015, CUS-016, CUS-020, CUS-022 |
-
-Fuente: Elaboración propia a partir de la arquitectura modular de C-SharkTeam.
-
-El análisis del Cuadro 5.1 certifica la completa cobertura del ciclo formativo de mentorías. Cada módulo agrupa capacidades cohesivas y se vincula unívocamente a los casos de uso canónicos, erradicando funcionalidades huérfanas y garantizando trazabilidad integral hacia el diseño e implementación.
-
----
+La grafía rectora de requisitos es **RF01–RF26**, **RN-01–RN-14** y **RNF01–RNF10**. Las variantes RF-001–RF-026 de las narrativas son alias numéricos del mismo requisito, no requisitos nuevos. RF21 y las notificaciones permanecen transversales, sin asignarles un CUS vigente que tenga otro objetivo. CUS-018 conserva una brecha de requisito específico por formalizar.
 
 ## 5.2. Requerimientos No Funcionales (ISO/IEC 25010)
 
-Los requerimientos no funcionales delimitan los atributos de calidad, restricciones arquitectónicas y niveles de servicio del software. Se estructuran rigurosamente bajo el estándar internacional **ISO/IEC 25010:2011**, incorporando métricas cuantificables verificadas empíricamente durante el desarrollo:
+### Cuadro 5.2: Requerimientos no funcionales y evidencia
 
-A continuación, se presenta la matriz de requerimientos no funcionales:
-
-### Cuadro 5.2: Matriz de Requerimientos No Funcionales bajo el Estándar ISO/IEC 25010
-
-| Código | Característica (ISO 25010) | Requerimiento No Funcional | Especificación Cuantitativa y Criterio de Aceptación | Métrica y Procedimiento de Verificación Empírica |
-| :---: | :--- | :--- | :--- | :--- |
-| **RNF01** | Seguridad | Autenticación institucional multifactor y gestión segura de sesiones | Autenticación 2FA sin contraseñas estáticas mediante código OTP temporal de 6 dígitos o credencial federada Google Workspace UPT. Sesión gobernada mediante tokens criptográficos firmados con HMAC-SHA256 y expiración perentoria. | • Tiempo de vida del código OTP: **5 minutos (300 s)**.<br>• Tiempo de enfriamiento para reenvío: **60 segundos**.<br>• Expiración de sesión web: **8 horas (480 min)**.<br>• Verificado con pruebas automatizadas simulando expiración temporal de credenciales. |
-| **RNF02** | Seguridad | Privacidad de datos personales, aislamiento RLS y cumplimiento legal | Comunicaciones protegidas íntegramente mediante protocolo HTTPS con TLS 1.3. Aislamiento granular de datos académicos a nivel de motor relacional mediante políticas de seguridad de fila (*Row Level Security*). Identificadores disociados de tipo UUID para prevenir enumeración maliciosa. | • **100% de tablas sensibles con aislamiento multiusuario activo**.<br>• **0% de exposición de notas o correos a usuarios no autorizados**.<br>• Registro inmutable de consentimiento legal (IP, fecha UTC y User-Agent) bajo Ley N° 29733. |
-| **RNF03** | Eficiencia de Desempeño | Latencia de inferencia y precisión del recomendador algorítmico | El motor híbrido *EdRecSys* vectoriza debilidades silábicas y calcula similitud coseno ajustada por reputación y balance de carga, retornando un ranking adaptativo Top-k en tiempo casi instantáneo. | • **Precision@3 = 83.3%**<br>• **Precision@5 = 80.0%**<br>• **NDCG = 0.82**<br>• **Latencia media algorítmica = 12.4 ms** (umbral de diseño: $\le 500\text{ ms}$). |
-| **RNF04** | Eficiencia de Desempeño | Tiempo de carga y renderizado reactivo de la interfaz web | La aplicación web de página única optimiza el empaquetado de componentes, code splitting y lazy loading para garantizar renderizados fluidos en conexiones universitarias y móviles. | • Tiempo hasta el primer contenido visible (**FCP < 1.2 segundos**).<br>• Paquete inicial de recursos comprimidos **< 250 KB**.<br>• Transiciones de interfaz reactivas en **< 50 ms**. |
-| **RNF05** | Usabilidad | Ergonomía, accesibilidad universal y diseño intuitivo | Interfaces estructuradas sobre el Design System institucional con Tailwind CSS que garantizan navegación por teclado al 100%, compatibilidad con lectores de pantalla y contraste cromático adecuado. | • **Puntaje SUS > 75 puntos** en evaluación de ergonomía.<br>• Cumplimiento estricto **WCAG 2.1 Nivel AA** (contraste mínimo de **4.5:1** en textos regulares y **3.0:1** en elementos gráficos).<br>• Atributos semánticos ARIA en la totalidad de diálogos y controles interactivos. |
-| **RNF06** | Fiabilidad | Disponibilidad ininterrumpida y resiliencia del servicio | Arquitectura web en la nube que asegura la continuidad operativa ininterrumpida de los servicios de consulta, reserva y marcación durante las 16 semanas del semestre académico. | • Disponibilidad del servicio **$\ge 99.5\%$** en horario lectivo.<br>• Tolerancia a fallos transitorios en microservicios auxiliares.<br>• Monitoreo de estado de salud del sistema mediante endpoint `/health`. |
-| **RNF07** | Integridad y Fiabilidad | Consistencia transaccional estricta en reserva concurrente | Persistencia atómica de reservas gobernada por cerrojos transaccionales pesimistas a nivel de fila (`SELECT ... FOR UPDATE`), garantizando que jamás se asigne un cupo por encima del aforo máximo. | • **Tasa de sobrecupo verificada: estrictamente 0.0%**.<br>• 100% de transacciones concurrentes serializadas atómicamente sin inconsistencias de estado. |
-| **RNF08** | Portabilidad | Compatibilidad multiplataforma y diseño web responsivo | Compatibilidad operativa y paridad visual garantizada en todos los navegadores web modernos de escritorio y dispositivos móviles (Google Chrome, Mozilla Firefox, Microsoft Edge, Safari). | • 100% funcional en resoluciones desde teléfonos móviles (**360 px**) hasta monitores de escritorio (**1920x1080 px**).<br>• Ausencia de desbordamientos horizontales o solapamientos visuales. |
-| **RNF09** | Mantenibilidad | Arquitectura limpia desacoplada y cobertura de pruebas | Separación estricta en tres capas (Presentación Web, Lógica de Negocio y Persistencia Relacional). Tipado estricto en interfaces y contratos JSON. Batería de pruebas automatizadas continua. | • Suite completa de pruebas automatizadas en backend y frontend.<br>• Cobertura de código **> 85%**.<br>• Código verificado con linters estáticos (`ruff`, `eslint`) sin advertencias críticas. |
-| **RNF10** | Interoperabilidad | Resiliencia ante fallos externos y manejo estandarizado de errores | Respuestas del sistema estructuradas de forma uniforme en formato JSON con códigos de estado HTTP estandarizados y mensajes descriptivos orientados al usuario universitario. | • 100% de errores de validación y negocio formateados homogéneamente.<br>• Degradación elegante y reintentos ante caídas del servidor de correo institucional.<br>• Timeouts seguros configurados en $\le 5$ segundos. |
-
-Fuente: Elaboración propia a partir del marco normativo ISO/IEC 25010 y las verificaciones del proyecto.
-
-El análisis del Cuadro 5.2 demuestra que el sistema no solo satisface los requerimientos funcionales de negocio, sino que incorpora métricas cuantitativas verificables que aseguran una experiencia de usuario ágil, confiable, accesible e inviolable en términos de privacidad institucional.
-
----
+| Código | Atributo | Objetivo y criterio de aceptación | Estado de evidencia |
+| --- | --- | --- | --- |
+| RNF01 | Seguridad de acceso | OTP 300 s; reenvío 60 s; desafío bloqueado al quinto error; sesión de referencia 8 h; dos factores independientes como brecha si se exige 2FA. | Implementación OTP/SSO identificada; validación externa pendiente |
+| RNF02 | Privacidad y aislamiento | Proteger datos, consentimiento y acceso por titular/rol; aislamiento por fila y transporte seguro como requisitos. | No se certifica RLS, TLS ni ausencia de exposición por inspección de código |
+| RNF03 | Rendimiento algorítmico | Objetivo de respuesta <=500 ms y evaluación reproducible de relevancia Top-k. | Jaccard implementado; valores de precisión/latencia previos son históricos sin validación actual |
+| RNF04 | Rendimiento de interfaz | Objetivos FCP <1.2 s, recursos iniciales comprimidos <250 KB y transiciones <50 ms. | Especificado; sin medición nueva ni afirmación de lazy loading universal |
+| RNF05 | Usabilidad y accesibilidad | Objetivos SUS >75; WCAG 2.1 AA, contraste 4.5:1 en texto y 3:1 en gráficos; navegación por teclado. | Especificado; las pruebas de componentes no certifican accesibilidad total |
+| RNF06 | Disponibilidad | Objetivo >=99.5% en horario lectivo y continuidad durante el semestre. | Pendiente de observación; health responde a una comprobación puntual, sin demostrar SLA |
+| RNF07 | Consistencia transaccional | No sobrepasar aforo ni duplicar reservas bajo concurrencia. | Bloqueos de filas y restricciones identificados; validar contra PostgreSQL dedicado |
+| RNF08 | Compatibilidad | Resoluciones de referencia 360 a 1920 px y navegadores de escritorio/móvil. | Pendiente de matriz de dispositivos; no se certifica soporte total |
+| RNF09 | Mantenibilidad | Pruebas focalizadas, tipado y separación de responsabilidades; objetivo de cobertura >85%. | Dependencias y pruebas presentes; cifras históricas no representan corrida vigente |
+| RNF10 | Interoperabilidad | Errores visibles, contratos coherentes y recuperación ante proveedores externos; objetivo de timeout <=5 s. | Parcial: revisar ruta y proveedor; no se afirma tratamiento uniforme del 100% de fallos |
 
 ## 5.3. Matriz Consolidada de Requerimientos Funcionales (RF01 al RF26)
 
-El sistema formaliza **veintiséis requerimientos funcionales atómicos (RF01 al RF26)**. Cada requerimiento establece el comportamiento operativo del sistema, sus casos de uso soportados, sus contratos RESTful y sus componentes técnicos correspondientes:
+### Cuadro 5.3: Requerimientos, casos vigentes y estado
 
-A continuación, se presenta la matriz consolidada de requerimientos funcionales:
+| Código | Módulo principal | Requerimiento conservado | CUS vigentes | Estado |
+| --- | --- | --- | --- | --- |
+| RF01 | MOD-01 | Acceso institucional por código de correo o Google | CUS-001 | Implementado; validación externa pendiente |
+| RF02 | MOD-01 | Formalización de consentimiento legal digital (Ley 29733) | CUS-001, CUS-016 | Parcial: consentimiento; auditoría integral pendiente |
+| RF03 | MOD-01 | Gestión y asignación administrativa de roles de usuario | CUS-010, CUS-005, CUS-021 | Parcial: asignación administrativa; mérito y comité pendientes |
+| RF04 | MOD-02 | Configuración de perfil formativo y matriz horaria | CUS-005 | Parcial: perfil y disponibilidad; expediente pendiente |
+| RF05 | MOD-05 | Catálogo curricular de asignaturas y temarios silábicos | CUS-020 | Implementado; discrepancia de ciclos pendiente |
+| RF06 | MOD-03 | Inferencia algorítmica y recomendación personalizada Top-k | CUS-002, CUS-015 | Implementado; parametrización propuesta |
+| RF07 | MOD-02 | Registro y banco de solicitudes por demanda académica | CUS-008 | Parcial: registro y banco; controles pendientes |
+| RF08 | MOD-02 | Publicación y parametrización de ofertas de mentoría | CUS-006 | Parcial: publicación; mérito y anexos pendientes |
+| RF09 | MOD-02 | Aprovisionamiento automatizado de espacios y salas virtuales | CUS-006, CUS-017 | Parcial: disponibilidad; provisión externa pendiente |
+| RF10 | MOD-05 | Procesamiento de cronogramas oficiales de aulas | CUS-017 | Implementado; importación y consulta |
+| RF11 | MOD-02 | Gestión de imprevistos, reprogramación y cancelación | CUS-006, CUS-023 | Implementado; notificaciones externas pendientes |
+| RF12 | MOD-03 | Reserva concurrente de cupos con control de aforo | CUS-003 | Implementado; validación nueva de concurrencia no ejecutada |
+| RF13 | MOD-03 | Ratificación anticipada obligatoria de asistencia | CUS-004, CUS-022 | Implementado; edición administrativa propuesta |
+| RF14 | MOD-03 | Desistimiento voluntario y liberación inmediata de cupo | CUS-024, CUS-018, CUS-022 | Parcial: desistimiento; justificación y penalizaciones propuestas |
+| RF15 | MOD-03 | Monitoreo desatendido y corte de quórum en $T-24\text{ h}$ | CUS-023, CUS-009, CUS-022 | Parcial: evaluación y planificador; operación real pendiente |
+| RF16 | MOD-03 | Gestión resolutiva del mentor ante quórum insuficiente | CUS-023 | Implementado; decisión del mentor |
+| RF17 | MOD-04 | Marcación de asistencia con pase QR dinámico | CUS-007, CUS-018 | Parcial: pase efímero; cámara real pendiente |
+| RF18 | MOD-04 | Registro de bitácora docente en 48h con hash SHA-256 | CUS-007, CUS-012, CUS-019 | Implementado; sello de integridad y visado administrativo |
+| RF19 | MOD-04 | Historial de sesiones, bitácoras y recursos compartidos | CUS-013 | Parcial: historial por rol |
+| RF20 | MOD-04 | Captura de encuestas de calidad post-mentoría (ventana 24h) | CUS-012 | Parcial: encuesta; feedback individual inverso pendiente |
+| RF21 | MOD-04 | Cálculo de reputación docente y catálogo de insignias | Transversal RF21; sin CUS autónomo en el catálogo | Especificado; reputación integral e insignias por validar |
+| RF22 | MOD-04 | Parametrización y autorización de certificados de horas | CUS-014 | Parcial: umbral y emisión; autorización institucional pendiente |
+| RF23 | MOD-04 | Emisión, descarga y verificación con código QR | CUS-014 | Parcial: PDF/folio DEMO; certificación institucional pendiente |
+| RF24 | MOD-05 | Parametrización institucional de aforos y prioridades | CUS-015, CUS-020, CUS-022 | Parcial: prioridades curriculares; parametrización administrativa propuesta |
+| RF25 | MOD-05 | Tablero analítico directivo y métricas de retención ICACIT | CUS-009, CUS-011 | Parcial: quórum; retención y exportación propuestas |
+| RF26 | MOD-05 | Auditoría institucional de bitácoras y privacidad legal | CUS-016, CUS-019 | Parcial: visado administrativo; seguridad integral propuesta |
 
-### Cuadro 5.3: Matriz Consolidada de Requerimientos Funcionales del Sistema Web P2P (RF01 al RF26)
-
-| Código | Módulo | Denominación del Requerimiento Funcional | Casos de Uso Vinculados | Contrato RESTful / Router Principal | Componentes Técnicos Asociados (UI / Service / Persistencia) | Criticidad |
-| :---: | :---: | :--- | :---: | :--- | :--- | :---: |
-| **RF01** | MOD-01 | Autenticación institucional multifactor (2FA) | CUS-001 | `POST /api/v1/auth/otp/request`<br>`POST /api/v1/auth/otp/verify`<br>`POST /api/v1/auth/otp/resend`<br>`POST /api/v1/auth/google` | `LoginOtpView.tsx`<br>`AuthService.py` / `authService.ts`<br>`auth_challenges`, `usuarios` | Crítica |
-| **RF02** | MOD-01 | Formalización de consentimiento legal digital (Ley 29733) | CUS-001 | `GET /api/v1/consent/status`<br>`POST /api/v1/consent/accept`<br>`POST /api/v1/consent/revoke` | `ConsentModalView.tsx`<br>`ConsentService.py` / `consentService.ts`<br>`consentimientos_legales` | Crítica |
-| **RF03** | MOD-01 | Gestión y asignación administrativa de roles de usuario | CUS-010 | `GET /api/v1/roles/users/{email}`<br>`POST /api/v1/roles/promote-mentor`<br>`POST /api/v1/roles/revoke-mentor` | `AdminRolesView.tsx`<br>`RoleService.py` / `roleService.ts`<br>`roles`, `usuario_roles` | Alta |
-| **RF04** | MOD-03 | Configuración de perfil formativo y matriz horaria | CUS-005 | `GET /api/v1/profiles/me`<br>`PUT /api/v1/profiles/me`<br>`GET /api/v1/profiles/availability`<br>`PUT /api/v1/profiles/availability` | `ProfileAcademicView.tsx`<br>`ProfileService.py` / `profileService.ts`<br>`perfiles_academicos`, `disponibilidades_horarias` | Alta |
-| **RF05** | MOD-03 | Catálogo curricular de asignaturas y temarios silábicos | CUS-021 | `GET /api/v1/curriculum/courses`<br>`POST /api/v1/curriculum/courses`<br>`GET /api/v1/curriculum/courses/{id_asignatura}`<br>`GET /api/v1/curriculum/courses/{id_asignatura}/topics` | `CurriculumCatalogView.tsx`<br>`CurriculumService.py` / `apiClient.ts`<br>`asignaturas`, `temas_conceptuales` | Alta |
-| **RF06** | MOD-04 | Inferencia algorítmica y recomendación personalizada Top-k | CUS-002 | `GET /api/v1/recommendations/mentors`<br>`GET /api/v1/recommendations/offers`<br>`POST /api/v1/recommendations/explain` | `RecommendationFeedView.tsx`<br>`RecommendationService.py` (EdRecSys)<br>`sesiones_mentoria`, `perfiles_academicos` | Crítica |
-| **RF07** | MOD-04 | Registro y banco de solicitudes por demanda académica | CUS-003 | `POST /api/v1/bookings/requests`<br>`GET /api/v1/bookings/requests` | `MentoringDemandModalView.tsx`, `MentorSessionsView.tsx`<br>`BookingService.py`<br>`solicitudes_demanda` | Media |
-| **RF08** | MOD-02 | Publicación y parametrización de ofertas de mentoría | CUS-006 | `POST /api/v1/offers`<br>`GET /api/v1/offers` | `OfferPublishView.tsx`<br>`OfferService.py` / `offerService.ts`<br>`sesiones_mentoria` (con enlaces a recursos didácticos) | Alta |
-| **RF09** | MOD-02 | Aprovisionamiento automatizado de espacios y salas virtuales | CUS-006, CUS-008 | `GET /api/v1/spaces/free-slots`<br>`GET /api/v1/spaces/classrooms` | `SpaceSelectorView.tsx`<br>`VirtualRoomService.py`, `CatalogSupportService.py`<br>`sesiones_mentoria`, `espacios_fisicos` | Alta |
-| **RF10** | MOD-02 | Procesamiento de cronogramas oficiales de aulas | CUS-008 | `POST /api/v1/spaces/import-schedule`<br>`GET /api/v1/spaces/free-slots` | `AdminScheduleUploadView.tsx`<br>`ScheduleParserService.py`<br>`spacesService.ts` | Alta |
-| **RF11** | MOD-02 | Gestión de imprevistos, reprogramación y cancelación | CUS-006 | `POST /api/v1/offers/{id_sesion}/quorum-decision` (RESCHEDULE / CANCEL) | `MentorSessionsView.tsx`<br>`OfferService.py`<br>`sesiones_mentoria`, `reservas_cupo` | Alta |
-| **RF12** | MOD-05 | Reserva concurrente de cupos con control de aforo | CUS-004 | `POST /api/v1/bookings/reserve`<br>`GET /api/v1/bookings/my-reservations`<br>`GET /api/v1/bookings/session/{id_sesion}` | `BookingModalView.tsx`<br>`BookingService.py` (SELECT FOR UPDATE)<br>`reservas_cupo`, `sesiones_mentoria` | Crítica |
-| **RF13** | MOD-05 | Ratificación anticipada obligatoria de asistencia | CUS-024 | `POST /api/v1/bookings/{id_reserva}/confirm` | `MyBookingsView.tsx`<br>`BookingService.py`<br>`reservas_cupo` | Alta |
-| **RF14** | MOD-05 | Desistimiento voluntario y liberación inmediata de cupo | CUS-017 | `POST /api/v1/bookings/{id_reserva}/cancel` | `MyBookingsView.tsx`<br>`BookingService.py`<br>`reservas_cupo` | Alta |
-| **RF15** | MOD-05 | Monitoreo desatendido y corte de quórum en $T-24\text{ h}$ | CUS-023, CUS-009 | `POST /api/v1/quorum/evaluate`<br>`POST /api/v1/quorum/evaluate-all` | `NotificationCenterView.tsx`<br>`QuorumScheduler.py`, `BookingService.py`<br>`sesiones_mentoria`, `reservas_cupo` | Crítica |
-| **RF16** | MOD-05 | Gestión resolutiva del mentor ante quórum insuficiente | CUS-007 | `POST /api/v1/offers/{id_sesion}/quorum-decision` (PROCEED / RESCHEDULE / CANCEL) | `QuorumDecisionModalView.tsx`<br>`OfferService.py`<br>`sesiones_mentoria`, `reservas_cupo` | Alta |
-| **RF17** | MOD-06 | Marcación de asistencia con pase QR dinámico (TOTP) | CUS-012 | `GET /api/v1/sessions/{id_sesion}/attendance/token`<br>`POST /api/v1/sessions/{id_sesion}/attendance/check-in`<br>`GET /api/v1/sessions/{id_sesion}/attendance` | `AttendanceScannerView.tsx`, `AttendanceQrModalView.tsx`<br>`AttendanceService.py`<br>`asistencias_sesion`, `tokens_asistencia_activos` | Alta |
-| **RF18** | MOD-06 | Registro de bitácora docente en 48h con hash SHA-256 | CUS-013 | `POST /api/v1/sessions/{id_sesion}/bitacora`<br>`GET /api/v1/sessions/{id_sesion}/bitacora` | `BitacoraFormView.tsx`<br>`BitacoraService.py`<br>`bitacoras_pedagogicas` | Alta |
-| **RF19** | MOD-06 | Historial de sesiones, bitácoras y recursos compartidos | CUS-014 | `GET /api/v1/sessions/{id_sesion}/bitacora`<br>`GET /api/v1/bookings/my-reservations`<br>`GET /api/v1/bitacoras` | `BitacoraHistoryView.tsx`<br>`BitacoraService.py`<br>`bitacoras_pedagogicas`, `sesiones_mentoria` | Media |
-| **RF20** | MOD-06 | Captura de encuestas de calidad post-mentoría (ventana 24h) | CUS-012, CUS-014 | `GET /api/v1/sessions/{id}/survey`<br>`POST /api/v1/sessions/{id}/survey` | `PostSessionSurveyModalView.tsx`<br>`SurveyService.py` / `surveyService.ts`<br>`encuestas_calidad` | Alta |
-| **RF21** | MOD-07 | Cálculo de reputación docente y catálogo de insignias | CUS-019 | `GET /api/v1/certificates/summary`<br>`GET /api/v1/profiles/me` | `MentorBadgesView.tsx`<br>`RecommendationService.py`, `ProfileService.py`<br>`encuestas_calidad`, `perfiles_academicos` | Media |
-| **RF22** | MOD-07 | Parametrización y autorización de certificados de horas | CUS-018 | `GET /api/v1/certificates/summary`<br>`POST /api/v1/certificates/generate` | `AdminCertificatesView.tsx`<br>`CertificateService.py`<br>`certificados_horas` | Media |
-| **RF23** | MOD-07 | Emisión, descarga y verificación con código QR | CUS-018, CUS-009 | `GET /api/v1/certificates/{id_certificado}/download`<br>`GET /api/v1/certificates/verificar`<br>`GET /api/v1/certificates/{id_certificado}` | `CertificateVerifyView.tsx`, `AdminCertificatesView.tsx`<br>`CertificateService.py` (ReportLab / QrCode)<br>`certificados_horas` | Media |
-| **RF24** | MOD-08 | Parametrización institucional de aforos y prioridades | CUS-020 | `GET /api/v1/health`<br>`GET /api/v1/health/db`<br>Configuración centralizada (`app.core.config.Settings`) | `AdminConfigView.tsx`<br>`app.core.config`, `SimulationService.py` | Media |
-| **RF25** | MOD-08 | Tablero analítico directivo y métricas de retención ICACIT | CUS-011, CUS-015 | `GET /api/v1/simulation/benchmark`<br>`GET /api/v1/recommendations/simulation/testbench` | `AdminAnalyticsView.tsx`<br>`SimulationService.py`<br>`AnalyticsService.ts` | Alta |
-| **RF26** | MOD-08 | Auditoría institucional de bitácoras y privacidad legal | CUS-016, CUS-022 | `GET /api/v1/bitacoras`<br>`POST /api/v1/bitacoras/{id}/visar`<br>`POST /api/v1/bitacoras/{id}/observar`<br>`GET /api/v1/consent/status` | `AdminAuditView.tsx`<br>`BitacoraService.py`, `ConsentService.py`<br>`bitacoras_pedagogicas`, `consentimientos_legales` | Alta |
-
-Fuente: Elaboración propia a partir de la homologación canónica de diseño y los controladores FastAPI efectivamente implementados.
-
-El análisis del Cuadro 5.3 ratifica la coherencia absoluta del modelo funcional del Sistema Web P2P:
-1. **Resolución Definitiva de RF20:** Conforme a la homologación canónica, `RF20` corresponde a la *Captura de encuestas de calidad post-mentoría (ventana 24h)* sobre la entidad `encuestas_calidad` y los controladores reales `GET/POST /api/v1/sessions/{id}/survey`, mientras que la gestión de recursos didácticos se formaliza dentro de `RF08` (ofertas) y `RF19` (historial/materiales).
-2. **Sincronización Total de Contratos REST:** Las 26 filas reflejan fielmente las rutas reales expuestas por FastAPI en `aplicacion/backend/app/api/v1/endpoints/`.
-3. **Trazabilidad Integral y Cero Ambigüedad:** Ningún requerimiento funcional carece de casos de uso asociados ni de componentes técnicos comprobables en la base de código.
+Los estados se basan en revisión estática y en los anexos A-C. **Implementado** indica código identificado, con validación suficiente aún pendiente salvo evidencia acotada citada; **parcial** señala alcance incompleto; **especificado/propuesto** conserva un requisito sin implementación identificada. **Verificado histórico** solo se usa con la procedencia y limitación del reporte correspondiente. No se adjudica verificación actual a los 26 RF por el recuento de pruebas.
 
 ### 5.3.1. Fichas Detalladas de Especificación de Requerimientos Funcionales (RF01 al RF26)
 
-A continuación, se especifican exhaustivamente las fichas técnicas individuales para los veintiséis (26) requerimientos funcionales del sistema, redactadas en lenguaje funcional orientado al usuario universitario y segregando formalmente los detalles de implementación técnica, contratos RESTful verificados en FastAPI y criterios de aceptación en formato Given–When–Then clasificados con las etiquetas normalizadas `[REQUISITO]`, `[IMPLEMENTADO]`, `[VERIFICADO]`, `[PENDIENTE]` y `[PROPUESTO]`:
+#### Ficha Técnica de Requerimiento Funcional: RF01 — Acceso institucional por código de correo o Google
 
----
-
-#### Ficha Técnica de Requerimiento Funcional: RF01 — Autenticación Institucional Multifactor (2FA)
 
 - **Identificador:** RF01
 - **Nombre Oficial:** Autenticación institucional multifactor (2FA) y control de acceso seguro
-- **Módulo Arquitectónico:** MOD-01: Seguridad, Autenticación y Gobernanza
+- **Módulo funcional vigente:** MOD-01: Seguridad, Autenticación y Gobernanza
 - **Descripción Funcional:** El sistema debe autenticar la identidad de los estudiantes, mentores y autoridades universitarias de la EPIS-UPT garantizando que pertenezcan a la comunidad institucional. El usuario podrá acceder ingresando su correo electrónico institucional y verificando su identidad mediante un código temporal de un solo uso recibido en su buzón de correo, o alternativamente mediante el botón oficial de inicio de sesión con su cuenta institucional de Google Workspace.
 - **Objetivo y Necesidad Académica:** Prevenir la suplantación de identidad y el acceso no autorizado de personas ajenas a la universidad, protegiendo los expedientes académicos y asegurando que las mentorías se desarrollen exclusivamente entre miembros legítimos de la EPIS.
 - **Actores Participantes:** Estudiante Mentoreado, Estudiante Mentor, Administrador Institucional (Actores Primarios); Servicio de Correo Electrónico Institucional y Proveedor de Identidad Google Workspace (Actores Secundarios).
 - **Condiciones de Entrada (Precondiciones):** El usuario debe contar con una cuenta de correo electrónico institucional activa terminada en `@virtual.upt.pe` o `@upt.pe`.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El usuario accede a la pantalla de bienvenida e ingresa su dirección de correo institucional o selecciona la opción de acceso con Google Workspace.
   2. Si elige código de correo, el sistema comprueba la validez del dominio institucional, genera un código numérico temporal de 6 dígitos y lo remite de inmediato al buzón universitario del solicitante.
   3. El sistema muestra una pantalla con seis casillas numéricas con temporizador regresivo visible de 5 minutos y botón de reenvío bloqueado durante 60 segundos.
   4. El usuario ingresa el código de 6 dígitos recibido.
   5. El sistema valida la coincidencia y vigencia del código, confirma la identidad del estudiante y habilita el ingreso al portal universitario correspondiente a sus roles asignados.
-- **Resultado Verificable (Postcondiciones):** El usuario ingresa exitosamente a su panel principal con sesión activa durante su jornada académica, registrándose la marca de auditoría de acceso exitoso.
+- **Resultado esperado (Postcondiciones del requisito):** El usuario ingresa exitosamente a su panel principal con sesión activa durante su jornada académica, registrándose la marca de auditoría de acceso exitoso.
 - **Reglas de Negocio Vinculadas:** RN-01 (Dominio institucional exclusivo, código OTP con vigencia improrrogable de 5 minutos y enfriamiento de reenvío de 60 segundos).
 - **Restricciones Funcionales:** Se rechaza de forma estricta cualquier dirección de correo comercial o ajena a los dominios universitarios oficiales de la UPT.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Acceso exitoso con código OTP) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante registrado introduce una dirección institucional válida `@virtual.upt.pe` o `@upt.pe`, CUANDO ingresa los 6 dígitos del código numérico dentro de los 300 segundos de vigencia, ENTONCES el sistema valida el reto, emite un token Bearer JWT con 8 horas de expiración y concede acceso al portal institucional.
-  - *Escenario 2 (Código expirado o erróneo) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el usuario ingresa un código que ha superado los 5 minutos de vigencia o que no coincide con el reto activo, CUANDO solicita la verificación, ENTONCES el sistema rechaza la autenticación con error HTTP 400 Bad Request, incrementa el contador de intentos fallidos y ofrece solicitar un nuevo código tras un enfriamiento de 60 segundos.
-  - *Escenario 3 (Rechazo de dominio no institucional) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un usuario intenta autenticarse mediante un correo no institucional (ej. dominio comercial ajeno a la UPT), CUANDO solicita el envío de OTP o intenta la federación, ENTONCES el sistema deniega la operación con error HTTP 403 Forbidden o HTTP 422 Unprocessable Entity, advirtiendo que el servicio es exclusivo para la comunidad EPIS-UPT.
-  - *Escenario 4 (Reejecución de pruebas en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la suite unitaria `test_auth.py` (14 pruebas backend) y `LoginOtpView.test.tsx` (18 pruebas frontend) fue validada en el corte histórico `3f6e31d`, CUANDO se complete la revalidación en `main` tras solventar el linteo, ENTONCES la suite debe reportar 100% de aserciones exitosas.
-- **Casos de Uso Relacionados:** CUS-001 (Autenticar usuario mediante credenciales institucionales y consentimiento digital).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/auth.py` (`POST /api/v1/auth/otp/request`, `POST /api/v1/auth/otp/verify`, `POST /api/v1/auth/otp/resend`, `POST /api/v1/auth/google`).
-  - *Servicios de Negocio:* `AuthService.py` (`request_otp`, `verify_otp`, `login_google`).
-  - *Entidades Relacionales:* Tablas `auth_challenges`, `usuarios`.
-  - *Componentes Visuales:* `LoginOtpView.tsx`, `authService.ts`.
-  - *Evidencia de Pruebas:* `test_auth.py` (14 pruebas backend), `LoginOtpView.test.tsx` (18 pruebas frontend).
+- **Casos de uso vigentes:** CUS-001.
+
+- **Estado observado:** Implementado; validación externa pendiente.
+- **Límites de la implementación:** SMTP y Google externos requieren validación; OTP por correo o SSO no acreditan dos factores independientes.
+- **Criterio de aceptación `[REQUISITO]`:** DADO un código institucional vigente, CUANDO el usuario lo presenta dentro de 300 s, ENTONCES se permite el acceso; al quinto error se bloquea ese desafío sin confundirlo con el límite de solicitudes.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF01 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF02 — Formalización de Consentimiento Legal Digital
+#### Ficha Técnica de Requerimiento Funcional: RF02 — Formalización de consentimiento legal digital (Ley 29733)
+
 
 - **Identificador:** RF02
 - **Nombre Oficial:** Formalización y registro del consentimiento informado digital bajo la Ley N° 29733
-- **Módulo Arquitectónico:** MOD-01: Seguridad, Autenticación y Gobernanza
+- **Módulo funcional vigente:** MOD-01: Seguridad, Autenticación y Gobernanza
 - **Descripción Funcional:** El sistema debe presentar a todo usuario que ingrese por primera vez a la plataforma una cláusula legal comprensible de consentimiento informado sobre el tratamiento de sus datos académicos y personales, exigiendo su aceptación explícita y vinculante para permitir la navegación en el sistema.
 - **Objetivo y Necesidad Académica:** Garantizar el cumplimiento irrestricto de la legislación peruana de protección de datos personales (Ley N° 29733) y los reglamentos universitarios de la UPT, asegurando que las calificaciones y necesidades académicas se manejen con absoluta confidencialidad y reserva.
 - **Actores Participantes:** Estudiante Mentoreado, Estudiante Mentor (Actores Primarios).
 - **Condiciones de Entrada (Precondiciones):** El usuario debe haberse autenticado exitosamente por primera vez en la plataforma.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. Tras validar la identidad del usuario, el sistema verifica si cuenta con registro previo de consentimiento informado vigente.
   2. Si no registra consentimiento, despliega inmediatamente un diálogo modal prioritario que bloquea cualquier otra interacción en la pantalla.
   3. El diálogo presenta en texto claro las finalidades del tratamiento: emparejamiento con mentores, emisión de constancias de asistencia, control de quórum y analítica agregada no nominal.
   4. El usuario revisa los términos y pulsa el botón de aceptación explícita.
   5. El sistema formaliza la aceptación registrando la decisión con sello inmutable de fecha y hora, cierra el modal y desbloquea el portal de servicios.
   6. Si el usuario rechaza los términos, el sistema cancela la sesión de forma segura y retorna a la pantalla de acceso sin registrar datos personales.
-- **Resultado Verificable (Postcondiciones):** El estudiante queda formalmente habilitado para utilizar los servicios de mentoría con constancia legal digital de su aceptación.
+- **Resultado esperado (Postcondiciones del requisito):** El estudiante queda formalmente habilitado para utilizar los servicios de mentoría con constancia legal digital de su aceptación.
 - **Reglas de Negocio Vinculadas:** RN-02 (Consentimiento digital previo e informado obligatorio bajo Ley N° 29733).
 - **Restricciones Funcionales:** Ninguna funcionalidad de catálogo, reserva o publicación puede ejecutarse sin la previa aceptación del consentimiento.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Aceptación formal de consentimiento) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante autenticado no registra consentimiento informado previo, CUANDO visualiza el diálogo modal bloqueante y presiona "Aceptar y Continuar", ENTONCES el sistema registra en `consentimientos_legales` la conformidad con IP, User-Agent y marca de tiempo UTC, desbloqueando el acceso a las funciones de mentoría.
-  - *Escenario 2 (Revocación o rechazo voluntario) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante decide revocar o rechazar el consentimiento de tratamiento de datos personales bajo la Ley N° 29733, CUANDO envía la solicitud de revocación, ENTONCES el sistema aplica la regla RN-02 bloqueando de inmediato el acceso a los servicios de emparejamiento, catálogo y reserva hasta una eventual reaceptación.
-  - *Escenario 3 (Trazabilidad legal auditada en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la persistencia inmutable de auditoría fue respaldada por 10 pruebas en `test_consent.py` y 12 pruebas en `ConsentModalView.test.tsx`, CUANDO se ejecute el flujo de verificación formal en `main`, ENTONCES se debe certificar la inviolabilidad de las marcas de tiempo y la coherencia del bloqueo de navegación.
-- **Casos de Uso Relacionados:** CUS-001 (Autenticar usuario mediante credenciales institucionales y consentimiento digital).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/consent.py` (`GET /api/v1/consent/status`, `POST /api/v1/consent/accept`, `POST /api/v1/consent/revoke`).
-  - *Servicios de Negocio:* `ConsentService.py` (`get_consent_status`, `accept_consent`, `revoke_consent`).
-  - *Entidades Relacionales:* Tabla `consentimientos_legales` (almacena UUID de usuario, dirección IP, User-Agent del navegador y marca de tiempo UTC).
-  - *Componentes Visuales:* `ConsentModalView.tsx`, `consentService.ts`.
-  - *Evidencia de Pruebas:* `test_consent.py` (10 pruebas backend), `ConsentModalView.test.tsx` (12 pruebas frontend).
+- **Casos de uso vigentes:** CUS-001, CUS-016.
+
+- **Estado observado:** Parcial: consentimiento; auditoría integral pendiente.
+- **Límites de la implementación:** SMTP y Google externos requieren validación; OTP por correo o SSO no acreditan dos factores independientes. Propuesto: consentimiento y logs parciales no sustituyen auditoría integral.
+- **Criterio de aceptación `[REQUISITO]`:** DADO un usuario sin consentimiento vigente, CUANDO acepta el texto informado, ENTONCES se registra su decisión y se habilita el recorrido; si rechaza, puede salir.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF02 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF03 — Gestión Administrativa de Roles y Verificación de Mérito
+#### Ficha Técnica de Requerimiento Funcional: RF03 — Gestión y asignación administrativa de roles de usuario
+
 
 - **Identificador:** RF03
 - **Nombre Oficial:** Gestión, fiscalización y asignación administrativa de roles de usuario
-- **Módulo Arquitectónico:** MOD-01: Seguridad, Autenticación y Gobernanza
+- **Módulo funcional vigente:** MOD-01: Seguridad, Autenticación y Gobernanza
 - **Descripción Funcional:** El sistema debe permitir a las autoridades de la Dirección de Escuela y Coordinación de Tutoría consultar la nómina de estudiantes universitarios y administrar sus roles operativos (Mentoreado, Mentor, Administrador, Coordinador), verificando de forma estricta los requisitos de mérito académico exigidos para autorizar a un estudiante a desempeñarse como mentor de sus compañeros.
 - **Objetivo y Necesidad Académica:** Garantizar la idoneidad académica y solvencia pedagógica de los mentores, protegiendo la calidad de la enseñanza que reciben los alumnos de ciclos iniciales y asegurando que los mentores sean alumnos destacados.
 - **Actores Participantes:** Administrador Institucional (Actor Primario); Estudiante Mentor (Beneficiario del Rol).
 - **Condiciones de Entrada (Precondiciones):** El administrador debe contar con una sesión activa con privilegios de gestión institucional en la plataforma.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El administrador accede al panel de administración de usuarios y visualiza la relación de estudiantes registrados.
   2. Selecciona a un estudiante postulante al rol de mentor y revisa su historial académico formal.
   3. El sistema valida automáticamente que el estudiante se encuentre matriculado en el ciclo VII o superior y que posea promedio ponderado aprobatorio.
   4. Si cumple los requisitos, el administrador confirma la asignación del rol de mentor.
   5. El sistema actualiza de inmediato los privilegios de la cuenta, habilitando la publicación de sesiones de mentoría en el portal.
   6. Si no cumple los requisitos, el sistema bloquea la asignación e indica detalladamente la condición académica insatisfecha.
-- **Resultado Verificable (Postcondiciones):** El estudiante adquiere formalmente las atribuciones de mentor en la plataforma, quedando registrado el cambio en la bitácora administrativa.
+- **Resultado esperado (Postcondiciones del requisito):** El estudiante adquiere formalmente las atribuciones de mentor en la plataforma, quedando registrado el cambio en la bitácora administrativa.
 - **Reglas de Negocio Vinculadas:** RN-03 (Elegibilidad y mérito académico de mentores: ciclo VII o superior, nota aprobatoria sobresaliente en la materia a dictar).
 - **Restricciones Funcionales:** Ningún estudiante puede autoasignarse el rol de mentor sin la debida verificación y autorización administrativa.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Promoción autorizada por mérito académico) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante postula al rol de mentor cumpliendo con pertenecer al ciclo VII o superior (RN-03) y una autoridad administradora evalúa su solicitud, CUANDO el administrador envía la orden de promoción a `/api/v1/roles/promote-mentor`, ENTONCES el sistema asigna el rol `mentor` en `usuario_roles` y habilita las capacidades de publicación de ofertas con código HTTP 200 OK.
-  - *Escenario 2 (Denegación estricta de autopromoción no autorizada) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante con rol exclusivo de mentoreado intenta invocar el endpoint de promoción hacia su propia cuenta sin privilegios de administrador, CUANDO el backend intercepta la solicitud, ENTONCES el sistema aborta la transacción con código HTTP 403 Forbidden y mensaje explícito de denegación por regla de mérito RN-03.
-  - *Escenario 3 (Revocación administrativa del rol mentor) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE la Dirección de Escuela dispone retirar la condición de mentor a un estudiante por bajo rendimiento o inactividad, CUANDO el administrador confirma la revocación en `/api/v1/roles/revoke-mentor`, ENTONCES el sistema conmuta su rol a mentoreado, cancela preventivamente ofertas publicadas sin inscritos y registra la auditoría institucional.
-  - *Escenario 4 (Acreditación en suite de integración en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el subsistema de roles cuenta con 7 pruebas en `test_roles.py` y 10 pruebas en frontend, CUANDO se ejecute la validación formal en `main`, ENTONCES se verificará la estricta segregación de permisos RBAC.
-- **Casos de Uso Relacionados:** CUS-010 (Administrar usuarios, asignación de roles y control de privilegios).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/roles.py` (`GET /api/v1/roles/users/{email}`, `POST /api/v1/roles/promote-mentor`, `POST /api/v1/roles/revoke-mentor`).
-  - *Servicios de Negocio:* `RoleService.py` (`get_user_roles`, `promote_to_mentor`, `revoke_mentor`).
-  - *Entidades Relacionales:* Tablas `roles`, `usuario_roles`, `usuarios`.
-  - *Componentes Visuales:* `AdminRolesView.tsx`, `roleService.ts`.
-  - *Evidencia de Pruebas:* `test_roles.py` (7 pruebas backend), `AdminRolesView.test.tsx` (10 pruebas frontend).
+- **Casos de uso vigentes:** CUS-010, CUS-005, CUS-021.
+
+- **Estado observado:** Parcial: asignación administrativa; mérito y comité pendientes.
+- **Límites de la implementación:** Parcial: sin acreditación de nota 14 ni administración general de todos los roles; buscador institucional limitado. Parcial: sin expediente, certificación de nota 14 ni envío a comité; preferencia no concede privilegios. Propuesto: sin bandeja, expediente, votación ni resolución; asignación efectiva corresponde a CUS-010.
+- **Criterio de aceptación `[REQUISITO]`:** DADO un administrador autorizado, CUANDO promueve o revoca Mentor, ENTONCES se informa el resultado y el rol efectivo; la nota mínima y la evaluación por comité se comprueban como brechas.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF03 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF04 — Configuración de Perfil Académico y Matriz Horaria
+#### Ficha Técnica de Requerimiento Funcional: RF04 — Configuración de perfil formativo y matriz horaria
+
 
 - **Identificador:** RF04
 - **Nombre Oficial:** Parametrización del perfil formativo y matriz semanal de disponibilidad horaria
-- **Módulo Arquitectónico:** MOD-03: Perfiles Académicos y Catálogo Curricular
+- **Módulo funcional vigente:** MOD-02: Ofertas de Mentoría y Gestión de Recursos
 - **Descripción Funcional:** El sistema debe proveer a cada estudiante una interfaz interactiva donde configure su perfil académico (ciclo cursado, materias de interés, fortalezas curriculares y modalidad de estudio preferida) y defina su disponibilidad horaria semanal mediante una matriz visual de bloques de tiempo.
 - **Objetivo y Necesidad Académica:** Alimentar con datos precisos y actualizados al algoritmo de recomendación, evitando colisiones con los horarios oficiales de clase de los estudiantes y garantizando coincidencias factibles.
 - **Actores Participantes:** Estudiante Mentoreado, Estudiante Mentor (Actores Primarios).
 - **Condiciones de Entrada (Precondiciones):** Usuario con cuenta institucional activa y sesión iniciada en la plataforma.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El estudiante ingresa a la sección de configuración de perfil.
   2. Selecciona su ciclo de estudios actual y marca las asignaturas filtro en las que requiere apoyo o en las que se ofrece a brindar asesoría.
   3. Visualiza la matriz semanal interactiva de 6 días (lunes a sábado) dividida en franjas horarias de 60 minutos entre las 08:00 y las 20:00 horas (grilla estándar 6×11).
   4. Marca con un clic los bloques horarios en los que dispone de tiempo libre.
   5. Pulsa el botón de confirmación para guardar sus preferencias.
   6. El sistema valida que los datos no presenten incoherencias y actualiza el perfil académico y la matriz horaria.
-- **Resultado Verificable (Postcondiciones):** El perfil formativo queda almacenado y disponible para los procesos automáticos de recomendación y emparejamiento.
+- **Resultado esperado (Postcondiciones del requisito):** El perfil formativo queda almacenado y disponible para los procesos automáticos de recomendación y emparejamiento.
 - **Reglas de Negocio Vinculadas:** RN-04 (Antelación de programación y compatibilidad horaria), RN-03 (Mérito académico).
 - **Restricciones Funcionales:** Ningún mentor podrá ofrecer sesiones en franjas no declaradas como disponibles en su matriz horaria activa.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Actualización de perfil y matriz semanal 6×11) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante accede a la vista de configuración horaria, CUANDO selecciona bloques de disponibilidad entre lunes y sábado de 08:00 a 20:00 y pulsa "Guardar Cambios", ENTONCES el sistema actualiza de manera atómica las franjas en `disponibilidades_horarias` y las disponibiliza para el motor algorítmico EdRecSys con código HTTP 200 OK.
-  - *Escenario 2 (Intento de guardado sin bloques horarios seleccionados) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor intenta guardar su disponibilidad horaria sin marcar ninguna franja activa en la matriz 6×11, CUANDO envía la actualización, ENTONCES el sistema muestra una advertencia preventiva notificando que la ausencia de bloques impedirá la generación de recomendaciones en el catálogo de ofertas.
-  - *Escenario 3 (Revalidación de consistencia en suite automatizada) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la persistencia horaria cuenta con 14 pruebas en `test_profiles.py` y 16 pruebas en `ProfileAcademicView.test.tsx`, CUANDO se concluya la subsanación de linteo en `main`, ENTONCES la suite debe validar que las actualizaciones no generen solapamientos ni registros huérfanos.
-- **Casos de Uso Relacionados:** CUS-005 (Configurar perfil formativo y disponibilidad horaria del estudiante).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/profiles.py` (`GET /api/v1/profiles/me`, `PUT /api/v1/profiles/me`, `GET /api/v1/profiles/availability`, `PUT /api/v1/profiles/availability`).
-  - *Servicios de Negocio:* `ProfileService.py` (`get_profile`, `update_profile`, `get_availability`, `update_availability`).
-  - *Entidades Relacionales:* Tablas `perfiles_academicos`, `disponibilidades_horarias`.
-  - *Componentes Visuales:* `ProfileAcademicView.tsx`, `profileService.ts`.
-  - *Evidencia de Pruebas:* `test_profiles.py` (14 pruebas backend), `ProfileAcademicView.test.tsx` (16 pruebas frontend).
+- **Casos de uso vigentes:** CUS-005.
+
+- **Estado observado:** Parcial: perfil y disponibilidad; expediente pendiente.
+- **Límites de la implementación:** Parcial: sin expediente, certificación de nota 14 ni envío a comité; preferencia no concede privilegios.
+- **Criterio de aceptación `[REQUISITO]`:** DADO un usuario autenticado, CUANDO guarda su perfil y disponibilidad, ENTONCES se conservan los datos válidos; elegir preferencia Mentor no concede permisos.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF04 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF05 — Catálogo Curricular Interactivo y Temarios Silábicos
+#### Ficha Técnica de Requerimiento Funcional: RF05 — Catálogo curricular de asignaturas y temarios silábicos
+
 
 - **Identificador:** RF05
 - **Nombre Oficial:** Exploración y gestión del catálogo curricular de asignaturas filtro y temarios silábicos
-- **Módulo Arquitectónico:** MOD-03: Perfiles Académicos y Catálogo Curricular
+- **Módulo funcional vigente:** MOD-05: Administración y Analítica Institucional
 - **Descripción Funcional:** El sistema debe suministrar a estudiantes y mentores un catálogo oficial interactivo con las asignaturas formativas críticas del plan de estudios de Ingeniería de Sistemas (ciclos I al IV), desglosadas jerárquicamente por unidades de aprendizaje y temas conceptuales conforme a los sílabos oficiales aprobados por la facultad. Asimismo, debe proveer a la administración de interfaces para mantener actualizado dicho catálogo.
 - **Objetivo y Necesidad Académica:** Asegurar que las sesiones de mentoría se enfoquen con precisión en contenidos temáticos oficiales del currículo universitario, erradicando asesorías vagas o desalineadas de las evaluaciones de cátedra.
 - **Actores Participantes:** Estudiante Mentoreado, Estudiante Mentor (Actores Primarios de Consulta); Administrador Institucional (Actor Primario de Mantenimiento).
 - **Condiciones de Entrada (Precondiciones):** Usuario con sesión activa en el sistema.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El estudiante ingresa al catálogo curricular interactivo y utiliza el buscador en tiempo real para localizar una materia o concepto específico.
   2. El sistema despliega las asignaturas formativas con indicación de su ciclo lectivo, su condición de asignatura filtro y su número de créditos.
   3. Al seleccionar una materia, el sistema expande el árbol de temas silábicos organizados por unidad y semana de dictado regular.
   4. El estudiante puede seleccionar cualquier tema específico para visualizar las ofertas de mentoría disponibles o canalizar una solicitud de demanda pedagógica.
   5. Para administradores, el sistema provee formularios para agregar, editar o desactivar asignaturas y temas según actualizaciones del plan curricular.
-- **Resultado Verificable (Postcondiciones):** Los usuarios seleccionan temas estandarizados oficiales para todas sus publicaciones y solicitudes de mentoría.
+- **Resultado esperado (Postcondiciones del requisito):** Los usuarios seleccionan temas estandarizados oficiales para todas sus publicaciones y solicitudes de mentoría.
 - **Reglas de Negocio Vinculadas:** RN-11 (Asignaturas filtro prioritarias y catalogación oficial).
 - **Restricciones Funcionales:** Ningún tema fuera del sílabo oficial puede ser registrado sin autorización previa de la Coordinación Académica.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Exploración jerárquica de catálogo silábico) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante filtra el catálogo por asignaturas prioritarias de los ciclos I al IV, CUANDO selecciona una materia crítica (ej. Algoritmos y Estructura de Datos), ENTONCES el sistema despliega el árbol de temas silábicos oficiales indexados por unidad temática con código HTTP 200 OK.
-  - *Escenario 2 (Mantenimiento curricular por el administrador) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE la Dirección de Escuela actualiza el plan silábico institucional, CUANDO el usuario con rol administrador registra una nueva asignatura o tema en `/api/v1/curriculum/courses`, ENTONCES el sistema persiste los metadatos en `asignaturas` y propaga los temas de forma inmediata para ofertas y solicitudes por demanda.
-  - *Escenario 3 (Revisión de integridad en integración continua) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE las operaciones del catálogo cuentan con 16 pruebas en `test_curriculum.py` y 18 pruebas en `CurriculumCatalogView.test.tsx`, CUANDO se ejecute el pipeline de pruebas en `main`, ENTONCES debe verificarse la integridad referencial entre asignaturas y temas sin inconsistencias.
-- **Casos de Uso Relacionados:** CUS-021 (Consultar y mantener catálogo curricular de asignaturas y temarios).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/curriculum.py` (`GET /api/v1/curriculum/courses`, `POST /api/v1/curriculum/courses`, `GET /api/v1/curriculum/courses/{id_asignatura}`, `GET /api/v1/curriculum/courses/{id_asignatura}/topics`).
-  - *Servicios de Negocio:* `CurriculumService.py` (`get_courses`, `get_course_by_id`, `get_course_topics`, `create_course`).
-  - *Entidades Relacionales:* Tablas `asignaturas`, `temas_conceptuales`.
-  - *Componentes Visuales:* `CurriculumCatalogView.tsx`, `apiClient.ts`.
-  - *Evidencia de Pruebas:* `test_curriculum.py` (16 pruebas backend), `CurriculumCatalogView.test.tsx` (18 pruebas frontend).
+- **Casos de uso vigentes:** CUS-020.
+
+- **Estado observado:** Implementado; discrepancia de ciclos pendiente.
+- **Límites de la implementación:** Discrepancia pendiente entre consulta I-IV y formulario 1-10; prioridad curricular no garantiza pesos dinámicos.
+- **Criterio de aceptación `[REQUISITO]`:** DADO un usuario autorizado para consultar o mantener el catálogo, CUANDO selecciona una asignatura, ENTONCES se muestran sus temas y vigencia, identificando la discrepancia de ciclos pendiente.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF05 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF06 — Inferencia Algorítmica y Recomendación Adaptativa Top-k
+#### Ficha Técnica de Requerimiento Funcional: RF06 — Inferencia algorítmica y recomendación personalizada Top-k
 
 - **Identificador:** RF06
-- **Nombre Oficial:** Inferencia algorítmica y recomendación personalizada Top-k (Motor EdRecSys)
-- **Módulo Arquitectónico:** MOD-04: Banco de Demanda y Recomendación Adaptativa
-- **Descripción Funcional:** El sistema debe procesar las debilidades académicas del estudiante mentoreado, sus horarios disponibles y su historial de calificaciones, comparándolos contra los perfiles, horarios y especialidades de los mentores mediante un algoritmo de recomendación híbrido (EdRecSys) que combina filtrado basado en contenido (similitud coseno) y filtrado colaborativo, entregando una lista ordenada de los $k$ mejores mentores y ofertas disponibles.
-- **Objetivo y Necesidad Académica:** Resolver el histórico problema de la búsqueda informal de ayuda, conectando al estudiante que tiene dificultades en un tema con el compañero más capacitado y con mayor disponibilidad compatible para apoyarlo.
-- **Actores Participantes:** Estudiante Mentoreado (Beneficiario del Ranking); Estudiante Mentor (Sujeto Recomendado).
-- **Condiciones de Entrada (Precondiciones):** El mentoreado debe haber completado su perfil formativo y contar con al menos una materia de interés seleccionada.
-- **Comportamiento Esperado:**
-  1. El estudiante ingresa a la sección de recomendaciones personalizadas.
-  2. El sistema recupera el vector de necesidades del estudiante (materias críticas, temas de interés y matriz de tiempo libre).
-  3. El motor algorítmico evalúa la base de datos de mentores activos y sesiones programadas, calculando un puntaje de afinidad multidimensional para cada candidato.
-  4. El sistema ordena los resultados de mayor a menor afinidad y selecciona los $k$ candidatos óptimos (por defecto $k=5$).
-  5. Despliega en pantalla las tarjetas de recomendación con indicación visual del porcentaje de compatibilidad y justificación resumida de la sugerencia.
-- **Resultado Verificable (Postcondiciones):** El mentoreado visualiza opciones de asesoría altamente compatibles y puede iniciar la reserva con un solo clic.
-- **Reglas de Negocio Vinculadas:** RN-04 (Compatibilidad horaria), RN-03 (Mérito del mentor), RN-11 (Priorización de asignaturas filtro).
-- **Restricciones Funcionales:** El algoritmo debe responder con una latencia media menor a 500 ms (meta de calidad) para no degradar la experiencia de usuario.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Generación de ranking adaptativo Top-k) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante mentoreado consulta el feed de recomendaciones, CUANDO el motor EdRecSys evalúa la afinidad curricular, solapamiento horario y reputación docente, ENTONCES entrega una lista ordenada Top-5 de candidatos con latencia inferior a 500 ms (mediana observada de 12.4 ms) y Precision@3 superior al 80%.
-  - *Escenario 2 (Explicabilidad pedagógica de puntajes) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el usuario solicita el detalle de compatibilidad de un mentor sugerido, CUANDO invoca `/api/v1/recommendations/explain`, ENTONCES el sistema devuelve el desglose cuantitativo y cualitativo de similitud temática, compatibilidad horaria y mérito académico con código HTTP 200 OK.
-  - *Escenario 3 (Revalidación de casos frontera algorítmicos en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el testbench algorítmico fue evaluado en `test_recommendations.py` (18 pruebas) y `SimulationService.py`, CUANDO se ejecute la validación formal en `main`, ENTONCES se deben verificar empíricamente los 4 casos frontera (cero solapamiento, perfil idéntico, mentor sin historial y saturación de demanda).
-- **Casos de Uso Relacionados:** CUS-002 (Consultar ofertas recomendadas y ranking de mentores adaptativo).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/recommendations.py` (`GET /api/v1/recommendations/mentors`, `GET /api/v1/recommendations/offers`, `POST /api/v1/recommendations/explain`).
-  - *Servicios de Negocio:* `RecommendationService.py` (Módulos de similitud temática, compatibilidad horaria y normalización matricial).
-  - *Entidades Relacionales:* Tablas `sesiones_mentoria`, `perfiles_academicos`, `disponibilidades_horarias`.
-  - *Componentes Visuales:* `RecommendationFeedView.tsx`, `MentorCardView.tsx`.
-  - *Evidencia de Pruebas:* `test_recommendations.py` (18 pruebas backend), `RecommendationFeedView.test.tsx` (14 pruebas frontend).
+- **Nombre Oficial:** Recomendación explicable de mentorías Top-k.
+- **Módulo funcional vigente:** MOD-03: Recomendaciones, Reservas y Quórum.
+- **Descripción Funcional:** El estudiante consulta mentorías ordenadas según sus temas e intereses, compatibilidad de horario y modalidad, y prioridad de asignaturas críticas.
+- **Objetivo y Necesidad Académica:** Facilitar la elección de una mentoría pertinente, con información comprensible sobre su posición en la lista.
+- **Actores Participantes:** Estudiante mentoreado.
+- **Condiciones de Entrada (Precondiciones):** El usuario ingresa a la consulta de mentorías y dispone de los intereses y preferencias que haya registrado. La falta de agenda no impide por sí sola la consulta.
+- **Comportamiento Esperado (requisito):**
+  1. El estudiante abre el catálogo y selecciona los filtros y el límite visible de resultados (3, 4 o 5).
+  2. El sistema obtiene las ofertas o mentores candidatos y calcula coincidencia temática, compatibilidad horaria, modalidad y afinidad curricular, con prioridad de asignaturas críticas.
+  3. Ordena los resultados de manera determinista y presenta la información y explicación disponibles.
+  4. El estudiante revisa el detalle, puede modificar filtros y solicitar una reserva cuando exista cupo; si no encuentra una oferta adecuada, accede al recorrido de demanda cuando esté disponible.
+- **Resultado esperado (Postcondiciones del requisito):** El estudiante dispone de una lista explicable para decidir. La consulta no reserva cupo ni garantiza la confirmación posterior de la sesión.
+- **Reglas de Negocio Vinculadas:** RN-04, RN-05 y RN-11.
+- **Restricciones Funcionales:** La recomendación actual no usa reputación ni balance de carga; RF21 conserva esos objetivos por separado. El contacto visible no acredita mensajería interna. Las métricas de precisión y latencia requieren evaluación propia.
+- **Casos de uso vigentes:** CUS-002 y CUS-015, este último para parametrización propuesta.
+
+
+- **Estado observado:** Implementado; parametrización propuesta.
+- **Límites de la implementación:** Sin medición nueva de precisión ni rendimiento; contacto no acredita mensajería. Propuesto: pesos en código no equivalen a interfaz administrativa configurable.
+- **Criterio de aceptación `[REQUISITO]`:** DADO intereses, temas, modalidad y disponibilidad del estudiante, CUANDO solicita Top-k, ENTONCES recibe el ranking explicable descrito en ADR-009 sin atribuir reputación ni similitud coseno al cálculo actual.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF06 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF07 — Banco de Solicitudes por Demanda Académica
+#### Ficha Técnica de Requerimiento Funcional: RF07 — Registro y banco de solicitudes por demanda académica
+
 
 - **Identificador:** RF07
 - **Nombre Oficial:** Registro y banco colaborativo de solicitudes por demanda insatisfecha
-- **Módulo Arquitectónico:** MOD-04: Banco de Demanda y Recomendación Adaptativa
+- **Módulo funcional vigente:** MOD-02: Ofertas de Mentoría y Gestión de Recursos
 - **Descripción Funcional:** El sistema debe permitir a los estudiantes mentoreados registrar solicitudes temáticas específicas de mentoría cuando no encuentren ofertas disponibles en el catálogo, consolidando un "banco de demanda académica" visible para todos los mentores calificados a fin de que formulen sesiones orientadas a necesidades reales de sus compañeros.
 - **Objetivo y Necesidad Académica:** Evitar que los alumnos con dudas específicas se queden sin orientación por falta de oferta previa, equilibrando la oferta formativa a partir de las necesidades directas de los alumnos.
 - **Actores Participantes:** Estudiante Mentoreado (Solicitante); Estudiante Mentor (Atendedor de la Demanda).
 - **Condiciones de Entrada (Precondiciones):** Estudiante autenticado que exploró el catálogo de ofertas sin hallar el tema silábico requerido.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El estudiante abre el formulario de registro de solicitud por demanda.
   2. Selecciona la asignatura crítica, el tema silábico puntual y redacta una breve descripción del problema o ejercicio que necesita resolver.
   3. Indica su disponibilidad horaria tentativa para recibir la sesión.
   4. Envía la solicitud y el sistema genera un folio de demanda con estado "Abierta".
   5. El requerimiento se publica de inmediato en el banco colaborativo visible para mentores que dominan dicha materia.
   6. Los mentores interesados pueden postularse para dictar la sesión requerida o crear una oferta orientada a dicho tema.
-- **Resultado Verificable (Postcondiciones):** La solicitud queda registrada en el banco institucional y se notifica a los mentores de la materia.
+- **Resultado esperado (Postcondiciones del requisito):** La solicitud queda registrada en el banco institucional y se notifica a los mentores de la materia.
 - **Reglas de Negocio Vinculadas:** RN-04 (Antelación de programación), RN-11 (Alineamiento con temarios oficiales).
 - **Restricciones Funcionales:** No se admiten solicitudes de materias en las que el estudiante no se encuentre matriculado o que no figuren en el catálogo oficial.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Registro exitoso de necesidad por demanda) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante no encuentra ofertas activas para un tema silábico específico, CUANDO completa el formulario modal de demanda indicando asignatura, tema y franja tentativa, ENTONCES el sistema crea el registro en `solicitudes_demanda` con estado `PENDIENTE` y código HTTP 201 Created.
-  - *Escenario 2 (Consulta del banco de solicitudes por mentores) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante mentor explora el banco de necesidades insatisfechas, CUANDO consulta `/api/v1/bookings/requests`, ENTONCES el sistema entrega la nómina consolidada agrupada por materia y ciclo para facilitar la publicación de ofertas dirigidas.
-  - *Escenario 3 (Verificación de despacho y visualización en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el banco de demandas cuenta con 12 pruebas en `test_bookings.py` y 14 pruebas en `MentoringDemandModalView.test.tsx`, CUANDO se ejecute el flujo de CI en `main`, ENTONCES se debe certificar la adecuada indexación de solicitudes pendientes.
-- **Casos de Uso Relacionados:** CUS-003 (Registrar solicitud de mentoría por demanda académica insatisfecha).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bookings.py` (`POST /api/v1/bookings/requests`, `GET /api/v1/bookings/requests`).
-  - *Servicios de Negocio:* `BookingService.py` (`create_demand_request`, `get_demand_requests`).
-  - *Entidades Relacionales:* Tabla `solicitudes_demanda`.
-  - *Componentes Visuales:* `MentoringDemandModalView.tsx`, `MentorSessionsView.tsx`.
-  - *Evidencia de Pruebas:* `test_bookings.py` (12 pruebas backend), `MentoringDemandModalView.test.tsx` (14 pruebas frontend).
+- **Casos de uso vigentes:** CUS-008.
+
+- **Estado observado:** Parcial: registro y banco; controles pendientes.
+- **Límites de la implementación:** Parcial: duplicados, matrícula, autorización y exposición de correos requieren remediación o validación.
+- **Criterio de aceptación `[REQUISITO]`:** DADO una necesidad de mentoría no cubierta, CUANDO se registra la demanda, ENTONCES se informa su recepción; el banco conserva las brechas de permisos, duplicados y exposición señaladas en el Anexo A.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF07 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF08 — Publicación y Parametrización de Ofertas de Mentoría
+#### Ficha Técnica de Requerimiento Funcional: RF08 — Publicación y parametrización de ofertas de mentoría
+
 
 - **Identificador:** RF08
 - **Nombre Oficial:** Publicación, programación y parametrización de ofertas de mentoría académica
-- **Módulo Arquitectónico:** MOD-02: Ofertas de Mentoría y Gestión de Espacios
+- **Módulo funcional vigente:** MOD-02: Ofertas de Mentoría y Gestión de Recursos
 - **Descripción Funcional:** El sistema debe proporcionar a los mentores autorizados un asistente interactivo para crear y publicar sesiones de mentoría, especificando la asignatura, los temas silábicos a abordar, la fecha y hora de realización, la modalidad (presencial o virtual), el aforo máximo de participantes y los enlaces o referencias a recursos didácticos preliminares.
 - **Objetivo y Necesidad Académica:** Fomentar una programación académica ordenada y predecible, permitiendo a los mentoreados planificar su asistencia con la debida anticipación y garantizando condiciones adecuadas de aforo.
 - **Actores Participantes:** Estudiante Mentor (Actor Primario); Estudiantes Mentoreados (Destinatarios).
 - **Condiciones de Entrada (Precondiciones):** El usuario debe poseer rol activo de mentor institucional verificado y disponibilidad horaria coincidente.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El mentor accede al formulario de publicación de nueva oferta de mentoría.
   2. Selecciona la asignatura crítica en la que está habilitado y marca uno o más temas silábicos del catálogo oficial.
   3. Define la fecha y hora de la sesión, verificando que exista un margen de antelación mayor a 24 horas respecto a la hora actual.
   4. Selecciona la modalidad de impartición: presencial (con aforo de 10 estudiantes) o virtual (con aforo de 20 estudiantes).
   5. Si lo considera pertinente, adjunta enlaces a diapositivas o guías de ejercicios que los participantes deban revisar previamente.
   6. Envía la oferta; el sistema valida los parámetros, reserva los recursos institucionales y publica la sesión en el catálogo activo.
-- **Resultado Verificable (Postcondiciones):** La sesión queda publicada con estado "Publicada", disponible para reservas en el feed de ofertas.
+- **Resultado esperado (Postcondiciones del requisito):** La sesión queda publicada con estado "Publicada", disponible para reservas en el feed de ofertas.
 - **Reglas de Negocio Vinculadas:** RN-04 (Antelación obligatoria mayor a 24 horas), RN-05 (Aforos estándar: 10 presencial / 20 virtual).
 - **Restricciones Funcionales:** Ninguna sesión puede publicarse con menos de 24 horas de antelación ni exceder los aforos normados.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Publicación reglamentaria de oferta de mentoría) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor autorizado (ciclo >= VII) formula una oferta con más de 24 horas de anticipación (RN-04) y aforo reglamentario (10 presencial / 20 virtual, RN-05), CUANDO envía la solicitud a `/api/v1/offers`, ENTONCES el sistema persiste la sesión en estado `PUBLICADA` con código HTTP 201 Created y enlaces a recursos didácticos.
-  - *Escenario 2 (Rechazo por antelación menor a 24 horas) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor intenta programar una sesión con inicio en un intervalo inferior a 24 horas desde el momento actual, CUANDO invoca la publicación, ENTONCES el sistema rechaza la operación con código HTTP 400 Bad Request en cumplimiento estricto de la regla de negocio RN-04.
-  - *Escenario 3 (Acreditación de suite de ofertas en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE las validaciones de publicación están cubiertas por 16 pruebas en `test_offers.py` y 18 pruebas en `OfferPublishView.test.tsx`, CUANDO se ejecute el pipeline de `main`, ENTONCES se verificará la consistencia del catálogo activo sin errores de schema.
-- **Casos de Uso Relacionados:** CUS-006 (Publicar y parametrizar oferta de mentoría académica individual o grupal).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/offers.py` (`POST /api/v1/offers`, `GET /api/v1/offers`).
-  - *Servicios de Negocio:* `OfferService.py` (`publish_offer`, `get_offers`).
-  - *Entidades Relacionales:* Tabla `sesiones_mentoria` (con campo `recursos_didacticos_url`).
-  - *Componentes Visuales:* `OfferPublishView.tsx`, `offerService.ts`.
-  - *Evidencia de Pruebas:* `test_offers.py` (16 pruebas backend), `OfferPublishView.test.tsx` (18 pruebas frontend).
+- **Casos de uso vigentes:** CUS-006.
+
+- **Estado observado:** Parcial: publicación; mérito y anexos pendientes.
+- **Límites de la implementación:** Parcial: ciclo >= VII o rol habilitado; nota 14 no comprobada, un tema, sin anexos separados ni garantía de reunión real.
+- **Criterio de aceptación `[REQUISITO]`:** DADO una oferta con antelación superior a 24 h, tema y modalidad válidos, CUANDO el mentor autorizado publica, ENTONCES se registra la oferta o se informa el motivo de rechazo; el límite exacto de 24 h se rechaza.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF08 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF09 — Aprovisionamiento de Espacios Físicos y Salas Virtuales
+#### Ficha Técnica de Requerimiento Funcional: RF09 — Aprovisionamiento automatizado de espacios y salas virtuales
+
 
 - **Identificador:** RF09
 - **Nombre Oficial:** Aprovisionamiento inteligente de infraestructura física y enlaces virtuales
-- **Módulo Arquitectónico:** MOD-02: Ofertas de Mentoría y Gestión de Espacios
+- **Módulo funcional vigente:** MOD-02: Ofertas de Mentoría y Gestión de Recursos
 - **Descripción Funcional:** El sistema debe asignar automáticamente el recinto educativo para cada sesión de mentoría en función de la modalidad elegida. Para sesiones presenciales, debe verificar la disponibilidad de aulas y laboratorios libres en el campus de Capanique a partir del cronograma oficial procesado, previniendo solapamientos. Para sesiones virtuales, debe generar y vincular automáticamente una sala institucional segura de videoconferencia.
 - **Objetivo y Necesidad Académica:** Eliminar la fricción organizativa de buscar ambientes libres a última hora, erradicando interrupciones durante las sesiones y garantizando condiciones acústicas y técnicas adecuadas.
 - **Actores Participantes:** Estudiante Mentor (Beneficiario del Aprovisionamiento); Sistema (Gestor de Espacios).
 - **Condiciones de Entrada (Precondiciones):** Mentor publicando una oferta con fecha, hora y modalidad definidas.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. Si la modalidad es presencial, el sistema consulta el registro de franjas horarias libres de aulas y laboratorios de la facultad.
   2. Filtra los recintos que no tienen clases regulares asignadas ni otras mentorías en la franja seleccionada.
   3. Asigna el aula más apropiada según el aforo de la sesión y reserva el espacio en el calendario de infraestructura física.
   4. Si la modalidad es virtual, el sistema interactúa con el generador institucional de enlaces seguros y reserva una sala virtual única.
   5. Vincula el recinto físico o enlace virtual al registro de la sesión y lo exhibe en los detalles de la oferta para los estudiantes inscritos.
-- **Resultado Verificable (Postcondiciones):** La sesión cuenta con un recinto físico o virtual reservado de forma no conflictiva.
+- **Resultado esperado (Postcondiciones del requisito):** La sesión cuenta con un recinto físico o virtual reservado de forma no conflictiva.
 - **Reglas de Negocio Vinculadas:** RN-06 (Disponibilidad de aulas físicas), RN-07 (Enlaces virtuales institucionales seguros).
 - **Restricciones Funcionales:** Ninguna sesión presencial podrá registrarse en aulas no catalogadas o que tengan clases oficiales programadas.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Aprovisionamiento de aula física sin colisión) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor selecciona modalidad presencial, CUANDO consulta recintos libres para su franja horaria en `/api/v1/spaces/free-slots`, ENTONCES el sistema filtra contra el cronograma oficial de la facultad y entrega las aulas disponibles garantizando 0 solapamientos de infraestructura (RN-06).
-  - *Escenario 2 (Generación automática de sala virtual) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE la sesión es programada en modalidad virtual, CUANDO se formaliza la oferta, ENTONCES el subsistema aprovisiona un enlace institucional seguro persistido en la entidad de sesión para su distribución a los inscritos confirmados (RN-07).
-  - *Escenario 3 (Comprobación de aprovisionamiento en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el módulo cuenta con 14 pruebas en `test_spaces.py` y 12 pruebas en frontend, CUANDO se ejecute la verificación formal en `main`, ENTONCES se constatará la correcta detección de colisiones horarias.
-- **Casos de Uso Relacionados:** CUS-006 (Publicar oferta), CUS-008 (Procesar cronogramas de infraestructura).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/spaces.py` (`GET /api/v1/spaces/free-slots`, `GET /api/v1/spaces/classrooms`).
-  - *Servicios de Negocio:* `VirtualRoomService.py`, `CatalogSupportService.py`.
-  - *Entidades Relacionales:* Tablas `sesiones_mentoria`, `espacios_fisicos`.
-  - *Componentes Visuales:* `SpaceSelectorView.tsx`, `spacesService.ts`.
-  - *Evidencia de Pruebas:* `test_spaces.py` (14 pruebas backend), `SpaceSelectorView.test.tsx` (12 pruebas frontend).
+- **Casos de uso vigentes:** CUS-006, CUS-017.
+
+- **Estado observado:** Parcial: disponibilidad; provisión externa pendiente.
+- **Límites de la implementación:** Parcial: ciclo >= VII o rol habilitado; nota 14 no comprobada, un tema, sin anexos separados ni garantía de reunión real. Parcial: generación de URL no provisiona una sala externa; no existe tabla espacios_fisicos.
+- **Criterio de aceptación `[REQUISITO]`:** DADO una oferta presencial o virtual, CUANDO se elige el ambiente, ENTONCES se comprueba disponibilidad física o se resuelve la URL; una URL generada no acredita creación de reunión externa.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF09 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF10 — Procesamiento de Cronogramas Oficiales de Aulas
+#### Ficha Técnica de Requerimiento Funcional: RF10 — Procesamiento de cronogramas oficiales de aulas
+
 
 - **Identificador:** RF10
 - **Nombre Oficial:** Carga, procesamiento y análisis de cronogramas oficiales de distribución horaria de aulas
-- **Módulo Arquitectónico:** MOD-02: Ofertas de Mentoría y Gestión de Espacios
+- **Módulo funcional vigente:** MOD-05: Administración y Analítica Institucional
 - **Descripción Funcional:** El sistema debe proveer al administrador de infraestructura la funcionalidad de cargar archivos estructurados en formato Excel (.xlsx) o PDF (.pdf) conteniendo el cronograma oficial de ocupación de aulas y laboratorios de la EPIS-UPT, procesando su contenido para extraer automáticamente las franjas horarias y recintos físicos vacantes para mentorías.
 - **Objetivo y Necesidad Académica:** Automatizar la detección de aulas libres sin requerir coordinación manual continua con conserjería ni transcripción manual de horarios, garantizando información verídica y actualizada de ambientes.
 - **Actores Participantes:** Administrador Institucional (Actor Primario); Componente Parser de Horarios (Actor Secundario).
 - **Condiciones de Entrada (Precondiciones):** Archivo oficial de cronograma emitido por la Dirección de Escuela disponible en formato digital.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El administrador accede al módulo de gestión de infraestructura física y selecciona la opción de carga de cronograma.
   2. Sube el archivo estructurado (.xlsx o .pdf) correspondiente al semestre académico en curso.
   3. El sistema ejecuta el parser interno que recorre las matrices de aulas, días lectivos y horas de clase regular.
   4. Identifica las celdas vacías y calcula las franjas libres aprovechables para mentorías (bloques de 60 o 120 minutos).
   5. Presenta un resumen de recintos y franjas extraídas, solicitando la confirmación de la importación.
   6. Al confirmar, el sistema actualiza la base de datos de espacios libres disponibles para asignación automática.
-- **Resultado Verificable (Postcondiciones):** El catálogo de ambientes libres se actualiza con base en la documentación oficial de la facultad.
+- **Resultado esperado (Postcondiciones del requisito):** El catálogo de ambientes libres se actualiza con base en la documentación oficial de la facultad.
 - **Reglas de Negocio Vinculadas:** RN-06 (Disponibilidad de aulas físicas y respeto al horario de clases oficiales).
 - **Restricciones Funcionales:** El formato del archivo debe coincidir con la plantilla oficial de la facultad; de lo contrario, el sistema rechaza el archivo indicando los errores de estructura.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Carga e ingesta de cronograma oficial en Excel o PDF) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el administrador transmite un archivo estructurado (.xlsx o .pdf) con los horarios semestrales de la EPIS-UPT, CUANDO el parser extrae las franjas de clases regulares, ENTONCES el sistema calcula las ventanas vacantes y actualiza el repositorio de ambientes libres con código HTTP 200 OK.
-  - *Escenario 2 (Rechazo de formato o archivo corrupto) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE se transmite un archivo con extensión no permitida o contenido no estructurado, CUANDO el parser inicia la validación sintáctica, ENTONCES el sistema aborta el procesamiento con código HTTP 400 Bad Request detallando la naturaleza del error de formato.
-  - *Escenario 3 (Verificación de parsing en flujo CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el componente `ScheduleParserService.py` cuenta con 8 pruebas en `test_spaces.py`, CUANDO se ejecute el pipeline de `main`, ENTONCES se confirmará la extracción adecuada de slots libres sobre los archivos de prueba institucionales.
-- **Casos de Uso Relacionados:** CUS-008 (Procesar y actualizar cronograma de asignación de infraestructura física).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/spaces.py` (`POST /api/v1/spaces/import-schedule`, `GET /api/v1/spaces/free-slots`).
-  - *Servicios de Negocio:* `ScheduleParserService.py` (`procesar_cronograma_administrador`, `get_active_slots`).
-  - *Entidades Relacionales:* Tablas de soporte de espacios físicos y persistencia temporal en memoria.
-  - *Componentes Visuales:* `AdminScheduleUploadView.tsx`, `spacesService.ts`.
-  - *Evidencia de Pruebas:* `test_spaces.py` (8 pruebas específicas de parsing backend).
+- **Casos de uso vigentes:** CUS-017.
+
+- **Estado observado:** Implementado; importación y consulta.
+- **Límites de la implementación:** Parcial: generación de URL no provisiona una sala externa; no existe tabla espacios_fisicos.
+- **Criterio de aceptación `[REQUISITO]`:** DADO un cronograma con formato admitido, CUANDO el administrador lo importa, ENTONCES se conserva una versión y se permite consultar disponibilidad; un archivo inválido informa error.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF10 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF11 — Gestión de Imprevistos, Reprogramación y Cancelación
+#### Ficha Técnica de Requerimiento Funcional: RF11 — Gestión de imprevistos, reprogramación y cancelación
+
 
 - **Identificador:** RF11
 - **Nombre Oficial:** Gestión de contingencias, reprogramación consensuada y cancelación justificada de sesiones
-- **Módulo Arquitectónico:** MOD-02: Ofertas de Mentoría y Gestión de Espacios
+- **Módulo funcional vigente:** MOD-02: Ofertas de Mentoría y Gestión de Recursos
 - **Descripción Funcional:** El sistema debe proveer al mentor mecanismos formales para gestionar situaciones imprevistas de fuerza mayor sobre sesiones publicadas o confirmadas, permitiéndole reprogramar la fecha y hora con más de 24 horas de antelación o cancelar la sesión ingresando una justificación académica obligatoria, notificando de inmediato a todos los estudiantes inscritos.
 - **Objetivo y Necesidad Académica:** Proteger a los mentoreados de ausencias imprevistas del mentor sin previo aviso, promoviendo la responsabilidad y el respeto por el tiempo de los compañeros.
 - **Actores Participantes:** Estudiante Mentor (Actor Primario); Estudiantes Inscritos (Actores Notificados).
 - **Condiciones de Entrada (Precondiciones):** Sesión de mentoría en estado "Publicada" o "Confirmada" con antelación superior a 24 horas respecto a su inicio.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El mentor accede al detalle de su sesión programada y selecciona la opción de contingencia (Reprogramar o Cancelar).
   2. Si elige reprogramar, selecciona una nueva fecha y hora respetando el margen mínimo de 24 horas y redacta el motivo del cambio.
   3. El sistema comprueba que el nuevo horario no tenga conflictos de aula ni de disponibilidad del mentor.
   4. Si elige cancelar, ingresa obligatoriamente el justificante del imprevisto académico o personal.
   5. El sistema actualiza el estado de la sesión, libera el aula física o sala virtual asignada y despacha notificaciones por correo a los estudiantes inscritos.
-- **Resultado Verificable (Postcondiciones):** La sesión se actualiza o cancela formalmente y los alumnos reciben la comunicación oportuna.
+- **Resultado esperado (Postcondiciones del requisito):** La sesión se actualiza o cancela formalmente y los alumnos reciben la comunicación oportuna.
 - **Reglas de Negocio Vinculadas:** RN-10 (Plazos de reprogramación y justificación formal de contingencias).
 - **Restricciones Funcionales:** Ninguna reprogramación puede realizarse dentro de las 24 horas previas al inicio de la sesión.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Reprogramación justificada con notificación masiva) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor sufre una contingencia académica sobrevenida, CUANDO remite una reprogramación a través de `quorum-decision` con motivo justificado y nueva fecha mayor a 24 horas, ENTONCES el sistema actualiza la sesión, notifica por correo institucional a los estudiantes inscritos y recalcula la ventana de confirmación.
-  - *Escenario 2 (Cancelación definitiva y liberación de recursos) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el mentor cancela la sesión con justificación reglamentaria, CUANDO envía la acción `CANCEL`, ENTONCES el sistema conmuta el estado de la sesión a `CANCELADA`, libera inmediatamente a los estudiantes inscritos sin penalización alguna y reincorpora el aula física al catálogo libre.
-  - *Escenario 3 (Revalidación de contingencias en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el flujo de contingencias está cubierto por 10 pruebas en `test_offers.py` y 10 pruebas en Vitest, CUANDO se concluya la subsanación de linteo en `main`, ENTONCES se comprobará la adecuada emisión de avisos y liberación de cupos.
-- **Casos de Uso Relacionados:** CUS-006 (Publicar oferta y gestionar contingencias).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/offers.py` (`POST /api/v1/offers/{id_sesion}/quorum-decision` con acción `RESCHEDULE` o `CANCEL`).
-  - *Servicios de Negocio:* `OfferService.py` (`resolve_quorum_decision`).
-  - *Entidades Relacionales:* Tablas `sesiones_mentoria`, `reservas_cupo`.
-  - *Componentes Visuales:* `MentorSessionsView.tsx`, `QuorumDecisionModalView.tsx`.
-  - *Evidencia de Pruebas:* `test_offers.py` (10 pruebas backend), `MentorSessionsView.test.tsx` (10 pruebas frontend).
+- **Casos de uso vigentes:** CUS-006, CUS-023.
+
+- **Estado observado:** Implementado; notificaciones externas pendientes.
+- **Límites de la implementación:** Parcial: ciclo >= VII o rol habilitado; nota 14 no comprobada, un tema, sin anexos separados ni garantía de reunión real. Planificador implementado en lifespan y condicionado a habilitación; operación periódica y correo externos no validados.
+- **Criterio de aceptación `[REQUISITO]`:** DADO una sesión en contingencia, CUANDO el mentor decide reprogramar o cancelar, ENTONCES se comprueban las condiciones y se actualiza la sesión; la entrega de avisos externos se valida por separado.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF11 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF12 — Reserva Concurrente de Cupos con Control de Aforo
+#### Ficha Técnica de Requerimiento Funcional: RF12 — Reserva concurrente de cupos con control de aforo
+
 
 - **Identificador:** RF12
 - **Nombre Oficial:** Inscripción transaccional concurrente y reserva de cupo con cerrojo pesimista
-- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Gestión de Asistencia
+- **Módulo funcional vigente:** MOD-03: Recomendaciones, Reservas y Quórum
 - **Descripción Funcional:** El sistema debe permitir a los estudiantes mentoreados inscribirse en sesiones de mentoría activas, gestionando las solicitudes simultáneas mediante transacciones atómicas seguras en base de datos (`SELECT ... FOR UPDATE`) que aseguren de forma estricta que jamás se exceda el aforo máximo permitido (0.0% de sobrecupo).
 - **Objetivo y Necesidad Académica:** Evitar la sobreocupación de aulas o salas virtuales, garantizando que cada estudiante que obtenga un cupo cuente con las condiciones materiales y pedagógicas para recibir atención de calidad.
 - **Actores Participantes:** Estudiante Mentoreado (Actor Primario).
 - **Condiciones de Entrada (Precondiciones):** Estudiante autenticado, con consentimiento informado vigente y sesión con cupos vacantes disponibles.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El estudiante selecciona una sesión de mentoría en el catálogo y pulsa el botón de reserva de vacante.
   2. El sistema inicia una transacción de base de datos con bloqueo a nivel de fila sobre el registro de la sesión.
   3. Verifica que la cantidad de reservas activas sea estrictamente menor al aforo reglamentario (10 presencial / 20 virtual).
   4. Si hay cupo disponible, crea la reserva con estado "Pendiente de Confirmación" y descuenta la vacante.
   5. Cierra la transacción de forma segura y confirma la reserva en la pantalla del usuario.
   6. Si la sesión se agotó exactamente en ese instante por otra solicitud concurrente, notifica al usuario que no quedan vacantes y lo invita a inscribirse en lista de espera o formular una solicitud por demanda.
-- **Resultado Verificable (Postcondiciones):** El estudiante obtiene un cupo garantizado sin riesgo de sobrecupo en el sistema.
+- **Resultado esperado (Postcondiciones del requisito):** El estudiante obtiene un cupo garantizado sin riesgo de sobrecupo en el sistema.
 - **Reglas de Negocio Vinculadas:** RN-05 (Aforos estándar y prevención estricta de sobrecupo).
 - **Restricciones Funcionales:** Ninguna transacción puede concretarse si el aforo ha alcanzado su límite reglamentario.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Reserva concurrente atómica con cero sobrecupo) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE múltiples estudiantes intentan reservar el último cupo disponible de una sesión de forma simultánea, CUANDO el backend ejecuta el bloqueo pesimista `SELECT ... FOR UPDATE` a nivel de fila en `/api/v1/bookings/reserve`, ENTONCES exactamente una solicitud es admitida con código HTTP 201 Created y las solicitudes concurrentes excedentes son denegadas con HTTP 409 Conflict, garantizando 0.0% de sobrecupo (RNF07).
-  - *Escenario 2 (Consulta de historial personal de reservas) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentoreado autenticado consulta sus inscripciones, CUANDO invoca `/api/v1/bookings/my-reservations`, ENTONCES el sistema entrega la lista completa de sesiones reservadas con detalle de estado, recinto y hora con código HTTP 200 OK.
-  - *Escenario 3 (Acreditación multihilo en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la transacción de reserva cuenta con 18 pruebas en `test_bookings.py` y 16 pruebas en `BookingModalView.test.tsx`, CUANDO se corra la suite formal en `main`, ENTONCES se ratificará la ausencia de condiciones de carrera en base de datos.
-- **Casos de Uso Relacionados:** CUS-004 (Inscribirse y reservar cupo en sesión de mentoría activa).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bookings.py` (`POST /api/v1/bookings/reserve`, `GET /api/v1/bookings/my-reservations`, `GET /api/v1/bookings/session/{id_sesion}`).
-  - *Servicios de Negocio:* `BookingService.py` (`reserve_seat`, `get_student_reservations`, `get_session_reservations`).
-  - *Entidades Relacionales:* Tablas `reservas_cupo`, `sesiones_mentoria`.
-  - *Componentes Visuales:* `BookingModalView.tsx`, `bookingService.ts`.
-  - *Evidencia de Pruebas:* `test_bookings.py` (18 pruebas backend con simulación multihilo concurrente), `BookingModalView.test.tsx` (16 pruebas frontend).
+- **Casos de uso vigentes:** CUS-003.
+
+- **Estado observado:** Implementado; validación nueva de concurrencia no ejecutada.
+- **Límites de la implementación:** La reserva no confirma la sesión ni registra asistencia.
+- **Criterio de aceptación `[REQUISITO]`:** DADO una sesión con cupo y sin reserva duplicada del solicitante, CUANDO confirma la reserva, ENTONCES se registra PENDIENTE_CONFIRMACION; solicitudes concurrentes no deben exceder el aforo.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF12 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF13 — Ratificación Anticipada Obligatoria de Asistencia
+#### Ficha Técnica de Requerimiento Funcional: RF13 — Ratificación anticipada obligatoria de asistencia
+
 
 - **Identificador:** RF13
 - **Nombre Oficial:** Confirmación y ratificación obligatoria de asistencia previa a la sesión
-- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Gestión de Asistencia
+- **Módulo funcional vigente:** MOD-03: Recomendaciones, Reservas y Quórum
 - **Descripción Funcional:** El sistema debe requerir que todo estudiante que cuente con una reserva provisional ratifique explícitamente su asistencia dentro de la ventana de confirmación establecida previa a la sesión (hasta el límite de $T-24	ext{ h}$), formalizando su intención real de acudir. Si no ratifica su asistencia en el plazo indicado, el sistema liberará automáticamente su vacante.
 - **Objetivo y Necesidad Académica:** Reducir el ausentismo ficticio en las sesiones de mentoría, asegurando que los cupos sean aprovechados por estudiantes realmente comprometidos en asistir y optimizando el tiempo del mentor.
 - **Actores Participantes:** Estudiante Mentoreado con reserva provisional (Actor Primario).
 - **Condiciones de Entrada (Precondiciones):** Estudiante con reserva activa en estado "Pendiente de Confirmación".
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El sistema envía un recordatorio automático al correo del estudiante informándole que debe confirmar su asistencia.
   2. El estudiante accede a su panel de reservas y pulsa el botón "Ratificar Asistencia".
   3. El sistema valida que la operación se realice antes de la hora de corte de quórum ($T-24	ext{ h}$).
   4. Conmuta el estado de la reserva a "Confirmada", asegurando el cupo definitivo para el estudiante.
   5. Informa al usuario que su vacante ha sido ratificada y le entrega los detalles definitivos de acceso al aula o sala virtual.
-- **Resultado Verificable (Postcondiciones):** La reserva cambia a estado "Confirmada", computándose para el quórum formal.
+- **Resultado esperado (Postcondiciones del requisito):** La reserva cambia a estado "Confirmada", computándose para el quórum formal.
 - **Reglas de Negocio Vinculadas:** RN-08 (Ratificación obligatoria de asistencia), RN-09 (Cómputo de quórum).
 - **Restricciones Funcionales:** Ninguna confirmación puede registrarse después del corte perentorio de $T-24	ext{ h}$.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Ratificación oportuna de asistencia previa al corte) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante cuenta con una reserva en estado `PENDIENTE_CONFIRMACION`, CUANDO pulsa el botón de ratificación formal antes del límite perentorio de $T-24	ext{ h}$ (RN-08) en `/api/v1/bookings/{id}/confirm`, ENTONCES el sistema conmuta el estado de la reserva a `CONFIRMADA` con código HTTP 200 OK y la computa para el quórum reglamentario.
-  - *Escenario 2 (Intento de ratificación fuera de plazo) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE la sesión ha ingresado en la ventana crítica de las 24 horas previas al inicio, CUANDO un estudiante rezagado intenta confirmar su cupo, ENTONCES el sistema rechaza la acción con código HTTP 400 Bad Request en cumplimiento de la política de corte de quórum.
-  - *Escenario 3 (Verificación en CI del cambio de estado) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el procedimiento cuenta con 12 pruebas en `test_bookings.py` y 14 pruebas en `MyBookingsView.test.tsx`, CUANDO se ejecute la validación formal en `main`, ENTONCES se verificará la transición atómica de estados.
-- **Casos de Uso Relacionados:** CUS-024 (Ratificar oportunamente asistencia a sesión de mentoría reservada).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bookings.py` (`POST /api/v1/bookings/{id_reserva}/confirm`).
-  - *Servicios de Negocio:* `BookingService.py` (`confirm_attendance`).
-  - *Entidades Relacionales:* Tabla `reservas_cupo`.
-  - *Componentes Visuales:* `MyBookingsView.tsx`.
-  - *Evidencia de Pruebas:* `test_bookings.py` (12 pruebas backend), `MyBookingsView.test.tsx` (14 pruebas frontend).
+- **Casos de uso vigentes:** CUS-004, CUS-022.
+
+- **Estado observado:** Implementado; edición administrativa propuesta.
+- **Límites de la implementación:** El servicio rechaza cuando faltan 24 horas o menos; no equivale a asistencia efectiva. Propuesto: configuración de despliegue no equivale a edición administrativa; sanciones pendientes.
+- **Criterio de aceptación `[REQUISITO]`:** DADO una reserva propia pendiente, CUANDO el estudiante ratifica antes de T-24h, ENTONCES se registra CONFIRMADA; al llegar al corte se rechaza la ratificación extemporánea.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF13 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF14 — Desistimiento Voluntario y Liberación Inmediata de Cupo
+#### Ficha Técnica de Requerimiento Funcional: RF14 — Desistimiento voluntario y liberación inmediata de cupo
+
 
 - **Identificador:** RF14
 - **Nombre Oficial:** Cancelación voluntaria de reserva y restitución inmediata de vacante
-- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Gestión de Asistencia
+- **Módulo funcional vigente:** MOD-03: Recomendaciones, Reservas y Quórum
 - **Descripción Funcional:** El sistema debe permitir a cualquier estudiante inscrito cancelar voluntariamente su reserva con anticipación superior a 24 horas respecto al inicio de la sesión, liberando instantáneamente la vacante para que otro compañero pueda inscribirse de inmediato, sin aplicar penalizaciones académicas al usuario que desiste oportunamente.
 - **Objetivo y Necesidad Académica:** Fomentar una cultura de respeto mutuo y solidaridad, permitiendo que las vacantes no utilizadas se reasignen a compañeros que las necesitan con urgencia.
 - **Actores Participantes:** Estudiante Mentoreado con reserva vigente (Actor Primario).
 - **Condiciones de Entrada (Precondiciones):** Estudiante con reserva en estado "Pendiente" o "Confirmada" con antelación mayor a 24 horas.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El estudiante visualiza su panel de reservas activas y pulsa "Cancelar Reserva".
   2. El sistema despliega un mensaje pidiendo confirmar la acción y recordando que la vacante se liberará para otro estudiante.
   3. El usuario confirma el desistimiento voluntario.
   4. El sistema cancela la reserva, actualiza el aforo disponible de la sesión en base de datos e informa a los estudiantes en lista de espera si existieran.
   5. Emite confirmación de cancelación exitosa sin registrar sanciones para el estudiante.
-- **Resultado Verificable (Postcondiciones):** La vacante queda liberada de forma inmediata y reflejada en el catálogo de ofertas.
+- **Resultado esperado (Postcondiciones del requisito):** La vacante queda liberada de forma inmediata y reflejada en el catálogo de ofertas.
 - **Reglas de Negocio Vinculadas:** RN-10 (Desistimiento oportuno sin sanción antes de $T-24	ext{ h}$).
 - **Restricciones Funcionales:** Si el estudiante cancela con menos de 24 horas de antelación o no asiste a la sesión confirmada, el sistema registrará una falta injustificada en su historial.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Desistimiento voluntario antes de $T-24	ext{ h}$) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante con reserva activa no podrá asistir y desiste con más de 24 horas de antelación (RN-10), CUANDO confirma la anulación en `/api/v1/bookings/{id}/cancel`, ENTONCES el sistema cancela la reserva sin registrar sanción académica y restituye inmediatamente la vacante al aforo libre con código HTTP 200 OK.
-  - *Escenario 2 (Intento de cancelación intempestiva en ventana crítica) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE restan menos de 24 horas para la sesión, CUANDO el estudiante intenta anular unilateralmente su cupo, ENTONCES el sistema advierte que la cancelación tardía compromete el quórum y registra la incidencia conforme a la reglamentación interna.
-  - *Escenario 3 (Acreditación de liberación en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la liberación inmediata de cupos cuenta con 10 pruebas en Pytest y 10 en Vitest, CUANDO se ejecute el flujo de `main`, ENTONCES se confirmará el recálculo instantáneo de vacantes.
-- **Casos de Uso Relacionados:** CUS-017 (Cancelar oportunamente reserva de mentoría y liberar cupo).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bookings.py` (`POST /api/v1/bookings/{id_reserva}/cancel`).
-  - *Servicios de Negocio:* `BookingService.py` (`cancel_reservation`).
-  - *Entidades Relacionales:* Tablas `reservas_cupo`, `sesiones_mentoria`.
-  - *Componentes Visuales:* `MyBookingsView.tsx`.
-  - *Evidencia de Pruebas:* `test_bookings.py` (10 pruebas backend), `MyBookingsView.test.tsx` (10 pruebas frontend).
+- **Casos de uso vigentes:** CUS-024, CUS-018, CUS-022.
+
+- **Estado observado:** Parcial: desistimiento; justificación y penalizaciones propuestas.
+- **Límites de la implementación:** Antes de T-24h; motivo opcional, distinto de justificación posterior de inasistencia. Propuesto: falta RF específico, plazo, evidencia, responsable y resolución; no es cancelación previa. Propuesto: configuración de despliegue no equivale a edición administrativa; sanciones pendientes.
+- **Criterio de aceptación `[REQUISITO]`:** DADO una reserva propia dentro de plazo, CUANDO el estudiante desiste, ENTONCES se registra CANCELADA_USUARIO y se libera cupo con motivo opcional; no se crea una justificación posterior.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF14 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF15 — Monitoreo Desatendido y Corte de Quórum en $T-24	ext{ h}$
+#### Ficha Técnica de Requerimiento Funcional: RF15 — Monitoreo desatendido y corte de quórum en $T-24\text{ h}$
+
 
 - **Identificador:** RF15
 - **Nombre Oficial:** Evaluación desatendida del quórum reglamentario en la ventana de corte $T-24	ext{ h}$
-- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Gestión de Asistencia
+- **Módulo funcional vigente:** MOD-03: Recomendaciones, Reservas y Quórum
 - **Descripción Funcional:** El sistema debe ejecutar de forma desatendida y automática (mediante un demonio cron programado) una verificación sobre todas las sesiones de mentoría que alcancen exactamente la marca de 24 horas previas a su inicio ($T-24	ext{ h}$), evaluando si el número de reservas confirmadas alcanza el quórum mínimo obligatorio del 50% del aforo (al menos 3 estudiantes en presencial o 5 en virtual). Si alcanza el quórum, confirma la sesión definitivamente; de lo contrario, la declara en quórum insuficiente.
 - **Objetivo y Necesidad Académica:** Proteger el tiempo de los mentores y evitar el desplazamiento innecesario de docentes o estudiantes al campus si la sesión no cuenta con una cantidad mínima de participantes.
 - **Actores Participantes:** Componente Demonio Cron / Scheduler de Quórum (Actor Primario); Mentor y Estudiantes Inscritos (Actores Notificados).
 - **Condiciones de Entrada (Precondiciones):** Sesión de mentoría en estado "Publicada" que alcanza la marca temporal de $T-24	ext{ h}$.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El demonio de evaluación se activa periódicamente y selecciona las sesiones activas en el umbral exacto de $T-24	ext{ h}$.
   2. Invalida automáticamente las reservas que permanecieron en estado "Pendiente de Confirmación" sin ratificar.
   3. Cuenta el número de reservas confirmadas restantes.
   4. Si las confirmaciones son $\ge 50\%$ del aforo reglamentario (3 en presencial / 5 en virtual), transiciona la sesión a "Confirmada" y remite notificaciones de ratificación.
   5. Si las confirmaciones son $< 50\%$, transiciona la sesión a "Quórum Insuficiente" y notifica de inmediato al mentor para su resolución.
-- **Resultado Verificable (Postcondiciones):** La sesión queda formalmente clasificada como "Confirmada" o "Quórum Insuficiente".
+- **Resultado esperado (Postcondiciones del requisito):** La sesión queda formalmente clasificada como "Confirmada" o "Quórum Insuficiente".
 - **Reglas de Negocio Vinculadas:** RN-08 (Corte de quórum en $T-24	ext{ h}$), RN-09 (Umbral mínimo del 50% de aforo).
 - **Restricciones Funcionales:** Ninguna sesión puede mantenerse con reservas pendientes sin definir tras el corte de $T-24	ext{ h}$.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Corte automático y confirmación con quórum suficiente) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE una sesión alcanza la marca temporal de $T-24	ext{ h}$ y cuenta con al menos el 50% de cupos ratificados (>= 3 presencial / >= 5 virtual, RN-08 y RN-09), CUANDO el demonio desatendido ejecuta la evaluación en `/api/v1/quorum/evaluate`, ENTONCES transiciona la sesión a `CONFIRMADA`, caduca las reservas no ratificadas y despacha las notificaciones de confirmación con código HTTP 200 OK.
-  - *Escenario 2 (Detección de quórum insuficiente a $T-24	ext{ h}$) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE una sesión no alcanza el umbral mínimo reglamentario en la ventana de corte, CUANDO el motor de quórum la evalúa, ENTONCES conmuta su estado a `QUORUM_INSUFICIENTE` y abre la ventana resolutiva de 12 horas para decisión del mentor.
-  - *Escenario 3 (Verificación de idempotencia del cron en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la evaluación masiva cuenta con 16 pruebas en `test_quorum.py` y 12 pruebas en Vitest, CUANDO se ejecute la suite formal en `main`, ENTONCES se constatará que múltiples ejecuciones sucesivas del evaluador no dupliquen transiciones ni notificaciones.
-- **Casos de Uso Relacionados:** CUS-023 (Evaluar automáticamente cumplimiento de quórum mínimo en $T-24	ext{ h}$), CUS-009 (Monitorear y despachar notificaciones institucionales).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/quorum.py` (`POST /api/v1/quorum/evaluate`, `POST /api/v1/quorum/evaluate-all`).
-  - *Servicios de Negocio:* `BookingService.py` (`evaluate_quorum`, `evaluate_all_active_quorums`).
-  - *Entidades Relacionales:* Tablas `sesiones_mentoria`, `reservas_cupo`.
-  - *Componentes Visuales:* `NotificationCenterView.tsx`.
-  - *Evidencia de Pruebas:* `test_quorum.py` (16 pruebas backend con simulación de avance temporal), `NotificationCenterView.test.tsx` (12 pruebas frontend).
+- **Casos de uso vigentes:** CUS-023, CUS-009, CUS-022.
+
+- **Estado observado:** Parcial: evaluación y planificador; operación real pendiente.
+- **Límites de la implementación:** Planificador implementado en lifespan y condicionado a habilitación; operación periódica y correo externos no validados. Parcial: no acredita analítica integral de retención ni indicadores institucionales. Propuesto: configuración de despliegue no equivale a edición administrativa; sanciones pendientes.
+- **Criterio de aceptación `[REQUISITO]`:** DADO una sesión no evaluada dentro de la ventana de corte, CUANDO se evalúa el quórum, ENTONCES se invalidan pendientes y se confirma la sesión o se informa quórum insuficiente sin repetir mutaciones ya efectuadas.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF15 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF16 — Gestión Resolutiva del Mentor ante Quórum Insuficiente
+#### Ficha Técnica de Requerimiento Funcional: RF16 — Gestión resolutiva del mentor ante quórum insuficiente
+
 
 - **Identificador:** RF16
 - **Nombre Oficial:** Gestión resolutiva y toma de decisión del mentor ante contingencia de quórum insuficiente
-- **Módulo Arquitectónico:** MOD-05: Quórum, Reservas y Gestión de Asistencia
+- **Módulo funcional vigente:** MOD-03: Recomendaciones, Reservas y Quórum
 - **Descripción Funcional:** El sistema debe suministrar al estudiante mentor una ventana interactiva de resolución urgente (máximo 12 horas) cuando su sesión sea declarada en "Quórum Insuficiente" a $T-24	ext{ h}$, facultándolo para decidir soberanamente entre tres opciones: (1) impartir la sesión con los alumnos confirmados asumiendo el dictado con aforo reducido, (2) reprogramar la fecha de la sesión con más de 24 horas de anticipación, o (3) cancelar definitivamente la sesión sin sanción formativa.
 - **Objetivo y Necesidad Académica:** Respetar la autonomía pedagógica del mentor permitiéndole atender a compañeros motivados aun con poca audiencia si así lo decide, o reprogramar ordenadamente sin perjudicar su expediente.
 - **Actores Participantes:** Estudiante Mentor (Actor Decisor); Estudiantes Confirmados (Beneficiarios de la Decisión).
 - **Condiciones de Entrada (Precondiciones):** Sesión en estado "Quórum Insuficiente" dentro del plazo resolutivo de 12 horas.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El mentor recibe alerta urgente y accede a su panel de control de mentorías.
   2. Visualiza el diálogo modal resolutivo con los datos de alumnos confirmados y las tres alternativas normativas.
   3. Si elige "Impartir con aforo reducido", el sistema confirma la sesión y notifica a los alumnos inscritos que la clase se dictará con normalidad.
   4. Si elige "Reprogramar", selecciona nueva fecha (con antelación $> 24	ext{ h}$) y el sistema traslada las reservas notificando el cambio.
   5. Si elige "Cancelar", ingresa la justificación y el sistema anula la sesión liberando los recursos sin penalización.
   6. Si transcurren las 12 horas sin respuesta del mentor, el sistema cancela automáticamente la sesión por vencimiento de plazo.
-- **Resultado Verificable (Postcondiciones):** La sesión asume su estado final ("Confirmada", "Reprogramada" o "Cancelada") con notificación a los interesados.
+- **Resultado esperado (Postcondiciones del requisito):** La sesión asume su estado final ("Confirmada", "Reprogramada" o "Cancelada") con notificación a los interesados.
 - **Reglas de Negocio Vinculadas:** RN-09 (Opciones resolutivas ante quórum insuficiente), RN-10 (Justificación de contingencias).
 - **Restricciones Funcionales:** La ventana resolutiva vence indefectiblemente a las 12 horas previas a la sesión.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Resolución positiva de dictado con aforo reducido) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE una sesión fue catalogada en `QUORUM_INSUFICIENTE`, CUANDO el mentor opta voluntariamente por la resolución `PROCEED` para apoyar a los pocos inscritos confirmados, ENTONCES el sistema valida la decisión en `/api/v1/offers/{id}/quorum-decision`, transiciona la sesión a `CONFIRMADA` y despacha el recordatorio con los accesos definitivos con código HTTP 200 OK.
-  - *Escenario 2 (Resolución de cancelación reglamentaria) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el mentor decide acogerse a la cancelación institucional por falta de quórum, CUANDO remite la acción `CANCEL`, ENTONCES el sistema anula la sesión sin penalidad formativa para el mentor, notifica a los inscritos y libera el espacio físico o virtual reservado.
-  - *Escenario 3 (Revalidación de interfaz resolutiva en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el flujo está cubierto por 10 pruebas en Pytest y 10 pruebas en `QuorumDecisionModalView.test.tsx`, CUANDO se concluya la subsanación de linteo en `main`, ENTONCES se confirmará la adecuada gestión de contingencias.
-- **Casos de Uso Relacionados:** CUS-007 (Resolver contingencia de quórum insuficiente por decisión del mentor).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/offers.py` (`POST /api/v1/offers/{id_sesion}/quorum-decision` con payload `action` en `PROCEED`, `RESCHEDULE` o `CANCEL`).
-  - *Servicios de Negocio:* `OfferService.py` (`resolve_quorum_decision`).
-  - *Entidades Relacionales:* Tablas `sesiones_mentoria`, `reservas_cupo`.
-  - *Componentes Visuales:* `QuorumDecisionModalView.tsx`.
-  - *Evidencia de Pruebas:* `test_offers.py` (10 pruebas backend), `QuorumDecisionModalView.test.tsx` (10 pruebas frontend).
+- **Casos de uso vigentes:** CUS-023.
+
+- **Estado observado:** Implementado; decisión del mentor.
+- **Límites de la implementación:** Planificador implementado en lifespan y condicionado a habilitación; operación periódica y correo externos no validados.
+- **Criterio de aceptación `[REQUISITO]`:** DADO una sesión con quórum insuficiente, CUANDO el mentor decide continuar, reprogramar o cancelar con motivo, ENTONCES se aplica la decisión válida y se muestra el estado resultante.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF16 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF17 — Marcación de Asistencia con Pase QR Dinámico (TOTP)
+#### Ficha Técnica de Requerimiento Funcional: RF17 — Marcación de asistencia con pase QR dinámico
+
 
 - **Identificador:** RF17
-- **Nombre Oficial:** Control de asistencia en tiempo real mediante código QR dinámico criptográfico (TOTP)
-- **Módulo Arquitectónico:** MOD-06: Asistencia, Bitácoras y Calidad
-- **Descripción Funcional:** El sistema debe proveer al mentor titular la capacidad de proyectar en pantalla un código QR dinámico que rota automáticamente cada 30 segundos (basado en algoritmos de contraseñas de un solo uso basadas en el tiempo - TOTP) y exhibe un código numérico de 6 dígitos de respaldo, permitiendo que los mentoreados presentes en el aula o sala virtual registren su asistencia mediante el escaneo del código desde sus dispositivos o digitando el PIN activo.
+- **Nombre Oficial:** Control de asistencia en tiempo real mediante código QR dinámico criptográfico (pase efímero)
+- **Módulo funcional vigente:** MOD-04: Ejecución y Seguimiento Académico
+- **Descripción Funcional:** El sistema debe proveer al mentor titular la capacidad de proyectar en pantalla un código QR dinámico que rota automáticamente cada 30 segundos (basado en algoritmos de contraseñas de un solo uso basadas en el tiempo - pase efímero) y exhibe un código numérico de 6 dígitos de respaldo, permitiendo que los mentoreados presentes en el aula o sala virtual registren su asistencia mediante el escaneo del código desde sus dispositivos o digitando el PIN activo.
 - **Objetivo y Necesidad Académica:** Erradicar la suplantación de asistencia y el registro fraudulento a distancia (fotos compartidas por mensajería), asegurando que solo los estudiantes físicamente presentes o conectados en vivo certifiquen su participación.
 - **Actores Participantes:** Estudiante Mentor (Generador y Proyector del QR); Estudiante Mentoreado (Registrador de Asistencia).
 - **Condiciones de Entrada (Precondiciones):** Sesión confirmada en ejecución dentro de la ventana de marcación permitida (desde 15 minutos antes hasta 30 minutos después de la hora de inicio).
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El mentor inicia la proyección del pase de asistencia desde su panel de control.
   2. El sistema genera el código QR dinámico y el PIN numérico de respaldo, iniciando la rotación cada 30 segundos.
   3. Los estudiantes mentoreados abren la cámara o escáner desde la aplicación web o digitan el PIN en pantalla.
   4. El sistema valida criptográficamente la coincidencia del token y verifica que el alumno cuente con reserva confirmada.
   5. Registra de inmediato la asistencia con fecha, hora e IP de origen, actualizando el listado en tiempo real en la pantalla del mentor.
   6. Si un estudiante no dispone de cámara, el mentor puede marcarlo manualmente en la lista de respaldo con motivo justificado.
-- **Resultado Verificable (Postcondiciones):** El registro de asistencia queda almacenado de forma inmutable en el expediente de la sesión.
+- **Resultado esperado (Postcondiciones del requisito):** El registro de asistencia queda almacenado de forma inmutable en el expediente de la sesión.
 - **Reglas de Negocio Vinculadas:** RN-05 (Control de asistencia presencial), RN-12 (Obligatoriedad de asistencia para responder encuestas).
 - **Restricciones Funcionales:** Ningún escaneo será admitido fuera de la ventana horaria de tolerancia ([-15 min, +30 min]).
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Generación de pase TOTP dinámico de 30 segundos) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el mentor titular inicia la sesión dentro de la ventana de marcación ([-15 min, +30 min]), CUANDO solicita el token en `/api/v1/sessions/{id}/attendance/token`, ENTONCES el sistema genera un código numérico y QR efímero que rota cada 30 segundos mediante HMAC-SHA1 para prevenir la falsificación por captura de pantalla con código HTTP 200 OK.
-  - *Escenario 2 (Check-in exitoso de mentoreado con reserva confirmada) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante con reserva `CONFIRMADA` escanea el QR o introduce el código activo, CUANDO envía la solicitud a `/api/v1/sessions/{id}/attendance/check-in`, ENTONCES el sistema valida la vigencia del token, registra la presencia efectiva en `asistencias_sesion` con IP de origen y código HTTP 200 OK.
-  - *Escenario 3 (Rechazo de pase expirado o sin reserva previa) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante intenta marcar con un token vencido o sin reserva confirmada, CUANDO remite el check-in, ENTONCES el sistema rechaza la marcación con código HTTP 400 Bad Request o HTTP 403 Forbidden registrando la traza de intento fallido.
-  - *Escenario 4 (Acreditación de seguridad de asistencia en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el subsistema cuenta con 14 pruebas en `test_attendance.py` y 20 pruebas en `AttendanceScannerView.test.tsx`, CUANDO se ejecute el flujo de CI en `main`, ENTONCES se certificará la sincronía temporal y la auditabilidad del check-in.
-- **Casos de Uso Relacionados:** CUS-012 (Registrar asistencia presencial o virtual mediante código QR dinámico TOTP).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/attendance.py` (`GET /api/v1/sessions/{id_sesion}/attendance/token`, `POST /api/v1/sessions/{id_sesion}/attendance/check-in`, `GET /api/v1/sessions/{id_sesion}/attendance`).
-  - *Servicios de Negocio:* `AttendanceService.py` (`generate_token`, `record_checkin`, `get_roster`).
-  - *Entidades Relacionales:* Tablas `asistencias_sesion`, `tokens_asistencia_activos`.
-  - *Componentes Visuales:* `AttendanceScannerView.tsx`, `AttendanceQrModalView.tsx`.
-  - *Evidencia de Pruebas:* `test_attendance.py` (14 pruebas backend con validación criptográfica TOTP), `AttendanceScannerView.test.tsx` (20 pruebas frontend).
+- **Casos de uso vigentes:** CUS-007, CUS-018.
+
+- **Estado observado:** Parcial: pase efímero; cámara real pendiente.
+- **Límites de la implementación:** Cámara real pendiente; token aleatorio de 30 s, no TOTP RFC 6238; SHA-256 no equivale a firma certificada. Propuesto: falta RF específico, plazo, evidencia, responsable y resolución; no es cancelación previa.
+- **Criterio de aceptación `[REQUISITO]`:** DADO una reserva confirmada y un pase vigente, CUANDO el estudiante marca dentro de inicio −15 min a fin +30 min, ENTONCES se registra asistencia; un pase vencido se rechaza.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF17 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF18 — Registro de Bitácora Docente en 48h con Hash SHA-256
+#### Ficha Técnica de Requerimiento Funcional: RF18 — Registro de bitácora docente en 48h con hash SHA-256
+
 
 - **Identificador:** RF18
 - **Nombre Oficial:** Suscripción y registro obligatorio de bitácora pedagógica con sello de integridad SHA-256
-- **Módulo Arquitectónico:** MOD-06: Asistencia, Bitácoras y Calidad
+- **Módulo funcional vigente:** MOD-04: Ejecución y Seguimiento Académico
 - **Descripción Funcional:** El sistema debe requerir que el mentor registre obligatoriamente una bitácora pedagógica detallada dentro de las 48 horas posteriores a la culminación de la sesión, especificando los temas silábicos efectivamente explicados, los ejercicios desarrollados, las observaciones sobre el desempeño del grupo y las incidencias ocurridas, sellando el reporte con una huella criptográfica SHA-256 inalterable.
 - **Objetivo y Necesidad Académica:** Proveer respaldo documental y pedagógico a la labor del mentor, permitiendo al Comité de Tutoría fiscalizar el contenido dictado y sirviendo de base auditada para la posterior convalidación de horas de mentoría.
 - **Actores Participantes:** Estudiante Mentor (Actor Redactor); Coordinación de Tutoría (Entidad Fiscalizadora).
 - **Condiciones de Entrada (Precondiciones):** Sesión de mentoría culminada y con registro de asistencia cerrado.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El mentor accede al formulario de redacción de bitácora de la sesión finalizada.
   2. Verifica la lista consolidada de estudiantes que registraron asistencia.
   3. Redacta el resumen temático desarrollado, ejercicios resueltos y observaciones pedagógicas (mínimo 50 caracteres).
   4. Adjunta enlaces a materiales o repositorios de código trabajados durante la clase.
   5. Pulsa el botón de firma digital del reporte.
   6. El sistema compila el documento en un objeto inmutable, calcula el hash SHA-256 de los datos, almacena la bitácora y marca la sesión como "Bitácora Registrada".
-- **Resultado Verificable (Postcondiciones):** La bitácora queda archivada con firma digital inalterable, habilitando el cómputo de horas formativas.
+- **Resultado esperado (Postcondiciones del requisito):** La bitácora queda archivada con firma digital inalterable, habilitando el cómputo de horas formativas.
 - **Reglas de Negocio Vinculadas:** RN-12 (Plazo improrrogable de 48 horas para registro de bitácora), RN-14 (Horas auditadas para certificación).
-- **Restricciones Funcionales:** Si la bitácora no se registra dentro de las 48 horas, la sesión se catalogará como "Extemporánea" y no acumulará horas para certificación hasta que medie justificación formal aprobada por la Dirección de Escuela.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Registro oportuno de bitácora con hash criptográfico SHA-256) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE una sesión concluyó y el mentor ingresa dentro del plazo improrrogable de 48 horas (RN-12), CUANDO redacta las observaciones pedagógicas (>= 50 caracteres) y firma el reporte en `/api/v1/sessions/{id}/bitacora`, ENTONCES el sistema genera un sello inalterable SHA-256 sobre los datos de asistencia y contenidos, registra la bitácora con código HTTP 201 Created y conmuta la sesión a `BITACORA_REGISTRADA`.
-  - *Escenario 2 (Bloqueo por vencimiento del plazo de 48 horas) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE han transcurrido más de 48 horas desde la culminación de la sesión, CUANDO el mentor intenta remitir la bitácora, ENTONCES el sistema bloquea el registro con código HTTP 400 Bad Request o HTTP 422, impidiendo la acreditación de horas y marcando la sesión como extemporánea para fiscalización de Tutoría.
-  - *Escenario 3 (Validación de inmutabilidad en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el sellado criptográfico cuenta con 18 pruebas en `test_bitacora.py` y 22 pruebas en `BitacoraFormView.test.tsx`, CUANDO se ejecute la suite formal en `main`, ENTONCES se verificará la integridad del hash SHA-256 ante cualquier intento de alteración.
-- **Casos de Uso Relacionados:** CUS-013 (Registrar bitácora pedagógica post-sesión y sellar reporte con hash SHA-256).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bitacora.py` (`POST /api/v1/sessions/{id_sesion}/bitacora`, `GET /api/v1/sessions/{id_sesion}/bitacora`).
-  - *Servicios de Negocio:* `BitacoraService.py` (`create_bitacora`, `get_bitacora`).
-  - *Entidades Relacionales:* Tabla `bitacoras_pedagogicas`.
-  - *Componentes Visuales:* `BitacoraFormView.tsx`.
-  - *Evidencia de Pruebas:* `test_bitacora.py` (18 pruebas backend con verificación del hash SHA-256), `BitacoraFormView.test.tsx` (22 pruebas frontend).
+- **Restricciones Funcionales:** Si la bitácora no se registra dentro de las 48 horas, el servicio rechaza el registro; una reapertura o justificación posterior sigue como requisito pendiente, sin atribuir un estado físico nuevo a la sesión.
+- **Casos de uso vigentes:** CUS-007, CUS-012, CUS-019.
+
+- **Estado observado:** Implementado; sello de integridad y visado administrativo.
+- **Límites de la implementación:** Cámara real pendiente; token aleatorio de 30 s, no TOTP RFC 6238; SHA-256 no equivale a firma certificada. Parcial: no existe evidencia de evaluación individual mentor a estudiante. Parcial: Tutor no identificado como rol operativo; visado administrativo no constituye firma certificada.
+- **Criterio de aceptación `[REQUISITO]`:** DADO un mentor titular o administrador autorizado, CUANDO registra una bitácora válida antes de fin +48 h, ENTONCES se conserva su contenido y huella; fuera del plazo se rechaza sin inventar un estado Extemporánea.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF18 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF19 — Historial de Sesiones, Bitácoras y Recursos Compartidos
+#### Ficha Técnica de Requerimiento Funcional: RF19 — Historial de sesiones, bitácoras y recursos compartidos
+
 
 - **Identificador:** RF19
 - **Nombre Oficial:** Repositorio cronológico de sesiones, bitácoras y biblioteca de recursos didácticos
-- **Módulo Arquitectónico:** MOD-06: Asistencia, Bitácoras y Calidad
+- **Módulo funcional vigente:** MOD-04: Ejecución y Seguimiento Académico
 - **Descripción Funcional:** El sistema debe suministrar a mentores y mentoreados un historial cronológico interactivo donde consulten las sesiones pasadas en las que participaron, las bitácoras docentes suscritas, los temas revisados y los enlaces a materiales didácticos compartidos (diapositivas, grabaciones, repositorios de GitHub o ejercicios prácticos), sirviendo de biblioteca digital de consulta permanente para la comunidad estudiantil.
 - **Objetivo y Necesidad Académica:** Fomentar el autoaprendizaje continuo y la reutilización de materiales de calidad generados durante las mentorías, permitiendo a los alumnos repasar conceptos antes de sus evaluaciones oficiales.
 - **Actores Participantes:** Estudiante Mentoreado, Estudiante Mentor (Actores de Consulta).
 - **Condiciones de Entrada (Precondiciones):** Usuario autenticado en la plataforma.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El usuario accede a la sección de "Historial de Mentorías".
   2. El sistema despliega la relación cronológica de sesiones en las que participó como asistente o mentor.
   3. El usuario puede filtrar por ciclo académico, asignatura formativa o palabra clave de tema.
   4. Al pulsar sobre una sesión, visualiza los detalles: fecha, mentor, temas silábicos cubiertos y la bitácora suscrita.
   5. Puede acceder a los enlaces de recursos didácticos adjuntos y descargarlos para su estudio personal.
-- **Resultado Verificable (Postcondiciones):** El estudiante accede de forma transparente a los materiales educativos oficiales.
+- **Resultado esperado (Postcondiciones del requisito):** El estudiante accede de forma transparente a los materiales educativos oficiales.
 - **Reglas de Negocio Vinculadas:** RN-11 (Alineamiento curricular), RN-02 (Privacidad de datos personales).
 - **Restricciones Funcionales:** Ningún usuario ajeno a la comunidad universitaria podrá acceder a los materiales compartidos.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Consulta de historial formativo y materiales compartidos) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante o mentor accede a su historial académico, CUANDO filtra por ciclo o asignatura, ENTONCES el sistema entrega la relación cronológica de sesiones atendidas, enlaces a diapositivas, repositorios de código y bitácoras asociadas con código HTTP 200 OK.
-  - *Escenario 2 (Visualización restringida por titularidad de datos) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un usuario común intenta consultar la bitácora o materiales de una sesión en la que no participó como asistente ni mentor, CUANDO envía la solicitud de lectura, ENTONCES el sistema deniega el acceso con código HTTP 403 Forbidden conforme al principio de privacidad académica.
-  - *Escenario 3 (Comprobación en suite de integración en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la consulta histórica cuenta con 8 pruebas en Pytest y 12 pruebas en `BitacoraHistoryView.test.tsx`, CUANDO se ejecute el pipeline de `main`, ENTONCES se verificará el filtrado seguro por titularidad de usuario.
-- **Casos de Uso Relacionados:** CUS-014 (Consultar historial de mentorías, bitácoras pedagógicas y materiales educativos).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bitacora.py` (`GET /api/v1/sessions/{id_sesion}/bitacora`, `GET /api/v1/bitacoras`), `aplicacion/backend/app/api/v1/endpoints/bookings.py` (`GET /api/v1/bookings/my-reservations`).
-  - *Servicios de Negocio:* `BitacoraService.py` (`get_bitacora`, `list_bitacoras`), `BookingService.py` (`get_student_reservations`).
-  - *Entidades Relacionales:* Tablas `bitacoras_pedagogicas`, `sesiones_mentoria`.
-  - *Componentes Visuales:* `BitacoraHistoryView.tsx`.
-  - *Evidencia de Pruebas:* `test_bitacora.py` (8 pruebas backend), `BitacoraHistoryView.test.tsx` (12 pruebas frontend).
+- **Casos de uso vigentes:** CUS-013.
+
+- **Estado observado:** Parcial: historial por rol.
+- **Límites de la implementación:** Parcial: historial unificado, recursos y consulta de bitácoras por mentoreado pendientes.
+- **Criterio de aceptación `[REQUISITO]`:** DADO un usuario autenticado, CUANDO consulta su historial, ENTONCES visualiza las reservas o sesiones de su rol; el historial unificado y los recursos se mantienen como alcance pendiente.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF19 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF20 — Encuestas de Calidad y Retroalimentación Post-Mentoría (24h)
+#### Ficha Técnica de Requerimiento Funcional: RF20 — Captura de encuestas de calidad post-mentoría (ventana 24h)
+
 
 - **Identificador:** RF20
 - **Nombre Oficial:** Captura, procesamiento y control de encuestas de calidad pedagógica post-mentoría
-- **Módulo Arquitectónico:** MOD-06: Asistencia, Bitácoras y Calidad
+- **Módulo funcional vigente:** MOD-04: Ejecución y Seguimiento Académico
 - **Descripción Funcional:** El sistema debe habilitar una encuesta de satisfacción y calidad pedagógica (instrumento CSAT adaptado a 4 dimensiones: dominio temático, claridad pedagógica, puntualidad y utilidad práctica) dirigida exclusivamente a los estudiantes mentoreados que hayan registrado asistencia efectiva en la sesión, restringiendo su envío dentro de una ventana perentoria de 24 horas posteriores a la finalización de la mentoría.
 - **Objetivo y Necesidad Académica:** Recopilar retroalimentación objetiva, constructiva y fresca sobre el desempeño de los mentores para alimentar el motor de recomendación, identificar necesidades de capacitación y sustentar reconocimientos institucionales.
 - **Actores Participantes:** Estudiante Mentoreado con asistencia comprobada (Actor Evaluador); Estudiante Mentor (Sujeto Evaluado).
 - **Condiciones de Entrada (Precondiciones):** Estudiante con asistencia formalmente validada mediante QR dinámico y sesión culminada dentro de las últimas 24 horas.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. Al culminar la sesión y cerrarse la lista de asistencia, el sistema activa la encuesta para los estudiantes que asistieron efectivamente.
   2. El estudiante accede a la plataforma y visualiza una notificación destacando la disponibilidad de la encuesta de la sesión recién terminada.
   3. Abre el formulario y califica las 4 dimensiones pedagógicas en escala Likert de 1 a 5 estrellas.
   4. Opcionalmente, ingresa un comentario cualitativo con sugerencias de mejora (mínimo 20 caracteres si decide completarlo).
   5. Envía la encuesta; el sistema valida que no haya transcurrido más de 24 horas desde el fin de la sesión y que el alumno no haya respondido previamente.
-  6. Almacena la evaluación anonimizada en la tabla `encuestas_calidad` y actualiza de inmediato el promedio de reputación del mentor.
-- **Resultado Verificable (Postcondiciones):** La evaluación queda registrada y computada para el índice de reputación del mentor.
+  6. Registra la evaluación asociada a la participación del asistente. La anonimización y el recálculo integral de reputación se conservan como requisitos pendientes; el registro actual incluye la identidad del estudiante.
+- **Resultado esperado (Postcondiciones del requisito):** La evaluación queda registrada; su empleo en un índice integral de reputación requiere la cobertura pendiente de RF21.
 - **Reglas de Negocio Vinculadas:** RN-13 (Plazo de 24 horas para respuesta de encuestas de calidad), RN-12 (Acceso condicionado a asistencia efectiva).
 - **Restricciones Funcionales:** Ningún estudiante sin asistencia confirmada podrá visualizar o enviar la encuesta; una vez transcurridas las 24 horas, el sistema bloquea definitivamente el formulario.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Envío de evaluación dentro de la ventana de 24 horas por asistente confirmado) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE una sesión culminó, restan menos de 24 horas (RN-13) y el mentoreado registra asistencia efectiva comprobada (`asistio = True`, RN-12), CUANDO califica las 4 dimensiones Likert (1 al 5) e incluye retroalimentación cualitativa (>= 20 caracteres) en `/api/v1/sessions/{id}/survey`, ENTONCES el sistema persiste la evaluación en `encuestas_calidad` con código HTTP 201 Created y actualiza el promedio del mentor.
-  - *Escenario 2 (Bloqueo por inasistencia del mentoreado) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante con reserva no asistió a la sesión de mentoría, CUANDO intenta enviar el formulario de encuesta, ENTONCES el sistema bloquea la operación con código HTTP 403 Forbidden y mensaje explícito de inhabilitación por falta de asistencia comprobada (RN-12).
-  - *Escenario 3 (Cierre definitivo de la ventana perentoria de 24 horas) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE han transcurrido más de 24 horas desde la culminación de la mentoría, CUANDO el estudiante intenta enviar la encuesta, ENTONCES el sistema rechaza la recepción con código HTTP 400 Bad Request o mensaje de expiración temporal, garantizando la frescura y objetividad de la evaluación (RN-13).
-  - *Escenario 4 (Prevención de doble encuesta y acreditación en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la regla de encuesta única cuenta con 16 pruebas en `test_survey.py` y 14 pruebas en `PostSessionSurveyModalView.test.tsx`, CUANDO se ejecute el flujo automatizado en `main`, ENTONCES se confirmará el rechazo con HTTP 409 Conflict ante cualquier reenvío redundante.
-- **Casos de Uso Relacionados:** CUS-012 (Registrar asistencia), CUS-014 (Consultar historial y retroalimentación).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/survey.py` (`GET /api/v1/sessions/{id}/survey`, `POST /api/v1/sessions/{id}/survey`).
-  - *Servicios de Negocio:* `SurveyService.py` (`create_survey`, `get_survey_status`).
-  - *Entidades Relacionales:* Tabla `encuestas_calidad`.
-  - *Componentes Visuales:* `PostSessionSurveyModalView.tsx`, `surveyService.ts`.
-  - *Evidencia de Pruebas:* `test_survey.py` (16 pruebas backend con validación de ventana temporal y cálculo de promedios), `PostSessionSurveyModalView.test.tsx` (14 pruebas frontend).
+- **Casos de uso vigentes:** CUS-012.
+
+- **Estado observado:** Parcial: encuesta; feedback individual inverso pendiente.
+- **Límites de la implementación:** Parcial: no existe evidencia de evaluación individual mentor a estudiante.
+- **Criterio de aceptación `[REQUISITO]`:** DADO un asistente sin encuesta previa para la sesión, CUANDO evalúa entre el fin y fin +24 h, ENTONCES se registra una encuesta; no se permite duplicarla ni confundirla con feedback individual inverso.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF20 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF21 — Cálculo de Reputación Docente y Catálogo de Insignias
+#### Ficha Técnica de Requerimiento Funcional: RF21 — Cálculo de reputación docente y catálogo de insignias
+
 
 - **Identificador:** RF21
 - **Nombre Oficial:** Ponderación algorítmica de reputación docente y asignación de insignias por mérito
-- **Módulo Arquitectónico:** MOD-07: Gamificación, Reputación y Certificación
+- **Módulo funcional vigente:** MOD-04: Ejecución y Seguimiento Académico
 - **Descripción Funcional:** El sistema debe procesar dinámicamente las calificaciones obtenidas en las encuestas de satisfacción, el volumen de sesiones dictadas y la puntualidad del mentor para calcular su índice de reputación docente y desbloquear automáticamente insignias de honor ("Mentor Destacado", "Especialista en Algoritmos", "Puntualidad Impecable") visibles en su perfil público.
 - **Objetivo y Necesidad Académica:** Estimular la excelencia pedagógica y el compromiso de los mentores a través de mecanismos de gamificación positiva, proveyendo a los mentoreados señales claras de confianza para elegir a sus guías.
 - **Actores Participantes:** Estudiante Mentor (Receptor del Reconocimiento); Sistema (Evaluador Algorítmico).
 - **Condiciones de Entrada (Precondiciones):** Mentor con sesiones dictadas y encuestas de calidad respondidas por sus alumnos.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. Cada vez que se registra una nueva encuesta de satisfacción, el sistema recalcula la puntuación global del mentor mediante media ponderada.
   2. Evalúa los umbrales de gamificación definidos por la facultad (por ejemplo: más de 10 sesiones con calificación promedio $\ge 4.5/5.0$).
   3. Si el mentor alcanza un hito de calidad, el sistema desbloquea la insignia correspondiente y la incorpora a su perfil académico.
   4. Notifica al mentor el logro alcanzado mediante una alerta en la plataforma.
   5. La reputación e insignias se reflejan de inmediato en las tarjetas de recomendación del catálogo de ofertas.
-- **Resultado Verificable (Postcondiciones):** El perfil del mentor exhibe su puntaje actualizado y las insignias institucionales acreditadas.
+- **Resultado esperado (Postcondiciones del requisito):** El perfil del mentor exhibe su puntaje actualizado y las insignias institucionales acreditadas.
 - **Reglas de Negocio Vinculadas:** RN-13 (Encuestas de calidad), RN-03 (Mérito académico).
 - **Restricciones Funcionales:** Ninguna insignia puede asignarse manualmente sin cumplir con las métricas objetivas procesadas por el sistema.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Recálculo dinámico de reputación a partir de encuestas) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor acumula nuevas encuestas válidas de satisfacción estudiantil, CUANDO se consulta su perfil, ENTONCES el sistema calcula el promedio ponderado en escala vigesimal (o 1 a 5) y actualiza su índice de reputación docente con código HTTP 200 OK.
-  - *Escenario 2 (Desbloqueo de insignias por mérito docente acumulado) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor supera los hitos reglamentarios (ej. 10 sesiones dictadas con promedio >= 4.5/5.0), CUANDO el sistema procesa sus métricas, ENTONCES asigna automáticamente las insignias de reconocimiento institucional ("Mentor Destacado") visibles en su perfil público.
-  - *Escenario 3 (Acreditación algorítmica en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el cómputo de reputación está cubierto por 12 pruebas en Pytest y 18 pruebas en `MentorBadgesView.test.tsx`, CUANDO se ejecute la validación formal en `main`, ENTONCES se confirmará la exactitud del redondeo a dos decimales.
-- **Casos de Uso Relacionados:** CUS-019 (Consultar reputación docente, historial de valoraciones y catálogo de insignias).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/certificates.py` (`GET /api/v1/certificates/summary`), `aplicacion/backend/app/api/v1/endpoints/profiles.py` (`GET /api/v1/profiles/me`).
-  - *Servicios de Negocio:* `RecommendationService.py`, `ProfileService.py`.
-  - *Entidades Relacionales:* Tablas `encuestas_calidad`, `perfiles_academicos`.
-  - *Componentes Visuales:* `MentorBadgesView.tsx`.
-  - *Evidencia de Pruebas:* `test_recommendations.py` (12 pruebas backend), `MentorBadgesView.test.tsx` (18 pruebas frontend).
+- **Casos de uso vigentes:** Transversal RF21; sin CUS autónomo en el catálogo.
+
+- **Estado observado:** Especificado; reputación integral e insignias por validar.
+- **Límites de la implementación:** No se acredita reputación institucional integral, ni su uso en el ranking actual. Se conserva RF21 como requisito transversal.
+- **Criterio de aceptación `[REQUISITO]`:** DADO el requisito de reputación e insignias conservado, CUANDO se evalúa su aceptación, ENTONCES deben comprobarse reglas, cálculo, distintivos y evidencia sin atribuir su uso al ranking actual.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF21 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF22 — Parametrización y Autorización de Certificados de Horas
+#### Ficha Técnica de Requerimiento Funcional: RF22 — Parametrización y autorización de certificados de horas
+
 
 - **Identificador:** RF22
 - **Nombre Oficial:** Parametrización y autorización institucional de constancias de horas de mentoría
-- **Módulo Arquitectónico:** MOD-07: Gamificación, Reputación y Certificación
+- **Módulo funcional vigente:** MOD-04: Ejecución y Seguimiento Académico
 - **Descripción Funcional:** El sistema debe permitir a la Dirección de Escuela y Coordinación de Tutoría verificar el cumplimiento de las metas de horas formativas dictadas por cada mentor (alcanzando el umbral mínimo reglamentario de 20.0 horas académicas auditadas con bitácoras visadas), autorizando formalmente la expedición de sus constancias oficiales para la convalidación de créditos extracurriculares.
 - **Objetivo y Necesidad Académica:** Proporcionar valor curricular real al esfuerzo del mentor, permitiéndole convalidar su labor de asesoría por créditos universitarios conforme a la Ley Universitaria N° 30220 y el plan curricular de la EPIS.
 - **Actores Participantes:** Administrador / Coordinador de Tutoría (Actor Autorizador); Estudiante Mentor (Beneficiario).
 - **Condiciones de Entrada (Precondiciones):** Mentor con acumulación $\ge 20.0	ext{ horas}$ académicas visadas con bitácoras aprobadas por la facultad.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. La autoridad accede al módulo de acreditación y certificación de horas formativas.
   2. El sistema presenta la nómina de mentores que han alcanzado o superado el umbral reglamentario de 20 horas en el semestre.
   3. El administrador revisa el consolidado de sesiones, asistencia de alumnos y bitácoras pedagógicas suscritas.
   4. Si todos los registros se encuentran conformes y visados, pulsa "Autorizar Emisión de Certificado".
   5. El sistema formaliza la aprobación, asigna el código correlativo de folio oficial institucional y habilita la descarga del documento.
-- **Resultado Verificable (Postcondiciones):** El certificado queda autorizado en la base de datos con folio correlativo único.
+- **Resultado esperado (Postcondiciones del requisito):** El certificado queda autorizado en la base de datos con folio correlativo único.
 - **Reglas de Negocio Vinculadas:** RN-14 (Acreditación de horas de mentoría y requisitos de certificación: $\ge 20	ext{ h}$ y 100% bitácoras visadas).
 - **Restricciones Funcionales:** Ningún certificado podrá ser autorizado si el mentor mantiene bitácoras pendientes de entrega o sesiones en estado observado.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Autorización y expedición con horas auditadas completas) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un mentor acumula al menos 20.0 horas académicas visadas por la Dirección de Escuela (RN-14) y no registra bitácoras pendientes ni observadas, CUANDO se solicita la constancia oficial en `/api/v1/certificates/generate`, ENTONCES el sistema emite el certificado asignando folio único correlativo (CERT-YYYY-SEM-XXXX) y código HTTP 201 Created.
-  - *Escenario 2 (Denegación por déficit de horas visadas) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un estudiante registra menos de 20.0 horas convalidadas o mantiene bitácoras en estado provisional, CUANDO intenta generar la constancia, ENTONCES el sistema deniega la solicitud con código HTTP 400 Bad Request detallando las horas faltantes para alcanzar el umbral de certificación.
-  - *Escenario 3 (Verificación en pipeline de CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la emisión de constancias cuenta con 14 pruebas en `test_certificates.py` y 16 pruebas en `AdminCertificatesView.test.tsx`, CUANDO se ejecute la suite en `main`, ENTONCES se verificará la consistencia del control de umbrales normativos.
-- **Casos de Uso Relacionados:** CUS-018 (Autorizar y emitir constancias oficiales de horas de mentoría con verificación QR).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/certificates.py` (`GET /api/v1/certificates/summary`, `POST /api/v1/certificates/generate`).
-  - *Servicios de Negocio:* `CertificateService.py` (`get_hours_summary`, `generate_certificate`).
-  - *Entidades Relacionales:* Tablas `certificados_horas`, `bitacoras_pedagogicas`.
-  - *Componentes Visuales:* `AdminCertificatesView.tsx`.
-  - *Evidencia de Pruebas:* `test_certificates.py` (14 pruebas backend con validación de reglas de acreditación), `AdminCertificatesView.test.tsx` (16 pruebas frontend).
+- **Casos de uso vigentes:** CUS-014.
+
+- **Estado observado:** Parcial: umbral y emisión; autorización institucional pendiente.
+- **Límites de la implementación:** La ruta de emisión existe; no acredita autorización, firma ni validez institucional.
+- **Criterio de aceptación `[REQUISITO]`:** DADO un mentor con horas del período, CUANDO solicita autorización de constancia, ENTONCES se comprueba el umbral de 20 h y el visado requerido; la autorización institucional sigue pendiente.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF22 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF23 — Emisión, Descarga y Verificación con Código QR
+#### Ficha Técnica de Requerimiento Funcional: RF23 — Emisión, descarga y verificación con código QR
+
 
 - **Identificador:** RF23
 - **Nombre Oficial:** Generación documental PDF, descarga con marca de agua y portal público de verificación QR
-- **Módulo Arquitectónico:** MOD-07: Gamificación, Reputación y Certificación
+- **Módulo funcional vigente:** MOD-04: Ejecución y Seguimiento Académico
 - **Descripción Funcional:** El sistema debe compilar dinámicamente el certificado oficial de mentoría en formato PDF institucional de alta resolución (utilizando ReportLab), incorporando una marca de agua diagonal de seguridad ("DEMO - FINES ACADÉMICOS"), sello criptográfico SHA-256 e incrustando un código QR que enlaza a un portal web público de verificación donde cualquier tercero o evaluador puede comprobar la autenticidad e inalterabilidad del documento ingresando el folio institucional o escaneando el código.
 - **Objetivo y Necesidad Académica:** Proporcionar plena validez institucional al documento, erradicando fraudes o adulteraciones de constancias y permitiendo a comisiones evaluadoras verificar la autenticidad de forma inmediata.
 - **Actores Participantes:** Estudiante Mentor (Descargador del PDF); Evaluador Externo o Tercero Interesado (Verificador de Autenticidad).
 - **Condiciones de Entrada (Precondiciones):** Certificado formalmente autorizado por la Dirección de Escuela.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El mentor pulsa el botón "Descargar Certificado Oficial" en su panel.
   2. El sistema compila el archivo PDF incluyendo membrete oficial, nombre completo del mentor, código universitario, cantidad exacta de horas visadas, periodo lectivo, huella hash SHA-256 y código QR navegable.
   3. Entrega el archivo PDF listo para su impresión o archivo digital.
   4. Cuando un evaluador escanea el código QR impreso en el certificado o ingresa el folio en el portal público de la facultad, el sistema consulta el registro institucional.
   5. Despliega la constancia oficial de validez con los datos verídicos registrados en base de datos.
-- **Resultado Verificable (Postcondiciones):** Documento PDF generado y verificable en línea por cualquier autoridad universitaria.
+- **Resultado esperado (Postcondiciones del requisito):** Documento PDF generado y verificable en línea por cualquier autoridad universitaria.
 - **Reglas de Negocio Vinculadas:** RN-14 (Acreditación institucional de horas y verificación pública).
 - **Restricciones Funcionales:** Ningún certificado descargable carecerá de su código QR institucional y su respectiva huella digital SHA-256.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Descarga de constancia PDF con sello criptográfico y QR) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE una constancia fue válidamente expedida, CUANDO el usuario solicita su descarga en `/api/v1/certificates/{id}/download`, ENTONCES el sistema entrega un documento PDF oficial compilado con ReportLab, que incorpora marca de agua diagonal ("DEMO - FINES ACADÉMICOS"), huella digital SHA-256 y código QR navegable con cabeceras `application/pdf`.
-  - *Escenario 2 (Validación pública institucional por folio o código QR) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE un evaluador externo o autoridad académica consulta el portal de validación pública pasando el folio en `/api/v1/certificates/verificar?folio=CERT-...`, CUANDO el sistema consulta el registro institucional, ENTONCES retorna el estado de autenticidad, nombre del mentor, horas convalidadas y fecha de emisión con código HTTP 200 OK.
-  - *Escenario 3 (Rechazo de folio o certificado inexistente) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE se consulta un folio alterado o apócrifo, CUANDO el servicio ejecuta la búsqueda, ENTONCES devuelve código HTTP 404 Not Found o indicador de no autenticidad protegiendo la validez institucional de la EPIS-UPT.
-  - *Escenario 4 (Acreditación del motor de PDF y QR en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la generación y verificación de certificados cuenta con 16 pruebas en Pytest y 16 en Vitest, CUANDO se ejecute el pipeline en `main`, ENTONCES se comprobará la validez estructural del PDF generado y la legibilidad del QR.
-- **Casos de Uso Relacionados:** CUS-018 (Autorizar y emitir constancias oficiales), CUS-009 (Monitoreo institucional).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/certificates.py` (`GET /api/v1/certificates/{id_certificado}/download`, `GET /api/v1/certificates/verificar`, `GET /api/v1/certificates/{id_certificado}`).
-  - *Servicios de Negocio:* `CertificateService.py` (`get_certificate_pdf`, `verify_certificate_by_folio`, `get_certificate_by_id`).
-  - *Entidades Relacionales:* Tabla `certificados_horas`.
-  - *Componentes Visuales:* `CertificateVerifyView.tsx`, `AdminCertificatesView.tsx`.
-  - *Evidencia de Pruebas:* `test_certificates.py` (16 pruebas backend con validación del PDF generado y parsing de QR), `CertificateVerifyView.test.tsx` (16 pruebas frontend).
+- **Casos de uso vigentes:** CUS-014.
+
+- **Estado observado:** Parcial: PDF/folio DEMO; certificación institucional pendiente.
+- **Límites de la implementación:** La ruta de emisión existe; no acredita autorización, firma ni validez institucional.
+- **Criterio de aceptación `[REQUISITO]`:** DADO una emisión elegible, CUANDO se genera y consulta el PDF por folio, ENTONCES se identifica el estado DEMO cuando corresponda; el QR no convierte el documento en una certificación institucional.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF23 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF24 — Parametrización Institucional de Aforos y Prioridades
+#### Ficha Técnica de Requerimiento Funcional: RF24 — Parametrización institucional de aforos y prioridades
+
 
 - **Identificador:** RF24
 - **Nombre Oficial:** Consola de configuración institucional de aforos, umbrales y asignaturas prioritarias
-- **Módulo Arquitectónico:** MOD-08: Gestión Administrativa y Auditoría
+- **Módulo funcional vigente:** MOD-05: Administración y Analítica Institucional
 - **Descripción Funcional:** El sistema debe proporcionar a la Dirección de Escuela un panel de administración centralizado para ajustar los parámetros institucionales de la plataforma, incluyendo: modificación de los aforos máximos estándar (presencial y virtual), ajuste de porcentajes de quórum de confirmación ($50\%$), definición del umbral mínimo de horas para certificación ($20.0	ext{ h}$) y asignación de la condición de "asignatura filtro prioritaria" a cursos con alta tasa de repitencia.
 - **Objetivo y Necesidad Académica:** Otorgar flexibilidad operativa a las autoridades académicas para calibrar la plataforma conforme a las decisiones de Consejo de Facultad o variaciones en la disponibilidad física de infraestructura.
 - **Actores Participantes:** Administrador Institucional / Director de Escuela (Actor Primario).
 - **Condiciones de Entrada (Precondiciones):** Sesión activa con privilegios de Administrador General.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El administrador ingresa a la sección de configuración de parámetros institucionales.
   2. Modifica los valores deseados (por ejemplo: eleva el aforo presencial de 10 a 12 participantes o incorpora una nueva materia filtro).
   3. El sistema valida que los valores se mantengan dentro de rangos razonables de seguridad pedagógica.
   4. Guarda las nuevas directrices en el repositorio centralizado de configuraciones.
   5. Los nuevos parámetros se propagan de inmediato a los módulos de ofertas, quórum y reservas sin requerir reinicio del servidor.
-- **Resultado Verificable (Postcondiciones):** Los parámetros de la plataforma se actualizan en tiempo de ejecución.
+- **Resultado esperado (Postcondiciones del requisito):** Los parámetros de la plataforma se actualizan en tiempo de ejecución.
 - **Reglas de Negocio Vinculadas:** RN-05 (Aforos estándar), RN-09 (Quórum reglamentario), RN-11 (Asignaturas filtro prioritarias).
 - **Restricciones Funcionales:** Ningún valor podrá ajustarse a cifras que comprometan la seguridad de los recintos o vulneren las directivas curriculares de la facultad.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Parametrización centralizada de reglas de negocio y aforos) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE la Dirección de Escuela actualiza los parámetros operativos del semestre (aforos estándar de 10/20, quórum del 50% y umbral de certificación de 20h), CUANDO el sistema carga las configuraciones centralizadas de entorno en `app.core.config.Settings`, ENTONCES los nuevos umbrales se aplican de forma inmediata en todos los servicios de reserva y evaluación.
-  - *Escenario 2 (Supervisión de salud del sistema y persistencia) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE la administración supervisa la infraestructura, CUANDO invoca los endpoints de salud `/api/v1/health` y `/api/v1/health/db`, ENTONCES el sistema responde con estado operativo normal (HTTP 200 OK) y métricas de latencia de conexión a base de datos.
-  - *Escenario 3 (Verificación de configuración en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE la consola de configuración y salud cuenta con 10 pruebas en Pytest y 14 pruebas en `AdminConfigView.test.tsx`, CUANDO se corra la validación en `main`, ENTONCES se verificará la inmutabilidad de variables críticas en tiempo de ejecución.
-- **Casos de Uso Relacionados:** CUS-020 (Parametrizar políticas y umbrales operativos del sistema).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/health.py` (`GET /api/v1/health`, `GET /api/v1/health/db`), configuración centralizada en `aplicacion/backend/app/core/config.py` (`Settings`).
-  - *Servicios de Negocio:* `SimulationService.py`, componentes de configuración del núcleo.
-  - *Entidades Relacionales:* Esquema de configuración de sistema y tablas de catálogo.
-  - *Componentes Visuales:* `AdminConfigView.tsx`.
-  - *Evidencia de Pruebas:* `test_config.py` (10 pruebas backend), `AdminConfigView.test.tsx` (14 pruebas frontend).
+- **Casos de uso vigentes:** CUS-015, CUS-020, CUS-022.
+
+- **Estado observado:** Parcial: prioridades curriculares; parametrización administrativa propuesta.
+- **Límites de la implementación:** Propuesto: pesos en código no equivalen a interfaz administrativa configurable. Discrepancia pendiente entre consulta I-IV y formulario 1-10; prioridad curricular no garantiza pesos dinámicos. Propuesto: configuración de despliegue no equivale a edición administrativa; sanciones pendientes.
+- **Criterio de aceptación `[REQUISITO]`:** DADO un parámetro de recomendación, currículo o corte, CUANDO se solicita modificarlo, ENTONCES se distingue mantenimiento curricular operativo de editores administrativos propuestos.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF24 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF25 — Tablero Analítico Directivo y Métricas de Retención ICACIT
+#### Ficha Técnica de Requerimiento Funcional: RF25 — Tablero analítico directivo y métricas de retención ICACIT
+
 
 - **Identificador:** RF25
 - **Nombre Oficial:** Tablero de mando analítico, indicadores de demanda insatisfecha y reportes ICACIT
-- **Módulo Arquitectónico:** MOD-08: Gestión Administrativa y Auditoría
+- **Módulo funcional vigente:** MOD-05: Administración y Analítica Institucional
 - **Descripción Funcional:** El sistema debe consolidar métricas operacionales agregadas en un panel gráfico de control directivo para las autoridades universitarias, presentando en tiempo real: volumen de mentorías ejecutadas, horas pedagógicas impartidas, asignaturas y temas con mayor demanda insatisfecha, tasas de asistencia efectiva, evolución del promedio de satisfacción de mentores y estimación del impacto en la reducción del rezago estudiantil conforme a los criterios de acreditación ICACIT.
 - **Objetivo y Necesidad Académica:** Suministrar evidencia cuantitativa rigurosa para la toma de decisiones institucionales y para las auditorías de calidad educativa exigidas por comités de acreditación nacional e internacional.
 - **Actores Participantes:** Director de Escuela, Coordinador de Tutoría, Comité de Calidad y Acreditación (Actores Consultores).
 - **Condiciones de Entrada (Precondiciones):** Sesión activa con permisos de visualización analítica institucional.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. La autoridad académica ingresa al módulo de analítica directiva.
   2. Selecciona el periodo lectivo a evaluar y los filtros por ciclo o materia crítica.
   3. El sistema procesa los datos y renderiza gráficos interactivos de barras, líneas temporales e indicadores clave de rendimiento (KPIs).
   4. Presenta el mapa térmico de temas silábicos con mayor dificultad reportada por los estudiantes.
   5. Permite exportar los informes en formato PDF y hojas de cálculo para su presentación ante comités académicos de facultad.
-- **Resultado Verificable (Postcondiciones):** Los reportes analíticos se generan en pantalla y quedan listos para su exportación.
+- **Resultado esperado (Postcondiciones del requisito):** Los reportes analíticos se generan en pantalla y quedan listos para su exportación.
 - **Reglas de Negocio Vinculadas:** RN-02 (Anonimización de datos en analítica agregada), RN-11 (Métricas de asignaturas filtro).
 - **Restricciones Funcionales:** Ningún reporte directivo expondrá calificaciones individuales nominales que transgredan la Ley N° 29733.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Generación de métricas de retención y demanda para ICACIT) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE las autoridades de la facultad acceden al tablero analítico directivo, CUANDO consultan las métricas consolidadas, ENTONCES el sistema presenta indicadores de demanda insatisfecha, horas de mentoría impartidas y tasas de cobertura por asignatura filtro aptas para sustentación de acreditación internacional.
-  - *Escenario 2 (Ejecución del testbench algorítmico y latencias) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el equipo técnico ejecuta la auditoría del motor de recomendación, CUANDO invoca `/api/v1/simulation/benchmark`, ENTONCES el servicio corre la simulación sobre el dataset sintético y reporta Precision@3, Precision@5 y distribución de latencias en milisegundos con código HTTP 200 OK.
-  - *Escenario 3 (Acreditación del testbench en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE los tableros analíticos cuentan con 14 pruebas en Pytest y 22 pruebas en `AdminAnalyticsView.test.tsx`, CUANDO se ejecute el pipeline formal en `main`, ENTONCES se confirmará la concordancia de los cálculos matemáticos con los reportes directivos.
-- **Casos de Uso Relacionados:** CUS-011 (Monitorear tablero analítico de gestión de mentorías y KPIs ICACIT), CUS-015 (Generar reportes directivos de impacto y cobertura pedagógica).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/simulation.py` (`GET /api/v1/simulation/benchmark`), `aplicacion/backend/app/api/v1/endpoints/recommendations.py` (`GET /api/v1/recommendations/simulation/testbench`).
-  - *Servicios de Negocio:* `SimulationService.py` (`run_benchmark`).
-  - *Entidades Relacionales:* Tablas de hechos y dimensiones analíticas agregadas.
-  - *Componentes Visuales:* `AdminAnalyticsView.tsx`, `AnalyticsService.ts`.
-  - *Evidencia de Pruebas:* `test_simulation.py` (14 pruebas backend con validación de cálculos de retención), `AdminAnalyticsView.test.tsx` (22 pruebas frontend).
+- **Casos de uso vigentes:** CUS-009, CUS-011.
+
+- **Estado observado:** Parcial: quórum; retención y exportación propuestas.
+- **Límites de la implementación:** Parcial: no acredita analítica integral de retención ni indicadores institucionales. Propuesto: no se identificó exportación ejecutiva consolidada.
+- **Criterio de aceptación `[REQUISITO]`:** DADO un administrador que consulta indicadores, CUANDO se muestran datos de quórum, ENTONCES se identifica su fuente y alcance; retención y exportación ejecutiva conservan su estado pendiente.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF25 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
-#### Ficha Técnica de Requerimiento Funcional: RF26 — Auditoría Institucional de Bitácoras y Privacidad Legal
+#### Ficha Técnica de Requerimiento Funcional: RF26 — Auditoría institucional de bitácoras y privacidad legal
+
 
 - **Identificador:** RF26
 - **Nombre Oficial:** Bandeja de fiscalización, visado de bitácoras y auditoría de cumplimiento de privacidad legal
-- **Módulo Arquitectónico:** MOD-08: Gestión Administrativa y Auditoría
+- **Módulo funcional vigente:** MOD-05: Administración y Analítica Institucional
 - **Descripción Funcional:** El sistema debe proporcionar una bandeja administrativa especializada para que la Coordinación de Tutoría y el Oficial de Privacidad auditen el cumplimiento de la Ley N° 29733 de Protección de Datos Personales (inspeccionando trazas inmutables de consentimiento, accesos y revocaciones) y fiscalicen exhaustivamente las bitácoras pedagógicas suscritas por mentores, permitiendo visar las horas dictadas o formular observaciones técnicas debidamente motivadas.
 - **Objetivo y Necesidad Académica:** Dotar a la facultad de un control riguroso sobre las horas formativas convalidadas a los estudiantes, garantizando que ninguna constancia se emita sin revisión docente previa y asegurando el estricto resguardo legal de la información estudiantil.
 - **Actores Participantes:** Coordinador de Tutoría, Auditor Institucional (Actores Fiscalizadores); Estudiante Mentor (Sujeto Fiscalizado).
 - **Condiciones de Entrada (Precondiciones):** Sesión con bitácora registrada en espera de visado administrativo.
-- **Comportamiento Esperado:**
+- **Comportamiento Esperado (requisito):**
   1. El fiscalizador institucional ingresa a la bandeja de auditoría docente.
   2. Filtra las sesiones que tienen bitácora suscrita pendiente de visado.
   3. Abre el expediente de la sesión y verifica: quórum, lista de alumnos asistentes, observaciones pedagógicas y firma SHA-256.
@@ -1593,169 +1335,104 @@ A continuación, se especifican exhaustivamente las fichas técnicas individuale
   5. Si detecta anomalías (ej. observaciones vagas o incongruencias), pulsa "Observar Bitácora" e ingresa la justificación motivada.
   6. La sesión transiciona a "Observada", se notifica al mentor para su subsanación y las horas quedan temporalmente congeladas.
   7. Asimismo, el módulo permite auditar el registro inmutable de consentimientos de privacidad de todos los usuarios registrados.
-- **Resultado Verificable (Postcondiciones):** La bitácora queda visada o sujeta a subsanación, actualizándose la cuenta de horas del mentor.
+- **Resultado esperado (Postcondiciones del requisito):** La bitácora queda visada o sujeta a subsanación, actualizándose la cuenta de horas del mentor.
 - **Reglas de Negocio Vinculadas:** RN-14 (Fiscalización obligatoria de bitácoras para acreditación de horas), RN-02 (Auditoría de consentimiento Ley N° 29733).
 - **Restricciones Funcionales:** Ninguna hora de mentoría podrá ser computada para certificación si la bitácora correspondiente no cuenta con el visado formal de la autoridad.
-- **Criterios de Aceptación:**
-  - *Escenario 1 (Fiscalización y visado institucional de bitácoras docentes) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el administrador institucional inspecciona la bandeja de bitácoras pendientes en `/api/v1/bitacoras`, CUANDO verifica la solvencia de las observaciones pedagógicas y confirma el visado en `/api/v1/bitacoras/{id}/visar`, ENTONCES el sistema conmuta la sesión a `HORAS_VISADAS`, acumula las horas para la certificación del mentor (RN-14) y registra la traza de auditoría con código HTTP 200 OK.
-  - *Escenario 2 (Formulación de observación técnica sobre bitácora) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE una bitácora contiene justificaciones insuficientes o inconsistencias horarias, CUANDO el fiscalizador registra una observación en `/api/v1/bitacoras/{id}/observar`, ENTONCES el sistema transiciona la sesión a `OBSERVADA`, notifica al mentor para su subsanación y retiene preventivamente las horas hasta su corrección con código HTTP 200 OK.
-  - *Escenario 3 (Auditoría de cumplimiento de privacidad Ley N° 29733) `[REQUISITO]` `[IMPLEMENTADO]` `[VERIFICADO]`:* DADO QUE el oficial de cumplimiento legal audita el tratamiento de datos personales, CUANDO consulta el estado de consentimiento en `/api/v1/consent/status`, ENTONCES el sistema genera el reporte inmutable de marcas de aceptación, revocaciones y accesos con sellos de tiempo UTC.
-  - *Escenario 4 (Revalidación de auditoría en CI) `[REQUISITO]` `[IMPLEMENTADO]` `[PENDIENTE]`:* DADO QUE el módulo de fiscalización cuenta con 14 pruebas en Pytest y 16 pruebas en `AdminAuditView.test.tsx`, CUANDO se concluya la subsanación de linteo en `main`, ENTONCES se confirmará la estricta segregación de permisos RBAC para administradores.
-- **Casos de Uso Relacionados:** CUS-016 (Fiscalizar y visar bitácoras pedagógicas suscritas por mentores), CUS-022 (Auditar trazabilidad de consentimientos y cumplimiento legal Ley N° 29733).
-- **Apartado de Trazabilidad Técnica e Implementación:**
-  - *Controladores y Endpoints:* `aplicacion/backend/app/api/v1/endpoints/bitacora.py` (`GET /api/v1/bitacoras`, `POST /api/v1/bitacoras/{id}/visar`, `POST /api/v1/bitacoras/{id}/observar`), `aplicacion/backend/app/api/v1/endpoints/consent.py` (`GET /api/v1/consent/status`).
-  - *Servicios de Negocio:* `BitacoraService.py` (`list_bitacoras`, `visar_bitacora`, `observar_bitacora`), `ConsentService.py` (`get_consent_status`).
-  - *Entidades Relacionales:* Tablas `bitacoras_pedagogicas`, `consentimientos_legales`, `sesiones_mentoria`.
-  - *Componentes Visuales:* `AdminAuditView.tsx`.
-  - *Evidencia de Pruebas:* `test_bitacora.py` (14 pruebas backend de auditoría y visado), `AdminAuditView.test.tsx` (16 pruebas frontend).
+- **Casos de uso vigentes:** CUS-016, CUS-019.
+
+- **Estado observado:** Parcial: visado administrativo; seguridad integral propuesta.
+- **Límites de la implementación:** Propuesto: consentimiento y logs parciales no sustituyen auditoría integral. Parcial: Tutor no identificado como rol operativo; visado administrativo no constituye firma certificada.
+- **Criterio de aceptación `[REQUISITO]`:** DADO un administrador que revisa bitácoras, CUANDO visa u observa un registro, ENTONCES se conserva el resultado correspondiente; no se presenta esa revisión como bandeja integral de seguridad.
+- **Criterio de brecha `[PENDIENTE]`:** DADO el alcance observado, CUANDO se evalúa RF26 para aceptación institucional, ENTONCES se debe comprobar cada límite indicado, con evidencia de la versión y entorno evaluados.
+- **Trazabilidad de diseño:** Ver el catálogo de rutas declaradas, entidades y dependencias en SAD 6.3 y 10; la existencia de un contrato no demuestra cobertura integral del requisito.
 
 ---
 
 ## 5.4. Reglas de Negocio Institucionales (RN-01 al RN-14)
 
-Las catorce reglas de negocio institucionales (**RN-01 al RN-14**) gobiernan la interacción pedagógica, la seguridad jurídica y la integridad transaccional de la plataforma en la EPIS-UPT:
+### Cuadro 5.4: Reglas, política y brechas
 
-A continuación, se presenta la matriz consolidada de reglas de negocio:
-
-### Cuadro 5.4: Matriz de Reglas de Negocio Institucionales del Sistema Web P2P (RN-01 al RN-14)
-
-| Código | Denominación de la Regla | Condición Disparadora | Política Institucional y Restricción Impuesta | Consecuencia de Infracción | Mecanismo de Imposición en el Sistema | Módulo |
-| :---: | :--- | :--- | :--- | :--- | :--- | :---: |
-| **RN-01** | Acceso Institucional Exclusivo y 2FA | Intento de autenticación en la plataforma. | Acceso exclusivo para cuentas con dominio `@virtual.upt.pe` o `@upt.pe`. Código OTP de 6 dígitos con tiempo de vida máximo e improrrogable de 5 minutos (300 s) y enfriamiento de reenvío de 60 segundos. | Rechazo inmediato del acceso y bloqueo de emisión de token JWT. | Validación regex en servidor y hash seguro SHA-256 en base de datos. | MOD-01 |
-| **RN-02** | Consentimiento Legal Digital (Ley N° 29733) | Primer inicio de sesión de cualquier usuario universitario. | Consentimiento previo, expreso, inequívoco e informado sobre tratamiento de datos académicos obligatorio antes de utilizar la plataforma. | Bloqueo perentorio de navegación y cierre seguro de sesión sin almacenar datos. | Diálogo modal prioritario en cliente y middleware de verificación en servidor que audita IP, fecha UTC y User-Agent. | MOD-01 |
-| **RN-03** | Jerarquía de Roles y Verificación de Mérito | Postulación o asignación de rol de Mentor. | El mentor debe pertenecer a ciclos superiores (VII al X) y haber aprobado la materia a dictar con calificación sobresaliente igual o superior a 14.0. | Denegación de la promoción a mentor y restricción a rol exclusivo de mentoreado. | Validación algorítmica contra historial de notas y control de acceso RBAC. | MOD-01 |
-| **RN-04** | Antelación Mínima de Publicación ($\ge 24\text{ h}$) | Formulación de una oferta de mentoría académica. | Toda oferta de mentoría debe publicarse con una antelación mínima obligatoria de 24 horas respecto a su inicio, recomendándose 48 horas ($T \ge 48\text{ h}$). | Bloqueo del formulario de publicación con mensaje de error de fecha no válida. | Validación temporal estricta en servidor (`fecha_inicio >= fecha_actual + 24h`). | MOD-02 |
-| **RN-05** | Control Estricto de Aforos Estándar | Programación y reserva de sesiones de mentoría. | Aforo máximo de 10 participantes en sesiones presenciales y 20 en sesiones virtuales. Bloqueo automático ante aforo lleno. | Imposibilidad de exceder el límite y derivación al banco de solicitudes por demanda. | Restricción inmutable en base de datos (`aforo <= 10` presencial, `aforo <= 20` virtual) y cerrojos pesimistas. | MOD-05 |
-| **RN-06** | Asignación Validada de Espacios Físicos | Selección de ambiente para mentoría presencial. | Las sesiones presenciales solo pueden agendarse en aulas o laboratorios libres de la EPIS verificados contra el horario de clases regulares. | Exclusión de ambientes ocupados en el selector interactivo de espacios. | Algoritmo de detección de solapamientos horarios sobre cronogramas oficiales. | MOD-02 |
-| **RN-07** | Aprovisionamiento Virtual Automatizado | Selección de modalidad virtual de mentoría. | La plataforma provisiona y asocia enlaces institucionales seguros de teleconferencia sin intervención manual externa. | Cancelación de la publicación si el enlace no es válido o seguro. | Generación y validación de URLs institucionales seguras. | MOD-02 |
-| **RN-08** | Ventana Perentoria de Ratificación ($T-24\text{ h}$) | Reservas activas en la ventana previa a la sesión. | La confirmación de asistencia debe realizarse hasta el corte de 24 horas previas. Las reservas no ratificadas pierden vigencia (`NO_CONFIRMADA`). | Revocación automática del cupo en $T-24\text{ h}$ y restitución de vacante al aforo libre. | Demonio desatendido de corte que invalida reservas pendientes a $T-24\text{ h}$. | MOD-05 |
-| **RN-09** | Quórum Mínimo del 50% en $T-24\text{ h}$ | Evaluación de viabilidad de sesión a $T-24\text{ h}$. | Toda sesión debe alcanzar un quórum del 50% de su aforo (5 en presencial, 10 en virtual). Si no se alcanza, transiciona a `QUORUM_INSUFICIENTE`. | Notificación de contingencia al mentor para resolver continuidad extraordinaria o cancelación. | Demonio cron que totaliza confirmados y conmuta estado de la sesión. | MOD-05 |
-| **RN-10** | Cancelación Oportuna y Liberación de Espacios | Suspensión de sesión por quórum o imprevisto. | Al cancelarse una sesión, se notifica de inmediato a los inscritos y se libera la infraestructura física o virtual asignada. | Cancelación formal y desasignación del aula física en el calendario. | Transacción atómica que actualiza la sesión y libera la ocupación de ambientes. | MOD-05 |
-| **RN-11** | Ponderación y Desempate Algorítmico | Inferencia del ranking Top-k de recomendaciones. | El recomendador pondera afinidad temática por similitud coseno. Desempata por: 1) reputación docente, 2) menor carga horaria activa, y 3) condición prioritaria de la materia. | Reordenamiento automático de la cartelera adaptativa para maximizar impacto. | Fórmula matemática multivariada en el motor *EdRecSys*. | MOD-04 |
-| **RN-12** | Cierre de Bitácora y Filtro de Evaluación | Finalización de la sesión de mentoría. | El mentor dispone de 48 horas post-sesión para registrar la bitácora con los temas dictados y la asistencia. Solo los asistentes evalúan. | Bloqueo definitivo del registro de horas si se supera el plazo de 48 horas. | Cómputo de ventana de tiempo e inmutabilidad sellada con firma SHA-256. | MOD-06 |
-| **RN-13** | Ventana Perentoria para Encuestas (24h) | Conclusión de una sesión de mentoría con asistencia. | El formulario de evaluación de calidad está habilitado durante 24 horas posteriores al cierre de la sesión. Luego se cierra definitivamente. | Cierre del formulario e imposibilidad de emitir calificaciones extemporáneas. | Verificación temporal estricta (`fecha_actual <= fecha_cierre + 24h`) y filtro por asistencia efectiva. | MOD-06 |
-| **RN-14** | Certificación por Horas Auditadas ($\ge 20\text{ h}$) | Solicitud o autorización de certificados oficiales. | La certificación de horas exige acumular un mínimo de 20 horas efectivas en el semestre con el 100% de bitácoras auditadas y visadas. | Denegación de emisión documental hasta alcanzar el umbral completo. | Validación algorítmica sobre la suma de horas con bitácoras en estado aprobado. | MOD-07 |
-
-Fuente: Elaboración propia a partir de las políticas académicas de la EPIS-UPT.
-
-El análisis del Cuadro 5.4 demuestra que las reglas de negocio institucionalizan un marco pedagógico transparente y seguro. La combinación de validaciones temporales ($T-24\text{ h}$, 48h, 24h), aforos estándar y verificación de mérito garantiza el orden operativo y protege los derechos de mentores y mentoreados.
-
----
+| Regla | Denominación | Política / requisito | Estado observado | Módulo / CUS vigentes |
+| --- | --- | --- | --- | --- |
+| RN-01 | Acceso institucional | Dominios @virtual.upt.pe y @upt.pe; OTP de 6 dígitos, 300 s, reenvío 60 s. Cinco errores bloquean el desafío; tasa de solicitudes es un control distinto. | Implementado; entrega externa y SSO pendientes de validación | MOD-01 / CUS-001 |
+| RN-02 | Consentimiento informado | Aceptación explícita antes de usar las funciones protegidas; rechazo permite salir. | Parcial: registro y pantalla; cobertura de todos los accesos por verificar | MOD-01 / CUS-001, CUS-016 |
+| RN-03 | Mérito del mentor | Requisito institucional: ciclo VII-X y nota >=14 en la materia. Preferencia en perfil y rol concedido son distintos. | Brecha: el código acepta ciclo >=VII o rol habilitado sin acreditar nota ni comité | MOD-02 / CUS-005, CUS-006, CUS-010, CUS-021 |
+| RN-04 | Antelación de oferta | Publicar y reprogramar con más de 24 h; se recomienda 48 h. El límite exacto de 24 h se rechaza. | Implementado en servicio; se corrige el anterior >=24 h | MOD-02 / CUS-006 |
+| RN-05 | Aforo | 10 presencial y 20 virtual; no reservar sobre cupo disponible. | Control en servicios y restricciones de valores; comprobar concurrencia por entorno | MOD-03 / CUS-003, CUS-006 |
+| RN-06 | Espacios físicos | Seleccionar ambientes disponibles según cronograma y sin solapamiento de sesiones. | Parcial: cronogramas y control; no tabla propia de ambientes | MOD-05 / CUS-006, CUS-017 |
+| RN-07 | Ambiente virtual | Requisito: disponer de sala válida para desarrollar la mentoría. | Parcial: URL proporcionada o generada; no acredita aprovisionamiento externo | MOD-05 / CUS-006, CUS-017 |
+| RN-08 | Ratificación y corte | Ratificar antes de T-24h. El corte invalida pendientes con CANCELADA_NO_CONFIRMADA. | Implementado; edición administrativa de ventana propuesta | MOD-03 / CUS-004, CUS-023, CUS-022 |
+| RN-09 | Quórum | Referencia institucional 50% del aforo: 5 presencial / 10 virtual; evaluar al corte. | Servicio usa configuración de despliegue; activación periódica y valores efectivos no inspeccionados | MOD-03 / CUS-023, CUS-009, CUS-022 |
+| RN-10 | Cancelación y liberación | Desistimiento previo a T-24h; motivo opcional. La cancelación de sesión por mentor exige motivo y libera cupos. | Operación implementada; entrega externa de avisos y penalizaciones pendientes | MOD-03 / CUS-024, CUS-023, CUS-022 |
+| RN-11 | Recomendación y desempate | Jaccard, horario, modalidad y afinidad curricular ponderados por asignatura crítica; claves según 6.3 / SAD ADR-009. | Implementado; reputación/carga histórica se conserva como objetivo de RF21 | MOD-03 / CUS-002, CUS-015, CUS-020 |
+| RN-12 | Asistencia y bitácora | Pase vigente y reserva confirmada; registro de bitácora hasta fin +48 h. Hash de integridad técnica. | Parcial: pase aleatorio 30 s; cámara real y reapertura por validar | MOD-04 / CUS-007, CUS-019 |
+| RN-13 | Encuesta | Encuesta del asistente dentro de las 24 h posteriores a la sesión; feedback grupal del mentor distinto. | Parcial: sin evaluación individual mentor a estudiante acreditada | MOD-04 / CUS-012 |
+| RN-14 | Constancia de horas | Requisito institucional: >=20 h del semestre y bitácoras visadas; autorización y firma válidas para certificar. | Parcial: emisión/folio DEMO; validez institucional pendiente | MOD-04 / CUS-014, CUS-019 |
 
 ## 5.5. Matriz de Trazabilidad Bidireccional de Requerimientos
 
-> Los identificadores de esta matriz pertenecen a la línea base de ocho módulos. La [matriz de homologación](docs/revision_srs/MATRIZ_HOMOLOGACION_SRS_V4.md) recoge las correspondencias por función con el catálogo provisional de 6.2.3.
+### Cuadro 5.5: Trazabilidad vigente RF–RN–CUS–RNF
 
-A continuación, se presenta la matriz de trazabilidad que articula la totalidad de requerimientos funcionales con los módulos, reglas de negocio, casos de uso, requerimientos no funcionales y métodos de verificación técnica:
+| RF | Módulo principal | Reglas conservadas | CUS vigentes | RNF vinculados | Estado |
+| --- | --- | --- | --- | --- | --- |
+| RF01 | MOD-01 | RN-01 | CUS-001 | RNF01, RNF02 | Implementado; validación externa pendiente |
+| RF02 | MOD-01 | RN-02 | CUS-001, CUS-016 | RNF02 | Parcial: consentimiento; auditoría integral pendiente |
+| RF03 | MOD-01 | RN-03 | CUS-010, CUS-005, CUS-021 | RNF02, RNF09 | Parcial: asignación administrativa; mérito y comité pendientes |
+| RF04 | MOD-02 | RN-03, RN-04 | CUS-005 | RNF04, RNF08 | Parcial: perfil y disponibilidad; expediente pendiente |
+| RF05 | MOD-05 | RN-11 | CUS-020 | RNF09 | Implementado; discrepancia de ciclos pendiente |
+| RF06 | MOD-03 | RN-04, RN-11 | CUS-002, CUS-015 | RNF03 | Implementado; parametrización propuesta |
+| RF07 | MOD-02 | RN-04 | CUS-008 | RNF04, RNF09 | Parcial: registro y banco; controles pendientes |
+| RF08 | MOD-02 | RN-04, RN-05 | CUS-006 | RNF04, RNF09 | Parcial: publicación; mérito y anexos pendientes |
+| RF09 | MOD-02 | RN-06, RN-07 | CUS-006, CUS-017 | RNF09, RNF10 | Parcial: disponibilidad; provisión externa pendiente |
+| RF10 | MOD-05 | RN-06 | CUS-017 | RNF09, RNF10 | Implementado; importación y consulta |
+| RF11 | MOD-02 | RN-10 | CUS-006, CUS-023 | RNF09, RNF10 | Implementado; notificaciones externas pendientes |
+| RF12 | MOD-03 | RN-05 | CUS-003 | RNF07 | Implementado; validación nueva de concurrencia no ejecutada |
+| RF13 | MOD-03 | RN-08 | CUS-004, CUS-022 | RNF07, RNF09 | Implementado; edición administrativa propuesta |
+| RF14 | MOD-03 | RN-08, RN-10 | CUS-024, CUS-018, CUS-022 | RNF07 | Parcial: desistimiento; justificación y penalizaciones propuestas |
+| RF15 | MOD-03 | RN-08, RN-09 | CUS-023, CUS-009, CUS-022 | RNF06, RNF09 | Parcial: evaluación y planificador; operación real pendiente |
+| RF16 | MOD-03 | RN-09, RN-10 | CUS-023 | RNF09, RNF10 | Implementado; decisión del mentor |
+| RF17 | MOD-04 | RN-05, RN-12 | CUS-007, CUS-018 | RNF02, RNF09 | Parcial: pase efímero; cámara real pendiente |
+| RF18 | MOD-04 | RN-12 | CUS-007, CUS-012, CUS-019 | RNF02, RNF09 | Implementado; sello de integridad y visado administrativo |
+| RF19 | MOD-04 | — | CUS-013 | RNF02, RNF04 | Parcial: historial por rol |
+| RF20 | MOD-04 | RN-13 | CUS-012 | RNF05, RNF07 | Parcial: encuesta; feedback individual inverso pendiente |
+| RF21 | MOD-04 | RN-13 | Transversal RF21; sin CUS autónomo en el catálogo | RNF05, RNF09 | Especificado; reputación integral e insignias por validar |
+| RF22 | MOD-04 | RN-14 | CUS-014 | RNF09 | Parcial: umbral y emisión; autorización institucional pendiente |
+| RF23 | MOD-04 | RN-14 | CUS-014 | RNF02, RNF09 | Parcial: PDF/folio DEMO; certificación institucional pendiente |
+| RF24 | MOD-05 | RN-05, RN-09, RN-11 | CUS-015, CUS-020, CUS-022 | RNF03, RNF05 | Parcial: prioridades curriculares; parametrización administrativa propuesta |
+| RF25 | MOD-05 | RN-02 | CUS-009, CUS-011 | RNF02, RNF04 | Parcial: quórum; retención y exportación propuestas |
+| RF26 | MOD-05 | RN-02, RN-14 | CUS-016, CUS-019 | RNF02, RNF09 | Parcial: visado administrativo; seguridad integral propuesta |
 
-### Cuadro 5.5: Matriz de Trazabilidad Bidireccional de Requerimientos (RF -> MOD -> RN -> CUS -> RNF -> Verificación)
+CUS-018 y CUS-021 requieren formalizar la cobertura de requisitos institucionales, sin inventar RF nuevos. CUS-018 se relaciona funcionalmente con RF14/RF17 y no se declara cubierto por ellos. RF24 se vincula a CUS-015/CUS-020/CUS-022 según el parámetro; el monitoreo no acredita un editor de configuración.
 
-| Código RF | Requerimiento Funcional | Módulo | Reglas Vinculadas | Casos de Uso | RNF Asociados | Método de Verificación Técnica |
-| :---: | :--- | :---: | :---: | :---: | :---: | :--- |
-| **RF01** | Autenticación institucional multifactor (2FA) | MOD-01 | RN-01 | CUS-001 | RNF01, RNF02 | Prueba automatizada de generación/validación OTP, verificación de expiración temporal y prueba de autenticación federada Google. |
-| **RF02** | Formalización de consentimiento legal digital | MOD-01 | RN-02 | CUS-001 | RNF02 | Comprobación de persistencia de marcas UTC/IP en base de datos y prueba de bloqueo perentorio en endpoints privados. |
-| **RF03** | Gestión y asignación administrativa de roles | MOD-01 | RN-03 | CUS-010 | RNF02, RNF09 | Inspección de actualización atómica de privilegios y validación algorítmica de mérito (ciclo $\ge \text{VII}$ y nota $\ge 14.0$). |
-| **RF04** | Configuración de perfil y matriz horaria | MOD-03 | RN-03, RN-04 | CUS-005 | RNF04, RNF08 | Prueba visual de la cuadrícula interactiva 6×11 y prueba de persistencia atómica en base de datos. |
-| **RF05** | Catálogo curricular de asignaturas y temas | MOD-03 | RN-11 | CUS-021 | RNF09 | Pruebas de integración sobre operaciones CRUD del catálogo y visualización de unidades silábicas oficiales. |
-| **RF06** | Inferencia algorítmica y recomendación Top-k | MOD-04 | RN-04, RN-11 | CUS-002 | RNF03 | Validación experimental de precisión algorítmica (Precision@3, NDCG) y latencia media inferior a 500 ms. |
-| **RF07** | Registro y banco de solicitudes por demanda | MOD-04 | RN-04 | CUS-003 | RNF04, RNF09 | Prueba funcional de registro temático, generación de folio y visualización en el banco de necesidades de mentores. |
-| **RF08** | Publicación y parametrización de ofertas | MOD-02 | RN-04, RN-05 | CUS-006 | RNF04, RNF09 | Validación de antelación mínima de 24 horas, límites de aforo estándar (10/20) y registro de enlaces didácticos. |
-| **RF09** | Aprovisionamiento automatizado de espacios | MOD-02 | RN-06, RN-07 | CUS-006, CUS-008 | RNF09, RNF10 | Verificación de detección de solapamientos horarios en aulas y configuración de enlaces virtuales institucionales. |
-| **RF10** | Procesamiento de cronogramas oficiales | MOD-02 | RN-06 | CUS-008 | RNF09, RNF10 | Prueba funcional del parser de cronogramas para extracción de aulas libres e importación estructurada. |
-| **RF11** | Gestión de imprevistos y reprogramación | MOD-02 | RN-10 | CUS-006 | RNF09, RNF10 | Prueba de reprogramación justificada, liberación inmediata de ambientes y despacho de notificaciones a inscritos. |
-| **RF12** | Reserva de cupos con control de aforo | MOD-05 | RN-05 | CUS-004 | RNF07 | Prueba de estrés concurrente multihilo con cerrojo pesimista verificando estrictamente 0.0% de sobrecupo. |
-| **RF13** | Ratificación anticipada obligatoria de asistencia | MOD-05 | RN-08 | CUS-024 | RNF07, RNF09 | Prueba de confirmación previa en ventana de tiempo y transición de estado a confirmada. |
-| **RF14** | Desistimiento voluntario y liberación de cupo | MOD-05 | RN-08, RN-10 | CUS-017 | RNF07 | Prueba de cancelación voluntaria antes de $T-24\text{ h}$ y restitución instantánea de vacantes en el aforo libre. |
-| **RF15** | Monitoreo desatendido y corte en $T-24\text{ h}$ | MOD-05 | RN-08, RN-09 | CUS-023, CUS-009 | RNF06, RNF09 | Verificación del demonio cron en $T-24\text{ h}$, invalidación de no ratificados y evaluación automática de quórum (50%). |
-| **RF16** | Gestión resolutiva ante quórum insuficiente | MOD-05 | RN-09, RN-10 | CUS-007 | RNF09, RNF10 | Prueba de interfaz resolutiva del mentor (continuar excepcional vs cancelar con liberación de recursos). |
-| **RF17** | Marcación de asistencia con QR dinámico TOTP | MOD-06 | RN-05, RN-12 | CUS-012 | RNF02, RNF09 | Validación de generación y escaneo de pase QR efímero de 30 segundos y control de lista de respaldo. |
-| **RF18** | Registro de bitácora docente con hash SHA-256 | MOD-06 | RN-12 | CUS-013 | RNF02, RNF09 | Comprobación de generación de firma criptográfica SHA-256 e inmutabilidad dentro del plazo de 48 horas. |
-| **RF19** | Historial de sesiones, bitácoras y recursos | MOD-06 | — | CUS-014 | RNF02, RNF04 | Prueba de interfaz cronológica de consultas con filtros temáticos y acceso a materiales compartidos. |
-| **RF20** | Captura de encuestas de calidad post-mentoría | MOD-06 | RN-13 | CUS-012, CUS-014 | RNF05, RNF07 | Validación de acceso exclusivo a asistentes y cierre definitivo de encuesta al cumplirse las 24 horas. |
-| **RF21** | Cálculo de reputación y catálogo de insignias | MOD-07 | RN-13 | CUS-019 | RNF05, RNF09 | Prueba matemática del recálculo de reputación a partir de encuestas y desbloqueo de insignias por mérito. |
-| **RF22** | Parametrización y autorización de certificados | MOD-07 | RN-14 | CUS-018 | RNF09 | Validación del umbral mínimo de 20 horas auditadas y exigencia de 100% de bitácoras aprobadas para autorizar. |
-| **RF23** | Emisión, descarga y verificación pública con QR | MOD-07 | RN-14 | CUS-018 | RNF02, RNF09 | Generación de archivo PDF oficial con ReportLab, sello hash SHA-256 y escaneo de código QR en validador público. |
-| **RF24** | Parametrización institucional de aforos | MOD-08 | RN-05, RN-09, RN-11 | CUS-020 | RNF03, RNF05 | Comprobación de actualización de umbrales y realce algorítmico en cartelera para materias prioritarias. |
-| **RF25** | Tablero analítico y métricas de retención | MOD-08 | RN-02 | CUS-011, CUS-015 | RNF02, RNF04 | Verificación de consolidación de KPIs institucionales de demanda insatisfecha y reportes para acreditación ICACIT. |
-| **RF26** | Auditoría de bitácoras y privacidad legal | MOD-08 | RN-02, RN-14 | CUS-016, CUS-022 | RNF02, RNF09 | Inspección del panel de fiscalización y visado docente y exportación de trazas inmutables bajo Ley N° 29733. |
+### Cuadro 5.6: Estado de madurez y procedencia de resultados
 
-Fuente: Elaboración propia a partir del marco de trazabilidad de ingeniería de requisitos.
+Las cifras de pruebas y rendimiento publicadas en versiones anteriores son antecedentes, sin certificación actual ni aprobación institucional. DOC-H06 no ejecuta suites de aplicación ni mediciones de carga, accesibilidad, disponibilidad o precisión.
 
-A continuación, se acredita el estado de madurez y verificación técnica de los requerimientos en la fase de construcción:
-
-### Cuadro 5.6: Estado de Madurez y Verificación de Requerimientos al Cierre de Sprints
-
-| Requerimiento / Atributo | Módulo | Iteración de Construcción | Estado Técnico Formal | Evidencia Técnica Reportada |
-| :---: | :---: | :---: | :---: | :--- |
-| **RF01** (Autenticación 2FA) | MOD-01 | Sprint 1 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Flujo OTP con correo institucional, cooldown de 60 s y token JWT de 8h (13 tests Pytest / 15 tests Vitest). |
-| **RF02** (Consentimiento Ley 29733) | MOD-01 | Sprint 2 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Modal accesible, persistencia de marcas UTC/IP en BD y bloqueo perentorio (9 tests Vitest / 5 tests Pytest). |
-| **RF03** (Roles y Mérito) | MOD-01 | Sprint 2 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Verificación de mérito académico (ciclo $\ge \text{VII}$ y nota $\ge 14.0$) y control RBAC (7 tests Pytest). |
-| **RF04** (Perfil y Matriz 6×11) | MOD-03 | Sprint 2 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Matriz semanal interactiva 6×11 (08:00 a 20:00) y reemplazo atómico en BD (10 tests Vitest / 11 tests Pytest). |
-| **RF05** (Catálogo Curricular) | MOD-03 | Sprints 1 y 2 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Materias formativas críticas en base de datos y árbol de temas silábicos (4 tests Vitest / 8 tests Pytest). |
-| **RF06** (EdRecSys Top-k) | MOD-04 | Sprint 3 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Similitud coseno y filtrado colaborativo calibrado ($P@3=83.3\%$, latencia 12.4 ms) (18 tests Pytest / 14 tests Vitest). |
-| **RF07** (Banco de Demanda) | MOD-04 | Sprint 3 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Registro de demandas temáticas, validación de temarios y visualización docente (12 tests Pytest / 14 tests Vitest). |
-| **RF08** (Publicación de Ofertas) | MOD-02 | Sprint 4 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Antelación $\ge 24\text{ h}$, límites de aforo estándar y registro de recursos (16 tests Pytest / 18 tests Vitest). |
-| **RF09** (Aprovisionamiento de Espacios) | MOD-02 | Sprint 4 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Aulas libres verificadas contra solapamientos y salas virtuales (14 tests Pytest / 12 tests Vitest). |
-| **RF10** (Parser de Cronogramas) | MOD-02 | Sprint 4 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Ingesta estructurada de cronogramas oficiales para detección de ambientes libres (8 tests Pytest). |
-| **RF11** (Gestión de Contingencias) | MOD-02 | Sprint 4 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Reprogramación y cancelación justificada con liberación de recursos y avisos (10 tests Pytest / 10 tests Vitest). |
-| **RF12** (Reserva Concurrente Pesimista)| MOD-05 | Sprint 5 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Bloqueo pesimista `SELECT ... FOR UPDATE` demostrando **0.0% de sobrecupo** (18 tests Pytest / 16 tests Vitest). |
-| **RF13** (Ratificación Anticipada) | MOD-05 | Sprint 5 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Confirmación previa hasta el corte de $T-24\text{ h}$ y cambio a confirmada (12 tests Pytest / 14 tests Vitest). |
-| **RF14** (Desistimiento Voluntario) | MOD-05 | Sprint 5 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Anulación voluntaria antes de $T-24\text{ h}$ con restitución instantánea de vacantes (10 tests Pytest / 10 tests Vitest). |
-| **RF15** (Corte de Quórum en $T-24\text{ h}$)| MOD-05 | Sprint 5 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Demonio cron desatendido que invalida pendientes y evalúa quórum del 50% (16 tests Pytest / 12 tests Vitest). |
-| **RF16** (Resolución de Quórum) | MOD-05 | Sprint 5 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Diálogo resolutivo del mentor ante quórum insuficiente (10 tests Pytest / 10 tests Vitest). |
-| **RF17** (Asistencia QR Dinámico TOTP)| MOD-06 | Sprint 6 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Pase QR dinámico de 30 segundos y escaneo por cámara institucional (14 tests Pytest / 20 tests Vitest). |
-| **RF18** (Bitácora Docente SHA-256) | MOD-06 | Sprint 6 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Registro obligatorio en 48 horas con sello hash SHA-256 (18 tests Pytest / 22 tests Vitest). |
-| **RF19** (Historial y Recursos) | MOD-06 | Sprint 6 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Historial cronológico con filtros temáticos y acceso a materiales educativos (8 tests Pytest / 12 tests Vitest). |
-| **RF20** (Encuestas CSAT de 24h) | MOD-06 | Sprint 7 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Encuesta de 4 dimensiones pedagógicas en ventana perentoria de 24 horas (16 tests Pytest / 14 tests Vitest). |
-| **RF21** (Reputación e Insignias) | MOD-07 | Sprint 7 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Recálculo dinámico de reputación y catálogo de insignias por mérito (12 tests Pytest / 18 tests Vitest). |
-| **RF22** (Parametrización de Certificados)| MOD-07 | Sprint 7 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Control de umbral mínimo de 20 horas auditadas para autorizar certificación (14 tests Pytest / 16 tests Vitest). |
-| **RF23** (Certificado PDF con QR) | MOD-07 | Sprint 7 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Compilación ReportLab de PDF oficial con hash SHA-256 y validador QR (16 tests Pytest / 16 tests Vitest). |
-| **RF24** (Configuración Institucional) | MOD-08 | Sprint 8 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Consola administrativa de aforos y asignaturas prioritarias (10 tests Pytest / 14 tests Vitest). |
-| **RF25** (Tableros Analíticos ICACIT)| MOD-08 | Sprint 8 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Tablero con métricas de demanda insatisfecha y retención estudiantil (14 tests Pytest / 22 tests Vitest). |
-| **RF26** (Auditoría y Visado Docente) | MOD-08 | Sprint 8 | `[IMPLEMENTADO]` / `[VERIFICADO_HISTORICO]` ✅ | Fiscalización de bitácoras docentes y auditoría legal bajo Ley N° 29733 (14 tests Pytest / 16 tests Vitest). |
-
-Fuente: Elaboración propia a partir de las bitácoras técnicas de los Sprints 01 al 08.
-
-> **Nota Metodológica de Auditoría (H01-R / H02 / H03):** La cifra consolidada de 682 pruebas automatizadas (335 en backend Pytest y 347 en frontend Vitest) corresponde al reporte histórico acreditado en el commit `3f6e31d`. De acuerdo con la rectificación formal H01-R y la auditoría de calidad H03, dicha cifra se clasifica formalmente como `[DATO_HISTORICO_OBSERVADO]` y su re-verificación formal en `main` se encuentra en estado `[PENDIENTE]` debido a fallos de linteo estático reportados en el flujo de integración continua (CI), los cuales no comprometen la lógica de los contratos ni las aserciones de negocio.
-
-El análisis de los Cuadros 5.5 y 5.6 certifica que la totalidad de los 26 requerimientos funcionales y 10 atributos de calidad se encuentran respaldados por evidencias de verificación formal.
-
----
+| Antecedente | Procedencia | Interpretación permitida |
+| --- | --- | --- |
+| 627 pruebas (280 backend / 347 frontend) | SAD v3.0; reportes de sprints en docs/sprints | Cifra declarada históricamente; no total vigente ni ejecución de DOC-H06 |
+| 682 pruebas (335 / 347), commit 3f6e31d | Nota de auditoría H01-R/H03 del SRS anterior | Corte histórico diferente; no sumar con otras corridas |
+| 363 backend / 366 frontend; 16 diagnósticos | [Remediación QA_AUTH](docs/qa/REPORTE_REMEDIACION_QA_AUTH_01_FIX_AUTH_02.md) | Resultado reportado por ese informe; no certifica entrega externa ni todo el sistema actual |
+| P@3 83.3%; P@5 80%; NDCG 0.82; 12.4 ms | Declaraciones SRS/SAD v3.x y docs/sprints/sprint-03.md | No reutilizar como resultado actual: faltan protocolo reproducible, muestra y correspondencia con el algoritmo vigente |
+| QA transaccional / recorridos / seguridad | [QA-P2P-04R](docs/qa/QA-P2P-04R-CIERRE.md), [QA-P2P-04](docs/qa/QA-P2P-04-RESULTADOS.md) | Conservar alcance y limitaciones de cada corrida; autorización en aplicación no demuestra RLS |
 
 ## 5.6. Requisitos de Interfaz Externa
 
-### 5.6.1. Interfaces de Usuario (UI)
+### 5.6.1. Interfaces de Usuario (Design System y Accesibilidad WCAG 2.1 AA)
 
-La interfaz web del Sistema Web P2P está construida como una aplicación de página única (*Single Page Application - SPA*) reactiva y accesible:
-- **Design System Institucional y Vocabulario Cromático:** Desarrollado sobre Tailwind CSS v3.4+, aplicando la paleta de colores institucional de la Universidad Privada de Tacna descrita en lenguaje natural:
-  - *Azul marino institucional:* Utilizado para barras de navegación superiores, encabezados de módulo y botones de acción principal.
-  - *Dorado universitario:* Aplicado en distintivos de acreditación, estrellas de reputación docente e insignias de mérito.
-  - *Fondo blanco puro y gris pizarra claro:* Utilizados para paneles de contenido y áreas de lectura descansada.
-  - *Borde gris claro y texto secundario atenuado:* Para la delimitación sutil de tarjetas y campos de formulario.
-  - *Alertas y notificaciones:* Banner de advertencia en color ámbar preventivo, notificación de error en color rojo y etiqueta de éxito en color verde.
-- **Accesibilidad Universal (WCAG 2.1 Nivel AA):**
-  - Contraste cromático estricto $\ge 4.5:1$ en la totalidad de textos regulares frente a sus fondos.
-  - Navegación completa por teclado con indicador de foco visible (`focus:ring-2 focus:ring-blue-500`) en todos los controles interactivos, botones y campos de entrada.
-  - Soporte integral para lectores de pantalla mediante atributos descriptivos `aria-label`, roles semánticos (`role="dialog"`, `role="alert"`) y regiones dinámicas `aria-live`.
-  - Cierre intuitivo de diálogos modales mediante la tecla `Escape`.
+Las 24 narrativas y sus 48 figuras describen la interacción en términos funcionales. Las propuestas se identifican expresamente; el diseño institucional y la accesibilidad son objetivos sujetos a evaluación, sin declaración universal de conformidad.
 
-### 5.6.2. Interfaces de Software
+### 5.6.2. Interfaces de Software (APIs, Base de Datos y Dependencias)
 
-- **Servidor de Aplicación y API RESTful:** Desarrollado en Python 3.13 bajo el framework FastAPI. Expone interfaces RESTful con contratos JSON fuertemente tipados bajo el prefijo `/api/v1/`, documentadas interactivamente mediante la especificación OpenAPI v3.0 (Swagger UI).
-- **Capa de Persistencia Relacional:** Motor PostgreSQL v15+ administrado sobre la infraestructura cloud de Supabase, con conexión mediante pool de conexiones y políticas de seguridad a nivel de fila (*Row Level Security - RLS*).
-- **Servicios Externos de Correo e Identidad:** Integración con transporte SMTP institucional de Gmail para despacho de códigos OTP y avisos urgentes al dominio `@virtual.upt.pe`, y SDK oficial de Google Identity Services (GIS) para autenticación federada.
-- **Generación Documental Oficial:** Motor programático ReportLab v4.x para compilación en streaming de certificados oficiales en formato estándar PDF/A con códigos QR vectoriales incorporados.
+El SAD documenta tecnologías declaradas, contratos, componentes y entidades. El SRS conserva la conducta esperada sin convertir proveedores externos ni mecanismos de respaldo en capacidades verificadas.
 
 ### 5.6.3. Interfaces de Hardware
 
-- **Plataforma Servidora:** Contenedores de ejecución cloud sobre arquitectura x86_64 o ARM64, con requerimientos mínimos de 1 núcleo vCPU y 1 GB de memoria RAM para atender la demanda simultánea de la EPIS.
-- **Terminales y Dispositivos de Usuario:** Estaciones de trabajo de los laboratorios de cómputo de la EPIS, computadoras portátiles personales y teléfonos inteligentes. Para el control de asistencia presencial, se requiere cámara web o cámara fotográfica en el dispositivo móvil para el escaneo del pase QR dinámico.
+Se prevé uso en equipo de escritorio o móvil con navegador. El escaneo de cámara requiere permiso y verificación en dispositivo; no se certificó durante DOC-H06.
 
 ### 5.6.4. Interfaces de Comunicaciones y Seguridad de Red
 
-- **Cifrado en Tránsito:** Todo el intercambio de información entre los clientes web y el servidor se transmite estrictamente a través del protocolo HTTPS con cifrado TLS v1.3 sobre el puerto TCP 443.
-- **Políticas de Control de Origen (CORS):** Cabeceras restrictivas en el servidor FastAPI que limitan el acceso exclusivamente a los dominios universitarios autorizados (`http://localhost:5173` en desarrollo y `https://*.upt.pe` en producción).
-- **Seguridad en Peticiones Privadas:** Cabeceras de autorización HTTP Bearer (`Authorization: Bearer <token_jwt>`) con tokens firmados criptográficamente mediante HMAC-SHA256 y vigencia de 8 horas.
+Se exige transporte seguro y manejo visible de fallos de entrega. La validación de dominio no acredita vigencia administrativa de la cuenta, ni entrega SMTP real, ni dos factores independientes.
 
 # 6. Fase de Desarrollo
 
@@ -1763,898 +1440,119 @@ El ciclo de vida del desarrollo de software del proyecto se fundamenta en la met
 
 ### Diagrama 6.1: Fases del Ciclo de Vida del Desarrollo de Software (Metodología UWE - Semestre 2026-II)
 
-**Figura 4. Fases del Ciclo de Vida del Desarrollo de Software (Metodología UWE - Semestre 2026-II)**
+**Figura 4. Ciclo de vida y metodología UWE**
 
-![Figura 4. Fases del Ciclo de Vida del Desarrollo de Software (Metodología UWE - Semestre 2026-II)](docs/diseño/diagramas/srs/img/diag_004_sec60_ciclo_vida_metodologia.png)
+![Figura 4. Ciclo de vida y metodología UWE](docs/revision_srs/diagramas/doc-h06/srs/img/diag_004_ciclo_vida.png)
 
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_004_ciclo_vida.puml).
 
-```plantuml
-/'
-  Diagrama: Diagrama 6.1: Fases del Ciclo de Vida del Desarrollo de Software (Metodología UWE - Semestre 2026-II)
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Fases de Desarrollo del Sistema Web P2P (Metodología UWE - Semestre 2026-II)
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam activity {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-start
-:29 Ago 2026;
-:FASE 1: Especificación de Requisitos y Gobernanza Legal\nSemanas 1-3 (Sprints 1 y 2)\n• Levantamiento de información y entrevistas estructuradas\n• Definición de RF01-RF26, RN-01 a RN-14 y RNF01-RNF10 (ISO 25010)\n• Protocolo formal de Consentimiento Digital bajo Ley N° 29733\n• Autenticación multifactor 2FA institucional;
-
-:FASE 2: Diseño del Sistema y Modelado de Datos Relacional\nSemanas 4-6 (Sprints 2 y 3)\n• Arquitectura desacoplada en 3 capas y modularización (MOD-01 al MOD-08)\n• Modelado relacional PostgreSQL (15 tablas) con políticas RLS\n• Prototipos de alta fidelidad en React SPA y diseño de navegación UWE;
-
-:FASE 3: Construcción del Software y Motor Algorítmico\nSemanas 7-11 (Sprints 3 al 6)\n• Microservicios RESTful en Python (FastAPI)\n• Motor híbrido EdRecSys (Similitud Coseno + Filtrado Colaborativo)\n• Orquestación de quórum con cerrojos pesimistas a T-24h (FOR UPDATE)\n• Marcación QR TOTP y bitácoras docentes con hash SHA-256;
-
-:FASE 4: Verificación Integral, Gamificación y Cierre\nSemanas 12-14 (Sprints 7 y 8)\n• Gamificación e insignias por mérito docente\n• Emisión de certificados digitales oficiales PDF con QR institucional\n• Tableros de analítica institucional y supervisión directiva\n• Batería de 627 pruebas automatizadas (280 backend, 347 frontend);
-
-:FASE 5: Piloto Institucional y Cierre del Semestre\nSemanas 15-16 (Diciembre 2026)\n• Despliegue en producción sobre infraestructura PaaS (Supabase / Render)\n• Prueba piloto con estudiantes de I a X ciclo de la EPIS-UPT\n• Evaluación de usabilidad SUS (>75 puntos) y entrega formal de versión 3.0;
-:14 Dic 2026;
-stop
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
+Las fases representan la organización metodológica del proyecto, sin acreditar completitud operativa o institucional de las capacidades indicadas.
 
 ## 6.1. Perfiles de Usuario y Modelo de Control de Acceso (RBAC)
 
-### Presentación de los Perfiles de Usuario
-La operación eficiente y ordenada del Sistema Web P2P requiere la definición explícita de los perfiles de usuario y actores que interactúan en la plataforma. En el ecosistema formativo de la EPIS-UPT, los usuarios desempeñan roles diferenciados según su nivel de avance curricular, su investidura académica o la naturaleza técnica de sus procesos. Con el fin de gobernar el acceso bajo el principio de mínimo privilegio y resguardar la privacidad académica (Ley N° 29733), el sistema implementa un modelo de control de acceso basado en roles (**Role-Based Access Control - RBAC**):
+Mentoreado, Mentor y Administrador son roles operativos identificados. La preferencia de postulación del perfil no concede permisos; la promoción a Mentor es una operación administrativa. Comité y Tutor son actores previstos, sin atribuirles roles o pantallas existentes. El requisito de mérito (ciclo VII-X y nota >=14) se mantiene con su brecha de verificación.
 
-### Cuadro 6.1: Perfiles de Usuario y Actores del Sistema Web P2P
-
-| Perfil / Actor | Tipo de Actor | Población Objetivo / Componente | Responsabilidades y Actividades Principales | Privilegios y Permisos en el Sistema |
-| :--- | :--- | :--- | :--- | :--- |
-| **Estudiante Mentoreado** | Humano (Actor Primario) | Estudiantes matriculados de I a IV ciclo con necesidades de reforzamiento académico en materias formativas críticas (*Cálculo, Algoritmos, Estructuras, POO*). | • Formalizar el consentimiento informado digital obligatorio (Ley N° 29733).<br>• Declarar asignaturas de interés y disponibilidad horaria semanal en la matriz 6×11.<br>• Consultar recomendaciones personalizadas Top-k y registrar demandas temáticas.<br>• Reservar cupos de mentoría con control concurrente.<br>• Ratificar asistencia obligatoria antes de $T-24\text{ h}$ o desistir oportunamente.<br>• Marcar asistencia mediante pase QR y responder encuestas de satisfacción (24h). | • Acceso a vistas de catálogo y recomendaciones personales (`RoleGuard`).<br>• Creación, ratificación y desistimiento de reservas propias.<br>• Registro en el banco de solicitudes por demanda.<br>• Descarga de materiales académicos vinculados.<br>• Diligenciamiento de encuestas de calidad post-sesión. |
-| **Estudiante Mentor** | Humano (Actor Primario) | Estudiantes de rendimiento sobresaliente de VII a X ciclo promovidos formalmente por la Dirección de Escuela tras verificación de mérito. | • Configurar áreas de dominio curricular y agenda de disponibilidad semanal.<br>• Publicar ofertas de mentoría académica (materia, temario, fecha, modalidad).<br>• Resolver la continuidad o cancelación de sesiones ante alertas de quórum deficiente.<br>• Dictar las sesiones en aulas asignadas o salas virtuales validadas.<br>• Marcar asistencia efectiva y registrar bitácoras pedagógicas firmadas con SHA-256 en 48h.<br>• Compartir recursos didácticos y monitorear insignias/reputación obtenida.<br>• Descargar certificados oficiales de horas para convalidación de créditos. | • Publicación, reprogramación y anulación justificada de ofertas propias.<br>• Aprovisionamiento guiado de infraestructura física o virtual.<br>• Diligenciamiento y cierre formal de bitácoras docentes.<br>• Carga de materiales educativos para sus participantes.<br>• Visualización de tablero de reputación y descarga de certificados PDF auditados. |
-| **Administrador Institucional** | Humano (Gobernanza y Supervisión) | Comité de Tutoría Docente, Coordinación Académica y Dirección de la EPIS-UPT. | • Auditar expedientes estudiantiles y aprobar la promoción a rol de Mentor.<br>• Mantener actualizado el catálogo de asignaturas críticas y temarios silábicos.<br>• Cargar cronogramas oficiales de aulas para el motor parser de espacios.<br>• Registrar materias y mentorías en condición prioritaria por reprobación.<br>• Fiscalizar bitácoras docentes, asistencias y computabilidad de horas acumuladas.<br>• Parametrizar umbrales semestrales y emitir certificados oficiales PDF foliados.<br>• Supervisar tableros analíticos de demanda insatisfecha, ausentismo y desempeño. | • Control de acceso total y administración de roles en `/roles/promote-mentor`.<br>• Operaciones CRUD sobre catálogo curricular y prioridades académicas.<br>• Carga e indexación de cronogramas institucionales de espacios.<br>• Visado administrativo, observación y validación de horas de mentoría.<br>• Autorización y emisión de certificados digitales con código QR.<br>• Acceso irrestricto al panel de analítica institucional (`/analytics`). |
-| **Servicio Cron / Backend** | Técnico (Proceso Desatendido) | Demonio de tareas programadas en el servidor backend FastAPI. | • Inspeccionar periódicamente la base de datos para identificar sesiones próximas.<br>• Despachar notificaciones automáticas y recordatorios a estudiantes inscritos.<br>• Ejecutar el corte perentorio a $T-24\text{ h}$, revocar cupos no ratificados y evaluar quórum.<br>• Transicionar a `QUORUM_INSUFICIENTE` si no se alcanza el 50% de aforo y alertar al Mentor. | • Ejecución en segundo plano con privilegios a nivel de servicio de sistema.<br>• Modificación atómica de estados en tablas de reservas y sesiones.<br>• Despacho de correos electrónicos institucionales mediante servicio SMTP. |
-| **Servicios Externos** | Técnico (Sistemas Colaboradores) | Infraestructura institucional: Servidor SMTP UPT, repositorios y navegadores web. | • Despachar códigos de verificación OTP y notificaciones al buzón `@upt.pe`.<br>• Suministrar entornos de videoconferencia validados para sesiones virtuales.<br>• Proveer soporte para captura de cámara en escaneo de códigos QR. | • Conexión autenticada mediante tokens y protocolos seguros TLS 1.3.<br>• Sin exposición directa de datos personales sensibles a terceros. |
-
-Fuente: Elaboración propia.
-
----
+Las restricciones concretas por ruta se documentan en SAD 6.3. No se deduce autorización general de todos los endpoints por la existencia de un token de acceso ni se equipara control en la aplicación con políticas RLS.
 
 ## 6.2. Modelo Conceptual
 
-### Presentación del Modelo Conceptual
-El modelo conceptual formaliza las entidades del dominio de la EPIS-UPT, capturando sus atributos esenciales, estados operacionales y las relaciones semánticas que sustentan el ecosistema de mentorías académicas. Este modelo traduce las reglas de negocio (aforos máximos, consentimiento de privacidad bajo la Ley N° 29733, estados de reserva, bitácoras de cumplimiento y certificación) en una estructura ontológica coherente y extensible alineada con las **15 tablas relacionales de PostgreSQL**:
+Las entidades conceptuales se relacionan con las tablas vigentes del apartado 6.3.6. Un expediente de comité o una justificación son objetos previstos y no se incorporan al modelo físico sin implementación.
 
-### Diagrama 6.2: Diagrama de Clases Conceptuales del Dominio - Sistema Web P2P EPIS-UPT
+### Diagrama 6.2: Clases conceptuales del dominio
 
-**Figura 5. Diagrama de Clases Conceptuales del Dominio - Sistema Web P2P EPIS-UPT**
+**Figura 5. Modelo conceptual del dominio**
 
-![Figura 5. Diagrama de Clases Conceptuales del Dominio - Sistema Web P2P EPIS-UPT](docs/diseño/diagramas/srs/img/diag_005_sec62_clases_conceptuales_dominio.png)
+![Figura 5. Modelo conceptual del dominio](docs/revision_srs/diagramas/doc-h06/srs/img/diag_005_conceptual.png)
 
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_005_conceptual.puml).
 
-```plantuml
-/'
-  Diagrama: Diagrama 6.2: Diagrama de Clases Conceptuales del Dominio - Sistema Web P2P EPIS-UPT
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Conceptuales del Dominio - Sistema Web P2P EPIS-UPT
-hide methods
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
+## 6.2.1. Diagrama de Clases Conceptuales y Paquetes Arquitecturales
 
-skinparam class {
-  BackgroundColor #F8F9FA
-  BorderColor #2B3A42
-  ArrowColor #2B3A42
-}
+### Diagrama 6.3: Cinco agrupaciones funcionales
 
-class Usuario {
-  +id_usuario: UUID
-  +codigo_estudiante: String
-  +correo_institucional: String
-  +nombres: String
-  +apellidos: String
-  +activo: Boolean
-  +fecha_registro: DateTime
-}
+**Figura 6. Agrupación funcional de cinco módulos**
 
-class ConsentimientoLegal {
-  +id_consentimiento: UUID
-  +id_usuario: UUID
-  +ip_address: String
-  +user_agent: String
-  +fecha_aceptacion: DateTime
-}
+![Figura 6. Agrupación funcional de cinco módulos](docs/revision_srs/diagramas/doc-h06/srs/img/diag_006_paquetes.png)
 
-class Rol {
-  +id_rol: Integer
-  +codigo_rol: String
-  +nombre_rol: String
-}
-
-class PerfilFormativo {
-  +id_perfil: UUID
-  +id_usuario: UUID
-  +biografia: Text
-  +ciclo_actual: Integer
-  +reputacion_promedio: Float
-  +horas_dictadas_total: Float
-}
-
-class DisponibilidadHoraria {
-  +id_disponibilidad: UUID
-  +id_usuario: UUID
-  +dia_semana: Integer
-  +hora_inicio: Time
-  +hora_fin: Time
-}
-
-class CursoCritico {
-  +id_curso: UUID
-  +codigo_curso: String
-  +nombre_curso: String
-  +ciclo_sugerido: Integer
-  +es_prioritario: Boolean
-}
-
-class TemaCurricular {
-  +id_tema: UUID
-  +id_curso: UUID
-  +unidad_silabica: Integer
-  +titulo_tema: String
-  +descripcion_conceptual: Text
-}
-
-class OfertaMentoria {
-  +id_oferta: UUID
-  +id_mentor: UUID
-  +id_curso: UUID
-  +id_tema: UUID
-  +modalidad: String
-  +aforo_maximo: Integer
-  +fecha_hora_inicio: DateTime
-  +fecha_hora_fin: DateTime
-  +estado_oferta: String
-}
-
-class EspacioFisico {
-  +id_espacio: UUID
-  +codigo_ambiente: String
-  +pabellon: String
-  +capacidad: Integer
-  +es_activo: Boolean
-}
-
-class SesionMentoria {
-  +id_sesion: UUID
-  +id_oferta: UUID
-  +id_espacio: UUID
-  +enlace_virtual: String
-  +estado_sesion: String
-  +quorum_alcanzado: Boolean
-}
-
-class ReservaCupo {
-  +id_reserva: UUID
-  +id_sesion: UUID
-  +id_mentoreado: UUID
-  +estado_reserva: String
-  +fecha_reserva: DateTime
-  +fecha_ratificacion: DateTime
-}
-
-class AsistenciaSesion {
-  +id_asistencia: UUID
-  +id_sesion: UUID
-  +id_estudiante: UUID
-  +estado_asistencia: String
-  +metodo_checkin: String
-  +timestamp_checkin: DateTime
-}
-
-class BitacoraPedagogica {
-  +id_bitacora: UUID
-  +id_sesion: UUID
-  +id_mentor: UUID
-  +temas_impartidos: Text
-  +observaciones_docentes: Text
-  +hash_sha256: String
-  +estado_visado: String
-  +fecha_registro: DateTime
-}
-
-class EvaluacionCalidad {
-  +id_evaluacion: UUID
-  +id_sesion: UUID
-  +id_estudiante: UUID
-  +puntuacion_estrellas: Integer
-  +comentario_cualitativo: Text
-  +fecha_evaluacion: DateTime
-}
-
-class CertificadoHoras {
-  +id_certificado: UUID
-  +id_mentor: UUID
-  +folio_correlativo: String
-  +horas_acreditadas: Float
-  +hash_documento: String
-  +url_qr_verificacion: String
-  +fecha_emision: DateTime
-}
-
-Usuario "1" -- "0..1" ConsentimientoLegal : formaliza
-Usuario "1" -- "1..*" Rol : posee
-Usuario "1" -- "1" PerfilFormativo : define
-Usuario "1" -- "0..*" DisponibilidadHoraria : agenda
-
-CursoCritico "1" -- "1..*" TemaCurricular : desglosa
-Usuario "1" -- "0..*" OfertaMentoria : publica (como mentor)
-CursoCritico "1" -- "0..*" OfertaMentoria : clasifica
-TemaCurricular "1" -- "0..*" OfertaMentoria : especifica
-
-OfertaMentoria "1" -- "1" SesionMentoria : materializa
-EspacioFisico "0..1" -- "0..*" SesionMentoria : alberga
-
-SesionMentoria "1" -- "0..*" ReservaCupo : gestiona cupos
-Usuario "1" -- "0..*" ReservaCupo : inscribe (como mentoreado)
-
-SesionMentoria "1" -- "0..*" AsistenciaSesion : controla
-SesionMentoria "1" -- "0..1" BitacoraPedagogica : documenta
-SesionMentoria "1" -- "0..*" EvaluacionCalidad : recibe
-
-Usuario "1" -- "0..*" CertificadoHoras : acredita
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
-
-### 6.2.1. Diagrama de Paquetes Arquitecturales
-
-### Presentación del Diagrama de Paquetes
-La arquitectura de software del Sistema Web P2P adopta un patrón en **Capas Desacopladas** (*Clean Architecture / Layered Architecture*), asegurando la separación estricta de responsabilidades entre la capa de presentación del cliente (React SPA), los controladores y servicios RESTful (FastAPI), la capa de dominio y persistencia (SQLAlchemy / PostgreSQL) y las integraciones con servicios externos (SMTP, ReportLab, Supabase RLS):
-
-### Diagrama 6.3: Diagrama de Paquetes Arquitecturales y Subsistemas del Sistema Web P2P
-
-**Figura 6. Diagrama de Paquetes Arquitecturales y Subsistemas del Sistema Web P2P**
-
-![Figura 6. Diagrama de Paquetes Arquitecturales y Subsistemas del Sistema Web P2P](docs/diseño/diagramas/srs/img/diag_006_sec621_paquetes_arquitecturales.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.3: Diagrama de Paquetes Arquitecturales y Subsistemas del Sistema Web P2P
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Paquetes Arquitecturales y Subsistemas del Sistema Web P2P
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-package "Capa de Presentación (Frontend SPA - React 18 / TypeScript)" as PKG_FRONT #EBF3FB {
-  package "Vistas de Usuario (UI Views)" as PKG_VIEWS {
-    [LoginOtpView]
-    [ConsentModalView]
-    [ProfileAvailabilityView]
-    [RecommendationsView]
-    [PublishMentorshipView]
-    [BookingModalView]
-    [QrScannerView / QrPassView]
-    [BitacoraRegisterView]
-    [AdminAnalyticsView]
-    [AdminCertificatesView]
-  }
-  package "Adaptadores de Cliente (HTTP / State)" as PKG_CLIENT {
-    [apiClient (Axios)]
-    [authService]
-    [mentorshipService]
-    [bookingService]
-    [bitacoraService]
-  }
-  PKG_VIEWS ..> PKG_CLIENT : invoca
-}
-
-package "Capa de Aplicación y API RESTful (Python / FastAPI)" as PKG_API #F0FDF4 {
-  package "Controladores (Endpoints v1)" as PKG_ENDPOINTS {
-    [auth.py]
-    [consent.py]
-    [roles.py]
-    [curriculum.py]
-    [recommendations.py]
-    [mentorships.py]
-    [bookings.py]
-    [attendance.py]
-    [bitacora.py]
-    [certificates.py]
-    [analytics.py]
-  }
-  package "Esquemas de Datos (Pydantic v2)" as PKG_SCHEMAS {
-    [AuthSchemas]
-    [BookingSchemas]
-    [MentorshipSchemas]
-    [BitacoraSchemas]
-    [CertificateSchemas]
-  }
-  PKG_ENDPOINTS ..> PKG_SCHEMAS : valida
-}
-
-package "Capa de Servicios y Dominio (Lógica de Negocio)" as PKG_DOMAIN #FEF9C3 {
-  package "Servicios de Negocio (Services)" as PKG_SERVICES {
-    [AuthService]
-    [ConsentService]
-    [RecommendationService (EdRecSys)]
-    [MentorshipService]
-    [BookingService (Locks pesimistas)]
-    [QuorumCronService]
-    [AttendanceService (TOTP QR)]
-    [BitacoraService (SHA-256)]
-    [CertificateService]
-    [AnalyticsService]
-  }
-  package "Entidades ORM (SQLAlchemy 2.0)" as PKG_MODELS {
-    [Usuario / Rol]
-    [Perfil / Disponibilidad]
-    [Curso / Tema]
-    [Oferta / Sesion]
-    [Reserva / Asistencia]
-    [Bitacora / Evaluacion]
-    [Certificado / Insignia]
-  }
-  PKG_SERVICES ..> PKG_MODELS : manipula
-}
-
-package "Capa de Persistencia e Infraestructura Externa" as PKG_INFRA #FFF1F2 {
-  database "PostgreSQL 15 (Supabase)" as DB_PG {
-    [15 Tablas Relacionales]
-    [Políticas RLS]
-    [Constraints chk_sesion]
-  }
-  [Servidor SMTP UPT (Emails)] as EXT_SMTP
-  [Generador PDF (ReportLab)] as EXT_PDF
-}
-
-PKG_CLIENT ..> PKG_ENDPOINTS : peticiones HTTPS / JSON
-PKG_ENDPOINTS ..> PKG_SERVICES : orquesta
-PKG_SERVICES ..> DB_PG : transacciones ACID
-PKG_SERVICES ..> EXT_SMTP : despacha correos
-PKG_SERVICES ..> EXT_PDF : compila certificados
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_006_paquetes.puml).
 
 ## 6.2.2. Diagramas de Casos de Uso
 
-> Los diagramas de contexto y de módulos de este apartado conservan la numeración y los objetivos de la fase de diseño. Antes de enlazar un identificador con 6.2.3, consultar su función en la matriz de homologación.
-
-### Presentación de los Diagramas de Casos de Uso
-Los casos de uso del Sistema Web P2P especifican la interacción funcional entre los actores institucionales y el software. A continuación, se presenta el **Diagrama General Consolidado (Diagrama 6.4)** que integra los 24 casos de uso canónicos estructurados en los ocho módulos del sistema, seguido de los diagramas modulares individuales (Diagramas 6.5 al 6.12).
-
-### Diagrama 6.4: Diagrama de Casos de Uso General Consolidado del Sistema Web P2P (CUS-001 al CUS-024)
-
-**Figura 7. Diagrama de Casos de Uso General Consolidado del Sistema Web P2P (CUS-001 al CUS-024)**
-
-![Figura 7. Diagrama de Casos de Uso General Consolidado del Sistema Web P2P (CUS-001 al CUS-024)](docs/diseño/diagramas/srs/img/diag_007_sec622_casos_uso_general_24cus.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.4: Diagrama de Casos de Uso General Consolidado del Sistema Web P2P (CUS-001 al CUS-024)
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.4: Diagrama de Casos de Uso General Consolidado (CUS-001 al CUS-024)\nSistema Web P2P - EPIS UPT
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Usuario Institucional" as User #EBF3FB
-actor "Estudiante Mentoreado" as Mentoreado #EBF3FB
-actor "Estudiante Mentor" as Mentor #EBF3FB
-actor "Administrador (EPIS)" as Admin #FEF9C3
-actor "Servicio Cron Backend" as Cron #FFF1F2
-
-Mentoreado -up-|> User
-Mentor -up-|> User
-Admin -up-|> User
-
-rectangle "Sistema Web P2P de Mentorías Académicas EPIS-UPT" {
-
-  package "MOD-01: Seguridad y Gobernanza" {
-    usecase "CUS-001: Iniciar sesión con 2FA\ny consentimiento Ley 29733" as CUS01
-    usecase "CUS-010: Gestionar asignación\nde roles de usuario" as CUS10
-  }
-
-  package "MOD-02: Ofertas de Mentoría y Recursos" {
-    usecase "CUS-006: Publicar oferta\nde mentoría académica" as CUS06
-    usecase "CUS-008: Consultar disponibilidad\nde espacios y recursos" as CUS08
-  }
-
-  package "MOD-03: Perfil y Plan de Aprendizaje" {
-    usecase "CUS-005: Gestionar perfil\ny disponibilidad horaria" as CUS05
-    usecase "CUS-021: Explorar catálogo\ncurricular de asignaturas filtro" as CUS21
-  }
-
-  package "MOD-04: Demanda y Recomendaciones" {
-    usecase "CUS-002: Explorar recomendaciones\npersonalizadas Top-k" as CUS02
-    usecase "CUS-003: Registrar solicitud\nde demanda académica" as CUS03
-  }
-
-  package "MOD-05: Quórum y Cancelaciones" {
-    usecase "CUS-004: Reservar cupo\nde mentoría académica" as CUS04
-    usecase "CUS-024: Ratificar asistencia\na sesión de mentoría" as CUS24
-    usecase "CUS-017: Desistir voluntariamente\nde reserva de cupo" as CUS17
-    usecase "CUS-023: Evaluar quórum\nautomático a T-24h" as CUS23
-    usecase "CUS-007: Decisión ante\nquórum insuficiente" as CUS07
-  }
-
-  package "MOD-06: Asistencia, Bitácoras y Feedback" {
-    usecase "CUS-012: Registrar asistencia\ncon pase QR dinámico" as CUS12
-    usecase "CUS-013: Registrar bitácora\ndocente con SHA-256" as CUS13
-    usecase "CUS-014: Visualizar historial\ny bitácoras académicas" as CUS14
-  }
-
-  package "MOD-07: Gamificación e Incentivos" {
-    usecase "CUS-018: Emitir constancia\ninstitucional de horas" as CUS18
-    usecase "CUS-019: Gestionar insignias\ny reputación gamificada" as CUS19
-  }
-
-  package "MOD-08: Analítica y Configuración" {
-    usecase "CUS-009: Notificar eventos\ncríticos y alertas temporales" as CUS09
-    usecase "CUS-011: Generar reportes\ne indicadores de analítica" as CUS11
-    usecase "CUS-015: Consultar métricas\nde retención y desempeño" as CUS15
-    usecase "CUS-016: Auditar trazas de\nseguridad y consentimiento" as CUS16
-    usecase "CUS-020: Configurar parámetros\ninstitucionales y umbrales" as CUS20
-    usecase "CUS-022: Gestionar catálogo\nde temas y materias críticas" as CUS22
-  }
-}
-
-User --> CUS01
-Admin --> CUS10
-
-Mentor --> CUS06
-Mentor --> CUS08
-Mentor --> CUS07
-Mentor --> CUS13
-Mentor --> CUS18
-Mentor --> CUS19
-
-User --> CUS05
-User --> CUS21
-User --> CUS14
-
-Mentoreado --> CUS02
-Mentoreado --> CUS03
-Mentoreado --> CUS04
-Mentoreado --> CUS24
-Mentoreado --> CUS17
-Mentoreado --> CUS12
-
-Cron --> CUS23
-Cron --> CUS09
-
-Admin --> CUS11
-Admin --> CUS15
-Admin --> CUS16
-Admin --> CUS20
-Admin --> CUS22
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
-
-### Diagrama 6.5: Diagrama de Casos de Uso - MOD-01: Seguridad, Autenticación y Gobernanza
-
-**Figura 8. Diagrama de Casos de Uso - MOD-01: Seguridad, Autenticación y Gobernanza**
-
-![Figura 8. Diagrama de Casos de Uso - MOD-01: Seguridad, Autenticación y Gobernanza](docs/diseño/diagramas/srs/img/diag_008_sec622_casos_uso_mod01.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.5: Diagrama de Casos de Uso - MOD-01: Seguridad, Autenticación y Gobernanza
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.5: Diagrama de Casos de Uso - MOD-01: Seguridad, Autenticación y Gobernanza
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Usuario Institucional" as User #EBF3FB
-actor "Administrador (EPIS)" as Admin #FEF9C3
-actor "Servicio Correo SMTP" as SMTP #FFF1F2
-
-rectangle "MOD-01: Seguridad, Autenticación y Gobernanza" {
-  usecase "CUS-001: Iniciar sesión con 2FA\ny consentimiento Ley 29733" as CUS01
-  usecase "CUS-010: Gestionar asignación\nde roles de usuario" as CUS10
-}
-
-User --> CUS01
-CUS01 ..> SMTP : <<include>>
-Admin --> CUS10
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
-
-### Diagrama 6.6: Diagrama de Casos de Uso - MOD-02: Ofertas de Mentoría y Gestión de Recursos
-
-**Figura 9. Diagrama de Casos de Uso - MOD-02: Ofertas de Mentoría y Gestión de Recursos**
-
-![Figura 9. Diagrama de Casos de Uso - MOD-02: Ofertas de Mentoría y Gestión de Recursos](docs/diseño/diagramas/srs/img/diag_009_sec622_casos_uso_mod02.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.6: Diagrama de Casos de Uso - MOD-02: Ofertas de Mentoría y Gestión de Recursos
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.6: Diagrama de Casos de Uso - MOD-02: Ofertas de Mentoría y Gestión de Recursos
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Estudiante Mentor" as Mentor #EBF3FB
-actor "Administrador (EPIS)" as Admin #FEF9C3
-
-rectangle "MOD-02: Ofertas de Mentoría y Gestión de Recursos" {
-  usecase "CUS-006: Publicar oferta\nde mentoría académica" as CUS06
-  usecase "CUS-008: Consultar disponibilidad\nde espacios y recursos" as CUS08
-}
-
-Mentor --> CUS06
-Mentor --> CUS08
-Admin --> CUS08
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
-
-### Diagrama 6.7: Diagrama de Casos de Uso - MOD-03: Perfil del Mentor y Plan de Aprendizaje
-
-**Figura 10. Diagrama de Casos de Uso - MOD-03: Perfil del Mentor y Plan de Aprendizaje**
-
-![Figura 10. Diagrama de Casos de Uso - MOD-03: Perfil del Mentor y Plan de Aprendizaje](docs/diseño/diagramas/srs/img/diag_010_sec622_casos_uso_mod03.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.7: Diagrama de Casos de Uso - MOD-03: Perfil del Mentor y Plan de Aprendizaje
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.7: Diagrama de Casos de Uso - MOD-03: Perfil del Mentor y Plan de Aprendizaje
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Usuario Institucional\n(Mentoreado / Mentor)" as User #EBF3FB
-
-rectangle "MOD-03: Perfil del Mentor y Plan de Aprendizaje" {
-  usecase "CUS-005: Gestionar perfil formativo\ny disponibilidad horaria" as CUS05
-  usecase "CUS-021: Explorar catálogo curricular\nde asignaturas filtro" as CUS21
-}
-
-User --> CUS05
-User --> CUS21
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
-
-### Diagrama 6.8: Diagrama de Casos de Uso - MOD-04: Demanda y Recomendaciones Personalizadas
-
-**Figura 11. Diagrama de Casos de Uso - MOD-04: Demanda y Recomendaciones Personalizadas**
-
-![Figura 11. Diagrama de Casos de Uso - MOD-04: Demanda y Recomendaciones Personalizadas](docs/diseño/diagramas/srs/img/diag_011_sec622_casos_uso_mod04.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.8: Diagrama de Casos de Uso - MOD-04: Demanda y Recomendaciones Personalizadas
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.8: Diagrama de Casos de Uso - MOD-04: Demanda y Recomendaciones Personalizadas
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Estudiante Mentoreado" as Mentoreado #EBF3FB
-actor "Estudiante Mentor" as Mentor #EBF3FB
-actor "Motor EdRecSys" as RecSys #FFF1F2
-
-rectangle "MOD-04: Demanda y Recomendaciones Personalizadas" {
-  usecase "CUS-002: Explorar recomendaciones\npersonalizadas Top-k" as CUS02
-  usecase "CUS-003: Registrar solicitud\nde demanda académica" as CUS03
-}
-
-Mentoreado --> CUS02
-CUS02 ..> RecSys : <<include>>
-Mentoreado --> CUS03
-Mentor --> CUS03
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
-
-### Diagrama 6.9: Diagrama de Casos de Uso - MOD-05: Quórum, Confirmación y Cancelaciones
-
-**Figura 12. Diagrama de Casos de Uso - MOD-05: Quórum, Confirmación y Cancelaciones**
-
-![Figura 12. Diagrama de Casos de Uso - MOD-05: Quórum, Confirmación y Cancelaciones](docs/diseño/diagramas/srs/img/diag_012_sec622_casos_uso_mod05.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.9: Diagrama de Casos de Uso - MOD-05: Quórum, Confirmación y Cancelaciones
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.9: Diagrama de Casos de Uso - MOD-05: Quórum, Confirmación y Cancelaciones
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Estudiante Mentoreado" as Mentoreado #EBF3FB
-actor "Estudiante Mentor" as Mentor #EBF3FB
-actor "Servicio Cron Backend" as Cron #FFF1F2
-
-rectangle "MOD-05: Quórum, Confirmación y Cancelaciones" {
-  usecase "CUS-004: Reservar cupo\nde mentoría académica" as CUS04
-  usecase "CUS-024: Ratificar asistencia\na sesión de mentoría" as CUS24
-  usecase "CUS-017: Desistir voluntariamente\nde reserva" as CUS17
-  usecase "CUS-023: Evaluar quórum\nautomático a T-24h" as CUS23
-  usecase "CUS-007: Decisión del mentor\nante quórum insuficiente" as CUS07
-}
-
-Mentoreado --> CUS04
-Mentoreado --> CUS24
-Mentoreado --> CUS17
-Cron --> CUS23
-Mentor --> CUS07
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
-
-### Diagrama 6.10: Diagrama de Casos de Uso - MOD-06: Asistencia, Bitácoras y Feedback
-
-**Figura 13. Diagrama de Casos de Uso - MOD-06: Asistencia, Bitácoras y Feedback**
-
-![Figura 13. Diagrama de Casos de Uso - MOD-06: Asistencia, Bitácoras y Feedback](docs/diseño/diagramas/srs/img/diag_013_sec622_casos_uso_mod06.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.10: Diagrama de Casos de Uso - MOD-06: Asistencia, Bitácoras y Feedback
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.10: Diagrama de Casos de Uso - MOD-06: Asistencia, Bitácoras y Feedback
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Estudiante Mentoreado" as Mentoreado #EBF3FB
-actor "Estudiante Mentor" as Mentor #EBF3FB
-
-rectangle "MOD-06: Asistencia, Bitácoras y Feedback" {
-  usecase "CUS-012: Registrar asistencia\na sesión de mentoría" as CUS12
-  usecase "CUS-013: Registrar bitácora\nacadémica de sesión" as CUS13
-  usecase "CUS-014: Visualizar historial\ny bitácoras académicas" as CUS14
-}
-
-Mentoreado --> CUS12
-Mentor --> CUS12
-Mentor --> CUS13
-Mentoreado --> CUS14
-Mentor --> CUS14
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
-
-### Diagrama 6.11: Diagrama de Casos de Uso - MOD-07: Gamificación e Incentivos
-
-**Figura 14. Diagrama de Casos de Uso - MOD-07: Gamificación e Incentivos**
-
-![Figura 14. Diagrama de Casos de Uso - MOD-07: Gamificación e Incentivos](docs/diseño/diagramas/srs/img/diag_014_sec622_casos_uso_mod07.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.11: Diagrama de Casos de Uso - MOD-07: Gamificación e Incentivos
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.11: Diagrama de Casos de Uso - MOD-07: Gamificación e Incentivos
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Estudiante Mentor" as Mentor #EBF3FB
-actor "Administrador (EPIS)" as Admin #FEF9C3
-
-rectangle "MOD-07: Gamificación e Incentivos" {
-  usecase "CUS-018: Emitir constancia\ninstitucional de horas" as CUS18
-  usecase "CUS-019: Gestionar insignias\ny reputación gamificada" as CUS19
-}
-
-Mentor --> CUS18
-Admin --> CUS18
-Mentor --> CUS19
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
-
-### Diagrama 6.12: Diagrama de Casos de Uso - MOD-08: Analítica, Notificaciones y Configuración
-
-**Figura 15. Diagrama de Casos de Uso - MOD-08: Analítica, Notificaciones y Configuración**
-
-![Figura 15. Diagrama de Casos de Uso - MOD-08: Analítica, Notificaciones y Configuración](docs/diseño/diagramas/srs/img/diag_015_sec622_casos_uso_mod08.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.12: Diagrama de Casos de Uso - MOD-08: Analítica, Notificaciones y Configuración
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.12: Diagrama de Casos de Uso - MOD-08: Analítica, Notificaciones y Configuración
-left to right direction
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-actor "Administrador (EPIS)" as Admin #FEF9C3
-actor "Servicio Cron Backend" as Cron #FFF1F2
-
-rectangle "MOD-08: Analítica, Notificaciones y Configuración" {
-  usecase "CUS-009: Notificar eventos\ncríticos y alertas temporales" as CUS09
-  usecase "CUS-011: Generar reportes e\nindicadores de analítica" as CUS11
-  usecase "CUS-015: Consultar métricas\nde retención y desempeño" as CUS15
-  usecase "CUS-016: Auditar trazas de\nseguridad y consentimiento" as CUS16
-  usecase "CUS-020: Configurar parámetros\ninstitucionales y umbrales" as CUS20
-  usecase "CUS-022: Gestionar catálogo\nde temas y materias críticas" as CUS22
-}
-
-Cron --> CUS09
-Admin --> CUS11
-Admin --> CUS15
-Admin --> CUS16
-Admin --> CUS20
-Admin --> CUS22
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
+### Diagrama 6.4: Catálogo vigente de 24 casos de uso
+
+**Figura 7. Catálogo vigente: 24 casos y cinco módulos**
+
+![Figura 7. Catálogo vigente: 24 casos y cinco módulos](docs/revision_srs/diagramas/doc-h06/srs/img/diag_007_catalogo.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_007_catalogo.puml).
+
+### Diagrama 6.5: MOD-01 — Seguridad, Autenticación y Gobernanza
+
+**Figura 8. MOD-01: Seguridad, Autenticación y Gobernanza**
+
+![Figura 8. MOD-01: Seguridad, Autenticación y Gobernanza](docs/revision_srs/diagramas/doc-h06/srs/img/diag_008_MOD-01.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_008_MOD-01.puml).
+
+### Diagrama 6.6: MOD-02 — Ofertas de Mentoría y Gestión de Recursos
+
+**Figura 9. MOD-02: Ofertas de Mentoría y Gestión de Recursos**
+
+![Figura 9. MOD-02: Ofertas de Mentoría y Gestión de Recursos](docs/revision_srs/diagramas/doc-h06/srs/img/diag_009_MOD-02.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_009_MOD-02.puml).
+
+### Diagrama 6.7: MOD-03 — Recomendaciones, Reservas y Quórum
+
+**Figura 10. MOD-03: Recomendaciones, Reservas y Quórum**
+
+![Figura 10. MOD-03: Recomendaciones, Reservas y Quórum](docs/revision_srs/diagramas/doc-h06/srs/img/diag_010_MOD-03.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_010_MOD-03.puml).
+
+### Diagrama 6.8: MOD-04 — Ejecución y Seguimiento Académico
+
+**Figura 11. MOD-04: Ejecución y Seguimiento Académico**
+
+![Figura 11. MOD-04: Ejecución y Seguimiento Académico](docs/revision_srs/diagramas/doc-h06/srs/img/diag_011_MOD-04.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_011_MOD-04.puml).
+
+### Diagrama 6.9: MOD-05 — Administración y Analítica Institucional
+
+**Figura 12. MOD-05: Administración y Analítica Institucional**
+
+![Figura 12. MOD-05: Administración y Analítica Institucional](docs/revision_srs/diagramas/doc-h06/srs/img/diag_012_MOD-05.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_012_MOD-05.puml).
+
+### Diagrama 6.10: Roles operativos y actores previstos
+
+**Figura 13. Roles operativos y actores previstos**
+
+![Figura 13. Roles operativos y actores previstos](docs/revision_srs/diagramas/doc-h06/srs/img/diag_013_roles.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_013_roles.puml).
+
+### Diagrama 6.11: Notificaciones transversales
+
+**Figura 14. Notificaciones transversales y límite externo**
+
+![Figura 14. Notificaciones transversales y límite externo](docs/revision_srs/diagramas/doc-h06/srs/img/diag_014_notificaciones.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_014_notificaciones.puml).
+
+### Diagrama 6.12: RF21 y certificación
+
+**Figura 15. Incentivos y constancias: alcance conservado**
+
+![Figura 15. Incentivos y constancias: alcance conservado](docs/revision_srs/diagramas/doc-h06/srs/img/diag_015_incentivos.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_015_incentivos.puml).
 
 ## 6.2.3. Escenarios de Casos de Uso (Fase de Diseño)
 
-Este apartado incorpora las fichas, flujos y diagramas del [catálogo consolidado](NARRATIVAS_CASOS_DE_USO.md). Los cinco módulos se utilizan como agrupación documental provisional. Los requisitos, la trazabilidad, los diagramas generales y el modelo lógico conservan las referencias de los ocho módulos de la línea base. La [matriz de homologación](docs/revision_srs/MATRIZ_HOMOLOGACION_SRS_V4.md) documenta las equivalencias y las decisiones pendientes.
+Este apartado conserva íntegramente las 24 narrativas y 48 figuras del [catálogo vigente](NARRATIVAS_CASOS_DE_USO.md). DOC-H06 adopta sus cinco módulos e identificadores para requisitos y diseño. El Anexo B conserva la numeración anterior; las propuestas y validaciones pendientes mantienen su estado. La adopción documental no constituye aprobación institucional.
 
 Las figuras de este apartado se numeran de **6.2.3-1 a 6.2.3-48**. El número final corresponde a la figura del catálogo. Cada imagen conserva su tamaño original y enlaza su fuente PlantUML. Si el visor ajusta la anchura, se pueden abrir los PNG originales de [CUS-006, actividades](docs/narrativas/diagramas/img/CUS-006_actividades.png) y [CUS-008, actividades](docs/narrativas/diagramas/img/CUS-008_actividades.png) para leer los carriles y los textos al 100 %.
 
@@ -6084,8821 +4982,1172 @@ Fuente: Elaboración propia.
 
 # 6.3. Modelo Lógico
 
-> Las vistas ECB, de actividades con objetos, de secuencia, de clases, de estados y el modelo físico conservan los identificadores de la fase de diseño. Su correspondencia con el catálogo queda sujeta a aprobación.
-
-El modelo lógico traduce los requerimientos funcionales y las especificaciones narrativas de los casos de uso en una representación analítica abstracta, orientada a objetos e independiente de la plataforma tecnológica final. Mediante esta modelación, el equipo de ingeniería formaliza las colaboraciones internas, los flujos dinámicos de datos y las responsabilidades operacionales de las entidades del dominio de la EPIS-UPT, asegurando una transición fluida hacia el diseño de software detallado y la implementación bajo el marco metodológico UWE.
-
----
+Las vistas siguientes adoptan los 24 identificadores del catálogo vigente. Las clases representan entidades declaradas y las secuencias identifican responsabilidades; una vista propuesta no atribuye un endpoint inexistente. Los modelos previos se conservan en [la edición histórica de diseño](docs/diseño/FD03-EPIS-Informe%20SRS%20de%20Proyecto.md).
 
 ## 6.3.1. Análisis de Objetos (Modelo ECB)
 
-### Presentación del Análisis de Objetos
-Para descomponer las responsabilidades funcionales y aislar la lógica de presentación, de control y de persistencia, se emplea el patrón analítico **Entidad-Control-Frontera (ECB - Entity-Control-Boundary)** propuesto por Ivar Jacobson y adoptado en UWE. El análisis abarca la totalidad de los **24 casos de uso canónicos (CUS-001 al CUS-024)** organizados en los ocho módulos del sistema. A través de este modelo, se explicita cómo las interfaces de usuario (Boundary) canalizan las peticiones de los actores hacia controladores especializados (Control), los cuales hacen cumplir las reglas de negocio (RN-01 a RN-14) interactuando con las entidades de dominio persistentes (Entity) y los servicios de infraestructura externa.
-
-A continuación, se presenta el diagrama general de análisis de objetos correspondiente al ciclo transaccional principal, seguido de los 24 diagramas de análisis de objetos por caso de uso.
-
-### Diagrama 6.13: Diagrama de Análisis de Objetos (Modelo ECB) - Flujo General de Mentorías P2P
-
-**Figura 16. Diagrama de Análisis de Objetos (Modelo ECB) - Flujo General de Mentorías P2P**
-
-![Figura 16. Diagrama de Análisis de Objetos (Modelo ECB) - Flujo General de Mentorías P2P](docs/diseño/diagramas/srs/img/diag_016_sec631_ecb_general_consolidado.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13: Diagrama de Análisis de Objetos (Modelo ECB) - Flujo General de Mentorías P2P
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - Flujo General de Mentorías P2P\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Estudiante Mentoreado" as ActEst
-actor "Estudiante Mentor" as ActMen
-actor "Administrador EPIS" as ActAdm
-actor "Servicio Cron Backend" as ActCron
-
-boundary "UI_CatalogoYRecomendaciones" as B_Rec
-boundary "UI_ReservaYConfirmacion" as B_Res
-boundary "UI_OfertasYEspacios" as B_Of
-boundary "UI_AsistenciaYBitacora" as B_Bit
-boundary "UI_CertificadosYAdmin" as B_Adm
-
-control "ControladorRecomendaciones" as C_Rec
-control "ControladorReservas" as C_Res
-control "ControladorMentorias" as C_Of
-control "ControladorBitacoras" as C_Bit
-control "ControladorAdmin" as C_Adm
-control "ControladorQuorumCron" as C_Cron
-
-entity "Usuario" as E_User
-entity "CursoCritico" as E_Cur
-entity "OfertaMentoria" as E_Of
-entity "SesionMentoria" as E_Ses
-entity "ReservaCupo" as E_Res
-entity "BitacoraPedagogica" as E_Bit
-entity "CertificadoHoras" as E_Cert
-
-ActEst --> B_Rec : 1. Explora recomendaciones Top-k
-B_Rec --> C_Rec : 1.1. inferirRecomendaciones()
-C_Rec ..> E_Cur : 1.2. similitudCoseno()
-C_Rec --> B_Rec : 1.3. retornoTopK()
-
-ActEst --> B_Res : 2. Reserva cupo de sesion
-B_Res --> C_Res : 2.1. reservarCupoPesimista(FOR UPDATE)
-C_Res --> E_Ses : 2.2. bloquearSesion()
-C_Res --> E_Res : 2.3. registrarReserva()
-
-ActCron --> C_Cron : 3. Dispara corte T-24h
-C_Cron --> E_Res : 3.1. revocarNoConfirmadas()
-C_Cron --> E_Ses : 3.2. evaluarQuorumMinimo()
-
-ActMen --> B_Bit : 4. Cierra sesion y firma bitacora (SHA-256)
-B_Bit --> C_Bit : 4.1. registrarBitacora()
-C_Bit --> E_Bit : 4.2. persistirBitacoraConHash()
-
-ActAdm --> B_Adm : 5. Visa bitacoras y emite certificado
-B_Adm --> C_Adm : 5.1. emitirCertificadoOficial()
-C_Adm --> E_Cert : 5.2. compilarPDFConQR()
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
-
-### 6.3.1.1. CUS-001 – Análisis de Objetos: Iniciar sesión institucional con 2FA
-
-El análisis de objetos para `CUS-001` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-01: Seguridad, Autenticación y Gobernanza`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.1: Análisis de Objetos (Modelo ECB) - CUS-001: Iniciar sesión institucional con 2FA
-
-**Figura 17. Análisis de Objetos (Modelo ECB) - CUS-001: Iniciar sesión institucional con 2FA**
-
-![Figura 17. Análisis de Objetos (Modelo ECB) - CUS-001: Iniciar sesión institucional con 2FA](docs/diseño/diagramas/srs/img/diag_017_sec631_ecb_cus001.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.1: Análisis de Objetos (Modelo ECB) - CUS-001: Iniciar sesión institucional con 2FA
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-001: Iniciar sesión institucional con 2FA\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_LoginOtpView" as B_Main
-control "AuthService" as C_Main
-entity "Usuario" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Iniciar sesión institucional con 2FA)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-01.
-
-
----
-
-### 6.3.1.2. CUS-010 – Análisis de Objetos: Gestionar asignación de roles de usuario
-
-El análisis de objetos para `CUS-010` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-01: Seguridad, Autenticación y Gobernanza`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.2: Análisis de Objetos (Modelo ECB) - CUS-010: Gestionar asignación de roles de usuario
-
-**Figura 18. Análisis de Objetos (Modelo ECB) - CUS-010: Gestionar asignación de roles de usuario**
-
-![Figura 18. Análisis de Objetos (Modelo ECB) - CUS-010: Gestionar asignación de roles de usuario](docs/diseño/diagramas/srs/img/diag_018_sec631_ecb_cus010.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.2: Análisis de Objetos (Modelo ECB) - CUS-010: Gestionar asignación de roles de usuario
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-010: Gestionar asignación de roles de usuario\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_AdminRolesView" as B_Main
-control "RoleService" as C_Main
-entity "Usuario" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Gestionar asignación de roles de usuario)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-01.
-
-
----
-
-### 6.3.1.3. CUS-006 – Análisis de Objetos: Publicar oferta de mentoría académica
-
-El análisis de objetos para `CUS-006` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-02: Ofertas de Mentoría y Gestión de Recursos`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.3: Análisis de Objetos (Modelo ECB) - CUS-006: Publicar oferta de mentoría académica
-
-**Figura 19. Análisis de Objetos (Modelo ECB) - CUS-006: Publicar oferta de mentoría académica**
-
-![Figura 19. Análisis de Objetos (Modelo ECB) - CUS-006: Publicar oferta de mentoría académica](docs/diseño/diagramas/srs/img/diag_019_sec631_ecb_cus006.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.3: Análisis de Objetos (Modelo ECB) - CUS-006: Publicar oferta de mentoría académica
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-006: Publicar oferta de mentoría académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_PublishMentorshipView" as B_Main
-control "MentorshipService" as C_Main
-entity "OfertaMentoria" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Publicar oferta de mentoría académica)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-02.
-
-
----
-
-### 6.3.1.4. CUS-008 – Análisis de Objetos: Consultar disponibilidad de espacios y recursos
-
-El análisis de objetos para `CUS-008` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-02: Ofertas de Mentoría y Gestión de Recursos`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.4: Análisis de Objetos (Modelo ECB) - CUS-008: Consultar disponibilidad de espacios y recursos
-
-**Figura 20. Análisis de Objetos (Modelo ECB) - CUS-008: Consultar disponibilidad de espacios y recursos**
-
-![Figura 20. Análisis de Objetos (Modelo ECB) - CUS-008: Consultar disponibilidad de espacios y recursos](docs/diseño/diagramas/srs/img/diag_020_sec631_ecb_cus008.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.4: Análisis de Objetos (Modelo ECB) - CUS-008: Consultar disponibilidad de espacios y recursos
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-008: Consultar disponibilidad de espacios y recursos\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_SpaceSelectorView" as B_Main
-control "SpaceService" as C_Main
-entity "EspacioFisico" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Consultar disponibilidad de espacios y recursos)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-02.
-
-
----
-
-### 6.3.1.5. CUS-005 – Análisis de Objetos: Gestionar perfil formativo y disponibilidad horaria
-
-El análisis de objetos para `CUS-005` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-03: Perfil del Mentor y Plan de Aprendizaje`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.5: Análisis de Objetos (Modelo ECB) - CUS-005: Gestionar perfil formativo y disponibilidad horaria
-
-**Figura 21. Análisis de Objetos (Modelo ECB) - CUS-005: Gestionar perfil formativo y disponibilidad horaria**
-
-![Figura 21. Análisis de Objetos (Modelo ECB) - CUS-005: Gestionar perfil formativo y disponibilidad horaria](docs/diseño/diagramas/srs/img/diag_021_sec631_ecb_cus005.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.5: Análisis de Objetos (Modelo ECB) - CUS-005: Gestionar perfil formativo y disponibilidad horaria
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-005: Gestionar perfil formativo y disponibilidad horaria\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_ProfileAvailabilityView" as B_Main
-control "ProfileService" as C_Main
-entity "PerfilFormativo" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Gestionar perfil formativo y disponibilidad horaria)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-03.
-
-
----
-
-### 6.3.1.6. CUS-021 – Análisis de Objetos: Explorar catálogo curricular de asignaturas filtro
-
-El análisis de objetos para `CUS-021` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-03: Perfil del Mentor y Plan de Aprendizaje`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.6: Análisis de Objetos (Modelo ECB) - CUS-021: Explorar catálogo curricular de asignaturas filtro
-
-**Figura 22. Análisis de Objetos (Modelo ECB) - CUS-021: Explorar catálogo curricular de asignaturas filtro**
-
-![Figura 22. Análisis de Objetos (Modelo ECB) - CUS-021: Explorar catálogo curricular de asignaturas filtro](docs/diseño/diagramas/srs/img/diag_022_sec631_ecb_cus021.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.6: Análisis de Objetos (Modelo ECB) - CUS-021: Explorar catálogo curricular de asignaturas filtro
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-021: Explorar catálogo curricular de asignaturas filtro\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_CurriculumCatalogView" as B_Main
-control "CurriculumService" as C_Main
-entity "CursoCritico" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Explorar catálogo curricular de asignaturas filtro)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-03.
-
-
----
-
-### 6.3.1.7. CUS-002 – Análisis de Objetos: Explorar recomendaciones personalizadas Top-k
-
-El análisis de objetos para `CUS-002` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-04: Demanda y Recomendaciones Personalizadas`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.7: Análisis de Objetos (Modelo ECB) - CUS-002: Explorar recomendaciones personalizadas Top-k
-
-**Figura 23. Análisis de Objetos (Modelo ECB) - CUS-002: Explorar recomendaciones personalizadas Top-k**
-
-![Figura 23. Análisis de Objetos (Modelo ECB) - CUS-002: Explorar recomendaciones personalizadas Top-k](docs/diseño/diagramas/srs/img/diag_023_sec631_ecb_cus002.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.7: Análisis de Objetos (Modelo ECB) - CUS-002: Explorar recomendaciones personalizadas Top-k
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-002: Explorar recomendaciones personalizadas Top-k\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_RecommendationsView" as B_Main
-control "RecommendationService" as C_Main
-entity "PerfilFormativo" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Explorar recomendaciones personalizadas Top-k)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-04.
-
-
----
-
-### 6.3.1.8. CUS-003 – Análisis de Objetos: Registrar solicitud de demanda académica
-
-El análisis de objetos para `CUS-003` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-04: Demanda y Recomendaciones Personalizadas`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.8: Análisis de Objetos (Modelo ECB) - CUS-003: Registrar solicitud de demanda académica
-
-**Figura 24. Análisis de Objetos (Modelo ECB) - CUS-003: Registrar solicitud de demanda académica**
-
-![Figura 24. Análisis de Objetos (Modelo ECB) - CUS-003: Registrar solicitud de demanda académica](docs/diseño/diagramas/srs/img/diag_024_sec631_ecb_cus003.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.8: Análisis de Objetos (Modelo ECB) - CUS-003: Registrar solicitud de demanda académica
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-003: Registrar solicitud de demanda académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_DemandsBankView" as B_Main
-control "DemandService" as C_Main
-entity "SolicitudDemanda" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Registrar solicitud de demanda académica)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-04.
-
-
----
-
-### 6.3.1.9. CUS-004 – Análisis de Objetos: Reservar cupo de mentoría académica
-
-El análisis de objetos para `CUS-004` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-05: Quórum, Confirmación y Cancelaciones`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.9: Análisis de Objetos (Modelo ECB) - CUS-004: Reservar cupo de mentoría académica
-
-**Figura 25. Análisis de Objetos (Modelo ECB) - CUS-004: Reservar cupo de mentoría académica**
-
-![Figura 25. Análisis de Objetos (Modelo ECB) - CUS-004: Reservar cupo de mentoría académica](docs/diseño/diagramas/srs/img/diag_025_sec631_ecb_cus004.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.9: Análisis de Objetos (Modelo ECB) - CUS-004: Reservar cupo de mentoría académica
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-004: Reservar cupo de mentoría académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_BookingModalView" as B_Main
-control "BookingService" as C_Main
-entity "SesionMentoria" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Reservar cupo de mentoría académica)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-05.
-
-
----
-
-### 6.3.1.10. CUS-024 – Análisis de Objetos: Ratificar asistencia a sesión de mentoría
-
-El análisis de objetos para `CUS-024` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-05: Quórum, Confirmación y Cancelaciones`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.10: Análisis de Objetos (Modelo ECB) - CUS-024: Ratificar asistencia a sesión de mentoría
-
-**Figura 26. Análisis de Objetos (Modelo ECB) - CUS-024: Ratificar asistencia a sesión de mentoría**
-
-![Figura 26. Análisis de Objetos (Modelo ECB) - CUS-024: Ratificar asistencia a sesión de mentoría](docs/diseño/diagramas/srs/img/diag_026_sec631_ecb_cus024.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.10: Análisis de Objetos (Modelo ECB) - CUS-024: Ratificar asistencia a sesión de mentoría
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-024: Ratificar asistencia a sesión de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_StudentBookingsView" as B_Main
-control "BookingService" as C_Main
-entity "ReservaCupo" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Ratificar asistencia a sesión de mentoría)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-05.
-
-
----
-
-### 6.3.1.11. CUS-017 – Análisis de Objetos: Desistir voluntariamente de reserva
-
-El análisis de objetos para `CUS-017` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-05: Quórum, Confirmación y Cancelaciones`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.11: Análisis de Objetos (Modelo ECB) - CUS-017: Desistir voluntariamente de reserva
-
-**Figura 27. Análisis de Objetos (Modelo ECB) - CUS-017: Desistir voluntariamente de reserva**
-
-![Figura 27. Análisis de Objetos (Modelo ECB) - CUS-017: Desistir voluntariamente de reserva](docs/diseño/diagramas/srs/img/diag_027_sec631_ecb_cus017.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.11: Análisis de Objetos (Modelo ECB) - CUS-017: Desistir voluntariamente de reserva
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-017: Desistir voluntariamente de reserva\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_StudentBookingsView" as B_Main
-control "BookingService" as C_Main
-entity "ReservaCupo" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Desistir voluntariamente de reserva)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-05.
-
-
----
-
-### 6.3.1.12. CUS-023 – Análisis de Objetos: Evaluar quórum automático a T-24h
-
-El análisis de objetos para `CUS-023` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-05: Quórum, Confirmación y Cancelaciones`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.12: Análisis de Objetos (Modelo ECB) - CUS-023: Evaluar quórum automático a T-24h
-
-**Figura 28. Análisis de Objetos (Modelo ECB) - CUS-023: Evaluar quórum automático a T-24h**
-
-![Figura 28. Análisis de Objetos (Modelo ECB) - CUS-023: Evaluar quórum automático a T-24h](docs/diseño/diagramas/srs/img/diag_028_sec631_ecb_cus023.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.12: Análisis de Objetos (Modelo ECB) - CUS-023: Evaluar quórum automático a T-24h
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-023: Evaluar quórum automático a T-24h\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_NotificationCenterView" as B_Main
-control "QuorumCronService" as C_Main
-entity "SesionMentoria" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Evaluar quórum automático a T-24h)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-05.
-
-
----
-
-### 6.3.1.13. CUS-007 – Análisis de Objetos: Decisión del mentor ante quórum insuficiente
-
-El análisis de objetos para `CUS-007` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-05: Quórum, Confirmación y Cancelaciones`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.13: Análisis de Objetos (Modelo ECB) - CUS-007: Decisión del mentor ante quórum insuficiente
-
-**Figura 29. Análisis de Objetos (Modelo ECB) - CUS-007: Decisión del mentor ante quórum insuficiente**
-
-![Figura 29. Análisis de Objetos (Modelo ECB) - CUS-007: Decisión del mentor ante quórum insuficiente](docs/diseño/diagramas/srs/img/diag_029_sec631_ecb_cus007.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.13: Análisis de Objetos (Modelo ECB) - CUS-007: Decisión del mentor ante quórum insuficiente
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-007: Decisión del mentor ante quórum insuficiente\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_MentorSessionActionView" as B_Main
-control "MentorshipService" as C_Main
-entity "SesionMentoria" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Decisión del mentor ante quórum insuficiente)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-05.
-
-
----
-
-### 6.3.1.14. CUS-012 – Análisis de Objetos: Registrar asistencia a sesión de mentoría
-
-El análisis de objetos para `CUS-012` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-06: Asistencia, Bitácoras y Feedback`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.14: Análisis de Objetos (Modelo ECB) - CUS-012: Registrar asistencia a sesión de mentoría
-
-**Figura 30. Análisis de Objetos (Modelo ECB) - CUS-012: Registrar asistencia a sesión de mentoría**
-
-![Figura 30. Análisis de Objetos (Modelo ECB) - CUS-012: Registrar asistencia a sesión de mentoría](docs/diseño/diagramas/srs/img/diag_030_sec631_ecb_cus012.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.14: Análisis de Objetos (Modelo ECB) - CUS-012: Registrar asistencia a sesión de mentoría
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-012: Registrar asistencia a sesión de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_QrScannerView" as B_Main
-control "AttendanceService" as C_Main
-entity "AsistenciaSesion" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Registrar asistencia a sesión de mentoría)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-06.
-
-
----
-
-### 6.3.1.15. CUS-013 – Análisis de Objetos: Registrar bitácora académica de sesión
-
-El análisis de objetos para `CUS-013` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-06: Asistencia, Bitácoras y Feedback`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.15: Análisis de Objetos (Modelo ECB) - CUS-013: Registrar bitácora académica de sesión
-
-**Figura 31. Análisis de Objetos (Modelo ECB) - CUS-013: Registrar bitácora académica de sesión**
-
-![Figura 31. Análisis de Objetos (Modelo ECB) - CUS-013: Registrar bitácora académica de sesión](docs/diseño/diagramas/srs/img/diag_031_sec631_ecb_cus013.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.15: Análisis de Objetos (Modelo ECB) - CUS-013: Registrar bitácora académica de sesión
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-013: Registrar bitácora académica de sesión\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_BitacoraRegisterView" as B_Main
-control "BitacoraService" as C_Main
-entity "BitacoraPedagogica" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Registrar bitácora académica de sesión)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-06.
-
-
----
-
-### 6.3.1.16. CUS-014 – Análisis de Objetos: Visualizar historial y bitácoras académicas
-
-El análisis de objetos para `CUS-014` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-06: Asistencia, Bitácoras y Feedback`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.16: Análisis de Objetos (Modelo ECB) - CUS-014: Visualizar historial y bitácoras académicas
-
-**Figura 32. Análisis de Objetos (Modelo ECB) - CUS-014: Visualizar historial y bitácoras académicas**
-
-![Figura 32. Análisis de Objetos (Modelo ECB) - CUS-014: Visualizar historial y bitácoras académicas](docs/diseño/diagramas/srs/img/diag_032_sec631_ecb_cus014.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.16: Análisis de Objetos (Modelo ECB) - CUS-014: Visualizar historial y bitácoras académicas
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-014: Visualizar historial y bitácoras académicas\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_BitacoraHistoryView" as B_Main
-control "BitacoraService" as C_Main
-entity "BitacoraPedagogica" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Visualizar historial y bitácoras académicas)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-06.
-
-
----
-
-### 6.3.1.17. CUS-018 – Análisis de Objetos: Emitir constancia institucional de horas de mentoría
-
-El análisis de objetos para `CUS-018` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-07: Gamificación e Incentivos`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.17: Análisis de Objetos (Modelo ECB) - CUS-018: Emitir constancia institucional de horas de mentoría
-
-**Figura 33. Análisis de Objetos (Modelo ECB) - CUS-018: Emitir constancia institucional de horas de mentoría**
-
-![Figura 33. Análisis de Objetos (Modelo ECB) - CUS-018: Emitir constancia institucional de horas de mentoría](docs/diseño/diagramas/srs/img/diag_033_sec631_ecb_cus018.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.17: Análisis de Objetos (Modelo ECB) - CUS-018: Emitir constancia institucional de horas de mentoría
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-018: Emitir constancia institucional de horas de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_AdminCertificatesView" as B_Main
-control "CertificateService" as C_Main
-entity "CertificadoHoras" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Emitir constancia institucional de horas de mentoría)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-07.
-
-
----
-
-### 6.3.1.18. CUS-019 – Análisis de Objetos: Gestionar insignias y reputación gamificada
-
-El análisis de objetos para `CUS-019` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-07: Gamificación e Incentivos`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.18: Análisis de Objetos (Modelo ECB) - CUS-019: Gestionar insignias y reputación gamificada
-
-**Figura 34. Análisis de Objetos (Modelo ECB) - CUS-019: Gestionar insignias y reputación gamificada**
-
-![Figura 34. Análisis de Objetos (Modelo ECB) - CUS-019: Gestionar insignias y reputación gamificada](docs/diseño/diagramas/srs/img/diag_034_sec631_ecb_cus019.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.18: Análisis de Objetos (Modelo ECB) - CUS-019: Gestionar insignias y reputación gamificada
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-019: Gestionar insignias y reputación gamificada\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_MentorBadgesView" as B_Main
-control "GamificationService" as C_Main
-entity "Insignia" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Gestionar insignias y reputación gamificada)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-07.
-
-
----
-
-### 6.3.1.19. CUS-009 – Análisis de Objetos: Notificar eventos críticos y alertas temporales
-
-El análisis de objetos para `CUS-009` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-08: Analítica, Notificaciones y Configuración`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.19: Análisis de Objetos (Modelo ECB) - CUS-009: Notificar eventos críticos y alertas temporales
-
-**Figura 35. Análisis de Objetos (Modelo ECB) - CUS-009: Notificar eventos críticos y alertas temporales**
-
-![Figura 35. Análisis de Objetos (Modelo ECB) - CUS-009: Notificar eventos críticos y alertas temporales](docs/diseño/diagramas/srs/img/diag_035_sec631_ecb_cus009.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.19: Análisis de Objetos (Modelo ECB) - CUS-009: Notificar eventos críticos y alertas temporales
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-009: Notificar eventos críticos y alertas temporales\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_NotificationCenterView" as B_Main
-control "NotificationService" as C_Main
-entity "Notificacion" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Notificar eventos críticos y alertas temporales)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.1.20. CUS-011 – Análisis de Objetos: Generar reportes e indicadores de analítica académica
-
-El análisis de objetos para `CUS-011` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-08: Analítica, Notificaciones y Configuración`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.20: Análisis de Objetos (Modelo ECB) - CUS-011: Generar reportes e indicadores de analítica académica
-
-**Figura 36. Análisis de Objetos (Modelo ECB) - CUS-011: Generar reportes e indicadores de analítica académica**
-
-![Figura 36. Análisis de Objetos (Modelo ECB) - CUS-011: Generar reportes e indicadores de analítica académica](docs/diseño/diagramas/srs/img/diag_036_sec631_ecb_cus011.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.20: Análisis de Objetos (Modelo ECB) - CUS-011: Generar reportes e indicadores de analítica académica
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-011: Generar reportes e indicadores de analítica académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_AdminAnalyticsView" as B_Main
-control "AnalyticsService" as C_Main
-entity "KpiAcademico" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Generar reportes e indicadores de analítica académica)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.1.21. CUS-015 – Análisis de Objetos: Consultar métricas de retención y desempeño
-
-El análisis de objetos para `CUS-015` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-08: Analítica, Notificaciones y Configuración`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.21: Análisis de Objetos (Modelo ECB) - CUS-015: Consultar métricas de retención y desempeño
-
-**Figura 37. Análisis de Objetos (Modelo ECB) - CUS-015: Consultar métricas de retención y desempeño**
-
-![Figura 37. Análisis de Objetos (Modelo ECB) - CUS-015: Consultar métricas de retención y desempeño](docs/diseño/diagramas/srs/img/diag_037_sec631_ecb_cus015.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.21: Análisis de Objetos (Modelo ECB) - CUS-015: Consultar métricas de retención y desempeño
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-015: Consultar métricas de retención y desempeño\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_AdminAnalyticsView" as B_Main
-control "AnalyticsService" as C_Main
-entity "KpiAcademico" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Consultar métricas de retención y desempeño)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.1.22. CUS-016 – Análisis de Objetos: Auditar trazas de seguridad y consentimiento Ley 29733
-
-El análisis de objetos para `CUS-016` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-08: Analítica, Notificaciones y Configuración`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.22: Análisis de Objetos (Modelo ECB) - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733
-
-**Figura 38. Análisis de Objetos (Modelo ECB) - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733**
-
-![Figura 38. Análisis de Objetos (Modelo ECB) - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733](docs/diseño/diagramas/srs/img/diag_038_sec631_ecb_cus016.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.22: Análisis de Objetos (Modelo ECB) - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_AdminAuditView" as B_Main
-control "AuditService" as C_Main
-entity "ConsentimientoLegal" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Auditar trazas de seguridad y consentimiento Ley 29733)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.1.23. CUS-020 – Análisis de Objetos: Configurar parámetros institucionales y umbrales
-
-El análisis de objetos para `CUS-020` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-08: Analítica, Notificaciones y Configuración`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.23: Análisis de Objetos (Modelo ECB) - CUS-020: Configurar parámetros institucionales y umbrales
-
-**Figura 39. Análisis de Objetos (Modelo ECB) - CUS-020: Configurar parámetros institucionales y umbrales**
-
-![Figura 39. Análisis de Objetos (Modelo ECB) - CUS-020: Configurar parámetros institucionales y umbrales](docs/diseño/diagramas/srs/img/diag_039_sec631_ecb_cus020.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.23: Análisis de Objetos (Modelo ECB) - CUS-020: Configurar parámetros institucionales y umbrales
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-020: Configurar parámetros institucionales y umbrales\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_AdminSettingsView" as B_Main
-control "AdminService" as C_Main
-entity "ParametroInstitucional" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Configurar parámetros institucionales y umbrales)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.1.24. CUS-022 – Análisis de Objetos: Gestionar catálogo de temas y materias críticas
-
-El análisis de objetos para `CUS-022` descompone las responsabilidades arquitectónicas conforme al patrón Entidad-Control-Frontera (ECB) en el módulo `MOD-08: Analítica, Notificaciones y Configuración`. Los objetos de frontera canalizan la interacción entre los actores institucionales y el software; los objetos de control orquestan la lógica de negocio, validaciones y reglas institucionales; y los objetos de entidad mantienen la persistencia relacional en PostgreSQL.
-
-#### Diagrama 6.13.24: Análisis de Objetos (Modelo ECB) - CUS-022: Gestionar catálogo de temas y materias críticas
-
-**Figura 40. Análisis de Objetos (Modelo ECB) - CUS-022: Gestionar catálogo de temas y materias críticas**
-
-![Figura 40. Análisis de Objetos (Modelo ECB) - CUS-022: Gestionar catálogo de temas y materias críticas](docs/diseño/diagramas/srs/img/diag_040_sec631_ecb_cus022.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.13.24: Análisis de Objetos (Modelo ECB) - CUS-022: Gestionar catálogo de temas y materias críticas
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Análisis de Objetos (Modelo ECB) - CUS-022: Gestionar catálogo de temas y materias críticas\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam actor {
-    BackgroundColor #E9ECEF
-    BorderColor #1D2D44
-}
-skinparam boundary {
-    BackgroundColor #E8F4F8
-    BorderColor #2B3A42
-}
-skinparam control {
-    BackgroundColor #FFF2DF
-    BorderColor #D97706
-}
-skinparam entity {
-    BackgroundColor #E8F8F5
-    BorderColor #0D9488
-}
-
-actor "Actor Institucional" as ActUser
-boundary "UI_AdminCurriculumView" as B_Main
-control "CurriculumService" as C_Main
-entity "CursoCritico" as E_Main
-
-ActUser --> B_Main : 1. Solicita operacion (Gestionar catálogo de temas y materias críticas)
-B_Main --> C_Main : 1.1. ejecutarAccion(payload)
-C_Main ..> E_Main : 1.2. validarReglasYPersistir()
-E_Main --> C_Main : 1.3. estadoActualizado(OK)
-C_Main --> B_Main : 1.4. confirmarResultado(DTO)
-B_Main --> ActUser : 2. Despliega estado en pantalla
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
+### Diagrama 6.13: Vista general
+
+**Figura 16. Análisis de Objetos (Modelo ECB): vista general**
+
+![Figura 16. Análisis de Objetos (Modelo ECB): vista general](docs/revision_srs/diagramas/doc-h06/srs/img/diag_016_general.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_016_general.puml).
+
+### 6.3.1.1. CUS-001 — Iniciar sesión institucional con 2FA
+
+**Figura 17. Diagrama 6.13.1: ECB — CUS-001: Iniciar sesión institucional con 2FA**
+
+![Figura 17. Diagrama 6.13.1: ECB — CUS-001: Iniciar sesión institucional con 2FA](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-001_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-001_ecb.puml).
+
+### 6.3.1.2. CUS-010 — Gestionar asignación de roles de usuario
+
+**Figura 18. Diagrama 6.13.2: ECB — CUS-010: Gestionar asignación de roles de usuario**
+
+![Figura 18. Diagrama 6.13.2: ECB — CUS-010: Gestionar asignación de roles de usuario](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-010_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-010_ecb.puml).
+
+### 6.3.1.3. CUS-006 — Registrar oferta de mentoría académica
+
+**Figura 19. Diagrama 6.13.3: ECB — CUS-006: Registrar oferta de mentoría académica**
+
+![Figura 19. Diagrama 6.13.3: ECB — CUS-006: Registrar oferta de mentoría académica](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-006_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-006_ecb.puml).
+
+### 6.3.1.4. CUS-008 — Gestionar demanda insatisfecha de mentoría
+
+**Figura 20. Diagrama 6.13.4: ECB — CUS-008: Gestionar demanda insatisfecha de mentoría**
+
+![Figura 20. Diagrama 6.13.4: ECB — CUS-008: Gestionar demanda insatisfecha de mentoría](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-008_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-008_ecb.puml).
+
+### 6.3.1.5. CUS-005 — Postular al rol de estudiante mentor
+
+**Figura 21. Diagrama 6.13.5: ECB — CUS-005: Postular al rol de estudiante mentor**
+
+![Figura 21. Diagrama 6.13.5: ECB — CUS-005: Postular al rol de estudiante mentor](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-005_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-005_ecb.puml).
+
+### 6.3.1.6. CUS-021 — Evaluar postulaciones a mentor por comité
+
+**Figura 22. Diagrama 6.13.6: ECB — CUS-021: Evaluar postulaciones a mentor por comité**
+
+![Figura 22. Diagrama 6.13.6: ECB — CUS-021: Evaluar postulaciones a mentor por comité](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-021_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-021_ecb.puml).
+
+### 6.3.1.7. CUS-002 — Consultar catálogo de mentorías con recomendación
+
+**Figura 23. Diagrama 6.13.7: ECB — CUS-002: Consultar catálogo de mentorías con recomendación**
+
+![Figura 23. Diagrama 6.13.7: ECB — CUS-002: Consultar catálogo de mentorías con recomendación](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-002_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-002_ecb.puml).
+
+### 6.3.1.8. CUS-003 — Reservar cupo para sesión de mentoría
+
+**Figura 24. Diagrama 6.13.8: ECB — CUS-003: Reservar cupo para sesión de mentoría**
+
+![Figura 24. Diagrama 6.13.8: ECB — CUS-003: Reservar cupo para sesión de mentoría](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-003_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-003_ecb.puml).
+
+### 6.3.1.9. CUS-004 — Ratificar asistencia a sesión de mentoría (T-24h)
+
+**Figura 25. Diagrama 6.13.9: ECB — CUS-004: Ratificar asistencia a sesión de mentoría (T-24h)**
+
+![Figura 25. Diagrama 6.13.9: ECB — CUS-004: Ratificar asistencia a sesión de mentoría (T-24h)](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-004_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-004_ecb.puml).
+
+### 6.3.1.10. CUS-023 — Evaluar quórum y ejecutar corte automático (T-24h)
+
+**Figura 26. Diagrama 6.13.10: ECB — CUS-023: Evaluar quórum y ejecutar corte automático (T-24h)**
+
+![Figura 26. Diagrama 6.13.10: ECB — CUS-023: Evaluar quórum y ejecutar corte automático (T-24h)](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-023_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-023_ecb.puml).
+
+### 6.3.1.11. CUS-024 — Cancelar reserva de cupo por estudiante
+
+**Figura 27. Diagrama 6.13.11: ECB — CUS-024: Cancelar reserva de cupo por estudiante**
+
+![Figura 27. Diagrama 6.13.11: ECB — CUS-024: Cancelar reserva de cupo por estudiante](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-024_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-024_ecb.puml).
+
+### 6.3.1.12. CUS-007 — Registrar asistencia y bitácora pedagógica
+
+**Figura 28. Diagrama 6.13.12: ECB — CUS-007: Registrar asistencia y bitácora pedagógica**
+
+![Figura 28. Diagrama 6.13.12: ECB — CUS-007: Registrar asistencia y bitácora pedagógica](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-007_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-007_ecb.puml).
+
+### 6.3.1.13. CUS-012 — Registrar calificación y feedback bidireccional
+
+**Figura 29. Diagrama 6.13.13: ECB — CUS-012: Registrar calificación y feedback bidireccional**
+
+![Figura 29. Diagrama 6.13.13: ECB — CUS-012: Registrar calificación y feedback bidireccional](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-012_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-012_ecb.puml).
+
+### 6.3.1.14. CUS-013 — Consultar historial académico de mentorías
+
+**Figura 30. Diagrama 6.13.14: ECB — CUS-013: Consultar historial académico de mentorías**
+
+![Figura 30. Diagrama 6.13.14: ECB — CUS-013: Consultar historial académico de mentorías](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-013_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-013_ecb.puml).
+
+### 6.3.1.15. CUS-014 — Emitir constancia de horas de mentoría
+
+**Figura 31. Diagrama 6.13.15: ECB — CUS-014: Emitir constancia de horas de mentoría**
+
+![Figura 31. Diagrama 6.13.15: ECB — CUS-014: Emitir constancia de horas de mentoría](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-014_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-014_ecb.puml).
+
+### 6.3.1.16. CUS-018 — Gestionar justificación de inasistencia a sesión
+
+**Figura 32. Diagrama 6.13.16: ECB — CUS-018: Gestionar justificación de inasistencia a sesión**
+
+![Figura 32. Diagrama 6.13.16: ECB — CUS-018: Gestionar justificación de inasistencia a sesión](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-018_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-018_ecb.puml).
+
+### 6.3.1.17. CUS-019 — Consultar bitácoras de mentoría por tutor
+
+**Figura 33. Diagrama 6.13.17: ECB — CUS-019: Consultar bitácoras de mentoría por tutor**
+
+![Figura 33. Diagrama 6.13.17: ECB — CUS-019: Consultar bitácoras de mentoría por tutor](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-019_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-019_ecb.puml).
+
+### 6.3.1.18. CUS-009 — Consultar analítica institucional de mentorías
+
+**Figura 34. Diagrama 6.13.18: ECB — CUS-009: Consultar analítica institucional de mentorías**
+
+![Figura 34. Diagrama 6.13.18: ECB — CUS-009: Consultar analítica institucional de mentorías](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-009_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-009_ecb.puml).
+
+### 6.3.1.19. CUS-011 — Exportar reportes ejecutivos consolidados
+
+**Figura 35. Diagrama 6.13.19: ECB — CUS-011: Exportar reportes ejecutivos consolidados**
+
+![Figura 35. Diagrama 6.13.19: ECB — CUS-011: Exportar reportes ejecutivos consolidados](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-011_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-011_ecb.puml).
+
+### 6.3.1.20. CUS-015 — Configurar parámetros del algoritmo de recomendación
+
+**Figura 36. Diagrama 6.13.20: ECB — CUS-015: Configurar parámetros del algoritmo de recomendación**
+
+![Figura 36. Diagrama 6.13.20: ECB — CUS-015: Configurar parámetros del algoritmo de recomendación](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-015_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-015_ecb.puml).
+
+### 6.3.1.21. CUS-016 — Gestionar auditoría de eventos de seguridad
+
+**Figura 37. Diagrama 6.13.21: ECB — CUS-016: Gestionar auditoría de eventos de seguridad**
+
+![Figura 37. Diagrama 6.13.21: ECB — CUS-016: Gestionar auditoría de eventos de seguridad](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-016_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-016_ecb.puml).
+
+### 6.3.1.22. CUS-017 — Configurar ambientes físicos y virtuales
+
+**Figura 38. Diagrama 6.13.22: ECB — CUS-017: Configurar ambientes físicos y virtuales**
+
+![Figura 38. Diagrama 6.13.22: ECB — CUS-017: Configurar ambientes físicos y virtuales](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-017_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-017_ecb.puml).
+
+### 6.3.1.23. CUS-020 — Gestionar catálogo curricular y asignaturas
+
+**Figura 39. Diagrama 6.13.23: ECB — CUS-020: Gestionar catálogo curricular y asignaturas**
+
+![Figura 39. Diagrama 6.13.23: ECB — CUS-020: Gestionar catálogo curricular y asignaturas](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-020_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-020_ecb.puml).
+
+### 6.3.1.24. CUS-022 — Configurar parámetros de corte y penalización
+
+**Figura 40. Diagrama 6.13.24: ECB — CUS-022: Configurar parámetros de corte y penalización**
+
+![Figura 40. Diagrama 6.13.24: ECB — CUS-022: Configurar parámetros de corte y penalización](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-022_ecb.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-022_ecb.puml).
 
 ## 6.3.2. Diagrama de Actividades con objetos
 
-### Presentación del Diagrama de Actividades con Objetos
-El diagrama de actividades con flujo de objetos modela la dinámica operacional del sistema, explicitando no solo la secuencia temporal de actividades y las decisiones condicionales, sino también el ciclo de vida y los cambios de estado que experimentan los artefactos de datos (objetos de negocio) a medida que transitan por las diferentes etapas del proceso de mentorías. A continuación se presenta el Diagrama General de Actividades del Ciclo de Mentoría (Diagrama 6.14), seguido de los 24 diagramas de actividades detallados para cada caso de uso canónico.
-
-### Diagrama 6.14: Diagrama de Actividades con Flujo de Objetos del Ciclo de Mentoría
-
-**Figura 41. Diagrama de Actividades con Flujo de Objetos del Ciclo de Mentoría**
-
-![Figura 41. Diagrama de Actividades con Flujo de Objetos del Ciclo de Mentoría](docs/diseño/diagramas/srs/img/diag_041_sec632_act_general_consolidado.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14: Diagrama de Actividades con Flujo de Objetos del Ciclo de Mentoría
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos del Ciclo de Mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Estudiante Mentoreado|
-|#E8F8F5|Estudiante Mentor|
-|#FEF9C3|Sistema Web P2P (Backend)|
-|#FFF1F2|Administración (EPIS)|
-
-|Estudiante Mentor|
-start
-:Publica oferta de mentoría;
-|Sistema Web P2P (Backend)|
-:Valida disponibilidad de espacio;
-:Crea OfertaMentoria [PUBLICADA];
-:Crea SesionMentoria [PROGRAMADA];
-
-|Estudiante Mentoreado|
-:Explora recomendaciones Top-k;
-:Reserva cupo de sesión;
-|Sistema Web P2P (Backend)|
-:Adquiere cerrojo pesimista FOR UPDATE;
-:Crea ReservaCupo [PENDIENTE_CONFIRMACION];
-
-|Estudiante Mentoreado|
-:Ratifica asistencia antes de T-24h;
-|Sistema Web P2P (Backend)|
-:Transiciona ReservaCupo [CONFIRMADA];
-
-|Sistema Web P2P (Backend)|
-:Ejecuta corte automatizado a T-24h;
-if (¿Quórum >= 50% de aforo?) then (Sí)
-  :Transiciona SesionMentoria [CONFIRMADA];
-else (No)
-  :Transiciona SesionMentoria [QUORUM_INSUFICIENTE];
-  |Estudiante Mentor|
-  if (¿Mentor decide continuar?) then (Sí)
-    :Ratifica sesión extraordinaria;
-  else (No)
-    :Cancela sesión;
-    |Sistema Web P2P (Backend)|
-    :SesionMentoria [CANCELADA_QUORUM];
-    stop
-  endif
-endif
-
-|Estudiante Mentor|
-:Desarrolla la sesión de mentoría;
-:Registra bitácora pedagógica antes de 48h;
-|Sistema Web P2P (Backend)|
-:Calcula hash SHA-256 inmutable;
-:Crea BitacoraPedagogica [REGISTRADA];
-:Transiciona SesionMentoria [FINALIZADA];
-
-|Estudiante Mentoreado|
-:Completa encuesta de satisfacción (24h);
-|Sistema Web P2P (Backend)|
-:Actualiza reputación e insignias del mentor;
-
-|Administración (EPIS)|
-:Visa bitácoras docentes;
-if (¿Horas acumuladas >= 20h?) then (Sí)
-  :Emite certificado digital oficial;
-  |Sistema Web P2P (Backend)|
-  :Genera CertificadoHoras [EMITIDO_VALIDADO];
-endif
-stop
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
-
-### 6.3.2.1. CUS-001 – Actividades con Objetos: Iniciar sesión institucional con 2FA
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-001` en `MOD-01`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.1: Diagrama de Actividades con Flujo de Objetos - CUS-001: Iniciar sesión institucional con 2FA
-
-**Figura 42. Diagrama de Actividades con Flujo de Objetos - CUS-001: Iniciar sesión institucional con 2FA**
-
-![Figura 42. Diagrama de Actividades con Flujo de Objetos - CUS-001: Iniciar sesión institucional con 2FA](docs/diseño/diagramas/srs/img/diag_042_sec632_act_cus001.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.1: Diagrama de Actividades con Flujo de Objetos - CUS-001: Iniciar sesión institucional con 2FA
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-001: Iniciar sesión institucional con 2FA\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Iniciar sesión institucional con 2FA;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre Usuario;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-01.
-
-
----
-
-### 6.3.2.2. CUS-010 – Actividades con Objetos: Gestionar asignación de roles de usuario
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-010` en `MOD-01`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.2: Diagrama de Actividades con Flujo de Objetos - CUS-010: Gestionar asignación de roles de usuario
-
-**Figura 43. Diagrama de Actividades con Flujo de Objetos - CUS-010: Gestionar asignación de roles de usuario**
-
-![Figura 43. Diagrama de Actividades con Flujo de Objetos - CUS-010: Gestionar asignación de roles de usuario](docs/diseño/diagramas/srs/img/diag_043_sec632_act_cus010.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.2: Diagrama de Actividades con Flujo de Objetos - CUS-010: Gestionar asignación de roles de usuario
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-010: Gestionar asignación de roles de usuario\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Gestionar asignación de roles de usuario;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre Usuario;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-01.
-
-
----
-
-### 6.3.2.3. CUS-006 – Actividades con Objetos: Publicar oferta de mentoría académica
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-006` en `MOD-02`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.3: Diagrama de Actividades con Flujo de Objetos - CUS-006: Publicar oferta de mentoría académica
-
-**Figura 44. Diagrama de Actividades con Flujo de Objetos - CUS-006: Publicar oferta de mentoría académica**
-
-![Figura 44. Diagrama de Actividades con Flujo de Objetos - CUS-006: Publicar oferta de mentoría académica](docs/diseño/diagramas/srs/img/diag_044_sec632_act_cus006.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.3: Diagrama de Actividades con Flujo de Objetos - CUS-006: Publicar oferta de mentoría académica
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-006: Publicar oferta de mentoría académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Publicar oferta de mentoría académica;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre OfertaMentoria;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-02.
-
-
----
-
-### 6.3.2.4. CUS-008 – Actividades con Objetos: Consultar disponibilidad de espacios y recursos
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-008` en `MOD-02`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.4: Diagrama de Actividades con Flujo de Objetos - CUS-008: Consultar disponibilidad de espacios y recursos
-
-**Figura 45. Diagrama de Actividades con Flujo de Objetos - CUS-008: Consultar disponibilidad de espacios y recursos**
-
-![Figura 45. Diagrama de Actividades con Flujo de Objetos - CUS-008: Consultar disponibilidad de espacios y recursos](docs/diseño/diagramas/srs/img/diag_045_sec632_act_cus008.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.4: Diagrama de Actividades con Flujo de Objetos - CUS-008: Consultar disponibilidad de espacios y recursos
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-008: Consultar disponibilidad de espacios y recursos\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Consultar disponibilidad de espacios y recursos;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre EspacioFisico;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-02.
-
-
----
-
-### 6.3.2.5. CUS-005 – Actividades con Objetos: Gestionar perfil formativo y disponibilidad horaria
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-005` en `MOD-03`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.5: Diagrama de Actividades con Flujo de Objetos - CUS-005: Gestionar perfil formativo y disponibilidad horaria
-
-**Figura 46. Diagrama de Actividades con Flujo de Objetos - CUS-005: Gestionar perfil formativo y disponibilidad horaria**
-
-![Figura 46. Diagrama de Actividades con Flujo de Objetos - CUS-005: Gestionar perfil formativo y disponibilidad horaria](docs/diseño/diagramas/srs/img/diag_046_sec632_act_cus005.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.5: Diagrama de Actividades con Flujo de Objetos - CUS-005: Gestionar perfil formativo y disponibilidad horaria
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-005: Gestionar perfil formativo y disponibilidad horaria\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Gestionar perfil formativo y disponibilidad horaria;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre PerfilFormativo;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-03.
-
-
----
-
-### 6.3.2.6. CUS-021 – Actividades con Objetos: Explorar catálogo curricular de asignaturas filtro
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-021` en `MOD-03`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.6: Diagrama de Actividades con Flujo de Objetos - CUS-021: Explorar catálogo curricular de asignaturas filtro
-
-**Figura 47. Diagrama de Actividades con Flujo de Objetos - CUS-021: Explorar catálogo curricular de asignaturas filtro**
-
-![Figura 47. Diagrama de Actividades con Flujo de Objetos - CUS-021: Explorar catálogo curricular de asignaturas filtro](docs/diseño/diagramas/srs/img/diag_047_sec632_act_cus021.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.6: Diagrama de Actividades con Flujo de Objetos - CUS-021: Explorar catálogo curricular de asignaturas filtro
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-021: Explorar catálogo curricular de asignaturas filtro\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Explorar catálogo curricular de asignaturas filtro;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre CursoCritico;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-03.
-
-
----
-
-### 6.3.2.7. CUS-002 – Actividades con Objetos: Explorar recomendaciones personalizadas Top-k
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-002` en `MOD-04`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.7: Diagrama de Actividades con Flujo de Objetos - CUS-002: Explorar recomendaciones personalizadas Top-k
-
-**Figura 48. Diagrama de Actividades con Flujo de Objetos - CUS-002: Explorar recomendaciones personalizadas Top-k**
-
-![Figura 48. Diagrama de Actividades con Flujo de Objetos - CUS-002: Explorar recomendaciones personalizadas Top-k](docs/diseño/diagramas/srs/img/diag_048_sec632_act_cus002.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.7: Diagrama de Actividades con Flujo de Objetos - CUS-002: Explorar recomendaciones personalizadas Top-k
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-002: Explorar recomendaciones personalizadas Top-k\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Explorar recomendaciones personalizadas Top-k;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre PerfilFormativo;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-04.
-
-
----
-
-### 6.3.2.8. CUS-003 – Actividades con Objetos: Registrar solicitud de demanda académica
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-003` en `MOD-04`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.8: Diagrama de Actividades con Flujo de Objetos - CUS-003: Registrar solicitud de demanda académica
-
-**Figura 49. Diagrama de Actividades con Flujo de Objetos - CUS-003: Registrar solicitud de demanda académica**
-
-![Figura 49. Diagrama de Actividades con Flujo de Objetos - CUS-003: Registrar solicitud de demanda académica](docs/diseño/diagramas/srs/img/diag_049_sec632_act_cus003.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.8: Diagrama de Actividades con Flujo de Objetos - CUS-003: Registrar solicitud de demanda académica
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-003: Registrar solicitud de demanda académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Registrar solicitud de demanda académica;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre SolicitudDemanda;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-04.
-
-
----
-
-### 6.3.2.9. CUS-004 – Actividades con Objetos: Reservar cupo de mentoría académica
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-004` en `MOD-05`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.9: Diagrama de Actividades con Flujo de Objetos - CUS-004: Reservar cupo de mentoría académica
-
-**Figura 50. Diagrama de Actividades con Flujo de Objetos - CUS-004: Reservar cupo de mentoría académica**
-
-![Figura 50. Diagrama de Actividades con Flujo de Objetos - CUS-004: Reservar cupo de mentoría académica](docs/diseño/diagramas/srs/img/diag_050_sec632_act_cus004.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.9: Diagrama de Actividades con Flujo de Objetos - CUS-004: Reservar cupo de mentoría académica
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-004: Reservar cupo de mentoría académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Reservar cupo de mentoría académica;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre SesionMentoria;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-05.
-
-
----
-
-### 6.3.2.10. CUS-024 – Actividades con Objetos: Ratificar asistencia a sesión de mentoría
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-024` en `MOD-05`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.10: Diagrama de Actividades con Flujo de Objetos - CUS-024: Ratificar asistencia a sesión de mentoría
-
-**Figura 51. Diagrama de Actividades con Flujo de Objetos - CUS-024: Ratificar asistencia a sesión de mentoría**
-
-![Figura 51. Diagrama de Actividades con Flujo de Objetos - CUS-024: Ratificar asistencia a sesión de mentoría](docs/diseño/diagramas/srs/img/diag_051_sec632_act_cus024.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.10: Diagrama de Actividades con Flujo de Objetos - CUS-024: Ratificar asistencia a sesión de mentoría
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-024: Ratificar asistencia a sesión de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Ratificar asistencia a sesión de mentoría;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre ReservaCupo;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-05.
-
-
----
-
-### 6.3.2.11. CUS-017 – Actividades con Objetos: Desistir voluntariamente de reserva
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-017` en `MOD-05`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.11: Diagrama de Actividades con Flujo de Objetos - CUS-017: Desistir voluntariamente de reserva
-
-**Figura 52. Diagrama de Actividades con Flujo de Objetos - CUS-017: Desistir voluntariamente de reserva**
-
-![Figura 52. Diagrama de Actividades con Flujo de Objetos - CUS-017: Desistir voluntariamente de reserva](docs/diseño/diagramas/srs/img/diag_052_sec632_act_cus017.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.11: Diagrama de Actividades con Flujo de Objetos - CUS-017: Desistir voluntariamente de reserva
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-017: Desistir voluntariamente de reserva\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Desistir voluntariamente de reserva;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre ReservaCupo;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-05.
-
-
----
-
-### 6.3.2.12. CUS-023 – Actividades con Objetos: Evaluar quórum automático a T-24h
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-023` en `MOD-05`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.12: Diagrama de Actividades con Flujo de Objetos - CUS-023: Evaluar quórum automático a T-24h
-
-**Figura 53. Diagrama de Actividades con Flujo de Objetos - CUS-023: Evaluar quórum automático a T-24h**
-
-![Figura 53. Diagrama de Actividades con Flujo de Objetos - CUS-023: Evaluar quórum automático a T-24h](docs/diseño/diagramas/srs/img/diag_053_sec632_act_cus023.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.12: Diagrama de Actividades con Flujo de Objetos - CUS-023: Evaluar quórum automático a T-24h
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-023: Evaluar quórum automático a T-24h\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Evaluar quórum automático a T-24h;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre SesionMentoria;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-05.
-
-
----
-
-### 6.3.2.13. CUS-007 – Actividades con Objetos: Decisión del mentor ante quórum insuficiente
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-007` en `MOD-05`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.13: Diagrama de Actividades con Flujo de Objetos - CUS-007: Decisión del mentor ante quórum insuficiente
-
-**Figura 54. Diagrama de Actividades con Flujo de Objetos - CUS-007: Decisión del mentor ante quórum insuficiente**
-
-![Figura 54. Diagrama de Actividades con Flujo de Objetos - CUS-007: Decisión del mentor ante quórum insuficiente](docs/diseño/diagramas/srs/img/diag_054_sec632_act_cus007.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.13: Diagrama de Actividades con Flujo de Objetos - CUS-007: Decisión del mentor ante quórum insuficiente
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-007: Decisión del mentor ante quórum insuficiente\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Decisión del mentor ante quórum insuficiente;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre SesionMentoria;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-05.
-
-
----
-
-### 6.3.2.14. CUS-012 – Actividades con Objetos: Registrar asistencia a sesión de mentoría
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-012` en `MOD-06`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.14: Diagrama de Actividades con Flujo de Objetos - CUS-012: Registrar asistencia a sesión de mentoría
-
-**Figura 55. Diagrama de Actividades con Flujo de Objetos - CUS-012: Registrar asistencia a sesión de mentoría**
-
-![Figura 55. Diagrama de Actividades con Flujo de Objetos - CUS-012: Registrar asistencia a sesión de mentoría](docs/diseño/diagramas/srs/img/diag_055_sec632_act_cus012.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.14: Diagrama de Actividades con Flujo de Objetos - CUS-012: Registrar asistencia a sesión de mentoría
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-012: Registrar asistencia a sesión de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Registrar asistencia a sesión de mentoría;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre AsistenciaSesion;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-06.
-
-
----
-
-### 6.3.2.15. CUS-013 – Actividades con Objetos: Registrar bitácora académica de sesión
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-013` en `MOD-06`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.15: Diagrama de Actividades con Flujo de Objetos - CUS-013: Registrar bitácora académica de sesión
-
-**Figura 56. Diagrama de Actividades con Flujo de Objetos - CUS-013: Registrar bitácora académica de sesión**
-
-![Figura 56. Diagrama de Actividades con Flujo de Objetos - CUS-013: Registrar bitácora académica de sesión](docs/diseño/diagramas/srs/img/diag_056_sec632_act_cus013.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.15: Diagrama de Actividades con Flujo de Objetos - CUS-013: Registrar bitácora académica de sesión
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-013: Registrar bitácora académica de sesión\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Registrar bitácora académica de sesión;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre BitacoraPedagogica;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-06.
-
-
----
-
-### 6.3.2.16. CUS-014 – Actividades con Objetos: Visualizar historial y bitácoras académicas
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-014` en `MOD-06`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.16: Diagrama de Actividades con Flujo de Objetos - CUS-014: Visualizar historial y bitácoras académicas
-
-**Figura 57. Diagrama de Actividades con Flujo de Objetos - CUS-014: Visualizar historial y bitácoras académicas**
-
-![Figura 57. Diagrama de Actividades con Flujo de Objetos - CUS-014: Visualizar historial y bitácoras académicas](docs/diseño/diagramas/srs/img/diag_057_sec632_act_cus014.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.16: Diagrama de Actividades con Flujo de Objetos - CUS-014: Visualizar historial y bitácoras académicas
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-014: Visualizar historial y bitácoras académicas\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Visualizar historial y bitácoras académicas;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre BitacoraPedagogica;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-06.
-
-
----
-
-### 6.3.2.17. CUS-018 – Actividades con Objetos: Emitir constancia institucional de horas de mentoría
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-018` en `MOD-07`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.17: Diagrama de Actividades con Flujo de Objetos - CUS-018: Emitir constancia institucional de horas de mentoría
-
-**Figura 58. Diagrama de Actividades con Flujo de Objetos - CUS-018: Emitir constancia institucional de horas de mentoría**
-
-![Figura 58. Diagrama de Actividades con Flujo de Objetos - CUS-018: Emitir constancia institucional de horas de mentoría](docs/diseño/diagramas/srs/img/diag_058_sec632_act_cus018.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.17: Diagrama de Actividades con Flujo de Objetos - CUS-018: Emitir constancia institucional de horas de mentoría
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-018: Emitir constancia institucional de horas de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Emitir constancia institucional de horas de mentoría;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre CertificadoHoras;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-07.
-
-
----
-
-### 6.3.2.18. CUS-019 – Actividades con Objetos: Gestionar insignias y reputación gamificada
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-019` en `MOD-07`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.18: Diagrama de Actividades con Flujo de Objetos - CUS-019: Gestionar insignias y reputación gamificada
-
-**Figura 59. Diagrama de Actividades con Flujo de Objetos - CUS-019: Gestionar insignias y reputación gamificada**
-
-![Figura 59. Diagrama de Actividades con Flujo de Objetos - CUS-019: Gestionar insignias y reputación gamificada](docs/diseño/diagramas/srs/img/diag_059_sec632_act_cus019.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.18: Diagrama de Actividades con Flujo de Objetos - CUS-019: Gestionar insignias y reputación gamificada
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-019: Gestionar insignias y reputación gamificada\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Gestionar insignias y reputación gamificada;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre Insignia;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-07.
-
-
----
-
-### 6.3.2.19. CUS-009 – Actividades con Objetos: Notificar eventos críticos y alertas temporales
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-009` en `MOD-08`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.19: Diagrama de Actividades con Flujo de Objetos - CUS-009: Notificar eventos críticos y alertas temporales
-
-**Figura 60. Diagrama de Actividades con Flujo de Objetos - CUS-009: Notificar eventos críticos y alertas temporales**
-
-![Figura 60. Diagrama de Actividades con Flujo de Objetos - CUS-009: Notificar eventos críticos y alertas temporales](docs/diseño/diagramas/srs/img/diag_060_sec632_act_cus009.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.19: Diagrama de Actividades con Flujo de Objetos - CUS-009: Notificar eventos críticos y alertas temporales
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-009: Notificar eventos críticos y alertas temporales\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Notificar eventos críticos y alertas temporales;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre Notificacion;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.2.20. CUS-011 – Actividades con Objetos: Generar reportes e indicadores de analítica académica
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-011` en `MOD-08`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.20: Diagrama de Actividades con Flujo de Objetos - CUS-011: Generar reportes e indicadores de analítica académica
-
-**Figura 61. Diagrama de Actividades con Flujo de Objetos - CUS-011: Generar reportes e indicadores de analítica académica**
-
-![Figura 61. Diagrama de Actividades con Flujo de Objetos - CUS-011: Generar reportes e indicadores de analítica académica](docs/diseño/diagramas/srs/img/diag_061_sec632_act_cus011.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.20: Diagrama de Actividades con Flujo de Objetos - CUS-011: Generar reportes e indicadores de analítica académica
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-011: Generar reportes e indicadores de analítica académica\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Generar reportes e indicadores de analítica académica;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre KpiAcademico;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.2.21. CUS-015 – Actividades con Objetos: Consultar métricas de retención y desempeño
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-015` en `MOD-08`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.21: Diagrama de Actividades con Flujo de Objetos - CUS-015: Consultar métricas de retención y desempeño
-
-**Figura 62. Diagrama de Actividades con Flujo de Objetos - CUS-015: Consultar métricas de retención y desempeño**
-
-![Figura 62. Diagrama de Actividades con Flujo de Objetos - CUS-015: Consultar métricas de retención y desempeño](docs/diseño/diagramas/srs/img/diag_062_sec632_act_cus015.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.21: Diagrama de Actividades con Flujo de Objetos - CUS-015: Consultar métricas de retención y desempeño
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-015: Consultar métricas de retención y desempeño\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Consultar métricas de retención y desempeño;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre KpiAcademico;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.2.22. CUS-016 – Actividades con Objetos: Auditar trazas de seguridad y consentimiento Ley 29733
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-016` en `MOD-08`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.22: Diagrama de Actividades con Flujo de Objetos - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733
-
-**Figura 63. Diagrama de Actividades con Flujo de Objetos - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733**
-
-![Figura 63. Diagrama de Actividades con Flujo de Objetos - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733](docs/diseño/diagramas/srs/img/diag_063_sec632_act_cus016.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.22: Diagrama de Actividades con Flujo de Objetos - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Auditar trazas de seguridad y consentimiento Ley 29733;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre ConsentimientoLegal;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.2.23. CUS-020 – Actividades con Objetos: Configurar parámetros institucionales y umbrales
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-020` en `MOD-08`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.23: Diagrama de Actividades con Flujo de Objetos - CUS-020: Configurar parámetros institucionales y umbrales
-
-**Figura 64. Diagrama de Actividades con Flujo de Objetos - CUS-020: Configurar parámetros institucionales y umbrales**
-
-![Figura 64. Diagrama de Actividades con Flujo de Objetos - CUS-020: Configurar parámetros institucionales y umbrales](docs/diseño/diagramas/srs/img/diag_064_sec632_act_cus020.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.23: Diagrama de Actividades con Flujo de Objetos - CUS-020: Configurar parámetros institucionales y umbrales
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-020: Configurar parámetros institucionales y umbrales\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Configurar parámetros institucionales y umbrales;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre ParametroInstitucional;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.2.24. CUS-022 – Actividades con Objetos: Gestionar catálogo de temas y materias críticas
-
-El diagrama de actividades con flujo de objetos modela la secuencia lógica, las compuertas de decisión y las transiciones de estado de los artefactos informáticos para `CUS-022` en `MOD-08`. Se organiza en carriles de ejecución (*swimlanes*) que delimitan las acciones del usuario, los controladores de backend y las entidades de datos persistentes.
-
-#### Diagrama 6.14.24: Diagrama de Actividades con Flujo de Objetos - CUS-022: Gestionar catálogo de temas y materias críticas
-
-**Figura 65. Diagrama de Actividades con Flujo de Objetos - CUS-022: Gestionar catálogo de temas y materias críticas**
-
-![Figura 65. Diagrama de Actividades con Flujo de Objetos - CUS-022: Gestionar catálogo de temas y materias críticas](docs/diseño/diagramas/srs/img/diag_065_sec632_act_cus022.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.14.24: Diagrama de Actividades con Flujo de Objetos - CUS-022: Gestionar catálogo de temas y materias críticas
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Actividades con Flujo de Objetos - CUS-022: Gestionar catálogo de temas y materias críticas\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-|#F8F9FA|Actor Institucional|
-|#E8F8F5|Sistema Web P2P (Backend)|
-|#FFF2DF|Persistencia (PostgreSQL)|
-
-|Actor Institucional|
-start
-:Inicia accion para Gestionar catálogo de temas y materias críticas;
-:Envía formulario / petición técnica;
-
-|Sistema Web P2P (Backend)|
-:Valida esquema Pydantic y reglas de negocio;
-if (¿Datos válidos y reglas conformes?) then (Sí)
-  :Inicia transacción ACID;
-  |Persistencia (PostgreSQL)|
-  :Ejecuta operaciones SQL sobre CursoCritico;
-  :Transiciona estado de la entidad;
-  |Sistema Web P2P (Backend)|
-  :Confirma transacción (commit);
-  :Genera Response DTO;
-  |Actor Institucional|
-  :Visualiza confirmación exitosa en Vista React;
-  stop
-else (No)
-  |Sistema Web P2P (Backend)|
-  :Genera error controlado (HTTP 4xx);
-  |Actor Institucional|
-  :Visualiza mensaje de alerta descriptivo;
-  stop
-endif
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
----
+### Diagrama 6.14: Vista general
+
+**Figura 41. Diagrama de Actividades con objetos: vista general**
+
+![Figura 41. Diagrama de Actividades con objetos: vista general](docs/revision_srs/diagramas/doc-h06/srs/img/diag_041_general.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_041_general.puml).
+
+### 6.3.2.1. CUS-001 — Iniciar sesión institucional con 2FA
+
+**Figura 42. Diagrama 6.14.1: Actividades con objetos — CUS-001: Iniciar sesión institucional con 2FA**
+
+![Figura 42. Diagrama 6.14.1: Actividades con objetos — CUS-001: Iniciar sesión institucional con 2FA](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-001_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-001_actividades.puml).
+
+### 6.3.2.2. CUS-010 — Gestionar asignación de roles de usuario
+
+**Figura 43. Diagrama 6.14.2: Actividades con objetos — CUS-010: Gestionar asignación de roles de usuario**
+
+![Figura 43. Diagrama 6.14.2: Actividades con objetos — CUS-010: Gestionar asignación de roles de usuario](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-010_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-010_actividades.puml).
+
+### 6.3.2.3. CUS-006 — Registrar oferta de mentoría académica
+
+**Figura 44. Diagrama 6.14.3: Actividades con objetos — CUS-006: Registrar oferta de mentoría académica**
+
+![Figura 44. Diagrama 6.14.3: Actividades con objetos — CUS-006: Registrar oferta de mentoría académica](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-006_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-006_actividades.puml).
+
+### 6.3.2.4. CUS-008 — Gestionar demanda insatisfecha de mentoría
+
+**Figura 45. Diagrama 6.14.4: Actividades con objetos — CUS-008: Gestionar demanda insatisfecha de mentoría**
+
+![Figura 45. Diagrama 6.14.4: Actividades con objetos — CUS-008: Gestionar demanda insatisfecha de mentoría](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-008_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-008_actividades.puml).
+
+### 6.3.2.5. CUS-005 — Postular al rol de estudiante mentor
+
+**Figura 46. Diagrama 6.14.5: Actividades con objetos — CUS-005: Postular al rol de estudiante mentor**
+
+![Figura 46. Diagrama 6.14.5: Actividades con objetos — CUS-005: Postular al rol de estudiante mentor](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-005_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-005_actividades.puml).
+
+### 6.3.2.6. CUS-021 — Evaluar postulaciones a mentor por comité
+
+**Figura 47. Diagrama 6.14.6: Actividades con objetos — CUS-021: Evaluar postulaciones a mentor por comité**
+
+![Figura 47. Diagrama 6.14.6: Actividades con objetos — CUS-021: Evaluar postulaciones a mentor por comité](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-021_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-021_actividades.puml).
+
+### 6.3.2.7. CUS-002 — Consultar catálogo de mentorías con recomendación
+
+**Figura 48. Diagrama 6.14.7: Actividades con objetos — CUS-002: Consultar catálogo de mentorías con recomendación**
+
+![Figura 48. Diagrama 6.14.7: Actividades con objetos — CUS-002: Consultar catálogo de mentorías con recomendación](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-002_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-002_actividades.puml).
+
+### 6.3.2.8. CUS-003 — Reservar cupo para sesión de mentoría
+
+**Figura 49. Diagrama 6.14.8: Actividades con objetos — CUS-003: Reservar cupo para sesión de mentoría**
+
+![Figura 49. Diagrama 6.14.8: Actividades con objetos — CUS-003: Reservar cupo para sesión de mentoría](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-003_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-003_actividades.puml).
+
+### 6.3.2.9. CUS-004 — Ratificar asistencia a sesión de mentoría (T-24h)
+
+**Figura 50. Diagrama 6.14.9: Actividades con objetos — CUS-004: Ratificar asistencia a sesión de mentoría (T-24h)**
+
+![Figura 50. Diagrama 6.14.9: Actividades con objetos — CUS-004: Ratificar asistencia a sesión de mentoría (T-24h)](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-004_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-004_actividades.puml).
+
+### 6.3.2.10. CUS-023 — Evaluar quórum y ejecutar corte automático (T-24h)
+
+**Figura 51. Diagrama 6.14.10: Actividades con objetos — CUS-023: Evaluar quórum y ejecutar corte automático (T-24h)**
+
+![Figura 51. Diagrama 6.14.10: Actividades con objetos — CUS-023: Evaluar quórum y ejecutar corte automático (T-24h)](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-023_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-023_actividades.puml).
+
+### 6.3.2.11. CUS-024 — Cancelar reserva de cupo por estudiante
+
+**Figura 52. Diagrama 6.14.11: Actividades con objetos — CUS-024: Cancelar reserva de cupo por estudiante**
+
+![Figura 52. Diagrama 6.14.11: Actividades con objetos — CUS-024: Cancelar reserva de cupo por estudiante](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-024_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-024_actividades.puml).
+
+### 6.3.2.12. CUS-007 — Registrar asistencia y bitácora pedagógica
+
+**Figura 53. Diagrama 6.14.12: Actividades con objetos — CUS-007: Registrar asistencia y bitácora pedagógica**
+
+![Figura 53. Diagrama 6.14.12: Actividades con objetos — CUS-007: Registrar asistencia y bitácora pedagógica](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-007_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-007_actividades.puml).
+
+### 6.3.2.13. CUS-012 — Registrar calificación y feedback bidireccional
+
+**Figura 54. Diagrama 6.14.13: Actividades con objetos — CUS-012: Registrar calificación y feedback bidireccional**
+
+![Figura 54. Diagrama 6.14.13: Actividades con objetos — CUS-012: Registrar calificación y feedback bidireccional](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-012_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-012_actividades.puml).
+
+### 6.3.2.14. CUS-013 — Consultar historial académico de mentorías
+
+**Figura 55. Diagrama 6.14.14: Actividades con objetos — CUS-013: Consultar historial académico de mentorías**
+
+![Figura 55. Diagrama 6.14.14: Actividades con objetos — CUS-013: Consultar historial académico de mentorías](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-013_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-013_actividades.puml).
+
+### 6.3.2.15. CUS-014 — Emitir constancia de horas de mentoría
+
+**Figura 56. Diagrama 6.14.15: Actividades con objetos — CUS-014: Emitir constancia de horas de mentoría**
+
+![Figura 56. Diagrama 6.14.15: Actividades con objetos — CUS-014: Emitir constancia de horas de mentoría](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-014_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-014_actividades.puml).
+
+### 6.3.2.16. CUS-018 — Gestionar justificación de inasistencia a sesión
+
+**Figura 57. Diagrama 6.14.16: Actividades con objetos — CUS-018: Gestionar justificación de inasistencia a sesión**
+
+![Figura 57. Diagrama 6.14.16: Actividades con objetos — CUS-018: Gestionar justificación de inasistencia a sesión](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-018_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-018_actividades.puml).
+
+### 6.3.2.17. CUS-019 — Consultar bitácoras de mentoría por tutor
+
+**Figura 58. Diagrama 6.14.17: Actividades con objetos — CUS-019: Consultar bitácoras de mentoría por tutor**
+
+![Figura 58. Diagrama 6.14.17: Actividades con objetos — CUS-019: Consultar bitácoras de mentoría por tutor](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-019_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-019_actividades.puml).
+
+### 6.3.2.18. CUS-009 — Consultar analítica institucional de mentorías
+
+**Figura 59. Diagrama 6.14.18: Actividades con objetos — CUS-009: Consultar analítica institucional de mentorías**
+
+![Figura 59. Diagrama 6.14.18: Actividades con objetos — CUS-009: Consultar analítica institucional de mentorías](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-009_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-009_actividades.puml).
+
+### 6.3.2.19. CUS-011 — Exportar reportes ejecutivos consolidados
+
+**Figura 60. Diagrama 6.14.19: Actividades con objetos — CUS-011: Exportar reportes ejecutivos consolidados**
+
+![Figura 60. Diagrama 6.14.19: Actividades con objetos — CUS-011: Exportar reportes ejecutivos consolidados](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-011_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-011_actividades.puml).
+
+### 6.3.2.20. CUS-015 — Configurar parámetros del algoritmo de recomendación
+
+**Figura 61. Diagrama 6.14.20: Actividades con objetos — CUS-015: Configurar parámetros del algoritmo de recomendación**
+
+![Figura 61. Diagrama 6.14.20: Actividades con objetos — CUS-015: Configurar parámetros del algoritmo de recomendación](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-015_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-015_actividades.puml).
+
+### 6.3.2.21. CUS-016 — Gestionar auditoría de eventos de seguridad
+
+**Figura 62. Diagrama 6.14.21: Actividades con objetos — CUS-016: Gestionar auditoría de eventos de seguridad**
+
+![Figura 62. Diagrama 6.14.21: Actividades con objetos — CUS-016: Gestionar auditoría de eventos de seguridad](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-016_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-016_actividades.puml).
+
+### 6.3.2.22. CUS-017 — Configurar ambientes físicos y virtuales
+
+**Figura 63. Diagrama 6.14.22: Actividades con objetos — CUS-017: Configurar ambientes físicos y virtuales**
+
+![Figura 63. Diagrama 6.14.22: Actividades con objetos — CUS-017: Configurar ambientes físicos y virtuales](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-017_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-017_actividades.puml).
+
+### 6.3.2.23. CUS-020 — Gestionar catálogo curricular y asignaturas
+
+**Figura 64. Diagrama 6.14.23: Actividades con objetos — CUS-020: Gestionar catálogo curricular y asignaturas**
+
+![Figura 64. Diagrama 6.14.23: Actividades con objetos — CUS-020: Gestionar catálogo curricular y asignaturas](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-020_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-020_actividades.puml).
+
+### 6.3.2.24. CUS-022 — Configurar parámetros de corte y penalización
+
+**Figura 65. Diagrama 6.14.24: Actividades con objetos — CUS-022: Configurar parámetros de corte y penalización**
+
+![Figura 65. Diagrama 6.14.24: Actividades con objetos — CUS-022: Configurar parámetros de corte y penalización](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-022_actividades.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-022_actividades.puml).
 
 ## 6.3.3. Diagramas de Secuencia del Sistema (Fase de Diseño)
 
-### Presentación de los Diagramas de Secuencia en Fase de Diseño
-
-En la presente **Fase de Diseño de Software**, los diagramas de secuencia formalizan el comportamiento dinámico, la sincronización de procesos y el orden cronológico estricto de los mensajes entre componentes para los **24 casos de uso canónicos** (`CUS-001` a `CUS-024`) del Sistema Web P2P de Mentorías Universitarias de la EPIS-UPT, distribuidos a través de sus **8 módulos arquitectónicos** (`MOD-01` a `MOD-08`).
-
-Cada diagrama desglosa de manera exhaustiva las responsabilidades y mensajes a través de las capas técnicas del sistema:
-1. **Actores del Sistema:** Estudiante Mentoreado (`UserRole.mentoreado`), Estudiante Mentor (`UserRole.mentor`), Administrador Institucional (`UserRole.administrador`), Director de Escuela EPIS, Coordinador Académico/Curricular, Comisión de Acreditación ICACIT, y Procesos en Segundo Plano (`SchedulerWorker` / Celery / APScheduler).
-2. **Componente de Presentación / Vista React (`.tsx`):** Vistas SPA construidas con React 18, TypeScript y Tailwind CSS (`LoginOtpView.tsx`, `ConsentModalView.tsx`, `AdminDashboardView.tsx`, `OfferPublishView.tsx`, `ProfileAvailabilityView.tsx`, `CurriculumCatalogView.tsx`, `RecommendationFeedView.tsx`, `BookingModalView.tsx`, `StudentBookingsView.tsx`, `MentorSessionsView.tsx`, `SessionAttendanceView.tsx`, `BitacoraFormView.tsx`, `HistorySessionsView.tsx`, `CertificateView.tsx`, `GamificationView.tsx`, `NotificationBell.tsx`, `AnalyticsDashboardView.tsx`, `RetentionDashboardView.tsx`, `AuditLogView.tsx`, `SystemSettingsView.tsx`, `AdminCurriculumView.tsx`).
-3. **Servicio y Adaptador Cliente (`.ts`):** Clientes HTTP tipados basados en Axios/Fetch (`authService.ts`, `consentService.ts`, `roleService.ts`, `offerService.ts`, `profileService.ts`, `curriculumService.ts`, `recommendationService.ts`, `bookingService.ts`, `attendanceService.ts`, `bitacoraService.ts`, `historyService.ts`, `certificateService.ts`, `gamificationService.ts`, `notificationService.ts`, `analyticsService.ts`, `auditService.ts`, `configService.ts`).
-4. **Controlador y Rutas FastAPI (`.py`):** Endpoints RESTful en `app/api/v1/endpoints/` (`auth.py`, `consent.py`, `roles.py`, `offers.py`, `profiles.py`, `curriculum.py`, `recommendations.py`, `bookings.py`, `quorum.py`, `attendance.py`, `bitacora.py`, `history.py`, `certificates.py`, `gamification.py`, `notifications.py`, `analytics.py`, `audit.py`, `config.py`), con validación de esquemas Pydantic y autorización RBAC vía tokens JWT criptográficos (HS256).
-5. **Servicio de Lógica de Negocio Backend (`.py`):** Capa de servicios (`auth_service.py`, `consent_service.py`, `role_service.py`, `offer_service.py`, `profile_service.py`, `curriculum_service.py`, `recommendation_service.py`, `booking_service.py`, `simulation_service.py`, `attendance_service.py`, `bitacora_service.py`, `history_service.py`, `certificate_service.py`, `reputation_service.py`, `notification_service.py`, `analytics_service.py`, `audit_service.py`, `config_service.py`).
-6. **Persistencia Relacional PostgreSQL / Repositorio (SQLAlchemy ORM / Cerrojos):** Modelos de datos en Supabase/PostgreSQL con control estricto de concurrencia (`SELECT ... FOR UPDATE`, `SET LOCAL lock_timeout = '5.0s'`, transacciones ACID `db.begin()` / `db.commit()` / `db.rollback()`, políticas RLS e integridad referencial).
-7. **Servicios Externos:** Servidor SMTP institucional de la Universidad Privada de Tacna (`EmailService`), generación de documentos PDF oficiales y canales WebSockets / Server-Sent Events (SSE).
-
-### Diagrama 6.15: Diagrama de Secuencia General del Ciclo Transaccional de Mentorías
-
-El diagrama general de secuencia formaliza la visión holística de los flujos temporales y de sincronización entre capas técnicas para el proceso transaccional neurálgico de la plataforma: la orquestación concurrente de Reserva de Cupos (`CUS-004`), Ratificación de Asistencia antes de $T-24	ext{ h}$ (`CUS-024`), y Corte Automatizado de Quórum en $T-24	ext{ h}$ (`CUS-023`) con resolución de contingencia del mentor (`CUS-007`).
-
-**Figura 66. Diagrama de Secuencia General del Ciclo Transaccional de Mentorías**
-
-![Figura 66. Diagrama de Secuencia General del Ciclo Transaccional de Mentorías](docs/diseño/diagramas/srs/img/diag_066_sec633_seq_general_integracion.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15: Diagrama de Secuencia General del Ciclo Transaccional de Mentorías
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title
-Diagrama 6.15: Diagrama de Secuencia General del Ciclo de Reserva, Ratificación y Quórum
-Sistema Web P2P - EPIS UPT
-end title
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado" as User
-participant "Vista React (SPA)\n(BookingModal / StudentBookings)" as UI
-participant "Adaptador Cliente\n(bookingService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/bookings.py)" as API
-participant "Servicio Backend\n(booking_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-participant "Planificador Cron\n(Celery / SchedulerWorker)" as Cron
-participant "Servicio Email\n(SMTP UPT)" as Mail
-actor "Estudiante Mentor" as Mentor
-
-== 1. Reserva Concurrente de Cupo (CUS-004) ==
-User -> UI: Clic en "Reservar Cupo" (idSesion)
-activate UI
-UI -> Client: reserveSeat(idSesion)
-activate Client
-Client -> API: POST /api/v1/bookings/reserve {"id_sesion": idSesion} [Bearer JWT]
-activate API
-API -> Service: reserve_seat(idSesion, user_email)
-activate Service
-Service -> DB: BEGIN TRANSACTION
-activate DB
-Service -> DB: SELECT * FROM sesiones_mentoria WHERE id = :idSesion FOR UPDATE OF sesiones_mentoria
-DB --> Service: Registro Sesion (aforo, cupos_ocupados)
-alt Cupos disponibles > 0 y Elegibilidad Validada
-    Service -> DB: INSERT INTO reservas_cupo (id_usuario, id_sesion, estado='PENDIENTE_CONFIRMACION', ticket_hash=SHA256(...))
-    Service -> DB: UPDATE sesiones_mentoria SET cupos_ocupados = cupos_ocupados + 1 WHERE id = :idSesion
-    Service -> DB: COMMIT
-    DB --> Service: Transacción confirmada
-    Service --> API: BookingResponseDTO {idReserva, estado: 'PENDIENTE_CONFIRMACION'}
-    API --> Client: HTTP 201 Created {idReserva, estado: 'PENDIENTE_CONFIRMACION'}
-    Client --> UI: Comprobante provisional
-    UI --> User: Muestra confirmación y plazo hasta T-24h
-else Conflicto de aforo o estudiante no elegible
-    Service -> DB: ROLLBACK
-    Service --> API: Lanza HTTPException(409, "Aforo agotado o colisión concurrente")
-    API --> Client: HTTP 409 Conflict {"detail": "Aforo agotado"}
-    Client --> UI: Captura error 409
-    UI --> User: Alerta de denegación de reserva
-end
-deactivate DB
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-
-== 2. Ratificación de Asistencia antes de T-24h (CUS-024) ==
-User -> UI: Clic en "Confirmar Asistencia" (idReserva)
-activate UI
-UI -> Client: confirmBooking(idReserva)
-activate Client
-Client -> API: POST /api/v1/bookings/{idReserva}/confirm [Bearer JWT]
-activate API
-API -> Service: confirm_booking(idReserva, user_email)
-activate Service
-Service -> DB: SELECT * FROM reservas_cupo r JOIN sesiones_mentoria s ON r.id_sesion = s.id WHERE r.id = :idReserva
-activate DB
-DB --> Service: Datos Reserva y Sesión
-deactivate DB
-alt Tiempo restante >= 24 horas (now_utc <= s.fecha_inicio - 24h)
-    Service -> DB: UPDATE reservas_cupo SET estado = 'CONFIRMADA', fecha_confirmacion = NOW() WHERE id = :idReserva
-    activate DB
-    Service -> DB: COMMIT
-    DB --> Service: Confirmado
-    deactivate DB
-    Service -> Mail: Despacha ticket digital con código QR de asistencia
-    activate Mail
-    Mail --> Service: Despacho OK
-    deactivate Mail
-    Service --> API: BookingConfirmDTO {estado: 'CONFIRMADA', pase_asistencia: 'PASS-8472'}
-    API --> Client: HTTP 200 OK {estado: 'CONFIRMADA', pase_asistencia: 'PASS-8472'}
-    Client --> UI: Pase digital confirmado
-    UI --> User: Despliega ticket digital y acceso formal
-else Plazo cerrado (now_utc > s.fecha_inicio - 24h)
-    Service --> API: Lanza HTTPException(400, "Ventana de ratificación vencida")
-    API --> Client: HTTP 400 Bad Request {"detail": "Ventana de ratificación vencida"}
-    Client --> UI: Captura error 400
-    UI --> User: Informa revocación reglamentaria
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-
-== 3. Corte Automatizado y Cómputo de Quórum en T-24h (CUS-023) ==
-Cron -> API: Disparo automático de corte de quórum (sesiones a T=24h)
-activate API
-API -> Service: evaluate_all_active_quorums()
-activate Service
-Service -> DB: BEGIN TRANSACTION
-activate DB
-Service -> DB: UPDATE reservas_cupo SET estado = 'NO_CONFIRMADA' WHERE id_sesion = :idSesion AND estado = 'PENDIENTE_CONFIRMACION'
-Service -> DB: SELECT COUNT(*) FROM reservas_cupo WHERE id_sesion = :idSesion AND estado = 'CONFIRMADA'
-DB --> Service: confirmed_count (ej. 4)
-deactivate DB
-
-alt confirmed_count >= 3 (Quórum Reglamentario >= 3 confirmados, RN-05)
-    Service -> DB: UPDATE sesiones_mentoria SET estado = 'CONFIRMADA' WHERE id = :idSesion
-    activate DB
-    Service -> DB: COMMIT
-    DB --> Service: Confirmada
-    deactivate DB
-    Service -> Mail: Notifica realización confirmada al Mentor y a Mentoreados
-    activate Mail
-    Mail --> Service: Correo enviado
-    deactivate Mail
-    Service --> API: QuorumBatchSummaryDTO
-    API --> Cron: HTTP 200 OK (Quórum alcanzado)
-else confirmed_count < 3 (Quórum Insuficiente)
-    Service -> DB: UPDATE sesiones_mentoria SET estado = 'QUORUM_INSUFICIENTE' WHERE id = :idSesion
-    activate DB
-    Service -> DB: COMMIT
-    DB --> Service: Estado contingencia
-    deactivate DB
-    Service -> Mail: Envía alerta urgente de resolución a Mentor (CUS-007)
-    activate Mail
-    Mail --> Mentor: Notificación de contingencia
-    deactivate Mail
-    Service --> API: QuorumAlertDTO
-    API --> Cron: HTTP 200 OK (Alerta emitida)
-
-    Mentor -> UI: Accede a panel de contingencia de sesión
-    activate UI
-    alt Mentor selecciona "Dictar de Todas Formas"
-        Mentor -> UI: Clic "Dictar de Todas Formas"
-        UI -> Client: submitQuorumDecision(idSesion, 'PROCEED')
-        activate Client
-        Client -> API: POST /api/v1/offers/{idSesion}/quorum-decision {"decision": 'PROCEED'}
-        API -> Service: process_quorum_decision(idSesion, 'PROCEED')
-        Service -> DB: UPDATE sesiones_mentoria SET estado = 'CONFIRMADA'
-        activate DB
-        Service -> DB: COMMIT
-        DB --> Service: Sesión confirmada
-        deactivate DB
-        Service -> Mail: Confirma dictado a los inscritos
-        activate Mail
-        Mail --> Service: Mail OK
-        deactivate Mail
-        Service --> API: QuorumDecisionResponseDTO
-        API --> Client: HTTP 200 OK
-        Client --> UI: Dictado confirmado
-        UI --> Mentor: Notificación de éxito
-    else Mentor selecciona "Reprogramar Sesión"
-        Mentor -> UI: Clic "Reprogramar Sesión" con nueva fecha (> 24h)
-        UI -> Client: submitQuorumDecision(idSesion, 'RESCHEDULE', new_start)
-        Client -> API: POST /api/v1/offers/{idSesion}/quorum-decision {"decision": 'RESCHEDULE', ...}
-        API -> Service: process_quorum_decision(idSesion, 'RESCHEDULE', new_start)
-        Service -> DB: UPDATE sesiones_mentoria SET estado = 'PUBLICADA', fecha_inicio = :new_start
-        activate DB
-        Service -> DB: COMMIT
-        DB --> Service: Reprogramada
-        deactivate DB
-        Service -> Mail: Notifica reprogramación a los inscritos
-        activate Mail
-        Mail --> Service: Mail OK
-        deactivate Mail
-        Service --> API: QuorumDecisionResponseDTO
-        API --> Client: HTTP 200 OK
-        Client --> UI: Reprogramación confirmada
-        UI --> Mentor: Sesión reprogramada
-    else Mentor selecciona "Cancelar Sesión"
-        Mentor -> UI: Clic "Cancelar sin Penalización" con justificativo
-        UI -> Client: submitQuorumDecision(idSesion, 'CANCEL', reason)
-        Client -> API: POST /api/v1/offers/{idSesion}/quorum-decision {"decision": 'CANCEL', ...}
-        API -> Service: process_quorum_decision(idSesion, 'CANCEL', reason)
-        Service -> DB: UPDATE sesiones_mentoria SET estado = 'CANCELADA_QUORUM'
-        activate DB
-        Service -> DB: UPDATE reservas_cupo SET estado = 'CANCELADA_SISTEMA' WHERE id_sesion = :idSesion
-        Service -> DB: COMMIT
-        DB --> Service: Cancelada
-        deactivate DB
-        Service -> Mail: Informa anulación solidaria a confirmados
-        activate Mail
-        Mail --> Service: Mail OK
-        deactivate Mail
-        Service --> API: QuorumDecisionResponseDTO
-        API --> Client: HTTP 200 OK
-        Client --> UI: Cancelación confirmada
-        UI --> Mentor: Cancelación registrada
-    end
-    deactivate Client
-    deactivate UI
-end
-deactivate Service
-deactivate API
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-05.
-
-
----
-
-### MOD-01: Seguridad, Autenticación y Gobernanza
-
-#### Diagrama 6.15.1: Diagrama de Secuencia - CUS-001: Iniciar sesión institucional con 2FA
-
-El diagrama de secuencia para `CUS-001` formaliza la interacción temporal y el intercambio de mensajes entre el usuario universitario, la interfaz de autenticación React, el adaptador de cliente, los controladores FastAPI, el servicio de seguridad y correo institucional, y la base de datos relacional siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`), manteniéndola actualizada a la espera de las acciones directas del usuario. Modela con precisión exhaustiva las tres fases del Flujo Normal (solicitud de OTP, verificación de código temporal, y formalización de consentimiento bajo la Ley N° 29733 con emisión de JWT de 8 horas), los dos flujos alternativos (consentimiento previo `A001` y reenvío de OTP `A002`) y los seis flujos de excepción (`E001` a `E006`).
-
-**Figura 67. Diagrama de Secuencia - CUS-001: Iniciar sesión institucional con 2FA**
-
-![Figura 67. Diagrama de Secuencia - CUS-001: Iniciar sesión institucional con 2FA](docs/diseño/diagramas/srs/img/diag_067_sec633_seq_cus001.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.1: Diagrama de Secuencia - CUS-001: Iniciar sesión institucional con 2FA
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.1: Diagrama de Secuencia - CUS-001: Iniciar sesión institucional con 2FA y formalización de consentimiento digital\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Usuario Institucional\n(Estudiante / Mentor / Administrador)" as User
-participant "Vista React\n(LoginOtpView.tsx / ConsentModalView.tsx)" as UI
-participant "Adaptador Cliente\n(authService.ts / consentService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/auth.py / consent.py)" as API
-participant "Servicio Backend\n(auth_service.py / consent_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-participant "Servicio SMTP UPT\n(EmailService)" as SMTP
-
-== Fase 1: Validación de identidad institucional y solicitud de OTP ==
-User -> UI: enter (email: "usuario@upt.pe")
-activate UI
-User -> UI: click ["Continuar"]
-UI -> Client: requestOtp(email)
-activate Client
-Client -> API: POST /api/v1/auth/otp/request {"email": email}
-activate API
-
-API -> API: Valida sintaxis con Pydantic (EmailStr) y comprueba email.endswith("@upt.pe")
-
-alt [E001] Dominio de correo no termina en @upt.pe
-    API --> Client: HTTP 400 Bad Request {"detail": "INVALID_DOMAIN: El acceso está reservado a @upt.pe."}
-    Client -> UI: displayDomainError(400, "INVALID_DOMAIN: El acceso está reservado a @upt.pe.")
-    User -> UI: click ["Corregir Correo"]
-    UI -> UI: resetEmailField()
-else Dominio universitario válido
-    API -> Service: request_otp(email)
-    activate Service
-    Service -> DB: SELECT * FROM usuarios WHERE email = :email AND activo = true
-    activate DB
-    DB --> Service: Registro de usuario (activo)
-    deactivate DB
-
-    alt [E002] Cuenta institucional inactiva o suspendida (activo = false)
-        Service --> API: Lanza HTTPException(403, "ACCOUNT_SUSPENDED")
-        API --> Client: HTTP 403 Forbidden {"detail": "ACCOUNT_SUSPENDED: Su cuenta registra suspensión administrativa."}
-        Client -> UI: displayAccountSuspendedModal(403, "Cuenta inhabilitada por suspensión.")
-        User -> UI: click ["Aceptar"]
-        UI -> UI: resetForm()
-    else Cuenta activa y habilitada
-        Service --> API: Correo verificado y habilitado
-        API --> Client: HTTP 200 OK {"status": "ELIGIBLE"}
-        Client -> UI: displayOtpRequestForm(email, eligible=true)
-    end
-    deactivate Service
-end
-deactivate API
-deactivate Client
-deactivate UI
-
-== Fase 2: Generación criptográfica, despacho SMTP y verificación de código temporal ==
-User -> UI: click ["Solicitar Código de Acceso"]
-activate UI
-UI -> Client: requestOtp(email)
-activate Client
-Client -> API: POST /api/v1/auth/otp/request {"email": email}
-activate API
-API -> Service: generate_and_dispatch_otp(email)
-activate Service
-
-Service -> Service: Genera código seguro (secrets.randbelow(900000) + 100000)
-Service -> Service: Calcula hash criptográfico SHA-256(otp_code)
-Service -> DB: INSERT INTO credenciales_otp (id_usuario, hash_otp, expira_en=NOW()+5m)
-activate DB
-DB --> Service: Confirmación de persistencia (challenge_id)
-deactivate DB
-
-Service -> SMTP: send_otp_email(email, otp_plano)
-activate SMTP
-SMTP --> Service: Despacho SMTP exitoso (HTTP 200 / SMTP OK)
-deactivate SMTP
-
-Service --> API: OTP_SENT exitoso {"challenge_id": id, "expires_in": 300}
-deactivate Service
-API --> Client: HTTP 200 OK {"message": "OTP_SENT", "challengeId": id, "expires_in": 300}
-deactivate API
-Client -> UI: displayOtpModal(challengeId, expiresIn=300)
-deactivate Client
-deactivate UI
-
-opt [A002] Reenvío de código temporal por retraso en buzón (> 60s) o caducidad
-    User -> UI: click ["Reenviar código OTP"]
-    activate UI
-    UI -> Client: resendOtp(challengeId)
-    activate Client
-    Client -> API: POST /api/v1/auth/otp/resend {"challengeId": challengeId}
-    activate API
-    API -> Service: resend_otp(challenge_id)
-    activate Service
-    Service -> DB: UPDATE credenciales_otp SET consumido = true WHERE id = :challenge_id
-    activate DB
-    DB --> Service: Desafío previo invalidado
-    deactivate DB
-    Service -> Service: Genera nueva clave aleatoria de 6 dígitos
-    Service -> SMTP: send_otp_email(email, nuevo_otp)
-    activate SMTP
-    SMTP --> Service: SMTP OK
-    deactivate SMTP
-    Service --> API: OTP_SENT
-    deactivate Service
-    API --> Client: HTTP 200 OK {"message": "OTP_SENT"}
-    deactivate API
-    Client -> UI: displayOtpResentAlert(expiresIn=300)
-    deactivate Client
-    deactivate UI
-end
-
-User -> UI: enter (otpCode: "123456")
-activate UI
-User -> UI: click ["Verificar e Ingresar"]
-UI -> Client: verifyOtp(challengeId, otpCode)
-activate Client
-Client -> API: POST /api/v1/auth/otp/verify {"challengeId": challengeId, "otp": otpCode}
-activate API
-API -> Service: verify_otp(challenge_id, otpCode)
-activate Service
-
-Service -> DB: SELECT * FROM credenciales_otp WHERE id = :challenge_id AND consumido = false
-activate DB
-DB --> Service: Registro OTP persistido
-deactivate DB
-
-alt [E003] Código temporal OTP incorrecto
-    Service -> DB: UPDATE credenciales_otp SET intentos_fallidos = intentos_fallidos + 1
-    activate DB
-    DB --> Service: Actualizado
-    deactivate DB
-    Service --> API: Lanza HTTPException(400, "INVALID_OTP")
-    API --> Client: HTTP 400 Bad Request {"detail": "INVALID_OTP: El código no coincide."}
-    Client -> UI: displayOtpError(400, "INVALID_OTP: Código erróneo. Le quedan X intentos")
-    User -> UI: click ["Reintentar"]
-    UI -> UI: clearOtpInputs()
-else [E004] Código temporal OTP expirado (NOW() > expira_en)
-    Service --> API: Lanza HTTPException(400, "EXPIRED_OTP")
-    API --> Client: HTTP 400 Bad Request {"detail": "EXPIRED_OTP: El código ha caducado por límite de 5 min."}
-    Client -> UI: displayOtpExpiredAlert(400, "EXPIRED_OTP: Código caducado.")
-    User -> UI: click ["Solicitar Nuevo Código"]
-    UI -> UI: resetOtpForm()
-else [E005] Bloqueo temporal por exceso de intentos (intentos_fallidos >= 3)
-    Service -> DB: UPDATE usuarios SET bloqueado_hasta = NOW() + INTERVAL '15 MINUTES'
-    activate DB
-    DB --> Service: Usuario bloqueado
-    deactivate DB
-    Service --> API: Lanza HTTPException(429, "MAX_ATTEMPTS_EXCEEDED")
-    API --> Client: HTTP 429 Too Many Requests {"detail": "MAX_ATTEMPTS_EXCEEDED: Acceso bloqueado por 15 minutos."}
-    Client -> UI: displayBlockedSecurityModal(429, "Acceso bloqueado por 15 minutos.")
-    User -> UI: click ["Volver al Inicio"]
-    UI -> UI: redirectToInitialLogin()
-else Código válido y vigente
-    Service -> DB: UPDATE credenciales_otp SET consumido = true WHERE id = :challenge_id
-    activate DB
-    DB --> Service: Desafío invalidado
-    deactivate DB
-    Service --> API: OTP validado exitosamente {"temp_token": temp_token}
-    deactivate Service
-    API --> Client: HTTP 200 OK {"temp_token": temp_token}
-    deactivate API
-    Client -> UI: displayConsentOrProceed(temp_token)
-    deactivate Client
-    deactivate UI
-end
-
-== Fase 3: Formalización de consentimiento legal digital y emisión de sesión ==
-UI -> Client: getConsentStatus(email)
-activate UI
-activate Client
-Client -> API: GET /api/v1/consent/status?email={email}
-activate API
-API -> Service: get_consent_status(email)
-activate Service
-Service -> DB: SELECT * FROM consentimientos_legales WHERE email = :email AND revocado = false
-activate DB
-DB --> Service: Registro de consentimiento
-deactivate DB
-
-alt [A001] Acceso recurrente con consentimiento formalizado previo (has_consented = true)
-    Service -> Service: create_access_token(sub=email, roles=[UserRole], exp=8h)
-    Service --> API: TokenJWT_Firmado + Perfil
-    API --> Client: HTTP 200 OK {"access_token": token, "token_type": "Bearer", "user": user}
-    Client -> UI: displaySessionDashboard(token, user)
-    UI -> UI: localStorage.setItem('auth_token', token)
-    UI --> User: displaySuccessSessionNotification
-else Primer acceso sin consentimiento legal formalizado
-    Service --> API: Requiere consentimiento {"requires_consent": true, "temp_token": temp_token}
-    API --> Client: HTTP 200 OK {"requires_consent": true}
-    Client -> UI: renderConsentModal(Ley 29733)
-
-    alt [E006] Rechazo voluntario del consentimiento informado
-        User -> UI: click ["Declinar y Salir"]
-        UI -> UI: displayMandatoryConsentWarning()
-        User -> UI: click ["Confirmar Salida"]
-        UI -> UI: purgeSessionAndReset()
-    else Aceptación de términos legales
-        User -> UI: selectCheckbox ["He leído y acepto los términos..."]
-        User -> UI: click ["Aceptar y Continuar"]
-        UI -> Client: acceptConsent(user_id, version="2026-II-v1.0")
-        activate Client
-        Client -> API: POST /api/v1/consent/accept {"version": "2026-II-v1.0"}
-        activate API
-        API -> Service: register_consent(email, ip, user_agent)
-        activate Service
-        Service -> DB: INSERT INTO consentimientos_legales (usuario_id, ip, user_agent, version, fecha_registro) VALUES (...)
-        activate DB
-        DB --> Service: Registro inmutable persistido
-        deactivate DB
-
-        Service -> Service: create_access_token(sub=email, roles=[UserRole], exp=8h)
-        Service --> API: TokenJWT_Firmado + Perfil
-        deactivate Service
-        API --> Client: HTTP 200 OK {"access_token": token, "token_type": "Bearer", "user": user}
-        deactivate API
-        Client -> UI: displaySessionDashboard(token, user)
-        deactivate Client
-
-        UI -> UI: localStorage.setItem('auth_token', token)
-        UI -> UI: Actualiza estado global de autenticación en App.tsx
-        UI --> User: displaySuccessSessionNotification
-    end
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-001.
-
----
-
-#### Diagrama 6.15.2: Diagrama de Secuencia - CUS-010: Gestionar asignación de roles de usuario
-
-El diagrama de secuencia para `CUS-010` modela la gestión y administración de roles de usuario por parte de la Dirección de Escuela y administradores institucionales siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Desglosa los participantes en capas: Autoridad Administradora, `AdminDashboardView.tsx`, `roleService.ts`, `roles.py`, `role_service.py` y PostgreSQL. Abarca la consulta de nómina paginada, la búsqueda de usuarios (con flujo alternativo `A001`), la verificación de autorización RBAC (`E001`), la tolerancia a fallos de persistencia (`E002`), la prohibición de conjuntos de roles vacíos (`E003`) y la protección de gobernanza contra auto-revocación del rol Administrador (`E004`).
-
-**Figura 68. Diagrama de Secuencia - CUS-010: Gestionar asignación de roles de usuario**
-
-![Figura 68. Diagrama de Secuencia - CUS-010: Gestionar asignación de roles de usuario](docs/diseño/diagramas/srs/img/diag_068_sec633_seq_cus010.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.2: Diagrama de Secuencia - CUS-010: Gestionar asignación de roles de usuario
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.2: Diagrama de Secuencia - CUS-010: Gestionar asignación y revocación de roles institucionales de usuario\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Autoridad Institucional\n(Administrador / Director EPIS)" as Admin
-participant "Vista React\n(AdminDashboardView.tsx)" as UI
-participant "Adaptador Cliente\n(roleService.ts / ApiRoleAdapter)" as Client
-participant "Controlador FastAPI\n(endpoints/roles.py)" as API
-participant "Servicio Backend\n(role_service.py / RoleService)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Acceso al panel administrativo y consulta de nómina de usuarios ==
-Admin -> UI: click ["Gestión de Roles"]
-activate UI
-UI -> Client: listUsers() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/roles/users
-activate API
-
-API -> API: require_admin_role(current_user): valida JWT y claim roles conteniendo 'administrador'
-
-alt [E001] Privilegios administrativos insuficientes (rol no administrador)
-    API --> Client: HTTP 403 Forbidden {"detail": "FORBIDDEN: Se requieren privilegios de Administrador."}
-    Client -> UI: displayAccessDenied(403, "Acceso Restringido")
-    Admin -> UI: click ["Entendido"]
-    UI -> UI: redirectToAuthorizedView()
-else [E002] Error de conexión o timeout en base de datos
-    API -> Service: list_users()
-    activate Service
-    Service -> DB: SELECT u.id, u.email, array_agg(r.nombre) FROM usuarios u...
-    activate DB
-    DB --> Service: Timeout / Conexión rechazada
-    deactivate DB
-    Service --> API: Lanza OperationalError
-    deactivate Service
-    API --> Client: HTTP 503 Service Unavailable {"detail": "SERVICE_UNAVAILABLE: No se pudo conectar a BD."}
-    Client -> UI: displayServiceUnavailable(503)
-    Admin -> UI: click ["Reintentar Carga"]
-    UI -> Client: listUsers()
-else Token válido y conexión activa
-    API -> Service: list_users()
-    activate Service
-    Service -> DB: SELECT u.id, u.email, u.nombres, u.apellidos, array_agg(r.nombre) AS roles\nFROM usuarios u LEFT JOIN roles_usuarios ru ON u.id = ru.id_usuario\nLEFT JOIN roles r ON ru.id_rol = r.id GROUP BY u.id
-    activate DB
-    DB --> Service: Nómina de usuarios con roles asignados
-    deactivate DB
-    Service --> API: UserRoleListResponseDTO
-    deactivate Service
-    API --> Client: HTTP 200 OK UserRoleListResponseDTO
-    Client -> UI: displayUserTable(users)
-end
-deactivate API
-deactivate Client
-deactivate UI
-
-== Fase 2: Búsqueda y selección de usuario para modificación ==
-Admin -> UI: enter (query: "2020-119001" o "estudiante@upt.pe")
-activate UI
-Admin -> UI: click ["Buscar"]
-UI -> Client: searchUsers(query)
-activate Client
-Client -> API: GET /api/v1/roles/users?query={query}
-activate API
-API -> Service: search_users(query)
-activate Service
-Service -> DB: SELECT u.* FROM usuarios u WHERE email ILIKE :q OR codigo ILIKE :q
-activate DB
-DB --> Service: Resultados coincidentes
-deactivate DB
-Service --> API: Nómina filtrada
-deactivate Service
-API --> Client: HTTP 200 OK
-deactivate API
-Client -> UI: displaySearchResults(results)
-deactivate Client
-
-alt [A001] Búsqueda sin coincidencias en el padrón institucional
-    UI -> UI: displayNoResultsMessage()
-    Admin -> UI: click ["Limpiar Búsqueda"]
-    UI -> UI: resetSearchAndReload()
-else Usuario localizado
-    UI -> UI: highlightUserRow(targetUser)
-    Admin -> UI: click ["Modificar Roles"]
-    UI -> UI: openRoleAssignmentModal(targetUser, currentRoles)
-end
-deactivate UI
-
-== Fase 3: Modificación atómica de roles y registro de auditoría ==
-Admin -> UI: toggleRoles (assign: 'mentor')
-activate UI
-Admin -> UI: click ["Guardar Asignación"]
-UI -> Client: assignRoles(target_user_id, selected_roles)
-activate Client
-Client -> API: POST /api/v1/roles/assign {"user_id": target_id, "roles": selected_roles}
-activate API
-
-API -> Service: assign_roles(admin_id, target_user_id, selected_roles)
-activate Service
-
-alt [E003] Intento de dejar al usuario sin ningún rol asignado (len(selected_roles) == 0)
-    Service --> API: Lanza HTTPException(400, "EMPTY_ROLE_SET_PROHIBITED")
-    API --> Client: HTTP 400 Bad Request {"detail": "EMPTY_ROLE_SET_PROHIBITED: Todo usuario debe tener al menos un rol."}
-    Client -> UI: displayEmptyRolesError(400, "Todo usuario debe tener al menos un rol.")
-    Admin -> UI: selectRoleCheckbox ('mentoreado')
-    UI -> UI: enableSaveButton()
-else [E004] Intento de auto-revocación del rol Administrador (target_id == current_user_id)
-    Service --> API: Lanza HTTPException(400, "CANNOT_REVOKE_OWN_ADMIN")
-    API --> Client: HTTP 400 Bad Request {"detail": "CANNOT_REVOKE_OWN_ADMIN: No puede auto-revocarse el rol Administrador."}
-    Client -> UI: displaySelfRevocationError(400, "No puede auto-revocarse el rol Administrador.")
-    Admin -> UI: click ["Restablecer Selección"]
-    UI -> UI: resetAdminCheckbox()
-else Asignación válida y conforme a RBAC
-    Service -> DB: BEGIN TRANSACTION
-    activate DB
-    Service -> DB: DELETE FROM roles_usuarios WHERE id_usuario = :target_id
-    Service -> DB: INSERT INTO roles_usuarios (id_usuario, id_rol) VALUES (:target_id, :rol_id)...
-    Service -> DB: INSERT INTO auditoria_admin (admin_id, target_user_id, accion='ROLE_CHANGE', ip, fecha) VALUES (...)
-    Service -> DB: COMMIT
-    DB --> Service: Transacción ACID confirmada exitosamente
-    deactivate DB
-
-    Service --> API: RoleAssignResponseDTO {"success": true, "updated_roles": selected_roles}
-    API --> Client: HTTP 200 OK RoleAssignResponseDTO
-    Client -> UI: displayRoleUpdateSuccess(updated_roles)
-
-    UI -> UI: updateTableInMemory()
-    UI -> UI: closeAssignmentModal()
-    UI --> Admin: displaySuccessNotification
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-010.
-
-
----
-
-### MOD-02: Ofertas de Mentoría y Espacios
-
-#### Diagrama 6.15.3: Diagrama de Secuencia - CUS-006: Publicar oferta de mentoría académica
-
-El diagrama de secuencia para `CUS-006` formaliza la programación y publicación de sesiones de mentoría académica por parte de un mentor acreditado siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`interface : UI`), reflejando que la interfaz se actualiza y permanece a la espera de las acciones directas del estudiante mentor. Modela la interacción entre el Estudiante Mentor, la interfaz React (`OfferPublishView.tsx`), los clientes HTTP (`offerService.ts` / `apiClient.ts`), los endpoints FastAPI (`endpoints/curriculum.py` y `endpoints/offers.py`), los servicios de lógica de negocio (`CurriculumService` y `OfferService`) y PostgreSQL. Abarca la recuperación de temas curriculares silábicos, la verificación criptográfica del token JWT (`RN-01`, `E005`), la validación de mérito académico y rol habilitado (`RN-03`, `E004`), la comprobación de antelación mínima de 24 horas (`RN-04`, `E002`), el aforo reglamentario (exactamente 10 presencial o 20 virtual, `RN-05`, `E003`) y la creación transaccional atómica de la entidad `SesionMentoria` en estado `PUBLICADA`.
-
-**Figura 69. Diagrama 69**
-
-![Figura 69. Diagrama 69](docs/diseño/diagramas/srs/img/diag_069_sec633_seq_item_69.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 69: Diagrama UML
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.3: Diagrama de Secuencia - CUS-006: Publicar oferta de mentoría académica\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-participant "interface : UI\n(OfferPublishView.tsx)" as UI
-participant "clientAdapter : Client\n(offerService.ts / apiClient.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/offers.py)" as API
-participant "Servicio Backend\n(offer_service.py / OfferService)" as Service
-database "postgresDB : Database\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Configuración de la sesión y selección curricular ==
-Mentor -> UI: selectCourse(selectedCourseId)
-activate UI
-UI -> Client: fetchCourseDetail(selectedCourseId)
-activate Client
-Client -> API: GET /api/v1/curriculum/courses/{id}
-activate API
-API -> Service: get_course_by_id(id)
-activate Service
-Service -> DB: SELECT * FROM asignaturas WHERE id_asignatura = :id\nSELECT * FROM temas_curriculares WHERE id_asignatura = :id
-activate DB
-DB --> Service: Asignatura y lista de temas silábicos (Topic[])
-deactivate DB
-Service --> API: CourseDetailResponse
-deactivate Service
-API --> Client: HTTP 200 OK CourseDetailResponse
-deactivate API
-Client -> UI: displayTopicsAndForm(temas, defaultCapacity, suggestedSpace)
-deactivate Client
-deactivate UI
-
-== Fase 2: Ingreso de parámetros, validación de reglas de aforo y antelación ==
-Mentor -> UI: enter (topicId, startDateTime, duration, modality, assignedSpace)
-activate UI
-Mentor -> UI: click ["Verificar y Publicar"]
-UI -> UI: validateOfferPayload(payload)
-
-alt [E001] Campos obligatorios incompletos o sintaxis inválida
-    UI -> UI: displayValidationErrors(fieldErrors)
-    Mentor -> UI: enterMissingFields(payload)
-    Mentor -> UI: click ["Verificar y Publicar"]
-else Formulario válido en cliente
-    UI -> Client: publishOffer(payload: PublishOfferPayload)
-    activate Client
-    Client -> API: POST /api/v1/offers PublishOfferPayload [Bearer JWT]
-    activate API
-    API -> API: _extract_caller_and_admin_status(authorization, payload.mentor_email)
-
-    alt [E005] Discrepancia de identidad o suplantación de mentor
-        API --> Client: HTTP 403 Forbidden {"detail": "No tiene autorización para publicar ofertas en nombre de otro usuario."}
-        Client -> UI: displaySecurityError(403, "No tiene autorización para publicar ofertas en nombre de otro usuario.")
-    else Identidad de mentor verificada
-        API -> Service: publish_offer(db, payload, caller_email, is_admin)
-        activate Service
-
-        Service -> Service: validate_mentor_eligibility(db, effective_email)
-        Service -> DB: SELECT * FROM usuario_roles ur JOIN roles r ON ur.id_rol = r.id_rol\nWHERE ur.email = :email AND ur.activo = true AND r.nombre_rol IN ('mentor', 'administrador')
-        activate DB
-        DB --> Service: Roles del usuario y perfil académico (ciclo_actual)
-        deactivate DB
-
-        alt [E004] Mentor no elegible por ciclo insuficiente o falta de rol (RN-03)
-            Service --> API: Lanza HTTPException(403, "Infracción de RN-03: Solo los estudiantes habilitados con rol de mentor (ciclo >= VII)...")
-            API --> Client: HTTP 403 Forbidden {"detail": "Infracción de RN-03: Solo los estudiantes habilitados..."}
-            Client -> UI: displayEligibilityError(403, "Infracción de RN-03: Solo los estudiantes habilitados con rol de mentor...")
-        else Mentor acreditado (ciclo >= VII)
-            Service -> Service: calculate_advance_hours(payload.fecha_inicio)
-
-            alt [E002] Incumplimiento de antelación mínima de 24 horas (fecha_inicio <= now_utc + 24h)
-                Service --> API: Lanza HTTPException(400, "Infracción de RN-04: Toda mentoría debe publicarse con una antelación superior a 24 horas...")
-                API --> Client: HTTP 400 Bad Request {"detail": "Infracción de RN-04: Toda mentoría debe publicarse..."}
-                Client -> UI: displayAdvanceTimeError(400, "Infracción de RN-04: Toda mentoría debe publicarse con antelación > 24h")
-            else [E003] Aforo no conforme con la modalidad (aforo != 10 presencial o != 20 virtual)
-                Service --> API: Lanza HTTPException(400, "Infracción de RN-05: El aforo reglamentario...")
-                API --> Client: HTTP 400 Bad Request {"detail": "Infracción de RN-05: El aforo reglamentario..."}
-                Client -> UI: displayCapacityError(400, "Infracción de RN-05: El aforo reglamentario...")
-            else Parámetros de mérito, aforo y antelación válidos
-                == Fase 3: Persistencia transaccional de la oferta y confirmación en cliente ==
-                Service -> DB: sesion_db = SesionMentoria(codigo_sesion=code, mentor_email=..., estado='PUBLICADA', ...)
-                Service -> DB: db.add(sesion_db)\ndb.commit()\ndb.refresh(sesion_db)
-                activate DB
-                DB --> Service: Transacción confirmada (id_sesion, codigo_sesion='SES-XXXX')
-                deactivate DB
-
-                Service --> API: PublishOfferResponse (id_oferta=..., codigo_sesion='SES-XXXX', estado='PUBLICADA')
-                API --> Client: HTTP 201 Created PublishOfferResponse
-                Client -> UI: showSuccessScreen(codigo_sesion='SES-XXXX', estado='PUBLICADA')
-                UI --> Mentor: displayPublishedConfirmation
-            end
-        end
-        deactivate Service
-    end
-    deactivate API
-    deactivate Client
-end
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-006.
-
----
-
-#### Diagrama 6.15.4: Diagrama de Secuencia - CUS-008: Consultar disponibilidad de espacios y recursos
-
-El diagrama de secuencia para `CUS-008` modela la consulta de disponibilidad de infraestructura física de la EPIS (aulas, laboratorios y salas de estudio) antes de programar sesiones presenciales siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Detalla la interacción entre el Mentor, la interfaz de usuario, `offerService.ts`, el endpoint `GET /api/v1/offers/spaces/availability`, `offer_service.py` y las tablas `aulas` y `sesiones_mentoria`. Incorpora la restricción de horario universitario de 08:00 a 20:00 (`RN-07`, `E001`), la tolerancia a fallos de persistencia (`E002`) y la conmutación guiada hacia modalidad virtual (`A001`) ante saturación de espacios físicos.
-
-**Figura 70. Diagrama de Secuencia - CUS-008: Consultar disponibilidad de espacios y recursos**
-
-![Figura 70. Diagrama de Secuencia - CUS-008: Consultar disponibilidad de espacios y recursos](docs/diseño/diagramas/srs/img/diag_070_sec633_seq_cus008.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.4: Diagrama de Secuencia - CUS-008: Consultar disponibilidad de espacios y recursos
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.4: Diagrama de Secuencia - CUS-008: Consultar disponibilidad de espacios físicos y aulas de la EPIS\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-participant "Vista React\n(OfferPublishView.tsx / SpacesModal)" as UI
-participant "Adaptador Cliente\n(offerService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/offers.py)" as API
-participant "Servicio Backend\n(offer_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Definición de criterios temporales y despacho de consulta ==
-Mentor -> UI: enter (date, startTime, endTime)
-activate UI
-Mentor -> UI: click ["Consultar Aulas Disponibles"]
-UI -> Client: checkSpaceAvailability(date, startTime, endTime)
-activate Client
-
-Client -> API: GET /api/v1/offers/spaces/availability?date={date}&start_time={start_time}&end_time={end_time} [Bearer JWT]
-activate API
-API -> Service: check_space_availability(date, start_time, end_time)
-activate Service
-
-alt [E001] Horario fuera de la jornada institucional (fuera del intervalo 08:00 - 20:00, RN-07)
-    Service --> API: Lanza HTTPException(400, "OPERATIONAL_HOURS_VIOLATION")
-    API --> Client: HTTP 400 Bad Request {"detail": "OPERATIONAL_HOURS_VIOLATION: Operación sólo entre 08:00 y 20:00 horas."}
-    Client -> UI: displayOperationalHoursError(400, "OPERATIONAL_HOURS_VIOLATION")
-    Mentor -> UI: enter (correctedStartTime, correctedEndTime)
-    Mentor -> UI: click ["Consultar Aulas Disponibles"]
-else Rango horario reglamentario válido
-    == Fase 2: Verificación de ocupación en base de datos y renderización de resultados ==
-    alt [E002] Falla de conexión o timeout con repositorio de infraestructura
-        Service -> DB: Conexión y consulta de aulas (timeout)
-        activate DB
-        DB --> Service: Timeout de conexión en PostgreSQL
-        deactivate DB
-        Service --> API: Lanza OperationalError
-        API --> Client: HTTP 503 Service Unavailable {"detail": "INFRASTRUCTURE_UNAVAILABLE: No se pudo verificar disponibilidad."}
-        Client -> UI: displayInfrastructureUnavailable(503)
-        Mentor -> UI: click ["Reintentar Consulta"]
-        UI -> Client: checkSpaceAvailability(date, startTime, endTime)
-    else Conexión exitosa y consulta ejecutada
-        Service -> DB: SELECT a.id, a.codigo, a.capacidad, a.equipamiento FROM aulas a\nWHERE a.activa = true AND a.id NOT IN (\n  SELECT aula_id FROM sesiones_mentoria\n  WHERE fecha = :fecha AND NOT (hora_fin <= :start OR hora_inicio >= :end)\n  AND estado IN ('PUBLICADA', 'CONFIRMADA')\n)
-        activate DB
-        DB --> Service: Lista de aulas disponibles
-        deactivate DB
-        Service --> API: AvailableSpacesResponseDTO
-        API --> Client: HTTP 200 OK AvailableSpacesResponseDTO
-        Client -> UI: displayAvailableSpaces(availableSpaces)
-
-        alt [A001] Aulas físicas agotadas (cero registros libres)
-            UI -> UI: displayNoSpacesAlert()
-            Mentor -> UI: click ["Cambiar a Modalidad Virtual"]
-            UI -> UI: setModalityVirtual(capacity=20, meet=true)
-        else Aulas físicas disponibles
-            Mentor -> UI: selectSpace (selectedSpaceId)
-            Mentor -> UI: click ["Asignar Aula a la Oferta"]
-            UI -> UI: assignSpaceToForm(selectedSpaceId)
-            UI --> Mentor: displaySpaceAssignedConfirmation
-        end
-    end
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-008.
-
-
----
-
-### MOD-03: Perfil del Mentor y Plan de Aprendizaje
-
-#### Diagrama 6.15.5: Diagrama de Secuencia - CUS-005: Gestionar perfil académico y disponibilidad horaria
-
-El diagrama de secuencia para `CUS-005` modela la configuración integral del perfil formativo del estudiante mentor y la administración atómica de su matriz semanal de disponibilidad horaria (lunes a sábado, 08:00 a 20:00) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Desglosa las interacciones entre el Estudiante Mentor, `ProfileAvailabilityView.tsx`, `profileService.ts`, `profiles.py`, `profile_service.py` y PostgreSQL. Modela la consulta inicial de perfil, la validación sintáctica de biografía y bloques, el reemplazo atómico transaccional (`DELETE` + `INSERT` en bloque bajo `db.begin()`), y los flujos de excepción por matriz horaria vacía (`E001`), validación de texto (`E002`) y colisión de concurrencia (`E003`).
-
-**Figura 71. Diagrama de Secuencia - CUS-005: Gestionar perfil académico y disponibilidad horaria**
-
-![Figura 71. Diagrama de Secuencia - CUS-005: Gestionar perfil académico y disponibilidad horaria](docs/diseño/diagramas/srs/img/diag_071_sec633_seq_cus005.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.5: Diagrama de Secuencia - CUS-005: Gestionar perfil académico y disponibilidad horaria
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.5: Diagrama de Secuencia - CUS-005: Gestionar perfil formativo y disponibilidad horaria\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-participant "Vista React\n(ProfileAvailabilityView.tsx)" as UI
-participant "Adaptador Cliente\n(profileService.ts / ApiProfileAdapter)" as Client
-participant "Controlador FastAPI\n(endpoints/profiles.py)" as API
-participant "Servicio Backend\n(profile_service.py / ProfileService)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Consulta del perfil académico y visualización de la matriz horaria ==
-Mentor -> UI: click ["Mi Perfil y Disponibilidad"]
-activate UI
-UI -> Client: getMyProfile() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/profiles/me
-activate API
-API -> Service: get_profile(user_id)
-activate Service
-Service -> DB: SELECT p.*, d.* FROM perfiles_academicos p\nLEFT JOIN disponibilidad_horaria d ON p.id = d.perfil_id\nWHERE p.usuario_id = :uid
-activate DB
-DB --> Service: Perfil formativo y franjas horarias existentes
-deactivate DB
-Service --> API: ProfileResponseDTO
-deactivate Service
-API --> Client: HTTP 200 OK ProfileResponseDTO
-deactivate API
-Client -> UI: displayProfileAndSlots(profile, slots)
-deactivate Client
-deactivate UI
-
-== Fase 2: Edición de datos formativos y selección de bloques de disponibilidad ==
-Mentor -> UI: enter (biografia, materiasDominio)
-activate UI
-Mentor -> UI: toggleSlot (dia="Lunes", franja="08:00-10:00")
-UI -> UI: updateAvailabilityState(slots)
-
-Mentor -> UI: click ["Guardar Cambios y Disponibilidad"]
-UI -> UI: validateProfileData(biografia, slots)
-
-alt [E001] Matriz de disponibilidad horaria semanal vacía (cero bloques marcados)
-    UI -> UI: displayEmptySlotsWarning()
-    Mentor -> UI: toggleSlot (dia="Martes", franja="10:00-12:00")
-    Mentor -> UI: click ["Guardar Cambios y Disponibilidad"]
-else [E002] Biografía excede 500 caracteres o contiene scripts no autorizados
-    UI -> UI: displayBioLengthError()
-    Mentor -> UI: enter (adjustedBiography)
-    Mentor -> UI: click ["Guardar Cambios y Disponibilidad"]
-else Datos válidos en cliente
-    == Fase 3: Persistencia transaccional de disponibilidad y perfil ==
-    UI -> Client: updateProfile(payload)
-    activate Client
-    Client -> API: PUT /api/v1/profiles/me ProfileUpdateRequest [Bearer JWT]
-    activate API
-    API -> Service: update_profile_and_availability(mentor_id, payload)
-    activate Service
-
-    Service -> DB: BEGIN TRANSACTION
-    activate DB
-    Service -> DB: UPDATE perfiles_academicos SET biografia = :bio, materias = :m WHERE usuario_id = :uid
-
-    alt [E003] Conflicto de concurrencia al actualizar perfil (versión obsoleta)
-        DB --> Service: Concurrency Conflict / Row Version Mismatch
-        Service -> DB: ROLLBACK
-        Service --> API: Lanza HTTPException(409, "CONCURRENCY_CONFLICT")
-        API --> Client: HTTP 409 Conflict {"detail": "CONCURRENCY_CONFLICT: Modificado desde otra sesión."}
-        Client -> UI: displayConcurrencyConflict(409)
-        Mentor -> UI: click ["Recargar Perfil"]
-        UI -> Client: getMyProfile()
-    else Transacción atómica exitosa
-        Service -> DB: DELETE FROM disponibilidad_horaria WHERE perfil_id = :pid
-        Service -> DB: INSERT INTO disponibilidad_horaria (perfil_id, dia_semana, hora_inicio, hora_fin) VALUES (:pid, :dia, :hi, :hf)...
-        Service -> DB: COMMIT
-        DB --> Service: Transacción confirmada exitosamente
-        deactivate DB
-
-        Service --> API: ProfileResponseDTO
-        API --> Client: HTTP 200 OK ProfileResponseDTO
-        Client -> UI: displayProfileUpdatedSuccess(profile)
-
-        UI -> UI: updateLocalCache(profile)
-        UI --> Mentor: displayProfileUpdatedConfirmation
-    end
-    deactivate Service
-    deactivate API
-    deactivate Client
-end
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-005.
-
----
-
-#### Diagrama 6.15.6: Diagrama de Secuencia - CUS-021: Explorar catálogo curricular de asignaturas filtro
-
-El diagrama de secuencia para `CUS-021` modela la navegación por el catálogo curricular oficial de la EPIS-UPT, estructurado jerárquicamente por ciclo académico (I al X), asignaturas y temas silábicos con identificación destacada de materias filtro (`RN-11`) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las interacciones entre los estudiantes (mentoreados y mentores), `CurriculumCatalogView.tsx`, `curriculumService.ts`, `curriculum.py`, `curriculum_service.py` y PostgreSQL. Describe la consulta de cursos con manejo de indisponibilidad (`E001`), el filtrado reactivo de materias con flujo alternativo sin coincidencias (`A001`) y la expansión de temarios con derivación directa hacia la reserva o demanda.
-
-**Figura 72. Diagrama de Secuencia - CUS-021: Explorar catálogo curricular de asignaturas filtro**
-
-![Figura 72. Diagrama de Secuencia - CUS-021: Explorar catálogo curricular de asignaturas filtro](docs/diseño/diagramas/srs/img/diag_072_sec633_seq_cus021.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.6: Diagrama de Secuencia - CUS-021: Explorar catálogo curricular de asignaturas filtro
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.6: Diagrama de Secuencia - CUS-021: Explorar catálogo curricular de asignaturas filtro\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado / Mentor" as User
-participant "Vista React\n(CurriculumCatalogView.tsx)" as UI
-participant "Adaptador Cliente\n(curriculumService.ts / ApiCurriculumAdapter)" as Client
-participant "Controlador FastAPI\n(endpoints/curriculum.py)" as API
-participant "Servicio Backend\n(curriculum_service.py / CurriculumService)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Navegación por ciclo académico y selección de asignatura ==
-User -> UI: click ["Catálogo Curricular"]
-activate UI
-UI -> Client: getCourses() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/curriculum/courses
-activate API
-API -> Service: get_courses()
-activate Service
-
-alt [E001] Falla de conexión con el repositorio curricular
-    Service -> DB: SELECT c.*, count(t.id) FROM cursos c...
-    activate DB
-    DB --> Service: Timeout / Conexión rechazada
-    deactivate DB
-    Service --> API: Lanza OperationalError
-    API --> Client: HTTP 503 Service Unavailable {"detail": "CURRICULUM_SERVICE_UNAVAILABLE: Repositorio no disponible."}
-    Client -> UI: displayCurriculumError(503)
-    User -> UI: click ["Reintentar Carga"]
-    UI -> Client: getCourses()
-else Conexión exitosa y consulta de cursos
-    Service -> DB: SELECT c.*, count(t.id) as total_temas FROM cursos c\nLEFT JOIN temas_curriculares t ON c.id = t.curso_id\nWHERE c.activo = true GROUP BY c.id ORDER BY c.ciclo, c.nombre
-    activate DB
-    DB --> Service: Listado jerárquico de asignaturas (ciclos I al X)
-    deactivate DB
-    Service --> API: CourseListResponseDTO
-    API --> Client: HTTP 200 OK CourseListResponseDTO
-    Client -> UI: displayCurriculumGrid(courses)
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-
-== Fase 2: Búsqueda y filtrado interactivo de cursos ==
-User -> UI: enter (filterText: "Algoritmos", ciclo=3)
-activate UI
-UI -> UI: filterCoursesInState(filterText, ciclo)
-
-alt [A001] Búsqueda curricular sin coincidencias
-    UI -> UI: displayNoMatchesPanel()
-    User -> UI: click ["Restablecer Filtros"]
-    UI -> UI: resetFiltersAndRestore()
-else Cursos coincidentes localizados
-    UI -> UI: displayFilteredCourses()
-end
-deactivate UI
-
-== Fase 3: Despliegue de temarios silábicos y vinculación con mentorías ==
-User -> UI: selectCourseCard(courseId)
-activate UI
-UI -> Client: getCourseTopics(courseId)
-activate Client
-Client -> API: GET /api/v1/curriculum/courses/{course_id}/topics
-activate API
-API -> Service: get_topics(course_id)
-activate Service
-Service -> DB: SELECT * FROM temas_curriculares WHERE curso_id = :cid ORDER BY unidad, semana
-activate DB
-DB --> Service: Lista de temas silábicos con ofertas activas asociadas
-deactivate DB
-Service --> API: TopicListResponseDTO
-deactivate Service
-API --> Client: HTTP 200 OK TopicListResponseDTO
-deactivate API
-Client -> UI: displayTopicAccordion(topics)
-deactivate Client
-
-UI -> UI: expandTopicAccordion()
-UI --> User: displayTopicListAccordion
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-021.
-
-
----
-
-### MOD-04: Demanda y Recomendaciones Personalizadas
-
-#### Diagrama 6.15.7: Diagrama de Secuencia - CUS-002: Explorar recomendaciones personalizadas Top-k
-
-El diagrama de secuencia para `CUS-002` formaliza la inferencia algorítmica y la entrega de la cartelera personalizada de sesiones de mentoría Top-k siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las llamadas entre el Estudiante Mentoreado, el componente cliente `RecommendationFeedView.tsx`, el adaptador `recommendationService.ts`, el endpoint FastAPI en `recommendations.py`, el motor algorítmico `recommendation_service.py` y las tablas de PostgreSQL. Incorpora el fallback heurístico por popularidad ("Cold Start" `A001`), la contingencia ante cartelera desierta (`A002`), el tratamiento de errores de cómputo (`E001`) y la derivación transaccional hacia la reserva de cupo (`CUS-004`).
-
-**Figura 73. Diagrama de Secuencia - CUS-002: Explorar recomendaciones personalizadas Top-k**
-
-![Figura 73. Diagrama de Secuencia - CUS-002: Explorar recomendaciones personalizadas Top-k](docs/diseño/diagramas/srs/img/diag_073_sec633_seq_cus002.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.7: Diagrama de Secuencia - CUS-002: Explorar recomendaciones personalizadas Top-k
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.7: Diagrama de Secuencia - CUS-002: Explorar recomendaciones personalizadas Top-k\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as User
-participant "Vista React\n(RecommendationFeedView.tsx)" as UI
-participant "Adaptador Cliente\n(recommendationService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/recommendations.py)" as API
-participant "Servicio Backend\n(recommendation_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-participant "Modal Reserva\n(BookingModalView.tsx)" as BookingModal
-
-== Fase 1: Acceso a la cartelera y solicitud de recomendaciones Top-k ==
-User -> UI: click ["Cartelera de Mentorías"]
-activate UI
-UI -> Client: getTopKRecommendations(limit=6) [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/recommendations/top-k?limit=6
-activate API
-API -> Service: get_top_k_recommendations(user_id, limit=6)
-activate Service
-
-alt [E001] Error interno de cómputo o timeout en base de datos
-    Service --> API: Lanza HTTPException(500, "RECOMMENDER_ENGINE_ERROR")
-    API --> Client: HTTP 500 Internal Server Error {"detail": "RECOMMENDER_ENGINE_ERROR"}
-    Client -> UI: displayRecommenderError(500)
-    User -> UI: click ["Reintentar Cartelera"]
-    UI -> Client: getTopKRecommendations()
-else Motor operativo
-    Service -> DB: SELECT * FROM perfiles_academicos WHERE usuario_id = :uid
-    activate DB
-    DB --> Service: Perfil del estudiante e historial de asignaturas
-    deactivate DB
-
-    alt [A001] Estudiante nuevo sin historial académico (Cold Start Fallback)
-        Service -> DB: SELECT s.* FROM sesiones_mentoria s\nJOIN temas_curriculares t ON s.id_tema = t.id\nJOIN cursos c ON t.curso_id = c.id\nWHERE c.es_filtro = true AND s.estado = 'PUBLICADA' ORDER BY s.aforo_maximo DESC LIMIT 6
-        activate DB
-        DB --> Service: Sesiones populares en cursos filtro
-        deactivate DB
-        Service --> API: FallbackRecommendationDTO (populares)
-        API --> Client: HTTP 200 OK FallbackRecommendationDTO
-        Client -> UI: displayFallbackRecommendations(fallbackList)
-        Mentor -> UI: click ["Configurar Mis Materias"]
-    else Perfil con historial académico activo
-        == Fase 2: Ejecución del algoritmo de emparejamiento y ordenamiento de compatibilidad ==
-        Service -> DB: SELECT s.*, t.titulo, c.nombre, c.es_filtro FROM sesiones_mentoria s\nJOIN temas_curriculares t ON s.id_tema = t.id\nJOIN cursos c ON t.curso_id = c.id\nWHERE s.estado = 'PUBLICADA' AND s.fecha_inicio > NOW() + INTERVAL '24 HOURS'\nAND s.cupos_ocupados < s.aforo_maximo
-        activate DB
-        DB --> Service: Candidatas a mentoría activas
-        deactivate DB
-
-        alt [A002] Cartelera vacía por ausencia de sesiones disponibles (0 ofertas)
-            Service --> API: EmptyListDTO []
-            API --> Client: HTTP 200 OK []
-            Client -> UI: displayEmptyFeedNotification()
-            User -> UI: click ["Registrar Demanda"]
-            UI -> UI: openDemandModal()
-        else Ofertas disponibles
-            Service -> Service: Computa Score = 0.5*Similitud + 0.3*FactorFiltro + 0.2*Urgencia
-            Service -> Service: Ordena descendentemente y toma las 6 mejores
-            Service --> API: TopKRecommendationResponseDTO
-            API --> Client: HTTP 200 OK TopKRecommendationResponseDTO
-            Client -> UI: displayTopKCards(recommendations)
-
-            == Fase 3: Selección de sesión para reserva de cupo ==
-            User -> UI: clickOfferCard ["Reservar Cupo"]
-            UI -> BookingModal: openBookingModal(offer_id, user_id)
-            activate BookingModal
-            BookingModal -> UI: renderBookingModal(offer_id, user_id)
-            deactivate BookingModal
-            UI --> User: displayBookingModalTransfer
-        end
-    end
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-002.
-
----
-
-#### Diagrama 6.15.8: Diagrama de Secuencia - CUS-003: Registrar solicitud de demanda académica
-
-El diagrama de secuencia para `CUS-003` describe el registro de necesidades pedagógicas no atendidas por parte de los estudiantes mentoreados siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción temporal entre el Estudiante Mentoreado, el modal de demanda en `RecommendationFeedView.tsx`, `recommendationService.ts`, el endpoint `POST /api/v1/recommendations/demand`, el servicio `recommendation_service.py` y la tabla `demandas_academicas` en PostgreSQL. Detalla la validación de campos obligatorios (`E001`), la detección y rechazo de solicitudes duplicadas (`E002`), y la persistencia transaccional confirmada con `db.commit()` que actualiza el acumulador de demanda en caché.
-
-**Figura 74. Diagrama de Secuencia - CUS-003: Registrar solicitud de demanda académica**
-
-![Figura 74. Diagrama de Secuencia - CUS-003: Registrar solicitud de demanda académica](docs/diseño/diagramas/srs/img/diag_074_sec633_seq_cus003.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.8: Diagrama de Secuencia - CUS-003: Registrar solicitud de demanda académica
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.8: Diagrama de Secuencia - CUS-003: Registrar solicitud de demanda académica\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as User
-participant "Vista React\n(DemandModalView.tsx)" as UI
-participant "Adaptador Cliente\n(recommendationService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/recommendations.py)" as API
-participant "Servicio Backend\n(recommendation_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Apertura del formulario de demanda y selección temática ==
-User -> UI: click ["Registrar Demanda de Tema"]
-activate UI
-UI -> Client: loadAvailableCoursesAndTopics()
-activate Client
-Client -> API: GET /api/v1/curriculum/courses-with-topics
-activate API
-API -> Service: get_courses_with_topics()
-activate Service
-Service -> DB: SELECT * FROM cursos c JOIN temas_curriculares t ON c.id = t.curso_id
-activate DB
-DB --> Service: Asignaturas y temarios silábicos
-deactivate DB
-Service --> API: CoursesWithTopicsDTO
-deactivate Service
-API --> Client: HTTP 200 OK CoursesWithTopicsDTO
-deactivate API
-Client -> UI: displayDemandForm(coursesWithTopics)
-deactivate Client
-deactivate UI
-
-== Fase 2: Ingreso de preferencias y despacho de solicitud ==
-User -> UI: enter (cursoId, temaId, franjaHoraria, modalidad, comentarios)
-activate UI
-User -> UI: click ["Enviar Solicitud"]
-UI -> UI: validateDemandForm(cursoId, temaId)
-
-alt [E001] Formulario de demanda incompleto (tema o materia omitida)
-    UI -> UI: displayValidationErrors(fieldErrors)
-    User -> UI: enter (missingFields)
-    User -> UI: click ["Enviar Solicitud"]
-else Formulario válido en cliente
-    UI -> Client: createDemand(payload)
-    activate Client
-    Client -> API: POST /api/v1/recommendations/demand DemandCreateRequest [Bearer JWT]
-    activate API
-    API -> Service: create_demand_request(user_id, payload)
-    activate Service
-
-    Service -> DB: SELECT id FROM demandas_academicas\nWHERE estudiante_id = :uid AND tema_id = :tid AND estado = 'PENDIENTE'
-    activate DB
-    DB --> Service: Registro existente o nulo
-    deactivate DB
-
-    alt [E002] Solicitud duplicada de demanda en estado PENDIENTE
-        Service --> API: Lanza HTTPException(409, "DUPLICATE_DEMAND")
-        API --> Client: HTTP 409 Conflict {"detail": "DUPLICATE_DEMAND: Ya mantienes una solicitud activa para este tema."}
-        Client -> UI: displayDuplicateDemandAlert(409)
-        User -> UI: click ["Entendido"]
-        UI -> UI: closeModal()
-    else Demanda no duplicada
-        == Fase 3: Registro transaccional e indexación de demanda grupal ==
-        Service -> DB: BEGIN TRANSACTION
-        activate DB
-        Service -> DB: INSERT INTO demandas_academicas (estudiante_id, tema_id, franja_horaria, modalidad, comentarios, estado='PENDIENTE')\nVALUES (:uid, :tid, :franja, :mod, :com, 'PENDIENTE') RETURNING id
-        Service -> DB: UPDATE acumuladores_demanda SET total_solicitudes = total_solicitudes + 1 WHERE tema_id = :tid
-        Service -> DB: COMMIT
-        DB --> Service: Transacción confirmada (id_demanda)
-        deactivate DB
-
-        Service --> API: DemandResponseDTO {"id": id_demanda, "estado": "PENDIENTE"}
-        API --> Client: HTTP 201 Created DemandResponseDTO
-        Client -> UI: displayDemandCreatedSuccess(id_demanda)
-
-        UI -> UI: closeModal()
-        UI --> User: displayDemandRegisteredConfirmation
-    end
-    deactivate Service
-    deactivate API
-    deactivate Client
-end
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-003.
-
-
----
-
-### MOD-05: Quórum, Confirmación y Cancelaciones
-
-#### Diagrama 6.15.9: Diagrama de Secuencia - CUS-004: Reservar cupo de mentoría académica
-
-El diagrama de secuencia para `CUS-004` formaliza el ciclo transaccional de reserva de cupos con control de aforo y concurrencia crítica bajo PostgreSQL siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela detalladamente las cuatro fases de interacción entre el Estudiante Mentoreado, la interfaz React (`BookingModalView.tsx`), el adaptador `bookingService.ts`, el endpoint `POST /api/v1/bookings/reserve`, el servicio `booking_service.py` y la base de datos relacional. Incluye la adquisición del cerrojo en memoria `_booking_lock`, el bloqueo pesimista de fila `SELECT ... FOR UPDATE OF sesiones_mentoria` con timeout de 5.0s, y los diez flujos de excepción (`E001` a `E010`).
-
-**Figura 75. Diagrama de Secuencia - CUS-004: Reservar cupo de mentoría académica**
-
-![Figura 75. Diagrama de Secuencia - CUS-004: Reservar cupo de mentoría académica](docs/diseño/diagramas/srs/img/diag_075_sec633_seq_cus004.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.9: Diagrama de Secuencia - CUS-004: Reservar cupo de mentoría académica
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.9: Diagrama de Secuencia - CUS-004: Reservar cupo de mentoría académica\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as User
-participant "Vista React\n(BookingModalView.tsx / RecommendationFeedView.tsx)" as UI
-participant "Adaptador Cliente\n(bookingService.ts / ApiBookingAdapter)" as Client
-participant "Controlador FastAPI\n(endpoints/bookings.py)" as API
-participant "Servicio Backend\n(booking_service.py / consent_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Exploración en Cartelera y Apertura del Diálogo Modal ==
-User -> UI: clickOfferCard ["Reservar Cupo"]
-activate UI
-UI -> UI: onSelectOffer: monta BookingModalView.tsx con offer, userEmail
-
-alt [E001] Oferta en cartelera sin vacantes disponibles (available_slots <= 0)
-    UI -> UI: displayCapacityExhaustedWarning()
-    User -> UI: click ["Volver a Cartelera"]
-    UI -> UI: closeModal()
-else [E002] Reserva duplicada activa para el mismo estudiante
-    UI -> Client: checkActiveBooking(offer.id, userEmail)
-    activate Client
-    Client -> API: GET /api/v1/bookings/check-duplicate?session_id={session_id}
-    activate API
-    API -> Service: check_active_booking(session_id, userEmail)
-    activate Service
-    Service -> DB: SELECT id FROM reservas_cupo WHERE id_sesion = :sid AND estudiante_email = :email AND estado IN ('PENDIENTE_CONFIRMACION', 'CONFIRMADA')
-    activate DB
-    DB --> Service: Reserva activa existente
-    deactivate DB
-    Service --> API: ActiveBookingResultDTO {"has_active": true}
-    deactivate Service
-    API --> Client: HTTP 400 Bad Request {"detail": "ALREADY_BOOKED"}
-    deactivate API
-    Client -> UI: displayDuplicateBookingError(400, "ALREADY_BOOKED")
-    deactivate Client
-    User -> UI: click ["Aceptar"]
-    UI -> UI: closeModal()
-else Tarjeta con vacantes y sin duplicidad previa
-    == Fase 2: Verificación de Precondiciones y Reglas de Negocio en Cliente ==
-    User -> UI: click ["Confirmar Reserva"]
-    UI -> UI: setIsSubmitting(true)
-
-    alt [E003] Sesión institucional no autenticada o token JWT expirado
-        UI -> UI: displaySessionExpired()
-        User -> UI: click ["Iniciar Sesión"]
-        UI -> UI: redirectToLoginView()
-    else [E004] Conflicto de rol de mentor (Autoreserva Prohibida: offer.mentor_email === userEmail)
-        UI -> UI: displaySelfBookingError()
-        User -> UI: click ["Cerrar"]
-        UI -> UI: closeModal()
-    else [E005] Ausencia o revocación de consentimiento legal digital Ley N° 29733
-        UI -> Client: getConsentStatus(userEmail)
-        activate Client
-        Client -> API: GET /api/v1/consent/status
-        activate API
-        API --> Client: HTTP 403 Forbidden {"detail": "CONSENT_REQUIRED"}
-        deactivate API
-        Client -> UI: displayConsentRequiredModal()
-        deactivate Client
-        User -> UI: click ["Aceptar y Continuar"]
-        UI -> UI: setConsentAccepted()
-    else Precondiciones en cliente verificadas
-        == Fase 3: Transacción Atómica con Bloqueo Pesimista en Base de Datos ==
-        UI -> Client: reserveSeat(offer.id, userEmail)
-        activate Client
-        Client -> API: POST /api/v1/bookings/reserve {"id_sesion": id, "estudiante_email": email} [Bearer JWT]
-        activate API
-        API -> Service: reserve_seat(session_id, user_email)
-        activate Service
-
-        Service -> Service: _booking_lock.acquire(timeout=5.0)
-
-        alt [E009] Timeout de concurrencia en adquisición de cerrojo (_booking_lock timeout)
-            Service --> API: Lanza HTTPException(503, "DATABASE_BUSY")
-            API --> Client: HTTP 503 Service Unavailable {"detail": "DATABASE_BUSY: Servicio sobrecargado."}
-            Client -> UI: displayDatabaseBusyAlert(503)
-            User -> UI: click ["Reintentar Reserva"]
-            UI -> Client: reserveSeat(offer.id, userEmail)
-        else Cerrojo en memoria adquirido
-            Service -> DB: BEGIN TRANSACTION
-            activate DB
-            Service -> DB: SET LOCAL lock_timeout = '5.0s'
-            Service -> DB: SELECT * FROM sesiones_mentoria WHERE id = :sid FOR UPDATE OF sesiones_mentoria
-            DB --> Service: Fila bloqueada pesimistamente (aforo_maximo, cupos_ocupados, estado)
-
-            alt [E006] Sesión de mentoría inexistente o cancelada concurrentemente
-                Service -> DB: ROLLBACK
-                Service --> API: Lanza HTTPException(404, "SESSION_NOT_FOUND")
-                API --> Client: HTTP 404 Not Found {"detail": "SESSION_NOT_FOUND"}
-                Client -> UI: displaySessionNotFound(404)
-                User -> UI: click ["Volver a Cartelera"]
-                UI -> UI: closeModal()
-            else [E007] Ventana de antelación menor a 24 horas (now_utc > fecha_inicio - 24h, RN-04)
-                Service -> DB: ROLLBACK
-                Service --> API: Lanza HTTPException(400, "RESERVATION_WINDOW_CLOSED")
-                API --> Client: HTTP 400 Bad Request {"detail": "RESERVATION_WINDOW_CLOSED"}
-                Client -> UI: displayReservationWindowClosed(400)
-                User -> UI: click ["Entendido"]
-                UI -> UI: closeModal()
-            else [E008] Aforo agotado en el instante del cerrojo (cupos_ocupados >= aforo_maximo, RN-05)
-                Service -> DB: ROLLBACK
-                Service --> API: Lanza HTTPException(409, "CAPACITY_EXCEEDED")
-                API --> Client: HTTP 409 Conflict {"detail": "CAPACITY_EXCEEDED: Último cupo reservado."}
-                Client -> UI: displayCapacityExceeded(409)
-                User -> UI: click ["Ver Otras Sesiones"]
-                UI -> UI: closeModal()
-            else Condiciones de reserva válidas y aforo garantizado
-                Service -> Service: Genera ticket_hash = SHA256(uid + sid + timestamp)
-                Service -> DB: INSERT INTO reservas_cupo (id_usuario, id_sesion, estado='PENDIENTE_CONFIRMACION', ticket_hash)\nVALUES (:uid, :sid, 'PENDIENTE_CONFIRMACION', :th) RETURNING id
-                Service -> DB: UPDATE sesiones_mentoria SET cupos_ocupados = cupos_ocupados + 1 WHERE id = :sid
-
-                alt [E010] Error inesperado en base de datos al confirmar transacción
-                    DB --> Service: Database Write Error
-                    Service -> DB: ROLLBACK
-                    Service --> API: Lanza HTTPException(500, "TRANSACTION_FAILED")
-                    API --> Client: HTTP 500 Internal Server Error {"detail": "TRANSACTION_FAILED"}
-                    Client -> UI: displayTransactionFailed(500)
-                    User -> UI: click ["Reintentar"]
-                    UI -> Client: reserveSeat(offer.id, userEmail)
-                else Transacción confirmada exitosamente
-                    Service -> DB: COMMIT
-                    DB --> Service: Transacción ACID confirmada
-                    Service -> Service: _booking_lock.release()
-
-                    == Fase 4: Confirmación Provisional y Notificación de Plazo Límite ==
-                    Service --> API: BookingCreateResponseDTO {"id": id_reserva, "estado": "PENDIENTE_CONFIRMACION", "deadline": t_minus_24h}
-                    API --> Client: HTTP 201 Created BookingCreateResponseDTO
-                    Client -> UI: displayBookingSuccessModal(id_reserva, deadline)
-
-                    UI -> UI: setIsSubmitting(false)
-                    User -> UI: click ["Ir a Mis Reservas"]
-                    UI -> UI: unmountBookingModal()
-                    UI --> User: displayStudentBookingsDashboard
-                end
-            end
-            deactivate DB
-        end
-        deactivate Service
-        deactivate API
-        deactivate Client
-    end
-end
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-004.
-
----
-
-#### Diagrama 6.15.10: Diagrama de Secuencia - CUS-024: Ratificar asistencia a sesión de mentoría
-
-El diagrama de secuencia para `CUS-024` formaliza la confirmación obligatoria de asistencia por parte de los estudiantes con reserva en la ventana reglamentaria entre 48 y 24 horas antes del inicio de la sesión (`[T-48h, T-24h]`, `RN-08`) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el Estudiante Mentoreado, el panel `StudentBookingsView.tsx`, `bookingService.ts`, el endpoint `POST /api/v1/bookings/{id}/confirm`, el servicio `booking_service.py` y PostgreSQL. Modela la validación de ventana temporal, la conmutación de estado a `CONFIRMADA`, la emisión del pase digital de asistencia con código alfanumérico y los flujos de excepción por ratificación anticipada (`E001`) o extemporánea (`E002`).
-
-**Figura 76. Diagrama de Secuencia - CUS-024: Ratificar asistencia a sesión de mentoría**
-
-![Figura 76. Diagrama de Secuencia - CUS-024: Ratificar asistencia a sesión de mentoría](docs/diseño/diagramas/srs/img/diag_076_sec633_seq_cus024.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.10: Diagrama de Secuencia - CUS-024: Ratificar asistencia a sesión de mentoría
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.10: Diagrama de Secuencia - CUS-024: Ratificar asistencia obligatoria a sesión de mentoría a T-24h\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as User
-participant "Vista React\n(StudentBookingsView.tsx)" as UI
-participant "Adaptador Cliente\n(bookingService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/bookings.py)" as API
-participant "Servicio Backend\n(booking_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Identificación de reservas pendientes y verificación de ventana temporal ==
-User -> UI: click ["Mis Reservas"]
-activate UI
-UI -> Client: getMyBookings() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/bookings/my-bookings
-activate API
-API -> Service: get_user_bookings(user_email)
-activate Service
-Service -> DB: SELECT r.*, s.fecha_inicio, s.modalidad FROM reservas_cupo r\nJOIN sesiones_mentoria s ON r.id_sesion = s.id WHERE r.estudiante_email = :email
-activate DB
-DB --> Service: Lista de reservas del estudiante
-deactivate DB
-Service --> API: BookingListResponseDTO
-deactivate Service
-API --> Client: HTTP 200 OK BookingListResponseDTO
-deactivate API
-Client -> UI: displayBookingsList(bookings)
-deactivate Client
-
-== Fase 2: Despacho de ratificación y validación de reglas de negocio ==
-User -> UI: clickCardButton ["Confirmar Asistencia"]
-UI -> UI: openConfirmationModal()
-User -> UI: click ["Sí, Confirmo mi Asistencia Definitiva"]
-
-UI -> Client: confirmBooking(bookingId)
-activate Client
-Client -> API: POST /api/v1/bookings/{id}/confirm [Bearer JWT]
-activate API
-API -> Service: confirm_booking(booking_id, user_email)
-activate Service
-
-Service -> DB: SELECT r.*, s.fecha_inicio FROM reservas_cupo r\nJOIN sesiones_mentoria s ON r.id_sesion = s.id\nWHERE r.id = :bid AND r.estudiante_email = :email
-activate DB
-DB --> Service: Datos de reserva y horario de sesión
-deactivate DB
-
-alt [E001] Intento de ratificación anticipada fuera de ventana (now_utc < fecha_inicio - 48h)
-    Service --> API: Lanza HTTPException(400, "CONFIRMATION_NOT_OPEN")
-    API --> Client: HTTP 400 Bad Request {"detail": "CONFIRMATION_NOT_OPEN: La ventana abre 48h antes del inicio."}
-    Client -> UI: displayConfirmationNotOpen(400)
-    User -> UI: click ["Entendido"]
-    UI -> UI: closeConfirmationModal()
-else [E002] Ventana de ratificación vencida a T-24h (now_utc > fecha_inicio - 24h)
-    Service --> API: Lanza HTTPException(400, "CONFIRMATION_WINDOW_EXPIRED")
-    API --> Client: HTTP 400 Bad Request {"detail": "CONFIRMATION_WINDOW_EXPIRED: Ventana cerró a T-24h."}
-    Client -> UI: displayConfirmationExpired(400)
-    User -> UI: click ["Aceptar"]
-    UI -> UI: refreshBookingsList()
-else Dentro de la ventana reglamentaria [T-48h, T-24h]
-    == Fase 3: Transición atómica de estado y emisión de pase de asistencia ==
-    Service -> DB: BEGIN TRANSACTION
-    activate DB
-    Service -> DB: UPDATE reservas_cupo SET estado = 'CONFIRMADA', fecha_confirmacion = NOW() WHERE id = :bid
-    Service -> DB: COMMIT
-    DB --> Service: Transacción confirmada
-    deactivate DB
-
-    Service --> API: BookingResponseDTO {"id": booking_id, "estado": "CONFIRMADA", "pass_code": "PASS-8472"}
-    API --> Client: HTTP 200 OK BookingResponseDTO
-    Client -> UI: displayPassCodeModal(booking_id, pass_code)
-
-    UI -> UI: updateCardToConfirmed()
-    UI --> User: displayAttendanceConfirmedNotification
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-024.
-
----
-
-#### Diagrama 6.15.11: Diagrama de Secuencia - CUS-017: Desistir voluntariamente de reserva
-
-El diagrama de secuencia para `CUS-017` modela la anulación voluntaria de una reserva de cupo sin penalización académica, condicionada a una antelación mayor a 24 horas (`fecha_inicio > now_utc + 24h`, `RN-04`) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las interacciones entre el Estudiante Mentoreado, `StudentBookingsView.tsx`, `bookingService.ts`, el endpoint `POST /api/v1/bookings/{id}/cancel`, `booking_service.py` y PostgreSQL. Modela la adquisición del cerrojo pesimista de fila, la conmutación a estado `CANCELADA_ESTUDIANTE`, la reducción atómica del contador de cupos ocupados y el rechazo de cancelaciones tardías (`E001`).
-
-**Figura 77. Diagrama de Secuencia - CUS-017: Desistir voluntariamente de reserva**
-
-![Figura 77. Diagrama de Secuencia - CUS-017: Desistir voluntariamente de reserva](docs/diseño/diagramas/srs/img/diag_077_sec633_seq_cus017.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.11: Diagrama de Secuencia - CUS-017: Desistir voluntariamente de reserva
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.11: Diagrama de Secuencia - CUS-017: Desistir voluntariamente de reserva de cupo sin penalidad antes de T-24h\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as User
-participant "Vista React\n(StudentBookingsView.tsx)" as UI
-participant "Adaptador Cliente\n(bookingService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/bookings.py)" as API
-participant "Servicio Backend\n(booking_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Solicitud de desistimiento y verificación de plazos ==
-User -> UI: clickCardButton ["Cancelar Reserva"]
-activate UI
-UI -> UI: openCancellationModal()
-
-alt [E001] Desistimiento tardío con menos de 24 horas de antelación (fecha_inicio <= now_utc + 24h)
-    UI -> Client: checkCancellationDeadline(bookingId)
-    activate Client
-    Client -> API: GET /api/v1/bookings/{id}/cancellation-eligibility
-    activate API
-    API -> Service: check_cancellation_eligibility(booking_id)
-    activate Service
-    Service -> DB: SELECT s.fecha_inicio FROM reservas_cupo r JOIN sesiones_mentoria s ON r.id_sesion = s.id WHERE r.id = :bid
-    activate DB
-    DB --> Service: Horario de sesión (T < 24h)
-    deactivate DB
-    Service --> API: CancellationEligibilityDTO {"eligible": false, "reason": "LATE_CANCELLATION"}
-    deactivate Service
-    API --> Client: HTTP 400 Bad Request {"detail": "LATE_CANCELLATION_PROHIBITED: Menos de 24h de antelación."}
-    deactivate API
-    Client -> UI: displayLateCancellationProhibited(400)
-    deactivate Client
-    User -> UI: click ["Entendido"]
-    UI -> UI: closeCancellationModal()
-else Antelación superior a 24 horas (cumple RN-04)
-    == Fase 2: Confirmación y procesamiento atómico de liberación de cupo ==
-    User -> UI: enter (cancellationReason)
-    User -> UI: click ["Confirmar Cancelación"]
-    UI -> Client: cancelBooking(bookingId, reason)
-    activate Client
-    Client -> API: POST /api/v1/bookings/{id}/cancel {"reason": reason} [Bearer JWT]
-    activate API
-    API -> Service: cancel_booking(booking_id, user_email, reason)
-    activate Service
-
-    Service -> DB: BEGIN TRANSACTION
-    activate DB
-    Service -> DB: SELECT * FROM reservas_cupo WHERE id = :bid FOR UPDATE
-    Service -> DB: SELECT * FROM sesiones_mentoria WHERE id = :sid FOR UPDATE
-    Service -> DB: UPDATE reservas_cupo SET estado = 'CANCELADA_ESTUDIANTE', fecha_cancelacion = NOW(), motivo_cancelacion = :reason WHERE id = :bid
-    Service -> DB: UPDATE sesiones_mentoria SET cupos_ocupados = cupos_ocupados - 1 WHERE id = :sid
-    Service -> DB: COMMIT
-    DB --> Service: Transacción ACID confirmada
-    deactivate DB
-
-    Service --> API: BookingResponseDTO {"id": booking_id, "estado": "CANCELADA_ESTUDIANTE"}
-    deactivate Service
-    API --> Client: HTTP 200 OK BookingResponseDTO
-    deactivate API
-    Client -> UI: displayCancellationSuccess()
-    deactivate Client
-
-    UI -> UI: closeCancellationModal()
-    UI -> UI: updateCardToCancelled()
-    UI --> User: displayBookingCancelledConfirmation
-end
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-017.
-
----
-
-#### Diagrama 6.15.12: Diagrama de Secuencia - CUS-023: Evaluar quórum automático a T-24h
-
-El diagrama de secuencia para `CUS-023` especifica el proceso automatizado y desatendido de evaluación de quórum reglamentario (mínimo 3 estudiantes con asistencia ratificada, `RN-05`) ejecutado exactamente 24 horas antes del inicio de cada sesión de mentoría siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el Proceso Demonio (`SchedulerWorker` / Celery / APScheduler), el controlador de quórum en `quorum.py`, `booking_service.py`, `simulation_service.py`, PostgreSQL y el servicio de correo SMTP. Incluye la promoción automática a `CONFIRMADA` si se cumple el quórum, y la transición a `QUORUM_INSUFICIENTE` con disparo de alertas urgentes (`A001`) si no se alcanza el umbral.
-
-**Figura 78. Diagrama de Secuencia - CUS-023: Evaluar quórum automático a T-24h**
-
-![Figura 78. Diagrama de Secuencia - CUS-023: Evaluar quórum automático a T-24h](docs/diseño/diagramas/srs/img/diag_078_sec633_seq_cus023.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.12: Diagrama de Secuencia - CUS-023: Evaluar quórum automático a T-24h
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.12: Diagrama de Secuencia - CUS-023: Evaluar automáticamente el quórum reglamentario de sesiones de mentoría a T-24h\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-participant "Planificador\n(SchedulerWorker / Celery)" as Cron
-actor "Administrador Institucional\n(UserRole.administrador)" as Admin
-participant "Vista React\n(AdminDashboardView.tsx / MentorSessionsView.tsx)" as UI
-participant "Adaptador Cliente\n(quorumService.ts / apiClient)" as Client
-participant "Controlador FastAPI\n(endpoints/quorum.py)" as API
-participant "Servicio Backend\n(booking_service.py / simulation_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-participant "Servicio SMTP UPT\n(EmailService)" as SMTP
-actor "Estudiante Mentor" as Mentor
-actor "Estudiante Mentoreado" as Mentoreado
-
-== Fase 1: Disparo de la tarea programada y localización de sesiones a T-24h ==
-alt Disparo automatizado por demonio programado
-    Cron -> API: Disparo automático de corte de quórum a T-24h
-else Disparo administrativo o simulado desde consola
-    Admin -> UI: click ["Evaluar Quórum Masivo"]
-    activate UI
-    UI -> Client: triggerQuorumEvaluation() [Bearer JWT]
-    activate Client
-    Client -> API: POST /api/v1/quorum/evaluate-all
-    deactivate Client
-    deactivate UI
-end
-activate API
-API -> Service: evaluate_all_active_quorums()
-activate Service
-
-Service -> DB: SELECT * FROM sesiones_mentoria\nWHERE estado = 'PUBLICADA' AND fecha_inicio <= NOW() + INTERVAL '24 HOURS'
-activate DB
-DB --> Service: Lista de sesiones en ventana T-24h
-deactivate DB
-
-== Fase 2: Cuantificación de confirmaciones y verificación de umbral de quórum ==
-loop Para cada sesión en ventana T-24h
-    Service -> DB: SELECT count(*) FROM reservas_cupo WHERE id_sesion = :sid AND estado = 'CONFIRMADA'
-    activate DB
-    DB --> Service: confirmed_count (número de estudiantes ratificados)
-    deactivate DB
-
-    alt [A001] Quórum insuficiente a T-24h (confirmed_count < 3 estudiantes, RN-05)
-        Service -> DB: BEGIN TRANSACTION
-        activate DB
-        Service -> DB: UPDATE sesiones_mentoria SET estado = 'QUORUM_INSUFICIENTE' WHERE id = :sid
-        Service -> DB: INSERT INTO auditoria_evaluacion (sesion_id, estado_anterior='PUBLICADA', nuevo_estado='QUORUM_INSUFICIENTE', quorum_logrado=confirmed_count, fecha=NOW())
-        Service -> DB: COMMIT
-        DB --> Service: Transacción confirmada
-        deactivate DB
-
-        Service -> SMTP: send_urgent_quorum_alert(mentor_email, session_id, confirmed_count)
-        activate SMTP
-        SMTP --> Mentor: Alerta urgente: Sesión no alcanzó quórum de 3 alumnos
-        deactivate SMTP
-
-        Service -> UI: pushNotificationQuorumInsufficient(session_id)
-        Service --> API: A001-1.4 Sesión en QUORUM_INSUFICIENTE
-    else Quórum reglamentario alcanzado (confirmed_count >= 3 estudiantes)
-        == Fase 3: Confirmación oficial de sesión y notificación de viabilidad ==
-        Service -> DB: BEGIN TRANSACTION
-        activate DB
-        Service -> DB: UPDATE sesiones_mentoria SET estado = 'CONFIRMADA' WHERE id = :sid
-        Service -> DB: INSERT INTO auditoria_evaluacion (sesion_id, estado_anterior='PUBLICADA', nuevo_estado='CONFIRMADA', quorum_logrado=confirmed_count, fecha=NOW())
-        Service -> DB: COMMIT
-        DB --> Service: Transacción confirmada
-        deactivate DB
-
-        Service -> SMTP: send_session_confirmed_email(mentor_email, session_data)
-        activate SMTP
-        SMTP --> Mentor: Correo oficial de dictado de sesión
-        deactivate SMTP
-
-        Service -> SMTP: send_confirmation_to_students(enrolled_emails, session_data)
-        activate SMTP
-        SMTP --> Mentoreado: Correo oficial: Sesión confirmada con quórum reglamentario
-        deactivate SMTP
-
-        Service -> UI: pushNotificationQuorumConfirmed(session_id)
-        Service --> API: SessionQuorumResultDTO {"session_id": sid, "status": "CONFIRMADA", "confirmed_students": confirmed_count}
-    end
-end
-
-Service --> API: BatchQuorumEvaluationSummaryDTO
-deactivate Service
-API --> Cron: HTTP 200 OK (Ciclo completado)
-deactivate API
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-023.
-
----
-
-#### Diagrama 6.15.13: Diagrama de Secuencia - CUS-007: Decisión del mentor ante quórum insuficiente
-
-El diagrama de secuencia para `CUS-007` modela la gestión resolutiva que ejecuta el estudiante mentor cuando una sesión no alcanza el quórum a T-24h (estado `QUORUM_INSUFICIENTE`) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las interacciones entre el Mentor, `MentorSessionsView.tsx`, `offerService.ts`, el endpoint `POST /api/v1/offers/{offer_id}/quorum-decision`, `offer_service.py` y PostgreSQL. Abarca las tres alternativas de resolución: dictar de todas formas (`PROCEED`), reprogramar con antelación mayor a 24 horas (`RESCHEDULE`, con validación `E001`), o cancelar definitivamente con justificación obligatoria (`CANCEL`, con validación `E002`), actualizando los estados y notificando a los estudiantes inscritos.
-
-**Figura 79. Diagrama de Secuencia - CUS-007: Decisión del mentor ante quórum insuficiente**
-
-![Figura 79. Diagrama de Secuencia - CUS-007: Decisión del mentor ante quórum insuficiente](docs/diseño/diagramas/srs/img/diag_079_sec633_seq_cus007.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.13: Diagrama de Secuencia - CUS-007: Decisión del mentor ante quórum insuficiente
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.13: Diagrama de Secuencia - CUS-007: Decisión del mentor ante quórum insuficiente\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-participant "Vista React\n(MentorSessionsView.tsx)" as UI
-participant "Adaptador Cliente\n(offerService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/offers.py)" as API
-participant "Servicio Backend\n(offer_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-participant "Servicio SMTP UPT\n(EmailService)" as SMTP
-actor "Estudiantes Inscritos" as Students
-
-== Fase 1: Acceso a la sesión con quórum insuficiente y visualización de opciones ==
-Mentor -> UI: click ["Mis Sesiones"]
-activate UI
-Mentor -> UI: clickButton ["Gestionar Sesión"]
-UI -> UI: openQuorumDecisionModal()
-
-== Fase 2: Elección de la resolución y verificación de parámetros ==
-alt Decisión == 'RESCHEDULE' con nueva fecha ingresada
-    Mentor -> UI: selectOption ["Reprogramar Sesión"]
-    Mentor -> UI: enter (newStartDateTime, newEndDateTime)
-    UI -> UI: validateAdvanceNotice(newStartDateTime)
-
-    alt [E001] Fecha de reprogramación con menos de 24 horas de antelación
-        UI -> UI: displayRescheduleDateError()
-        Mentor -> UI: enter (validStartDateTime > 24h)
-        UI -> UI: enableRescheduleConfirmButton()
-    end
-else Decisión == 'CANCEL' con motivo de cancelación
-    Mentor -> UI: selectOption ["Cancelar Sesión"]
-
-    alt [E002] Justificación de cancelación definitiva vacía
-        UI -> UI: displayEmptyReasonError()
-        Mentor -> UI: enter (validCancellationReason)
-        UI -> UI: enableCancelConfirmButton()
-    end
-else Decisión == 'PROCEED' (Dictar de todas formas)
-    Mentor -> UI: selectOption ["Dictar de Todas Formas"]
-end
-
-Mentor -> UI: click ["Confirmar Decisión Resolutiva"]
-UI -> Client: submitQuorumDecision(offerId, decision, payload)
-activate Client
-Client -> API: POST /api/v1/offers/{offer_id}/quorum-decision {"decision": d, ...} [Bearer JWT]
-activate API
-API -> Service: process_quorum_decision(mentor_id, offer_id, decision, payload)
-activate Service
-
-== Fase 3: Persistencia de la resolución y notificación a los estudiantes ==
-Service -> DB: BEGIN TRANSACTION
-activate DB
-
-alt Decisión == 'PROCEED' (Confirmar dictado a pesar del quórum bajo)
-    Service -> DB: UPDATE sesiones_mentoria SET estado = 'CONFIRMADA' WHERE id = :oid
-    Service -> DB: COMMIT
-    Service -> SMTP: notify_students_session_confirmed(enrolled_emails)
-    activate SMTP
-    SMTP --> Students: Notificación: Tu sesión de mentoría se dictará según lo programado
-    deactivate SMTP
-else Decisión == 'RESCHEDULE' (Reprogramar sesión)
-    Service -> DB: UPDATE sesiones_mentoria SET estado = 'PUBLICADA', fecha_inicio = :new_start, fecha_fin = :new_end WHERE id = :oid
-    Service -> DB: UPDATE reservas_cupo SET estado = 'PENDIENTE_CONFIRMACION' WHERE id_sesion = :oid
-    Service -> DB: COMMIT
-    Service -> SMTP: notify_students_session_rescheduled(enrolled_emails, new_start)
-    activate SMTP
-    SMTP --> Students: Notificación: La sesión ha sido reprogramada
-    deactivate SMTP
-else Decisión == 'CANCEL' (Cancelar definitivamente)
-    Service -> DB: UPDATE sesiones_mentoria SET estado = 'CANCELADA_QUORUM', motivo_cancelacion = :reason WHERE id = :oid
-    Service -> DB: UPDATE reservas_cupo SET estado = 'CANCELADA_SISTEMA' WHERE id_sesion = :oid
-    Service -> DB: COMMIT
-    Service -> SMTP: notify_students_session_cancelled(enrolled_emails, reason)
-    activate SMTP
-    SMTP --> Students: Notificación: Sesión cancelada por no alcanzar quórum reglamentario
-    deactivate SMTP
-end
-deactivate DB
-
-Service --> API: QuorumResolutionResponseDTO {"success": true, "new_state": estado}
-deactivate Service
-API --> Client: HTTP 200 OK QuorumResolutionResponseDTO
-deactivate API
-Client -> UI: displayQuorumResolutionSuccess(new_state)
-deactivate Client
-
-UI -> UI: closeQuorumDecisionModal()
-UI -> UI: updateSessionCardState(new_state)
-UI --> Mentor: displayQuorumDecisionConfirmation
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-007.
-
-
----
-
-### MOD-06: Asistencia, Bitácoras y Feedback
-
-#### Diagrama 6.15.14: Diagrama de Secuencia - CUS-012: Registrar asistencia a sesión de mentoría
-
-El diagrama de secuencia para `CUS-012` especifica la captura y validación en tiempo real de la asistencia efectiva mediante códigos QR dinámicos basados en TOTP de 30 segundos siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Desglosa los participantes: Estudiante Mentor, Estudiante Mentoreado, `SessionAttendanceView.tsx`, `attendanceService.ts`, `attendance.py`, `attendance_service.py`, WebSockets y PostgreSQL. Modela la rotación criptográfica del token, la verificación de reservas ratificadas y ventana de tolerancia horaria (`-15m` a `+30m`), y los flujos de excepción por caducidad de token (`E001`), ausencia de reserva (`E002`) y fuera de ventana (`E003`).
-
-**Figura 80. Diagrama de Secuencia - CUS-012: Registrar asistencia a sesión de mentoría**
-
-![Figura 80. Diagrama de Secuencia - CUS-012: Registrar asistencia a sesión de mentoría](docs/diseño/diagramas/srs/img/diag_080_sec633_seq_cus012.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.14: Diagrama de Secuencia - CUS-012: Registrar asistencia a sesión de mentoría
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.14: Diagrama de Secuencia - CUS-012: Registrar asistencia interactiva mediante código QR dinámico\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-actor "Estudiante Mentoreado\n(UserRole.mentoreado)" as Mentoreado
-participant "Vista React (Mentor / Alumno)\n(SessionAttendanceView.tsx)" as UI
-participant "Adaptador Cliente\n(attendanceService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/attendance.py)" as API
-participant "Servicio Backend\n(attendance_service.py)" as Service
-participant "Servicio WebSocket\n(FastAPI WS Manager)" as WS
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Apertura de sesión y generación de token dinámico de asistencia ==
-Mentor -> UI: click ["Iniciar Pase de Asistencia Digital"]
-activate UI
-UI -> Client: getAttendanceToken(sessionId)
-activate Client
-Client -> API: GET /api/v1/sessions/{session_id}/attendance/token [Bearer JWT]
-activate API
-API -> Service: generate_totp_token(session_id)
-activate Service
-Service -> Service: Genera token TOTP con ciclo de rotación de 30 segundos
-Service --> API: AttendanceTokenDTO {"totp_token": token, "expires_in": 30}
-deactivate Service
-API --> Client: HTTP 200 OK AttendanceTokenDTO
-deactivate API
-Client -> UI: displayQrCodeAndRoster(totp_token, expires_in=30)
-deactivate Client
-deactivate UI
-
-== Fase 2: Escaneo de código QR y validación de reserva y ventana horaria ==
-Mentoreado -> UI: scanQrCode (qrToken: "TOTP-928192")
-activate UI
-Mentoreado -> UI: click ["Registrar Mi Asistencia"]
-UI -> Client: registerCheckIn(sessionId, qrToken)
-activate Client
-Client -> API: POST /api/v1/sessions/{session_id}/attendance/check-in {"qr_token": token} [Bearer JWT]
-activate API
-API -> Service: record_checkin(session_id, mentoreado_id, qr_token)
-activate Service
-
-alt [E001] Código QR o token TOTP expirado (> 30 segundos)
-    Service --> API: Lanza HTTPException(400, "QR_TOKEN_EXPIRED")
-    API --> Client: HTTP 400 Bad Request {"detail": "QR_TOKEN_EXPIRED: Escanee el código QR actualizado."}
-    Client -> UI: displayQrExpiredWarning(400)
-    Mentoreado -> UI: click ["Escanear Nuevo Código"]
-    UI -> UI: captureNewToken()
-else Token TOTP vigente
-    Service -> DB: SELECT id FROM reservas_cupo WHERE id_sesion = :sid AND id_estudiante = :uid AND estado = 'CONFIRMADA'
-    activate DB
-    DB --> Service: Reserva confirmada o nulo
-    deactivate DB
-
-    alt [E002] Estudiante sin reserva previa confirmada en la sesión
-        Service --> API: Lanza HTTPException(403, "NO_CONFIRMED_BOOKING")
-        API --> Client: HTTP 403 Forbidden {"detail": "NO_CONFIRMED_BOOKING: No registra reserva confirmada."}
-        Client -> UI: displayNoConfirmedBookingAlert(403)
-        Mentoreado -> UI: click ["Entendido"]
-        UI -> UI: closeScanner()
-    else Reserva ratificada verificada
-        alt [E003] Check-in fuera del intervalo temporal reglamentario (fuera de [inicio-15m, fin+30m])
-            Service --> API: Lanza HTTPException(400, "CHECKIN_WINDOW_CLOSED")
-            API --> Client: HTTP 400 Bad Request {"detail": "CHECKIN_WINDOW_CLOSED: Fuera de ventana reglamentaria."}
-            Client -> UI: displayCheckinWindowClosed(400)
-            Mentoreado -> UI: click ["Aceptar"]
-            UI -> UI: redirectToHome()
-        else Dentro del intervalo horario de la sesión
-            == Fase 3: Persistencia de asistencia y actualización reactiva en tiempo real ==
-            Service -> DB: BEGIN TRANSACTION
-            activate DB
-            Service -> DB: INSERT INTO asistencias_sesion (sesion_id, estudiante_id, fecha_checkin, asistio, ip_origen)\nVALUES (:sid, :uid, NOW(), true, :ip)\nON CONFLICT (sesion_id, estudiante_id) DO UPDATE SET asistio = true, fecha_checkin = NOW()
-            Service -> DB: COMMIT
-            DB --> Service: Asistencia persistida
-            deactivate DB
-
-            Service -> WS: broadcast_attendance_event(session_id, {"student_id": uid, "status": "PRESENTE"})
-            activate WS
-            WS --> UI: pushWsAttendanceUpdate(student_id, "PRESENTE")
-            deactivate WS
-            UI -> UI: updateAttendanceRoster(student_id, "PRESENTE")
-
-            Service --> API: AttendanceResponseDTO {"success": true, "asistio": true}
-            API --> Client: HTTP 200 OK AttendanceResponseDTO
-            Client -> UI: displayCheckinSuccessNotification()
-            UI --> Mentoreado: displayCheckinConfirmation
-        end
-    end
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-012.
-
----
-
-#### Diagrama 6.15.15: Diagrama de Secuencia - CUS-013: Registrar bitácora pedagógica de sesión
-
-El diagrama de secuencia para `CUS-013` modela el registro del reporte formativo post-sesión por parte del estudiante mentor siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el Mentor, `BitacoraFormView.tsx`, `bitacoraService.ts`, `bitacora.py`, `bitacora_service.py` y PostgreSQL. Especifica la validación del plazo reglamentario de 48 horas (`RN-12`, `E001`), la exigencia de al menos 50 caracteres pedagógicos (`E002`), el cómputo de la firma digital criptográfica SHA-256 sobre el contenido pedagógico y la promoción de la sesión a estado `BITACORA_REGISTRADA`.
-
-**Figura 81. Diagrama de Secuencia - CUS-013: Registrar bitácora pedagógica de sesión**
-
-![Figura 81. Diagrama de Secuencia - CUS-013: Registrar bitácora pedagógica de sesión](docs/diseño/diagramas/srs/img/diag_081_sec633_seq_cus013.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.15: Diagrama de Secuencia - CUS-013: Registrar bitácora pedagógica de sesión
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.15: Diagrama de Secuencia - CUS-013: Registrar bitácora pedagógica y reporte formativo\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-participant "Vista React\n(BitacoraFormView.tsx)" as UI
-participant "Adaptador Cliente\n(bitacoraService.ts / ApiBitacoraAdapter)" as Client
-participant "Controlador FastAPI\n(endpoints/bitacora.py)" as API
-participant "Servicio Backend\n(bitacora_service.py / BitacoraService)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Apertura de bitácora y verificación de plazo límite a 48h ==
-Mentor -> UI: click ["Completar Bitácora Pedagógica"]
-activate UI
-UI -> Client: verifySessionDeadline(sessionId)
-activate Client
-Client -> API: GET /api/v1/sessions/{session_id}/bitacora-eligibility [Bearer JWT]
-activate API
-API -> Service: check_bitacora_eligibility(session_id)
-activate Service
-Service -> DB: SELECT fecha_fin, estado FROM sesiones_mentoria WHERE id = :sid
-activate DB
-DB --> Service: Datos de finalización de sesión
-deactivate DB
-
-alt [E001] Plazo límite de 48 horas post-sesión vencido (now_utc > fecha_fin + 48h, RN-12)
-    Service --> API: Lanza HTTPException(400, "DEADLINE_EXCEEDED")
-    API --> Client: HTTP 400 Bad Request {"detail": "DEADLINE_EXCEEDED: Plazo reglamentario de 48h vencido."}
-    Client -> UI: displayDeadlineExceededError(400)
-    Mentor -> UI: click ["Solicitar Desbloqueo a Coordinación"]
-    UI -> UI: openExtensionForm()
-else Dentro del plazo reglamentario de 48 horas
-    Service --> API: BitacoraEligibilityDTO {"eligible": true}
-    API --> Client: HTTP 200 OK {"eligible": true}
-    Client -> UI: displayBitacoraForm(eligible=true)
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-
-== Fase 2: Ingreso de evidencias pedagógicas y validación de contenido ==
-Mentor -> UI: selectTopicsCheckboxes (coveredTopics)
-activate UI
-Mentor -> UI: selectDifficulty (difficultyLevel="Medio")
-Mentor -> UI: enter (observacionesPedagogicas)
-Mentor -> UI: click ["Guardar y Firmar Bitácora"]
-UI -> UI: validatePedagogicalObservations(observacionesPedagogicas)
-
-alt [E002] Descripción pedagógica insuficiente (< 50 caracteres)
-    UI -> UI: displayLengthError(required=50)
-    Mentor -> UI: enter (expandedObservations >= 50 chars)
-    Mentor -> UI: click ["Guardar y Firmar Bitácora"]
-else Contenido sustantivo válido
-    UI -> Client: submitBitacora(sessionId, payload)
-    activate Client
-    Client -> API: POST /api/v1/sessions/{session_id}/bitacora BitacoraCreateRequest [Bearer JWT]
-    activate API
-    API -> Service: create_bitacora(mentor_id, session_id, payload)
-    activate Service
-
-    == Fase 3: Persistencia transaccional y certificación de horas ==
-    Service -> Service: Calcula hash SHA-256(temas + observaciones + mentor_id + timestamp)
-    Service -> DB: BEGIN TRANSACTION
-    activate DB
-    Service -> DB: INSERT INTO bitacoras_pedagogicas (sesion_id, mentor_id, temas_cubiertos, observaciones, nivel_dificultad, hash_firma, fecha_registro)\nVALUES (:sid, :mid, :temas, :obs, :dif, :hash, NOW()) RETURNING id
-    Service -> DB: UPDATE sesiones_mentoria SET estado = 'BITACORA_REGISTRADA' WHERE id = :sid
-    Service -> DB: COMMIT
-    DB --> Service: Transacción confirmada
-    deactivate DB
-
-    Service --> API: BitacoraResponseDTO {"id": id_bitacora, "hash_firma": hash, "estado": "BITACORA_REGISTRADA"}
-    deactivate Service
-    API --> Client: HTTP 201 Created BitacoraResponseDTO
-    deactivate API
-    Client -> UI: displayBitacoraSuccess(id_bitacora, hash)
-    deactivate Client
-
-    UI -> UI: redirectToSessionHistory()
-    UI --> Mentor: displayBitacoraCreatedConfirmation
-end
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-013.
-
----
-
-#### Diagrama 6.15.16: Diagrama de Secuencia - CUS-014: Visualizar historial y bitácoras académicas
-
-El diagrama de secuencia para `CUS-014` formaliza la consulta histórica unificada del itinerario de mentorías para estudiantes y mentores siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el usuario universitario, `HistorySessionsView.tsx`, `historyService.ts`, `history.py`, `history_service.py` y las tablas de sesiones, bitácoras y asistencias en PostgreSQL. Detalla la renderización de la línea de tiempo interactiva, el filtrado cronológico por ciclo y materia, el tratamiento de usuarios nuevos con historial vacío (`A001`), y la inspección modal de bitácoras pedagógicas con comprobación de firmas criptográficas.
-
-**Figura 82. Diagrama de Secuencia - CUS-014: Visualizar historial y bitácoras académicas**
-
-![Figura 82. Diagrama de Secuencia - CUS-014: Visualizar historial y bitácoras académicas](docs/diseño/diagramas/srs/img/diag_082_sec633_seq_cus014.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.16: Diagrama de Secuencia - CUS-014: Visualizar historial y bitácoras académicas
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.16: Diagrama de Secuencia - CUS-014: Visualizar historial académico integral y bitácoras pedagógicas\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentoreado / Mentor" as User
-participant "Vista React\n(HistorySessionsView.tsx)" as UI
-participant "Adaptador Cliente\n(historyService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/history.py)" as API
-participant "Servicio Backend\n(history_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Consulta del historial y aplicación de filtros cronológicos ==
-User -> UI: click ["Mi Historial"]
-activate UI
-UI -> Client: getUserHistory() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/history/sessions
-activate API
-API -> Service: get_user_history(user_id)
-activate Service
-Service -> DB: SELECT s.*, b.hash_firma, a.asistio FROM sesiones_mentoria s\nLEFT JOIN bitacoras_pedagogicas b ON s.id = b.sesion_id\nLEFT JOIN asistencias_sesion a ON s.id = a.sesion_id\nWHERE s.id_mentor = :uid OR a.estudiante_id = :uid ORDER BY s.fecha_inicio DESC
-activate DB
-DB --> Service: Historial de sesiones y asistencias
-deactivate DB
-
-alt [A001] Historial académico vacío para usuario nuevo (cero registros)
-    Service --> API: EmptyHistoryDTO []
-    API --> Client: HTTP 200 OK []
-    Client -> UI: displayEmptyHistoryAlert()
-    User -> UI: click ["Explorar Cartelera"]
-    UI -> UI: redirectToRecommendations()
-else Historial con registros consolidados
-    Service --> API: UserHistoryResponseDTO
-    API --> Client: HTTP 200 OK UserHistoryResponseDTO
-    Client -> UI: displayHistoryTimeline(history)
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-
-== Fase 2: Búsqueda y filtrado por materia o período académico ==
-User -> UI: enter (searchQuery: "Algoritmos", semester="2026-I")
-activate UI
-UI -> UI: filterHistoryInState(searchQuery, semester)
-deactivate UI
-
-== Fase 3: Visualización de bitácora pedagógica y comprobante de asistencia ==
-User -> UI: clickCardButton ["Ver Bitácora Pedagógica"]
-activate UI
-UI -> Client: getSessionBitacora(sessionId)
-activate Client
-Client -> API: GET /api/v1/history/bitacora/{session_id} [Bearer JWT]
-activate API
-API -> Service: get_bitacora_detail(session_id)
-activate Service
-Service -> DB: SELECT b.*, u.nombres as mentor_nombre FROM bitacoras_pedagogicas b\nJOIN usuarios u ON b.mentor_id = u.id WHERE b.sesion_id = :sid
-activate DB
-DB --> Service: Detalle pedagógico y firma digital SHA-256
-deactivate DB
-Service --> API: BitacoraDetailDTO
-deactivate Service
-API --> Client: HTTP 200 OK BitacoraDetailDTO
-deactivate API
-Client -> UI: displayBitacoraDetailModal(bitacoraDetail)
-deactivate Client
-
-UI --> User: displayBitacoraDetailModal
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-014.
-
-
----
-
-### MOD-07: Gamificación e Incentivos
-
-#### Diagrama 6.15.17: Diagrama de Secuencia - CUS-018: Emitir constancia institucional de horas de mentoría
-
-El diagrama de secuencia para `CUS-018` especifica la emisión institucional y descarga de la constancia de horas de mentoría con validación del umbral reglamentario de 20 horas (`RN-14`) siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las llamadas entre el Estudiante Mentor, `CertificateView.tsx`, `certificateService.ts`, `certificates.py`, `certificate_service.py`, el compilador PDF/QR y PostgreSQL. Incorpora el control de umbral con manejo de horas insuficientes (`E001`), la previsualización modal, la generación del documento oficial foliado con sello SHA-256 y código QR institucional, y la descarga binaria segura en formato PDF.
-
-**Figura 83. Diagrama de Secuencia - CUS-018: Emitir constancia institucional de horas de mentoría**
-
-![Figura 83. Diagrama de Secuencia - CUS-018: Emitir constancia institucional de horas de mentoría](docs/diseño/diagramas/srs/img/diag_083_sec633_seq_cus018.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.17: Diagrama de Secuencia - CUS-018: Emitir constancia institucional de horas de mentoría
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.17: Diagrama de Secuencia - CUS-018: Emitir constancia oficial de horas de mentoría\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor\n(UserRole.mentor)" as Mentor
-participant "Vista React\n(CertificateView.tsx)" as UI
-participant "Adaptador Cliente\n(certificateService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/certificates.py)" as API
-participant "Servicio Backend\n(certificate_service.py)" as Service
-participant "Compilador PDF / QR\n(ReportLab / QREngine)" as PDF
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Consulta de acumulado de horas y verificación de umbral ==
-Mentor -> UI: click ["Mis Certificados"]
-activate UI
-UI -> Client: getHoursSummary() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/certificates/summary
-activate API
-API -> Service: calculate_accredited_hours(mentor_id)
-activate Service
-Service -> DB: SELECT sum(s.duracion_minutos)/60.0 as horas_totales FROM sesiones_mentoria s\nJOIN bitacoras_pedagogicas b ON s.id = b.sesion_id\nWHERE s.id_mentor = :mid AND s.estado = 'BITACORA_REGISTRADA'
-activate DB
-DB --> Service: Total de horas pedagógicas acumuladas
-deactivate DB
-
-alt [E001] Horas acreditadas insuficientes para el umbral institucional (horas_totales < 20.0, RN-14)
-    Service --> API: Lanza HTTPException(400, "INSUFFICIENT_HOURS")
-    API --> Client: HTTP 400 Bad Request {"detail": "INSUFFICIENT_HOURS: Requiere al menos 20 horas (Actual: Xh)."}
-    Client -> UI: displayInsufficientHoursWarning(400)
-    Mentor -> UI: click ["Ver Sesiones Pendientes"]
-    UI -> UI: redirectToPendingSessions()
-else Umbral alcanzado (horas_totales >= 20.0)
-    Service --> API: HoursSummaryDTO {"horas_totales": horas, "eligible": true}
-    API --> Client: HTTP 200 OK HoursSummaryDTO
-    Client -> UI: displayHoursEligible(horas_totales, eligible=true)
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-
-== Fase 2: Solicitud de emisión y previsualización de datos ==
-Mentor -> UI: click ["Emitir Constancia Oficial"]
-activate UI
-UI -> UI: openCertificatePreviewModal()
-Mentor -> UI: click ["Confirmar y Generar PDF Cifrado"]
-
-== Fase 3: Generación criptográfica, persistencia y descarga del PDF ==
-UI -> Client: generateCertificate(semester="2026-I")
-activate Client
-Client -> API: POST /api/v1/certificates/generate {"semester": "2026-I"} [Bearer JWT]
-activate API
-API -> Service: generate_certificate(mentor_id, semester)
-activate Service
-
-Service -> Service: Genera serie alfanumérica única (UPT-EPIS-2026-I-0042)
-Service -> Service: Calcula hash SHA-256 de los datos curriculares
-Service -> PDF: render_certificate_pdf(datos, firma_director, codigo_qr)
-activate PDF
-PDF --> Service: Documento PDF binario oficial compilado
-deactivate PDF
-
-Service -> DB: BEGIN TRANSACTION
-activate DB
-Service -> DB: INSERT INTO certificados_horas (mentor_id, semestre, total_horas, codigo_serie, hash_integridad, url_archivo, fecha_emision)\nVALUES (:mid, :sem, :horas, :serie, :hash, :url, NOW()) RETURNING id
-Service -> DB: COMMIT
-DB --> Service: Certificado persistido
-deactivate DB
-
-Service --> API: CertificateResponseDTO {"id": id_cert, "codigo_serie": serie, "url_descarga": url}
-deactivate Service
-API --> Client: HTTP 201 Created CertificateResponseDTO
-deactivate API
-Client -> UI: displayGeneratedCertificatePreview(id_cert, serie, url)
-deactivate Client
-
-Mentor -> UI: click ["Descargar Constancia en PDF"]
-UI -> Client: downloadCertificate(id_cert)
-activate Client
-Client -> API: GET /api/v1/certificates/{id}/download [Bearer JWT]
-activate API
-API -> Service: get_certificate_download(id_cert)
-activate Service
-Service -> DB: SELECT url_archivo FROM certificados_horas WHERE id = :id_cert
-activate DB
-DB --> Service: Metadata del archivo persistido
-deactivate DB
-Service --> API: Archivo binario (application/pdf)
-deactivate Service
-API --> Client: HTTP 200 OK (Stream PDF)
-deactivate API
-Client -> UI: triggerBrowserDownload(stream)
-deactivate Client
-UI --> Mentor: displayDownloadPdfCompleted
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-018.
-
----
-
-#### Diagrama 6.15.18: Diagrama de Secuencia - CUS-019: Gestionar insignias y reputación gamificada
-
-El diagrama de secuencia para `CUS-019` describe el cálculo de la reputación institucional gamificada y la consulta interactiva de insignias de honor alcanzadas por los mentores siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el Estudiante Mentor, el Estudiante Mentoreado, `GamificationView.tsx`, `gamificationService.ts`, `gamification.py`, `reputation_service.py` y PostgreSQL. Abarca la consulta de la vitrina virtual de insignias (conquistadas y bloqueadas), la inspección lateral de requisitos de logro y el despliegue del Cuadro de Honor (Leaderboard) con soporte de visualización anónima para privacidad (`A001`).
-
-**Figura 84. Diagrama de Secuencia - CUS-019: Gestionar insignias y reputación gamificada**
-
-![Figura 84. Diagrama de Secuencia - CUS-019: Gestionar insignias y reputación gamificada](docs/diseño/diagramas/srs/img/diag_084_sec633_seq_cus019.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.18: Diagrama de Secuencia - CUS-019: Gestionar insignias y reputación gamificada
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.18: Diagrama de Secuencia - CUS-019: Gestionar insignias y reputación gamificada\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Estudiante Mentor / Alumno" as User
-participant "Vista React\n(GamificationView.tsx)" as UI
-participant "Adaptador Cliente\n(gamificationService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/gamification.py)" as API
-participant "Servicio Backend\n(reputation_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Consulta de insignias personales y progreso de nivel ==
-User -> UI: click ["Insignias y Reputación"]
-activate UI
-UI -> Client: getUserBadges() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/gamification/badges
-activate API
-API -> Service: get_user_badges(user_id)
-activate Service
-Service -> DB: SELECT b.*, ub.fecha_obtencion, ub.progreso FROM insignias b\nLEFT JOIN insignias_usuarios ub ON b.id = ub.insignia_id AND ub.usuario_id = :uid
-activate DB
-DB --> Service: Catálogo de insignias y estado de avance
-deactivate DB
-Service --> API: BadgeListResponseDTO
-deactivate Service
-API --> Client: HTTP 200 OK BadgeListResponseDTO
-deactivate API
-Client -> UI: displayBadgesShowcase(badges)
-deactivate Client
-deactivate UI
-
-== Fase 2: Exploración de criterios de logro y detalle de insignia ==
-User -> UI: selectBadgeCard (badgeId="mentor-destacado")
-activate UI
-UI -> UI: displayBadgeDetailsSidebar(badgeInfo)
-deactivate UI
-
-== Fase 3: Visualización del cuadro de honor institucional (Leaderboard) ==
-User -> UI: click ["Cuadro de Honor de la Escuela"]
-activate UI
-UI -> Client: getLeaderboard() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/gamification/leaderboard
-activate API
-API -> Service: calculate_rank()
-activate Service
-Service -> DB: SELECT u.id, u.nombres, u.apellidos, u.codigo_estudiante, r.score_global, r.modo_anonimo\nFROM reputacion_usuarios r JOIN usuarios u ON r.usuario_id = u.id ORDER BY r.score_global DESC LIMIT 10
-activate DB
-DB --> Service: Top-10 mentores ordenados por reputación RN-13
-deactivate DB
-
-alt [A001] Visualización en el cuadro de honor con alias anónimo (modo_anonimo = true)
-    Service -> Service: Anonimiza nombres oficiales reemplazándolos por seudónimo (ej. "Mentor EPIS-742")
-    Service --> API: LeaderboardResponseDTO (con registros anonimizados)
-    API --> Client: HTTP 200 OK
-    Client -> UI: displayLeaderboardAnonymous(ranking)
-else Perfil público estándar
-    Service --> API: LeaderboardResponseDTO (nombres públicos)
-    API --> Client: HTTP 200 OK LeaderboardResponseDTO
-    Client -> UI: displayLeaderboardTable(ranking)
-end
-deactivate Service
-deactivate API
-deactivate Client
-
-UI --> User: displayLeaderboardView
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-019.
-
-
----
-
-### MOD-08: Analítica, Notificaciones y Configuración
-
-#### Diagrama 6.15.19: Diagrama de Secuencia - CUS-009: Notificar eventos críticos y alertas temporales
-
-El diagrama de secuencia para `CUS-009` formaliza el despacho multicanal de notificaciones reactivas (Server-Sent Events y correo electrónico SMTP) ante eventos críticos del ciclo de vida de las mentorías siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el Planificador desatendido (`SchedulerWorker`), los usuarios institucionales, el componente `NotificationBell.tsx`, `notificationService.ts`, `notifications.py`, `notification_service.py`, `EmailService` y PostgreSQL. Modela la inicialización del flujo SSE, la persistencia de alertas, la degradación controlada ante fallos del servidor SMTP (`E001`) y la lectura interactiva de notificaciones.
-
-**Figura 85. Diagrama de Secuencia - CUS-009: Notificar eventos críticos y alertas temporales**
-
-![Figura 85. Diagrama de Secuencia - CUS-009: Notificar eventos críticos y alertas temporales](docs/diseño/diagramas/srs/img/diag_085_sec633_seq_cus009.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.19: Diagrama de Secuencia - CUS-009: Notificar eventos críticos y alertas temporales
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.19: Diagrama de Secuencia - CUS-009: Notificar eventos críticos y alertas de confirmación a T-24h\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-participant "Planificador\n(SchedulerWorker / Celery)" as Cron
-actor "Usuario Institucional\n(Mentor / Alumno)" as User
-participant "Vista React\n(NotificationBell.tsx)" as UI
-participant "Adaptador Cliente\n(notificationService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/notifications.py)" as API
-participant "Servicio Backend\n(notification_service.py)" as Service
-participant "Servicio SMTP UPT\n(EmailService)" as SMTP
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Conexión al canal de notificaciones e inicialización de alertas ==
-User -> UI: click ["Campana de Notificaciones"]
-activate UI
-UI -> Client: subscribeNotifications() & getUnread() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/notifications/stream (SSE)
-activate API
-Client -> API: GET /api/v1/notifications/unread
-API -> Service: get_unread(user_id)
-activate Service
-Service -> DB: SELECT * FROM notificaciones_eventos WHERE usuario_id = :uid AND leida = false ORDER BY fecha_creacion DESC
-activate DB
-DB --> Service: Nómina de alertas no leídas
-deactivate DB
-Service --> API: UnreadNotificationsDTO
-deactivate Service
-API --> Client: HTTP 200 OK UnreadNotificationsDTO
-Client -> UI: displayUnreadBadge(unreadCount)
-
-== Fase 2: Generación asíncrona de evento crítico y despacho multicanal ==
-Cron -> Service: dispatch_critical_event(user_id, event_type, message, reference_id)
-activate Service
-Service -> DB: INSERT INTO notificaciones_eventos (usuario_id, tipo_evento, mensaje, referencia_id, leida=false, fecha_creacion=NOW())\nVALUES (...) RETURNING id
-activate DB
-DB --> Service: Alerta persistida
-deactivate DB
-
-Service -> API: push_sse_event(user_id, notification_data)
-API --> Client: SSE Stream Event: "critical_alert" {mensaje, id}
-Client -> UI: updateNotificationBadge(unreadCount + 1)
-
-alt [E001] Falla de despacho en servicio SMTP institucional de respaldo
-    Service -> SMTP: send_alert_email(email, subject, message)
-    activate SMTP
-    SMTP --> Service: SMTPException / Conexión rechazada
-    deactivate SMTP
-    Service -> Service: logger.warning("SMTP dispatch failed, falling back to SSE only")
-    Service --> API: Evento despachado (degradación controlada, entrega vía web preservada)
-else Despacho SMTP exitoso
-    Service -> SMTP: send_alert_email(email, subject, message)
-    activate SMTP
-    SMTP --> User: Aviso institucional en buzón universitario @upt.pe
-    deactivate SMTP
-    Service --> API: Multichannel Dispatch OK
-end
-deactivate Service
-
-== Fase 3: Recepción reactiva en cliente y lectura de notificación ==
-User -> UI: clickIcon ["Campana"]
-UI -> UI: openNotificationPanel()
-User -> UI: selectNotificationItem(notificationId)
-UI -> Client: markAsRead(notificationId)
-Client -> API: POST /api/v1/notifications/{id}/mark-read [Bearer JWT]
-API -> Service: mark_notification_as_read(notificationId, user_id)
-activate Service
-Service -> DB: UPDATE notificaciones_eventos SET leida = true WHERE id = :id
-activate DB
-DB --> Service: Confirmación de actualización
-deactivate DB
-Service --> API: NotificationMarkReadResponseDTO {"success": true}
-deactivate Service
-API --> Client: HTTP 200 OK
-Client -> UI: decreaseUnreadCounter()
-UI -> UI: decrementNotificationCounter()
-UI --> User: displayReferencedSessionView
-deactivate Client
-deactivate API
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-009.
-
----
-
-#### Diagrama 6.15.20: Diagrama de Secuencia - CUS-011: Generar reportes e indicadores analíticos
-
-El diagrama de secuencia para `CUS-011` especifica la agregación analítica de indicadores de mentoría y la exportación de dossiers ejecutivos para la Dirección de Escuela y comités de calidad ICACIT siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela la interacción entre el Administrador, `AnalyticsDashboardView.tsx`, `analyticsService.ts`, `analytics.py`, `analytics_service.py`, el compilador de hojas de cálculo y PostgreSQL. Describe la consulta de métricas generales, la validación de intervalos temporales con rechazo de fechas inconsistentes (`E001`), y la serialización y descarga del informe binario consolidado (`.xlsx` o `.csv`).
-
-**Figura 86. Diagrama de Secuencia - CUS-011: Generar reportes e indicadores analíticos**
-
-![Figura 86. Diagrama de Secuencia - CUS-011: Generar reportes e indicadores analíticos](docs/diseño/diagramas/srs/img/diag_086_sec633_seq_cus011.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.20: Diagrama de Secuencia - CUS-011: Generar reportes e indicadores analíticos
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.20: Diagrama de Secuencia - CUS-011: Generar reportes consolidados e indicadores analíticos de gestión\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Administrador / Calidad ICACIT" as Admin
-participant "Vista React\n(AnalyticsDashboardView.tsx)" as UI
-participant "Adaptador Cliente\n(analyticsService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/analytics.py)" as API
-participant "Servicio Backend\n(analytics_service.py)" as Service
-participant "Generador de Hojas de Cálculo\n(Excel / OpenPyXL Engine)" as Excel
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Acceso al panel analítico y configuración de parámetros ==
-Admin -> UI: click ["Reportes y Analítica"]
-activate UI
-UI -> Client: getKpiSummary(semester="2026-I") [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/analytics/reports/kpis?semester=2026-I
-activate API
-API -> Service: calculate_kpis(semester="2026-I")
-activate Service
-Service -> DB: SELECT count(s.id) as total_sesiones, sum(s.duracion_minutos)/60.0 as total_horas,\n       avg(CASE WHEN s.estado = 'CONFIRMADA' THEN 1 ELSE 0 END)*100 as tasa_quorum,\n       avg(CASE WHEN a.asistio = true THEN 1 ELSE 0 END)*100 as tasa_asistencia\nFROM sesiones_mentoria s LEFT JOIN asistencias_sesion a ON s.id = a.sesion_id WHERE s.semestre = '2026-I'
-activate DB
-DB --> Service: Métricas agregadas
-deactivate DB
-Service --> API: KpiSummaryDTO
-deactivate Service
-API --> Client: HTTP 200 OK KpiSummaryDTO
-deactivate API
-Client -> UI: displayKpiCardsAndCharts(kpis)
-deactivate Client
-
-== Fase 2: Ajuste de filtros temporales y selección de formato de exportación ==
-Admin -> UI: enter (startDate, endDate, courseId, format="xlsx")
-UI -> UI: validateDateConsistency(startDate, endDate)
-
-alt [E001] Rango de fechas inconsistente o fechas futuras
-    UI -> UI: displayDateRangeError()
-    Admin -> UI: enter (validStartDate, validEndDate)
-    UI -> UI: updateDateSelector()
-else Rango temporal válido
-    Admin -> UI: click ["Exportar Informe Consolidado"]
-    UI -> Client: exportReport(format="xlsx", startDate, endDate, courseId)
-    activate Client
-    Client -> API: GET /api/v1/analytics/export?format=xlsx&start_date={start_date}&end_date={end_date}&course_id={course_id} [Bearer JWT]
-    activate API
-    API -> Service: export_report(format, start_date, end_date, course_id)
-    activate Service
-
-    == Fase 3: Generación del documento analítico y descarga segura ==
-    Service -> DB: SELECT * FROM sesiones_mentoria s JOIN bitacoras_pedagogicas b ON s.id = b.sesion_id...
-    activate DB
-    DB --> Service: Registros consolidados
-    deactivate DB
-
-    Service -> Excel: compile_workbook(resumen_kpi, sesiones, asistencias, materias_criticas)
-    activate Excel
-    Excel --> Service: StreamBinarioXLSX (Libro con 4 pestañas estructuradas)
-    deactivate Excel
-
-    Service -> DB: INSERT INTO auditoria_admin (admin_id, accion='EXPORT_REPORT', entidad='analytics', fecha=NOW())
-
-    Service --> API: StreamingResponse(content=stream, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    deactivate Service
-    API --> Client: HTTP 200 OK (Stream Binario XLSX)
-    deactivate API
-    Client -> UI: triggerExcelDownload()
-    deactivate Client
-
-    UI --> Admin: displayExcelDownloadedConfirmation
-end
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-011.
-
----
-
-#### Diagrama 6.15.21: Diagrama de Secuencia - CUS-015: Consultar métricas de retención y desempeño
-
-El diagrama de secuencia para `CUS-015` formaliza la inferencia estadística del impacto del programa de mentorías en la retención estudiantil y disminución de reprobación en asignaturas filtro, respaldando los criterios de mejora continua de ICACIT siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las llamadas entre la Comisión de Calidad, `RetentionDashboardView.tsx`, `analyticsService.ts`, `analytics.py`, `analytics_service.py` y PostgreSQL. Modela la comparación entre grupos de control y participantes, la verificación de tamaño muestral mínimo (`A001`), y la generación y exportación del expediente probatorio en formato PDF oficial.
-
-**Figura 87. Diagrama de Secuencia - CUS-015: Consultar métricas de retención y desempeño**
-
-![Figura 87. Diagrama de Secuencia - CUS-015: Consultar métricas de retención y desempeño](docs/diseño/diagramas/srs/img/diag_087_sec633_seq_cus015.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.21: Diagrama de Secuencia - CUS-015: Consultar métricas de retención y desempeño
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.21: Diagrama de Secuencia - CUS-015: Consultar métricas de correlación de retención estudiantil y desempeño\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Comisión de Calidad ICACIT / Admin" as Evaluador
-participant "Vista React\n(RetentionDashboardView.tsx)" as UI
-participant "Adaptador Cliente\n(analyticsService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/analytics.py)" as API
-participant "Servicio Backend\n(analytics_service.py)" as Service
-participant "Compilador PDF ICACIT\n(ReportEngine)" as PDF
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Acceso al módulo de impacto y selección de cohorte ==
-Evaluador -> UI: click ["Impacto y Retención Académica"]
-activate UI
-UI -> Client: getRetentionMetrics() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/analytics/retention/impact
-activate API
-API -> Service: analyze_retention_correlation()
-activate Service
-Service -> DB: SELECT count(DISTINCT estudiante_id) as total_alumnos,\n       avg(CASE WHEN asistencia_count >= 3 THEN tasa_aprobacion ELSE NULL END) as aprobacion_mentoreados,\n       avg(CASE WHEN asistencia_count = 0 THEN tasa_aprobacion ELSE NULL END) as aprobacion_control\nFROM cohortes_academicas
-activate DB
-DB --> Service: Comparativa estadística de cohortes
-deactivate DB
-Service --> API: RetentionImpactDTO
-deactivate Service
-API --> Client: HTTP 200 OK RetentionImpactDTO
-deactivate API
-Client -> UI: displayRetentionChart(metrics)
-deactivate Client
-
-== Fase 2: Segmentación por asignatura filtro y período lectivo ==
-Evaluador -> UI: selectCourseFilter (courseId="algoritmos-epis")
-Evaluador -> UI: click ["Calcular Índice de Impacto"]
-UI -> Client: getCourseRetentionImpact(courseId)
-activate Client
-Client -> API: GET /api/v1/analytics/retention/cohorts?course_id={course_id}
-activate API
-API -> Service: get_course_cohort_stats(course_id)
-activate Service
-Service -> DB: SELECT count(*) as n_muestra, corr(asistencias, nota_final) as r_pearson\nFROM actas_semestrales a JOIN asistencias_sesion s ON a.estudiante_id = s.estudiante_id\nWHERE a.curso_id = :cid
-activate DB
-DB --> Service: Muestra y correlación calculada
-deactivate DB
-
-alt [A001] Muestra insuficiente para inferencia estadística (< 10 registros)
-    Service --> API: RetentionCohortDTO {"n_muestra": n, "significancia": false, "solo_descriptivo": true}
-    API --> Client: HTTP 200 OK
-    Client -> UI: displayInsufficientSampleAlert()
-    Evaluador -> UI: click ["Ampliar Rango a Semestres Anteriores"]
-    UI -> UI: offerExpandedRange()
-else Tamaño muestral suficiente (>= 10 registros)
-    Service --> API: RetentionCohortDTO {"n_muestra": n, "significancia": true, "r_pearson": r}
-    API --> Client: HTTP 200 OK RetentionCohortDTO
-    Client -> UI: displayCorrelationResults(stats)
-end
-deactivate Service
-deactivate API
-deactivate Client
-
-== Fase 3: Visualización de indicadores ICACIT y exportación ==
-Evaluador -> UI: click ["Exportar Evidencia ICACIT"]
-UI -> Client: exportIcacitEvidence(courseId)
-activate Client
-Client -> API: POST /api/v1/analytics/retention/export-evidence {"course_id": cid} [Bearer JWT]
-activate API
-API -> Service: generate_icacit_report(course_id)
-activate Service
-Service -> PDF: compile_icacit_dossier(datos_retencion, tablas_frecuencia, firmas_integridad)
-activate PDF
-PDF --> Service: Documento PDF formal de acreditación
-deactivate PDF
-Service --> API: StreamingResponse(content=pdf_stream, media_type="application/pdf")
-deactivate Service
-API --> Client: HTTP 200 OK (Stream Binario PDF)
-deactivate API
-Client -> UI: triggerPdfDownload()
-deactivate Client
-UI --> Evaluador: displayIcacitDossierDownloadedConfirmation
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-015.
-
----
-
-#### Diagrama 6.15.22: Diagrama de Secuencia - CUS-016: Auditar trazas de seguridad y consentimiento
-
-El diagrama de secuencia para `CUS-016` modela la auditoría forense inmutable y la verificación de integridad de la cadena criptográfica de logs (Hash Chain) bajo los mandatos de la Ley Nº 29733 y el estándar ISO/IEC 27001 siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Desglosa los participantes: Oficial de Seguridad, `AuditLogView.tsx`, `auditService.ts`, `audit.py`, `audit_service.py` y PostgreSQL. Especifica la restricción RBAC (`E001`), la verificación de trazas de consentimiento, el cálculo iterativo recursivo `SHA256(prev_hash + data)` con detección de manipulaciones (`E002`), y la acreditación de integridad con 0 alteraciones.
-
-**Figura 88. Diagrama de Secuencia - CUS-016: Auditar trazas de seguridad y consentimiento**
-
-![Figura 88. Diagrama de Secuencia - CUS-016: Auditar trazas de seguridad y consentimiento](docs/diseño/diagramas/srs/img/diag_088_sec633_seq_cus016.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.22: Diagrama de Secuencia - CUS-016: Auditar trazas de seguridad y consentimiento
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.22: Diagrama de Secuencia - CUS-016: Auditar trazas inmutables de seguridad y consentimientos legales\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Oficial de Seguridad / Delegado DPO\n(UserRole.administrador)" as SecOfficer
-participant "Vista React\n(AuditLogView.tsx)" as UI
-participant "Adaptador Cliente\n(auditService.ts / ApiAuditAdapter)" as Client
-participant "Controlador FastAPI\n(endpoints/audit.py)" as API
-participant "Servicio Backend\n(audit_service.py / AuditService)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Consulta del registro forense de auditoría ==
-SecOfficer -> UI: click ["Auditoría de Seguridad y Ley 29733"]
-activate UI
-UI -> Client: getAuditLogs(limit=50) [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/audit/logs?limit=50
-activate API
-
-API -> API: require_security_officer_role(current_user)
-
-alt [E001] Permisos insuficientes para auditoría de seguridad
-    API --> Client: HTTP 403 Forbidden {"detail": "FORBIDDEN_AUDIT: Acceso reservado a Oficial de Seguridad."}
-    Client -> UI: displayAccessDeniedModal(403)
-    SecOfficer -> UI: click ["Aceptar"]
-    UI -> UI: redirectToAuthorizedDashboard()
-else Privilegios de seguridad verificados
-    API -> Service: get_logs(limit=50)
-    activate Service
-    Service -> DB: SELECT l.*, u.email FROM log_auditoria_seguridad l\nJOIN usuarios u ON l.usuario_id = u.id ORDER BY l.id DESC LIMIT 50
-    activate DB
-    DB --> Service: Trazas de auditoría forense
-    deactivate DB
-    Service --> API: AuditLogListResponseDTO
-    deactivate Service
-    API --> Client: HTTP 200 OK AuditLogListResponseDTO
-    Client -> UI: displayAuditLogTable(logs)
-end
-deactivate API
-deactivate Client
-
-== Fase 2: Filtrado por usuario y verificación de traza legal de consentimiento ==
-SecOfficer -> UI: enter (email: "usuario@upt.pe")
-SecOfficer -> UI: click ["Buscar Consentimiento"]
-UI -> Client: getConsentTraces(email)
-activate Client
-Client -> API: GET /api/v1/audit/consent-traces?email={email} [Bearer JWT]
-activate API
-API -> Service: get_consent_traces(email)
-activate Service
-Service -> DB: SELECT * FROM consentimientos_legales WHERE email = :email ORDER BY fecha_registro ASC
-activate DB
-DB --> Service: Trazas de formalización (UUID, versión, IP, User-Agent, UTC, revocado)
-deactivate DB
-Service --> API: ConsentTraceListDTO
-deactivate Service
-API --> Client: HTTP 200 OK ConsentTraceListDTO
-deactivate API
-Client -> UI: displayConsentTraceModal(traces)
-deactivate Client
-
-== Fase 3: Verificación criptográfica de la cadena de auditoría (Hash Chain) ==
-SecOfficer -> UI: click ["Verificar Integridad de Cadena de Logs"]
-UI -> Client: verifyLogChain()
-activate Client
-Client -> API: POST /api/v1/audit/verify-chain [Bearer JWT]
-activate API
-API -> Service: verify_chain_integrity()
-activate Service
-
-Service -> DB: SELECT id, hash_bloque, hash_anterior, datos_evento FROM log_auditoria_seguridad ORDER BY id ASC
-activate DB
-DB --> Service: Todos los registros de auditoría
-deactivate DB
-
-Service -> Service: Itera recursivamente recomputando SHA256(hash_anterior + datos_evento)
-
-alt [E002] Inconsistencia detectada en la cadena criptográfica de logs (discrepancia de hash)
-    Service --> API: Lanza HTTPException(409, "AUDIT_TAMPERING_DETECTED: Discrepancia en ID {broken_id}")
-    API --> Client: HTTP 409 Conflict {"detail": "AUDIT_TAMPERING_DETECTED"}
-    Client -> UI: displayTamperingAlert(409, broken_id)
-    SecOfficer -> UI: click ["Descargar Informe Forense"]
-    UI -> UI: exportForensicDump()
-else Cadena 100% íntegra (0 discrepancias)
-    Service --> API: VerifyChainResponseDTO {"status": "VALID", "records_verified": count, "tampering_detected": false}
-    API --> Client: HTTP 200 OK VerifyChainResponseDTO
-    Client -> UI: displayIntegrityVerifiedBadge()
-    UI --> SecOfficer: displayChainIntegrityConfirmation
-end
-deactivate Service
-deactivate API
-deactivate Client
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-016.
-
----
-
-#### Diagrama 6.15.23: Diagrama de Secuencia - CUS-020: Configurar parámetros institucionales y umbrales
-
-El diagrama de secuencia para `CUS-020` describe la calibración dinámica de reglas institucionales y umbrales operacionales sin modificación del código fuente siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las llamadas entre el Administrador Institucional, `SystemSettingsView.tsx`, `configService.ts`, `config.py`, `config_service.py` y PostgreSQL. Modela la consulta de parámetros vigentes, la validación de límites operacionales (`E001`), la exigencia de reautenticación para cambios críticos (`E002`), y la persistencia transaccional con purga inmediata de la memoria caché para aplicación en caliente.
-
-**Figura 89. Diagrama de Secuencia - CUS-020: Configurar parámetros institucionales y umbrales**
-
-![Figura 89. Diagrama de Secuencia - CUS-020: Configurar parámetros institucionales y umbrales](docs/diseño/diagramas/srs/img/diag_089_sec633_seq_cus020.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.23: Diagrama de Secuencia - CUS-020: Configurar parámetros institucionales y umbrales
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.23: Diagrama de Secuencia - CUS-020: Configurar parámetros operativos institucionales y umbrales\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Administrador Institucional\n(UserRole.administrador)" as Admin
-participant "Vista React\n(SystemSettingsView.tsx)" as UI
-participant "Adaptador Cliente\n(configService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/config.py)" as API
-participant "Servicio Backend\n(config_service.py)" as Service
-participant "Caché de Aplicación\n(Redis / MemoryCache)" as Cache
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Consulta de parámetros vigentes y despliegue del panel ==
-Admin -> UI: click ["Configuración del Sistema"]
-activate UI
-UI -> Client: getParameters() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/config/parameters
-activate API
-API -> Service: get_parameters()
-activate Service
-Service -> DB: SELECT clave, valor, descripcion, valor_min, valor_max FROM parametros_institucionales WHERE activo = true
-activate DB
-DB --> Service: Catálogo de parámetros base
-deactivate DB
-Service --> API: ParameterListResponseDTO
-deactivate Service
-API --> Client: HTTP 200 OK ParameterListResponseDTO
-deactivate API
-Client -> UI: displayParametersForm(parameters)
-deactivate Client
-
-== Fase 2: Edición de umbrales y validación de rangos permitidos ==
-Admin -> UI: enter (quorumMinimo=4, aforoPresencial=10)
-Admin -> UI: click ["Guardar Parámetros Institucionales"]
-UI -> UI: validateValueRanges(parameters)
-
-alt [E001] Parámetro fuera de los rangos institucionales permitidos
-    UI -> UI: displayOutOfRangeError()
-    Admin -> UI: enter (correctedParameterValue)
-    UI -> UI: enableSaveButton()
-else Valores en rangos admisibles
-    UI -> Client: updateParameters(payload)
-    activate Client
-    Client -> API: PUT /api/v1/config/parameters ParameterUpdatePayload [Bearer JWT]
-    activate API
-
-    alt [E002] Reautenticación de seguridad requerida (cambios críticos sin contraseña secundaria)
-        API --> Client: HTTP 401 Unauthorized {"detail": "REAUTH_REQUIRED: Confirmación de credenciales requerida."}
-        Client -> UI: displayReauthModal()
-        Admin -> UI: enter (adminSecondaryPassword)
-        Admin -> UI: click ["Verificar"]
-        UI -> Client: reauthenticateAdmin(credentials)
-        Client -> API: POST /api/v1/auth/reauth
-        API --> Client: HTTP 200 OK {"reauth_token": token}
-        Client -> UI: setReauthToken(token)
-    else Autorización confirmada
-        API -> Service: update_parameters(admin_id, payload)
-        activate Service
-
-        == Fase 3: Persistencia transaccional, purga de caché y aplicación en caliente ==
-        Service -> DB: BEGIN TRANSACTION
-        activate DB
-        Service -> DB: UPDATE parametros_institucionales SET valor = :val, fecha_modificacion = NOW(), modificado_por = :uid WHERE clave = :key
-        Service -> DB: INSERT INTO log_auditoria_seguridad (usuario_id, evento='PARAM_UPDATE', detalle=:key, fecha=NOW())
-        Service -> DB: COMMIT
-        DB --> Service: Transacción confirmada
-        deactivate DB
-
-        Service -> Cache: purge_system_config_cache()
-        activate Cache
-        Cache --> Service: Caché invalidada en caliente
-        deactivate Cache
-
-        Service --> API: ParameterUpdateResponseDTO {"success": true, "updated_keys": keys}
-        deactivate Service
-        API --> Client: HTTP 200 OK ParameterUpdateResponseDTO
-        Client -> UI: displayParametersUpdatedSuccess(updated_keys)
-        UI --> Admin: displayParametersUpdatedConfirmation
-    end
-    deactivate API
-    deactivate Client
-end
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-020.
-
----
-
-#### Diagrama 6.15.24: Diagrama de Secuencia - CUS-022: Gestionar catálogo de temas y materias críticas
-
-El diagrama de secuencia para `CUS-022` formaliza la actualización de la malla curricular y el catálogo silábico de materias críticas por parte de la Dirección de Escuela y administradores siguiendo el estándar de modelado de secuencia (Visual Paradigm). Todas las respuestas del sistema concluyen en la capa de vista (`Vista React`). Modela las llamadas entre el Administrador, `AdminCurriculumView.tsx`, `curriculumService.ts`, `curriculum.py`, `curriculum_service.py` y PostgreSQL. Describe la navegación por el árbol curricular, el alta de nuevos temas silábicos con validación de unicidad (`E001`) y rango semestral de semanas 1 a 17 (`E002`), y la confirmación transaccional con actualización reactiva en la interfaz administrativa.
-
-**Figura 90. Diagrama de Secuencia - CUS-022: Gestionar catálogo de temas y materias críticas**
-
-![Figura 90. Diagrama de Secuencia - CUS-022: Gestionar catálogo de temas y materias críticas](docs/diseño/diagramas/srs/img/diag_090_sec633_seq_cus022.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.15.24: Diagrama de Secuencia - CUS-022: Gestionar catálogo de temas y materias críticas
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.15.24: Diagrama de Secuencia - CUS-022: Gestionar catálogo de temas curriculares, asignaturas filtro y malla oficial\nSistema Web P2P - EPIS UPT
-
-autonumber
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-skinparam sequenceBoxBorderColor #1E3A8A
-skinparam sequenceBoxBackgroundColor #F0F4F8
-
-actor "Administrador Institucional\n(UserRole.administrador)" as Admin
-participant "Vista React\n(AdminCurriculumView.tsx)" as UI
-participant "Adaptador Cliente\n(curriculumService.ts)" as Client
-participant "Controlador FastAPI\n(endpoints/curriculum.py)" as API
-participant "Servicio Backend\n(curriculum_service.py)" as Service
-database "PostgreSQL DB\n(SQLAlchemy / Supabase)" as DB
-
-== Fase 1: Consulta del árbol curricular y selección de asignatura ==
-Admin -> UI: click ["Gestión de Malla y Temarios"]
-activate UI
-UI -> Client: getCoursesFullTree() [Bearer JWT]
-activate Client
-Client -> API: GET /api/v1/curriculum/courses
-activate API
-API -> Service: get_courses_tree()
-activate Service
-Service -> DB: SELECT * FROM cursos ORDER BY ciclo, nombre
-activate DB
-DB --> Service: Malla curricular ordenada por ciclo
-deactivate DB
-Service --> API: CourseTreeResponseDTO
-deactivate Service
-API --> Client: HTTP 200 OK CourseTreeResponseDTO
-deactivate API
-Client -> UI: displayCourseTree(coursesTree)
-deactivate Client
-
-== Fase 2: Ingreso de datos del nuevo tema curricular silábico ==
-Admin -> UI: clickCourse ["Ver Asignatura"]
-Admin -> UI: click ["Agregar Nuevo Tema Curricular"]
-UI -> UI: openNewTopicModal()
-Admin -> UI: enter (unidad=2, titulo="Grafos y Dijkstra", semana=7, descripcion="Teoría y algoritmos")
-Admin -> UI: click ["Registrar Tema Curricular"]
-UI -> UI: validateWeekNumber(semana)
-
-alt [E002] Número de semana académica fuera de rango semestral (semana < 1 o > 17)
-    UI -> UI: displayWeekOutOfRangeError()
-    Admin -> UI: enter (validWeekNumber)
-    UI -> UI: updateFormWeek()
-else Semana lectiva válida
-    UI -> Client: createTopic(courseId, payload)
-    activate Client
-    Client -> API: POST /api/v1/curriculum/courses/{course_id}/topics TopicCreateRequest [Bearer JWT]
-    activate API
-    API -> Service: create_topic(course_id, payload)
-    activate Service
-
-    Service -> DB: SELECT id FROM temas_curriculares WHERE curso_id = :cid AND unidad = :u AND titulo = :t
-    activate DB
-    DB --> Service: Tema existente o nulo
-    deactivate DB
-
-    alt [E001] Tema curricular duplicado en la misma unidad didáctica
-        Service --> API: Lanza HTTPException(409, "DUPLICATE_TOPIC")
-        API --> Client: HTTP 409 Conflict {"detail": "DUPLICATE_TOPIC: Ya existe un tema con ese título en la unidad."}
-        Client -> UI: displayDuplicateTopicError(409)
-        Admin -> UI: enter (adjustedTitle)
-        UI -> UI: enableSaveButton()
-    else Tema nuevo y válido
-        == Fase 3: Persistencia transaccional y actualización del catálogo ==
-        Service -> DB: BEGIN TRANSACTION
-        activate DB
-        Service -> DB: INSERT INTO temas_curriculares (curso_id, unidad, semana, titulo, descripcion, activo=true)\nVALUES (:cid, :u, :sem, :t, :desc, true) RETURNING id
-        Service -> DB: COMMIT
-        DB --> Service: Transacción confirmada (id_tema)
-        deactivate DB
-
-        Service --> API: TopicResponseDTO {"id": id_tema, "titulo": t, "semana": sem}
-        API --> Client: HTTP 201 Created TopicResponseDTO
-        Client -> UI: displayTopicCreatedSuccess(id_tema)
-
-        UI -> UI: closeNewTopicModal()
-        UI -> UI: appendTopicToTree(id_tema)
-        UI --> Admin: displayTopicRegisteredConfirmation
-    end
-    deactivate Service
-    deactivate API
-    deactivate Client
-end
-deactivate UI
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de las especificaciones de diseño de CUS-022.
-
----
+### Criterio del recomendador y claves de ordenamiento
+
+El motor implementado en `recommendation_service.py` calcula un ranking multifactorial, sin similitud coseno ni filtrado colaborativo. La función `compute_candidate_score` aplica:
+
+$$s = round\left(w_c (0.40 J + 0.35 H + 0.15 M + 0.10 A), 4\right)$$
+
+- **J:** Jaccard entre conjuntos de temas; dos conjuntos vacíos producen 0. Dice se calcula para explicación, sin intervenir en la suma.
+- **H:** en mentores, intersección de franjas exactas dividida por las franjas del mentoreado. Sin agenda del mentoreado vale 0.5. En ofertas usa la hora de inicio truncada a la hora y una o dos franjas completas según duración; no representa solapamiento continuo al minuto.
+- **M:** 1 para igual modalidad, 0.9 cuando alguna es híbrida y 0.2 para presencial frente a virtual. Las ofertas admiten presencial o virtual; la preferencia puede ser híbrida.
+- **A:** asignaturas comunes divididas por las asignaturas del mentoreado; sin intereses previos vale 0.
+- **w_c:** máximo peso crítico aplicable: IDs 1/2/4 = 1.2, ID 3 = 1.3, ID 5 = 1.1; resto 1.0. En ofertas, si no hay cursos comunes se consideran los cursos de la oferta. La puntuación puede exceder 1; no es una probabilidad.
+
+El candidato es elegible con ciclo >= 7 **o** autorización de rol. Esto no acredita la nota mínima 14 exigida por RN-03. El orden de mentores es puntuación, peso crítico, ciclo y franjas coincidentes descendentes, luego correo ascendente. El de ofertas es puntuación, peso y cupos disponibles descendentes, fecha y código ascendentes. La reputación y la menor carga docente no forman parte de estas claves. Los pesos críticos están definidos en código: editar `factor_ponderacion` en currículo no acredita que el motor los relea dinámicamente. CUS-015 conserva la configuración administrativa como propuesta.
+
+La revisión es estática: no aporta resultados nuevos de precisión ni de latencia. Los datos sintéticos o modos de respaldo se distinguen del perfil persistido y de la utilización en entorno real.
+
+### Diagrama 6.15: Vista general
+
+**Figura 66. Diagramas de Secuencia del Sistema (Fase de Diseño): vista general**
+
+![Figura 66. Diagramas de Secuencia del Sistema (Fase de Diseño): vista general](docs/revision_srs/diagramas/doc-h06/srs/img/diag_066_general.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_066_general.puml).
+
+### 6.3.3.1. CUS-001 — Iniciar sesión institucional con 2FA
+
+**Figura 67. Diagrama 6.15.1: Secuencia — CUS-001: Iniciar sesión institucional con 2FA**
+
+![Figura 67. Diagrama 6.15.1: Secuencia — CUS-001: Iniciar sesión institucional con 2FA](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-001_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-001_secuencia.puml).
+
+### 6.3.3.2. CUS-010 — Gestionar asignación de roles de usuario
+
+**Figura 68. Diagrama 6.15.2: Secuencia — CUS-010: Gestionar asignación de roles de usuario**
+
+![Figura 68. Diagrama 6.15.2: Secuencia — CUS-010: Gestionar asignación de roles de usuario](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-010_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-010_secuencia.puml).
+
+### 6.3.3.3. CUS-006 — Registrar oferta de mentoría académica
+
+**Figura 69. Diagrama 6.15.3: Secuencia — CUS-006: Registrar oferta de mentoría académica**
+
+![Figura 69. Diagrama 6.15.3: Secuencia — CUS-006: Registrar oferta de mentoría académica](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-006_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-006_secuencia.puml).
+
+### 6.3.3.4. CUS-008 — Gestionar demanda insatisfecha de mentoría
+
+**Figura 70. Diagrama 6.15.4: Secuencia — CUS-008: Gestionar demanda insatisfecha de mentoría**
+
+![Figura 70. Diagrama 6.15.4: Secuencia — CUS-008: Gestionar demanda insatisfecha de mentoría](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-008_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-008_secuencia.puml).
+
+### 6.3.3.5. CUS-005 — Postular al rol de estudiante mentor
+
+**Figura 71. Diagrama 6.15.5: Secuencia — CUS-005: Postular al rol de estudiante mentor**
+
+![Figura 71. Diagrama 6.15.5: Secuencia — CUS-005: Postular al rol de estudiante mentor](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-005_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-005_secuencia.puml).
+
+### 6.3.3.6. CUS-021 — Evaluar postulaciones a mentor por comité
+
+**Figura 72. Diagrama 6.15.6: Secuencia — CUS-021: Evaluar postulaciones a mentor por comité**
+
+![Figura 72. Diagrama 6.15.6: Secuencia — CUS-021: Evaluar postulaciones a mentor por comité](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-021_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-021_secuencia.puml).
+
+### 6.3.3.7. CUS-002 — Consultar catálogo de mentorías con recomendación
+
+**Figura 73. Diagrama 6.15.7: Secuencia — CUS-002: Consultar catálogo de mentorías con recomendación**
+
+![Figura 73. Diagrama 6.15.7: Secuencia — CUS-002: Consultar catálogo de mentorías con recomendación](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-002_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-002_secuencia.puml).
+
+### 6.3.3.8. CUS-003 — Reservar cupo para sesión de mentoría
+
+**Figura 74. Diagrama 6.15.8: Secuencia — CUS-003: Reservar cupo para sesión de mentoría**
+
+![Figura 74. Diagrama 6.15.8: Secuencia — CUS-003: Reservar cupo para sesión de mentoría](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-003_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-003_secuencia.puml).
+
+### 6.3.3.9. CUS-004 — Ratificar asistencia a sesión de mentoría (T-24h)
+
+**Figura 75. Diagrama 6.15.9: Secuencia — CUS-004: Ratificar asistencia a sesión de mentoría (T-24h)**
+
+![Figura 75. Diagrama 6.15.9: Secuencia — CUS-004: Ratificar asistencia a sesión de mentoría (T-24h)](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-004_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-004_secuencia.puml).
+
+### 6.3.3.10. CUS-023 — Evaluar quórum y ejecutar corte automático (T-24h)
+
+**Figura 76. Diagrama 6.15.10: Secuencia — CUS-023: Evaluar quórum y ejecutar corte automático (T-24h)**
+
+![Figura 76. Diagrama 6.15.10: Secuencia — CUS-023: Evaluar quórum y ejecutar corte automático (T-24h)](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-023_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-023_secuencia.puml).
+
+### 6.3.3.11. CUS-024 — Cancelar reserva de cupo por estudiante
+
+**Figura 77. Diagrama 6.15.11: Secuencia — CUS-024: Cancelar reserva de cupo por estudiante**
+
+![Figura 77. Diagrama 6.15.11: Secuencia — CUS-024: Cancelar reserva de cupo por estudiante](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-024_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-024_secuencia.puml).
+
+### 6.3.3.12. CUS-007 — Registrar asistencia y bitácora pedagógica
+
+**Figura 78. Diagrama 6.15.12: Secuencia — CUS-007: Registrar asistencia y bitácora pedagógica**
+
+![Figura 78. Diagrama 6.15.12: Secuencia — CUS-007: Registrar asistencia y bitácora pedagógica](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-007_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-007_secuencia.puml).
+
+### 6.3.3.13. CUS-012 — Registrar calificación y feedback bidireccional
+
+**Figura 79. Diagrama 6.15.13: Secuencia — CUS-012: Registrar calificación y feedback bidireccional**
+
+![Figura 79. Diagrama 6.15.13: Secuencia — CUS-012: Registrar calificación y feedback bidireccional](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-012_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-012_secuencia.puml).
+
+### 6.3.3.14. CUS-013 — Consultar historial académico de mentorías
+
+**Figura 80. Diagrama 6.15.14: Secuencia — CUS-013: Consultar historial académico de mentorías**
+
+![Figura 80. Diagrama 6.15.14: Secuencia — CUS-013: Consultar historial académico de mentorías](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-013_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-013_secuencia.puml).
+
+### 6.3.3.15. CUS-014 — Emitir constancia de horas de mentoría
+
+**Figura 81. Diagrama 6.15.15: Secuencia — CUS-014: Emitir constancia de horas de mentoría**
+
+![Figura 81. Diagrama 6.15.15: Secuencia — CUS-014: Emitir constancia de horas de mentoría](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-014_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-014_secuencia.puml).
+
+### 6.3.3.16. CUS-018 — Gestionar justificación de inasistencia a sesión
+
+**Figura 82. Diagrama 6.15.16: Secuencia — CUS-018: Gestionar justificación de inasistencia a sesión**
+
+![Figura 82. Diagrama 6.15.16: Secuencia — CUS-018: Gestionar justificación de inasistencia a sesión](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-018_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-018_secuencia.puml).
+
+### 6.3.3.17. CUS-019 — Consultar bitácoras de mentoría por tutor
+
+**Figura 83. Diagrama 6.15.17: Secuencia — CUS-019: Consultar bitácoras de mentoría por tutor**
+
+![Figura 83. Diagrama 6.15.17: Secuencia — CUS-019: Consultar bitácoras de mentoría por tutor](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-019_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-019_secuencia.puml).
+
+### 6.3.3.18. CUS-009 — Consultar analítica institucional de mentorías
+
+**Figura 84. Diagrama 6.15.18: Secuencia — CUS-009: Consultar analítica institucional de mentorías**
+
+![Figura 84. Diagrama 6.15.18: Secuencia — CUS-009: Consultar analítica institucional de mentorías](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-009_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-009_secuencia.puml).
+
+### 6.3.3.19. CUS-011 — Exportar reportes ejecutivos consolidados
+
+**Figura 85. Diagrama 6.15.19: Secuencia — CUS-011: Exportar reportes ejecutivos consolidados**
+
+![Figura 85. Diagrama 6.15.19: Secuencia — CUS-011: Exportar reportes ejecutivos consolidados](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-011_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-011_secuencia.puml).
+
+### 6.3.3.20. CUS-015 — Configurar parámetros del algoritmo de recomendación
+
+**Figura 86. Diagrama 6.15.20: Secuencia — CUS-015: Configurar parámetros del algoritmo de recomendación**
+
+![Figura 86. Diagrama 6.15.20: Secuencia — CUS-015: Configurar parámetros del algoritmo de recomendación](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-015_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-015_secuencia.puml).
+
+### 6.3.3.21. CUS-016 — Gestionar auditoría de eventos de seguridad
+
+**Figura 87. Diagrama 6.15.21: Secuencia — CUS-016: Gestionar auditoría de eventos de seguridad**
+
+![Figura 87. Diagrama 6.15.21: Secuencia — CUS-016: Gestionar auditoría de eventos de seguridad](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-016_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-016_secuencia.puml).
+
+### 6.3.3.22. CUS-017 — Configurar ambientes físicos y virtuales
+
+**Figura 88. Diagrama 6.15.22: Secuencia — CUS-017: Configurar ambientes físicos y virtuales**
+
+![Figura 88. Diagrama 6.15.22: Secuencia — CUS-017: Configurar ambientes físicos y virtuales](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-017_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-017_secuencia.puml).
+
+### 6.3.3.23. CUS-020 — Gestionar catálogo curricular y asignaturas
+
+**Figura 89. Diagrama 6.15.23: Secuencia — CUS-020: Gestionar catálogo curricular y asignaturas**
+
+![Figura 89. Diagrama 6.15.23: Secuencia — CUS-020: Gestionar catálogo curricular y asignaturas](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-020_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-020_secuencia.puml).
+
+### 6.3.3.24. CUS-022 — Configurar parámetros de corte y penalización
+
+**Figura 90. Diagrama 6.15.24: Secuencia — CUS-022: Configurar parámetros de corte y penalización**
+
+![Figura 90. Diagrama 6.15.24: Secuencia — CUS-022: Configurar parámetros de corte y penalización](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-022_secuencia.png)
+
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-022_secuencia.puml).
 
 ## 6.3.4. Diagrama de Clases del Modelo Lógico
 
-### Presentación del Diagrama de Clases
-El diagrama de clases del modelo lógico formaliza la estructura orientada a objetos de la solución, definiendo las responsabilidades, atributos, métodos y asociaciones entre las entidades del dominio, los servicios de aplicación y los controladores RESTful. Integra los modelos relacionales de SQLAlchemy 2.0 y los esquemas de validación Pydantic v2 en estricta consonancia con las reglas de negocio institucionales (RN-01 al RN-14). A continuación, se presenta el Diagrama General de Clases del Modelo Lógico (Diagrama 6.16), seguido de las 24 vistas lógicas parciales para cada caso de uso canónico.
-
-### Diagrama 6.16: Diagrama de Clases del Modelo Lógico del Sistema Web P2P
-
-**Figura 91. Diagrama de Clases del Modelo Lógico del Sistema Web P2P**
-
-![Figura 91. Diagrama de Clases del Modelo Lógico del Sistema Web P2P](docs/diseño/diagramas/srs/img/diag_091_sec634_clases_logico_general.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16: Diagrama de Clases del Modelo Lógico del Sistema Web P2P
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases del Modelo Lógico General - Sistema Web P2P EPIS UPT
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class Usuario {
-  -id: UUID
-  -codigo_estudiante: String
-  -email: String
-  -nombres: String
-  -apellidos: String
-  -activo: Boolean
-  +validarEmailUpt(): Boolean
-}
-
-class ConsentimientoLegal {
-  -id: UUID
-  -usuario_id: UUID
-  -ip_address: String
-  -user_agent: String
-  -fecha_aceptacion: DateTime
-}
-
-class CursoCritico {
-  -id: UUID
-  -codigo: String
-  -nombre: String
-  -ciclo: Integer
-  -es_prioritario: Boolean
-}
-
-class TemaCurricular {
-  -id: UUID
-  -curso_id: UUID
-  -unidad: Integer
-  -titulo: String
-}
-
-class OfertaMentoria {
-  -id: UUID
-  -mentor_id: UUID
-  -curso_id: UUID
-  -tema_id: UUID
-  -modalidad: String
-  -aforo_maximo: Integer
-  -fecha_inicio: DateTime
-  -estado: String
-}
-
-class SesionMentoria {
-  -id: UUID
-  -oferta_id: UUID
-  -espacio_id: UUID
-  -enlace_virtual: String
-  -estado: String
-  -quorum_alcanzado: Boolean
-}
-
-class ReservaCupo {
-  -id: UUID
-  -sesion_id: UUID
-  -mentoreado_id: UUID
-  -estado: String
-  -fecha_reserva: DateTime
-  +confirmar(): Void
-  +cancelar(): Void
-}
-
-class AsistenciaSesion {
-  -id: UUID
-  -sesion_id: UUID
-  -estudiante_id: UUID
-  -estado: String
-  -metodo_checkin: String
-  -fecha_checkin: DateTime
-}
-
-class BitacoraPedagogica {
-  -id: UUID
-  -sesion_id: UUID
-  -mentor_id: UUID
-  -temas_impartidos: Text
-  -observaciones: Text
-  -hash_sha256: String
-  -estado_visado: String
-  +calcularHash(): String
-}
-
-class CertificadoHoras {
-  -id: UUID
-  -mentor_id: UUID
-  -folio_correlativo: String
-  -horas_acreditadas: Float
-  -hash_documento: String
-  -url_qr: String
-  -fecha_emision: DateTime
-}
-
-Usuario "1" *-- "0..1" ConsentimientoLegal
-CursoCritico "1" *-- "1..*" TemaCurricular
-Usuario "1" -- "0..*" OfertaMentoria : publica
-OfertaMentoria "1" *-- "1" SesionMentoria
-SesionMentoria "1" *-- "0..*" ReservaCupo
-SesionMentoria "1" *-- "0..*" AsistenciaSesion
-SesionMentoria "1" *-- "0..1" BitacoraPedagogica
-Usuario "1" -- "0..*" CertificadoHoras : recibe
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
-
-### 6.3.4.1. CUS-001 – Vista Lógica Parcial de Clases: Iniciar sesión institucional con 2FA
-
-La vista lógica parcial para `CUS-001` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-01: Seguridad, Autenticación y Gobernanza`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.1: Diagrama de Clases Lógico Parcial - CUS-001: Iniciar sesión institucional con 2FA
-
-**Figura 92. Diagrama de Clases Lógico Parcial - CUS-001: Iniciar sesión institucional con 2FA**
-
-![Figura 92. Diagrama de Clases Lógico Parcial - CUS-001: Iniciar sesión institucional con 2FA](docs/diseño/diagramas/srs/img/diag_092_sec634_clases_logico_cus001.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.1: Diagrama de Clases Lógico Parcial - CUS-001: Iniciar sesión institucional con 2FA
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-001: Iniciar sesión institucional con 2FA\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "AuthService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "Usuario" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-01.
-
-
----
-
-### 6.3.4.2. CUS-010 – Vista Lógica Parcial de Clases: Gestionar asignación de roles de usuario
-
-La vista lógica parcial para `CUS-010` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-01: Seguridad, Autenticación y Gobernanza`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.2: Diagrama de Clases Lógico Parcial - CUS-010: Gestionar asignación de roles de usuario
-
-**Figura 93. Diagrama de Clases Lógico Parcial - CUS-010: Gestionar asignación de roles de usuario**
-
-![Figura 93. Diagrama de Clases Lógico Parcial - CUS-010: Gestionar asignación de roles de usuario](docs/diseño/diagramas/srs/img/diag_093_sec634_clases_logico_cus010.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.2: Diagrama de Clases Lógico Parcial - CUS-010: Gestionar asignación de roles de usuario
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-010: Gestionar asignación de roles de usuario\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
+### Diagrama 6.16: Vista general
 
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "RoleService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "Usuario" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-01.
-
-
----
-
-### 6.3.4.3. CUS-006 – Vista Lógica Parcial de Clases: Publicar oferta de mentoría académica
-
-La vista lógica parcial para `CUS-006` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-02: Ofertas de Mentoría y Gestión de Recursos`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.3: Diagrama de Clases Lógico Parcial - CUS-006: Publicar oferta de mentoría académica
-
-**Figura 94. Diagrama de Clases Lógico Parcial - CUS-006: Publicar oferta de mentoría académica**
-
-![Figura 94. Diagrama de Clases Lógico Parcial - CUS-006: Publicar oferta de mentoría académica](docs/diseño/diagramas/srs/img/diag_094_sec634_clases_logico_cus006.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.3: Diagrama de Clases Lógico Parcial - CUS-006: Publicar oferta de mentoría académica
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-006: Publicar oferta de mentoría académica\nSistema Web P2P - EPIS UPT
+**Figura 91. Diagrama de Clases del Modelo Lógico: vista general**
 
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
+![Figura 91. Diagrama de Clases del Modelo Lógico: vista general](docs/revision_srs/diagramas/doc-h06/srs/img/diag_091_general.png)
 
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "MentorshipService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "OfertaMentoria" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-02.
-
-
----
-
-### 6.3.4.4. CUS-008 – Vista Lógica Parcial de Clases: Consultar disponibilidad de espacios y recursos
-
-La vista lógica parcial para `CUS-008` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-02: Ofertas de Mentoría y Gestión de Recursos`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.4: Diagrama de Clases Lógico Parcial - CUS-008: Consultar disponibilidad de espacios y recursos
-
-**Figura 95. Diagrama de Clases Lógico Parcial - CUS-008: Consultar disponibilidad de espacios y recursos**
-
-![Figura 95. Diagrama de Clases Lógico Parcial - CUS-008: Consultar disponibilidad de espacios y recursos](docs/diseño/diagramas/srs/img/diag_095_sec634_clases_logico_cus008.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.4: Diagrama de Clases Lógico Parcial - CUS-008: Consultar disponibilidad de espacios y recursos
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-008: Consultar disponibilidad de espacios y recursos\nSistema Web P2P - EPIS UPT
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_091_general.puml).
 
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
+### 6.3.4.1. CUS-001 — Iniciar sesión institucional con 2FA
 
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
+**Figura 92. Diagrama 6.16.1: Clases del dominio — CUS-001: Iniciar sesión institucional con 2FA**
 
-class "SpaceService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
+![Figura 92. Diagrama 6.16.1: Clases del dominio — CUS-001: Iniciar sesión institucional con 2FA](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-001_clases.png)
 
-class "EspacioFisico" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-02.
-
-
----
-
-### 6.3.4.5. CUS-005 – Vista Lógica Parcial de Clases: Gestionar perfil formativo y disponibilidad horaria
-
-La vista lógica parcial para `CUS-005` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-03: Perfil del Mentor y Plan de Aprendizaje`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.5: Diagrama de Clases Lógico Parcial - CUS-005: Gestionar perfil formativo y disponibilidad horaria
-
-**Figura 96. Diagrama de Clases Lógico Parcial - CUS-005: Gestionar perfil formativo y disponibilidad horaria**
-
-![Figura 96. Diagrama de Clases Lógico Parcial - CUS-005: Gestionar perfil formativo y disponibilidad horaria](docs/diseño/diagramas/srs/img/diag_096_sec634_clases_logico_cus005.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.5: Diagrama de Clases Lógico Parcial - CUS-005: Gestionar perfil formativo y disponibilidad horaria
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-005: Gestionar perfil formativo y disponibilidad horaria\nSistema Web P2P - EPIS UPT
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-001_clases.puml).
 
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
+### 6.3.4.2. CUS-010 — Gestionar asignación de roles de usuario
 
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
+**Figura 93. Diagrama 6.16.2: Clases del dominio — CUS-010: Gestionar asignación de roles de usuario**
 
-class "ProfileService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
+![Figura 93. Diagrama 6.16.2: Clases del dominio — CUS-010: Gestionar asignación de roles de usuario](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-010_clases.png)
 
-class "PerfilFormativo" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-010_clases.puml).
 
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-03.
-
+### 6.3.4.3. CUS-006 — Registrar oferta de mentoría académica
 
----
-
-### 6.3.4.6. CUS-021 – Vista Lógica Parcial de Clases: Explorar catálogo curricular de asignaturas filtro
-
-La vista lógica parcial para `CUS-021` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-03: Perfil del Mentor y Plan de Aprendizaje`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.6: Diagrama de Clases Lógico Parcial - CUS-021: Explorar catálogo curricular de asignaturas filtro
-
-**Figura 97. Diagrama de Clases Lógico Parcial - CUS-021: Explorar catálogo curricular de asignaturas filtro**
-
-![Figura 97. Diagrama de Clases Lógico Parcial - CUS-021: Explorar catálogo curricular de asignaturas filtro](docs/diseño/diagramas/srs/img/diag_097_sec634_clases_logico_cus021.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
+**Figura 94. Diagrama 6.16.3: Clases del dominio — CUS-006: Registrar oferta de mentoría académica**
 
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.6: Diagrama de Clases Lógico Parcial - CUS-021: Explorar catálogo curricular de asignaturas filtro
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-021: Explorar catálogo curricular de asignaturas filtro\nSistema Web P2P - EPIS UPT
+![Figura 94. Diagrama 6.16.3: Clases del dominio — CUS-006: Registrar oferta de mentoría académica](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-006_clases.png)
 
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-006_clases.puml).
 
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
+### 6.3.4.4. CUS-008 — Gestionar demanda insatisfecha de mentoría
 
-class "CurriculumService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
+**Figura 95. Diagrama 6.16.4: Clases del dominio — CUS-008: Gestionar demanda insatisfecha de mentoría**
 
-class "CursoCritico" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
+![Figura 95. Diagrama 6.16.4: Clases del dominio — CUS-008: Gestionar demanda insatisfecha de mentoría](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-008_clases.png)
 
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-008_clases.puml).
 
-Fuente: Elaboración propia a partir del diseño de MOD-03.
+### 6.3.4.5. CUS-005 — Postular al rol de estudiante mentor
 
+**Figura 96. Diagrama 6.16.5: Clases del dominio — CUS-005: Postular al rol de estudiante mentor**
 
----
+![Figura 96. Diagrama 6.16.5: Clases del dominio — CUS-005: Postular al rol de estudiante mentor](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-005_clases.png)
 
-### 6.3.4.7. CUS-002 – Vista Lógica Parcial de Clases: Explorar recomendaciones personalizadas Top-k
-
-La vista lógica parcial para `CUS-002` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-04: Demanda y Recomendaciones Personalizadas`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.7: Diagrama de Clases Lógico Parcial - CUS-002: Explorar recomendaciones personalizadas Top-k
-
-**Figura 98. Diagrama de Clases Lógico Parcial - CUS-002: Explorar recomendaciones personalizadas Top-k**
-
-![Figura 98. Diagrama de Clases Lógico Parcial - CUS-002: Explorar recomendaciones personalizadas Top-k](docs/diseño/diagramas/srs/img/diag_098_sec634_clases_logico_cus002.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-005_clases.puml).
 
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.7: Diagrama de Clases Lógico Parcial - CUS-002: Explorar recomendaciones personalizadas Top-k
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-002: Explorar recomendaciones personalizadas Top-k\nSistema Web P2P - EPIS UPT
+### 6.3.4.6. CUS-021 — Evaluar postulaciones a mentor por comité
 
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
+**Figura 97. Diagrama 6.16.6: Clases del dominio — CUS-021: Evaluar postulaciones a mentor por comité**
 
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
+![Figura 97. Diagrama 6.16.6: Clases del dominio — CUS-021: Evaluar postulaciones a mentor por comité](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-021_clases.png)
 
-class "RecommendationService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-021_clases.puml).
 
-class "PerfilFormativo" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
+### 6.3.4.7. CUS-002 — Consultar catálogo de mentorías con recomendación
 
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
+**Figura 98. Diagrama 6.16.7: Clases del dominio — CUS-002: Consultar catálogo de mentorías con recomendación**
 
-Fuente: Elaboración propia a partir del diseño de MOD-04.
+![Figura 98. Diagrama 6.16.7: Clases del dominio — CUS-002: Consultar catálogo de mentorías con recomendación](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-002_clases.png)
 
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-002_clases.puml).
 
----
+### 6.3.4.8. CUS-003 — Reservar cupo para sesión de mentoría
 
-### 6.3.4.8. CUS-003 – Vista Lógica Parcial de Clases: Registrar solicitud de demanda académica
+**Figura 99. Diagrama 6.16.8: Clases del dominio — CUS-003: Reservar cupo para sesión de mentoría**
 
-La vista lógica parcial para `CUS-003` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-04: Demanda y Recomendaciones Personalizadas`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
+![Figura 99. Diagrama 6.16.8: Clases del dominio — CUS-003: Reservar cupo para sesión de mentoría](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-003_clases.png)
 
-#### Diagrama 6.16.8: Diagrama de Clases Lógico Parcial - CUS-003: Registrar solicitud de demanda académica
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-003_clases.puml).
 
-**Figura 99. Diagrama de Clases Lógico Parcial - CUS-003: Registrar solicitud de demanda académica**
+### 6.3.4.9. CUS-004 — Ratificar asistencia a sesión de mentoría (T-24h)
 
-![Figura 99. Diagrama de Clases Lógico Parcial - CUS-003: Registrar solicitud de demanda académica](docs/diseño/diagramas/srs/img/diag_099_sec634_clases_logico_cus003.png)
+**Figura 100. Diagrama 6.16.9: Clases del dominio — CUS-004: Ratificar asistencia a sesión de mentoría (T-24h)**
 
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
+![Figura 100. Diagrama 6.16.9: Clases del dominio — CUS-004: Ratificar asistencia a sesión de mentoría (T-24h)](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-004_clases.png)
 
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.8: Diagrama de Clases Lógico Parcial - CUS-003: Registrar solicitud de demanda académica
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-003: Registrar solicitud de demanda académica\nSistema Web P2P - EPIS UPT
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-004_clases.puml).
 
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
+### 6.3.4.10. CUS-023 — Evaluar quórum y ejecutar corte automático (T-24h)
 
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
+**Figura 101. Diagrama 6.16.10: Clases del dominio — CUS-023: Evaluar quórum y ejecutar corte automático (T-24h)**
 
-class "DemandService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
+![Figura 101. Diagrama 6.16.10: Clases del dominio — CUS-023: Evaluar quórum y ejecutar corte automático (T-24h)](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-023_clases.png)
 
-class "SolicitudDemanda" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-023_clases.puml).
 
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
+### 6.3.4.11. CUS-024 — Cancelar reserva de cupo por estudiante
 
-Fuente: Elaboración propia a partir del diseño de MOD-04.
+**Figura 102. Diagrama 6.16.11: Clases del dominio — CUS-024: Cancelar reserva de cupo por estudiante**
 
+![Figura 102. Diagrama 6.16.11: Clases del dominio — CUS-024: Cancelar reserva de cupo por estudiante](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-024_clases.png)
 
----
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-024_clases.puml).
 
-### 6.3.4.9. CUS-004 – Vista Lógica Parcial de Clases: Reservar cupo de mentoría académica
+### 6.3.4.12. CUS-007 — Registrar asistencia y bitácora pedagógica
 
-La vista lógica parcial para `CUS-004` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-05: Quórum, Confirmación y Cancelaciones`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
+**Figura 103. Diagrama 6.16.12: Clases del dominio — CUS-007: Registrar asistencia y bitácora pedagógica**
 
-#### Diagrama 6.16.9: Diagrama de Clases Lógico Parcial - CUS-004: Reservar cupo de mentoría académica
+![Figura 103. Diagrama 6.16.12: Clases del dominio — CUS-007: Registrar asistencia y bitácora pedagógica](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-007_clases.png)
 
-**Figura 100. Diagrama de Clases Lógico Parcial - CUS-004: Reservar cupo de mentoría académica**
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-007_clases.puml).
 
-![Figura 100. Diagrama de Clases Lógico Parcial - CUS-004: Reservar cupo de mentoría académica](docs/diseño/diagramas/srs/img/diag_100_sec634_clases_logico_cus004.png)
+### 6.3.4.13. CUS-012 — Registrar calificación y feedback bidireccional
 
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
+**Figura 104. Diagrama 6.16.13: Clases del dominio — CUS-012: Registrar calificación y feedback bidireccional**
 
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.9: Diagrama de Clases Lógico Parcial - CUS-004: Reservar cupo de mentoría académica
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-004: Reservar cupo de mentoría académica\nSistema Web P2P - EPIS UPT
+![Figura 104. Diagrama 6.16.13: Clases del dominio — CUS-012: Registrar calificación y feedback bidireccional](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-012_clases.png)
 
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-012_clases.puml).
 
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
+### 6.3.4.14. CUS-013 — Consultar historial académico de mentorías
 
-class "BookingService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
+**Figura 105. Diagrama 6.16.14: Clases del dominio — CUS-013: Consultar historial académico de mentorías**
 
-class "SesionMentoria" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
+![Figura 105. Diagrama 6.16.14: Clases del dominio — CUS-013: Consultar historial académico de mentorías](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-013_clases.png)
 
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-013_clases.puml).
 
-Fuente: Elaboración propia a partir del diseño de MOD-05.
+### 6.3.4.15. CUS-014 — Emitir constancia de horas de mentoría
 
+**Figura 106. Diagrama 6.16.15: Clases del dominio — CUS-014: Emitir constancia de horas de mentoría**
 
----
+![Figura 106. Diagrama 6.16.15: Clases del dominio — CUS-014: Emitir constancia de horas de mentoría](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-014_clases.png)
 
-### 6.3.4.10. CUS-024 – Vista Lógica Parcial de Clases: Ratificar asistencia a sesión de mentoría
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-014_clases.puml).
 
-La vista lógica parcial para `CUS-024` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-05: Quórum, Confirmación y Cancelaciones`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
+### 6.3.4.16. CUS-018 — Gestionar justificación de inasistencia a sesión
 
-#### Diagrama 6.16.10: Diagrama de Clases Lógico Parcial - CUS-024: Ratificar asistencia a sesión de mentoría
+**Figura 107. Diagrama 6.16.16: Clases del dominio — CUS-018: Gestionar justificación de inasistencia a sesión**
 
-**Figura 101. Diagrama de Clases Lógico Parcial - CUS-024: Ratificar asistencia a sesión de mentoría**
+![Figura 107. Diagrama 6.16.16: Clases del dominio — CUS-018: Gestionar justificación de inasistencia a sesión](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-018_clases.png)
 
-![Figura 101. Diagrama de Clases Lógico Parcial - CUS-024: Ratificar asistencia a sesión de mentoría](docs/diseño/diagramas/srs/img/diag_101_sec634_clases_logico_cus024.png)
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-018_clases.puml).
 
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
+### 6.3.4.17. CUS-019 — Consultar bitácoras de mentoría por tutor
 
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.10: Diagrama de Clases Lógico Parcial - CUS-024: Ratificar asistencia a sesión de mentoría
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-024: Ratificar asistencia a sesión de mentoría\nSistema Web P2P - EPIS UPT
+**Figura 108. Diagrama 6.16.17: Clases del dominio — CUS-019: Consultar bitácoras de mentoría por tutor**
 
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
+![Figura 108. Diagrama 6.16.17: Clases del dominio — CUS-019: Consultar bitácoras de mentoría por tutor](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-019_clases.png)
 
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-019_clases.puml).
 
-class "BookingService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
+### 6.3.4.18. CUS-009 — Consultar analítica institucional de mentorías
 
-class "ReservaCupo" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
+**Figura 109. Diagrama 6.16.18: Clases del dominio — CUS-009: Consultar analítica institucional de mentorías**
 
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
+![Figura 109. Diagrama 6.16.18: Clases del dominio — CUS-009: Consultar analítica institucional de mentorías](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-009_clases.png)
 
-Fuente: Elaboración propia a partir del diseño de MOD-05.
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-009_clases.puml).
 
+### 6.3.4.19. CUS-011 — Exportar reportes ejecutivos consolidados
 
----
+**Figura 110. Diagrama 6.16.19: Clases del dominio — CUS-011: Exportar reportes ejecutivos consolidados**
 
-### 6.3.4.11. CUS-017 – Vista Lógica Parcial de Clases: Desistir voluntariamente de reserva
+![Figura 110. Diagrama 6.16.19: Clases del dominio — CUS-011: Exportar reportes ejecutivos consolidados](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-011_clases.png)
 
-La vista lógica parcial para `CUS-017` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-05: Quórum, Confirmación y Cancelaciones`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-011_clases.puml).
 
-#### Diagrama 6.16.11: Diagrama de Clases Lógico Parcial - CUS-017: Desistir voluntariamente de reserva
+### 6.3.4.20. CUS-015 — Configurar parámetros del algoritmo de recomendación
 
-**Figura 102. Diagrama de Clases Lógico Parcial - CUS-017: Desistir voluntariamente de reserva**
+**Figura 111. Diagrama 6.16.20: Clases del dominio — CUS-015: Configurar parámetros del algoritmo de recomendación**
 
-![Figura 102. Diagrama de Clases Lógico Parcial - CUS-017: Desistir voluntariamente de reserva](docs/diseño/diagramas/srs/img/diag_102_sec634_clases_logico_cus017.png)
+![Figura 111. Diagrama 6.16.20: Clases del dominio — CUS-015: Configurar parámetros del algoritmo de recomendación](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-015_clases.png)
 
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-015_clases.puml).
 
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.11: Diagrama de Clases Lógico Parcial - CUS-017: Desistir voluntariamente de reserva
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-017: Desistir voluntariamente de reserva\nSistema Web P2P - EPIS UPT
+### 6.3.4.21. CUS-016 — Gestionar auditoría de eventos de seguridad
 
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
+**Figura 112. Diagrama 6.16.21: Clases del dominio — CUS-016: Gestionar auditoría de eventos de seguridad**
 
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
+![Figura 112. Diagrama 6.16.21: Clases del dominio — CUS-016: Gestionar auditoría de eventos de seguridad](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-016_clases.png)
 
-class "BookingService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-016_clases.puml).
 
-class "ReservaCupo" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
+### 6.3.4.22. CUS-017 — Configurar ambientes físicos y virtuales
 
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
+**Figura 113. Diagrama 6.16.22: Clases del dominio — CUS-017: Configurar ambientes físicos y virtuales**
 
-Fuente: Elaboración propia a partir del diseño de MOD-05.
+![Figura 113. Diagrama 6.16.22: Clases del dominio — CUS-017: Configurar ambientes físicos y virtuales](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-017_clases.png)
 
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-017_clases.puml).
 
----
+### 6.3.4.23. CUS-020 — Gestionar catálogo curricular y asignaturas
 
-### 6.3.4.12. CUS-023 – Vista Lógica Parcial de Clases: Evaluar quórum automático a T-24h
+**Figura 114. Diagrama 6.16.23: Clases del dominio — CUS-020: Gestionar catálogo curricular y asignaturas**
 
-La vista lógica parcial para `CUS-023` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-05: Quórum, Confirmación y Cancelaciones`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
+![Figura 114. Diagrama 6.16.23: Clases del dominio — CUS-020: Gestionar catálogo curricular y asignaturas](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-020_clases.png)
 
-#### Diagrama 6.16.12: Diagrama de Clases Lógico Parcial - CUS-023: Evaluar quórum automático a T-24h
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-020_clases.puml).
 
-**Figura 103. Diagrama de Clases Lógico Parcial - CUS-023: Evaluar quórum automático a T-24h**
+### 6.3.4.24. CUS-022 — Configurar parámetros de corte y penalización
 
-![Figura 103. Diagrama de Clases Lógico Parcial - CUS-023: Evaluar quórum automático a T-24h](docs/diseño/diagramas/srs/img/diag_103_sec634_clases_logico_cus023.png)
+**Figura 115. Diagrama 6.16.24: Clases del dominio — CUS-022: Configurar parámetros de corte y penalización**
 
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
+![Figura 115. Diagrama 6.16.24: Clases del dominio — CUS-022: Configurar parámetros de corte y penalización](docs/revision_srs/diagramas/doc-h06/srs/img/CUS-022_clases.png)
 
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.12: Diagrama de Clases Lógico Parcial - CUS-023: Evaluar quórum automático a T-24h
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-023: Evaluar quórum automático a T-24h\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "QuorumCronService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "SesionMentoria" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-05.
-
-
----
-
-### 6.3.4.13. CUS-007 – Vista Lógica Parcial de Clases: Decisión del mentor ante quórum insuficiente
-
-La vista lógica parcial para `CUS-007` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-05: Quórum, Confirmación y Cancelaciones`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.13: Diagrama de Clases Lógico Parcial - CUS-007: Decisión del mentor ante quórum insuficiente
-
-**Figura 104. Diagrama de Clases Lógico Parcial - CUS-007: Decisión del mentor ante quórum insuficiente**
-
-![Figura 104. Diagrama de Clases Lógico Parcial - CUS-007: Decisión del mentor ante quórum insuficiente](docs/diseño/diagramas/srs/img/diag_104_sec634_clases_logico_cus007.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.13: Diagrama de Clases Lógico Parcial - CUS-007: Decisión del mentor ante quórum insuficiente
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-007: Decisión del mentor ante quórum insuficiente\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "MentorshipService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "SesionMentoria" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-05.
-
-
----
-
-### 6.3.4.14. CUS-012 – Vista Lógica Parcial de Clases: Registrar asistencia a sesión de mentoría
-
-La vista lógica parcial para `CUS-012` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-06: Asistencia, Bitácoras y Feedback`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.14: Diagrama de Clases Lógico Parcial - CUS-012: Registrar asistencia a sesión de mentoría
-
-**Figura 105. Diagrama de Clases Lógico Parcial - CUS-012: Registrar asistencia a sesión de mentoría**
-
-![Figura 105. Diagrama de Clases Lógico Parcial - CUS-012: Registrar asistencia a sesión de mentoría](docs/diseño/diagramas/srs/img/diag_105_sec634_clases_logico_cus012.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.14: Diagrama de Clases Lógico Parcial - CUS-012: Registrar asistencia a sesión de mentoría
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-012: Registrar asistencia a sesión de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "AttendanceService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "AsistenciaSesion" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-06.
-
-
----
-
-### 6.3.4.15. CUS-013 – Vista Lógica Parcial de Clases: Registrar bitácora académica de sesión
-
-La vista lógica parcial para `CUS-013` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-06: Asistencia, Bitácoras y Feedback`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.15: Diagrama de Clases Lógico Parcial - CUS-013: Registrar bitácora académica de sesión
-
-**Figura 106. Diagrama de Clases Lógico Parcial - CUS-013: Registrar bitácora académica de sesión**
-
-![Figura 106. Diagrama de Clases Lógico Parcial - CUS-013: Registrar bitácora académica de sesión](docs/diseño/diagramas/srs/img/diag_106_sec634_clases_logico_cus013.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.15: Diagrama de Clases Lógico Parcial - CUS-013: Registrar bitácora académica de sesión
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-013: Registrar bitácora académica de sesión\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "BitacoraService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "BitacoraPedagogica" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-06.
-
-
----
-
-### 6.3.4.16. CUS-014 – Vista Lógica Parcial de Clases: Visualizar historial y bitácoras académicas
-
-La vista lógica parcial para `CUS-014` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-06: Asistencia, Bitácoras y Feedback`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.16: Diagrama de Clases Lógico Parcial - CUS-014: Visualizar historial y bitácoras académicas
-
-**Figura 107. Diagrama de Clases Lógico Parcial - CUS-014: Visualizar historial y bitácoras académicas**
-
-![Figura 107. Diagrama de Clases Lógico Parcial - CUS-014: Visualizar historial y bitácoras académicas](docs/diseño/diagramas/srs/img/diag_107_sec634_clases_logico_cus014.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.16: Diagrama de Clases Lógico Parcial - CUS-014: Visualizar historial y bitácoras académicas
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-014: Visualizar historial y bitácoras académicas\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "BitacoraService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "BitacoraPedagogica" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-06.
-
-
----
-
-### 6.3.4.17. CUS-018 – Vista Lógica Parcial de Clases: Emitir constancia institucional de horas de mentoría
-
-La vista lógica parcial para `CUS-018` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-07: Gamificación e Incentivos`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.17: Diagrama de Clases Lógico Parcial - CUS-018: Emitir constancia institucional de horas de mentoría
-
-**Figura 108. Diagrama de Clases Lógico Parcial - CUS-018: Emitir constancia institucional de horas de mentoría**
-
-![Figura 108. Diagrama de Clases Lógico Parcial - CUS-018: Emitir constancia institucional de horas de mentoría](docs/diseño/diagramas/srs/img/diag_108_sec634_clases_logico_cus018.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.17: Diagrama de Clases Lógico Parcial - CUS-018: Emitir constancia institucional de horas de mentoría
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-018: Emitir constancia institucional de horas de mentoría\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "CertificateService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "CertificadoHoras" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-07.
-
-
----
-
-### 6.3.4.18. CUS-019 – Vista Lógica Parcial de Clases: Gestionar insignias y reputación gamificada
-
-La vista lógica parcial para `CUS-019` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-07: Gamificación e Incentivos`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.18: Diagrama de Clases Lógico Parcial - CUS-019: Gestionar insignias y reputación gamificada
-
-**Figura 109. Diagrama de Clases Lógico Parcial - CUS-019: Gestionar insignias y reputación gamificada**
-
-![Figura 109. Diagrama de Clases Lógico Parcial - CUS-019: Gestionar insignias y reputación gamificada](docs/diseño/diagramas/srs/img/diag_109_sec634_clases_logico_cus019.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.18: Diagrama de Clases Lógico Parcial - CUS-019: Gestionar insignias y reputación gamificada
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-019: Gestionar insignias y reputación gamificada\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "GamificationService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "Insignia" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-07.
-
-
----
-
-### 6.3.4.19. CUS-009 – Vista Lógica Parcial de Clases: Notificar eventos críticos y alertas temporales
-
-La vista lógica parcial para `CUS-009` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-08: Analítica, Notificaciones y Configuración`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.19: Diagrama de Clases Lógico Parcial - CUS-009: Notificar eventos críticos y alertas temporales
-
-**Figura 110. Diagrama de Clases Lógico Parcial - CUS-009: Notificar eventos críticos y alertas temporales**
-
-![Figura 110. Diagrama de Clases Lógico Parcial - CUS-009: Notificar eventos críticos y alertas temporales](docs/diseño/diagramas/srs/img/diag_110_sec634_clases_logico_cus009.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.19: Diagrama de Clases Lógico Parcial - CUS-009: Notificar eventos críticos y alertas temporales
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-009: Notificar eventos críticos y alertas temporales\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "NotificationService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "Notificacion" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.4.20. CUS-011 – Vista Lógica Parcial de Clases: Generar reportes e indicadores de analítica académica
-
-La vista lógica parcial para `CUS-011` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-08: Analítica, Notificaciones y Configuración`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.20: Diagrama de Clases Lógico Parcial - CUS-011: Generar reportes e indicadores de analítica académica
-
-**Figura 111. Diagrama de Clases Lógico Parcial - CUS-011: Generar reportes e indicadores de analítica académica**
-
-![Figura 111. Diagrama de Clases Lógico Parcial - CUS-011: Generar reportes e indicadores de analítica académica](docs/diseño/diagramas/srs/img/diag_111_sec634_clases_logico_cus011.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.20: Diagrama de Clases Lógico Parcial - CUS-011: Generar reportes e indicadores de analítica académica
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-011: Generar reportes e indicadores de analítica académica\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "AnalyticsService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "KpiAcademico" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.4.21. CUS-015 – Vista Lógica Parcial de Clases: Consultar métricas de retención y desempeño
-
-La vista lógica parcial para `CUS-015` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-08: Analítica, Notificaciones y Configuración`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.21: Diagrama de Clases Lógico Parcial - CUS-015: Consultar métricas de retención y desempeño
-
-**Figura 112. Diagrama de Clases Lógico Parcial - CUS-015: Consultar métricas de retención y desempeño**
-
-![Figura 112. Diagrama de Clases Lógico Parcial - CUS-015: Consultar métricas de retención y desempeño](docs/diseño/diagramas/srs/img/diag_112_sec634_clases_logico_cus015.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.21: Diagrama de Clases Lógico Parcial - CUS-015: Consultar métricas de retención y desempeño
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-015: Consultar métricas de retención y desempeño\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "AnalyticsService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "KpiAcademico" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.4.22. CUS-016 – Vista Lógica Parcial de Clases: Auditar trazas de seguridad y consentimiento Ley 29733
-
-La vista lógica parcial para `CUS-016` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-08: Analítica, Notificaciones y Configuración`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.22: Diagrama de Clases Lógico Parcial - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733
-
-**Figura 113. Diagrama de Clases Lógico Parcial - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733**
-
-![Figura 113. Diagrama de Clases Lógico Parcial - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733](docs/diseño/diagramas/srs/img/diag_113_sec634_clases_logico_cus016.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.22: Diagrama de Clases Lógico Parcial - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-016: Auditar trazas de seguridad y consentimiento Ley 29733\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "AuditService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "ConsentimientoLegal" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.4.23. CUS-020 – Vista Lógica Parcial de Clases: Configurar parámetros institucionales y umbrales
-
-La vista lógica parcial para `CUS-020` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-08: Analítica, Notificaciones y Configuración`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.23: Diagrama de Clases Lógico Parcial - CUS-020: Configurar parámetros institucionales y umbrales
-
-**Figura 114. Diagrama de Clases Lógico Parcial - CUS-020: Configurar parámetros institucionales y umbrales**
-
-![Figura 114. Diagrama de Clases Lógico Parcial - CUS-020: Configurar parámetros institucionales y umbrales](docs/diseño/diagramas/srs/img/diag_114_sec634_clases_logico_cus020.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.23: Diagrama de Clases Lógico Parcial - CUS-020: Configurar parámetros institucionales y umbrales
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-020: Configurar parámetros institucionales y umbrales\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "AdminService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "ParametroInstitucional" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
-
-### 6.3.4.24. CUS-022 – Vista Lógica Parcial de Clases: Gestionar catálogo de temas y materias críticas
-
-La vista lógica parcial para `CUS-022` delimita el conjunto de clases de dominio, servicios de aplicación y adaptadores de infraestructura que participan en la ejecución del caso de uso dentro de `MOD-08: Analítica, Notificaciones y Configuración`. Se explicitan los atributos privados fuertemente tipados, las operaciones públicas de verificación de negocio y las relaciones estructurales de composición y dependencia.
-
-#### Diagrama 6.16.24: Diagrama de Clases Lógico Parcial - CUS-022: Gestionar catálogo de temas y materias críticas
-
-**Figura 115. Diagrama de Clases Lógico Parcial - CUS-022: Gestionar catálogo de temas y materias críticas**
-
-![Figura 115. Diagrama de Clases Lógico Parcial - CUS-022: Gestionar catálogo de temas y materias críticas](docs/diseño/diagramas/srs/img/diag_115_sec634_clases_logico_cus022.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.16.24: Diagrama de Clases Lógico Parcial - CUS-022: Gestionar catálogo de temas y materias críticas
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama de Clases Lógico Parcial - CUS-022: Gestionar catálogo de temas y materias críticas\nSistema Web P2P - EPIS UPT
-
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
-
-skinparam class {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-class "CurriculumService" as Controller {
-  +ejecutarOperacion(payload: DTO): ResponseDTO
-  -validarReglasNegocio(db: Session): Boolean
-}
-
-class "CursoCritico" as Entity {
-  -id: UUID
-  -estado: String
-  -fecha_creacion: DateTime
-  +actualizarEstado(nuevo: String): Void
-}
-
-Controller ..> Entity : manipula
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir del diseño de MOD-08.
-
-
----
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/CUS-022_clases.puml).
 
 ## 6.3.5. Diagramas de Máquinas de Estados Finitas (FSM)
 
-### Presentación de las Máquinas de Estados Finitas
-Para garantizar el determinismo, la integridad referencial y el cumplimiento riguroso de las reglas de negocio institucionales (RN-05, RN-08, RN-09, RN-10, RN-12, RN-14), el ciclo de vida de las entidades neurálgicas del sistema se formaliza mediante Máquinas de Estados Finitas (*Finite State Machines - FSM*). Las transiciones de estado están gobernadas por constraints a nivel de base de datos (`chk_sesion_estado`, `chk_reserva_estado`, `chk_bitacora_visado`) y por verificadores lógicos de precondiciones en los servicios de backend.
+Los estados permitidos por una restricción física no equivalen a transiciones efectivamente ejecutadas. `sesiones_mentoria` admite 13 valores y `reservas_cupo` nueve; se conservan las variantes históricas. El corte escribe `CANCELADA_NO_CONFIRMADA`, mientras la cancelación del mentor escribe `CANCELADA_SISTEMA_QUORUM` en reservas afectadas. No sustituir estos valores por nombres conceptuales ni inferir un paso de tiempo automático a EN_CURSO, CONCLUIDA o FINALIZADA sin invocación del servicio.
 
-### Diagrama 6.17: Máquina de Estados Finitos - Ciclo de Vida de SesionMentoria
+La asistencia se registra mediante reserva confirmada y pase vigente, en la ventana inicio −15 min a **fin +30 min**. El pase contiene token hash y código aleatorio con vencimiento de 30 segundos y respaldo en `tokens_asistencia_activos`; no implementa TOTP basado en secreto compartido. La prueba de cámara en dispositivo real continúa pendiente.
 
-**Figura 116. Máquina de Estados Finitos - Ciclo de Vida de SesionMentoria**
+La bitácora carece de columna `estado`: contiene `visado_administrador`; el servicio actualiza también `sesiones_mentoria.estado` a BITACORA_REGISTRADA, HORAS_VISADAS u OBSERVADA. El plazo de registro es fin +48 h. La encuesta del asistente dispone de 24 h tras la sesión y no equivale a feedback individual inverso. Los certificados almacenan `EMITIDO_DEMO` o `EMITIDO` según el servicio, sin que el texto del estado pruebe validez institucional. Se mantiene RN-14 como requisito pendiente de autorización y validación externa.
 
-![Figura 116. Máquina de Estados Finitos - Ciclo de Vida de SesionMentoria](docs/diseño/diagramas/srs/img/diag_116_sec635_fsm_sesion_mentoria.png)
+### Diagrama 6.17: Sesión de mentoría
 
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
+**Figura 116. Estados: Sesión de mentoría**
 
-```plantuml
-/'
-  Diagrama: Diagrama 6.17: Máquina de Estados Finitos - Ciclo de Vida de SesionMentoria
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.17: FSM del Ciclo de Vida de SesionMentoria\nSistema Web P2P - EPIS UPT
+![Figura 116. Estados: Sesión de mentoría](docs/revision_srs/diagramas/doc-h06/srs/img/diag_116_fsm_sesion.png)
 
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_116_fsm_sesion.puml).
 
-skinparam state {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
+### Diagrama 6.18: Reserva de cupo
 
-[*] --> PROGRAMADA : Publicación de Oferta (RN-04: T >= 24h)
+**Figura 117. Estados: Reserva de cupo**
 
-state PROGRAMADA {
-  PROGRAMADA : Acepta reservas concurrentes
-  PROGRAMADA : Ventana de confirmación abierta
-}
+![Figura 117. Estados: Reserva de cupo](docs/revision_srs/diagramas/doc-h06/srs/img/diag_117_fsm_reserva.png)
 
-PROGRAMADA --> CONFIRMADA : Corte T-24h y Quórum >= 50% (RN-09)
-PROGRAMADA --> QUORUM_INSUFICIENTE : Corte T-24h y Quórum < 50% (RN-09)
-PROGRAMADA --> CANCELADA_MENTOR : Cancelación justificada por el mentor (RN-10)
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_117_fsm_reserva.puml).
 
-state QUORUM_INSUFICIENTE {
-  QUORUM_INSUFICIENTE : Espera resolución del mentor
-}
+### Diagrama 6.19: Bitácora y certificado
 
-QUORUM_INSUFICIENTE --> CONFIRMADA : Mentor decide continuar (RN-09)
-QUORUM_INSUFICIENTE --> CANCELADA_QUORUM : Mentor cancela por falta de quórum (RN-10)
+**Figura 118. Estados: Bitácora y certificado**
 
-state CONFIRMADA {
-  CONFIRMADA : Espacio asegurado (Aula/Virtual)
-  CONFIRMADA : Notificación enviada a participantes
-}
+![Figura 118. Estados: Bitácora y certificado](docs/revision_srs/diagramas/doc-h06/srs/img/diag_118_fsm_bitacora.png)
 
-CONFIRMADA --> EN_CURSO : Hora de inicio de la sesión
-CONFIRMADA --> CANCELADA_MENTOR : Imprevisto de fuerza mayor justificado
-
-state EN_CURSO {
-  EN_CURSO : Marcación QR TOTP activa
-  EN_CURSO : Desarrollo de contenidos
-}
-
-EN_CURSO --> FINALIZADA : Cierre de sesión y registro de bitácora en 48h (RN-12)
-
-state FINALIZADA {
-  FINALIZADA : Bitácora firmada con SHA-256
-  FINALIZADA : Encuesta habilitada por 24h (RN-13)
-  FINALIZADA : Horas acumuladas para auditoría
-}
-
-CANCELADA_QUORUM --> [*] : Recursos liberados
-CANCELADA_MENTOR --> [*] : Recursos liberados
-FINALIZADA --> [*]
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de los constraints de PostgreSQL (`chk_sesion_estado`).
-
----
-
-### Diagrama 6.18: Máquina de Estados Finitos - Ciclo de Vida de ReservaCupo
-
-**Figura 117. Máquina de Estados Finitos - Ciclo de Vida de ReservaCupo**
-
-![Figura 117. Máquina de Estados Finitos - Ciclo de Vida de ReservaCupo](docs/diseño/diagramas/srs/img/diag_117_sec635_fsm_reserva_cupo.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.18: Máquina de Estados Finitos - Ciclo de Vida de ReservaCupo
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.18: FSM del Ciclo de Vida de ReservaCupo\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam state {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-[*] --> PENDIENTE_CONFIRMACION : Reserva de cupo con cerrojo pesimista FOR UPDATE (RN-05)
-
-state PENDIENTE_CONFIRMACION {
-  PENDIENTE_CONFIRMACION : Cupo bloqueado temporalmente
-  PENDIENTE_CONFIRMACION : Ventana abierta hasta T-24h
-}
-
-PENDIENTE_CONFIRMACION --> CONFIRMADA : Estudiante ratifica asistencia antes de T-24h (RN-08)
-PENDIENTE_CONFIRMACION --> CANCELADA_USUARIO : Estudiante desiste voluntariamente antes de T-24h (RN-10)
-PENDIENTE_CONFIRMACION --> NO_CONFIRMADA : Vence plazo T-24h sin ratificación (RN-08)
-
-state CONFIRMADA {
-  CONFIRMADA : Computa formalmente para quórum
-  CONFIRMADA : Pase QR dinámico habilitado
-}
-
-CONFIRMADA --> CANCELADA_USUARIO : Desistimiento extraordinario justificado
-CONFIRMADA --> ASISTIO : Check-in exitoso con pase QR TOTP o lista (RN-12)
-CONFIRMADA --> INASISTENCIA : Cierre de bitácora sin registro de check-in (RN-12)
-
-state ASISTIO {
-  ASISTIO : Habilitado para responder encuesta (24h)
-}
-
-state INASISTENCIA {
-  INASISTENCIA : Inhabilitado para evaluar
-}
-
-NO_CONFIRMADA --> [*] : Cupo liberado inmediatamente
-CANCELADA_USUARIO --> [*] : Cupo liberado inmediatamente
-ASISTIO --> [*]
-INASISTENCIA --> [*]
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia a partir de los constraints de PostgreSQL (`chk_reserva_estado`).
-
----
-
-### Diagrama 6.19: Máquina de Estados Finitos - Ciclo de Vida de BitacoraPedagogica y CertificadoHoras
-
-**Figura 118. Máquina de Estados Finitos - Ciclo de Vida de BitacoraPedagogica y CertificadoHoras**
-
-![Figura 118. Máquina de Estados Finitos - Ciclo de Vida de BitacoraPedagogica y CertificadoHoras](docs/diseño/diagramas/srs/img/diag_118_sec635_fsm_bitacora_certificado.png)
-
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
-
-```plantuml
-/'
-  Diagrama: Diagrama 6.19: Máquina de Estados Finitos - Ciclo de Vida de BitacoraPedagogica y CertificadoHoras
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.19: FSM de BitacoraPedagogica y CertificadoHoras\nSistema Web P2P - EPIS UPT
-
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 11
-
-skinparam state {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
-
-[*] --> PENDIENTE_REGISTRO : Sesión culminada (Ventana perentoria de 48h - RN-12)
-
-state PENDIENTE_REGISTRO {
-  PENDIENTE_REGISTRO : Espera reporte temático y asistencia
-}
-
-PENDIENTE_REGISTRO --> REGISTRADA : Mentor envía bitácora con hash SHA-256
-PENDIENTE_REGISTRO --> VENCIDA_NO_REGISTRADA : Expiran 48h sin registro (horas no computables)
-
-state REGISTRADA {
-  REGISTRADA : Sometida a fiscalización administrativa
-}
-
-REGISTRADA --> VISADA_APROBADA : Comisión de Tutoría aprueba contenidos (RN-14)
-REGISTRADA --> OBSERVADA : Discrepancia temática o documental
-
-state OBSERVADA {
-  OBSERVADA : Requiere subsanación por el mentor
-}
-
-OBSERVADA --> REGISTRADA : Mentor subsana observaciones
-
-state VISADA_APROBADA {
-  VISADA_APROBADA : Horas computables formalmente
-}
-
-VISADA_APROBADA --> CERTIFICADO_EMITIDO : Suma >= 20 horas semestrales auditadas (RN-14)
-
-state CERTIFICADO_EMITIDO {
-  CERTIFICADO_EMITIDO : Folio correlativo institucional asignado
-  CERTIFICADO_EMITIDO : Documento PDF/A compilado con ReportLab
-  CERTIFICADO_EMITIDO : Código QR institucional de validación en línea
-}
-
-CERTIFICADO_EMITIDO --> [*]
-VENCIDA_NO_REGISTRADA --> [*]
-@enduml
-```
-</details>
-
-Fuente: Elaboración propia.
-
----
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_118_fsm_bitacora.puml).
 
 ## 6.3.6. Modelo Físico de Base de Datos Relacional y Diccionario DDL
 
-### Presentación del Modelo Físico
-El modelo físico de base de datos materializa la arquitectura de persistencia sobre el motor relacional **PostgreSQL v15+ (Supabase)**. Está compuesto por **15 tablas físicas relacionales**, estructuradas bajo la Tercera Forma Normal (3FN), con tipos de datos nativos fuertemente tipados, claves primarias basadas en UUID v4 para prevenir la enumeración de recursos, restricciones de integridad referencial con cascadas controladas (`ON DELETE CASCADE` / `ON DELETE RESTRICT`), índices de cobertura para optimización de consultas concurrentes y políticas de seguridad a nivel de fila (**Row Level Security - RLS**) en cumplimiento vinculante de la Ley N° 29733 de Protección de Datos Personales del Perú.
+El inventario vigente declara **19 tablas ORM**, no 15. No se ha consultado ni alterado una base de datos durante DOC-H06; el modelo físico documentado corresponde a código y migraciones, sin acreditar su despliegue. Los correos son identificadores en varias tablas: no hay tabla ORM `usuarios`, `espacios_fisicos`, `ofertas_mentoria`, `codigos_otp`, `perfiles_formativos`, `reservas_cupos` ni `asistencias_sesiones` en esta línea base. Los nombres vigentes son los del diccionario siguiente.
 
-### Diagrama 6.20: Diagrama Entidad-Relación Físico (15 Tablas Relacionales) - PostgreSQL
+Se dibujan exclusivamente claves foráneas declaradas; los correos repetidos y `id_mentor` no se convierten en FK ficticias. `sesiones_mentoria` contiene la oferta y la sesión; `espacio_asignado` es texto. La disponibilidad y los cronogramas son entidades distintas.
 
-**Figura 119. Diagrama Entidad-Relación Físico (15 Tablas Relacionales) - PostgreSQL**
+La cabeza de migraciones es `20261123_008`: une `20261116_006` (límites de autenticación) con `20261121_007` (cronogramas), que desciende de `20261121_006` (alineación del cierre). Esta última conserva columnas históricas auxiliares y transforma bitácoras, encuestas y certificados; por ello el ORM no es un volcado completo de columnas residuales de una instalación migrada. Cuando hay certificados repetidos, la migración conserva revisiones mediante `revision_historica` y una unicidad de tres columnas; el modelo declara unicidad de mentor y período. Esta diferencia de compatibilidad requiere comprobación por instalación y no se oculta como igualdad exacta.
 
-![Figura 119. Diagrama Entidad-Relación Físico (15 Tablas Relacionales) - PostgreSQL](docs/diseño/diagramas/srs/img/diag_119_sec636_der_fisico_15tablas.png)
+Los modelos incluyen desafíos y límites de autenticación, tokens activos de asistencia y cronogramas persistentes. Esto corrige la auditoría antigua que los describía exclusivamente en memoria o ausentes de migraciones. Existen rutas de respaldo en memoria en desarrollo/pruebas: no se consideran persistencia durable ni garantía multiworker. Las políticas RLS históricas se conservan en los documentos de referencia; no se certifican activas por la existencia de controles de autorización en FastAPI.
 
-<details>
-<summary>Código fuente PlantUML (respaldo editable)</summary>
+### Diagrama 6.20: Modelo físico vigente de 19 tablas
 
-```plantuml
-/'
-  Diagrama: Diagrama 6.20: Diagrama Entidad-Relación Físico (15 Tablas Relacionales) - PostgreSQL
-  Proyecto: Sistema Web P2P de Mentorías Académicas - EPIS UPT
-  Estándar: Visual Paradigm / UML 2.5
-  Extracción automatizada: Fase D02 (H03)
-'/
-@startuml
-title Diagrama 6.20: Diagrama Entidad-Relación Físico (15 Tablas Relacionales)\nSistema Web P2P - PostgreSQL / Supabase
-hide circle
-skinparam linetype ortho
-skinparam shadowing false
-skinparam roundcorner 8
-skinparam defaultFontName Arial
-skinparam fontSize 10
+**Figura 119. Modelo físico declarado: 19 tablas**
 
-skinparam entity {
-    BackgroundColor #F8F9FA
-    BorderColor #2B3A42
-    ArrowColor #2B3A42
-}
+![Figura 119. Modelo físico declarado: 19 tablas](docs/revision_srs/diagramas/doc-h06/srs/img/diag_119_der_19tablas.png)
 
-entity "usuarios" as tbl_usuarios {
-  *id : uuid <<PK>>
-  --
-  *codigo_estudiante : varchar(20) <<UQ>>
-  *email : varchar(100) <<UQ>>
-  *nombres : varchar(100)
-  *apellidos : varchar(100)
-  *activo : boolean
-  *created_at : timestamptz
-}
+Fuente: Elaboración propia, DOC-H06. [Fuente PlantUML](docs/revision_srs/diagramas/doc-h06/srs/puml/diag_119_der_19tablas.puml).
 
-entity "roles" as tbl_roles {
-  *id : integer <<PK>>
-  --
-  *codigo : varchar(30) <<UQ>>
-  *nombre : varchar(50)
-}
+### Diccionario de datos del modelo físico vigente
 
-entity "usuario_roles" as tbl_usuario_roles {
-  *usuario_id : uuid <<PK, FK>>
-  *rol_id : integer <<PK, FK>>
-  --
-  *asignado_en : timestamptz
-}
+#### 1. Tabla `asignaturas`
+Fuente: [Asignatura](aplicacion/backend/app/models/curriculum.py).
 
-entity "consentimientos_legales" as tbl_consentimientos {
-  *id : uuid <<PK>>
-  --
-  *usuario_id : uuid <<FK, UQ>>
-  *ip_address : varchar(45)
-  *user_agent : text
-  *version_politica : varchar(20)
-  *aceptado_en : timestamptz
-}
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_asignatura | Integer | No | PK |
+| codigo_curso | String(20) | No | UNIQUE |
+| nombre_curso | String(150) | No |  |
+| ciclo_plan | Integer | No |  |
+| creditos | Integer | No |  |
+| es_prioritaria | Boolean | No |  / default: True |
+| factor_ponderacion | Float | No |  / default: 1.0 |
+| estado_activo | Boolean | No |  / default: True |
+| created_at | DateTime(timezone=True) | No |  / default: UTC al crear |
 
-entity "codigos_otp" as tbl_otp {
-  *id : uuid <<PK>>
-  --
-  *email : varchar(100)
-  *codigo_hash : varchar(64)
-  *intentos : integer
-  *expira_en : timestamptz
-  *consumido : boolean
-}
+#### 2. Tabla `asistencias_sesion`
+Fuente: [AsistenciaSesion](aplicacion/backend/app/models/attendance.py).
 
-entity "perfiles_formativos" as tbl_perfiles {
-  *id : uuid <<PK>>
-  --
-  *usuario_id : uuid <<FK, UQ>>
-  *biografia : text
-  *ciclo_actual : integer
-  *reputacion : numeric(3,2)
-  *horas_acumuladas : numeric(5,2)
-}
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_asistencia | Integer | No | PK |
+| id_sesion | Integer | No | FK sesiones_mentoria.id_sesion; ON DELETE CASCADE |
+| estudiante_email | String(255) | No |  |
+| asistio | Boolean | No |  / default: False |
+| fecha_checkin | DateTime(timezone=True) | Sí |  |
+| ip_origen | String(45) | Sí |  |
+| created_at | DateTime(timezone=True) | No |  / default: UTC al crear |
 
-entity "disponibilidades_horarias" as tbl_disponibilidad {
-  *id : uuid <<PK>>
-  --
-  *usuario_id : uuid <<FK>>
-  *dia_semana : integer <<CHECK 1-6>>
-  *hora_inicio : time
-  *hora_fin : time
-}
+Restricciones declaradas: `UniqueConstraint('id_sesion', 'estudiante_email')`.
 
-entity "cursos_criticos" as tbl_cursos {
-  *id : uuid <<PK>>
-  --
-  *codigo : varchar(20) <<UQ>>
-  *nombre : varchar(120)
-  *ciclo : integer
-  *es_prioritario : boolean
-}
+#### 3. Tabla `auth_challenges`
+Fuente: [AuthChallenge](aplicacion/backend/app/models/auth.py).
 
-entity "temas_curriculares" as tbl_temas {
-  *id : uuid <<PK>>
-  --
-  *curso_id : uuid <<FK>>
-  *unidad : integer
-  *titulo : varchar(150)
-  *descripcion : text
-}
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_challenge | String(64) | No | PK |
+| email | String(255) | No |  |
+| code_hash | String(255) | No |  |
+| code_salt | String(64) | No |  |
+| created_at | DateTime(timezone=True) | No |  / default: UTC al crear |
+| expires_at | DateTime(timezone=True) | No |  |
+| resend_available_at | DateTime(timezone=True) | No |  |
+| consumed | Boolean | No |  / default: False |
+| attempts | Integer | No |  / default: 0 |
 
-entity "espacios_fisicos" as tbl_espacios {
-  *id : uuid <<PK>>
-  --
-  *codigo_ambiente : varchar(30) <<UQ>>
-  *pabellon : varchar(50)
-  *capacidad : integer
-  *activo : boolean
-}
+#### 4. Tabla `auth_rate_limits`
+Fuente: [AuthRateLimit](aplicacion/backend/app/models/auth.py).
 
-entity "ofertas_mentoria" as tbl_ofertas {
-  *id : uuid <<PK>>
-  --
-  *mentor_id : uuid <<FK>>
-  *curso_id : uuid <<FK>>
-  *tema_id : uuid <<FK>>
-  *modalidad : varchar(20) <<CHECK>>
-  *aforo_maximo : integer
-  *fecha_inicio : timestamptz
-  *fecha_fin : timestamptz
-  *estado : varchar(30) <<CHECK>>
-}
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| key | String(128) | No | PK |
+| count | Integer | No |  / default: 1 |
+| window_expires_at | DateTime(timezone=True) | No |  |
+| updated_at | DateTime(timezone=True) | No |  / default: UTC al crear |
 
-entity "sesiones_mentoria" as tbl_sesiones {
-  *id : uuid <<PK>>
-  --
-  *oferta_id : uuid <<FK, UQ>>
-  *espacio_id : uuid <<FK>>
-  *enlace_virtual : varchar(255)
-  *estado : varchar(30) <<CHECK>>
-  *quorum_alcanzado : boolean
-}
+#### 5. Tabla `bitacoras_pedagogicas`
+Fuente: [BitacoraPedagogica](aplicacion/backend/app/models/bitacora.py).
 
-entity "reservas_cupos" as tbl_reservas {
-  *id : uuid <<PK>>
-  --
-  *sesion_id : uuid <<FK>>
-  *mentoreado_id : uuid <<FK>>
-  *estado : varchar(30) <<CHECK>>
-  *fecha_reserva : timestamptz
-  *fecha_ratificacion : timestamptz
-}
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_bitacora | Integer | No | PK |
+| id_sesion | Integer | No | FK sesiones_mentoria.id_sesion; ON DELETE CASCADE; UNIQUE |
+| id_mentor | String(255) | No |  |
+| temas_cubiertos | JSON | No |  / default: list |
+| observaciones | Text | No |  |
+| nivel_dificultad | String(20) | No | nivel_dificultad IN ('Bajo', 'Medio', 'Alto') / default: 'Medio' |
+| hash_firma | String(64) | No |  |
+| horas_declaradas | Float | No |  / default: 0.0 |
+| visado_administrador | Boolean | No |  / default: False |
+| created_at | DateTime(timezone=True) | No |  / default: UTC al crear |
 
-entity "asistencias_sesiones" as tbl_asistencias {
-  *id : uuid <<PK>>
-  --
-  *sesion_id : uuid <<FK>>
-  *estudiante_id : uuid <<FK>>
-  *estado : varchar(20) <<CHECK>>
-  *metodo_checkin : varchar(30)
-  *fecha_checkin : timestamptz
-}
+Restricciones declaradas: `CheckConstraint("nivel_dificultad IN ('Bajo', 'Medio', 'Alto')")`.
 
-entity "bitacoras_pedagogicas" as tbl_bitacoras {
-  *id : uuid <<PK>>
-  --
-  *sesion_id : uuid <<FK, UQ>>
-  *mentor_id : uuid <<FK>>
-  *temas_impartidos : text
-  *observaciones : text
-  *hash_sha256 : varchar(64)
-  *estado_visado : varchar(20) <<CHECK>>
-  *fecha_registro : timestamptz
-}
+#### 6. Tabla `certificados_horas`
+Fuente: [CertificadoHoras](aplicacion/backend/app/models/certificate.py).
 
-tbl_usuarios ||--o| tbl_consentimientos
-tbl_usuarios ||--o{ tbl_usuario_roles
-tbl_roles ||--o{ tbl_usuario_roles
-tbl_usuarios ||--o| tbl_perfiles
-tbl_usuarios ||--o{ tbl_disponibilidad
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_certificado | Integer | No | PK |
+| id_mentor | String(255) | No |  |
+| codigo_folio | String(50) | No | UNIQUE |
+| periodo_academico | String(20) | No |  / default: '2026-II' |
+| horas_acreditadas | Float | No |  |
+| hash_firma | String(64) | No |  |
+| estado | String(30) | No |  / default: 'EMITIDO_DEMO' |
+| created_at | DateTime(timezone=True) | No |  / default: UTC al crear |
 
-tbl_cursos ||--o{ tbl_temas
-tbl_usuarios ||--o{ tbl_ofertas
-tbl_cursos ||--o{ tbl_ofertas
-tbl_temas ||--o{ tbl_ofertas
+Restricciones declaradas: `UniqueConstraint('id_mentor', 'periodo_academico')`; `CheckConstraint('horas_acreditadas >= 20.0')`.
 
-tbl_ofertas ||--|| tbl_sesiones
-tbl_espacios ||--o{ tbl_sesiones
+#### 7. Tabla `consentimientos_legales`
+Fuente: [ConsentimientoLegal](aplicacion/backend/app/models/consent.py).
 
-tbl_sesiones ||--o{ tbl_reservas
-tbl_usuarios ||--o{ tbl_reservas
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_consentimiento | Integer | No | PK |
+| email | String(255) | No |  |
+| terms_version | String(50) | No |  / default: '2026-II-v1.0' |
+| accepted | Boolean | No |  / default: True |
+| consented_at | DateTime(timezone=True) | No |  / default: UTC al crear |
+| ip_address | String(45) | Sí |  |
+| user_agent | Text | Sí |  |
 
-tbl_sesiones ||--o{ tbl_asistencias
-tbl_usuarios ||--o{ tbl_asistencias
+#### 8. Tabla `cronograma_activo`
+Fuente: [CronogramaActivo](aplicacion/backend/app/models/schedule.py).
 
-tbl_sesiones ||--o| tbl_bitacoras
-@enduml
-```
-</details>
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id | Integer | No | PK |
+| id_version | Integer | Sí | FK versiones_cronograma.id |
 
-Fuente: Elaboración propia.
+Restricciones declaradas: `CheckConstraint('id = 1')`.
 
----
+#### 9. Tabla `disponibilidades_horarias`
+Fuente: [DisponibilidadHoraria](aplicacion/backend/app/models/profile.py).
 
-### Diccionario de Datos DDL del Sistema Web P2P (15 Tablas Relacionales)
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_disponibilidad | Integer | No | PK |
+| email | String(255) | No |  |
+| dia_semana | Integer | No | dia_semana >= 1 AND dia_semana <= 6 |
+| hora_inicio | String(10) | No |  |
+| hora_fin | String(10) | No |  |
+| created_at | DateTime(timezone=True) | No |  / default: UTC al crear |
 
-#### 1. Tabla: `usuarios`
-Almacena el padrón oficial de cuentas institucionales universitarias autorizadas para operar en la plataforma.
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identificador universal único del usuario (anonimizado). |
-| `codigo_estudiante` | `VARCHAR(20)` | `NOT NULL, UNIQUE` | Código institucional de matrícula de la UPT. |
-| `email` | `VARCHAR(100)` | `NOT NULL, UNIQUE, CHECK email LIKE '%@upt.pe'` | Dirección electrónica oficial institucional. |
-| `nombres` | `VARCHAR(100)` | `NOT NULL` | Nombres del estudiante según registro académico. |
-| `apellidos` | `VARCHAR(100)` | `NOT NULL` | Apellidos paterno y materno del estudiante. |
-| `activo` | `BOOLEAN` | `NOT NULL, DEFAULT TRUE` | Bandera de habilitación o suspensión administrativa. |
-| `created_at` | `TIMESTAMPTZ` | `NOT NULL, DEFAULT NOW()` | Marca de tiempo UTC de registro de la cuenta. |
+Restricciones declaradas: `CheckConstraint('dia_semana >= 1 AND dia_semana <= 6')`.
 
-#### 2. Tabla: `roles`
-Catálogo de roles institucionales canónicos del sistema de control de acceso RBAC.
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `id` | `INTEGER` | `PRIMARY KEY, GENERATED ALWAYS AS IDENTITY` | Identificador unívoco del rol. |
-| `codigo` | `VARCHAR(30)` | `NOT NULL, UNIQUE` | Código programático (`mentoreado`, `mentor`, `administrador`). |
-| `nombre` | `VARCHAR(50)` | `NOT NULL` | Nombre descriptivo legible del rol institucional. |
+#### 10. Tabla `encuestas_calidad`
+Fuente: [EncuestaCalidad](aplicacion/backend/app/models/survey.py).
 
-#### 3. Tabla: `usuario_roles`
-Tabla intermedia asociativa de asignación jerárquica de roles por usuario (M:N).
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `usuario_id` | `UUID` | `NOT NULL, REFERENCES usuarios(id) ON DELETE CASCADE` | Llave foránea hacia el usuario asignado. |
-| `rol_id` | `INTEGER` | `NOT NULL, REFERENCES roles(id) ON DELETE CASCADE` | Llave foránea hacia el rol institucional otorgado. |
-| `asignado_en` | `TIMESTAMPTZ` | `NOT NULL, DEFAULT NOW()` | Fecha y hora UTC en que se formalizó la asignación. |
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_encuesta | Integer | No | PK |
+| id_sesion | Integer | No | FK sesiones_mentoria.id_sesion; ON DELETE CASCADE |
+| estudiante_email | String(255) | No |  |
+| calificacion_general | Integer | No |  |
+| dominio_tema | Integer | No |  |
+| claridad_explicacion | Integer | No |  |
+| puntualidad | Integer | No |  |
+| comentarios | Text | Sí |  |
+| created_at | DateTime(timezone=True) | No |  / default: UTC al crear |
 
-#### 4. Tabla: `consentimientos_legales`
-Registro inmutable de formalización de consentimiento informado digital bajo la Ley N° 29733.
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identificador unívoco del registro de consentimiento. |
-| `usuario_id` | `UUID` | `NOT NULL, UNIQUE, REFERENCES usuarios(id) ON DELETE CASCADE` | Llave foránea hacia el titular del consentimiento. |
-| `ip_address` | `VARCHAR(45)` | `NOT NULL` | Dirección IP v4/v6 desde la que se formalizó el consentimiento. |
-| `user_agent` | `TEXT` | `NOT NULL` | Cabecera User-Agent del navegador web del usuario. |
-| `version_politica`| `VARCHAR(20)` | `NOT NULL, DEFAULT 'v1.0'` | Versión normativa de la política institucional aceptada. |
-| `aceptado_en` | `TIMESTAMPTZ` | `NOT NULL, DEFAULT NOW()` | Marca de tiempo UTC inmutable de aceptación expresa. |
+Restricciones declaradas: `UniqueConstraint('id_sesion', 'estudiante_email')`; `CheckConstraint('calificacion_general >= 1 AND calificacion_general <= 5')`; `CheckConstraint('dominio_tema >= 1 AND dominio_tema <= 5')`; `CheckConstraint('claridad_explicacion >= 1 AND claridad_explicacion <= 5')`; `CheckConstraint('puntualidad >= 1 AND puntualidad <= 5')`.
 
-#### 5. Tabla: `codigos_otp`
-Almacén transaccional efímero de códigos de un solo uso (OTP) para autenticación multifactor 2FA.
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identificador unívoco de la solicitud OTP. |
-| `email` | `VARCHAR(100)` | `NOT NULL` | Dirección de correo institucional destino. |
-| `codigo_hash` | `VARCHAR(64)` | `NOT NULL` | Hash criptográfico SHA-256 del código numérico de 6 dígitos. |
-| `intentos` | `INTEGER` | `NOT NULL, DEFAULT 0, CHECK intentos <= 3` | Contador de reintentos fallidos de validación. |
-| `expira_en` | `TIMESTAMPTZ` | `NOT NULL` | Marca temporal límite de expiración (5 minutos / 300 s). |
-| `consumido` | `BOOLEAN` | `NOT NULL, DEFAULT FALSE` | Bandera de consumo atómico para prevenir reutilización. |
+#### 11. Tabla `perfiles_academicos`
+Fuente: [PerfilAcademico](aplicacion/backend/app/models/profile.py).
 
-#### 6. Tabla: `perfiles_formativos`
-Expediente pedagógico y métricas de reputación del estudiante o mentor.
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identificador del perfil formativo. |
-| `usuario_id` | `UUID` | `NOT NULL, UNIQUE, REFERENCES usuarios(id) ON DELETE CASCADE` | Llave foránea al usuario titular. |
-| `biografia` | `TEXT` | `NULL` | Breve reseña de competencias y áreas de interés. |
-| `ciclo_actual` | `INTEGER` | `NOT NULL, CHECK ciclo_actual BETWEEN 1 AND 10` | Ciclo lectivo cursado en el semestre activo. |
-| `reputacion` | `NUMERIC(3,2)`| `NOT NULL, DEFAULT 5.00, CHECK reputacion BETWEEN 1 AND 5` | Promedio ponderado de calificaciones post-sesión. |
-| `horas_acumuladas`| `NUMERIC(5,2)`| `NOT NULL, DEFAULT 0.00` | Total de horas de mentoría efectivamente dictadas y auditadas. |
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_perfil | Integer | No | PK |
+| email | String(255) | No | UNIQUE |
+| codigo_estudiante | String(20) | Sí |  |
+| nombres | String(100) | Sí |  |
+| apellidos | String(100) | Sí |  |
+| ciclo_actual | Integer | No | ciclo_actual >= 1 AND ciclo_actual <= 10 / default: 1 |
+| rol_postulacion | String(20) | No |  / default: 'mentoreado' |
+| materias_interes | JSON | No |  / default: list |
+| temas_seleccionados | JSON | No |  / default: list |
+| biografia | Text | Sí |  |
+| modalidad_preferida | String(20) | No |  / default: 'presencial' |
+| updated_at | DateTime(timezone=True) | No |  / default: UTC al crear |
 
-#### 7. Tabla: `disponibilidades_horarias`
-Franjas horarias semanales declaradas por mentores y mentoreados (Matriz 6×11).
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identificador de la franja horaria. |
-| `usuario_id` | `UUID` | `NOT NULL, REFERENCES usuarios(id) ON DELETE CASCADE` | Llave foránea hacia el usuario. |
-| `dia_semana` | `INTEGER` | `NOT NULL, CHECK dia_semana BETWEEN 1 AND 6` | Día de la semana (1=Lunes, 2=Martes, ..., 6=Sábado). |
-| `hora_inicio` | `TIME` | `NOT NULL` | Hora de inicio del bloque de disponibilidad. |
-| `hora_fin` | `TIME` | `NOT NULL, CHECK hora_fin > hora_inicio` | Hora de culminación del bloque horario. |
+Restricciones declaradas: `CheckConstraint('ciclo_actual >= 1 AND ciclo_actual <= 10')`.
 
-#### 8. Tabla: `cursos_criticos`
-Catálogo oficial de asignaturas formativas críticas de I a IV ciclo de la EPIS-UPT.
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identificador unívoco del curso crítico. |
-| `codigo` | `VARCHAR(20)` | `NOT NULL, UNIQUE` | Código curricular oficial en el plan de estudios. |
-| `nombre` | `VARCHAR(120)` | `NOT NULL` | Denominación formal de la asignatura formativa. |
-| `ciclo` | `INTEGER` | `NOT NULL, CHECK ciclo BETWEEN 1 AND 10` | Ciclo sugerido en la malla curricular. |
-| `es_prioritario` | `BOOLEAN` | `NOT NULL, DEFAULT FALSE` | Bandera de priorización académica fijada por tutoría. |
+#### 12. Tabla `reservas_cupo`
+Fuente: [ReservaCupo](aplicacion/backend/app/models/booking.py).
 
-#### 9. Tabla: `temas_curriculares`
-Taxonomía jerárquica de unidades y contenidos silábicos oficiales de los cursos filtro.
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identificador unívoco del tema curricular. |
-| `curso_id` | `UUID` | `NOT NULL, REFERENCES cursos_criticos(id) ON DELETE CASCADE` | Llave foránea hacia la asignatura de pertenencia. |
-| `unidad` | `INTEGER` | `NOT NULL, CHECK unidad BETWEEN 1 AND 4` | Número de unidad didáctica del sílabo. |
-| `titulo` | `VARCHAR(150)` | `NOT NULL` | Título del contenido temático silábico. |
-| `descripcion` | `TEXT` | `NULL` | Desglose conceptual de competencias y ejercicios. |
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_reserva | Integer | No | PK |
+| codigo_reserva | String(20) | No | UNIQUE |
+| id_sesion | Integer | No | FK sesiones_mentoria.id_sesion; ON DELETE CASCADE |
+| estudiante_email | String(255) | No |  |
+| estado | String(30) | No | estado IN ('PENDIENTE_CONFIRMACION', 'CONFIRMADA', 'CANCELADA_USUARIO', 'NO_CONFIRMADA', 'CANCELADA_NO_CONFIRMADA', 'CANCELADA_SISTEMA', 'CANCELADA_SISTEMA_QUORUM', 'ASISTIDA', 'INASISTENCIA') / default: 'PENDIENTE_CONFIRMACION' |
+| fecha_reserva | DateTime(timezone=True) | No |  / default: UTC al crear |
+| fecha_ratificacion | DateTime(timezone=True) | Sí |  |
+| motivo_cancelacion | Text | Sí |  |
+| ticket_hash | String(64) | Sí |  |
+| created_at | DateTime(timezone=True) | No |  / default: UTC al crear |
+| updated_at | DateTime(timezone=True) | No |  / default: UTC al crear |
 
-#### 10. Tabla: `espacios_fisicos`
-Registro de infraestructura de aulas y laboratorios de cómputo de la EPIS-UPT.
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identificador unívoco del espacio físico. |
-| `codigo_ambiente` | `VARCHAR(30)` | `NOT NULL, UNIQUE` | Código institucional de aula o laboratorio (ej. `LAB-SIS-01`). |
-| `pabellon` | `VARCHAR(50)` | `NOT NULL` | Pabellón o edificio dentro del campus universitario. |
-| `capacidad` | `INTEGER` | `NOT NULL, DEFAULT 10, CHECK capacidad > 0` | Aforo máximo reglamentario para mentorías. |
-| `activo` | `BOOLEAN` | `NOT NULL, DEFAULT TRUE` | Estado operativo del ambiente físico. |
+Restricciones declaradas: `UniqueConstraint('id_sesion', 'estudiante_email')`; `CheckConstraint("estado IN ('PENDIENTE_CONFIRMACION', 'CONFIRMADA', 'CANCELADA_USUARIO', 'NO_CONFIRMADA', 'CANCELADA_NO_CONFIRMADA', 'CANCELADA_SISTEMA', 'CANCELADA_SISTEMA_QUORUM', 'ASISTIDA', 'INASISTENCIA')")`.
 
-#### 11. Tabla: `ofertas_mentoria`
-Ofertas formativas programadas y publicadas por mentores acreditados.
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identificador unívoco de la oferta de mentoría. |
-| `mentor_id` | `UUID` | `NOT NULL, REFERENCES usuarios(id) ON DELETE RESTRICT` | Llave foránea al mentor que imparte la clase. |
-| `curso_id` | `UUID` | `NOT NULL, REFERENCES cursos_criticos(id) ON DELETE RESTRICT` | Asignatura curricular asociada. |
-| `tema_id` | `UUID` | `NOT NULL, REFERENCES temas_curriculares(id) ON DELETE RESTRICT` | Tema silábico específico a desarrollar. |
-| `modalidad` | `VARCHAR(20)` | `NOT NULL, CHECK modalidad IN ('PRESENCIAL', 'VIRTUAL')` | Modalidad pedagógica de la sesión. |
-| `aforo_maximo` | `INTEGER` | `NOT NULL, CHECK aforo_maximo <= 20` | Límite estricto de asistentes (10 presencial, 20 virtual). |
-| `fecha_inicio` | `TIMESTAMPTZ` | `NOT NULL` | Fecha y hora de inicio de la mentoría. |
-| `fecha_fin` | `TIMESTAMPTZ` | `NOT NULL, CHECK fecha_fin > fecha_inicio` | Fecha y hora de finalización prevista. |
-| `estado` | `VARCHAR(30)` | `NOT NULL, DEFAULT 'PUBLICADA'` | Estado operativo (`PUBLICADA`, `CERRADA`, `CANCELADA`). |
+#### 13. Tabla `roles`
+Fuente: [Rol](aplicacion/backend/app/models/roles.py).
 
-#### 12. Tabla: `sesiones_mentoria`
-Instancia operativa transaccional vinculada al ciclo de reservas, quórum y ejecución.
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identificador unívoco de la sesión de mentoría. |
-| `oferta_id` | `UUID` | `NOT NULL, UNIQUE, REFERENCES ofertas_mentoria(id) ON DELETE CASCADE` | Llave foránea 1:1 hacia la oferta correspondiente. |
-| `espacio_id` | `UUID` | `NULL, REFERENCES espacios_fisicos(id) ON DELETE SET NULL` | Llave foránea al aula física asignada (si aplica). |
-| `enlace_virtual` | `VARCHAR(255)` | `NULL` | URL validada de la sala virtual de videoconferencia. |
-| `estado` | `VARCHAR(30)` | `NOT NULL, DEFAULT 'PROGRAMADA'` | Estado gobernado por constraint `chk_sesion_estado`. |
-| `quorum_alcanzado`| `BOOLEAN` | `NOT NULL, DEFAULT FALSE` | Bandera booleana evaluada al corte de $T-24\text{ h}$. |
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_rol | Integer | No | PK |
+| nombre_rol | String(50) | No | UNIQUE |
+| descripcion | Text | Sí |  |
 
-#### 13. Tabla: `reservas_cupos`
-Inscripciones y reservas individuales de plazas efectuadas por mentoreados.
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identificador unívoco de la reserva de cupo. |
-| `sesion_id` | `UUID` | `NOT NULL, REFERENCES sesiones_mentoria(id) ON DELETE CASCADE` | Llave foránea a la sesión reservada. |
-| `mentoreado_id` | `UUID` | `NOT NULL, REFERENCES usuarios(id) ON DELETE RESTRICT` | Llave foránea al estudiante inscrito. |
-| `estado` | `VARCHAR(30)` | `NOT NULL, DEFAULT 'PENDIENTE_CONFIRMACION'` | Estado gobernado por constraint `chk_reserva_estado`. |
-| `fecha_reserva` | `TIMESTAMPTZ` | `NOT NULL, DEFAULT NOW()` | Marca temporal UTC en que se reservó el cupo. |
-| `fecha_ratificacion`| `TIMESTAMPTZ`| `NULL` | Marca temporal UTC en que se ratificó la asistencia. |
+#### 14. Tabla `sesiones_mentoria`
+Fuente: [SesionMentoria](aplicacion/backend/app/models/offer.py).
 
-#### 14. Tabla: `asistencias_sesiones`
-Registro de presencia efectiva y check-in verificado mediante código QR TOTP.
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identificador unívoco del registro de asistencia. |
-| `sesion_id` | `UUID` | `NOT NULL, REFERENCES sesiones_mentoria(id) ON DELETE CASCADE` | Llave foránea a la sesión dictada. |
-| `estudiante_id` | `UUID` | `NOT NULL, REFERENCES usuarios(id) ON DELETE RESTRICT` | Llave foránea al estudiante participante. |
-| `estado` | `VARCHAR(20)` | `NOT NULL, CHECK estado IN ('ASISTIO', 'FALTO')` | Condición final de asistencia presencial/virtual. |
-| `metodo_checkin`| `VARCHAR(30)` | `NOT NULL, DEFAULT 'QR_TOTP'` | Medio de verificación (`QR_TOTP`, `MANUAL_MENTOR`). |
-| `fecha_checkin` | `TIMESTAMPTZ` | `NOT NULL, DEFAULT NOW()` | Marca temporal UTC exacta de marcación de asistencia. |
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_sesion | Integer | No | PK |
+| codigo_sesion | String(20) | No | UNIQUE |
+| mentor_email | String(255) | No |  |
+| id_asignatura | Integer | No | FK asignaturas.id_asignatura; ON DELETE RESTRICT |
+| id_tema | Integer | No | FK temas_conceptuales.id_tema; ON DELETE RESTRICT |
+| fecha_inicio | DateTime(timezone=True) | No |  |
+| duracion_minutos | Integer | No | duracion_minutos IN (60, 90) / default: 60 |
+| modalidad | String(20) | No | modalidad IN ('presencial', 'virtual') |
+| aforo_maximo | Integer | No | aforo_maximo IN (10, 20) |
+| espacio_asignado | String(255) | No |  |
+| notas_adicionales | Text | Sí |  |
+| estado | String(30) | No | estado IN ('PUBLICADA', 'PENDIENTE_CONFIRMACION', 'QUORUM_INSUFICIENTE', 'CONFIRMADA', 'EN_CURSO', 'CONCLUIDA', 'BITACORA_REGISTRADA', 'HORAS_VISADAS', 'OBSERVADA', 'CANCELADA_SISTEMA', 'CANCELADA_MENTOR', 'CANCELADA_QUORUM', 'FINALIZADA') / default: 'PUBLICADA' |
+| quorumevaluated_at | DateTime(timezone=True) | Sí |  / default: None |
+| created_at | DateTime(timezone=True) | No |  / default: UTC al crear |
 
-#### 15. Tabla: `bitacoras_pedagogicas`
-Acta pedagógica formal de contenidos impartidos, firmada criptográficamente con SHA-256.
-| Columna | Tipo de Dato | Modificadores | Descripción Técnica |
-|---|---|---|---|
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identificador unívoco de la bitácora pedagógica. |
-| `sesion_id` | `UUID` | `NOT NULL, UNIQUE, REFERENCES sesiones_mentoria(id) ON DELETE RESTRICT` | Llave foránea a la sesión culminada. |
-| `mentor_id` | `UUID` | `NOT NULL, REFERENCES usuarios(id) ON DELETE RESTRICT` | Llave foránea al mentor que dictó la sesión. |
-| `temas_impartidos`| `TEXT` | `NOT NULL` | Desglose detallado de los contenidos desarrollados. |
-| `observaciones` | `TEXT` | `NULL` | Anotaciones metodológicas sobre el desempeño estudiantil. |
-| `hash_sha256` | `VARCHAR(64)` | `NOT NULL` | Hash criptográfico inmutable de verificación de integridad. |
-| `estado_visado` | `VARCHAR(20)` | `NOT NULL, DEFAULT 'PENDIENTE', CHECK estado_visado IN ('PENDIENTE', 'APROBADO', 'OBSERVADO')` | Estado de fiscalización por tutoría universitaria. |
-| `fecha_registro`| `TIMESTAMPTZ` | `NOT NULL, DEFAULT NOW()` | Marca temporal de cierre formal de la bitácora. |
+Restricciones declaradas: `CheckConstraint('duracion_minutos IN (60, 90)')`; `CheckConstraint("modalidad IN ('presencial', 'virtual')")`; `CheckConstraint('aforo_maximo IN (10, 20)')`; `CheckConstraint("estado IN ('PUBLICADA', 'PENDIENTE_CONFIRMACION', 'QUORUM_INSUFICIENTE', 'CONFIRMADA', 'EN_CURSO', 'CONCLUIDA', 'BITACORA_REGISTRADA', 'HORAS_VISADAS', 'OBSERVADA', 'CANCELADA_SISTEMA', 'CANCELADA_MENTOR', 'CANCELADA_QUORUM', 'FINALIZADA')")`.
 
----
+#### 15. Tabla `solicitudes_demanda`
+Fuente: [SolicitudDemanda](aplicacion/backend/app/models/booking.py).
 
-### Políticas de Seguridad a Nivel de Fila (Row Level Security - RLS)
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_demanda | Integer | No | PK |
+| estudiante_email | String(255) | No |  |
+| id_asignatura | Integer | No | FK asignaturas.id_asignatura; ON DELETE RESTRICT |
+| id_tema | Integer | No | FK temas_conceptuales.id_tema; ON DELETE RESTRICT |
+| observaciones | Text | Sí |  |
+| estado | String(20) | No | estado IN ('PENDIENTE', 'ATENDIDA', 'CANCELADA') / default: 'PENDIENTE' |
+| created_at | DateTime(timezone=True) | No |  / default: UTC al crear |
 
-En cumplimiento de la Ley N° 29733 de Protección de Datos Personales, todas las consultas y mutaciones sobre datos académicos están protegidas en PostgreSQL mediante políticas RLS nativas:
+Restricciones declaradas: `CheckConstraint("estado IN ('PENDIENTE', 'ATENDIDA', 'CANCELADA')")`.
 
-```sql
--- Habilitación general de Row Level Security
-ALTER TABLE usuarios ENABLE ROW LEVEL SECURITY;
-ALTER TABLE consentimientos_legales ENABLE ROW LEVEL SECURITY;
-ALTER TABLE perfiles_formativos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE disponibilidades_horarias ENABLE ROW LEVEL SECURITY;
-ALTER TABLE reservas_cupos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE asistencias_sesiones ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bitacoras_pedagogicas ENABLE ROW LEVEL SECURITY;
+#### 16. Tabla `temas_conceptuales`
+Fuente: [TemaConceptual](aplicacion/backend/app/models/curriculum.py).
 
--- Política 1: Aislamiento de expediente de usuario (Solo propietario o Administrador)
-CREATE POLICY rls_usuario_propio ON usuarios
-  FOR ALL
-  USING (id = auth.uid() OR EXISTS (
-    SELECT 1 FROM usuario_roles ur JOIN roles r ON ur.rol_id = r.id
-    WHERE ur.usuario_id = auth.uid() AND r.codigo = 'administrador'
-  ));
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_tema | Integer | No | PK |
+| id_asignatura | Integer | No | FK asignaturas.id_asignatura; ON DELETE CASCADE |
+| nombre_tema | String(150) | No |  |
+| descripcion_silabo | Text | Sí |  |
+| unidad_silabica | Integer | No |  / default: 1 |
+| estado_activo | Boolean | No |  / default: True |
+| created_at | DateTime(timezone=True) | No |  / default: UTC al crear |
 
--- Política 2: Consulta y mutación de reservas propias
-CREATE POLICY rls_reservas_propias ON reservas_cupos
-  FOR ALL
-  USING (mentoreado_id = auth.uid() OR EXISTS (
-    SELECT 1 FROM sesiones_mentoria sm JOIN ofertas_mentoria om ON sm.oferta_id = om.id
-    WHERE sm.id = reservas_cupos.sesion_id AND om.mentor_id = auth.uid()
-  ));
+#### 17. Tabla `tokens_asistencia_activos`
+Fuente: [TokenAsistenciaActivo](aplicacion/backend/app/models/attendance.py).
 
--- Política 3: Inmutabilidad de consentimientos legales registrados
-CREATE POLICY rls_consentimiento_insert ON consentimientos_legales
-  FOR INSERT WITH CHECK (usuario_id = auth.uid());
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_token | Integer | No | PK |
+| id_sesion | Integer | No | FK sesiones_mentoria.id_sesion; ON DELETE CASCADE; UNIQUE |
+| token | String(64) | No |  |
+| totp_code | String(6) | No |  |
+| expires_at | DateTime(timezone=True) | No |  |
+| created_at | DateTime(timezone=True) | No |  / default: UTC al crear |
 
-CREATE POLICY rls_consentimiento_select ON consentimientos_legales
-  FOR SELECT USING (usuario_id = auth.uid() OR EXISTS (
-    SELECT 1 FROM usuario_roles ur JOIN roles r ON ur.rol_id = r.id
-    WHERE ur.usuario_id = auth.uid() AND r.codigo = 'administrador'
-  ));
-```
+#### 18. Tabla `usuario_roles`
+Fuente: [UsuarioRol](aplicacion/backend/app/models/roles.py).
 
----
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id_usuario_rol | Integer | No | PK |
+| email | String(255) | No |  |
+| id_rol | Integer | No | FK roles.id_rol; ON DELETE CASCADE |
+| fecha_asignacion | DateTime(timezone=True) | No |  / default: UTC al crear |
+| asignado_por | String(255) | Sí |  |
+| activo | Boolean | No |  / default: True |
 
----
+Restricciones declaradas: `UniqueConstraint('email', 'id_rol')`.
+
+#### 19. Tabla `versiones_cronograma`
+Fuente: [VersionCronograma](aplicacion/backend/app/models/schedule.py).
+
+| Campo | Tipo declarado | Admite nulo | Restricción / valor inicial |
+| --- | --- | --- | --- |
+| id | Integer | No | PK |
+| archivo | String(255) | No |  |
+| franjas | JSON | No |  |
+| creado | DateTime(timezone=True) | No |  / default: UTC al crear |
+
+### Políticas de Seguridad a Nivel de Fila (RLS)
+
+Las declaraciones históricas de aislamiento total se sustituyen por estado **pendiente de verificación por instalación**. Las dependencias de autorización del SAD documentan controles en la aplicación; no se ha inspeccionado un servidor ni las políticas efectivas de PostgreSQL.
 
 # 7. Conclusiones
 
-> Se conservan las conclusiones de la versión de referencia como registro del cierre académico. El Anexo A y la matriz de homologación detallan el alcance y las validaciones pendientes del SRS v4.0 provisional.
+La edición DOC-H06 adopta el catálogo vigente y distingue la implementación identificada de los requisitos y propuestas pendientes. Se conserva la trazabilidad histórica sin reutilizar los identificadores antiguos para otros objetivos.
 
-**1. Estructuración Formal y Madurez del Alcance Funcional:** Se consolidó con éxito la línea base técnica e institucional del Sistema Web P2P para la EPIS-UPT, articulando de manera armónica los ocho módulos canónicos (`MOD-01` al `MOD-08`), los veinticuatro casos de uso oficiales (`CUS-001` al `CUS-024`), los veintiséis requerimientos funcionales atómicos (`RF01` al `RF26`), las catorce reglas de negocio institucionales (`RN-01` al `RN-14`) y los diez requerimientos no funcionales bajo el estándar ISO/IEC 25010 (`RNF01` al `RNF10`). Esta especificación exhaustiva traduce las necesidades pedagógicas de tutoría universitaria en especificaciones arquitectónicas reproducibles y de alta fidelidad.
+El recomendador, las tablas, los contratos y las transiciones se describen con referencia al código de la base revisada. La persistencia desplegada, las integraciones externas y las métricas de calidad requieren validación propia. Las 24 narrativas y sus 48 figuras conservan su estructura y nivel de detalle; el diseño actualizado no declara cumplidas las brechas institucionales.
 
-**2. Eficiencia y Precisión Demostrada del Motor Algorítmico (EdRecSys):** La calibración experimental del microservicio de recomendación híbrido demostró un desempeño analítico sobresaliente que supera con holgura los criterios de diseño iniciales: se alcanzaron métricas empíricas de **Precision@3 = 83.3%**, **Precision@5 = 80.0%** y un índice de posicionamiento acumulado de **NDCG = 0.82**, manteniendo un tiempo medio de inferencia vectorial de apenas **12.4 ms** (umbral de aceptación $\le 500$ ms). Estos resultados ratifican que la combinación de similitud coseno sobre competencias silábicas con filtrado colaborativo ponderado por reputación y balance de carga personaliza eficazmente el apoyo formativo para los estudiantes de los primeros ciclos.
-
-**3. Integridad Transaccional, Quórum y Concurrencia Confiable:** La implementación de patrones de persistencia transaccional ACID con cerrojos pesimistas a nivel de fila (`SELECT ... FOR UPDATE`) en PostgreSQL erradicó por completo el riesgo de condiciones de carrera (*race conditions*), alcanzando una tasa de sobreasignación de cupos de **estrictamente 0.0%** bajo pruebas de estrés simultáneo. Asimismo, la automatización del demonio cron de backend para el corte de $T-24\text{ h}$ y el protocolo de resolución de contingencia del mentor ante quórum deficiente optimizan el aprovechamiento de las aulas físicas y recursos virtuales de la facultad, eliminando cancelaciones tardías e imprevistas.
-
-**4. Seguridad Multicapa, Privacidad y Fe Pública Universitaria:** La arquitectura de software blindó el ecosistema universitario mediante autenticación multifactor 2FA con códigos OTP de 6 dígitos con expiración de 5 minutos, tokens de sesión efímeros JWT (HS256) de 8 horas y políticas activas de *Row Level Security* (RLS) en las 15 tablas relacionales de la base de datos. Se formalizó el estricto cumplimiento vinculante de la Ley N° 29733 de Protección de Datos Personales del Perú mediante registros inmutables de consentimiento digital. Finalmente, la articulación entre pases QR dinámicos TOTP, bitácoras firmadas con hash SHA-256 en 48 horas y la emisión digital de certificados PDF con código correlativo institucional y código QR de validación en línea otorga plena validez y trazabilidad a las horas acumuladas para convalidación de créditos extracurriculares.
-
-**5. Calidad de Construcción y Verificación Empírica Integral:** La culminación de los ocho sprints de desarrollo se encuentra sólidamente respaldada por una batería automatizada de **627 pruebas de software aprobadas con 0 fallos (280 pruebas unitarias/integración backend con Pytest y 347 pruebas unitarias/componentes frontend con Vitest)**, alcanzando una cobertura global de código superior al **85%** en ambas capas. Las interfaces implementan el estándar de accesibilidad **WCAG 2.1 Nivel AA** y registran una puntuación media superior a los **75 puntos en la escala estandarizada System Usability Scale (SUS)**, garantizando una herramienta ergonómica, resiliente y de alto impacto para la Escuela Profesional de Ingeniería de Sistemas de la Universidad Privada de Tacna.
-
----
+El [informe de cierre DOC-H06](docs/revision_srs/DOC-H06-CIERRE.md) registra verificaciones, límites y dictamen documental. Esta edición no declara aprobación institucional ni aptitud operativa para producción.
 
 # 8. Bibliografía
 
@@ -14948,10 +6197,19 @@ Las observaciones siguientes son de control documental. No forman parte del fluj
 | CUS-011 | No se identificó botón, servicio ni formato de exportación ejecutiva. No confundir con importación de cronograma Excel/PDF o descarga de constancias individuales. El formato y las métricas requieren aprobación. | AdminDashboardView.tsx; simulation.py; SRS_NUEVO.md (RF25/RF26); navigationConfig.ts |
 | CUS-015 | El recomendador y el selector Top 3/4/5 existen, pero no se identificó interfaz administrativa de pesos, umbrales, simulación o restauración. La prioridad curricular puede editarse en el catálogo (CUS-020); no equivale a cambiar pesos globales. Rangos y política de versionado son propuestas. | recommendation_service.py; RecommendationFeedView.tsx; AdminDashboardView.tsx; simulation.py; SRS_NUEVO.md (RF06/RF24/RN11) |
 | CUS-016 | Existen mecanismos de autenticación, consentimiento y control de roles, pero no se acredita una bandeja integral de trazas de seguridad ni exportación, inmutabilidad o cobertura de todos los eventos. «Auditoría de Bitácoras» es pedagógica y no sustituye la auditoría de seguridad. | auth.py; consent.py; roles.py; AdminDashboardView.tsx; navigationConfig.ts; SRS_NUEVO.md (RF26/RN01/RN02) |
-| CUS-017 | El SRS anterior usa CUS-008/CUS-011 para espacios y cronogramas. No se acredita CRUD separado de aulas, aforo/equipamiento individual, configuración de proveedores o creación de salas reales. La disponibilidad se calcula según franjas y ocupación, no por el solo hecho de que el aula aparezca en catálogo. | AdminScheduleUploadView.tsx; AdminDashboardView.tsx; spacesService.ts; spaces.py; schedule_parser_service.py; offer_service.py; virtual_room_service.py |
+| CUS-017 | El SRS anterior usa CUS-008 para espacios y RF10 para cronogramas; CUS-011 histórico corresponde a reportes. DOC-H06 corrige esa cita de origen. No se acredita CRUD separado de aulas, aforo/equipamiento individual, configuración de proveedores o creación de salas reales. La disponibilidad se calcula según franjas y ocupación, no por el solo hecho de que el aula aparezca en catálogo. | AdminScheduleUploadView.tsx; AdminDashboardView.tsx; spacesService.ts; spaces.py; schedule_parser_service.py; offer_service.py; virtual_room_service.py |
 | CUS-020 | El filtro de consulta muestra ciclos I–IV, mientras que el formulario admite ciclo 1–10; requiere homologación con la política de materias prioritarias. No confundir este CUS con el CUS-021 del SRS anterior (consulta curricular), ni con el CUS-022 anterior (gestión del catálogo). | CurriculumCatalogView.tsx; curriculum.py; AdminDashboardView.tsx; navigationConfig.ts; SRS_NUEVO.md (RF05) |
 | CUS-022 | No se identificó panel de modificación de corte, porcentaje o penalizaciones. La referencia de 24 h y 50 % no prueba que sean editables desde la interfaz. No se acredita tabla de sanciones o aplicación configurable de penalidades; requiere política institucional explícita. | AdminDashboardView.tsx; quorum.py; booking_service.py; offer_service.py; SRS_NUEVO.md (RF24/RN08/RN09/RN10) |
 
+
+
+### Actualización de evidencia DOC-H06
+
+Las observaciones del Anexo A conservan su procedencia. La revisión estática actual confirma 19 tablas, persistencia del pase efímero y de cronogramas, cabeza de migraciones 20261123_008 y un planificador condicional en lifespan. Esto reemplaza conclusiones antiguas de ausencia total de dichos componentes, sin certificar su activación o despliegue. El código utiliza `CANCELADA_QUORUM` para la sesión cancelada por decisión del mentor y `CANCELADA_SISTEMA_QUORUM` para sus reservas. La asistencia no cambia por sí sola el estado de sesión a EN_CURSO; no se acredita una transición automática por mero transcurso del tiempo. Bitácoras: el servicio permite actualizar un registro existente y recalcula el hash; no se declara inmutabilidad absoluta.
+
+Los generadores de evidencias de sprints 7 y 8 incorporados en la base son herramientas, no prueba de que se hayan ejecutado ni de sus resultados. Las etiquetas históricas de aprobación de narrativas no acreditan aprobación institucional del documento.
+
+**Recuperación DOC-H06-R:** la base final es `ed6c1cc06f0794c661636e1893723e025c206b68`, tras contrastar `c67d877`, `a05b80c` y `ed6c1cc`. Solo cambian trazas y pistas del OTP y sus pruebas: en desarrollo se imprime el código incluso con correo habilitado; la pista de respuesta depende de su bandera y se excluye en producción/staging, sin condicionarse a correo deshabilitado. El respaldo de correo puede registrar el cuerpo del mensaje cuando falta SMTP habilitado o usuario, sin guarda propia de entorno. Estos mecanismos no prueban entrega externa ni añaden un factor de autenticación. No cambian los flujos visibles documentados ni sus figuras. El detalle de las condiciones y sus límites queda en SAD 3.2; las pruebas modificadas se inspeccionaron estáticamente, sin ejecutarlas ni reproducir códigos reales.
 
 ## Anexo B. Correspondencia con la numeración anterior del SRS
 

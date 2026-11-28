@@ -1,0 +1,33 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 10. MOD-03: Recomendaciones, Reservas y Quórum
+left to right direction
+actor "Usuario institucional" as u
+rectangle "Sistema Web P2P — EPIS-UPT" {
+package "MOD-03: Recomendaciones, Reservas y\nQuórum" as m03 {
+usecase "CUS-002 Consultar catálogo de mentorías con\nrecomendación" as c2
+usecase "CUS-003 Reservar cupo para sesión de\nmentoría" as c3
+usecase "CUS-004 Ratificar asistencia a sesión de\nmentoría (T-24h)" as c4
+usecase "CUS-023 Evaluar quórum y ejecutar corte\nautomático (T-24h)" as c23
+usecase "CUS-024 Cancelar reserva de cupo por\nestudiante" as c24
+}
+}
+u --> c2
+u --> c3
+u --> c4
+u --> c23
+u --> c24
+legend bottom
+Los casos propuestos conservan requisitos institucionales.
+Su presencia no acredita implementación. RF21 y avisos: transversales.
+endlegend
+@enduml

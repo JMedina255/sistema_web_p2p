@@ -1,0 +1,27 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 114. Diagrama 6.16.23: Clases del dominio — CUS-020: Gestionar catálogo\ncurricular y asignaturas
+entity "asignaturas" as asignaturas {
+  id_asignatura : Integer <<PK>>
+}
+entity "temas_conceptuales" as temas_conceptuales {
+  id_tema : Integer <<PK>>
+  id_asignatura : Integer
+}
+asignaturas ||--o{ temas_conceptuales : id_asignatura
+legend bottom
+IMPLEMENTADO; validación según alcance
+Discrepancia pendiente entre consulta I-IV y formulario 1-10; prioridad curricular no garantiza
+pesos dinámicos.
+endlegend
+
+@enduml

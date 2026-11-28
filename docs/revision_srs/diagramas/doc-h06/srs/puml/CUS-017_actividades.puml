@@ -1,0 +1,96 @@
+@startuml
+' CUS-017 — Configurar ambientes físicos y virtuales
+' Estado: Implementación parcial: importación y consulta de cronogramas; configuración virtual pendiente
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+' Las ramas de entrada representan interacciones independientes; no requieren simultaneidad.
+title CUS-017 — Configurar ambientes físicos y virtuales\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Sistema Web P2P|
+start
+if (¿Gestión administrativa de\ncronogramas?) then (Sí)
+|Administrador institucional|
+  :Abrir Cronograma de Aulas (RF10);
+|Sistema Web P2P|
+  if (¿Autorizado? [E004]) then (Sí)
+|Administrador institucional|
+    :Seleccionar o arrastrar archivo oficial;
+|Sistema Web P2P|
+    if (¿Excel o PDF admitido y hasta 15 MB?\n[E001]) then (Sí)
+|Administrador institucional|
+      if (¿Procesar archivo? [A001]) then (Sí)
+|Sistema Web P2P|
+        :Procesar cronograma y actualizar franjas;
+        if (¿Procesamiento correcto? [E002]) then (Sí)
+          :Mostrar resumen y reservas preservadas\ncuando se informa;
+          else (No)
+          :Mostrar error sin confirmar\nactualización;
+        endif
+        else (No)
+        :Descartar archivo seleccionado;
+      endif
+      else (No)
+      (E)
+      detach
+    endif
+|Administrador institucional|
+    (C)
+    :Consultar franjas y filtrar aula o día\n[A002];
+|Sistema Web P2P|
+    if (¿Consulta correcta? [E003]) then (Sí)
+      :Mostrar tabla o ausencia de\ncoincidencias;
+      else (No)
+      :Mostrar fallo de consulta;
+    endif
+    else (No)
+    :Restringir acceso;
+  endif
+  stop
+else (No)
+|Sistema Web P2P|
+  (M)
+  detach
+endif
+
+|Estudiante Mentor|
+(M)
+  :Programar oferta en CUS-006;
+|Sistema Web P2P|
+  if (¿Modalidad presencial?) then (Sí)
+    :Consultar aulas libres durante toda la\nsesión;
+    else (No)
+    :Permitir enlace propio o sugerido [A003]\ny  creación real no acreditada;
+  endif
+stop
+
+|Sistema Web P2P|
+(E)
+:Informar formato o tamaño no admitido;
+(C)
+detach
+legend bottom
+  Los círculos con la misma letra enlazan tramos del flujo.
+endlegend
+
+legend bottom
+PARCIAL
+Objetos: versiones_cronograma, cronograma_activo, sesiones_mentoria
+Parcial: generación de URL no provisiona una sala externa; no existe tabla espacios_fisicos.
+endlegend
+@enduml

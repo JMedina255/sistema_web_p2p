@@ -1,0 +1,45 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Diagrama 9.1. Componentes y dependencias presentes
+top to bottom direction
+package "Backend app" {
+component "api/v1/endpoints\nRouters y dependencias" as routers
+component "schemas\nContratos de datos" as schemas
+package "services" {
+component "Auth / Consent / Role / Profile" as identity
+component "Offer / Booking / Recommendation" as mentoring
+component "Attendance / Bitacora / Survey / Certificate" as tracking
+component "Curriculum / CatalogSupport / ScheduleParser" as resources
+component "Email / VirtualRoom / Simulation / Storage" as support
+}
+component "models\n19 entidades persistentes" as models
+component "db/session\nSesión relacional / respaldo según servicio" as session
+}
+routers --> schemas
+routers --> identity
+routers --> mentoring
+routers --> tracking
+routers --> resources
+mentoring ..> support
+identity ..> support
+tracking ..> support
+identity --> models
+mentoring --> models
+tracking --> models
+resources --> models
+models ..> session
+note bottom of support
+Simulation: banco sintético, no analítica institucional.
+VirtualRoom: URL, sin creación de reunión externa acreditada.
+No representa microservicios independientes.
+end note
+@enduml

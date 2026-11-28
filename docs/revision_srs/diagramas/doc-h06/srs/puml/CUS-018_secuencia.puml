@@ -1,0 +1,33 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 82. Diagrama 6.15.16: Secuencia — CUS-018: Gestionar justificación de\ninasistencia a sesión
+actor "Estudiante / Responsable previsto" as actor
+boundary "Interfaz de CUS-018" as ui
+control "Servicio previsto" as svc
+actor -> ui : Gestionar justificación de inasistencia a sesión
+ui -> svc : Trámite posterior de justificación
+activate svc
+note right of svc
+Diseño propuesto; no se atribuye
+endpoint ni persistencia actuales.
+end note
+svc --> ui : Resultado previsto sujeto a implementación
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+ESPECIFICADO / PROPUESTO
+Propuesto: falta RF específico, plazo, evidencia, responsable y resolución; no es cancelación
+previa.
+endlegend
+
+@enduml

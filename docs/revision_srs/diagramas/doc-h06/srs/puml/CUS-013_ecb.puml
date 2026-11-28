@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 30. Diagrama 6.13.14: ECB — CUS-013: Consultar historial académico de\nmentorías
+left to right direction
+actor "Estudiante / Mentor" as actor
+boundary "Interfaz de CUS-013" as ui
+control "booking_service / offer_service" as control
+actor --> ui
+ui --> control : Historial por rol de reservas y sesiones
+entity "reservas_cupo" as e0
+control --> e0
+entity "sesiones_mentoria" as e1
+control --> e1
+
+legend bottom
+PARCIAL
+Parcial: historial unificado, recursos y consulta de bitácoras por mentoreado pendientes.
+endlegend
+
+@enduml

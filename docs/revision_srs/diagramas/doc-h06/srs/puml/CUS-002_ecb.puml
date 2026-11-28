@@ -1,0 +1,31 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 23. Diagrama 6.13.7: ECB — CUS-002: Consultar catálogo de mentorías con\nrecomendación
+left to right direction
+actor "Estudiante mentoreado" as actor
+boundary "Interfaz de CUS-002" as ui
+control "recommendation_service" as control
+actor --> ui
+ui --> control : Ranking multifactorial explicable Top-k
+entity "perfiles_academicos" as e0
+control --> e0
+entity "disponibilidades_horarias" as e1
+control --> e1
+entity "sesiones_mentoria" as e2
+control --> e2
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+Sin medición nueva de precisión ni rendimiento; contacto no acredita mensajería.
+endlegend
+
+@enduml

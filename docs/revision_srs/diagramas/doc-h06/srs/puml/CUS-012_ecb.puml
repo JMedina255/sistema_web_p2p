@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 29. Diagrama 6.13.13: ECB — CUS-012: Registrar calificación y feedback\nbidireccional
+left to right direction
+actor "Asistente / Mentor" as actor
+boundary "Interfaz de CUS-012" as ui
+control "survey_service / bitacora_service" as control
+actor --> ui
+ui --> control : Encuesta individual y observación grupal\nen bitácora
+entity "encuestas_calidad" as e0
+control --> e0
+entity "bitacoras_pedagogicas" as e1
+control --> e1
+
+legend bottom
+PARCIAL
+Parcial: no existe evidencia de evaluación individual mentor a estudiante.
+endlegend
+
+@enduml

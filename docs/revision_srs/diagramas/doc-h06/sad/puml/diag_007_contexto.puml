@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Diagrama 6.1. Límites del sistema y proveedores
+left to right direction
+actor "Mentoreado / Mentor / Administrador" as user
+rectangle "Sistema Web P2P" as system
+database "PostgreSQL" as db
+cloud "Google Identity" as google
+cloud "Correo SMTP" as smtp
+cloud "Reunión virtual" as meeting
+user --> system
+system --> db
+system ..> google : autenticar según configuración
+system ..> smtp : despachar según configuración
+system ..> meeting : URL provista o generada
+note bottom of meeting
+No existe prueba de aprovisionamiento de reunión por API externa.
+Storage de PDF institucional no se presume por generar bytes de PDF.
+end note
+@enduml

@@ -1,0 +1,78 @@
+@startuml
+' CUS-014 — Emitir constancia de horas de mentoría
+' Estado: Implementación identificada; constancia DEMO y validación real pendiente
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-014 — Emitir constancia de horas de mentoría\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Estudiante Mentor|
+start
+|Sistema Web P2P|
+if (¿Acceso autorizado?) then (No)
+  :Restringir acceso;
+  stop
+endif
+|Estudiante Mentor|
+:Abrir Mis constancias;
+|Sistema Web P2P|
+if (¿Resumen disponible? [E001]) then (Sí)
+  :Mostrar periodo, horas visadas y\nprovisionales [A003];
+  if (¿Alcanza umbral de horas visadas?\n[A001]) then (Sí)
+    if (¿Constancia existente? [A002]) then (Sí)
+      :Mostrar constancia y folio;
+      else (No)
+|Estudiante Mentor|
+      :Presionar Emitir Constancia Oficial;
+|Sistema Web P2P|
+      if (¿Identidad y elegibilidad correctas?\n[E002]) then (Sí)
+        :Generar constancia DEMO con PDF y QR;
+        if (¿Emisión correcta? [E003]) then (Sí)
+          :Mostrar folio y datos de acreditación;
+          else (No)
+          :Mostrar error de emisión;
+          stop
+        endif
+        else (No)
+        :Rechazar emisión;
+        stop
+      endif
+    endif
+|Estudiante Mentor|
+    :Descargar Constancia en PDF;
+    :Seleccionar Verificar QR;
+|Sistema Web P2P|
+    if (¿Descarga y verificación\ndisponibles? [E003]) then (Sí)
+      :Mostrar documento y resultado por folio;
+      else (No)
+      :Mostrar fallo sin certificar\nautenticidad;
+    endif
+    else (No)
+    :Mostrar horas faltantes y bloquear\nemisión;
+  endif
+  else (No)
+  :Informar error de resumen;
+endif
+stop
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+Objetos: certificados_horas, bitacoras_pedagogicas
+La ruta de emisión existe; no acredita autorización, firma ni validez institucional.
+endlegend
+@enduml

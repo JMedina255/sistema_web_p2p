@@ -1,0 +1,35 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 73. Diagrama 6.15.7: Secuencia — CUS-002: Consultar catálogo de mentorías\ncon recomendación
+actor "Estudiante mentoreado" as actor
+boundary "Interfaz de CUS-002" as ui
+control "recommendation_service" as svc
+actor -> ui : Consultar catálogo de mentorías con recomendación
+ui -> svc : Ranking multifactorial explicable Top-k
+activate svc
+alt Reglas y autorización aplicables satisfechas
+database "Persistencia o respaldo de desarrollo" as db
+svc -> db : Consultar perfil, franjas y ofertas
+db --> svc : Datos / resultado
+svc --> ui : Ranking multifactorial explicable Top-k
+else Incumplimiento o fallo
+svc --> ui : Rechazo / error visible; no declarar éxito
+end
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+Sin medición nueva de precisión ni rendimiento; contacto no acredita mensajería.
+endlegend
+
+@enduml

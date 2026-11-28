@@ -1,0 +1,33 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 72. Diagrama 6.15.6: Secuencia — CUS-021: Evaluar postulaciones a mentor\npor comité
+actor "Comité previsto" as actor
+boundary "Interfaz de CUS-021" as ui
+control "Servicio previsto" as svc
+actor -> ui : Evaluar postulaciones a mentor por comité
+ui -> svc : Evaluación motivada de postulaciones
+activate svc
+note right of svc
+Diseño propuesto; no se atribuye
+endpoint ni persistencia actuales.
+end note
+svc --> ui : Resultado previsto sujeto a implementación
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+ESPECIFICADO / PROPUESTO
+Propuesto: sin bandeja, expediente, votación ni resolución; asignación efectiva corresponde a
+CUS-010.
+endlegend
+
+@enduml

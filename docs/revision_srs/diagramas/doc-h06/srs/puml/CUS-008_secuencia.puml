@@ -1,0 +1,36 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 70. Diagrama 6.15.4: Secuencia — CUS-008: Gestionar demanda insatisfecha\nde mentoría
+actor "Estudiante / Mentor" as actor
+boundary "Interfaz de CUS-008" as ui
+control "booking_service" as svc
+actor -> ui : Gestionar demanda insatisfecha de mentoría
+ui -> svc : Registro y consulta del banco de demanda
+activate svc
+alt Reglas y autorización aplicables satisfechas
+database "Persistencia o respaldo de desarrollo" as db
+svc -> db : Crear solicitud o consultar demandas pendientes
+db --> svc : Datos / resultado
+svc --> ui : Registro y consulta del banco de demanda
+else Incumplimiento o fallo
+svc --> ui : Rechazo / error visible; no declarar éxito
+end
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+PARCIAL
+Parcial: duplicados, matrícula, autorización y exposición de correos requieren remediación o
+validación.
+endlegend
+
+@enduml

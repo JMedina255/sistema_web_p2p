@@ -1,0 +1,40 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 118. Estados: Bitácora y certificado
+state "Bitácora registrada\nhash_firma SHA-256" as registrada
+state "Visada administrativamente" as visada
+state "Observada" as observada
+[*] --> registrada : registro antes de fin + 48h
+registrada --> visada : visar
+registrada --> observada : observar
+visada --> observada : observar
+observada --> visada : visar
+state "CertificadoHoras" as cert {
+state "EMITIDO_DEMO" as demo
+state "EMITIDO" as emitido
+}
+note left of cert
+Las horas visadas son un insumo de la emisión.
+No se representa como una transición de bitácora a certificado.
+end note
+note right of cert
+Estado de certificado es texto libre en el ORM.
+El servicio decide DEMO según su configuración.
+No se afirma transición DEMO a oficial ni firma certificada.
+No se declara aprobación institucional.
+end note
+note bottom of registrada
+Bitácora no tiene columna estado: visado_administrador
+y estado de sesión representan registro, visado u observación.
+El hash acredita integridad técnica, no identidad certificada.
+end note
+@enduml

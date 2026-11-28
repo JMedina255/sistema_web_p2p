@@ -1,0 +1,34 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 113. Diagrama 6.16.22: Clases del dominio — CUS-017: Configurar ambientes\nfísicos y virtuales
+entity "versiones_cronograma" as versiones_cronograma {
+  id : Integer <<PK>>
+}
+entity "cronograma_activo" as cronograma_activo {
+  id : Integer <<PK>>
+  id_version : Integer
+}
+entity "sesiones_mentoria" as sesiones_mentoria {
+  id_sesion : Integer <<PK>>
+  mentor_email : String(255)
+  id_asignatura : Integer
+  id_tema : Integer
+  fecha_inicio : DateTime(UTC)
+  estado : String(30)
+}
+versiones_cronograma |o--o{ cronograma_activo : id_version
+legend bottom
+PARCIAL
+Parcial: generación de URL no provisiona una sala externa; no existe tabla espacios_fisicos.
+endlegend
+
+@enduml

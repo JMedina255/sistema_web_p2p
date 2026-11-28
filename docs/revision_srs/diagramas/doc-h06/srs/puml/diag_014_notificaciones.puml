@@ -1,0 +1,25 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 14. Notificaciones transversales y límite externo
+actor Usuario
+control "Autenticación / Quórum" as svc
+component EmailService
+cloud "SMTP externo" as smtp
+Usuario --> svc
+svc --> EmailService
+EmailService ..> smtp : entrega según configuración
+note bottom
+Antiguo CUS-009: antecedente de avisos, sin identificador vigente autónomo.
+CUS-009 vigente es analítica; no confundir los objetivos.
+Entrega real y operación desatendida pendientes de validación.
+end note
+@enduml

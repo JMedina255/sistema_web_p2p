@@ -1,0 +1,35 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 75. Diagrama 6.15.9: Secuencia — CUS-004: Ratificar asistencia a sesión\nde mentoría (T-24h)
+actor "Estudiante mentoreado" as actor
+boundary "Interfaz de CUS-004" as ui
+control "booking_service" as svc
+actor -> ui : Ratificar asistencia a sesión de mentoría (T-24h)
+ui -> svc : Ratificación antes del corte T-24h
+activate svc
+alt Reglas y autorización aplicables satisfechas
+database "Persistencia o respaldo de desarrollo" as db
+svc -> db : Comprobar titular y plazo; ratificar reserva
+db --> svc : Datos / resultado
+svc --> ui : Ratificación antes del corte T-24h
+else Incumplimiento o fallo
+svc --> ui : Rechazo / error visible; no declarar éxito
+end
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+El servicio rechaza cuando faltan 24 horas o menos; no equivale a asistencia efectiva.
+endlegend
+
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 33. Diagrama 6.13.17: ECB — CUS-019: Consultar bitácoras de mentoría por\ntutor
+left to right direction
+actor "Administrador / Tutor previsto" as actor
+boundary "Interfaz de CUS-019" as ui
+control "bitacora_service" as control
+actor --> ui
+ui --> control : Consulta, visado y observación\nadministrativa
+entity "bitacoras_pedagogicas" as e0
+control --> e0
+entity "sesiones_mentoria" as e1
+control --> e1
+
+legend bottom
+PARCIAL
+Parcial: Tutor no identificado como rol operativo; visado administrativo no constituye firma
+certificada.
+endlegend
+
+@enduml

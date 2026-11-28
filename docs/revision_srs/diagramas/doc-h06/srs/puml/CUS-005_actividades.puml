@@ -1,0 +1,80 @@
+@startuml
+' CUS-005 — Postular al rol de estudiante mentor
+' Estado: Implementación parcial: postulación en perfil
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-005 — Postular al rol de estudiante mentor\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Estudiante Mentoreado|
+start
+|Sistema Web P2P|
+if (¿Acceso autorizado?) then (No)
+  :Restringir acceso;
+  stop
+endif
+|Estudiante Mentoreado|
+:Abrir Mi perfil;
+|Sistema Web P2P|
+:Cargar Perfil Formativo y Matriz Semanal;
+if (¿Perfil y catálogo disponibles?\n[E001]) then (Sí)
+|Estudiante Mentoreado|
+  (P)
+  :Elegir ciclo y rol de participación;
+  if (¿Postulante a Mentor? [A002]) then (Sí)
+|Sistema Web P2P|
+    if (¿Ciclo VII a X? [E002]) then (Sí)
+      :Mostrar materias de fortalezas;
+      else (No)
+      :Advertir el requisito de mérito [E002];
+|Estudiante Mentoreado|
+      (P)
+      detach
+    endif
+    else (No)
+    :Mostrar materias de necesidades como\nMentoreado;
+  endif
+|Estudiante Mentoreado|
+  :Seleccionar modalidad, materias y\nsemblanza;
+  :Elegir franjas semanales o Mañanas,\nTardes, Limpiar [A001];
+|Sistema Web P2P|
+  :Actualizar contador de horas disponibles;
+|Estudiante Mentoreado|
+  :Guardar Perfil y Disponibilidad;
+|Sistema Web P2P|
+  :Guardar perfil y agenda en operaciones\ndiferenciadas;
+  if (¿Guardado completo? [E003]) then (Sí)
+    :Mostrar resultado y  preferencia no\nconcede rol Mentor;
+    else (No)
+    :Mostrar fallo y  revisar posible\nguardado parcial;
+  endif
+  else (No)
+  :Informar fallo de carga;
+endif
+stop
+legend bottom
+  Los círculos con la misma letra enlazan tramos del flujo.
+endlegend
+
+legend bottom
+PARCIAL
+Objetos: perfiles_academicos, disponibilidades_horarias
+Parcial: sin expediente, certificación de nota 14 ni envío a comité; preferencia no concede
+privilegios.
+endlegend
+@enduml

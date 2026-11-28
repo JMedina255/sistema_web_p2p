@@ -1,0 +1,36 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 67. Diagrama 6.15.1: Secuencia — CUS-001: Iniciar sesión institucional\ncon 2FA
+actor "Usuario institucional" as actor
+boundary "Interfaz de CUS-001" as ui
+control "auth_service" as svc
+actor -> ui : Iniciar sesión institucional con 2FA
+ui -> svc : OTP y acceso federado; consentimiento
+activate svc
+alt Reglas y autorización aplicables satisfechas
+database "Persistencia o respaldo de desarrollo" as db
+svc -> db : Registrar / consumir desafío; consultar límites
+db --> svc : Datos / resultado
+svc --> ui : OTP y acceso federado; consentimiento
+else Incumplimiento o fallo
+svc --> ui : Rechazo / error visible; no declarar éxito
+end
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+SMTP y Google externos requieren validación; OTP por correo o SSO no acreditan dos factores
+independientes.
+endlegend
+
+@enduml

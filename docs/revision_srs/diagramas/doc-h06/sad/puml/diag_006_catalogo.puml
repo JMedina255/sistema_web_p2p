@@ -1,0 +1,84 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Diagrama 5.1. Catálogo vigente: cinco módulos y 24 casos
+left to right direction
+actor "Usuario institucional" as u
+actor "Administrador / actor previsto según caso" as a
+rectangle "Sistema Web P2P — EPIS-UPT" {
+package "MOD-01: Seguridad, Autenticación y\nGobernanza" as m01 {
+usecase "CUS-001 Iniciar sesión institucional con\n2FA" as c1
+usecase "CUS-010 Gestionar asignación de roles de\nusuario" as c10
+}
+package "MOD-02: Ofertas de Mentoría y\nGestión de Recursos" as m02 {
+usecase "CUS-006 Registrar oferta de mentoría\nacadémica" as c6
+usecase "CUS-008 Gestionar demanda insatisfecha de\nmentoría" as c8
+usecase "CUS-005 Postular al rol de estudiante\nmentor" as c5
+usecase "CUS-021 Evaluar postulaciones a mentor por\ncomité" as c21 <<propuesto>>
+}
+package "MOD-03: Recomendaciones, Reservas y\nQuórum" as m03 {
+usecase "CUS-002 Consultar catálogo de mentorías con\nrecomendación" as c2
+usecase "CUS-003 Reservar cupo para sesión de\nmentoría" as c3
+usecase "CUS-004 Ratificar asistencia a sesión de\nmentoría (T-24h)" as c4
+usecase "CUS-023 Evaluar quórum y ejecutar corte\nautomático (T-24h)" as c23
+usecase "CUS-024 Cancelar reserva de cupo por\nestudiante" as c24
+}
+package "MOD-04: Ejecución y Seguimiento\nAcadémico" as m04 {
+usecase "CUS-007 Registrar asistencia y bitácora\npedagógica" as c7
+usecase "CUS-012 Registrar calificación y feedback\nbidireccional" as c12
+usecase "CUS-013 Consultar historial académico de\nmentorías" as c13
+usecase "CUS-014 Emitir constancia de horas de\nmentoría" as c14
+usecase "CUS-018 Gestionar justificación de\ninasistencia a sesión" as c18 <<propuesto>>
+usecase "CUS-019 Consultar bitácoras de mentoría por\ntutor" as c19
+}
+package "MOD-05: Administración y Analítica\nInstitucional" as m05 {
+usecase "CUS-009 Consultar analítica institucional\nde mentorías" as c9
+usecase "CUS-011 Exportar reportes ejecutivos\nconsolidados" as c11 <<propuesto>>
+usecase "CUS-015 Configurar parámetros del algoritmo\nde recomendación" as c15 <<propuesto>>
+usecase "CUS-016 Gestionar auditoría de eventos de\nseguridad" as c16 <<propuesto>>
+usecase "CUS-017 Configurar ambientes físicos y\nvirtuales" as c17
+usecase "CUS-020 Gestionar catálogo curricular y\nasignaturas" as c20
+usecase "CUS-022 Configurar parámetros de corte y\npenalización" as c22 <<propuesto>>
+}
+m01 -[hidden]right-> m02
+m02 -[hidden]right-> m03
+m03 -[hidden]right-> m04
+m04 -[hidden]right-> m05
+}
+u --> c1
+a --> c10
+u --> c6
+u --> c8
+u --> c5
+a --> c21
+u --> c2
+u --> c3
+u --> c4
+u --> c23
+u --> c24
+u --> c7
+u --> c12
+u --> c13
+u --> c14
+u --> c18
+a --> c19
+a --> c9
+a --> c11
+a --> c15
+a --> c16
+a --> c17
+a --> c20
+a --> c22
+legend bottom
+Los casos propuestos conservan requisitos institucionales.
+Su presencia no acredita implementación. RF21 y avisos: transversales.
+endlegend
+@enduml

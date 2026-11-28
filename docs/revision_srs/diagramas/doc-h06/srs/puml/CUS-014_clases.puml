@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 106. Diagrama 6.16.15: Clases del dominio — CUS-014: Emitir constancia de\nhoras de mentoría
+entity "certificados_horas" as certificados_horas {
+  id_certificado : Integer <<PK>>
+  id_mentor : String(255)
+  estado : String(30)
+}
+entity "bitacoras_pedagogicas" as bitacoras_pedagogicas {
+  id_bitacora : Integer <<PK>>
+  id_sesion : Integer
+  id_mentor : String(255)
+  horas_declaradas : Float
+  visado_administrador : Boolean
+}
+legend bottom
+IMPLEMENTADO; validación según alcance
+La ruta de emisión existe; no acredita autorización, firma ni validez institucional.
+endlegend
+
+@enduml

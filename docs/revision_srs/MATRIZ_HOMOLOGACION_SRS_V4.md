@@ -1,10 +1,12 @@
 # Matriz de homologación del SRS v4.0
 
-**Estado** · Provisional, pendiente de decisión del responsable institucional.
+**Estado** · Correspondencias adoptadas documentalmente en DOC-H06 por solicitud expresa del responsable. Aprobación institucional y decisiones de producto pendientes.
 
 **Base documental** · DOC-H05, sobre el commit `32b768e`.
 
-El identificador propuesto denomina la función en el [catálogo](../../NARRATIVAS_CASOS_DE_USO.md) o indica que falta definir su destino. Cada fila se interpreta por función. El [SRS v4.0 provisional](../../SRS_V4.0_CONSOLIDADO.md) conserva la numeración de origen en los requisitos, la trazabilidad y los modelos anteriores a 6.2.3.
+El identificador propuesto denomina la función en el [catálogo](../../NARRATIVAS_CASOS_DE_USO.md) o indica que falta definir su destino. Cada fila se interpreta por función. El [SRS v4.0 DOC-H06](../../SRS_V4.0_CONSOLIDADO.md) y el [SAD](../../SAD.md) adoptan los cinco módulos y los 24 identificadores vigentes en requisitos y modelos. Las tablas siguientes conservan el análisis de DOC-H05 como trazabilidad histórica; sus decisiones pendientes se refieren a política, alcance o validación, sin revertir la adopción documental. RF-001–RF-026 son alias de RF01–RF26.
+
+**Actualización de evidencia, 28/11/2026:** el ranking vigente usa Jaccard y factores de horario, modalidad y afinidad curricular; la persistencia declara 19 tablas y cabeza de migraciones `20261123_008`. Existen planificador condicional y respaldo persistente del pase efímero y de cronogramas. Se distingue esta implementación de su activación o validación real. RF21 se conserva transversal en MOD-04; los avisos son transversales, sin CUS autónomo vigente. Para cronogramas se adopta CUS-008 histórico → CUS-017 vigente por RF10; el CUS-011 histórico corresponde a reportes. Las brechas de comité, Tutor y certificación institucional permanecen abiertas.
 
 En las tablas, «SRS anterior» comprende las copias de [raíz](../../SRS.md), [SRS_NUEVO](../../SRS_NUEVO.md) y [fase de diseño](<../diseño/FD03-EPIS-Informe SRS de Proyecto.md>). Los apartados citados usan la numeración de esas versiones.
 
@@ -54,10 +56,10 @@ En las tablas, «SRS anterior» comprende las copias de [raíz](../../SRS.md), [
 
 ## Decisiones de publicación
 
-1. Aprobar las cinco agrupaciones del catálogo y la correspondencia funcional por caso. Las tablas y vistas técnicas usan todavía los identificadores de origen.
-2. Resolver las discrepancias de alcance y de evidencia de los casos parciales o propuestos. El Anexo A incluido en el SRS provisional conserva los 24 registros completos, con sus referencias.
+1. DOC-H06 adopta las cinco agrupaciones del catálogo y su correspondencia funcional en SRS y SAD; la aprobación institucional sigue pendiente.
+2. Resolver las discrepancias de alcance y de evidencia de los casos parciales o propuestos. El Anexo A del SRS conserva los 24 registros completos, con sus referencias y la actualización de evidencia de DOC-H06.
 3. Aprobar la asignación institucional de responsables para comité, tutor, certificación y parametrización. El Anexo B conserva la correspondencia recibida y el Anexo C documenta las fuentes de contraste.
-4. Decidir qué vista de diseño, requisito o regla debe actualizarse con cada equivalencia aprobada. El SRS anterior conserva sus escenarios, criterios y detalles de interfaz para esta revisión.
+4. Las vistas de la edición DOC-H06 utilizan los CUS vigentes y separan componentes identificados de propuestas. Las ediciones históricas y sus figuras se conservan; no constituyen evidencia de implementación actual. El cierre y las verificaciones están en [DOC-H06-CIERRE](DOC-H06-CIERRE.md).
 
 ## Comparación de los documentos de referencia
 

@@ -1,0 +1,34 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 28. Diagrama 6.13.12: ECB — CUS-007: Registrar asistencia y bitácora\npedagógica
+left to right direction
+actor "Mentor / Estudiante" as actor
+boundary "Interfaz de CUS-007" as ui
+control "attendance_service / bitacora_service" as control
+actor --> ui
+ui --> control : Pase efímero, asistencia y registro de\nbitácora
+entity "asistencias_sesion" as e0
+control --> e0
+entity "tokens_asistencia_activos" as e1
+control --> e1
+entity "bitacoras_pedagogicas" as e2
+control --> e2
+entity "sesiones_mentoria" as e3
+control --> e3
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+Cámara real pendiente; token aleatorio de 30 s, no TOTP RFC 6238; SHA-256 no equivale a firma
+certificada.
+endlegend
+
+@enduml

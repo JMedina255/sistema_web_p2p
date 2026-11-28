@@ -1,0 +1,39 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Diagrama 7.2. Proceso To-Be y alcance actual
+start
+:Acceder por OTP o Google y comprobar consentimiento;
+:Configurar perfil e intereses;
+:Consultar ofertas con ranking Jaccard multifactorial;
+:Reservar provisionalmente y ratificar antes de T-24h;
+:Evaluar quórum al corte (planificador según habilitación);
+if (¿Quórum suficiente?) then (sí)
+  :Confirmar sesión;
+else (no)
+  :Solicitar decisión del mentor;
+  if (¿Continuar?) then (sí)
+    :Confirmar excepcionalmente;
+  else (no)
+    :Reprogramar o cancelar con motivo;
+    stop
+  endif
+endif
+:Registrar asistencia con pase efímero;
+:Registrar bitácora y encuesta en sus plazos;
+:Visado administrativo y constancia según condiciones;
+note right
+PDF identificado como DEMO; firma y validez
+institucional pendientes. Comité, justificaciones,
+analítica integral y parametrización son brechas.
+end note
+stop
+@enduml

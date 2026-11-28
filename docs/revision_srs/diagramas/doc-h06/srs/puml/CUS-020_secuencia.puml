@@ -1,0 +1,36 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 89. Diagrama 6.15.23: Secuencia — CUS-020: Gestionar catálogo curricular\ny asignaturas
+actor "Usuario / Administrador" as actor
+boundary "Interfaz de CUS-020" as ui
+control "curriculum_service" as svc
+actor -> ui : Gestionar catálogo curricular y asignaturas
+ui -> svc : Consulta y mantenimiento curricular
+activate svc
+alt Reglas y autorización aplicables satisfechas
+database "Persistencia o respaldo de desarrollo" as db
+svc -> db : Consultar o mantener asignaturas y temas
+db --> svc : Datos / resultado
+svc --> ui : Consulta y mantenimiento curricular
+else Incumplimiento o fallo
+svc --> ui : Rechazo / error visible; no declarar éxito
+end
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+Discrepancia pendiente entre consulta I-IV y formulario 1-10; prioridad curricular no garantiza
+pesos dinámicos.
+endlegend
+
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 6. Agrupación funcional de cinco módulos
+top to bottom direction
+package "MOD-01: Seguridad, Autenticación y\nGobernanza" as m01 {
+}
+package "MOD-02: Ofertas de Mentoría y Gestión de\nRecursos" as m02 {
+}
+package "MOD-03: Recomendaciones, Reservas y Quórum" as m03 {
+}
+package "MOD-04: Ejecución y Seguimiento Académico" as m04 {
+}
+package "MOD-05: Administración y Analítica\nInstitucional" as m05 {
+}
+m01 ..> m02 : roles y postulación
+m02 ..> m03 : ofertas y demanda
+m03 ..> m04 : sesiones y reservas
+m05 ..> m02 : currículo / cronogramas
+m05 ..> m03 : configuración propuesta
+m04 ..> m05 : seguimiento / analítica propuesta
+
+@enduml

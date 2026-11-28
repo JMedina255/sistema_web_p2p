@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 66. Diagramas de Secuencia del Sistema (Fase de Diseño): vista general
+actor Usuario
+boundary SPA
+control API
+control Servicios
+database PostgreSQL
+Usuario -> SPA : Acción funcional
+SPA -> API : Solicitud autenticada
+API -> Servicios : Validar reglas y autorización
+Servicios -> PostgreSQL : Operación cuando hay sesión persistente
+PostgreSQL --> Servicios : Resultado
+Servicios --> API : Datos o error
+API --> SPA : Respuesta
+SPA --> Usuario : Estado visible
+note over API,PostgreSQL
+Respaldo en memoria solo según entorno y servicio.
+Proveedores externos y RLS requieren evidencia propia.
+end note
+@enduml

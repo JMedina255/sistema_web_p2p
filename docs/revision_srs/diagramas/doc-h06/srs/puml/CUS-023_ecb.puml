@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 26. Diagrama 6.13.10: ECB — CUS-023: Evaluar quórum y ejecutar corte\nautomático (T-24h)
+left to right direction
+actor "Planificador / Mentor" as actor
+boundary "Interfaz de CUS-023" as ui
+control "booking_service / offer_service" as control
+actor --> ui
+ui --> control : Evaluación idempotente y decisión del\nmentor
+entity "sesiones_mentoria" as e0
+control --> e0
+entity "reservas_cupo" as e1
+control --> e1
+
+legend bottom
+IMPLEMENTADO; validación según alcance
+Planificador implementado en lifespan y condicionado a habilitación; operación periódica y correo
+externos no validados.
+endlegend
+
+@enduml

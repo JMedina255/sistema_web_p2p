@@ -1,0 +1,35 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 84. Diagrama 6.15.18: Secuencia — CUS-009: Consultar analítica\ninstitucional de mentorías
+actor "Administrador" as actor
+boundary "Interfaz de CUS-009" as ui
+control "booking_service" as svc
+actor -> ui : Consultar analítica institucional de mentorías
+ui -> svc : Monitoreo de quórum
+activate svc
+alt Reglas y autorización aplicables satisfechas
+database "Persistencia o respaldo de desarrollo" as db
+svc -> db : Consultar sesiones y reservas para monitoreo
+db --> svc : Datos / resultado
+svc --> ui : Monitoreo de quórum
+else Incumplimiento o fallo
+svc --> ui : Rechazo / error visible; no declarar éxito
+end
+deactivate svc
+ui --> actor : Información y opciones del recorrido
+
+legend bottom
+PARCIAL
+Parcial: no acredita analítica integral de retención ni indicadores institucionales.
+endlegend
+
+@enduml

@@ -1,0 +1,38 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #1C2A59
+skinparam packageStyle rectangle
+skinparam wrapWidth 220
+skinparam maxMessageSize 260
+skinparam dpi 140
+title Figura 12. MOD-05: Administración y Analítica Institucional
+left to right direction
+actor "Usuario institucional" as u
+actor "Administrador / actor previsto según caso" as a
+rectangle "Sistema Web P2P — EPIS-UPT" {
+package "MOD-05: Administración y Analítica\nInstitucional" as m05 {
+usecase "CUS-009 Consultar analítica institucional\nde mentorías" as c9
+usecase "CUS-011 Exportar reportes ejecutivos\nconsolidados" as c11 <<propuesto>>
+usecase "CUS-015 Configurar parámetros del algoritmo\nde recomendación" as c15 <<propuesto>>
+usecase "CUS-016 Gestionar auditoría de eventos de\nseguridad" as c16 <<propuesto>>
+usecase "CUS-017 Configurar ambientes físicos y\nvirtuales" as c17
+usecase "CUS-020 Gestionar catálogo curricular y\nasignaturas" as c20
+usecase "CUS-022 Configurar parámetros de corte y\npenalización" as c22 <<propuesto>>
+}
+}
+a --> c9
+a --> c11
+a --> c15
+a --> c16
+a --> c17
+a --> c20
+a --> c22
+legend bottom
+Los casos propuestos conservan requisitos institucionales.
+Su presencia no acredita implementación. RF21 y avisos: transversales.
+endlegend
+@enduml
