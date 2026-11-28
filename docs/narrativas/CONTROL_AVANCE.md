@@ -1,8 +1,9 @@
 # Control de avance del catálogo de narrativas y diagramas
 
 **Proyecto:** Sistema Web P2P de Mentorías Académicas — EPIS-UPT
-**Hito:** DOC-H04-R
-**Base en Git:** `044d2a8473908def9a40503cc9692426e02198a8`
+**Hito actual:** DOC-H05
+**Base de DOC-H05:** `32b768e`
+**Base de DOC-H04 y DOC-H04-R:** `044d2a8473908def9a40503cc9692426e02198a8`
 **Paquete de entrada:** DOC-H03_P2P_Diagramas_PlantUML
 
 | Etapa | Resultado |
@@ -11,6 +12,8 @@
 | Sintaxis y renderizado | 48 pares PlantUML/PNG. En DOC-H04-R se validaron y renderizaron en UTF-8 las 19 fuentes modificadas. Las otras 29 conservan la validación de DOC-H04. |
 | Revisión visual | DOC-H04 inspeccionó las 48 imágenes. DOC-H04-R comparó las 19 figuras corregidas con sus versiones anteriores y cerró las observaciones indicadas abajo. |
 | Aprobación documental | Pendiente de revisión final por el responsable. |
+
+DOC-H05 incorporó las 24 narrativas y sus 48 figuras en el apartado 6.2.3 del [SRS v4.0 provisional](../../SRS_V4.0_CONSOLIDADO.md). Se incorporaron las imágenes a tamaño original mediante enlaces relativos y se conservó la revisión gráfica anterior. Los requisitos, reglas y modelos heredados mantienen sus referencias de origen hasta que el responsable decida sobre la [matriz de homologación](../revision_srs/MATRIZ_HOMOLOGACION_SRS_V4.md).
 
 El [catálogo](../../NARRATIVAS_CASOS_DE_USO.md) enlaza cada PNG y su fuente. Su Anexo A conserva las discrepancias y el alcance de la implementación documentados en DOC-H03. La matriz histórica de CUS-001 está disponible en el repositorio en `docs/revision_srs/CUS-001/MATRIZ_REVISION_H01.md`.
 

@@ -1,5 +1,5 @@
 # Siguiente microincremento autorizado
 
-DOC-H04-R concluye con la entrega del catálogo, el control de avance y el ZIP para revisión final. El responsable tiene pendiente la aprobación documental.
+DOC-H05 termina con la entrega del SRS v4.0 provisional y la matriz de homologación. El siguiente paso institucional es una decisión expresa del responsable sobre las equivalencias y los alcances documentados.
 
-Reanudar solo con una instrucción expresa para atender comentarios, realizar otro hito o autorizar push o merge.
+La homologación definitiva de identificadores, DOC-H06, push y merge quedan sujetos a autorización.
