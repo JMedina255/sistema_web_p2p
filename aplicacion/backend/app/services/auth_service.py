@@ -470,8 +470,6 @@ class AuthService:
             and not settings.SMTP_ENABLED
         )
         mock_hint = code if is_test_hint_enabled else None
-        if is_test_hint_enabled:
-            print(f"[AUTH TEST] OTP simulado para {clean_email}: {code}", flush=True)
 
         return RequestOtpResponse(
             challengeId=challenge_id,
