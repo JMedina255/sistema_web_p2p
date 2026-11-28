@@ -225,9 +225,9 @@ Las siguientes figuras documentan las comprobaciones funcionales de la interfaz 
 
 **Figura 5.1: Bandeja consolidada de reservas personales del estudiante (T-25 / T-27)**
 
-![Figura 5.1: Bandeja consolidada de reservas personales del estudiante](imagenes/sprint-05/01_bandeja_reservas_estudiante.png)
+![Figura 5.1: Bandeja consolidada de reservas personales del estudiante](../sprints/sprint-05/05-evidencias/01_bandeja_reservas_estudiante.png)
 
-* **Evidencia visual:** `imagenes/sprint-05/01_bandeja_reservas_estudiante.png`.
+* **Evidencia visual:** `../sprints/sprint-05/05-evidencias/01_bandeja_reservas_estudiante.png`.
 * **Fuente:** Captura de pantalla en ejecución local sobre React 19 vía Playwright, 02/11/2026, commit `1b1acc4`.
 * **Interpretación técnica:** Muestra la vista `StudentBookingsView.tsx` renderizada con 4 reservas de prueba, contadores reactivos en filtros («Todas (4)», «Por Ratificar (2)», «Ratificadas (1)», «Histórico (1)») y resolución de identidad JWT (`2022074255@upt.pe`). Demuestra la integración completa del módulo MOD-05.
 * **Límite técnico:** Acredita renderizado en cliente y cálculo reactivo; la persistencia se apoya en el entorno local alfa.
@@ -236,9 +236,9 @@ Las siguientes figuras documentan las comprobaciones funcionales de la interfaz 
 
 **Figura 5.2: Diálogo modal accesible de ratificación anticipada de asistencia (T-25 / RF13 / CUS24)**
 
-![Figura 5.2: Diálogo modal accesible de ratificación anticipada de asistencia](imagenes/sprint-05/02_ratificacion_anticipada.png)
+![Figura 5.2: Diálogo modal accesible de ratificación anticipada de asistencia](../sprints/sprint-05/05-evidencias/02_ratificacion_anticipada.png)
 
-* **Evidencia visual:** `imagenes/sprint-05/02_ratificacion_anticipada.png`.
+* **Evidencia visual:** `../sprints/sprint-05/05-evidencias/02_ratificacion_anticipada.png`.
 * **Fuente:** Captura de pantalla de la interfaz web, 02/11/2026, commit `1b1acc4`.
 * **Interpretación técnica:** Despliegue del diálogo modal accesible (`role="dialog"`) con trampa de foco y compatibilidad WAI-ARIA (RNF05). Expone los términos de compromiso formativo (PB-014) y la regla de cómputo de quórum del 50% (RN-08 / RN-09).
 * **Límite técnico:** Valida la experiencia previa a la emisión de la mutación HTTP.
@@ -247,9 +247,9 @@ Las siguientes figuras documentan las comprobaciones funcionales de la interfaz 
 
 **Figura 5.3: Reserva en estado CONFIRMADA tras ratificación real (T-25 / T-26)**
 
-![Figura 5.3: Reserva en estado CONFIRMADA tras ratificación real](imagenes/sprint-05/03_asistencia_confirmada.png)
+![Figura 5.3: Reserva en estado CONFIRMADA tras ratificación real](../sprints/sprint-05/05-evidencias/03_asistencia_confirmada.png)
 
-* **Evidencia visual:** `imagenes/sprint-05/03_asistencia_confirmada.png`.
+* **Evidencia visual:** `../sprints/sprint-05/05-evidencias/03_asistencia_confirmada.png`.
 * **Fuente:** Captura de pantalla tras ejecución de mutación HTTP 200 OK, 02/11/2026, commit `1b1acc4`.
 * **Interpretación técnica:** Acredita la transición real de la reserva `RES-2026-0101` hacia el estado `CONFIRMADA`, mostrando el banner verde de éxito en cabecera, la asignación inmutable de `fecha_ratificacion` y la reactividad en los contadores («Por Ratificar (1)», «Ratificadas (2)»).
 * **Límite técnico:** Demuestra la integración fluida cliente-servidor bajo SQLite/mock local; la validación con Supabase PostgreSQL se efectúa en staging.
@@ -258,9 +258,9 @@ Las siguientes figuras documentan las comprobaciones funcionales de la interfaz 
 
 **Figura 5.4: Diálogo modal de desistimiento voluntario y liberación de cupo (T-27 / RF14 / CUS17)**
 
-![Figura 5.4: Diálogo modal de desistimiento voluntario y liberación de cupo](imagenes/sprint-05/04_desistimiento_voluntario.png)
+![Figura 5.4: Diálogo modal de desistimiento voluntario y liberación de cupo](../sprints/sprint-05/05-evidencias/04_desistimiento_voluntario.png)
 
-* **Evidencia visual:** `imagenes/sprint-05/04_desistimiento_voluntario.png`.
+* **Evidencia visual:** `../sprints/sprint-05/05-evidencias/04_desistimiento_voluntario.png`.
 * **Fuente:** Captura de pantalla de la interfaz web, 02/11/2026, commit `1b1acc4`.
 * **Interpretación técnica:** Modal accesible de desistimiento con motivo tipado (`Superposición horaria imprevista con entrega de laboratorio de Redes y Comunicaciones`), advirtiendo al mentoreado sobre la liberación ética y responsable de la vacante (RN-10 / PB-015).
 * **Límite técnico:** Evalúa la recolección estructurada del motivo previo al despacho transaccional.
@@ -280,9 +280,9 @@ Las siguientes figuras documentan las comprobaciones funcionales de la interfaz 
 
 **Figura 5.6: Control temporal de corte preventivo a T-24h (T-25 / RN-08 / RN-10)**
 
-![Figura 5.6: Control temporal de corte preventivo a T-24h](imagenes/sprint-05/06_control_temporal_t24h.png)
+![Figura 5.6: Control temporal de corte preventivo a T-24h](../sprints/sprint-05/05-evidencias/06_control_temporal_t24h.png)
 
-* **Evidencia visual:** `imagenes/sprint-05/06_control_temporal_t24h.png`.
+* **Evidencia visual:** `../sprints/sprint-05/05-evidencias/06_control_temporal_t24h.png`.
 * **Fuente:** Captura de pantalla de la interfaz web con filtro «Por Ratificar», 02/11/2026, commit `1b1acc4`.
 * **Interpretación técnica:** Reserva `RES-2026-0103` con antelación de 12 horas ($T+12\text{ h} \le 24\text{ h}$). Se comprueba la deshabilitación preventiva de los botones «Plazo Vencido (T-24h cerrado)» y «Desistimiento Cerrado (T-24h)» junto al aviso de corte reglamentario cumplido.
 * **Límite técnico:** Simulación controlada de proximidad temporal para evaluar deterministamente la barrera preventiva del cliente.
@@ -470,9 +470,9 @@ A continuación, se especifican los contratos REST reales implementados en `apli
 
 **Figura 5.7: Catálogo OpenAPI 3.1.0 documentado en Swagger UI (T-26 / T-28)**
 
-![Figura 5.7: Catálogo OpenAPI 3.1.0 documentado en Swagger UI](imagenes/sprint-05/07_swagger_api_docs_sprint05.png)
+![Figura 5.7: Catálogo OpenAPI 3.1.0 documentado en Swagger UI](../sprints/sprint-05/05-evidencias/07_swagger_api_docs_sprint05.png)
 
-* **Evidencia visual:** `imagenes/sprint-05/07_swagger_api_docs_sprint05.png`.
+* **Evidencia visual:** `../sprints/sprint-05/05-evidencias/07_swagger_api_docs_sprint05.png`.
 * **Fuente:** Captura de pantalla en `http://localhost:8000/docs`, 02/11/2026, commit `1b1acc4`.
 * **Interpretación técnica:** Exposición interactiva de los contratos REST de reservas (`/api/v1/bookings`): `POST /{id_reserva}/confirm`, `POST /{id_reserva}/cancel`, `GET /my-reservations`, `POST /reserve` y `POST /api/v1/quorum/evaluate`. Certifica esquemas Pydantic v2 normalizados y tipado estricto.
 * **Límite técnico:** Acredita especificación de contratos; la ejecución concurrente se respalda mediante las suites automatizadas.
@@ -524,9 +524,9 @@ Las siguientes figuras certifican la ejecución de las suites de prueba automati
 
 **Figura 5.8: Terminal de pruebas de backend con Pytest y reporte de cobertura (Pytest-Cov)**
 
-![Figura 5.8: Terminal de pruebas de backend con Pytest y reporte de cobertura](imagenes/sprint-05/08_backend_pytest_coverage_sprint05.png)
+![Figura 5.8: Terminal de pruebas de backend con Pytest y reporte de cobertura](../sprints/sprint-05/05-evidencias/08_backend_pytest_coverage_sprint05.png)
 
-* **Evidencia visual:** `imagenes/sprint-05/08_backend_pytest_coverage_sprint05.png`.
+* **Evidencia visual:** `../sprints/sprint-05/05-evidencias/08_backend_pytest_coverage_sprint05.png`.
 * **Fuente:** Terminal PowerShell ejecutando `pytest`, 02/11/2026, commit `1b1acc4`.
 * **Interpretación técnica:** Certifica 187 pruebas automatizadas superadas con 0 fallos en 2.28s y una cobertura consolidada de 90.40% de líneas sobre 2350 sentencias, superando ampliamente el umbral institucional del 70.0% (RNF09).
 * **Límite técnico:** Evaluación sobre entorno local aislado y SQLite; pendiente despliegue a Staging PostgreSQL.
@@ -535,9 +535,9 @@ Las siguientes figuras certifican la ejecución de las suites de prueba automati
 
 **Figura 5.9: Terminal de pruebas de frontend con Vitest y reporte de cobertura v8**
 
-![Figura 5.9: Terminal de pruebas de frontend con Vitest y reporte de cobertura](imagenes/sprint-05/09_frontend_vitest_coverage_sprint05.png)
+![Figura 5.9: Terminal de pruebas de frontend con Vitest y reporte de cobertura](../sprints/sprint-05/05-evidencias/09_frontend_vitest_coverage_sprint05.png)
 
-* **Evidencia visual:** `imagenes/sprint-05/09_frontend_vitest_coverage_sprint05.png`.
+* **Evidencia visual:** `../sprints/sprint-05/05-evidencias/09_frontend_vitest_coverage_sprint05.png`.
 * **Fuente:** Terminal PowerShell ejecutando `npm test -- --run --coverage`, 02/11/2026, commit `1b1acc4`.
 * **Interpretación técnica:** Certifica 265 pruebas unitarias y de integración pasando en 21 suites en 3.49s con 83.42% de cobertura de líneas, incluyendo 42 pruebas en `StudentBookingsView.tsx` y 42 en `bookingService.ts`.
 * **Límite técnico:** Instrumentación sobre `jsdom` en NodeJS 20.
@@ -546,9 +546,9 @@ Las siguientes figuras certifican la ejecución de las suites de prueba automati
 
 **Figura 5.10: Flujo de Integración Continua homologado en GitHub Actions**
 
-![Figura 5.10: Flujo de Integración Continua homologado en GitHub Actions](imagenes/sprint-05/10_github_actions_ci_sprint05.png)
+![Figura 5.10: Flujo de Integración Continua homologado en GitHub Actions](../sprints/sprint-05/05-evidencias/10_github_actions_ci_sprint05.png)
 
-* **Evidencia visual:** `imagenes/sprint-05/10_github_actions_ci_sprint05.png`.
+* **Evidencia visual:** `../sprints/sprint-05/05-evidencias/10_github_actions_ci_sprint05.png`.
 * **Fuente:** Panel de GitHub Actions (`ci.yml`), Run ID `41524635510`, PR #6, commit `1ed8a04` / `1b1acc4`.
 * **Interpretación técnica:** Ejecución limpia de los 4 jobs de integración en runner Ubuntu (`lint-backend`, `lint-frontend`, `test-backend`, `test-frontend`), totalizando 452 pruebas automatizadas sin regresiones en la rama `main`.
 * **Límite técnico:** El pipeline valida la integración en runners virtuales; no reemplaza la prueba de usuario final.
@@ -662,18 +662,18 @@ A continuación, se presenta el inventario exhaustivo de las diez capturas de pa
 
 | ID / Figura | Hito / Tarea / PBI | Criterio o prueba que respalda | Archivo relativo | Fecha, entorno y commit | Qué demuestra / Límite técnico |
 | :---: | :--- | :--- | :--- | :--- | :--- |
-| **Fig. 5.1** | `H2` / `T-25` / `PB-014` | Bandeja consolidada de reservas en `StudentBookingsView.tsx`. | `imagenes/sprint-05/01_bandeja_reservas_estudiante.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Muestra la interfaz reactiva con 4 reservas de prueba, filtros por estado y resolución JWT. Límite: Renderizado en cliente sobre base local. |
-| **Fig. 5.2** | `H2` / `T-25` / `PB-014` | Diálogo modal accesible de ratificación pedagógica. | `imagenes/sprint-05/02_ratificacion_anticipada.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Modal accesible WAI-ARIA (T-25/CUS24) con cláusula de compromiso y cómputo de quórum (RN-08/RN-09). Límite: Estado previo a la mutación HTTP. |
-| **Fig. 5.3** | `H2-H4` / `T-25-T-26` | Confirmación real de asistencia (estado `CONFIRMADA`). | `imagenes/sprint-05/03_asistencia_confirmada.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Transición real HTTP 200 OK a `CONFIRMADA`, banner verde de éxito y reactividad en contadores. Límite: Persistencia en entorno local; Supabase en staging. |
-| **Fig. 5.4** | `H3` / `T-27` / `PB-015` | Diálogo modal accesible de desistimiento voluntario. | `imagenes/sprint-05/04_desistimiento_voluntario.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Modal accesible de cancelación con motivo tipado y advertencia de liberación ética (RN-10/PB-015). Límite: Recolección y validación de texto en cliente. |
+| **Fig. 5.1** | `H2` / `T-25` / `PB-014` | Bandeja consolidada de reservas en `StudentBookingsView.tsx`. | `../sprints/sprint-05/05-evidencias/01_bandeja_reservas_estudiante.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Muestra la interfaz reactiva con 4 reservas de prueba, filtros por estado y resolución JWT. Límite: Renderizado en cliente sobre base local. |
+| **Fig. 5.2** | `H2` / `T-25` / `PB-014` | Diálogo modal accesible de ratificación pedagógica. | `../sprints/sprint-05/05-evidencias/02_ratificacion_anticipada.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Modal accesible WAI-ARIA (T-25/CUS24) con cláusula de compromiso y cómputo de quórum (RN-08/RN-09). Límite: Estado previo a la mutación HTTP. |
+| **Fig. 5.3** | `H2-H4` / `T-25-T-26` | Confirmación real de asistencia (estado `CONFIRMADA`). | `../sprints/sprint-05/05-evidencias/03_asistencia_confirmada.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Transición real HTTP 200 OK a `CONFIRMADA`, banner verde de éxito y reactividad en contadores. Límite: Persistencia en entorno local; Supabase en staging. |
+| **Fig. 5.4** | `H3` / `T-27` / `PB-015` | Diálogo modal accesible de desistimiento voluntario. | `../sprints/sprint-05/05-evidencias/04_desistimiento_voluntario.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Modal accesible de cancelación con motivo tipado y advertencia de liberación ética (RN-10/PB-015). Límite: Recolección y validación de texto en cliente. |
 | **Fig. 5.5** | `H3-H4` / `T-27-T-28` | Desistimiento voluntario y restitución atómica de aforo. | `imagenes/sprint-05/05_cancelacion_aforo.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Mutación real a `CANCELADA_USUARIO` y restitución atómica de plaza al aforo (RN-05/RNF07). Límite: Ejecutado bajo cerrojo de concurrencia en memoria/SQLite. |
-| **Fig. 5.6** | `H2-H4` / `T-25-T-26` | Control temporal estricto en ventana de corte $T-24\text{ h}$. | `imagenes/sprint-05/06_control_temporal_t24h.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Bloqueo preventivo en reserva con $\Delta t = 12\text{ h} \le 24\text{ h}$ (botones deshabilitados, RN-08/RN-10). Límite: Simulación controlada de proximidad temporal. |
-| **Fig. 5.7** | `H4` / `T-26-T-28` | Publicación de contratos REST en OpenAPI 3.1.0 / Swagger. | `imagenes/sprint-05/07_swagger_api_docs_sprint05.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Contratos HTTP documentados en Swagger UI para `/api/v1/bookings`. Límite: Muestra especificación formal; requiere pruebas para validar respuestas. |
-| **Fig. 5.8** | `H4` / `T-26-T-28` | 187 pruebas aprobadas en Pytest y cobertura 90.40%. | `imagenes/sprint-05/08_backend_pytest_coverage_sprint05.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Calidad y cobertura del backend superando RNF09 ($\ge 70\%$). Límite: Evalúa código Python en suite local, no mide capa cliente. |
-| **Fig. 5.9** | `H2-H3` / `T-25-T-27` | 265 pruebas aprobadas en Vitest y cobertura 83.42%. | `imagenes/sprint-05/09_frontend_vitest_coverage_sprint05.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Calidad y cobertura de la SPA superando RNF09 ($\ge 70\%$). Límite: Evalúa componentes React en jsdom, no mide backend. |
-| **Fig. 5.10** | `H5` / `T-25-T-28` | Flujo de CI aprobado en GitHub Actions (452 pruebas). | `imagenes/sprint-05/10_github_actions_ci_sprint05.png` | 02/11/2026 · CI Runner · `1ed8a04` | Integración continua exitosa en PR #6 con cero regresiones en runner Ubuntu. Límite: Pipeline automatizado sin validación manual de usuario. |
+| **Fig. 5.6** | `H2-H4` / `T-25-T-26` | Control temporal estricto en ventana de corte $T-24\text{ h}$. | `../sprints/sprint-05/05-evidencias/06_control_temporal_t24h.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Bloqueo preventivo en reserva con $\Delta t = 12\text{ h} \le 24\text{ h}$ (botones deshabilitados, RN-08/RN-10). Límite: Simulación controlada de proximidad temporal. |
+| **Fig. 5.7** | `H4` / `T-26-T-28` | Publicación de contratos REST en OpenAPI 3.1.0 / Swagger. | `../sprints/sprint-05/05-evidencias/07_swagger_api_docs_sprint05.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Contratos HTTP documentados en Swagger UI para `/api/v1/bookings`. Límite: Muestra especificación formal; requiere pruebas para validar respuestas. |
+| **Fig. 5.8** | `H4` / `T-26-T-28` | 187 pruebas aprobadas en Pytest y cobertura 90.40%. | `../sprints/sprint-05/05-evidencias/08_backend_pytest_coverage_sprint05.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Calidad y cobertura del backend superando RNF09 ($\ge 70\%$). Límite: Evalúa código Python en suite local, no mide capa cliente. |
+| **Fig. 5.9** | `H2-H3` / `T-25-T-27` | 265 pruebas aprobadas en Vitest y cobertura 83.42%. | `../sprints/sprint-05/05-evidencias/09_frontend_vitest_coverage_sprint05.png` | 02/11/2026 · Local Alfa · `1b1acc4` | Calidad y cobertura de la SPA superando RNF09 ($\ge 70\%$). Límite: Evalúa componentes React en jsdom, no mide backend. |
+| **Fig. 5.10** | `H5` / `T-25-T-28` | Flujo de CI aprobado en GitHub Actions (452 pruebas). | `../sprints/sprint-05/05-evidencias/10_github_actions_ci_sprint05.png` | 02/11/2026 · CI Runner · `1ed8a04` | Integración continua exitosa en PR #6 con cero regresiones en runner Ubuntu. Límite: Pipeline automatizado sin validación manual de usuario. |
 
-Fuente: Archivos originales de captura almacenados en `docs/diseño/imagenes/sprint-05/`.
+Fuente: Capturas enlazadas en la matriz. Las copias idénticas remiten a las evidencias del Sprint 05; la figura 5.5 conserva su archivo de diseño.
 
 El Cuadro 11.1 certifica que el acervo de evidencias visuales del Sprint 05 se encuentra debidamente normalizado, con trazabilidad integral hacia los requerimientos funcionales, reglas de negocio y compromisos de backlog.
 
