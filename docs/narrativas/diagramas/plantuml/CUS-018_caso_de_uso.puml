@@ -1,0 +1,44 @@
+@startuml
+' CUS-018 — Gestionar justificación de inasistencia a sesión
+' Estado: Pendiente: no se identificó trámite específico
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-018 — Gestionar justificación de inasistencia a sesión\nPropuesta funcional — implementación pendiente
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Estudiante Mentoreado" as A0
+actor "Responsable académico\n(previsto)" as A1
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "Registrar justificación\n(propuesta)" as U1
+  usecase "Comprobar reserva y motivo" as U2
+  usecase "Evaluar justificación\n(propuesta)" as U3
+  usecase "Registrar decisión motivada" as U4
+  usecase "Solicitar información\nadicional" as U5
+  usecase "Rechazar justificación" as U6
+  usecase "Consultar resolución\n(propuesta)" as U7
+}
+A0 -- U1
+A1 -- U3
+A0 -- U7
+U1 ..> U2 : <<include>>
+U3 ..> U4 : <<include>>
+U5 ..> U3 : <<extend>>\n[Falta evidencia]
+U6 ..> U3 : <<extend>>\n[Decisión desfavorable]
+U7 ..> U1 : <<extend>>\n[Resolución disponible]
+legend bottom
+  CUS-018 agrupa objetivos independientes.
+endlegend
+@enduml

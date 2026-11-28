@@ -1,0 +1,129 @@
+@startuml
+' CUS-006 — Registrar oferta de mentoría académica
+' Estado: Aprobado en conversación; consolidado
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-006 — Registrar oferta de mentoría académica
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Estudiante Mentor|
+start
+|Sistema Web P2P|
+if (¿Acceso autorizado?) then (No)
+  :Restringir acceso;
+  stop
+endif
+|Estudiante Mentor|
+:Abrir Publicar mentoría o Publicar Nueva\nOferta;
+|Sistema Web P2P|
+:Mostrar formulario de ocho campos;
+if (¿Oferta dirigida por demanda? [A002]) then (Sí)
+  :Completar y bloquear asignatura y tema;
+|Estudiante Mentor|
+  if (¿Desvincular solicitud? [A003]) then (Sí)
+|Sistema Web P2P|
+    :Retirar vínculo y habilitar selección;
+  endif
+endif
+(R)
+  :Cargar catálogo curricular;
+  if (¿Asignatura y tema disponibles?\n[E002/E005]) then (Sí)
+|Estudiante Mentor|
+    :Seleccionar asignatura y un tema;
+    :Elegir modalidad y fecha y  duración 60\no 90 min;
+|Sistema Web P2P|
+    :Calcular término y antelación y  fijar\naforo;
+    if (¿Antelación superior a 24 h? [E003]) then (Sí)
+      if (¿Modalidad?) then (Presencial)
+        :Fijar 10 cupos y  consultar aulas libres\ntoda la sesión;
+        if (¿Hay aula disponible? [E004]) then (Sí)
+|Estudiante Mentor|
+          :Seleccionar aula o laboratorio;
+          else (No)
+|Sistema Web P2P|
+          :Informar falta de aula y  permitir\ncambiar programación;
+          stop
+        endif
+        else (Virtual)
+|Sistema Web P2P|
+        (V)
+        detach
+      endif
+|Estudiante Mentor|
+      (I)
+      :Completar observaciones opcionales y\nrevisar;
+|Sistema Web P2P|
+      if (¿Formulario válido? [E005]) then (Sí)
+|Estudiante Mentor|
+        :Presionar Publicar Oferta de Mentoría;
+|Sistema Web P2P|
+        :Mostrar Publicando Oferta... y comprobar\nidentidad;
+        if (¿Elegibilidad aceptada? [E001]) then (Sí)
+          if (¿Parámetros e infraestructura siguen\nválidos? [E003/E006]) then (Sí)
+            if (¿Oferta general o solicitud\npendiente válida? [E007]) then (Sí)
+              :Registrar oferta PUBLICADA y código de\nsesión;
+              if (¿Registro exitoso? [E008]) then (Sí)
+                if (¿Solicitud vinculada?) then (Sí)
+                  :Actualizar solicitud a ATENDIDA;
+                endif
+                :Confirmar publicación y redirigir a Mis\nsesiones;
+|Estudiante Mentor|
+                :Consultar nueva oferta y  opción de otra\npublicación [A005];
+                stop
+                else (No)
+|Sistema Web P2P|
+                :Mostrar error y  comprobar antes de\nreintentar;
+              endif
+              else (No)
+              :Rechazar vínculo no disponible;
+            endif
+            else (No)
+            :Mostrar error y actualizar\ndisponibilidad;
+          endif
+          else (No)
+          :Rechazar publicación sin autorización;
+          stop
+        endif
+        else (No)
+        :Mantener botón deshabilitado;
+      endif
+      else (No)
+      :Mostrar antelación insuficiente;
+    endif
+    else (No)
+    :Informar fallo de catálogo;
+  endif
+|Estudiante Mentor|
+if (¿Corregir datos o programación?\n[A004]) then (Sí)
+  (R)
+  detach
+else (No)
+endif
+stop
+
+|Sistema Web P2P|
+(V)
+:Fijar 20 cupos y sugerir dirección virtual [A001];
+|Estudiante Mentor|
+:Conservar, escribir o generar enlace;
+(I)
+detach
+legend bottom
+  Los círculos con la misma letra enlazan tramos del flujo.
+endlegend
+@enduml

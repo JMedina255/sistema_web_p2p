@@ -1,0 +1,41 @@
+@startuml
+' CUS-012 — Registrar calificación y feedback bidireccional
+' Estado: Implementación parcial: encuesta del asistente y bitácora del mentor
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-012 — Registrar calificación y feedback bidireccional\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Estudiante Mentoreado" as A0
+actor "Estudiante Mentor" as A1
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "Evaluar mentoría" as U1
+  usecase "Comprobar asistencia y plazo" as U2
+  usecase "Calificar cuatro dimensiones y\ncomentar" as U3
+  usecase "Registrar evaluación" as U4
+  usecase "Registrar retroalimentación\ngrupal" as U5
+  usecase "CUS-007 Registrar bitácora" as U6
+}
+A0 -- U1
+A1 -- U5
+U1 ..> U2 : <<include>>
+U1 ..> U3 : <<include>>
+U1 ..> U4 : <<include>>
+U5 ..> U6 : <<include>>
+legend bottom
+  CUS-012 agrupa objetivos independientes.
+endlegend
+@enduml

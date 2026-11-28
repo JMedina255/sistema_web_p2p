@@ -1,0 +1,47 @@
+@startuml
+' CUS-023 — Evaluar quórum y ejecutar corte automático (T-24h)
+' Estado: Evaluación identificada; ejecución periódica en entorno real no certificada
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-023 — Evaluar quórum y ejecutar corte automático (T-24h)\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Administrador\ninstitucional" as A0
+actor "Estudiante Mentor" as A1
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-023 — Evaluar quórum y\nejecutar corte automático\n(T-24h)" as UC
+  usecase "Evaluar sesión y contar\nratificaciones" as U1
+  usecase "Calcular quórum y actualizar\nestado" as U2
+  usecase "Resolver quórum insuficiente" as U3
+  usecase "Consultar monitoreo" as U4
+  usecase "Dictar con aforo reducido" as U5
+  usecase "Reprogramar sesión" as U6
+  usecase "Cancelar sesión" as U7
+}
+A0 -- U4
+A1 -- U3
+UC ..> U1 : <<include>>
+UC ..> U2 : <<include>>
+U3 ..> UC : <<extend>>\n[Sesión insuficiente]
+U4 ..> UC : <<extend>>\n[Supervisión independiente]
+U5 ..> U3 : <<extend>>\n[Decisión de continuidad]
+U6 ..> U3 : <<extend>>\n[Nueva fecha válida]
+U7 ..> U3 : <<extend>>\n[Motivo requerido]
+note bottom of UC
+  Inicio por proceso programado interno.
+  Activación periódica no certificada.
+end note
+@enduml

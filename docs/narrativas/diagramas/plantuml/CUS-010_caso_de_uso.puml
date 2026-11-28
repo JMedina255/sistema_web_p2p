@@ -1,0 +1,37 @@
+@startuml
+' CUS-010 — Gestionar asignación de roles de usuario
+' Estado: Aprobado en conversación; consolidado
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-010 — Gestionar asignación de roles de usuario
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Administrador\ninstitucional" as A0
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-010 — Gestionar asignación\nde roles de usuario" as UC
+  usecase "Consultar roles del estudiante" as U1
+  usecase "Promover a Mentor" as U2
+  usecase "Revocar rol Mentor" as U3
+  usecase "Consultar otro correo" as U4
+  usecase "Comprobar ciclo académico" as U5
+}
+A0 -- UC
+UC ..> U1 : <<include>>
+U2 ..> UC : <<extend>>\n[Sin rol Mentor]
+U3 ..> UC : <<extend>>\n[Con rol Mentor]
+U4 ..> UC : <<extend>>\n[Nueva búsqueda]
+U2 ..> U5 : <<include>>
+@enduml

@@ -1,0 +1,45 @@
+@startuml
+' CUS-021 — Evaluar postulaciones a mentor por comité
+' Estado: Pendiente: sin flujo de comité identificado
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-021 — Evaluar postulaciones a mentor por comité\nPropuesta funcional — implementación pendiente
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Comité evaluador\n(previsto)" as A0
+actor "Administrador\ninstitucional" as A1
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-021 — Evaluar\npostulaciones a mentor por\ncomité" as UC
+  usecase "Consultar expediente" as U1
+  usecase "Evaluar mérito académico" as U2
+  usecase "Registrar decisión motivada" as U3
+  usecase "Solicitar subsanación" as U4
+  usecase "Rechazar postulación" as U5
+  usecase "CUS-010 Asignar rol" as U6
+}
+A0 -- UC
+A1 -- U6
+UC ..> U1 : <<include>>
+UC ..> U2 : <<include>>
+UC ..> U3 : <<include>>
+U4 ..> UC : <<extend>>\n[Falta evidencia]
+U5 ..> UC : <<extend>>\n[Decisión desfavorable]
+U6 ..> UC : <<extend>>\n[Decisión aprobatoria]
+legend right
+  Pendiente: sin flujo de comité
+  identificado
+endlegend
+@enduml

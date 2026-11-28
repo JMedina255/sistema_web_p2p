@@ -1,0 +1,51 @@
+@startuml
+' CUS-024 — Cancelar reserva de cupo por estudiante
+' Estado: Implementación identificada; revisión estática
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-024 — Cancelar reserva de cupo por estudiante
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Estudiante Mentoreado|
+start
+:Abrir Mis reservas y elegir reserva\nactiva;
+|Sistema Web P2P|
+if (¿Propia, activa y antes del corte?\n[E001/E002]) then (Sí)
+|Estudiante Mentoreado|
+  :Presionar Cancelar Reserva / Desistir;
+|Sistema Web P2P|
+  :Mostrar política, horario y motivo\nopcional;
+|Estudiante Mentoreado|
+  :Escribir motivo o dejarlo vacío [A002];
+  if (¿Confirmar Desistimiento? [A001]) then (Sí)
+|Sistema Web P2P|
+    :Procesar y volver a comprobar\ntitularidad, estado y plazo;
+    if (¿Cancelación registrada? [E003]) then (Sí)
+      :Marcar CANCELADA_USUARIO y liberar cupo;
+      :Actualizar tarjeta de reserva;
+      else (No)
+      :Mostrar error y  consultar estado antes\nde reintentar;
+    endif
+    else (No)
+    :Volver sin cancelar;
+  endif
+  else (No)
+  :Bloquear e informar restricción;
+endif
+stop
+@enduml

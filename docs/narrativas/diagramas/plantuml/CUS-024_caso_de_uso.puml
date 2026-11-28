@@ -1,0 +1,35 @@
+@startuml
+' CUS-024 — Cancelar reserva de cupo por estudiante
+' Estado: Implementación identificada; revisión estática
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-024 — Cancelar reserva de cupo por estudiante
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Estudiante Mentoreado" as A0
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-024 — Cancelar reserva de\ncupo por estudiante" as UC
+  usecase "Consultar reserva activa" as U1
+  usecase "Comprobar titularidad y corte" as U2
+  usecase "Liberar cupo y registrar\ndesistimiento" as U3
+  usecase "Registrar motivo" as U4
+}
+A0 -- UC
+UC ..> U1 : <<include>>
+UC ..> U2 : <<include>>
+UC ..> U3 : <<include>>
+U4 ..> UC : <<extend>>\n[Opcional]
+@enduml

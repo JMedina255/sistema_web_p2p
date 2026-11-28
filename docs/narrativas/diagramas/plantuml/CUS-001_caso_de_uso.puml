@@ -4,7 +4,10 @@
   Estándar: UML 2.5
 '/
 @startuml
-left to right direction
+title CUS-001 — Iniciar sesión institucional con 2FA
+top to bottom direction
+skinparam nodesep 36
+skinparam ranksep 45
 skinparam packageStyle rectangle
 skinparam shadowing false
 skinparam roundcorner 8
@@ -33,22 +36,27 @@ actor "Administrador Institucional" as Admin #FEF9C3
 actor "Servicio de Correo\nInstitucional" as Correo #FFF1F2
 actor "Servicio de Identidad\nde Google" as Google #FFF1F2
 
-rectangle "Sistema Web P2P - EPIS-UPT" {
+caption Límite del sistema: Sistema Web P2P - EPIS-UPT
+rectangle {
   usecase "CUS-001: Iniciar sesión institucional\ncon 2FA" as CUS01
   usecase "Solicitar y verificar\ncódigo temporal (OTP)" as UC_OTP
   usecase "Autenticar con cuenta\ninstitucional de Google" as UC_Google
   usecase "Registrar consentimiento informado\n(Ley N.° 29733)" as UC_Consent
 }
 
-Mentoreado --> CUS01
-Mentor --> CUS01
-Admin --> CUS01
+Mentoreado -down- CUS01
+Mentor -down- CUS01
+Admin -down- CUS01
 
-UC_OTP .> CUS01 : <<extend>>\n[acceso por correo]
-UC_Google .> CUS01 : <<extend>>\n[servicio disponible]
-UC_Consent .> CUS01 : <<extend>>\n[sin consentimiento vigente]
+CUS01 <.down. UC_OTP : <<extend>>\n[acceso por correo]
+CUS01 <.down. UC_Google : <<extend>>\n[si está disponible]
+CUS01 <.down. UC_Consent : <<extend>>\n[sin consentimiento vigente]
 
-UC_OTP --> Correo
-UC_Google --> Google
+UC_OTP -down- Correo
+UC_Google -down- Google
+
+legend bottom
+  Validación manual con cuenta institucional de Google pendiente.
+endlegend
 
 @enduml

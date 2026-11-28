@@ -1,0 +1,64 @@
+@startuml
+' CUS-016 — Gestionar auditoría de eventos de seguridad
+' Estado: Pendiente: bandeja integral de seguridad no identificada
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-016 — Gestionar auditoría de eventos de seguridad\nPropuesta funcional — implementación pendiente
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Responsable autorizado (previsto)|
+start
+:Acceder a auditoría de seguridad\n(propuesta);
+|Sistema Web P2P|
+if (¿Acceso permitido? [E001]) then (Sí)
+  (R)
+|Responsable autorizado (previsto)|
+    :Elegir periodo, evento y resultado y\nconsentimiento [A001];
+|Sistema Web P2P|
+    if (¿Filtros válidos? [E003]) then (Sí)
+      if (¿Registros disponibles? [E002]) then (Sí)
+        if (¿Hay coincidencias? [A002]) then (Sí)
+          :Deberá mostrar fecha, categoría y\nresultado sin secretos;
+|Responsable autorizado (previsto)|
+          :Seleccionar evento y revisar detalle\npermitido;
+|Sistema Web P2P|
+          :Deberá conservar evidencia sin permitir\nedición o borrado;
+          else (No)
+          :Deberá informar ausencia de resultados;
+        endif
+        else (No)
+        :Deberá informar registros no disponibles;
+      endif
+      else (No)
+      :Deberá solicitar filtros válidos;
+    endif
+|Responsable autorizado (previsto)|
+  if (¿Consultar otro conjunto?) then (Sí)
+    (R)
+    detach
+  else (No)
+  endif
+  else (No)
+|Sistema Web P2P|
+  :Deberá restringir acceso;
+endif
+stop
+legend bottom
+  Los círculos con la misma letra enlazan tramos del flujo.
+endlegend
+@enduml

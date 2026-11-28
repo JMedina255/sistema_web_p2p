@@ -1,0 +1,50 @@
+@startuml
+' CUS-020 — Gestionar catálogo curricular y asignaturas
+' Estado: Implementación identificada; revisión estática
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-020 — Gestionar catálogo curricular y asignaturas
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Administrador\ninstitucional" as A0
+actor "Usuario de consulta" as A1
+caption Límite del sistema: Sistema Web P2P — EPIS-UPT
+rectangle " " {
+  usecase "Registrar asignatura" as U1
+  usecase "Gestionar asignaturas" as U2
+  usecase "Editar asignatura" as U3
+  usecase "Desactivar asignatura" as U4
+  usecase "Registrar tema" as U5
+  usecase "Gestionar temario" as U6
+  usecase "Editar tema" as U7
+  usecase "Desactivar tema" as U8
+  usecase "Filtrar por ciclo o buscar" as U9
+  usecase "Consultar catálogo" as U10
+}
+A1 -- U10
+A0 -- U2
+A0 -- U6
+U1 ..> U2 : <<extend>>\n[Nueva asignatura]
+U3 ..> U2 : <<extend>>\n[Registro existente]
+U4 ..> U2 : <<extend>>\n[Registro existente]
+U5 ..> U6 : <<extend>>\n[Nuevo tema]
+U7 ..> U6 : <<extend>>\n[Registro existente]
+U8 ..> U6 : <<extend>>\n[Registro existente]
+U9 ..> U10 : <<extend>>\n[Filtro aplicado]
+legend bottom
+  CUS-020 agrupa objetivos independientes.
+endlegend
+@enduml

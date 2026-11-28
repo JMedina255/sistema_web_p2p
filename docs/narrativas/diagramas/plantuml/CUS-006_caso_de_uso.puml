@@ -1,0 +1,45 @@
+@startuml
+' CUS-006 — Registrar oferta de mentoría académica
+' Estado: Aprobado en conversación; consolidado
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-006 — Registrar oferta de mentoría académica
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Estudiante Mentor" as A0
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-006 — Registrar oferta de\nmentoría académica" as UC
+  usecase "Seleccionar asignatura y tema" as U1
+  usecase "Configurar fecha, duración y\nmodalidad" as U2
+  usecase "Validar antelación y aforo" as U3
+  usecase "Asignar infraestructura" as U4
+  usecase "Publicar oferta dirigida" as U5
+  usecase "Registrar observaciones" as U6
+  usecase "Seleccionar aula disponible" as U7
+  usecase "Asignar enlace virtual" as U8
+  usecase "Comprobar solicitud pendiente" as U9
+}
+A0 -- UC
+UC ..> U1 : <<include>>
+UC ..> U2 : <<include>>
+UC ..> U3 : <<include>>
+UC ..> U4 : <<include>>
+U5 ..> UC : <<extend>>\n[Solicitud vinculada]
+U6 ..> UC : <<extend>>\n[Opcional]
+U7 ..> U4 : <<extend>>\n[Modalidad presencial]
+U8 ..> U4 : <<extend>>\n[Modalidad virtual]
+U5 ..> U9 : <<include>>
+@enduml

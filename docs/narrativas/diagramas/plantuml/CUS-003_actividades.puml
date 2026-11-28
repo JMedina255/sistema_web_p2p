@@ -1,0 +1,63 @@
+@startuml
+' CUS-003 — Reservar cupo para sesión de mentoría
+' Estado: Implementación identificada; revisión estática
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+title CUS-003 — Reservar cupo para sesión de mentoría
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Estudiante Mentoreado|
+start
+:Elegir Reservar Cupo en la cartelera;
+|Sistema Web P2P|
+if (¿Oferta seleccionada y válida?\n[E001]) then (Sí)
+  :Mostrar Confirmar Reserva de Cupo y\ndatos de sesión;
+  if (¿Es mentor titular? [E002]) then (Sí)
+    :Bloquear autoreserva;
+    stop
+  endif
+  if (¿Hay vacantes y plazo abierto?\n[E003/E004]) then (Sí)
+    :Explicar reserva provisional y corte de\n24 h;
+|Estudiante Mentoreado|
+    if (¿Confirmar? [A001]) then (Sí)
+|Sistema Web P2P|
+      :Mostrar Procesando reserva... y\nrevalidar identidad, aforo, plazo y\nduplicidad;
+      if (¿Reserva admitida? [E003/E005/E006]) then (Sí)
+        :Registrar PENDIENTE_CONFIRMACION y\nactualizar cupos;
+        :Mostrar confirmación y opciones de\ncierre;
+|Estudiante Mentoreado|
+        if (¿Ver Mis Reservas? [A003]) then (Sí)
+|Sistema Web P2P|
+          :Abrir Mis reservas y  ratificación\nCUS-004;
+          else (No)
+          :Retornar a cartelera;
+        endif
+        else (No)
+        :Mostrar error y  no confirmar cupo;
+      endif
+      else (No)
+      :Cerrar sin registrar;
+    endif
+    else (No)
+    :Bloquear reserva y mostrar motivo y  si\naforo agotado ofrecer demanda [A002];
+  endif
+  else (No)
+  :Mostrar sesión inválida;
+endif
+stop
+@enduml

@@ -1,0 +1,69 @@
+@startuml
+' CUS-023 — Evaluar quórum y ejecutar corte automático (T-24h)
+' Estado: Evaluación identificada; ejecución periódica en entorno real no certificada
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+' Los reintentos no explícitos se realizan desde la interfaz; el diagrama no certifica implementación.
+' Las ramas de entrada representan interacciones independientes; no requieren simultaneidad.
+title CUS-023 — Evaluar quórum y ejecutar corte automático (T-24h)\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+  DiamondBackgroundColor #FEF9C3
+  DiamondBorderColor #B99451
+}
+skinparam swimlane {
+  BorderColor #CBD5E1
+  TitleBackgroundColor #1C2A59
+  TitleFontColor #FFFFFF
+}
+
+|Sistema Web P2P|
+start
+if (¿Se inicia evaluación de corte?) then (Sí)
+  :Identificar sesiones cuyo corte T-24 h\nse alcanzó;
+  if (¿Sesión evaluable y no procesada?\n[A001/E001]) then (Sí)
+    :Contar ratificaciones y calcular mínimo\nconfigurado;
+    if (¿Alcanza quórum mínimo?) then (Sí)
+      :Confirmar sesión y tratar reservas no\nratificadas conforme al corte;
+      else (No)
+      :Marcar QUORUM_INSUFICIENTE [A002];
+    endif
+    if (¿Evaluación registrada? [E002]) then (No)
+      :Informar fallo sin declarar evaluación completada;
+      stop
+    endif
+      if (¿Quórum insuficiente?) then (Sí)
+|Estudiante Mentor|
+        :Consultar sesión y elegir continuidad,\nreprogramación o cancelación;
+|Sistema Web P2P|
+        if (¿Decisión y datos válidos? [E003]) then (Sí)
+          :Aplicar decisión autorizada y actualizar\nreservas;
+          else (No)
+          :Rechazar decisión y  conservar estado;
+        endif
+      endif
+    else (No)
+    :Omitir sesión o informar que no procede;
+  endif
+  stop
+else (No)
+|Sistema Web P2P|
+  (M)
+  detach
+endif
+
+|Administrador institucional|
+(M)
+  :Abrir Monitoreo de Quórum [A003];
+|Sistema Web P2P|
+  :Mostrar inscritos, ratificados, mínimo y\nestado;
+stop
+legend bottom
+  Los círculos con la misma letra enlazan tramos del flujo.
+endlegend
+@enduml

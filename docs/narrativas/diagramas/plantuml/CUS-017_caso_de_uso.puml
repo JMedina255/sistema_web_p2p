@@ -1,0 +1,45 @@
+@startuml
+' CUS-017 — Configurar ambientes físicos y virtuales
+' Estado: Implementación parcial: importación y consulta de cronogramas; configuración virtual pendiente
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-017 — Configurar ambientes físicos y virtuales\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Administrador\ninstitucional" as A0
+actor "Estudiante Mentor" as A1
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "Importar cronograma" as U1
+  usecase "Validar formato y tamaño" as U2
+  usecase "Procesar y actualizar franjas" as U3
+  usecase "Filtrar por aula o día" as U4
+  usecase "Consultar franjas libres" as U5
+  usecase "Seleccionar aula" as U6
+  usecase "CUS-006 Registrar oferta" as U7
+  usecase "Asignar enlace virtual" as U8
+}
+A0 -- U1
+A0 -- U5
+A1 -- U7
+U1 ..> U2 : <<include>>
+U1 ..> U3 : <<include>>
+U4 ..> U5 : <<extend>>\n[Filtro aplicado]
+U6 ..> U7 : <<extend>>\n[Presencial]
+U8 ..> U7 : <<extend>>\n[Virtual]
+legend bottom
+  CUS-017 agrupa objetivos independientes.
+endlegend
+@enduml

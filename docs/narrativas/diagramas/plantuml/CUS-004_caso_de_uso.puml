@@ -1,0 +1,35 @@
+@startuml
+' CUS-004 — Ratificar asistencia a sesión de mentoría (T-24h)
+' Estado: Implementación identificada; revisión estática
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-004 — Ratificar asistencia a sesión de mentoría (T-24h)
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Estudiante Mentoreado" as A0
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "CUS-004 — Ratificar asistencia\na sesión de mentoría (T-24h)" as UC
+  usecase "Consultar reserva pendiente" as U1
+  usecase "Comprobar titularidad, estado\ny plazo" as U2
+  usecase "Registrar ratificación" as U3
+  usecase "Consultar reserva ya\nratificada" as U4
+}
+A0 -- UC
+UC ..> U1 : <<include>>
+UC ..> U2 : <<include>>
+UC ..> U3 : <<include>>
+U4 ..> UC : <<extend>>\n[Sin nueva operación]
+@enduml

@@ -1,0 +1,41 @@
+@startuml
+' CUS-013 — Consultar historial académico de mentorías
+' Estado: Implementación parcial: historial de reservas y sesiones
+' Fuente: catálogo consolidado DOC-H02, línea base 044d2a8.
+left to right direction
+title CUS-013 — Consultar historial académico de mentorías\nAlcance parcial o pendiente de verificación
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam actor {
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #1C2A59
+  FontColor #1C2A59
+}
+skinparam rectangle {
+  BorderColor #1C2A59
+}
+actor "Estudiante Mentoreado" as A0
+actor "Estudiante Mentor" as A1
+rectangle "Sistema Web P2P — EPIS-UPT" {
+  usecase "Consultar historial de\nreservas" as U1
+  usecase "Filtrar estados" as U2
+  usecase "Consultar historial de\nsesiones" as U3
+  usecase "Consultar detalle de sesión" as U4
+  usecase "Actualizar historial" as U5
+  usecase "Actualizar sesiones" as U6
+}
+A0 -- U1
+A1 -- U3
+U1 ..> U2 : <<include>>
+U3 ..> U4 : <<include>>
+U5 ..> U1 : <<extend>>\n[Actualización manual]
+U6 ..> U3 : <<extend>>\n[Actualización manual]
+legend bottom
+  CUS-013 agrupa objetivos independientes.
+endlegend
+@enduml
