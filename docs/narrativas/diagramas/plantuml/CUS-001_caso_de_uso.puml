@@ -1,6 +1,6 @@
 /'
   Diagrama: Diagrama de Caso de Uso — CUS-001: Iniciar sesión institucional con 2FA
-  Proyecto: Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT
+  Proyecto: Sistema Web P2P de Mentorías Académicas — EPIS-UPT
   Estándar: UML 2.5
 '/
 @startuml
@@ -30,24 +30,23 @@ skinparam usecase {
 actor "Estudiante Mentoreado" as Mentoreado #EBF3FB
 actor "Estudiante Mentor" as Mentor #EBF3FB
 actor "Administrador Institucional" as Admin #FEF9C3
+actor "Servicio de Correo\nInstitucional" as Correo #FFF1F2
+actor "Servicio de Identidad\nde Google" as Google #FFF1F2
 
-actor "Servicio de Correo\nInstitucional (SMTP)" as Correo #FFF1F2
-actor "Servicio de Identidad\nGoogle Workspace" as Google #FFF1F2
-
-rectangle "Sistema Web P2P — EPIS-UPT" {
+rectangle "Sistema Web P2P - EPIS-UPT" {
   usecase "CUS-001: Iniciar sesión institucional\ncon 2FA" as CUS01
-  usecase "Verificar código de acceso\ntemporal (OTP)" as UC_OTP
-  usecase "Formalizar consentimiento informado\nde privacidad (Ley N° 29733)" as UC_Consent
-  usecase "Autenticar mediante\nGoogle Workspace UPT" as UC_Google
+  usecase "Solicitar y verificar\ncódigo temporal (OTP)" as UC_OTP
+  usecase "Autenticar con cuenta\ninstitucional de Google" as UC_Google
+  usecase "Registrar consentimiento informado\n(Ley N.° 29733)" as UC_Consent
 }
 
 Mentoreado --> CUS01
 Mentor --> CUS01
 Admin --> CUS01
 
-CUS01 .> UC_OTP : <<include>>
-CUS01 .> UC_Consent : <<include>>
-UC_Google .> CUS01 : <<extend>>
+UC_OTP .> CUS01 : <<extend>>\n[acceso por correo]
+UC_Google .> CUS01 : <<extend>>\n[servicio disponible]
+UC_Consent .> CUS01 : <<extend>>\n[sin consentimiento vigente]
 
 UC_OTP --> Correo
 UC_Google --> Google

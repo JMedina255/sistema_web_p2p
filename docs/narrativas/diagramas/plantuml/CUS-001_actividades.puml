@@ -1,6 +1,6 @@
 /'
   Diagrama: Diagrama de Actividades — CUS-001: Iniciar sesión institucional con 2FA
-  Proyecto: Sistema Web P2P con algoritmo de recomendación para la personalización de mentorías académicas en la EPIS-UPT
+  Proyecto: Sistema Web P2P de Mentorías Académicas — EPIS-UPT
   Estándar: UML 2.5
 '/
 @startuml
@@ -37,89 +37,96 @@ skinparam swimlane {
 
 |Usuario|
 start
-:Accede a la dirección web del sistema;
+:Accede al sistema y selecciona\n«Iniciar sesión»;
 
 |Sistema Web P2P|
-:Muestra pantalla de inicio de sesión\ncon opciones de acceso institucional;
+:Muestra acceso por correo institucional\ny, si está disponible, botón oficial de Google;
 
 |Usuario|
-if (¿Método de acceso seleccionado?) then (Google Workspace)
+if (¿Selecciona Google?) then (Sí)
+  :Elige una cuenta en Google;
   |Sistema Web P2P|
-  :Presenta ventana federada de Google;\n[A001: Validación manual pendiente]
-  :Comprueba dominio @virtual.upt.pe o @upt.pe;
-else (Código de verificación OTP)
-  |Usuario|
-  :Ingresa correo institucional y presiona\n«Continuar con Código OTP →»;
-  |Sistema Web P2P|
-  :Comprueba formato de correo y estado de cuenta;
-  if (¿Correo pertenece al dominio institucional?) then (No)
-    :Muestra alerta de acceso restringido;\n[E001: Correo no institucional]
+  :Valida la identidad y el dominio institucional;
+  note right
+    [A001] Operación con cuenta real:
+    validación manual pendiente
+  end note
+  if (¿Cuenta institucional válida?) then (No)
+    :Muestra rechazo de dominio;\n[E001];
     stop
-  else (Sí)
-    if (¿Cuenta activa sin suspensión?) then (No)
-      :Muestra alerta de cuenta suspendida;\n[E002: Cuenta suspendida]
+  endif
+else (No, usa OTP)
+  :Ingresa el correo y presiona\n«Continuar con Código OTP →»;
+  |Sistema Web P2P|
+  if (¿Formato y dominio válidos?) then (No)
+    :Muestra rechazo de correo;\n[E001];
+    stop
+  endif
+  if (¿Solicitud admitida y correo enviado?) then (No)
+    :Muestra espera, límite o indisponibilidad;\n[E002 / E006 / E008];
+    stop
+  endif
+  :Emite código de 6 dígitos por 5 minutos;
+  :Muestra destino, contador 05:00,\n«Cambiar correo», reenvío y «Cancelar»;
+
+  |Usuario|
+  if (¿Cambia correo o cancela?) then (Sí [A004])
+    |Sistema Web P2P|
+    :Descarta el formulario visible\ny vuelve al ingreso de correo;
+    stop
+  endif
+  if (¿Solicita reenvío habilitado?) then (Sí [A002])
+    |Sistema Web P2P|
+    :Invalida el código anterior,\nemite otro y reinicia los contadores;
+  endif
+  |Usuario|
+  :Ingresa 6 dígitos y presiona\n«Verificar y Acceder»;
+  |Sistema Web P2P|
+  if (¿Código vigente?) then (No)
+    :Informa expiración y habilita reenvío;\n[E004];
+    stop
+  endif
+  if (¿Código correcto?) then (No)
+    if (¿Quinto intento fallido?) then (Sí)
+      :Bloquea definitivamente el desafío;\nsolicita generar un código nuevo [E005];
       stop
-    else (Sí)
-      :Genera código numérico temporal de 6 dígitos;\n(Vigencia de 5 min / Reenvío en 60s);
-      :Despacha código al buzón institucional;
-      :Muestra pantalla de verificación con contador 05:00;
-    endif
-  endif
-
-  |Usuario|
-  if (¿Desea cambiar de correo institucional?) then (Sí)
-    :Presiona enlace «Cambiar correo»;\n[A004: Cambio de correo]
-    |Sistema Web P2P|
-    :Anula desafío temporal y vuelve al inicio;
-    stop
-  else (No)
-    if (¿No recibió código y pasaron 60 segundos?) then (Sí)
-      :Presiona enlace «Reenviar código OTP»;\n[A002: Reenvío de código]
-      |Sistema Web P2P|
-      :Invalida código anterior y emite uno nuevo;
     else (No)
-    endif
-    |Usuario|
-    :Introduce código de 6 dígitos y presiona\n«Verificar y Acceder»;
-    |Sistema Web P2P|
-    :Comprueba validez del código ingresado;
-    if (¿Código ingresado es correcto?) then (No)
-      if (¿Superó límite de 5 intentos fallidos?) then (Sí)
-        :Muestra bloqueo temporal por 60 segundos;\n[E005: Límite de intentos alcanzado]
-        stop
-      else (No)
-        :Muestra alerta de código inválido o incorrecto;\n[E003: Código incorrecto]
-        stop
-      endif
-    else (Sí)
-      if (¿Código dentro del plazo de 5 minutos?) then (No)
-        :Muestra alerta de expiración del código;\n[E004: Código vencido]
-        stop
-      else (Sí)
-      endif
+      :Informa código incorrecto\ne intentos restantes [E003];
+      stop
     endif
   endif
 endif
 
 |Sistema Web P2P|
-if (¿Consentimiento informado registrado previamente?) then (Sí [A003])
+if (¿Consentimiento vigente?) then (Sí [A003])
 else (No)
-  :Presenta ventana de consentimiento informado\nde privacidad bajo la Ley N° 29733;
+  :Muestra «Consentimiento Informado Digital»;
   |Usuario|
-  if (¿Acepta términos de privacidad?) then (No)
-    :Presiona botón «🚫 Rechazar y Salir»;\n[E006: Rechazo del consentimiento]
+  if (¿Acepta el tratamiento de datos?) then (No)
+    :Presiona «🚫 Rechazar y Salir»;
     |Sistema Web P2P|
-    :Revoca sesión provisional y retorna al inicio;
+    :Cierra la sesión y vuelve al acceso [E007];
     stop
   else (Sí)
-    :Marca casilla obligatoria y presiona\n«✓ Aceptar y Continuar»;
+    :Marca la casilla y presiona\n«✓ Aceptar y Continuar»;
     |Sistema Web P2P|
-    :Registra formalización con constancia de fecha y hora;
+    :Registra versión y fecha del consentimiento;
   endif
 endif
 
 |Sistema Web P2P|
-:Inicia sesión institucional con vigencia de 8 horas;
-:Muestra panel principal según el rol asignado\n(Mentoreado, Mentor o Administrador);
-stop
+:Emite sesión con vigencia máxima de 8 horas;
+:Abre el panel inicial del rol y muestra\n«Cerrar Sesión»;
+
+|Usuario|
+if (¿Cierra la sesión?) then (Sí [A005])
+  :Presiona «Cerrar Sesión»;
+  |Sistema Web P2P|
+  :Elimina la sesión del navegador\ny retorna al acceso;
+  stop
+else (No)
+  |Sistema Web P2P|
+  :Mantiene el acceso mientras la sesión sea válida;
+  stop
+endif
 @enduml

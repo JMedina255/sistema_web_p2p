@@ -22,7 +22,7 @@
 
 | Módulo | Id | Caso de Uso | Narrativa | Diagrama Actividades | Diagrama Caso de Uso | Estado Hito DOC-SRS-02 |
 |---|---|---|:---:|:---:|:---:|---|
-| **MOD-01** | **CUS-001** | **Iniciar sesión institucional con 2FA** | **Completado** | **Renderizado** | **Renderizado** | **Desarrollado (Pendiente de Aprobación)** |
+| **MOD-01** | **CUS-001** | **Iniciar sesión institucional con 2FA** | **Revisado H01** | **Actualizado y renderizado** | **Actualizado y renderizado** | **Versión revisable (Pendiente de Aprobación)** |
 | MOD-01 | CUS-010 | Gestionar asignación de roles de usuario | Pendiente | Pendiente | Pendiente | No iniciado (En espera de aprobación CUS-001) |
 | MOD-02 | CUS-006 | Registrar oferta de mentoría académica | Pendiente | Pendiente | Pendiente | No iniciado (En espera de aprobación CUS-001) |
 | MOD-02 | CUS-008 | Gestionar demanda insatisfecha de mentoría | Pendiente | Pendiente | Pendiente | No iniciado (En espera de aprobación CUS-001) |
@@ -55,3 +55,10 @@ De conformidad con las restricciones obligatorias del hito **DOC-SRS-02**:
 - Se ha desarrollado de manera **exclusiva** el caso de uso **CUS-001**.
 - Se han generado y renderizado **exclusivamente** los diagramas de actividades y de caso de uso del **CUS-001**.
 - **Punto de detención mandatorio:** No se iniciará la reconstrucción de los 23 casos de uso restantes (CUS-002 al CUS-024) hasta recibir la aprobación formal y por escrito del presente modelo para CUS-001.
+
+### Actualización administrativa H01 — 2026-11-28
+
+- Los PR #26 y #27 ya se encuentran incorporados en `main`; esta integración confirma trazabilidad de Git, no aprobación funcional de la narrativa.
+- CUS-001 fue recontrastado con la interfaz, los servicios y las pruebas vigentes sobre la base `ded3afa`.
+- La narrativa y sus dos diagramas quedaron en estado **revisable, pendiente de aprobación**.
+- Los hallazgos y pendientes de SRS, SAD y README se registran en `docs/revision_srs/CUS-001/MATRIZ_REVISION_H01.md` sin ampliar el alcance a otros casos de uso.
